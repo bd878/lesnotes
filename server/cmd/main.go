@@ -33,6 +33,7 @@ func main() {
 
   http.Handle("/send_message", http.HandlerFunc(h.SaveMessage))
   http.Handle("/read_messages", http.HandlerFunc(h.ReadMessages))
+  http.Handle("/status", http.HandlerFunc(h.ReportStatus))
   log.Println("server is listening on =", *addr)
   if err := fcgi.Serve(l, nil); err != nil {
     panic(err)

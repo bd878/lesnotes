@@ -2,6 +2,7 @@ package fcgi
 
 import (
   "net/http"
+  "io"
   "context"
   "encoding/json"
 
@@ -38,5 +39,11 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) {
 
   if err := json.NewEncoder(w).Encode(v); err != nil {
     panic(err)
+  }
+}
+
+func (h *Handler) ReportStatus(w http.ResponseWriter, _ *http.Request) {
+  if _, err := io.WriteString(w, "ok"); err != nil {
+    w.WriteHeader(http.StatusInternalServerError)
   }
 }
