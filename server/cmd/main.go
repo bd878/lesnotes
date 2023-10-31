@@ -1,31 +1,40 @@
 package main
 
 import (
-  "flag"
   "context"
+  "io"
+  "syscall"
+  "encoding/json"
+  "os"
   "net"
   "net/http"
   "net/http/fcgi"
   "log"
+  "fmt"
+  "os/signal"
 
   fcgihandler "github.com/bd878/gallery/server/internal/handler/fcgi"
   controller "github.com/bd878/gallery/server/internal/controller/messages"
   memory "github.com/bd878/gallery/server/internal/repository/memory"
 )
 
-var (
-  addr = flag.String("addr", ":8083", "fcgi addr to listen")
-)
-
 func main() {
-  flag.Parse()
+  serverCfg := loadConfig()
+
+  if serverCfg.Debug {
+    setLogOutput(serverCfg.LogFile)
+  }
+
+  c := make(chan os.Signal, 1)
+  go runReloadConfig(c)
+  defer close(c)
 
   mem := memory.New()
   ctrl := controller.New(mem)
   h := fcgihandler.New(ctrl)
 
-  cfg := net.ListenConfig{}
-  l, err := cfg.Listen(context.Background(), "tcp", *addr)
+  netCfg := net.ListenConfig{}
+  l, err := netCfg.Listen(context.Background(), "tcp", fmt.Sprintf(":%d", serverCfg.Port))
   if err != nil {
     panic(err)
   }
@@ -34,8 +43,51 @@ func main() {
   http.Handle("/send_message", http.HandlerFunc(h.SaveMessage))
   http.Handle("/read_messages", http.HandlerFunc(h.ReadMessages))
   http.Handle("/status", http.HandlerFunc(h.ReportStatus))
-  log.Println("server is listening on =", *addr)
+
+  log.Println("server is listening on =", serverCfg.Port)
   if err := fcgi.Serve(l, nil); err != nil {
     panic(err)
   }
+}
+
+func loadConfig() *config {
+  f, err := os.Open("base.json")
+  if err != nil {
+    panic(err)
+  }
+  defer f.Close()
+
+  var cfg config
+  if err := json.NewDecoder(f).Decode(&cfg); err != nil {
+    panic(err)
+  }
+
+  return &cfg
+}
+
+func runReloadConfig(c chan os.Signal) {
+  signal.Notify(c, syscall.SIGHUP)
+
+  for {
+    switch <-c {
+    case syscall.SIGHUP:
+      log.Println("recieve sighup")
+
+      cfg := loadConfig()
+      if cfg.Debug {
+        setLogOutput(cfg.LogFile)
+      } else {
+        log.SetOutput(io.Discard)
+      }
+    }
+  }
+}
+
+func setLogOutput(p string) {
+  f, err := os.OpenFile(p, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+  if err != nil {
+    panic(err)
+  }
+
+  log.SetOutput(f)
 }

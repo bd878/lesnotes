@@ -1,6 +1,7 @@
 package fcgi
 
 import (
+  "log"
   "net/http"
   "io"
   "context"
@@ -25,6 +26,8 @@ func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
   }
 
   msg := req.PostFormValue("message")
+  log.Println("received message =", msg)
+
   err = h.ctrl.SaveMessage(context.Background(), msg)
   if err != nil {
     w.WriteHeader(http.StatusInternalServerError)
@@ -37,13 +40,15 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) {
     panic(err)
   }
 
+  log.Println("send n'th messages =", len(v))
   if err := json.NewEncoder(w).Encode(v); err != nil {
     panic(err)
   }
 }
 
 func (h *Handler) ReportStatus(w http.ResponseWriter, _ *http.Request) {
-  if _, err := io.WriteString(w, "ok"); err != nil {
+  log.Println("report ok status")
+  if _, err := io.WriteString(w, "ok\n"); err != nil {
     w.WriteHeader(http.StatusInternalServerError)
   }
 }
