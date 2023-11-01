@@ -22,11 +22,12 @@ func main() {
   serverCfg := loadConfig()
 
   if serverCfg.Debug {
-    setLogOutput(serverCfg.LogFile)
+    f := setLogOutput(serverCfg.LogFile)
+    defer f.Close() 
   }
 
   c := make(chan os.Signal, 1)
-  go runReloadConfig(c)
+  go trackConfig(c)
   defer close(c)
 
   mem := memory.New()
@@ -65,8 +66,11 @@ func loadConfig() *config {
   return &cfg
 }
 
-func runReloadConfig(c chan os.Signal) {
+func trackConfig(c chan os.Signal) {
   signal.Notify(c, syscall.SIGHUP)
+
+  var f *os.File
+  defer f.Close()
 
   for {
     switch <-c {
@@ -75,19 +79,21 @@ func runReloadConfig(c chan os.Signal) {
 
       cfg := loadConfig()
       if cfg.Debug {
-        setLogOutput(cfg.LogFile)
+        f = setLogOutput(cfg.LogFile)
       } else {
+        f.Close()
         log.SetOutput(io.Discard)
       }
     }
   }
 }
 
-func setLogOutput(p string) {
+func setLogOutput(p string) *os.File {
   f, err := os.OpenFile(p, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
   if err != nil {
     panic(err)
   }
 
   log.SetOutput(f)
+  return f
 }
