@@ -10,7 +10,7 @@ import useragent from './handlers/useragent.js';
 import favicon from './handlers/favicon.js';
 
 import assets from './routes/assets.js';
-import client from './routes/client.js';
+import index from './routes/index.js';
 
 const app = new Koa();
 const router = new Router();
@@ -25,7 +25,7 @@ app.use(favicon);
 
 router
   .get('/public/', assets)
-  .get('/', client);
+  .get('/', index);
 
 app.use(router.routes());
 
