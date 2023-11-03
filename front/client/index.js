@@ -5,7 +5,6 @@ import helmet from './handlers/helmet.js';
 import errors from './handlers/errors.js';
 import logger from './handlers/logger.js';
 import bodyParser from './handlers/bodyParser.js';
-import filename from './handlers/filename.js';
 import useragent from './handlers/useragent.js';
 import favicon from './handlers/favicon.js';
 
@@ -19,14 +18,18 @@ app.use(helmet);
 app.use(errors);
 app.use(logger);
 app.use(bodyParser);
-app.use(filename);
 app.use(useragent);
 app.use(favicon);
 
 router
-  .get('/public/', assets)
+  .get('/public/:filename', assets)
   .get('/', index);
 
 app.use(router.routes());
 
-export default app;
+// TODO: load from config
+const port = process.env.PORT || 8000;
+
+app.listen(port, () => {
+  console.log(`App is listening on ${port} port`);
+});
