@@ -7,7 +7,7 @@ import (
 )
 
 type Repository interface {
-  Append(context.Context, string) error
+  Put(context.Context, string) error
   GetAll(context.Context) ([]model.Message, error)
 }
 
@@ -20,7 +20,7 @@ func New(repo Repository) *Controller {
 }
 
 func (c *Controller) SaveMessage(ctx context.Context, msg string) error {
-  err := c.repo.Append(ctx, msg)
+  err := c.repo.Put(ctx, msg)
   if err != nil {
     return err
   }

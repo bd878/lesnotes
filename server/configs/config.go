@@ -1,7 +1,8 @@
-package main
+package configs
 
-type config struct {
+type Config struct {
   Port int `json:"port"`
   Debug bool `json:"debug"`
   LogFile string `json:"logFile"`
+  DBPath string `json:"dbPath"`
 }
