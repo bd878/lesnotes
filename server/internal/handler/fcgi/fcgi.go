@@ -3,8 +3,10 @@ package fcgi
 import (
   "log"
   "net/http"
+  "os"
   "io"
   "context"
+  "path/filepath"
   "encoding/json"
 
   "github.com/bd878/gallery/server/internal/controller/messages"
@@ -19,7 +21,7 @@ func New(ctrl *messages.Controller) *Handler {
 }
 
 func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
-  err := req.ParseForm()
+  err := req.ParseMultipartForm(1)
   if err != nil {
     w.WriteHeader(http.StatusBadRequest)
     return
@@ -27,6 +29,25 @@ func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
 
   msg := req.PostFormValue("message")
   log.Println("received message =", msg)
+
+  f, fh, err := req.FormFile("file")
+  if err != nil {
+    log.Println("err =", err)
+    w.WriteHeader(http.StatusBadRequest)
+    return
+  }
+  log.Println("filename, size:", fh.Filename, fh.Size)
+  switch f.(type) {
+  case *os.File:
+    log.Println("file is of type *os.File")
+    info, err := f.(*os.File).Stat()
+    if err != nil {
+      panic(err)
+    }
+    log.Println(filepath.Join(os.TempDir(), info.Name()))
+  default:
+    log.Println("file is of some other type")
+  }
 
   err = h.ctrl.SaveMessage(context.Background(), msg)
   if err != nil {
