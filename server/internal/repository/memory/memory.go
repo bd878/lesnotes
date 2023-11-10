@@ -8,7 +8,7 @@ import (
 )
 
 type Repository struct {
-  records []string
+  records [](*model.Message)
 }
 
 func New() *Repository {
@@ -17,17 +17,15 @@ func New() *Repository {
   }
 }
 
-func (m *Repository) Put(_ context.Context, str string) error {
-  log.Println("append string =", str)
-  m.records = append(m.records, str)
+func (m *Repository) Put(_ context.Context, msg *model.Message) error {
+  m.records = append(m.records, msg)
   return nil
 }
 
 func (m *Repository) GetAll(_ context.Context) ([]model.Message, error) {
-  log.Println("get all records")
   msgs := make([]model.Message, len(m.records))
-  for i, v := range m.records {
-    msgs[i] = model.Message{Value: v}
+  for i, m := range m.records {
+    msgs[i] = *m
   }
   return msgs, nil
 }

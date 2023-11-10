@@ -20,13 +20,13 @@ func New(dbpath string) (*Repository, error) {
   return &Repository{db}, nil
 }
 
-func (r *Repository) Put(ctx context.Context, message string) error {
-  _, err := r.db.ExecContext(ctx, "INSERT INTO messages(message) VALUES (?)", message)
+func (r *Repository) Put(ctx context.Context, msg *model.Message) error {
+  _, err := r.db.ExecContext(ctx, "INSERT INTO messages(message, file) VALUES (?,?)", msg.Value, msg.File)
   return err
 }
 
 func (r *Repository) GetAll(ctx context.Context) ([]model.Message, error) {
-  rows, err := r.db.QueryContext(ctx, "SELECT message FROM messages")
+  rows, err := r.db.QueryContext(ctx, "SELECT message, file FROM messages")
   if err != nil {
     return nil, err
   }
@@ -34,12 +34,19 @@ func (r *Repository) GetAll(ctx context.Context) ([]model.Message, error) {
 
   var res []model.Message
   for rows.Next() {
-    var message string
-    if err := rows.Scan(&message); err != nil {
+    var value string
+    var fileCol sql.NullString
+    if err := rows.Scan(&value, &fileCol); err != nil {
       return nil, err
     }
+
+    var fileName string
+    if fileCol.Valid {
+      fileName = fileCol.String
+    }
     res = append(res, model.Message{
-      Value: message,
+      Value: value,
+      File: fileName,
     })
   }
   return res, nil

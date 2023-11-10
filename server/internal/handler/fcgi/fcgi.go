@@ -10,6 +10,7 @@ import (
   "encoding/json"
 
   "github.com/bd878/gallery/server/internal/controller/messages"
+  "github.com/bd878/gallery/server/pkg/model"
 )
 
 type Handler struct {
@@ -32,26 +33,34 @@ func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
 
   f, fh, err := req.FormFile("file")
   if err != nil {
-    log.Println("err =", err)
     w.WriteHeader(http.StatusBadRequest)
     return
   }
-  log.Println("filename, size:", fh.Filename, fh.Size)
+  log.Println("received file of size =", fh.Filename, fh.Size)
+
+  var fPath string
   switch f.(type) {
   case *os.File:
-    log.Println("file is of type *os.File")
     info, err := f.(*os.File).Stat()
     if err != nil {
-      panic(err)
+      w.WriteHeader(http.StatusInternalServerError)
+      return
     }
-    log.Println(filepath.Join(os.TempDir(), info.Name()))
+
+    fPath = filepath.Join(os.TempDir(), info.Name())
   default:
-    log.Println("file is of some other type")
+    w.WriteHeader(http.StatusBadRequest)
+    return
   }
 
-  err = h.ctrl.SaveMessage(context.Background(), msg)
+  log.Println("file full path =", fPath)
+  err = h.ctrl.SaveMessage(context.Background(), &model.Message{
+    Value: msg,
+    File: fPath,
+  })
   if err != nil {
     w.WriteHeader(http.StatusInternalServerError)
+    return
   }
 }
 

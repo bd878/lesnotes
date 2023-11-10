@@ -5,4 +5,5 @@ type Config struct {
   Debug bool `json:"debug"`
   LogFile string `json:"logFile"`
   DBPath string `json:"dbPath"`
+  DataPath string `json:"dataPath"`
 }
