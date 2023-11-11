@@ -15,10 +15,11 @@ import (
 
 type Handler struct {
   ctrl *messages.Controller
+  dataPath string
 }
 
-func New(ctrl *messages.Controller) *Handler {
-  return &Handler{ctrl}
+func New(ctrl *messages.Controller, dataPath string) *Handler {
+  return &Handler{ctrl, dataPath}
 }
 
 func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
@@ -36,27 +37,23 @@ func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
     w.WriteHeader(http.StatusBadRequest)
     return
   }
-  log.Println("received file of size =", fh.Filename, fh.Size)
 
-  var fPath string
-  switch f.(type) {
-  case *os.File:
-    info, err := f.(*os.File).Stat()
-    if err != nil {
-      w.WriteHeader(http.StatusInternalServerError)
-      return
-    }
-
-    fPath = filepath.Join(os.TempDir(), info.Name())
-  default:
-    w.WriteHeader(http.StatusBadRequest)
+  ff, err := os.OpenFile(
+    filepath.Join(h.dataPath, fh.Filename),
+    os.O_WRONLY|os.O_CREATE, 0666,
+  )
+  if err != nil {
+    w.WriteHeader(http.StatusInternalServerError)
+    return
+  }
+  if _, err := io.Copy(ff, f); err != nil {
+    w.WriteHeader(http.StatusInternalServerError)
     return
   }
 
-  log.Println("file full path =", fPath)
   err = h.ctrl.SaveMessage(context.Background(), &model.Message{
     Value: msg,
-    File: fPath,
+    File: fh.Filename,
   })
   if err != nil {
     w.WriteHeader(http.StatusInternalServerError)

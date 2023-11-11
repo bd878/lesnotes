@@ -3,5 +3,5 @@
   "debug": true,
   "logFile": "log.txt",
   "dbPath": "./main.db",
-  "dataPath": "./data"
+  "dataPath": "./data/"
 }

@@ -49,7 +49,7 @@ func main() {
     panic(err)
   }
   ctrl := controller.New(mem)
-  h := fcgihandler.New(ctrl)
+  h := fcgihandler.New(ctrl, serverCfg.DataPath)
 
   netCfg := net.ListenConfig{}
   l, err := netCfg.Listen(context.Background(), "tcp4", fmt.Sprintf(":%d", serverCfg.Port))
