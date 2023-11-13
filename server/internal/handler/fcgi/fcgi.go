@@ -59,7 +59,12 @@ func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
   }
 
   if filename == "" && msg == "" {
-    w.WriteHeader(http.StatusBadRequest)
+    if err := json.NewEncoder(w).Encode(model.ServerResponse{
+      Status: "ok",
+      Description: "empty fields",
+    }); err != nil {
+      w.WriteHeader(http.StatusInternalServerError)
+    }
     return
   }
 
@@ -68,6 +73,14 @@ func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
     File: filename,
   })
   if err != nil {
+    w.WriteHeader(http.StatusInternalServerError)
+    return
+  }
+
+  if err := json.NewEncoder(w).Encode(model.ServerResponse{
+    Status: "ok",
+    Description: "accepted",
+  }); err != nil {
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
