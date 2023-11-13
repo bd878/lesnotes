@@ -29,6 +29,7 @@ func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
     return
   }
 
+
   var filename, msg string
 
   if req.Form.Has("message") {
