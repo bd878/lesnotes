@@ -29,31 +29,43 @@ func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
     return
   }
 
-  msg := req.PostFormValue("message")
-  log.Println("received message =", msg)
+  var filename, msg string
 
-  f, fh, err := req.FormFile("file")
-  if err != nil {
+  if req.Form.Has("message") {
+    msg = req.PostFormValue("message")
+    log.Println("received message =", msg)
+  }
+
+  if _, ok := req.MultipartForm.File["file"]; ok {
+    f, fh, err := req.FormFile("file")
+    if err != nil {
+      w.WriteHeader(http.StatusInternalServerError)
+      return
+    }
+
+    ff, err := os.OpenFile(
+      filepath.Join(h.dataPath, fh.Filename),
+      os.O_WRONLY|os.O_CREATE, 0666,
+    )
+    if err != nil {
+      w.WriteHeader(http.StatusInternalServerError)
+      return
+    }
+    if _, err := io.Copy(ff, f); err != nil {
+      w.WriteHeader(http.StatusInternalServerError)
+      return
+    }
+    filename = fh.Filename
+  }
+
+  if filename == "" && msg == "" {
     w.WriteHeader(http.StatusBadRequest)
-    return
-  }
-
-  ff, err := os.OpenFile(
-    filepath.Join(h.dataPath, fh.Filename),
-    os.O_WRONLY|os.O_CREATE, 0666,
-  )
-  if err != nil {
-    w.WriteHeader(http.StatusInternalServerError)
-    return
-  }
-  if _, err := io.Copy(ff, f); err != nil {
-    w.WriteHeader(http.StatusInternalServerError)
     return
   }
 
   err = h.ctrl.SaveMessage(context.Background(), &model.Message{
     Value: msg,
-    File: fh.Filename,
+    File: filename,
   })
   if err != nil {
     w.WriteHeader(http.StatusInternalServerError)
