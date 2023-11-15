@@ -51,3 +51,8 @@ func (r *Repository) GetAll(ctx context.Context) ([]model.Message, error) {
   }
   return res, nil
 }
+
+func (r *Repository) AddUser(ctx context.Context, usr *model.User) error {
+  _, err := r.db.ExecContext(ctx, "INSERT INTO users(name, password) VALUES(?,?)", usr.Name, usr.Password)
+  return err
+}

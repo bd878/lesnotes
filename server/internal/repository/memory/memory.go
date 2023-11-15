@@ -29,3 +29,6 @@ func (m *Repository) GetAll(_ context.Context) ([]model.Message, error) {
   }
   return msgs, nil
 }
+
+// adds user
+// func (m *Repository) AddUser(_ context.Context, usr *model.User) error {}

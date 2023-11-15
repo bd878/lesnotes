@@ -10,33 +10,67 @@ import (
   "encoding/json"
 
   "github.com/bd878/gallery/server/internal/controller/messages"
+  "github.com/bd878/gallery/server/internal/controller/users"
   "github.com/bd878/gallery/server/pkg/model"
 )
 
 type Handler struct {
-  ctrl *messages.Controller
+  msgCtrl *messages.Controller
+  usrCtrl *users.Controller
   dataPath string
 }
 
-func New(ctrl *messages.Controller, dataPath string) *Handler {
-  return &Handler{ctrl, dataPath}
+func New(
+  msgCtrl *messages.Controller,
+  usrCtrl *users.Controller,
+  dataPath string,
+) *Handler {
+  return &Handler{msgCtrl, usrCtrl, dataPath}
 }
 
-func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
-  err := req.ParseMultipartForm(1)
-  if err != nil {
-    w.WriteHeader(http.StatusBadRequest)
+func (h *Handler) AuthUser(w http.ResponseWriter, req *http.Request) {
+  userName := req.PostFormValue("name")
+  if userName == "" {
+    if err := json.NewEncoder(w).Encode(model.ServerResponse{
+      Status: "ok",
+      Description: "keine name",
+    }); err != nil {
+      w.WriteHeader(http.StatusInternalServerError)
+    }
     return
   }
 
-
-  var filename, msg string
-
-  if req.Form.Has("message") {
-    msg = req.PostFormValue("message")
-    log.Println("received message =", msg)
+  password := req.PostFormValue("password")
+  if password == "" {
+    if err := json.NewEncoder(w).Encode(model.ServerResponse{
+      Status: "ok",
+      Description: "keine password",
+    }); err != nil {
+      w.WriteHeader(http.StatusInternalServerError)
+    }
+    return
   }
 
+  log.Println("user, password=", userName, password)
+  if err := h.usrCtrl.Add(context.Background(), &model.User{
+    Name: userName,
+    Password: password,
+  }); err != nil {
+    w.WriteHeader(http.StatusInternalServerError)
+    return
+  }
+
+  if err := json.NewEncoder(w).Encode(model.ServerResponse{
+    Status: "ok",
+    Description: "accepted",
+  }); err != nil {
+    w.WriteHeader(http.StatusInternalServerError)
+    return
+  }
+}
+
+func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
+  var filename string
   if _, ok := req.MultipartForm.File["file"]; ok {
     f, fh, err := req.FormFile("file")
     if err != nil {
@@ -59,6 +93,8 @@ func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
     filename = fh.Filename
   }
 
+  msg := req.PostFormValue("message")
+
   if filename == "" && msg == "" {
     if err := json.NewEncoder(w).Encode(model.ServerResponse{
       Status: "ok",
@@ -69,11 +105,10 @@ func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
     return
   }
 
-  err = h.ctrl.SaveMessage(context.Background(), &model.Message{
+  if err := h.msgCtrl.SaveMessage(context.Background(), &model.Message{
     Value: msg,
     File: filename,
-  })
-  if err != nil {
+  }); err != nil {
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
@@ -88,7 +123,7 @@ func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) {
-  v, err := h.ctrl.ReadAllMessages(context.Background())
+  v, err := h.msgCtrl.ReadAllMessages(context.Background())
   if err != nil {
     panic(err)
   }
