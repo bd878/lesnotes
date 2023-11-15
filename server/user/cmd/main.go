@@ -14,11 +14,10 @@ import (
   "fmt"
   "os/signal"
 
-  configs "github.com/bd878/gallery/server/configs"
-  fcgihandler "github.com/bd878/gallery/server/internal/handler/fcgi"
-  messagesCtrl "github.com/bd878/gallery/server/internal/controller/messages"
-  usersCtrl "github.com/bd878/gallery/server/internal/controller/users"
-  sqlite "github.com/bd878/gallery/server/internal/repository/sqlite"
+  configs "github.com/bd878/gallery/server/user/configs"
+  fcgihandler "github.com/bd878/gallery/server/user/internal/handler/fcgi"
+  controller "github.com/bd878/gallery/server/user/internal/controller/users"
+  sqlite "github.com/bd878/gallery/server/user/internal/repository/sqlite"
 )
 
 var (
@@ -49,9 +48,8 @@ func main() {
   if err != nil {
     panic(err)
   }
-  msgCtrl := messagesCtrl.New(mem)
-  usrCtrl := usersCtrl.New(mem)
-  h := fcgihandler.New(msgCtrl, usrCtrl, serverCfg.DataPath)
+  ctrl := controller.New(mem)
+  h := fcgihandler.New(ctrl)
 
   netCfg := net.ListenConfig{}
   l, err := netCfg.Listen(context.Background(), "tcp4", fmt.Sprintf(":%d", serverCfg.Port))
@@ -60,10 +58,8 @@ func main() {
   }
   defer l.Close()
 
-  http.Handle("/v1/send_message", http.HandlerFunc(h.SaveMessage))
-  http.Handle("/v1/read_messages", http.HandlerFunc(h.ReadMessages))
-  http.Handle("/v1/status", http.HandlerFunc(h.ReportStatus))
-  http.Handle("/v1/auth", http.HandlerFunc(h.AuthUser))
+  http.Handle("/users/v1/auth", http.HandlerFunc(h.AuthUser))
+  http.Handle("/users/v1/status", http.HandlerFunc(h.ReportStatus))
 
   log.Println("server is listening on =", l.Addr())
   if err := fcgi.Serve(l, nil); err != nil {

@@ -3,11 +3,11 @@ package users
 import (
   "context"
 
-  "github.com/bd878/gallery/server/pkg/model"
+  "github.com/bd878/gallery/server/user/pkg/model"
 )
 
 type Repository interface {
-  AddUser(context.Context, *model.User) error
+  Add(context.Context, *model.User) error
 }
 
 type Controller struct {
@@ -19,7 +19,7 @@ func New(repo Repository) *Controller {
 }
 
 func (c *Controller) Add(ctx context.Context, usr *model.User) error {
-  err := c.repo.AddUser(ctx, usr)
+  err := c.repo.Add(ctx, usr)
   if err != nil {
     return err
   }

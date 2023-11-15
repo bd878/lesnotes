@@ -1,0 +1,6 @@
+{
+  "port": 8084,
+  "debug": true,
+  "logFile": "log.txt",
+  "dbPath": "../main.db"
+}

@@ -1,3 +1,4 @@
 *.db
 data/*
 test.txt
+headers.txt
