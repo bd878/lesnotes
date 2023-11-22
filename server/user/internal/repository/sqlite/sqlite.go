@@ -1,13 +1,17 @@
 package repository
 
 import (
+  "errors"
   "context"
   "log"
   "database/sql"
 
   _ "github.com/mattn/go-sqlite3"
   "github.com/bd878/gallery/server/user/pkg/model"
+  "github.com/bd878/gallery/server/user/internal/repository"
 )
+
+var ErrNotImplemented = errors.New("not implemented")
 
 type Repository struct {
   db *sql.DB
@@ -38,10 +42,38 @@ func (r *Repository) Has(ctx context.Context, user *model.User) (bool, error) {
   return r.hasUserAndPassword(ctx, user)
 }
 
+func (r *Repository) Get(ctx context.Context, user *model.User) (*model.User, error) {
+  if user.Token != "" {
+    return r.getByToken(ctx, user.Token)
+  }
+  return nil, ErrNotImplemented
+}
+
 func (r *Repository) Refresh(ctx context.Context, user *model.User) error {
   _, err := r.db.ExecContext(ctx, "UPDATE users SET token = ?, expires = ? WHERE name = ?",
     user.Token, user.Expires, user.Name)
   return err
+}
+
+func (r *Repository) getByToken(ctx context.Context, token string) (*model.User, error) {
+  var name, password, expires string
+  err := r.db.QueryRowContext(ctx, "SELECT name, password, token, expires FROM users WHERE " +
+    "token = ?", token).Scan(&name, &password, &token, &expires)
+  switch {
+  case err == sql.ErrNoRows:
+    log.Printf("no rows for token %v\n", token)
+    return nil, repository.ErrNoUser
+  case err != nil:
+    log.Printf("query error: %v\n", err)
+    return nil, err
+  default:
+    return &model.User{
+      Name: name,
+      Password: password,
+      Token: token,
+      Expires: expires,
+    }, nil
+  }
 }
 
 func (r *Repository) hasUserAndPassword(ctx context.Context, user *model.User) (bool, error) {

@@ -70,7 +70,46 @@ func (h *Handler) Authenticate(w http.ResponseWriter, req *http.Request) {
   }
 }
 
-func (h *Handler) Authorize(w http.ResponseWriter, req *http.Request) {}
+func (h *Handler) Authorize(w http.ResponseWriter, req *http.Request) {
+  cookie, err := req.Cookie("token")
+  if err != nil {
+    log.Println("bad cookie")
+    w.WriteHeader(http.StatusBadRequest)
+    return
+  }
+
+  log.Println("cookie value =", cookie.Value)
+  valid, err := h.ctrl.IsTokenValid(context.Background(), cookie.Value)
+  if err != nil {
+    log.Println(err)
+    w.WriteHeader(http.StatusInternalServerError)
+    return
+  }
+
+  if valid {
+    if err := json.NewEncoder(w).Encode(model.ServerTokenValidResponse{
+      ServerResponse: model.ServerResponse{
+        Status: "ok",
+        Description: "token valid",
+      },
+      Valid: true,
+    }); err != nil {
+      log.Println(err)
+      w.WriteHeader(http.StatusInternalServerError)
+      return
+    }
+  } else {
+    if err := json.NewEncoder(w).Encode(model.ServerResponse{
+      Status: "ok",
+      Description: "invalid token",
+    }); err != nil {
+      log.Println(err)
+      w.WriteHeader(http.StatusInternalServerError)
+      return
+    }
+  }
+  return
+}
 
 func (h *Handler) Register(w http.ResponseWriter, req *http.Request) {
   var userName, password string

@@ -13,3 +13,8 @@ type ServerResponse struct {
   Status string `json:"status"`
   Description string `json:"description"`
 }
+
+type ServerTokenValidResponse struct {
+  ServerResponse
+  Valid bool `json:"valid"`
+}
