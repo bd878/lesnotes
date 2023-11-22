@@ -21,46 +21,99 @@ func New(ctrl *users.Controller) *Handler {
   return &Handler{ctrl}
 }
 
-func (h *Handler) AuthUser(w http.ResponseWriter, req *http.Request) {
-  userName := req.PostFormValue("name")
-  if userName == "" {
+func (h *Handler) Authenticate(w http.ResponseWriter, req *http.Request) {
+  var userName, password string 
+  var ok bool
+
+  if userName, ok = getName(w, req); !ok {
+    return
+  }
+
+  if password, ok = getPassword(w, req); !ok {
+    return
+  }
+
+  exists, err := h.ctrl.Has(context.Background(), &model.User{Name: userName, Password: password})
+  if err != nil {
+    log.Println(err)
+    w.WriteHeader(http.StatusInternalServerError)
+    return
+  }
+
+  if !exists {
     if err := json.NewEncoder(w).Encode(model.ServerResponse{
       Status: "ok",
-      Description: "keine name",
+      Description: "no user,password pair",
     }); err != nil {
       log.Println(err)
       w.WriteHeader(http.StatusInternalServerError)
+      return
     }
     return
   }
 
-  password := req.PostFormValue("password")
-  if password == "" {
+  token, expires := getToken(w)
+  err = h.ctrl.Refresh(context.Background(), &model.User{Name: userName, Token: token, Expires: expires})
+  if err != nil {
+    log.Println(err)
+    w.WriteHeader(http.StatusInternalServerError)
+    return
+  }
+
+  if err := json.NewEncoder(w).Encode(model.ServerResponse{
+    Status: "ok",
+    Description: "authenticated",
+  }); err != nil {
+    log.Println(err)
+    w.WriteHeader(http.StatusInternalServerError)
+    return
+  }
+}
+
+func (h *Handler) Authorize(w http.ResponseWriter, req *http.Request) {}
+
+func (h *Handler) Register(w http.ResponseWriter, req *http.Request) {
+  var userName, password string
+  var ok bool
+
+  // user name
+  if userName, ok = getName(w, req); !ok {
+    return
+  }
+
+  // already exists
+  exists, err := h.ctrl.Has(context.Background(), &model.User{Name: userName})
+  if err != nil {
+    log.Println(err)
+    w.WriteHeader(http.StatusInternalServerError)
+    return
+  }
+
+  if exists {
     if err := json.NewEncoder(w).Encode(model.ServerResponse{
       Status: "ok",
-      Description: "keine password",
+      Description: "name exists",
     }); err != nil {
       log.Println(err)
       w.WriteHeader(http.StatusInternalServerError)
+      return
     }
     return
   }
 
-  token := utils.RandomString(10)
-  http.SetCookie(w, &http.Cookie{
-    Name: "token",
-    Value: token,
-    Path: "/",
-    Domain: "127.0.0.1:8080/",
-    Expires: time.Now().Add(time.Hour * 24 * 5),
-    HttpOnly: true,
-  })
+  // password
+  if password, ok = getPassword(w, req); !ok {
+    return
+  }
 
-  log.Println("user, password, token=", userName, password, token)
+  token, expires := getToken(w)
+
+  log.Println("user, password, token, expires=", userName, password, token, expires)
   if err := h.ctrl.Add(context.Background(), &model.User{
     Name: userName,
     Password: password,
     Token: token,
+    Expires: expires,
   }); err != nil {
     log.Println(err)
     w.WriteHeader(http.StatusInternalServerError)
@@ -69,7 +122,7 @@ func (h *Handler) AuthUser(w http.ResponseWriter, req *http.Request) {
 
   if err := json.NewEncoder(w).Encode(model.ServerResponse{
     Status: "ok",
-    Description: "accepted",
+    Description: "created",
   }); err != nil {
     log.Println(err)
     w.WriteHeader(http.StatusInternalServerError)
@@ -84,4 +137,45 @@ func (h *Handler) ReportStatus(w http.ResponseWriter, _ *http.Request) {
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
+}
+
+func getName(w http.ResponseWriter, req *http.Request) (name string, ok bool) {
+  name, ok = getTextField(w, req, "name")
+  return
+}
+
+func getPassword(w http.ResponseWriter, req *http.Request) (pass string, ok bool) {
+  pass, ok = getTextField(w, req, "password")
+  return
+}
+
+func getTextField(w http.ResponseWriter, req *http.Request, field string) (value string, ok bool) {
+  value = req.PostFormValue(field)
+  if value == "" {
+    if err := json.NewEncoder(w).Encode(model.ServerResponse{
+      Status: "ok",
+      Description: "no " + field,
+    }); err != nil {
+      log.Println(err)
+      w.WriteHeader(http.StatusInternalServerError)
+    }
+    ok = false
+  } else {
+    ok = true
+  }
+  return
+}
+
+func getToken(w http.ResponseWriter) (token string, expires string) {
+  token = utils.RandomString(10)
+  expiresAt := time.Now().Add(time.Hour * 24 * 5)
+  expires = expiresAt.String()
+
+  http.SetCookie(w, &http.Cookie{
+    Name: "token",
+    Value: token,
+    Expires: expiresAt,
+    HttpOnly: true,
+  })
+  return
 }

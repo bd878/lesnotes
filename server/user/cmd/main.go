@@ -58,7 +58,9 @@ func main() {
   }
   defer l.Close()
 
-  http.Handle("/users/v1/auth", http.HandlerFunc(h.AuthUser))
+  http.Handle("/users/v1/signup", http.HandlerFunc(h.Register))
+  http.Handle("/users/v1/login", http.HandlerFunc(h.Authenticate))
+  http.Handle("/users/v1/auth", http.HandlerFunc(h.Authorize))
   http.Handle("/users/v1/status", http.HandlerFunc(h.ReportStatus))
 
   log.Println("server is listening on =", l.Addr())
