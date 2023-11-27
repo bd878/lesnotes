@@ -71,7 +71,7 @@ func (h *Handler) Authenticate(w http.ResponseWriter, req *http.Request) {
   }
 }
 
-func (h *Handler) Authorize(w http.ResponseWriter, req *http.Request) {
+func (h *Handler) Auth(w http.ResponseWriter, req *http.Request) {
   cookie, err := req.Cookie("token")
   if err != nil {
     log.Println("bad cookie")

@@ -2,6 +2,7 @@ package main
 
 import (
   "flag"
+  "sync"
   "context"
   "io"
   "syscall"
@@ -14,8 +15,12 @@ import (
   "fmt"
   "os/signal"
 
+  "google.golang.org/grpc"
+
+  "github.com/bd878/gallery/server/gen"
   configs "github.com/bd878/gallery/server/user/configs"
   fcgihandler "github.com/bd878/gallery/server/user/internal/handler/fcgi"
+  grpchandler "github.com/bd878/gallery/server/user/internal/handler/grpc"
   controller "github.com/bd878/gallery/server/user/internal/controller/users"
   sqlite "github.com/bd878/gallery/server/user/internal/repository/sqlite"
 )
@@ -44,7 +49,17 @@ func main() {
   go trackConfig(c)
   defer close(c)
 
-  mem, err := sqlite.New(serverCfg.DBPath)
+  var wg sync.WaitGroup
+  wg.Add(2)
+
+  go func() { fcgiRun(serverCfg); wg.Done() }()
+  go func() { grpcRun(serverCfg); wg.Done() }()
+
+  wg.Wait()
+}
+
+func fcgiRun(cfg *configs.Config) {
+  mem, err := sqlite.New(cfg.DBPath)
   if err != nil {
     panic(err)
   }
@@ -52,7 +67,7 @@ func main() {
   h := fcgihandler.New(ctrl)
 
   netCfg := net.ListenConfig{}
-  l, err := netCfg.Listen(context.Background(), "tcp4", fmt.Sprintf(":%d", serverCfg.Port))
+  l, err := netCfg.Listen(context.Background(), "tcp4", fmt.Sprintf(":%d", cfg.FcgiPort))
   if err != nil {
     panic(err)
   }
@@ -60,13 +75,37 @@ func main() {
 
   http.Handle("/users/v1/signup", http.HandlerFunc(h.Register))
   http.Handle("/users/v1/login", http.HandlerFunc(h.Authenticate))
-  http.Handle("/users/v1/auth", http.HandlerFunc(h.Authorize))
+  http.Handle("/users/v1/auth", http.HandlerFunc(h.Auth))
   http.Handle("/users/v1/status", http.HandlerFunc(h.ReportStatus))
 
-  log.Println("server is listening on =", l.Addr())
+  log.Println("fcgi server is listening on =", l.Addr())
   if err := fcgi.Serve(l, nil); err != nil {
     panic(err)
   }
+  log.Println("fcgi server exited")
+}
+
+func grpcRun(cfg *configs.Config) {
+  mem, err := sqlite.New(cfg.DBPath)
+  if err != nil {
+    panic(err)
+  }
+  ctrl := controller.New(mem)
+  h := grpchandler.New(ctrl)
+  netCfg := net.ListenConfig{}
+  l, err := netCfg.Listen(context.Background(), "tcp4", fmt.Sprintf(":%d", cfg.GrpcPort))
+  if err != nil {
+    panic(err)
+  }
+  defer l.Close()
+
+  srv := grpc.NewServer()
+  gen.RegisterUserServiceServer(srv, h)
+  log.Println("grpc server is listening on =", l.Addr())
+  if err := srv.Serve(l); err != nil {
+    panic(err)
+  }
+  log.Println("grpc server exited")
 }
 
 func loadConfig() *configs.Config {

@@ -1,5 +1,6 @@
 {
-  "port": 8084,
+  "fcgiport": 8084,
+  "grpcport": 8085,
   "debug": true,
   "logFile": "log.txt",
   "dbPath": "main.db"
