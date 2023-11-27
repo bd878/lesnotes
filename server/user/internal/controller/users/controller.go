@@ -5,6 +5,7 @@ import (
 
   "github.com/bd878/gallery/server/user/pkg/model"
   "github.com/bd878/gallery/server/user/internal/repository"
+  "github.com/bd878/gallery/server/user/internal/controller"
 )
 
 type Repository interface {
@@ -34,19 +35,23 @@ func (c *Controller) Refresh(ctx context.Context, user *model.User) error {
   return c.repo.Refresh(ctx, user)
 }
 
-func (c *Controller) IsTokenValid(ctx context.Context, token string) (bool, error) {
-  user, err := c.repo.Get(ctx, &model.User{
-    Token: token,
+func (c *Controller) Get(ctx context.Context, user *model.User) (*model.User, error) {
+  result, err := c.repo.Get(ctx, &model.User{
+    Token: user.Token,
   })
   if err == repository.ErrNoUser {
-    return false, nil
+    return nil, nil
   }
   if err != nil {
-    return false, err
+    return nil, err
   }
   // TODO: check for expire
-  if user.Token == token {
-    return true, nil
+  if result.Token == user.Token {
+    return &model.User{
+      Name: result.Name,
+      Token: result.Token,
+      Expires: result.Expires,
+    }, nil
   }
-  return false, nil
+  return nil, controller.ErrTokenInvalid
 }

@@ -8,6 +8,7 @@ import (
   "context"
   "encoding/json"
 
+  "github.com/bd878/gallery/server/user/internal/controller"
   "github.com/bd878/gallery/server/user/internal/controller/users"
   "github.com/bd878/gallery/server/user/pkg/model"
   "github.com/bd878/gallery/server/utils"
@@ -79,36 +80,44 @@ func (h *Handler) Authorize(w http.ResponseWriter, req *http.Request) {
   }
 
   log.Println("cookie value =", cookie.Value)
-  valid, err := h.ctrl.IsTokenValid(context.Background(), cookie.Value)
+  user, err := h.ctrl.Get(context.Background(), &model.User{Token: cookie.Value})
+  if err == controller.ErrTokenInvalid {
+    if err := json.NewEncoder(w).Encode(model.ServerAuthorizeResponse{
+      ServerResponse: model.ServerResponse{
+        Status: "ok",
+        Description: "invalid token",
+      },
+      Valid: false,
+    }); err != nil {
+      log.Println(err)
+      w.WriteHeader(http.StatusInternalServerError)
+      return
+    }
+  }
+  // TODO: check for token expired error
   if err != nil {
     log.Println(err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
 
-  if valid {
-    if err := json.NewEncoder(w).Encode(model.ServerTokenValidResponse{
-      ServerResponse: model.ServerResponse{
-        Status: "ok",
-        Description: "token valid",
-      },
-      Valid: true,
-    }); err != nil {
-      log.Println(err)
-      w.WriteHeader(http.StatusInternalServerError)
-      return
-    }
-  } else {
-    if err := json.NewEncoder(w).Encode(model.ServerResponse{
+  if err := json.NewEncoder(w).Encode(model.ServerAuthorizeResponse{
+    ServerResponse: model.ServerResponse{
       Status: "ok",
-      Description: "invalid token",
-    }); err != nil {
-      log.Println(err)
-      w.WriteHeader(http.StatusInternalServerError)
-      return
-    }
+      Description: "token valid",
+    },
+    Valid: true,
+    User: model.User{
+      Id: -1,
+      Name: user.Name,
+      Token: user.Token,
+      Expires: user.Expires,
+    },
+  }); err != nil {
+    log.Println(err)
+    w.WriteHeader(http.StatusInternalServerError)
+    return
   }
-  return
 }
 
 func (h *Handler) Register(w http.ResponseWriter, req *http.Request) {

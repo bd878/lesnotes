@@ -2,6 +2,7 @@ package model
 
 // User model
 type User struct {
+  Id int `json:"id"`
   Name string `json:"name"`
   Password string `json:"password"`
   Token string `json:"token"`
@@ -14,7 +15,8 @@ type ServerResponse struct {
   Description string `json:"description"`
 }
 
-type ServerTokenValidResponse struct {
+type ServerAuthorizeResponse struct {
   ServerResponse
   Valid bool `json:"valid"`
+  User User `json:"user"`
 }
