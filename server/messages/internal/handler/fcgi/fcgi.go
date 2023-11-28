@@ -57,16 +57,34 @@ func (h *Handler) CheckAuth(
       return
     }
 
-    log.Println("request for user, token =", user.Name, user.Token)
+    log.Println("request for user id, name, token =", user.Id, user.Name, user.Token)
+
+    req = req.WithContext(
+      context.WithValue(context.Background(), userContextKey{}, user),
+    )
 
     next(w, req)
   }
 }
 
+type userContextKey struct {}
+
 func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
   if err := req.ParseMultipartForm(1); err != nil {
     log.Println(err)
     w.WriteHeader(http.StatusInternalServerError)
+    return
+  }
+
+  user, ok := req.Context().Value(userContextKey{}).(*usermodel.User)
+  if !ok {
+    if err := json.NewEncoder(w).Encode(model.ServerResponse{
+      Status: "ok",
+      Description: "user required",
+    }); err != nil {
+      log.Println(err)
+      w.WriteHeader(http.StatusInternalServerError)
+    }
     return
   }
 
@@ -110,6 +128,7 @@ func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
   }
 
   if err := h.ctrl.SaveMessage(context.Background(), &model.Message{
+    UserId: user.Id,
     Value: msg,
     File: filename,
   }); err != nil {

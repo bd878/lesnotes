@@ -48,6 +48,7 @@ func (c *Controller) Get(ctx context.Context, user *model.User) (*model.User, er
   // TODO: check for expire
   if result.Token == user.Token {
     return &model.User{
+      Id: result.Id,
       Name: result.Name,
       Token: result.Token,
       Expires: result.Expires,

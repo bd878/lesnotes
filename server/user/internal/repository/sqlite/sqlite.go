@@ -57,8 +57,9 @@ func (r *Repository) Refresh(ctx context.Context, user *model.User) error {
 
 func (r *Repository) getByToken(ctx context.Context, token string) (*model.User, error) {
   var name, password, expires string
-  err := r.db.QueryRowContext(ctx, "SELECT name, password, token, expires FROM users WHERE " +
-    "token = ?", token).Scan(&name, &password, &token, &expires)
+  var id int
+  err := r.db.QueryRowContext(ctx, "SELECT id, name, password, token, expires FROM users WHERE " +
+    "token = ?", token).Scan(&id, &name, &password, &token, &expires)
   switch {
   case err == sql.ErrNoRows:
     log.Printf("no rows for token %v\n", token)
@@ -68,6 +69,7 @@ func (r *Repository) getByToken(ctx context.Context, token string) (*model.User,
     return nil, err
   default:
     return &model.User{
+      Id: id,
       Name: name,
       Password: password,
       Token: token,

@@ -1,6 +1,7 @@
 package messages
 
 import (
+  "time"
   "context"
 
   "github.com/bd878/gallery/server/messages/pkg/model"
@@ -20,6 +21,7 @@ func New(repo Repository) *Controller {
 }
 
 func (c *Controller) SaveMessage(ctx context.Context, msg *model.Message) error {
+  msg.CreateTime = time.Now().String()
   err := c.repo.Put(ctx, msg)
   if err != nil {
     return err
