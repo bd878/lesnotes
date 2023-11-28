@@ -9,20 +9,58 @@ import (
   "path/filepath"
   "encoding/json"
 
+  usermodel "github.com/bd878/gallery/server/user/pkg/model"
   "github.com/bd878/gallery/server/messages/internal/controller/messages"
   "github.com/bd878/gallery/server/messages/pkg/model"
 )
 
+type userGateway interface {
+  Auth(ctx context.Context, token string) (*usermodel.User, error)
+}
+
 type Handler struct {
   ctrl *messages.Controller
+  userGateway userGateway
   dataPath string
 }
 
 func New(
   ctrl *messages.Controller,
+  userGateway userGateway,
   dataPath string,
 ) *Handler {
-  return &Handler{ctrl, dataPath}
+  return &Handler{ctrl, userGateway, dataPath}
+}
+
+func (h *Handler) CheckAuth(
+  next func (w http.ResponseWriter, req *http.Request),
+) func (w http.ResponseWriter, req *http.Request) {
+  return func(w http.ResponseWriter, req *http.Request) {
+    cookie, err := req.Cookie("token")
+    if err != nil {
+      log.Println("bad cookie")
+      w.WriteHeader(http.StatusBadRequest)
+      return
+    }
+
+    log.Println("cookie value =", cookie.Value)
+    user, err := h.userGateway.Auth(context.Background(), cookie.Value)
+    if err != nil {
+      log.Println(err) // TODO: return invalid token response instead
+      if err := json.NewEncoder(w).Encode(model.ServerResponse{
+        Status: "ok",
+        Description: "token not found",
+      }); err != nil {
+        log.Println(err)
+        w.WriteHeader(http.StatusInternalServerError)
+      }
+      return
+    }
+
+    log.Println("request for user, token =", user.Name, user.Token)
+
+    next(w, req)
+  }
 }
 
 func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {

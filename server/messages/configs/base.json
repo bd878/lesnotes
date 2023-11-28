@@ -1,7 +1,8 @@
 {
   "port": 8083,
+  "useraddr": "0.0.0.0:8085",
   "debug": true,
   "logFile": "log.txt",
-  "dbPath": "../main.db",
-  "dataPath": "../data/"
+  "dbPath": "main.db",
+  "dataPath": "data"
 }

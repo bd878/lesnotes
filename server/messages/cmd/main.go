@@ -16,6 +16,7 @@ import (
 
   configs "github.com/bd878/gallery/server/messages/configs"
   fcgihandler "github.com/bd878/gallery/server/messages/internal/handler/fcgi"
+  usergateway "github.com/bd878/gallery/server/messages/internal/gateway/user/grpc"
   messagesCtrl "github.com/bd878/gallery/server/messages/internal/controller/messages"
   sqlite "github.com/bd878/gallery/server/messages/internal/repository/sqlite"
 )
@@ -49,7 +50,8 @@ func main() {
     panic(err)
   }
   msgCtrl := messagesCtrl.New(mem)
-  h := fcgihandler.New(msgCtrl, serverCfg.DataPath)
+  userGateway := usergateway.New(serverCfg.UserAddr)
+  h := fcgihandler.New(msgCtrl, userGateway, serverCfg.DataPath)
 
   netCfg := net.ListenConfig{}
   l, err := netCfg.Listen(context.Background(), "tcp4", fmt.Sprintf(":%d", serverCfg.Port))
@@ -58,8 +60,8 @@ func main() {
   }
   defer l.Close()
 
-  http.Handle("/messages/v1/send", http.HandlerFunc(h.SaveMessage))
-  http.Handle("/messages/v1/read_all", http.HandlerFunc(h.ReadMessages))
+  http.Handle("/messages/v1/send", http.HandlerFunc(h.CheckAuth(h.SaveMessage)))
+  http.Handle("/messages/v1/read_all", http.HandlerFunc(h.CheckAuth(h.ReadMessages)))
   http.Handle("/messages/v1/status", http.HandlerFunc(h.ReportStatus))
 
   log.Println("server is listening on =", l.Addr())
@@ -96,7 +98,11 @@ func trackConfig(c chan os.Signal) {
 
       cfg := loadConfig()
       if cfg.Debug {
-        f = setLogOutput(cfg.LogFile)
+        if *interactive {
+          log.SetOutput(os.Stdout)
+        } else {
+          f = setLogOutput(cfg.LogFile)
+        }
       } else {
         f.Close()
         log.SetOutput(io.Discard)

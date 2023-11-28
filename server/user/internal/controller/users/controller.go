@@ -40,7 +40,7 @@ func (c *Controller) Get(ctx context.Context, user *model.User) (*model.User, er
     Token: user.Token,
   })
   if err == repository.ErrNoUser {
-    return nil, nil
+    return nil, controller.ErrNotFound
   }
   if err != nil {
     return nil, err
