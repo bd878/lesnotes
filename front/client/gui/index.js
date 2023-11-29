@@ -1,5 +1,6 @@
 import React from 'react';
-import { hydrateRoot } from 'react-dom/client';
+import ReactDOM from 'react-dom/client';
 import Index from './pages/Index';
 
-hydrateRoot(document.getElementById('app'), <Index />)
+const root = ReactDOM.createRoot(document.getElementById('app'));
+root.render(<Index />);

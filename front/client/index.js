@@ -1,6 +1,6 @@
 import Koa from 'koa';
 import Router from '@koa/router';
-
+import Config from 'config';
 import helmet from './handlers/helmet.js';
 import errors from './handlers/errors.js';
 import logger from './handlers/logger.js';
@@ -23,12 +23,11 @@ app.use(favicon);
 
 router
   .get('/public/:filename', assets)
-  .get('/', index);
+  .get('/', index)
 
 app.use(router.routes());
 
-// TODO: load from config
-const port = process.env.PORT || 8000;
+const port = process.env.PORT || Config.get("port");
 
 app.listen(port, () => {
   console.log(`App is listening on ${port} port`);

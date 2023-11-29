@@ -1,5 +1,11 @@
-import React from 'react';
+import React, {Suspense, lazy} from 'react';
 
-const Index = () => <div>Bonjour tous les monde!</div>
+const Greeting = lazy(() => import("../../components/Greeting/index.jsx"));
+
+const Index = () => (
+  <Suspense fallback="Loading...">
+    <Greeting />
+  </Suspense>
+)
 
 export default Index;

@@ -1,8 +1,4 @@
-import Index from '../gui/pages/Index';
-
 import mustache from 'mustache';
-import React from 'react';
-import ReactDOMServer from 'react-dom/server'; 
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
@@ -12,8 +8,7 @@ async function prerender(ctx) {
     const template = await readFile(filePath, { encoding: 'utf-8' });
 
     ctx.body = mustache.render(template, {
-      html: ReactDOMServer.renderToString(<Index />),
-      script: "public/gui.js",
+      script: "public/index.js",
     });
     ctx.status = 200;
   } catch (err) {
