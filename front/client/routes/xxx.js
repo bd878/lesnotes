@@ -11,7 +11,7 @@ async function renderer(ctx) {
     ctx.set({ 'ETag': '1' })
 
     ctx.body = mustache.render(template, {
-      script: "/public/index.js",
+      script: "/public/xxx.js",
     });
     ctx.status = 200;
   } catch (err) {

@@ -9,9 +9,9 @@ async function renderer(ctx) {
 
     ctx.set({ 'Cache-Control': 'no-cache, max-age=0' })
     ctx.set({ 'ETag': '1' })
-
+    // TODO: ctx.set({ 'Last-Modified': 'ls -l templates/index.mustache' })
     ctx.body = mustache.render(template, {
-      script: "/public/index.js",
+      script: "/public/messages.js",
     });
     ctx.status = 200;
   } catch (err) {

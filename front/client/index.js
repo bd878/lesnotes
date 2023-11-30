@@ -10,6 +10,10 @@ import favicon from './handlers/favicon.js';
 
 import assets from './routes/assets.js';
 import index from './routes/index.js';
+import login from './routes/login.js';
+import register from './routes/register.js';
+import messages from './routes/messages.js';
+import xxx from './routes/xxx.js';
 
 const app = new Koa();
 const router = new Router();
@@ -23,7 +27,15 @@ app.use(favicon);
 
 router
   .get('/public/:filename', assets)
+  .get('/index', ctx => {
+    ctx.redirect('/')
+    ctx.status = 301
+  })
   .get('/', index)
+  .get('/login', login)
+  .get('/register', register)
+  .get('/messages/:id', messages)
+  .get('/:any*', xxx)
 
 app.use(router.routes());
 
