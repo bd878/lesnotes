@@ -5,6 +5,7 @@ const FormField = (props) => {
     <input
       name={props.name}
       type={props.type}
+      required={props.required}
     />
   );
 }

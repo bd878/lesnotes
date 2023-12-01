@@ -18,7 +18,7 @@ import xxx from './routes/xxx.js';
 const app = new Koa();
 const router = new Router();
 
-app.use(helmet);
+// app.use(helmet);
 app.use(errors);
 app.use(logger);
 app.use(bodyParser);
