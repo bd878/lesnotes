@@ -12,7 +12,7 @@ function prepareBody(body, method) {
     return;
   }
 
-  if (body instanceof URLSearchParams) {
+  if (body instanceof URLSearchParams || body instanceof FormData) {
     return body;
   }
 

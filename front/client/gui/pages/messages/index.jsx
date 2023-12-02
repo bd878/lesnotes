@@ -2,18 +2,17 @@ import React, {Suspense, lazy} from 'react';
 import ReactDOM from 'react-dom/client';
 import AuthProvider from '../../providers/Auth';
 
-const List = lazy(() => import("../../components/List/index.jsx"));
-const ListItem = lazy(() => import("../../components/ListItem/index.jsx"));
+const MessagesList = lazy(() => import("../../components/MessagesList/index.jsx"));
+const SendMessageForm = lazy(() => import("../../components/SendMessageForm/index.jsx"));
 
 const Messages = () => (
   <AuthProvider fallback="Go to /login">
     <Suspense fallback="Loading...">
-      <div>Messages:</div>
+      <div>
+        <MessagesList />
 
-      <List>
-        <ListItem>Message 1</ListItem>
-        <ListItem>Message 2</ListItem>
-      </List>
+        <SendMessageForm />
+      </div>
     </Suspense>
   </AuthProvider>
 )

@@ -224,6 +224,7 @@ func createToken(w http.ResponseWriter) (token string, expires string) {
     Value: token,
     Domain: "galleryexample.com",
     Expires: expiresAt,
+    Path: "/",
     HttpOnly: true,
   })
   return
