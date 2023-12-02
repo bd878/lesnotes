@@ -3,7 +3,8 @@ const methodsWithBody = [
 ]
 
 function getFullUrl(url, isFullUrl) {
-  return isFullUrl ? url : `http://127.0.0.1:8080${url}`;
+  // TODO: replace backend url with value from config
+  return isFullUrl ? url : `http://galleryexample.com${url}`;
 }
 
 function prepareBody(body, method) {

@@ -53,7 +53,7 @@ func (h *Handler) Authenticate(w http.ResponseWriter, req *http.Request) {
     return
   }
 
-  token, expires := getToken(w)
+  token, expires := createToken(w)
   err = h.ctrl.Refresh(context.Background(), &model.User{Name: userName, Token: token, Expires: expires})
   if err != nil {
     log.Println(err)
@@ -154,7 +154,7 @@ func (h *Handler) Register(w http.ResponseWriter, req *http.Request) {
     return
   }
 
-  token, expires := getToken(w)
+  token, expires := createToken(w)
 
   log.Println("user, password, token, expires=", userName, password, token, expires)
   if err := h.ctrl.Add(context.Background(), &model.User{
@@ -214,7 +214,7 @@ func getTextField(w http.ResponseWriter, req *http.Request, field string) (value
   return
 }
 
-func getToken(w http.ResponseWriter) (token string, expires string) {
+func createToken(w http.ResponseWriter) (token string, expires string) {
   token = utils.RandomString(10)
   expiresAt := time.Now().Add(time.Hour * 24 * 5)
   expires = expiresAt.String()
@@ -222,6 +222,7 @@ func getToken(w http.ResponseWriter) (token string, expires string) {
   http.SetCookie(w, &http.Cookie{
     Name: "token",
     Value: token,
+    Domain: "galleryexample.com",
     Expires: expiresAt,
     HttpOnly: true,
   })

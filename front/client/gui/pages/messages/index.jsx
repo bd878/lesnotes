@@ -6,7 +6,7 @@ const List = lazy(() => import("../../components/List/index.jsx"));
 const ListItem = lazy(() => import("../../components/ListItem/index.jsx"));
 
 const Messages = () => (
-  <AuthProvider fallback="Authenticating...">
+  <AuthProvider fallback="Go to /login">
     <Suspense fallback="Loading...">
       <div>Messages:</div>
 
