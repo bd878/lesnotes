@@ -34,7 +34,7 @@ router
   .get('/', index)
   .get('/login', login)
   .get('/register', register)
-  .get('/messages/:id', messages)
+  .get('/messages', messages)
   .get('/:any*', xxx)
 
 app.use(router.routes());

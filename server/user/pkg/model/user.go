@@ -1,5 +1,7 @@
 package model
 
+type UserId int
+
 // User model
 type User struct {
   Id int `json:"id"`

@@ -76,15 +76,9 @@ func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
     return
   }
 
-  user, ok := req.Context().Value(userContextKey{}).(*usermodel.User)
-  if !ok {
-    if err := json.NewEncoder(w).Encode(model.ServerResponse{
-      Status: "ok",
-      Description: "user required",
-    }); err != nil {
-      log.Println(err)
-      w.WriteHeader(http.StatusInternalServerError)
-    }
+  var user *usermodel.User
+  var ok bool
+  if user, ok = getUser(w, req); !ok {
     return
   }
 
@@ -148,14 +142,19 @@ func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) {
-  v, err := h.ctrl.ReadAllMessages(context.Background())
+  var user *usermodel.User
+  var ok bool
+  if user, ok = getUser(w, req); !ok {
+    return
+  }
+
+  v, err := h.ctrl.ReadUserMessages(context.Background(), usermodel.UserId(user.Id))
   if err != nil {
     log.Println(err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
 
-  log.Println("send n'th messages =", len(v))
   if err := json.NewEncoder(w).Encode(v); err != nil {
     log.Println(err)
     w.WriteHeader(http.StatusInternalServerError)
@@ -170,4 +169,19 @@ func (h *Handler) ReportStatus(w http.ResponseWriter, _ *http.Request) {
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
+}
+
+func getUser(w http.ResponseWriter, req *http.Request) (*usermodel.User, bool) {
+  user, ok := req.Context().Value(userContextKey{}).(*usermodel.User)
+  if !ok {
+    if err := json.NewEncoder(w).Encode(model.ServerResponse{
+      Status: "ok",
+      Description: "user required",
+    }); err != nil {
+      log.Println(err)
+      w.WriteHeader(http.StatusInternalServerError)
+    }
+    return nil, false
+  }
+  return user, true
 }

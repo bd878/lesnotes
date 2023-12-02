@@ -4,12 +4,13 @@ import (
   "time"
   "context"
 
+  usermodel "github.com/bd878/gallery/server/user/pkg/model"
   "github.com/bd878/gallery/server/messages/pkg/model"
 )
 
 type Repository interface {
   Put(context.Context, *model.Message) error
-  GetAll(context.Context) ([]model.Message, error)
+  Get(context.Context, usermodel.UserId) ([]model.Message, error)
 }
 
 type Controller struct {
@@ -29,8 +30,8 @@ func (c *Controller) SaveMessage(ctx context.Context, msg *model.Message) error 
   return nil
 }
 
-func (c *Controller) ReadAllMessages(ctx context.Context) ([]model.Message, error) {
-  v, err := c.repo.GetAll(ctx)
+func (c *Controller) ReadUserMessages(ctx context.Context, userId usermodel.UserId) ([]model.Message, error) {
+  v, err := c.repo.Get(ctx, userId)
   if err != nil {
     return nil, err
   }

@@ -61,7 +61,7 @@ func main() {
   defer l.Close()
 
   http.Handle("/messages/v1/send", http.HandlerFunc(h.CheckAuth(h.SaveMessage)))
-  http.Handle("/messages/v1/read_all", http.HandlerFunc(h.CheckAuth(h.ReadMessages)))
+  http.Handle("/messages/v1/read", http.HandlerFunc(h.CheckAuth(h.ReadMessages)))
   http.Handle("/messages/v1/status", http.HandlerFunc(h.ReportStatus))
 
   log.Println("server is listening on =", l.Addr())

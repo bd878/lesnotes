@@ -6,6 +6,7 @@ import (
 
   _ "github.com/mattn/go-sqlite3"
   "github.com/bd878/gallery/server/messages/pkg/model"
+  usermodel "github.com/bd878/gallery/server/user/pkg/model"
 )
 
 type Repository struct {
@@ -28,8 +29,10 @@ func (r *Repository) Put(ctx context.Context, msg *model.Message) error {
   return err
 }
 
-func (r *Repository) GetAll(ctx context.Context) ([]model.Message, error) {
-  rows, err := r.db.QueryContext(ctx, "SELECT id, user_id, message, file FROM messages")
+func (r *Repository) Get(ctx context.Context, userId usermodel.UserId) ([]model.Message, error) {
+  rows, err := r.db.QueryContext(ctx,
+    "SELECT id, message, file FROM messages WHERE user_id = ?", int(userId),
+  )
   if err != nil {
     return nil, err
   }
@@ -37,10 +40,10 @@ func (r *Repository) GetAll(ctx context.Context) ([]model.Message, error) {
 
   var res []model.Message
   for rows.Next() {
-    var id, userId int
+    var id int
     var value string
     var fileCol sql.NullString
-    if err := rows.Scan(&id, &userId, &value, &fileCol); err != nil {
+    if err := rows.Scan(&id, &value, &fileCol); err != nil {
       return nil, err
     }
 
@@ -50,7 +53,8 @@ func (r *Repository) GetAll(ctx context.Context) ([]model.Message, error) {
     }
     res = append(res, model.Message{
       Id: id,
-      UserId: userId,
+      UserId: -1,
+      CreateTime: "null",
       Value: value,
       File: fileName,
     })
