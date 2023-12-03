@@ -1,5 +1,6 @@
 import React, {lazy,useEffect,useState} from 'react';
 import api from '../../api';
+import i18n from '../../i18n';
 
 const List = lazy(() => import("../../components/List/index.jsx"));
 const ListItem = lazy(() => import("../../components/ListItem/index.jsx"));
@@ -19,8 +20,8 @@ const MessagesList = () => {
           credentials: 'include',
         });
       } catch (e) {
-        console.error("error occured:", e);
-        setError("error occured while loading messages");
+        console.error(i18n("error_occured"), e);
+        setError(i18n("loading_messages_error"));
       } finally {
         setLoading(false)
       }
@@ -48,9 +49,9 @@ const MessagesList = () => {
 
   return (
     <>
-      <div>Messages:</div>
+      <div>{i18n("messages_header")}</div>
 
-      {loading ? <div>Loading...</div> : <>{content}</>}
+      {loading ? <div>{i18n("loading")}</div> : <>{content}</>}
     </>
   )
 }

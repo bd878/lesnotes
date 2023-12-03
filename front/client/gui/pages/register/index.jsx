@@ -1,11 +1,12 @@
 import React, {Suspense, lazy} from 'react';
 import ReactDOM from 'react-dom/client';
+import i18n from '../../i18n';
 
 const RegisterForm = lazy(() => import("../../components/RegisterForm/index.jsx"));
 
 const Register = () => (
-  <Suspense fallback="Loading...">
-    <div>Register:</div>
+  <Suspense fallback={i18n('loading')}>
+    <div>{i18n("register")}</div>
 
     <RegisterForm />
   </Suspense>

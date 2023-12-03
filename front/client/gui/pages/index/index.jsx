@@ -1,12 +1,13 @@
 import React, {Suspense, lazy} from 'react';
 import ReactDOM from 'react-dom/client';
-
-const Greeting = lazy(() => import("../../components/Greeting/index.jsx"));
+import i18n from '../../i18n';
 
 const Index = () => (
-  <Suspense fallback="Loading...">
-    <Greeting />
-  </Suspense>
+  <>
+    <div>{i18n("index_intro")}</div>
+    <a href="/login">{i18n("login")}</a>
+    <a href="/register">{i18n("register")}</a>
+  </>
 )
 
 const root = ReactDOM.createRoot(document.getElementById('app'));

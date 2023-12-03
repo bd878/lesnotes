@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import api from '../../api';
+import i18n from '../../i18n';
 
 const AuthProvider = props => {
   const [authed, setAuthed] = useState(false)
@@ -25,6 +26,7 @@ const AuthProvider = props => {
         console.log("welcome,", response.user.name)
       } else {
         setAuthed(false);
+        setTimeout(() => {location.href = "/login"}, 0)
       }
     }
 
@@ -32,13 +34,13 @@ const AuthProvider = props => {
   }, [setAuthed, setLoading])
 
   if (loading) {
-    return (<>Authenticating...</>)
+    return (<>{i18n('auth_process')}</>)
   }
 
   return (
     <>{authed
       ? props.children
-      : (props.fallback || "Not authed")
+      : (props.fallback || i18n("not_authed"))
     }</>
   );
 }

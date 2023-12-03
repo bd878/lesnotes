@@ -1,17 +1,18 @@
 import React, {lazy} from 'react';
 import api from '../../api';
+import i18n from '../../i18n';
 
 const Form = lazy(() => import("../../components/Form/index.jsx"));
 const FormField = lazy(() => import("../../components/FormField/index.jsx"));
-const FormButton = lazy(() => import("../../components/FormButton/index.jsx"));
+const Button = lazy(() => import("../../components/Button/index.jsx"));
 
 const sendRegisterRequest = async e => {
   e.preventDefault();
 
   let name = e.target.elements['name'].value;
   let password = e.target.elements['password'].value;
-  if (!name) {console.error("name required"); return;}
-  if (!password) {console.error("password required"); return;}
+  if (!name) {console.error(i18n("name_required_err")); return;}
+  if (!password) {console.error(i18n("pass_required_err")); return;}
 
   const response = await api("/users/v1/signup", {
     method: "POST",
@@ -28,11 +29,14 @@ const sendRegisterRequest = async e => {
 
 const RegisterForm = props => {
   return (
-    <Form name="register-form" onSubmit={sendRegisterRequest}>
-      <FormField required name="name" type="text" />
-      <FormField required name="password" type="password" />
-      <FormButton type="submit" text="Register" />
-    </Form>
+    <div>
+      <Form name="register-form" onSubmit={sendRegisterRequest}>
+        <FormField required name="name" type="text" />
+        <FormField required name="password" type="password" />
+        <Button type="submit" text={i18n("register")} />
+      </Form>
+      <a href="/login" target="_self">{i18n("login")}</a>
+    </div>
   );
 }
 

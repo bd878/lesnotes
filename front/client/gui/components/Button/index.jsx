@@ -1,6 +1,6 @@
 import React from 'react'
 
-const FormButton = props => {
+const Button = props => {
   return (
     <button type={props.button}>
       {props.text}
@@ -8,4 +8,4 @@ const FormButton = props => {
   )
 }
 
-export default FormButton;
+export default Button;
