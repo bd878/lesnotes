@@ -6,9 +6,11 @@ import (
   "os"
   "io"
   "context"
+  "strings"
   "path/filepath"
   "encoding/json"
 
+  "github.com/bd878/gallery/server/utils"
   usermodel "github.com/bd878/gallery/server/user/pkg/model"
   "github.com/bd878/gallery/server/messages/internal/controller/messages"
   "github.com/bd878/gallery/server/messages/pkg/model"
@@ -91,8 +93,11 @@ func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
       return
     }
 
+    filename = strings.ToLower(utils.RandomString(10) + filepath.Ext(fh.Filename))
+    log.Println("filename=", filename)
+
     ff, err := os.OpenFile(
-      filepath.Join(h.dataPath, fh.Filename),
+      filepath.Join(h.dataPath, filename),
       os.O_WRONLY|os.O_CREATE, 0666,
     )
     if err != nil {
@@ -105,7 +110,6 @@ func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
       w.WriteHeader(http.StatusInternalServerError)
       return
     }
-    filename = fh.Filename
   }
 
   msg := req.PostFormValue("message")

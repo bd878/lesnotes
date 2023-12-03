@@ -11,12 +11,14 @@ const sendMessageRequest = async e => {
 
   let message = e.target.elements['message'].value;
   if (!message) {console.error(i18n("msg_required_err")); return;}
-  let file = e.target.elements['file'].value;
+  let file = e.target.elements['file'].files[0];
+  let filename = e.target.elements['file'].value;
 
   const form = new FormData()
   form.append("message", message);
-  if (file) {form.append('file', file);}
-
+  if (file) {
+    form.append('file', file, filename);
+  }
   const response = await api("/messages/v1/send", {
     method: "POST",
     credentials: "include",
@@ -27,7 +29,11 @@ const sendMessageRequest = async e => {
 
 const SendMessageForm = props => {
   return (
-    <Form name="send-message-form" onSubmit={sendMessageRequest}>
+    <Form
+      name="send-message-form"
+      onSubmit={sendMessageRequest}
+      enctype="multipart/form-data"
+    >
       <FormField required name="message" type="text" />
       <FormField name="file" type="file" />
       <Button type="submit" text={i18n("msg_send_text")} />
