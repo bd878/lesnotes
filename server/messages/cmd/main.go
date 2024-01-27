@@ -2,23 +2,13 @@ package main
 
 import (
   "flag"
-  "context"
-  "io"
-  "syscall"
   "encoding/json"
   "os"
-  "net"
-  "net/http"
-  "net/http/fcgi"
   "log"
   "fmt"
-  "os/signal"
 
   configs "github.com/bd878/gallery/server/messages/configs"
-  fcgihandler "github.com/bd878/gallery/server/messages/internal/handler/fcgi"
-  usergateway "github.com/bd878/gallery/server/messages/internal/gateway/user/grpc"
-  messagesCtrl "github.com/bd878/gallery/server/messages/internal/controller/messages"
-  sqlite "github.com/bd878/gallery/server/messages/internal/repository/sqlite"
+  agent "github.com/bd878/gallery/server/messages/agent"
 )
 
 var (
@@ -30,42 +20,32 @@ var (
 func main() {
   flag.Parse()
 
-  serverCfg := loadConfig()
+  c := loadConfig()
 
-  if serverCfg.Debug {
+  if c.Debug {
     if *interactive {
       log.SetOutput(os.Stdout)
     } else {
-      f := setLogOutput(serverCfg.LogFile)
+      f := setLogOutput(c.LogFile)
       defer f.Close()
     }
   }
 
-  c := make(chan os.Signal, 1)
-  go trackConfig(c)
-  defer close(c)
+  a, err := agent.New(agent.Config{
+    UserAddr: c.UserAddr,
+    BindAddr: fmt.Sprintf(":%d", c.Port),
+    DBPath: c.DBPath,
+    DataPath: c.DataPath,
 
-  mem, err := sqlite.New(serverCfg.DBPath)
+    Bootstrap: false,
+    NodeName: "messages",
+    StartJoinAddrs: []string{},
+  })
   if err != nil {
     panic(err)
   }
-  msgCtrl := messagesCtrl.New(mem)
-  userGateway := usergateway.New(serverCfg.UserAddr)
-  h := fcgihandler.New(msgCtrl, userGateway, serverCfg.DataPath)
 
-  netCfg := net.ListenConfig{}
-  l, err := netCfg.Listen(context.Background(), "tcp4", fmt.Sprintf(":%d", serverCfg.Port))
-  if err != nil {
-    panic(err)
-  }
-  defer l.Close()
-
-  http.Handle("/messages/v1/send", http.HandlerFunc(h.CheckAuth(h.SaveMessage)))
-  http.Handle("/messages/v1/read", http.HandlerFunc(h.CheckAuth(h.ReadMessages)))
-  http.Handle("/messages/v1/status", http.HandlerFunc(h.ReportStatus))
-
-  log.Println("server is listening on =", l.Addr())
-  if err := fcgi.Serve(l, nil); err != nil {
+  if err := a.Serve(); err != nil {
     panic(err)
   }
 }
@@ -83,32 +63,6 @@ func loadConfig() *configs.Config {
   }
 
   return &cfg
-}
-
-func trackConfig(c chan os.Signal) {
-  signal.Notify(c, syscall.SIGHUP)
-
-  var f *os.File
-  defer f.Close()
-
-  for {
-    switch <-c {
-    case syscall.SIGHUP:
-      log.Println("recieve sighup")
-
-      cfg := loadConfig()
-      if cfg.Debug {
-        if *interactive {
-          log.SetOutput(os.Stdout)
-        } else {
-          f = setLogOutput(cfg.LogFile)
-        }
-      } else {
-        f.Close()
-        log.SetOutput(io.Discard)
-      }
-    }
-  }
 }
 
 func setLogOutput(p string) *os.File {
