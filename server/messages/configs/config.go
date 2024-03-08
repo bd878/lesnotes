@@ -2,6 +2,7 @@ package configs
 
 type Config struct {
   Port int `json:"port"`
+  DiscoveryPort int `json:"discoveryPort"`
   UserAddr string `json:"useraddr`
   Debug bool `json:"debug"`
   LogFile string `json:"logFile"`

@@ -1,0 +1,253 @@
+package messages
+
+import (
+  "io"
+  "os"
+  "net"
+  "time"
+  "bytes"
+  "encoding/json"
+  "context"
+  "path/filepath"
+
+  raftboltdb "github.com/hashicorp/raft-boltdb"
+  "github.com/hashicorp/raft"
+
+  usermodel "github.com/bd878/gallery/server/user/pkg/model"
+  "github.com/bd878/gallery/server/messages/pkg/model"
+)
+
+type Repository interface {
+  Put(context.Context, *model.Message) error
+  Get(context.Context, usermodel.UserId) ([]model.Message, error)
+  PutBatch(context.Context, [](*model.Message)) error
+  GetBatch(context.Context) ([]model.Message, error)
+  Truncate(context.Context) error
+}
+
+type DistributedMessages struct {
+  config *Config
+  raft *raft.Raft
+  repo Repository
+}
+
+func New(repo Repository, config *Config) (
+  *DistributedMessages,
+  error,
+) {
+  m := &DistributedMessages{
+    repo: repo,
+    config: config,
+  }
+  if err := m.setupRaft(); err != nil {
+    return nil, err
+  }
+  return m, nil
+}
+
+func (m *DistributedMessages) setupRaft() error {
+  fsm := &fsm{repo: m.repo}
+  logStore, err := raftboltdb.NewBoltStore(
+    filepath.Join(m.config.DataDir, "raft", "log"),
+  )
+  if err != nil {
+    return err
+  }
+  stableStore, err := raftboltdb.NewBoltStore(
+    filepath.Join(m.config.DataDir, "raft", "stable"),
+  )
+  if err != nil {
+    return err
+  }
+  retain := 1
+  snapshotStore, err := raft.NewFileSnapshotStore(
+    filepath.Join(m.config.DataDir, "raft"),
+    retain,
+    nil,
+  )
+  if err != nil {
+    return err
+  }
+
+  maxPool := 5
+  timeout := 10*time.Second
+  transport := raft.NewNetworkTransport(
+    m.config.StreamLayer,
+    maxPool,
+    timeout,
+    os.Stderr,
+  )
+
+  if m.config.Raft == nil {
+    m.config.Raft = raft.DefaultConfig()
+  }
+
+  m.raft, err = raft.NewRaft(
+    m.config.Raft,
+    fsm,
+    logStore,
+    stableStore,
+    snapshotStore,
+    transport,
+  )
+  if err != nil {
+    return err
+  }
+
+  var hasState bool
+  hasState, err = raft.HasExistingState(
+    logStore,
+    stableStore,
+    snapshotStore,
+  )
+  if err != nil {
+    return err
+  }
+  if m.config.Bootstrap && !hasState {
+    configuration := raft.Configuration{
+      Servers: []raft.Server{{
+        ID: m.config.Raft.LocalID,
+        Address: transport.LocalAddr(),
+      }},
+    }
+    err = m.raft.BootstrapCluster(configuration).Error()
+  }
+  return err
+}
+
+func (m *DistributedMessages) SaveMessage(ctx context.Context, msg *model.Message) error {
+  msg.CreateTime = time.Now().String()
+  if err := m.apply(ctx, msg); err != nil {
+    return err
+  }
+  return nil
+}
+
+func (m *DistributedMessages) apply(ctx context.Context, msg *model.Message) error {
+  b, err := json.Marshal(msg)
+  if err != nil {
+    return err
+  }
+
+  timeout := 10*time.Second
+  future := m.raft.Apply(b, timeout)
+  if future.Error() != nil {
+    return future.Error()
+  }
+
+  res := future.Response()
+  if err, ok := res.(error); ok {
+    return err
+  }
+  return nil
+}
+
+func (m *DistributedMessages) ReadUserMessages(ctx context.Context, userId usermodel.UserId) (
+  []model.Message,
+  error,
+) {
+  return m.repo.Get(ctx, userId)
+}
+
+var _ raft.FSM = (*fsm)(nil)
+
+type fsm struct {
+  repo Repository
+}
+
+func (f *fsm) Apply(record *raft.Log) interface{} {
+  buf := record.Data
+  var msg model.Message
+  err := json.Unmarshal(buf, &msg)
+  if err != nil {
+    return err
+  }
+  return f.repo.Put(context.Background(), &msg)
+}
+
+func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {
+  return &snapshot{repo: f.repo}, nil
+}
+
+// TODO: restore on messages2, then rename on messages.
+// By this time it first deletes all messages and restores
+// them from snapshot data. For testing purposes only
+func (f *fsm) Restore(r io.ReadCloser) error {
+  var buf *bytes.Buffer
+  var msgs []model.Message
+
+  _, err := io.Copy(buf, r)
+  if err == io.EOF {
+    return err
+  } else if err != nil {
+    return err
+  }
+  err = json.Unmarshal(buf.Bytes(), &msgs)
+  if err != nil {
+    return err
+  }
+
+  ctx := context.Background()
+  err = f.repo.Truncate(ctx)
+  if err != nil {
+    return err
+  }
+  for _, msg := range msgs {
+    err := f.repo.Put(ctx, &msg)
+    if err != nil {
+      return err
+    }
+  }
+  return nil
+}
+
+type snapshot struct {
+  repo Repository
+}
+
+func (s *snapshot) Persist(sink raft.SnapshotSink) error {
+  msgs, err := s.repo.GetBatch(context.Background())
+  if err != nil {
+    return err
+  }
+
+  b, err := json.Marshal(msgs)
+  if err != nil {
+    return err
+  }
+  if _, err := io.Copy(sink, bytes.NewReader(b)); err != nil {
+    _ = sink.Cancel()
+    return err
+  }
+  return sink.Close()
+}
+
+func (s *snapshot) Release() {}
+
+type StreamLayer struct {
+  ln net.Listener
+}
+
+func NewStreamLayer(ln net.Listener) *StreamLayer {
+  return &StreamLayer{ln: ln}
+}
+
+func (s *StreamLayer) Dial(
+  addr raft.ServerAddress,
+  timeout time.Duration,
+) (net.Conn, error) {
+  dialer := &net.Dialer{Timeout: timeout}
+  return dialer.Dial("tcp", string(addr))
+}
+
+func (s *StreamLayer) Accept() (net.Conn, error) {
+  return s.ln.Accept()
+}
+
+func (s *StreamLayer) Close() error {
+  return s.ln.Close()
+}
+
+func (s *StreamLayer) Addr() net.Addr {
+  return s.ln.Addr()
+}

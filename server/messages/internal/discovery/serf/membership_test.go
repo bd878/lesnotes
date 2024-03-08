@@ -25,23 +25,38 @@ func TestMembership(t *testing.T) {
     }
   }
 
+  members := make([]*discovery.Membership, 0)
   handlers := make([]*handler, 0)
   for _, c := range configs {
     h := &handler{
       joins: make(chan map[string]string, 3),
       leaves: make(chan string, 3),
     }
-    _, err := discovery.New(h, c)
+    m, err := discovery.New(h, c)
     if err != nil {
       t.Fatal(err)
     }
     time.Sleep(250*time.Millisecond)
 
+    members = append(members, m)
     handlers = append(handlers, h)
   }
 
-  if len(handlers[0].joins) != 3 {
-    t.Errorf("joins != 3, got %d\n", len(handlers[0].joins))
+  if len(handlers[0].joins) != 2 {
+    t.Errorf("joins != 2, got %d\n", len(handlers[0].joins))
+  }
+
+  if len(handlers[0].leaves) != 0 {
+    t.Errorf("leaves != 0, got %d\n", len(handlers[0].leaves))
+  }
+
+  err := members[0].Leave()
+  if err != nil {
+    t.Fatal(err)
+  }
+
+  if len(handlers[1].leaves) != 1 {
+    t.Errorf("leaves != 1, got %d\n", len(handlers[1].leaves))
   }
 }
 
