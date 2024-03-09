@@ -34,6 +34,7 @@ func main() {
   a, err := agent.New(agent.Config{
     UserAddr: c.UserAddr,
     BindAddr: fmt.Sprintf(":%d", c.Port),
+    DiscoveryAddr: fmt.Sprintf(":%d", c.DiscoveryPort),
     DBPath: c.DBPath,
     DataPath: c.DataPath,
 
@@ -45,7 +46,7 @@ func main() {
     panic(err)
   }
 
-  if err := a.Serve(); err != nil {
+  if err := a.Run(); err != nil {
     panic(err)
   }
 }

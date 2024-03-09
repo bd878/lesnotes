@@ -12,7 +12,6 @@ import (
 
   "github.com/bd878/gallery/server/utils"
   usermodel "github.com/bd878/gallery/server/user/pkg/model"
-  "github.com/bd878/gallery/server/messages/internal/controller/messages"
   "github.com/bd878/gallery/server/messages/pkg/model"
 )
 
@@ -20,14 +19,19 @@ type userGateway interface {
   Auth(ctx context.Context, token string) (*usermodel.User, error)
 }
 
+type Controller interface {
+  SaveMessage(ctx context.Context, msg *model.Message) error
+  ReadUserMessages(ctx context.Context, userId usermodel.UserId) ([]model.Message, error)
+}
+
 type Handler struct {
-  ctrl *messages.Controller
+  ctrl Controller
   userGateway userGateway
   dataPath string
 }
 
 func New(
-  ctrl *messages.Controller,
+  ctrl Controller,
   userGateway userGateway,
   dataPath string,
 ) *Handler {

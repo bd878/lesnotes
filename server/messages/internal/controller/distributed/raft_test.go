@@ -2,6 +2,8 @@ package messages_test
 
 import (
   "testing"
+  "context"
+  "reflect"
   "time"
   "net"
   "fmt"
@@ -9,6 +11,8 @@ import (
   "github.com/hashicorp/raft"
   "github.com/stretchr/testify/require"
 
+  "github.com/bd878/gallery/server/messages/pkg/model"
+  usermodel "github.com/bd878/gallery/server/user/pkg/model"
   memory "github.com/bd878/gallery/server/messages/internal/repository/memory"
   distributed "github.com/bd878/gallery/server/messages/internal/controller/distributed"
 )
@@ -55,5 +59,33 @@ func TestDistributed(t *testing.T) {
     }
 
     logs = append(logs, m)
+  }
+
+  messages := []*model.Message{
+    {Id: 0, UserId: 1, Value: "first", File: "file1_1.pdf"},
+    {Id: 1, UserId: 2, Value: "second", File: "file2_1.pdf"},
+    {Id: 2, UserId: 1, Value: "third", File: "file1_2.pdf"},
+  }
+
+  for _, msg := range messages {
+    err := logs[0].SaveMessage(context.Background(), msg)
+    require.NoError(t, err)
+    require.Eventually(t, func() bool {
+      for j := 0; j < nodeCount; j++ {
+        got, err := logs[j].ReadOneMessage(
+          context.Background(),
+          usermodel.UserId(msg.UserId),
+          msg.Id,
+        )
+        if err != nil {
+          return false
+        }
+
+        if !reflect.DeepEqual(got.Value, msg.Value) {
+          return false
+        }
+      }
+      return true
+    }, 500*time.Millisecond, 50*time.Millisecond)
   }
 }

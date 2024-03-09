@@ -23,6 +23,7 @@ type Repository interface {
   Get(context.Context, usermodel.UserId) ([]model.Message, error)
   PutBatch(context.Context, [](*model.Message)) error
   GetBatch(context.Context) ([]model.Message, error)
+  GetOne(context.Context, usermodel.UserId, int) (model.Message, error)
   Truncate(context.Context) error
 }
 
@@ -168,6 +169,13 @@ func (m *DistributedMessages) ReadUserMessages(ctx context.Context, userId userm
   error,
 ) {
   return m.repo.Get(ctx, userId)
+}
+
+func (m *DistributedMessages) ReadOneMessage(ctx context.Context, userId usermodel.UserId, id int) (
+  model.Message,
+  error,
+) {
+  return m.repo.GetOne(ctx, userId, id)
 }
 
 func (m *DistributedMessages) WaitForLeader(timeout time.Duration) error {

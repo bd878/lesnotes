@@ -17,8 +17,8 @@ type Controller struct {
   repo Repository
 }
 
-func New(repo Repository) *Controller {
-  return &Controller{repo}
+func New(repo Repository) (*Controller, error) {
+  return &Controller{repo}, nil
 }
 
 func (c *Controller) SaveMessage(ctx context.Context, msg *model.Message) error {
