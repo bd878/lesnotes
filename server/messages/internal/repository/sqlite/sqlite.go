@@ -15,8 +15,8 @@ type Repository struct {
   insertSt *sql.Stmt
 }
 
-func New(dbpath string) (*Repository, error) {
-  db, err := sql.Open("sqlite3", "file:" + dbpath)
+func New(dbfilepath string) (*Repository, error) {
+  db, err := sql.Open("sqlite3", "file:" + dbfilepath)
   if err != nil {
     return nil, err
   }
@@ -40,6 +40,16 @@ func (r *Repository) Put(ctx context.Context, msg *model.Message) error {
     msg.UserId, msg.CreateTime, msg.Value, msg.File,
   )
   return err
+}
+
+func (r *Repository) Truncate(ctx context.Context) error {
+  _, err := r.db.ExecContext(ctx,
+    "DELETE * FROM messages",
+  )
+  if err != nil {
+    return err
+  }
+  return nil
 }
 
 func (r *Repository) Get(ctx context.Context, userId usermodel.UserId) ([]model.Message, error) {

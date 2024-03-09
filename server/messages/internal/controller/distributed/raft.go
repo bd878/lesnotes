@@ -3,6 +3,7 @@ package messages
 import (
   "io"
   "os"
+  "fmt"
   "net"
   "time"
   "bytes"
@@ -26,12 +27,12 @@ type Repository interface {
 }
 
 type DistributedMessages struct {
-  config *Config
+  config Config
   raft *raft.Raft
   repo Repository
 }
 
-func New(repo Repository, config *Config) (
+func New(repo Repository, config Config) (
   *DistributedMessages,
   error,
 ) {
@@ -47,21 +48,27 @@ func New(repo Repository, config *Config) (
 
 func (m *DistributedMessages) setupRaft() error {
   fsm := &fsm{repo: m.repo}
+
+  raftPath := filepath.Join(m.config.DataDir, "raft")
+  if err := os.MkdirAll(raftPath, 0755); err != nil {
+    return err
+  }
+
   logStore, err := raftboltdb.NewBoltStore(
-    filepath.Join(m.config.DataDir, "raft", "log"),
+    filepath.Join(raftPath, "log"),
   )
   if err != nil {
     return err
   }
   stableStore, err := raftboltdb.NewBoltStore(
-    filepath.Join(m.config.DataDir, "raft", "stable"),
+    filepath.Join(raftPath, "stable"),
   )
   if err != nil {
     return err
   }
   retain := 1
   snapshotStore, err := raft.NewFileSnapshotStore(
-    filepath.Join(m.config.DataDir, "raft"),
+    filepath.Join(raftPath, "raft"),
     retain,
     nil,
   )
@@ -78,12 +85,26 @@ func (m *DistributedMessages) setupRaft() error {
     os.Stderr,
   )
 
-  if m.config.Raft == nil {
-    m.config.Raft = raft.DefaultConfig()
+  config := raft.DefaultConfig()
+  config.LocalID = m.config.Raft.LocalID
+  if m.config.Raft.HeartbeatTimeout != 0 {
+    config.HeartbeatTimeout = m.config.Raft.HeartbeatTimeout
+  }
+  if m.config.Raft.ElectionTimeout != 0 {
+    config.ElectionTimeout = m.config.Raft.ElectionTimeout
+  }
+  if m.config.Raft.LeaderLeaseTimeout != 0 {
+    config.LeaderLeaseTimeout = m.config.Raft.LeaderLeaseTimeout
+  }
+  if m.config.Raft.CommitTimeout != 0 {
+    config.CommitTimeout = m.config.Raft.CommitTimeout
+  }
+  if m.config.Raft.LeaderLeaseTimeout != 0 {
+    config.LeaderLeaseTimeout = m.config.Raft.LeaderLeaseTimeout
   }
 
   m.raft, err = raft.NewRaft(
-    m.config.Raft,
+    config,
     fsm,
     logStore,
     stableStore,
@@ -147,6 +168,57 @@ func (m *DistributedMessages) ReadUserMessages(ctx context.Context, userId userm
   error,
 ) {
   return m.repo.Get(ctx, userId)
+}
+
+func (m *DistributedMessages) WaitForLeader(timeout time.Duration) error {
+  timeoutc := time.After(timeout)
+  ticker := time.NewTicker(time.Second)
+  defer ticker.Stop()
+  for {
+    select {
+    case <- timeoutc:
+      return fmt.Errorf("no leader, timeout")
+    case <-ticker.C:
+      if lead, _ := m.raft.LeaderWithID(); lead != "" {
+        return nil
+      }
+    }
+  }
+} 
+
+func (m *DistributedMessages) Join(id, addr string) error {
+  configFuture := m.raft.GetConfiguration()
+  if err := configFuture.Error(); err != nil {
+    return err
+  }
+
+  serverID := raft.ServerID(id)
+  serverAddr := raft.ServerAddress(addr)
+
+  for _, srv := range configFuture.Configuration().Servers {
+    if srv.ID == serverID || srv.Address == serverAddr {
+      if srv.ID == serverID && srv.Address == serverAddr {
+        return nil
+      }
+
+      removeFuture := m.raft.RemoveServer(serverID, 0, 0)
+      if err := removeFuture.Error(); err != nil {
+        return err
+      }
+    }
+  }
+
+  addFuture := m.raft.AddVoter(serverID, serverAddr, 0, 0)
+  if err := addFuture.Error(); err != nil {
+    return err
+  }
+
+  return nil
+}
+
+func (m *DistributedMessages) Leave(id string) error {
+  removeFuture := m.raft.RemoveServer(raft.ServerID(id), 0, 0)
+  return removeFuture.Error()
 }
 
 var _ raft.FSM = (*fsm)(nil)

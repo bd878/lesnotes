@@ -2,30 +2,58 @@ package messages_test
 
 import (
   "testing"
+  "time"
   "net"
-  sqlite "github.com/bd878/gallery/server/messages/internal/repository/sqlite"
+  "fmt"
+
+  "github.com/hashicorp/raft"
+  "github.com/stretchr/testify/require"
+
+  memory "github.com/bd878/gallery/server/messages/internal/repository/memory"
   distributed "github.com/bd878/gallery/server/messages/internal/controller/distributed"
 )
 
+var ports []int = []int{8081, 8082, 8083, 8084, 8085}
+
 func TestDistributed(t *testing.T) {
-  mem, err := sqlite.New(t.TempDir())
-  if err != nil {
-    panic(err)
-  }
+  nodeCount := len(ports)
 
-  ln, err := net.Listen("tcp", "127.0.0.1:8080")
-  if err != nil {
-    panic(err)
-  }
+  var logs []*distributed.DistributedMessages
+  for i := 0; i < nodeCount; i++ {
+    dataDir := t.TempDir()
+    repo := memory.New()
 
-  streamLayer := distributed.NewStreamLayer(ln)
-  config := &distributed.Config{
-    Bootstrap: true,
-    DataDir: t.TempDir(),
-    StreamLayer: streamLayer,
-  }
-  _, err = distributed.NewDistributedMessages(mem, config)
-  if err != nil {
-    t.Error(err)
+    ln, err := net.Listen("tcp",
+      fmt.Sprintf("127.0.0.1:%d", ports[i]),
+    )
+    require.NoError(t, err)
+
+    config := distributed.Config{}
+    config.StreamLayer = distributed.NewStreamLayer(ln)
+    config.Raft.LocalID = raft.ServerID(fmt.Sprintf("%d", i))
+    config.DataDir = dataDir
+    config.Raft.HeartbeatTimeout = 50 * time.Millisecond
+    config.Raft.ElectionTimeout = 50 * time.Millisecond
+    config.Raft.LeaderLeaseTimeout = 20 * time.Millisecond
+    config.Raft.CommitTimeout = 5 * time.Millisecond
+
+    if i == 0 {
+      config.Bootstrap = true
+    }
+
+    m, err := distributed.New(repo, config)
+    require.NoError(t, err)
+
+    if i != 0 {
+      err = logs[0].Join(
+        fmt.Sprintf("%d", i), ln.Addr().String(),
+      )
+      require.NoError(t, err)
+    } else {
+      err = m.WaitForLeader(3 * time.Second)
+      require.NoError(t, err)
+    }
+
+    logs = append(logs, m)
   }
 }
