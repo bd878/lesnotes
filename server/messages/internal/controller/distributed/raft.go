@@ -16,6 +16,8 @@ import (
 
   usermodel "github.com/bd878/gallery/server/user/pkg/model"
   "github.com/bd878/gallery/server/messages/pkg/model"
+
+  gen "github.com/bd878/gallery/server/gen"
 )
 
 type Repository interface {
@@ -193,6 +195,23 @@ func (m *DistributedMessages) WaitForLeader(timeout time.Duration) error {
     }
   }
 } 
+
+func (m *DistributedMessages) GetServers() ([](*gen.MessagesServer), error) {
+  future := m.raft.GetConfiguration()
+  if err := future.Error(); err != nil {
+    return nil, err
+  }
+  var servers []*gen.MessagesServer
+  leaderAddr, _ := m.raft.LeaderWithID()
+  for _, server := range future.Configuration().Servers {
+    servers = append(servers, &gen.MessagesServer{
+      Id: string(server.ID),
+      RpcAddr: string(server.Address),
+      IsLeader: leaderAddr == server.Address,
+    })
+  }
+  return servers, nil
+}
 
 func (m *DistributedMessages) Join(id, addr string) error {
   configFuture := m.raft.GetConfiguration()

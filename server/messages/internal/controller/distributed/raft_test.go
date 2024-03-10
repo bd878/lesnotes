@@ -88,4 +88,32 @@ func TestDistributed(t *testing.T) {
       return true
     }, 500*time.Millisecond, 50*time.Millisecond)
   }
+
+  servers, err := logs[0].GetServers()
+  require.NoError(t, err)
+  require.Equal(t, nodeCount, len(servers))
+  require.True(t, servers[0].IsLeader)
+  require.False(t, servers[1].IsLeader)
+  require.False(t, servers[2].IsLeader)
+
+  err = logs[0].Leave("1")
+  require.NoError(t, err)
+
+  time.Sleep(50 *time.Millisecond)
+
+  servers, err = logs[0].GetServers()
+  require.NoError(t, err)
+  require.Equal(t, nodeCount-1, len(servers))
+
+  err = logs[0].SaveMessage(context.Background(), &model.Message{
+    Id: 3,
+    UserId: 1,
+    Value: "third",
+  })
+  require.NoError(t, err)
+
+  time.Sleep(50 * time.Millisecond)
+  message, err := logs[2].ReadOneMessage(context.Background(), usermodel.UserId(1), 3)
+  require.NoError(t, err)
+  require.Equal(t, "third", message.Value)
 }

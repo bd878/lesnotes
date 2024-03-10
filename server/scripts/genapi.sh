@@ -8,7 +8,7 @@ if [ $# -ne 0 ]; then
   exit 1;
 fi
 
-protoc -I=api --go_out=. --go-grpc_out=. ./api/users.proto
+protoc -I=api --go_out=. --go-grpc_out=. ./api/*.proto
 
 exit 0;
 
