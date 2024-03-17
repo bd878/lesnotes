@@ -39,7 +39,11 @@ func New(config Config) (*Agent, error) {
     ch: make(chan struct{}, 1),
   }
 
-  if err := a.setupServer(); err != nil {
+  if err := a.setupFCGIServer(); err != nil {
+    return nil, err
+  }
+
+  if err := a.setupGRPCServer(); err != nil {
     return nil, err
   }
 
@@ -81,7 +85,7 @@ func (a *Agent) setupMembership() error {
   return err
 }
 
-func (a *Agent) setupServer() error {
+func (a *Agent) setupFCGIServer() error {
   mem, err := sqlite.New(a.Config.DBPath)
   if err != nil {
     return err
@@ -105,6 +109,13 @@ func (a *Agent) setupServer() error {
   http.Handle("/messages/v1/read", http.HandlerFunc(h.CheckAuth(h.ReadMessages)))
   http.Handle("/messages/v1/status", http.HandlerFunc(h.ReportStatus))
 
+  return nil
+}
+
+func (a *Agent) setupGRPCServer() error {
+  /* TODO: implement;
+     GRPC server is necessary for replication and distribution
+  */
   return nil
 }
 

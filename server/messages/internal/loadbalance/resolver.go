@@ -3,13 +3,13 @@ package loadbalance
 import (
   "context"
   "sync"
-  "fmt"
+  // "fmt"
   "log"
 
   "google.golang.org/grpc"
+  "google.golang.org/grpc/credentials/insecure"
   "google.golang.org/grpc/attributes"
   "google.golang.org/grpc/resolver"
-  "google.golang.org/grpc/serviceconfig"
 
   "github.com/bd878/gallery/server/gen"
 )
@@ -18,7 +18,6 @@ type Resolver struct {
   mu sync.Mutex
   clientConn resolver.ClientConn
   resolverConn *grpc.ClientConn
-  serviceConfig *serviceconfig.ParseResult
 }
 
 var _ resolver.Builder = (*Resolver)(nil)
@@ -26,16 +25,15 @@ var _ resolver.Builder = (*Resolver)(nil)
 func (r *Resolver) Build(
   target resolver.Target,
   cc resolver.ClientConn,
-  opts resolver.BuildOptions,
+  _ resolver.BuildOptions,
 ) (resolver.Resolver, error) {
   var err error
-  r.serviceConfig = r.clientConn.ParseServiceConfig(
-    fmt.Sprintf(`{"loadBalancingConfig":[{"%s":{}}]}`, Name),
-  )
 
-  var dialOpts []grpc.DialOption
-  dialOpts = append(dialOpts, grpc.WithTransportCredentials(opts.DialCreds))
-  r.resolverConn, err = grpc.Dial(target.Endpoint(), dialOpts...)
+  r.clientConn = cc
+  r.resolverConn, err = grpc.Dial(
+    target.Endpoint(),
+    grpc.WithTransportCredentials(insecure.NewCredentials()),
+  )
   if err != nil {
     return nil, err
   }
@@ -81,7 +79,6 @@ func (r *Resolver) ResolveNow(resolver.ResolveNowOptions) {
     Endpoints: []resolver.Endpoint{{
       Addresses: addrs,
     }},
-    ServiceConfig: r.serviceConfig,
   })
 }
 

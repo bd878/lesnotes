@@ -18,6 +18,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MessagesServiceClient interface {
 	GetServers(ctx context.Context, in *GetMessagesServersRequest, opts ...grpc.CallOption) (*GetMessagesServersResponse, error)
+	SaveMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*SaveMessageResponse, error)
+	ReadMessage(ctx context.Context, in *ReadMessageRequest, opts ...grpc.CallOption) (*ReadMessageResponse, error)
 }
 
 type messagesServiceClient struct {
@@ -37,11 +39,31 @@ func (c *messagesServiceClient) GetServers(ctx context.Context, in *GetMessagesS
 	return out, nil
 }
 
+func (c *messagesServiceClient) SaveMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*SaveMessageResponse, error) {
+	out := new(SaveMessageResponse)
+	err := c.cc.Invoke(ctx, "/MessagesService/SaveMessage", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *messagesServiceClient) ReadMessage(ctx context.Context, in *ReadMessageRequest, opts ...grpc.CallOption) (*ReadMessageResponse, error) {
+	out := new(ReadMessageResponse)
+	err := c.cc.Invoke(ctx, "/MessagesService/ReadMessage", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MessagesServiceServer is the server API for MessagesService service.
 // All implementations must embed UnimplementedMessagesServiceServer
 // for forward compatibility
 type MessagesServiceServer interface {
 	GetServers(context.Context, *GetMessagesServersRequest) (*GetMessagesServersResponse, error)
+	SaveMessage(context.Context, *SendMessageRequest) (*SaveMessageResponse, error)
+	ReadMessage(context.Context, *ReadMessageRequest) (*ReadMessageResponse, error)
 	mustEmbedUnimplementedMessagesServiceServer()
 }
 
@@ -51,6 +73,12 @@ type UnimplementedMessagesServiceServer struct {
 
 func (UnimplementedMessagesServiceServer) GetServers(context.Context, *GetMessagesServersRequest) (*GetMessagesServersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetServers not implemented")
+}
+func (UnimplementedMessagesServiceServer) SaveMessage(context.Context, *SendMessageRequest) (*SaveMessageResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SaveMessage not implemented")
+}
+func (UnimplementedMessagesServiceServer) ReadMessage(context.Context, *ReadMessageRequest) (*ReadMessageResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReadMessage not implemented")
 }
 func (UnimplementedMessagesServiceServer) mustEmbedUnimplementedMessagesServiceServer() {}
 
@@ -83,6 +111,42 @@ func _MessagesService_GetServers_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MessagesService_SaveMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendMessageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MessagesServiceServer).SaveMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/MessagesService/SaveMessage",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MessagesServiceServer).SaveMessage(ctx, req.(*SendMessageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MessagesService_ReadMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReadMessageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MessagesServiceServer).ReadMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/MessagesService/ReadMessage",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MessagesServiceServer).ReadMessage(ctx, req.(*ReadMessageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _MessagesService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "MessagesService",
 	HandlerType: (*MessagesServiceServer)(nil),
@@ -90,6 +154,14 @@ var _MessagesService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetServers",
 			Handler:    _MessagesService_GetServers_Handler,
+		},
+		{
+			MethodName: "SaveMessage",
+			Handler:    _MessagesService_SaveMessage_Handler,
+		},
+		{
+			MethodName: "ReadMessage",
+			Handler:    _MessagesService_ReadMessage_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

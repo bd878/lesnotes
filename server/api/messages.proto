@@ -1,7 +1,6 @@
 syntax = "proto3";
 option go_package = "/gen";
 
-// TODO: add other calls
 service MessagesService {
   rpc GetServers(GetMessagesServersRequest) returns (GetMessagesServersResponse) {}
   rpc SaveMessage(SendMessageRequest) returns (SaveMessageResponse) {}
@@ -9,9 +8,9 @@ service MessagesService {
 }
 
 message Message {
-  int id = 1;
-  int user_id = 2;
-  date create_time = 3;
+  uint32 id = 1;
+  uint32 user_id = 2;
+  string create_time = 3;
   bytes value = 4;
   string file = 5;
 }
@@ -19,23 +18,16 @@ message Message {
 message SendMessageRequest {}
 
 message SaveMessageResponse {
-  string status = 1;
-  string description = 2;
 }
 
 message ReadMessageRequest {}
 
 message ReadMessageResponse {
-  string status = 1;
-  string description = 2;
 }
 
 message GetMessagesServersRequest {}
 
 message GetMessagesServersResponse {
-  string status = 1;
-  string description = 2;
-
   repeated MessagesServer servers = 3;
 }
 
