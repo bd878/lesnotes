@@ -12,7 +12,7 @@ import (
   "google.golang.org/grpc/serviceconfig"
   "google.golang.org/grpc/attributes"
 
-  "github.com/bd878/gallery/server/gen"
+  "github.com/bd878/gallery/server/api"
   "github.com/bd878/gallery/server/messages/internal/loadbalance"
 )
 
@@ -75,7 +75,7 @@ func (cc *clientConn) ParseServiceConfig(string) *serviceconfig.ParseResult {
 }
 
 type grpcServer struct {
-  gen.UnimplementedMessagesServiceServer
+  api.UnimplementedMessagesServiceServer
 }
 
 func NewGRPCServer() *grpc.Server {
@@ -83,14 +83,14 @@ func NewGRPCServer() *grpc.Server {
 
   srv := &grpcServer{}
 
-  gen.RegisterMessagesServiceServer(gsrv, srv)
+  api.RegisterMessagesServiceServer(gsrv, srv)
   return gsrv
 }
 
-func (s *grpcServer) GetServers(_ context.Context, _ *gen.GetMessagesServersRequest) (
-  *gen.GetMessagesServersResponse, error,
+func (s *grpcServer) GetServers(_ context.Context, _ *api.GetMessagesServersRequest) (
+  *api.GetMessagesServersResponse, error,
 ) {
-  servers := []*gen.MessagesServer{{
+  servers := []*api.MessagesServer{{
     Id: "leader",
     RpcAddr: "localhost:9001",
     IsLeader: true,
@@ -99,17 +99,17 @@ func (s *grpcServer) GetServers(_ context.Context, _ *gen.GetMessagesServersRequ
     RpcAddr: "localhost:9002",
   }}
 
-  return &gen.GetMessagesServersResponse{Servers: servers}, nil
+  return &api.GetMessagesServersResponse{Servers: servers}, nil
 }
 
-func (s *grpcServer) SaveMessage(_ context.Context, _ *gen.SendMessageRequest) (
-  *gen.SaveMessageResponse, error,
+func (s *grpcServer) SaveMessage(_ context.Context, _ *api.SendMessageRequest) (
+  *api.SaveMessageResponse, error,
 ) {
   return nil, nil
 }
 
-func (s *grpcServer) ReadMessage(_ context.Context, _ *gen.ReadMessageRequest) (
-  *gen.ReadMessageResponse, error,
+func (s *grpcServer) ReadMessage(_ context.Context, _ *api.ReadMessageRequest) (
+  *api.ReadMessageResponse, error,
 ) {
   return nil, nil
 }

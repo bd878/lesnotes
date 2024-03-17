@@ -11,7 +11,7 @@ import (
   "google.golang.org/grpc/attributes"
   "google.golang.org/grpc/resolver"
 
-  "github.com/bd878/gallery/server/gen"
+  "github.com/bd878/gallery/server/api"
 )
 
 type Resolver struct {
@@ -57,10 +57,10 @@ func (r *Resolver) ResolveNow(resolver.ResolveNowOptions) {
   r.mu.Lock()
   defer r.mu.Unlock()
 
-  client := gen.NewMessagesServiceClient(r.resolverConn)
+  client := api.NewMessagesServiceClient(r.resolverConn)
 
   ctx := context.Background()
-  res, err := client.GetServers(ctx, &gen.GetMessagesServersRequest{})
+  res, err := client.GetServers(ctx, &api.GetMessagesServersRequest{})
   if err != nil {
     return
   }

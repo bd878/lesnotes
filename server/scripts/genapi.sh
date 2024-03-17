@@ -8,7 +8,13 @@ if [ $# -ne 0 ]; then
   exit 1;
 fi
 
-protoc -I=api --go_out=. --go-grpc_out=. ./api/*.proto
+protoc ./protos/*proto \
+  --go_out=. \
+  --go-grpc_out=. \
+  --go_opt=paths=import \
+  --go-grpc_opt=paths=import \
+  --go_opt=module="github.com/bd878/gallery/server" \
+  --go-grpc_opt=module="github.com/bd878/gallery/server"
 
 exit 0;
 

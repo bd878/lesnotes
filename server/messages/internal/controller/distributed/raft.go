@@ -17,7 +17,7 @@ import (
   usermodel "github.com/bd878/gallery/server/user/pkg/model"
   "github.com/bd878/gallery/server/messages/pkg/model"
 
-  gen "github.com/bd878/gallery/server/gen"
+  "github.com/bd878/gallery/server/api"
 )
 
 type Repository interface {
@@ -196,15 +196,15 @@ func (m *DistributedMessages) WaitForLeader(timeout time.Duration) error {
   }
 } 
 
-func (m *DistributedMessages) GetServers() ([](*gen.MessagesServer), error) {
+func (m *DistributedMessages) GetServers() ([](*api.MessagesServer), error) {
   future := m.raft.GetConfiguration()
   if err := future.Error(); err != nil {
     return nil, err
   }
-  var servers []*gen.MessagesServer
+  var servers []*api.MessagesServer
   leaderAddr, _ := m.raft.LeaderWithID()
   for _, server := range future.Configuration().Servers {
-    servers = append(servers, &gen.MessagesServer{
+    servers = append(servers, &api.MessagesServer{
       Id: string(server.ID),
       RpcAddr: string(server.Address),
       IsLeader: leaderAddr == server.Address,

@@ -17,7 +17,7 @@ import (
 
   "google.golang.org/grpc"
 
-  "github.com/bd878/gallery/server/gen"
+  "github.com/bd878/gallery/server/api"
   configs "github.com/bd878/gallery/server/user/configs"
   fcgihandler "github.com/bd878/gallery/server/user/internal/handler/fcgi"
   grpchandler "github.com/bd878/gallery/server/user/internal/handler/grpc"
@@ -100,7 +100,7 @@ func grpcRun(cfg *configs.Config) {
   defer l.Close()
 
   srv := grpc.NewServer()
-  gen.RegisterUserServiceServer(srv, h)
+  api.RegisterUserServiceServer(srv, h)
   log.Println("grpc server is listening on =", l.Addr())
   if err := srv.Serve(l); err != nil {
     panic(err)

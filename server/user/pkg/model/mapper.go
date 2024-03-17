@@ -1,11 +1,11 @@
 package model
 
 import (
-  "github.com/bd878/gallery/server/gen"
+  "github.com/bd878/gallery/server/api"
 )
 
-func UserToProto(u *User) *gen.User {
-  return &gen.User{
+func UserToProto(u *User) *api.User {
+  return &api.User{
     Id: int32(u.Id),
     Name: u.Name,
     Token: u.Token,
@@ -13,7 +13,7 @@ func UserToProto(u *User) *gen.User {
   }
 }
 
-func UserFromProto(u *gen.User) *User {
+func UserFromProto(u *api.User) *User {
   return &User{
     Id: int(u.Id),
     Name: u.Name,

@@ -3,7 +3,7 @@ package grpc
 import (
   "context"
 
-  "github.com/bd878/gallery/server/gen"
+  "github.com/bd878/gallery/server/api"
   "github.com/bd878/gallery/server/user/pkg/model"
   "github.com/bd878/gallery/server/internal/grpcutil"
 )
@@ -22,8 +22,8 @@ func (g *Gateway) Auth(ctx context.Context, token string) (*model.User, error) {
     return nil, err
   }
   defer conn.Close()
-  client := gen.NewUserServiceClient(conn)
-  resp, err := client.Auth(ctx, &gen.AuthUserRequest{Token: token})
+  client := api.NewUserServiceClient(conn)
+  resp, err := client.Auth(ctx, &api.AuthUserRequest{Token: token})
   if err != nil {
     return nil, err
   }
