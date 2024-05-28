@@ -1,6 +1,7 @@
 {
   "port": 8083,
   "useraddr": "0.0.0.0:8085",
+  "streamPort": 8001,
   "debug": true,
   "logFile": "log.txt",
   "dbPath": "main.db",

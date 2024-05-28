@@ -1,4 +1,4 @@
-package fcgi
+package http
 
 import (
   "log"

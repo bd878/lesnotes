@@ -10,7 +10,6 @@ import (
   "os"
   "net"
   "net/http"
-  "net/http/fcgi"
   "log"
   "fmt"
   "os/signal"
@@ -19,7 +18,7 @@ import (
 
   "github.com/bd878/gallery/server/api"
   configs "github.com/bd878/gallery/server/user/configs"
-  fcgihandler "github.com/bd878/gallery/server/user/internal/handler/fcgi"
+  httphandler "github.com/bd878/gallery/server/user/internal/handler/http"
   grpchandler "github.com/bd878/gallery/server/user/internal/handler/grpc"
   controller "github.com/bd878/gallery/server/user/internal/controller/users"
   sqlite "github.com/bd878/gallery/server/user/internal/repository/sqlite"
@@ -52,22 +51,22 @@ func main() {
   var wg sync.WaitGroup
   wg.Add(2)
 
-  go func() { fcgiRun(serverCfg); wg.Done() }()
+  go func() { httpRun(serverCfg); wg.Done() }()
   go func() { grpcRun(serverCfg); wg.Done() }()
 
   wg.Wait()
 }
 
-func fcgiRun(cfg *configs.Config) {
+func httpRun(cfg *configs.Config) {
   mem, err := sqlite.New(cfg.DBPath)
   if err != nil {
     panic(err)
   }
   ctrl := controller.New(mem)
-  h := fcgihandler.New(ctrl)
+  h := httphandler.New(ctrl)
 
   netCfg := net.ListenConfig{}
-  l, err := netCfg.Listen(context.Background(), "tcp4", fmt.Sprintf(":%d", cfg.FcgiPort))
+  l, err := netCfg.Listen(context.Background(), "tcp4", fmt.Sprintf(":%d", cfg.HttpPort))
   if err != nil {
     panic(err)
   }
@@ -78,11 +77,11 @@ func fcgiRun(cfg *configs.Config) {
   http.Handle("/users/v1/auth", http.HandlerFunc(h.Auth))
   http.Handle("/users/v1/status", http.HandlerFunc(h.ReportStatus))
 
-  log.Println("fcgi server is listening on =", l.Addr())
-  if err := fcgi.Serve(l, nil); err != nil {
+  log.Println("http server is listening on =", l.Addr())
+  if err := http.Serve(l, nil); err != nil {
     panic(err)
   }
-  log.Println("fcgi server exited")
+  log.Println("http server exited")
 }
 
 func grpcRun(cfg *configs.Config) {

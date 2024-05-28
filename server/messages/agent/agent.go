@@ -3,11 +3,12 @@ package agent
 import (
   "context"
   "net"
+  "log"
   "net/http"
-  "net/http/fcgi"
+  "github.com/hashicorp/raft"
 
   discovery "github.com/bd878/gallery/server/messages/internal/discovery/serf"
-  fcgihandler "github.com/bd878/gallery/server/messages/internal/handler/fcgi"
+  httphandler "github.com/bd878/gallery/server/messages/internal/handler/http"
   usergateway "github.com/bd878/gallery/server/messages/internal/gateway/user/grpc"
   messagesCtrl "github.com/bd878/gallery/server/messages/internal/controller/distributed"
   sqlite "github.com/bd878/gallery/server/messages/internal/repository/sqlite"
@@ -22,14 +23,15 @@ type Agent struct {
 }
 
 type Config struct {
-  UserAddr string
-  BindAddr string
-  DiscoveryAddr string 
-  DBPath string
-  DataPath string
+  UserAddr       string
+  BindAddr       string
+  StreamAddr     string
+  DiscoveryAddr  string 
+  DBPath         string
+  DataPath       string
 
-  Bootstrap bool
-  NodeName string
+  Bootstrap      bool
+  NodeName       string
   StartJoinAddrs []string
 }
 
@@ -39,7 +41,7 @@ func New(config Config) (*Agent, error) {
     ch: make(chan struct{}, 1),
   }
 
-  if err := a.setupFCGIServer(); err != nil {
+  if err := a.setupHTTPServer(); err != nil {
     return nil, err
   }
 
@@ -58,7 +60,8 @@ type handler struct {
 }
 
 func (a *Agent) Run() error {
-  if err := fcgi.Serve(a.listener, nil); err != nil {
+  log.Println("http server is listening on =", a.listener.Addr().String())
+  if err := http.Serve(a.listener, nil); err != nil {
     return err
   }
   return nil
@@ -76,7 +79,7 @@ func (a *Agent) setupMembership() error {
   var err error
   a.membership, err = discovery.New(&handler{}, discovery.Config{
     NodeName: a.Config.NodeName,
-    BindAddr: a.Config.BindAddr,
+    BindAddr: a.Config.DiscoveryAddr,
     Tags: map[string]string{
       "rpc_addr": a.Config.DiscoveryAddr,
     },
@@ -85,18 +88,29 @@ func (a *Agent) setupMembership() error {
   return err
 }
 
-func (a *Agent) setupFCGIServer() error {
+func (a *Agent) setupHTTPServer() error {
   mem, err := sqlite.New(a.Config.DBPath)
   if err != nil {
     return err
   }
-  messagesConfig := messagesCtrl.Config{}
+
+  streamLn, err := net.Listen("tcp", a.Config.StreamAddr)
+  if err != nil {
+    return err
+  }
+
+  messagesConfig := messagesCtrl.Config{
+    Raft: raft.Config{
+      LocalID: raft.ServerID(a.Config.BindAddr),
+    },
+    StreamLayer: messagesCtrl.NewStreamLayer(streamLn),
+  }
   msgCtrl, err := messagesCtrl.New(mem, messagesConfig)
   if err != nil {
     return err
   }
   userGateway := usergateway.New(a.Config.UserAddr)
-  h := fcgihandler.New(msgCtrl, userGateway, a.Config.DataPath)
+  h := httphandler.New(msgCtrl, userGateway, a.Config.DataPath)
 
   netCfg := net.ListenConfig{}
   l, err := netCfg.Listen(context.Background(), "tcp4", a.Config.BindAddr)

@@ -1,5 +1,8 @@
 package model
 
+// TODO: type MessageID int
+type MessageId int
+
 // This message handler passes to repository
 type Message struct {
   Id int `json:"id"`

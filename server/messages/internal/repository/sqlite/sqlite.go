@@ -2,10 +2,12 @@ package repository
 
 import (
   "context"
+  "errors"
   "database/sql"
 
   _ "github.com/mattn/go-sqlite3"
   "github.com/bd878/gallery/server/messages/pkg/model"
+  "github.com/bd878/gallery/server/messages/internal/repository"
   usermodel "github.com/bd878/gallery/server/user/pkg/model"
 )
 
@@ -86,7 +88,27 @@ func (r *Repository) Get(ctx context.Context, userId usermodel.UserId) ([]model.
   return res, nil
 }
 
-func (r *Repository) PutBatch(ctx context.Context, batch [](*model.Message)) error {
+func (r *Repository) GetOne(ctx context.Context, userId usermodel.UserId, id model.MessageId) (model.Message, error) {
+  row := r.db.QueryRowContext(ctx,
+    "SELECT id, user_id, message, file FROM messages WHERE user_id = ? AND id = ?",
+    int(userId), int(id),
+  )
+
+  var msg model.Message
+  var fileCol sql.NullString
+  if err := row.Scan(&msg.Id, &msg.UserId, &msg.Value, &fileCol); err != nil {
+    if errors.Is(err, sql.ErrNoRows) {
+      return msg, repository.ErrNotFound
+    }
+    return msg, err
+  }
+  if fileCol.Valid {
+    msg.File = fileCol.String
+  }
+  return msg, nil
+}
+
+func (r *Repository) PutBatch(ctx context.Context, batch []*model.Message) error {
   for _, msg := range batch {
     _, err := r.insertSt.ExecContext(ctx,
       msg.UserId, msg.CreateTime, msg.Value, msg.File,

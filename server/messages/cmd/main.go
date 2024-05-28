@@ -34,6 +34,7 @@ func main() {
   a, err := agent.New(agent.Config{
     UserAddr: c.UserAddr,
     BindAddr: fmt.Sprintf(":%d", c.Port),
+    StreamAddr: fmt.Sprintf(":%d", c.StreamPort),
     DiscoveryAddr: fmt.Sprintf(":%d", c.DiscoveryPort),
     DBPath: c.DBPath,
     DataPath: c.DataPath,

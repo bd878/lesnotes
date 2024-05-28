@@ -1,5 +1,6 @@
 package model
 
+// TODO: UserId -> UserID
 type UserId int
 
 // User model

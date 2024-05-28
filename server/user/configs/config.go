@@ -1,7 +1,7 @@
 package configs
 
 type Config struct {
-  FcgiPort int `json:"fcgiport"`
+  HttpPort int `json:"httpport"`
   GrpcPort int `json:"grpcport"`
   Debug bool `json:"debug"`
   LogFile string `json:"logFile"`

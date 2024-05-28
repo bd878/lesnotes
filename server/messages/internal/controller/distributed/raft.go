@@ -25,7 +25,7 @@ type Repository interface {
   Get(context.Context, usermodel.UserId) ([]model.Message, error)
   PutBatch(context.Context, [](*model.Message)) error
   GetBatch(context.Context) ([]model.Message, error)
-  GetOne(context.Context, usermodel.UserId, int) (model.Message, error)
+  GetOne(context.Context, usermodel.UserId, model.MessageId) (model.Message, error)
   Truncate(context.Context) error
 }
 
@@ -173,7 +173,7 @@ func (m *DistributedMessages) ReadUserMessages(ctx context.Context, userId userm
   return m.repo.Get(ctx, userId)
 }
 
-func (m *DistributedMessages) ReadOneMessage(ctx context.Context, userId usermodel.UserId, id int) (
+func (m *DistributedMessages) ReadOneMessage(ctx context.Context, userId usermodel.UserId, id model.MessageId) (
   model.Message,
   error,
 ) {
