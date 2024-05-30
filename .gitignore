@@ -1,5 +1,7 @@
 *.db
 data/*
-configs/*
+config/*
+raft/*
 test.txt
 headers.txt
+*.patch

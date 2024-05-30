@@ -1,12 +1,12 @@
 import esbuild from 'esbuild'
 
 await esbuild.build({
-  entryPoints: ['client/gui/pages/**/index.jsx'],
+  entryPoints: ['front/client/gui/pages/**/index.jsx'],
   entryNames: '[dir]',
   bundle: true,
   splitting: true,
-  outdir: "public",
+  outdir: "front/public",
   format: 'esm',
   loader: { '.js': 'jsx' },
-  outbase: 'client/gui/pages'
+  outbase: 'front/client/gui/pages'
 })

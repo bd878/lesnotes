@@ -1,3 +1,3 @@
 import favicon from 'koa-favicon';
 
-export default favicon('public/favicon.ico');
+export default favicon('front/public/favicon.ico');

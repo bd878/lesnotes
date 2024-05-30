@@ -12,7 +12,7 @@ import assets from './routes/assets.js';
 import index from './routes/index.js';
 import login from './routes/login.js';
 import register from './routes/register.js';
-import messages from './routes/messages.js';
+import home from './routes/home.js';
 import xxx from './routes/xxx.js';
 
 const app = new Koa();
@@ -34,7 +34,7 @@ router
   .get('/', index)
   .get('/login', login)
   .get('/register', register)
-  .get('/messages', messages)
+  .get('/home', home)
   .get('/:any*', xxx)
 
 app.use(router.routes());
