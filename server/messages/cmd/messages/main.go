@@ -7,7 +7,7 @@ import (
   "log"
   "fmt"
 
-  configs "github.com/bd878/gallery/server/messages/configs"
+  config "github.com/bd878/gallery/server/messages/config"
   agent "github.com/bd878/gallery/server/messages/agent"
 )
 
@@ -52,14 +52,14 @@ func main() {
   }
 }
 
-func loadConfig() *configs.Config {
+func loadConfig() *config.Config {
   f, err := os.Open(*configPath)
   if err != nil {
     panic(err)
   }
   defer f.Close()
 
-  var cfg configs.Config
+  var cfg config.Config
   if err := json.NewDecoder(f).Decode(&cfg); err != nil {
     panic(err)
   }

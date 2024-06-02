@@ -8,7 +8,7 @@ import (
   _ "github.com/mattn/go-sqlite3"
   "github.com/bd878/gallery/server/messages/pkg/model"
   "github.com/bd878/gallery/server/messages/internal/repository"
-  usermodel "github.com/bd878/gallery/server/user/pkg/model"
+  usermodel "github.com/bd878/gallery/server/users/pkg/model"
 )
 
 type Repository struct {

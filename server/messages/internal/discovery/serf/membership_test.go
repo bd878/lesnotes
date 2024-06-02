@@ -8,10 +8,10 @@ import (
 )
 
 func TestMembership(t *testing.T) {
-  configs := make([]discovery.Config, 3)
-  for i := 0; i < len(configs); i++ {
+  config := make([]discovery.Config, 3)
+  for i := 0; i < len(config); i++ {
     addr := fmt.Sprintf("%s:%d", "127.0.0.1", 8000 + i)
-    configs[i] = discovery.Config{
+    config[i] = discovery.Config{
       NodeName: fmt.Sprintf("%d", i),
       BindAddr: addr,
       Tags: map[string]string{
@@ -19,15 +19,15 @@ func TestMembership(t *testing.T) {
       },
     }
     if i > 0 {
-      configs[i].StartJoinAddrs = []string{
-        configs[0].BindAddr,
+      config[i].StartJoinAddrs = []string{
+        config[0].BindAddr,
       }
     }
   }
 
   members := make([]*discovery.Membership, 0)
   handlers := make([]*handler, 0)
-  for _, c := range configs {
+  for _, c := range config {
     h := &handler{
       joins: make(chan map[string]string, 3),
       leaves: make(chan string, 3),

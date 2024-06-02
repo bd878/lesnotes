@@ -5,7 +5,7 @@ await esbuild.build({
   entryNames: '[dir]',
   bundle: true,
   platform: 'node',
-  outdir: "front/public",
+  outdir: "front",
   format: 'cjs',
   outbase: 'front'
 })

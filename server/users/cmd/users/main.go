@@ -17,11 +17,11 @@ import (
   "google.golang.org/grpc"
 
   "github.com/bd878/gallery/server/api"
-  configs "github.com/bd878/gallery/server/user/configs"
-  httphandler "github.com/bd878/gallery/server/user/internal/handler/http"
-  grpchandler "github.com/bd878/gallery/server/user/internal/handler/grpc"
-  controller "github.com/bd878/gallery/server/user/internal/controller/users"
-  sqlite "github.com/bd878/gallery/server/user/internal/repository/sqlite"
+  config "github.com/bd878/gallery/server/users/config"
+  httphandler "github.com/bd878/gallery/server/users/internal/handler/http"
+  grpchandler "github.com/bd878/gallery/server/users/internal/handler/grpc"
+  controller "github.com/bd878/gallery/server/users/internal/controller/users"
+  sqlite "github.com/bd878/gallery/server/users/internal/repository/sqlite"
 )
 
 var (
@@ -57,7 +57,7 @@ func main() {
   wg.Wait()
 }
 
-func httpRun(cfg *configs.Config) {
+func httpRun(cfg *config.Config) {
   mem, err := sqlite.New(cfg.DBPath)
   if err != nil {
     panic(err)
@@ -84,7 +84,7 @@ func httpRun(cfg *configs.Config) {
   log.Println("http server exited")
 }
 
-func grpcRun(cfg *configs.Config) {
+func grpcRun(cfg *config.Config) {
   mem, err := sqlite.New(cfg.DBPath)
   if err != nil {
     panic(err)
@@ -107,14 +107,14 @@ func grpcRun(cfg *configs.Config) {
   log.Println("grpc server exited")
 }
 
-func loadConfig() *configs.Config {
+func loadConfig() *config.Config {
   f, err := os.Open(*configPath)
   if err != nil {
     panic(err)
   }
   defer f.Close()
 
-  var cfg configs.Config
+  var cfg config.Config
   if err := json.NewDecoder(f).Decode(&cfg); err != nil {
     panic(err)
   }

@@ -14,7 +14,7 @@ import (
   raftboltdb "github.com/hashicorp/raft-boltdb"
   "github.com/hashicorp/raft"
 
-  usermodel "github.com/bd878/gallery/server/user/pkg/model"
+  usermodel "github.com/bd878/gallery/server/users/pkg/model"
   "github.com/bd878/gallery/server/messages/pkg/model"
 
   "github.com/bd878/gallery/server/api"

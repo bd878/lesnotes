@@ -11,7 +11,7 @@ import (
   "encoding/json"
 
   "github.com/bd878/gallery/server/utils"
-  usermodel "github.com/bd878/gallery/server/user/pkg/model"
+  usermodel "github.com/bd878/gallery/server/users/pkg/model"
   "github.com/bd878/gallery/server/messages/pkg/model"
 )
 

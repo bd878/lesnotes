@@ -3,9 +3,9 @@ package users
 import (
   "context"
 
-  "github.com/bd878/gallery/server/user/pkg/model"
-  "github.com/bd878/gallery/server/user/internal/repository"
-  "github.com/bd878/gallery/server/user/internal/controller"
+  "github.com/bd878/gallery/server/users/pkg/model"
+  "github.com/bd878/gallery/server/users/internal/repository"
+  "github.com/bd878/gallery/server/users/internal/controller"
 )
 
 type Repository interface {

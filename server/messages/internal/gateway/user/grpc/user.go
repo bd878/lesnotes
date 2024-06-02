@@ -4,7 +4,7 @@ import (
   "context"
 
   "github.com/bd878/gallery/server/api"
-  "github.com/bd878/gallery/server/user/pkg/model"
+  "github.com/bd878/gallery/server/users/pkg/model"
   "github.com/bd878/gallery/server/internal/grpcutil"
 )
 

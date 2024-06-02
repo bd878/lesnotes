@@ -7,8 +7,8 @@ import (
   "database/sql"
 
   _ "github.com/mattn/go-sqlite3"
-  "github.com/bd878/gallery/server/user/pkg/model"
-  "github.com/bd878/gallery/server/user/internal/repository"
+  "github.com/bd878/gallery/server/users/pkg/model"
+  "github.com/bd878/gallery/server/users/internal/repository"
 )
 
 var ErrNotImplemented = errors.New("not implemented")

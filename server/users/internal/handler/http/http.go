@@ -8,9 +8,9 @@ import (
   "context"
   "encoding/json"
 
-  "github.com/bd878/gallery/server/user/internal/controller"
-  "github.com/bd878/gallery/server/user/internal/controller/users"
-  "github.com/bd878/gallery/server/user/pkg/model"
+  "github.com/bd878/gallery/server/users/internal/controller"
+  "github.com/bd878/gallery/server/users/internal/controller/users"
+  "github.com/bd878/gallery/server/users/pkg/model"
   "github.com/bd878/gallery/server/utils"
 )
 

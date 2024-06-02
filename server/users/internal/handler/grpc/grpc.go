@@ -7,9 +7,9 @@ import (
   "google.golang.org/grpc/status"
 
   "github.com/bd878/gallery/server/api"
-  "github.com/bd878/gallery/server/user/internal/controller"
-  "github.com/bd878/gallery/server/user/internal/controller/users"
-  "github.com/bd878/gallery/server/user/pkg/model"
+  "github.com/bd878/gallery/server/users/internal/controller"
+  "github.com/bd878/gallery/server/users/internal/controller/users"
+  "github.com/bd878/gallery/server/users/pkg/model"
 )
 
 type Handler struct {

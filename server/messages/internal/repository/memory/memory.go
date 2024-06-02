@@ -5,7 +5,7 @@ import (
   "errors"
 
   "github.com/bd878/gallery/server/messages/pkg/model"
-  usermodel "github.com/bd878/gallery/server/user/pkg/model"
+  usermodel "github.com/bd878/gallery/server/users/pkg/model"
 )
 
 type Repository struct {
