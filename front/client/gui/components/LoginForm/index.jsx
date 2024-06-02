@@ -25,7 +25,7 @@ const sendLoginRequest = async e => {
     })
   });
   console.log(response);
-  setTimeout(() => {location.href="/messages"}, 0);
+  setTimeout(() => {location.href="/home"}, 0);
 }
 
 const LoginForm = props => {

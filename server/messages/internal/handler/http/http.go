@@ -7,6 +7,7 @@ import (
   "io"
   "context"
   "strings"
+  "mime"
   "path/filepath"
   "encoding/json"
 
@@ -164,6 +165,43 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) {
   }
 
   if err := json.NewEncoder(w).Encode(v); err != nil {
+    log.Println(err)
+    w.WriteHeader(http.StatusInternalServerError)
+    return
+  }
+}
+
+func (h *Handler) ReadMessageFile(w http.ResponseWriter, req *http.Request) {
+  values := req.URL.Query()
+  filename := values.Get("name")
+  if filename == "" {
+    if err := json.NewEncoder(w).Encode(model.ServerResponse{
+      Status: "ok",
+      Description: "empty name",
+    }); err != nil {
+      log.Println(err)
+      w.WriteHeader(http.StatusInternalServerError)
+    }
+    return
+  }
+
+  log.Println("filename=", filename)
+
+  ff, err := os.Open(filepath.Join(h.dataPath, filename))
+  if err != nil {
+    log.Println(err)
+    w.WriteHeader(http.StatusInternalServerError)
+    return
+  }
+
+  mimetype := mime.TypeByExtension(filepath.Ext(filename))
+  if mimetype == "" {
+    mimetype = "text/plain"
+  }
+
+  w.Header().Set("Content-Type", mimetype)
+
+  if _, err := io.Copy(w, ff); err != nil {
     log.Println(err)
     w.WriteHeader(http.StatusInternalServerError)
     return

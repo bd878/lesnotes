@@ -39,7 +39,7 @@ func main() {
     DBPath: c.DBPath,
     DataPath: c.DataPath,
 
-    Bootstrap: false,
+    Bootstrap: true,
     NodeName: "messages",
     StartJoinAddrs: []string{},
   })

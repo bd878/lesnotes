@@ -10,7 +10,7 @@ import (
   discovery "github.com/bd878/gallery/server/messages/internal/discovery/serf"
   httphandler "github.com/bd878/gallery/server/messages/internal/handler/http"
   usergateway "github.com/bd878/gallery/server/messages/internal/gateway/user/grpc"
-  messagesCtrl "github.com/bd878/gallery/server/messages/internal/controller/distributed"
+  controller "github.com/bd878/gallery/server/messages/internal/controller/distributed"
   sqlite "github.com/bd878/gallery/server/messages/internal/repository/sqlite"
 )
 
@@ -99,18 +99,19 @@ func (a *Agent) setupHTTPServer() error {
     return err
   }
 
-  messagesConfig := messagesCtrl.Config{
+  distributedCfg := controller.Config{
     Raft: raft.Config{
       LocalID: raft.ServerID(a.Config.BindAddr),
     },
-    StreamLayer: messagesCtrl.NewStreamLayer(streamLn),
+    StreamLayer: controller.NewStreamLayer(streamLn),
+    Bootstrap: a.Config.Bootstrap,
   }
-  msgCtrl, err := messagesCtrl.New(mem, messagesConfig)
+  distributedCtrl, err := controller.New(mem, distributedCfg)
   if err != nil {
     return err
   }
   userGateway := usergateway.New(a.Config.UserAddr)
-  h := httphandler.New(msgCtrl, userGateway, a.Config.DataPath)
+  h := httphandler.New(distributedCtrl, userGateway, a.Config.DataPath)
 
   netCfg := net.ListenConfig{}
   l, err := netCfg.Listen(context.Background(), "tcp4", a.Config.BindAddr)
@@ -122,6 +123,8 @@ func (a *Agent) setupHTTPServer() error {
   http.Handle("/messages/v1/send", http.HandlerFunc(h.CheckAuth(h.SaveMessage)))
   http.Handle("/messages/v1/read", http.HandlerFunc(h.CheckAuth(h.ReadMessages)))
   http.Handle("/messages/v1/status", http.HandlerFunc(h.ReportStatus))
+  // TODO: create separate "files" service to serve static
+  http.Handle("/messages/v1/read_file", http.HandlerFunc(h.CheckAuth(h.ReadMessageFile)))
 
   return nil
 }
