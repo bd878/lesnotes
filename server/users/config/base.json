@@ -2,6 +2,6 @@
   "httpport": 8084,
   "grpcport": 8085,
   "debug": true,
-  "logFile": "log.txt",
-  "dbPath": "main.db"
+  "logFile": "../../logs/log_users.txt",
+  "dbPath": "../main.db"
 }

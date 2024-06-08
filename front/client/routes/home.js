@@ -12,6 +12,10 @@ async function renderer(ctx) {
     // TODO: ctx.set({ 'Last-Modified': 'ls -l templates/index.mustache' })
     ctx.body = mustache.render(template, {
       script: "/public/home.js",
+      styles: [
+        "/public/home.css",
+        "/public/styles.css",
+      ],
     });
     ctx.status = 200;
   } catch (err) {

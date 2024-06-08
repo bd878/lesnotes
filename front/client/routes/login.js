@@ -12,6 +12,10 @@ async function renderer(ctx) {
 
     ctx.body = mustache.render(template, {
       script: "/public/login.js",
+      styles: [
+        "/public/login.css",
+        "/public/styles.css",
+      ],
     });
     ctx.status = 200;
   } catch (err) {

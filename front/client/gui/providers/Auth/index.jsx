@@ -26,7 +26,7 @@ const AuthProvider = props => {
         console.log("welcome,", response.user.name)
       } else {
         setAuthed(false);
-        setTimeout(() => {location.href = "/login"}, 0)
+        setTimeout(() => {location.href = "/login"}, 1000)
       }
     }
 

@@ -12,8 +12,8 @@ import (
 )
 
 var (
-  configPath = flag.String("config", "base.json", "config path")
-  interactive = flag.Bool("interactive", false, "ignore logFile in config " + 
+  configPath = flag.String("config", "messages/config/base.json", "config path")
+  interactive = flag.Bool("interactive", true, "ignore logFile in config " + 
     "output log messages to stdout")
 )
 
