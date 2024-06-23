@@ -1,11 +1,10 @@
 import esbuild from 'esbuild'
 
 await esbuild.build({
-  entryPoints: ['front/client/index.js'],
-  entryNames: '[dir]',
+  entryPoints: ['index.js'],
+  entryNames: '[name]',
   bundle: true,
   platform: 'node',
-  outdir: "front",
+  outdir: "../build",
   format: 'cjs',
-  outbase: 'front'
 })

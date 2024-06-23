@@ -1,10 +1,12 @@
+import Config from 'config';
+import path from 'path';
 import mustache from 'mustache';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 async function renderer(ctx) {
   try {
-    const filePath = resolve('templates/index.mustache');
+    const filePath = resolve(path.join(Config.get('basedir'), 'templates/index.mustache'));
     const template = await readFile(filePath, { encoding: 'utf-8' });
 
     ctx.set({ 'Cache-Control': 'no-cache, max-age=0' })
