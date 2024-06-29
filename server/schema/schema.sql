@@ -16,4 +16,4 @@ CREATE TABLE IF NOT EXISTS messages(
     ON DELETE CASCADE
     NOT NULL
 );
-CREATE INDEX messagesindex ON messages(user_id);
+CREATE INDEX IF NOT EXISTS messagesindex ON messages(user_id);

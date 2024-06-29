@@ -1,5 +1,5 @@
 async function reportStatus(ctx) {
-  ctx.body = 'ok';
+  ctx.body = 'ok\n';
   ctx.status = 200;
 }
 
