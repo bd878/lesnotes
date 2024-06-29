@@ -105,6 +105,7 @@ func (a *Agent) setupHTTPServer() error {
     },
     StreamLayer: controller.NewStreamLayer(streamLn),
     Bootstrap: a.Config.Bootstrap,
+    DataDir: a.Config.DataPath,
   }
   distributedCtrl, err := controller.New(mem, distributedCfg)
   if err != nil {

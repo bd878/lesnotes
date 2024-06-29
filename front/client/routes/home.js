@@ -15,7 +15,6 @@ async function renderer(ctx) {
     ctx.body = mustache.render(template, {
       script: "/public/home.js",
       styles: [
-        "/public/home.css",
         "/public/styles.css",
       ],
     });

@@ -2,8 +2,7 @@
   "name": "@bd878/galleryserver",
   "version": "1.0.0",
   "description": "gallery front",
-  "main": "index.js",
-  "type": "module",
+  "main": "client/index.js",
   "author": "bd878",
   "license": "MIT",
   "dependencies": {

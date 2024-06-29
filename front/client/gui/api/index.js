@@ -4,7 +4,7 @@ const methodsWithBody = [
 
 function getFullUrl(url, isFullUrl) {
   // TODO: replace backend url with value from config
-  return isFullUrl ? url : `http://galleryexample.com${url}`;
+  return isFullUrl ? url : `http://${BACKENDURL}${url}`;
 }
 
 function prepareBody(body, method) {

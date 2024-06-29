@@ -4,6 +4,6 @@
   "streamPort": 8001,
   "debug": true,
   "logFile": "../../logs/log_messages.txt",
-  "dbPath": "../main.db",
+  "dbPath": "../../main.db",
   "dataPath": "../../data"
 }
