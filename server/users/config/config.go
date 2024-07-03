@@ -6,4 +6,5 @@ type Config struct {
   Debug bool `json:"debug"`
   LogFile string `json:"logFile"`
   DBPath string `json:"dbPath"`
+  Domainname string `json:"domainname"`
 }

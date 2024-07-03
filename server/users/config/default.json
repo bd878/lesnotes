@@ -3,5 +3,6 @@
   "grpcport": 8085,
   "debug": true,
   "logFile": "../../logs/log_users.txt",
-  "dbPath": "../../main.db"
+  "dbPath": "../../main.db",
+  "domainname": "lesnotes.space"
 }

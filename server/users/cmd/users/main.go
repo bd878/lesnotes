@@ -63,7 +63,7 @@ func httpRun(cfg *config.Config) {
     panic(err)
   }
   ctrl := controller.New(mem)
-  h := httphandler.New(ctrl)
+  h := httphandler.New(ctrl, httphandler.Config{Domainname:cfg.Domainname})
 
   netCfg := net.ListenConfig{}
   l, err := netCfg.Listen(context.Background(), "tcp4", fmt.Sprintf(":%d", cfg.HttpPort))

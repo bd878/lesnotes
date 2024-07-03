@@ -14,12 +14,18 @@ import (
   "github.com/bd878/gallery/server/utils"
 )
 
-type Handler struct {
-  ctrl *users.Controller
+/* TODO: rewrite global config on singletone pattern */
+type Config struct {
+  Domainname string
 }
 
-func New(ctrl *users.Controller) *Handler {
-  return &Handler{ctrl}
+type Handler struct {
+  ctrl *users.Controller
+  cfg   Config
+}
+
+func New(ctrl *users.Controller, cfg Config) *Handler {
+  return &Handler{ctrl, cfg}
 }
 
 func (h *Handler) Authenticate(w http.ResponseWriter, req *http.Request) {
@@ -53,7 +59,7 @@ func (h *Handler) Authenticate(w http.ResponseWriter, req *http.Request) {
     return
   }
 
-  token, expires := createToken(w)
+  token, expires := createToken(w, h.cfg.Domainname)
   err = h.ctrl.Refresh(context.Background(), &model.User{Name: userName, Token: token, Expires: expires})
   if err != nil {
     log.Println(err)
@@ -154,7 +160,7 @@ func (h *Handler) Register(w http.ResponseWriter, req *http.Request) {
     return
   }
 
-  token, expires := createToken(w)
+  token, expires := createToken(w, h.cfg.Domainname)
 
   log.Println("user, password, token, expires=", userName, password, token, expires)
   if err := h.ctrl.Add(context.Background(), &model.User{
@@ -214,7 +220,7 @@ func getTextField(w http.ResponseWriter, req *http.Request, field string) (value
   return
 }
 
-func createToken(w http.ResponseWriter) (token string, expires string) {
+func createToken(w http.ResponseWriter, domain string) (token string, expires string) {
   token = utils.RandomString(10)
   expiresAt := time.Now().Add(time.Hour * 24 * 5)
   expires = expiresAt.String()
@@ -222,7 +228,7 @@ func createToken(w http.ResponseWriter) (token string, expires string) {
   http.SetCookie(w, &http.Cookie{
     Name: "token",
     Value: token,
-    Domain: "galleryexample.com",
+    Domain: domain,
     Expires: expiresAt,
     Path: "/",
     HttpOnly: true,
