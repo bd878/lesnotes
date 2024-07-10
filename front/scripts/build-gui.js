@@ -17,6 +17,7 @@ await esbuild.build({
   entryNames: '[dir]',
   define: {
     BACKENDURL: '"' + Config.get("backendurl") + '"',
+    ENV: '"' + Config.get("env") + '"',
   },
   bundle: true,
   splitting: true,

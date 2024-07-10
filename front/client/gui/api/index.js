@@ -2,9 +2,14 @@ const methodsWithBody = [
   'POST', 'PUT', 'DELETE', 'PATCH',
 ]
 
+let proto = "http";
+if (ENV == "production" || ENV == "staging") {
+  proto = "https"
+}
+
 function getFullUrl(url, isFullUrl) {
   // TODO: replace backend url with value from config
-  return isFullUrl ? url : `http://${BACKENDURL}${url}`;
+  return isFullUrl ? url : `${proto}://${BACKENDURL}${url}`;
 }
 
 function prepareBody(body, method) {
