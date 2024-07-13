@@ -2,9 +2,9 @@ import React, {lazy} from 'react';
 import api from '../../api';
 import i18n from '../../i18n';
 
-const Form = lazy(() => import("../../components/Form/index.jsx"));
-const FormField = lazy(() => import("../../components/FormField/index.jsx"));
-const Button = lazy(() => import("../../components/Button/index.jsx"));
+const Form = lazy(() => import("../../components/Form"));
+const FormField = lazy(() => import("../../components/FormField/FormField.tsx"));
+const Button = lazy(() => import("../../components/Button/Button.tsx"));
 
 const sendLoginRequest = async e => {
   e.preventDefault();
@@ -25,7 +25,6 @@ const sendLoginRequest = async e => {
     })
   });
   console.log(response);
-  setTimeout(() => {location.href="/home"}, 0);
 }
 
 const LoginForm = props => {

@@ -2,9 +2,9 @@ import React, {lazy} from 'react';
 import api from '../../api';
 import i18n from '../../i18n';
 
-const Form = lazy(() => import("../../components/Form/index.jsx"));
-const FormField = lazy(() => import("../../components/FormField/index.jsx"));
-const Button = lazy(() => import("../../components/Button/index.jsx"));
+const Form = lazy(() => import("../../components/Form/Form.tsx"));
+const FormField = lazy(() => import("../../components/FormField/FormField.tsx"));
+const Button = lazy(() => import("../../components/Button/Button.tsx"));
 
 const sendRegisterRequest = async e => {
   e.preventDefault();

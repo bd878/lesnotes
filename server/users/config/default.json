@@ -4,5 +4,5 @@
   "debug": true,
   "logFile": "../../logs/log_users.txt",
   "dbPath": "../../main.db",
-  "domainname": "lesnotes.space"
+  "domainname": "galleryexample.com"
 }

@@ -1,17 +1,16 @@
 import React, {Suspense, lazy} from 'react';
 import ReactDOM from 'react-dom/client';
 import i18n from '../../i18n';
-import "./index.sass";
 
-const LoginForm = lazy(() => import("../../components/LoginForm/index.jsx"));
+const RegisterForm = lazy(() => import("../../components/RegisterForm/RegisterForm.tsx"));
 
-const Login = () => (
+const Register = () => (
   <Suspense fallback={i18n('loading')}>
-    <div className="login_page">{i18n("login_form_header")}</div>
+    <div>{i18n("register")}</div>
 
-    <LoginForm />
+    <RegisterForm />
   </Suspense>
 )
 
 const root = ReactDOM.createRoot(document.getElementById('app'));
-root.render(<Login />);
+root.render(<Register />);

@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import api from '../../api';
 import i18n from '../../i18n';
 
-const AuthProvider = props => {
+const Auth = props => {
   const [authed, setAuthed] = useState(false)
   const [loading, setLoading] = useState(true)
 
@@ -45,4 +45,4 @@ const AuthProvider = props => {
   );
 }
 
-export default AuthProvider;
+export default Auth;
