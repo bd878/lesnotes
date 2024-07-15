@@ -1,4 +1,5 @@
 import {unlink, readdir, stat, rm} from "node:fs/promises";
+// TODO: import ts from "typescript";
 import Config from "config";
 import path from "node:path";
 import esbuild from 'esbuild';
@@ -16,7 +17,7 @@ for (const file of files) {
     await unlink('public/' + file.name)
 }
 
-await esbuild.build({
+let ctx = await esbuild.context({
   entryPoints: [
     'client/gui/pages/**/*.tsx',
     'client/gui/styles/*.sass',
@@ -34,3 +35,10 @@ await esbuild.build({
   outbase: 'client/gui/',
   plugins: [sassPlugin()],
 })
+
+await ctx.watch()
+if (Config.get("env") == "development") {
+  console.log("watching...")
+} else {
+  await ctx.dispose()
+}
