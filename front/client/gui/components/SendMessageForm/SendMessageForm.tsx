@@ -7,24 +7,22 @@ const Form = lazy(() => import("../../components/Form"));
 const FormField = lazy(() => import("../../components/FormField"));
 const Button = lazy(() => import("../../components/Button"));
 
-const SendMessageForm = ({ setError, onSend }) => {
+const SendMessageForm = ({ onError, onSuccess }) => {
   const sendMessageRequest = useCallback(e => {
     e.preventDefault();
 
     const send = async form => {
       try {
-        await api("/messages/v1/send", {
+        const response = await api("/messages/v1/send", {
           method: "POST",
           credentials: "include",
           body: form,
         });
+        onSuccess(response)
       } catch (e) {
         console.error(i18n("error_occured"), e);
-        setError(i18n("loading_messages_error"));
-        return
+        onError(e);
       }
-
-      onSend()
     }
 
     let message = e.target.elements['message'].value;
@@ -39,7 +37,7 @@ const SendMessageForm = ({ setError, onSend }) => {
     }
 
     send(form)
-  }, [setError, onSend]);
+  }, [onSuccess, onError]);
 
   return (
     <Form

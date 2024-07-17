@@ -8,6 +8,7 @@ import (
   "github.com/bd878/gallery/server/messages/pkg/model"
 )
 
+// TODO: remove, may be stale code
 type Repository interface {
   Put(context.Context, *model.Message) error
   Get(context.Context, usermodel.UserId) ([]model.Message, error)

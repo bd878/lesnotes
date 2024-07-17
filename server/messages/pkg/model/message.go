@@ -17,3 +17,8 @@ type ServerResponse struct {
   Status string `json:"status"`
   Description string `json:"description"`
 }
+
+type NewMessageServerResponse struct {
+  ServerResponse
+  Message Message `json:"message"`
+}

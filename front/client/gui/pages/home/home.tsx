@@ -45,6 +45,18 @@ const Messages = () => {
     setTimeout(() => {location.href = "/login"}, 0)
   }, []);
 
+  const onSendSuccess = useCallback((response) => {
+    console.log("[onSendSuccess] response:", response);
+    setMessages([
+      ...messages,
+      response.message,
+    ]);
+  }, [setMessages, messages]);
+
+  const onSendError = useCallback(() => {
+    setError(i18n("loading_messages_error"))
+  }, [setError])
+
   return (
     <Auth fallback={i18n("messages_auth_fallback")}>
       <Suspense fallback={i18n("loading")}>
@@ -53,7 +65,7 @@ const Messages = () => {
           onClick={exit}
         />
 
-        <Tag css="flex column grow">
+        <Tag css="flex column grow y-hidden w-100">
           <MessagesList
             css="grow y-scroll"
             error={error}
@@ -63,8 +75,8 @@ const Messages = () => {
           />
 
           <SendMessageForm
-            onSend={reload}
-            setError={setError}
+            onSuccess={onSendSuccess}
+            onError={onSendError}
           />
         </Tag>
       </Suspense>

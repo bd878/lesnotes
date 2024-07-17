@@ -6,12 +6,11 @@ import (
   "os"
   "io"
   "context"
-  "strings"
   "mime"
   "path/filepath"
   "encoding/json"
+  "math/rand"
 
-  "github.com/bd878/gallery/server/utils"
   usermodel "github.com/bd878/gallery/server/users/pkg/model"
   "github.com/bd878/gallery/server/messages/pkg/model"
 )
@@ -98,7 +97,7 @@ func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
       return
     }
 
-    filename = strings.ToLower(utils.RandomString(10) + filepath.Ext(fh.Filename))
+    filename = fh.Filename
     log.Println("filename=", filename)
 
     ff, err := os.OpenFile(
@@ -130,19 +129,24 @@ func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
     return
   }
 
-  if err := h.ctrl.SaveMessage(context.Background(), &model.Message{
+  newMsg := model.Message{
+    Id: rand.Intn(10e5), // TODO: return real message id or notify front it is fictional msgId
     UserId: user.Id,
     Value: msg,
     File: filename,
-  }); err != nil {
+  }
+  if err := h.ctrl.SaveMessage(context.Background(), &newMsg); err != nil {
     log.Println(err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
 
-  if err := json.NewEncoder(w).Encode(model.ServerResponse{
-    Status: "ok",
-    Description: "accepted",
+  if err := json.NewEncoder(w).Encode(model.NewMessageServerResponse{
+    ServerResponse: model.ServerResponse{
+      Status: "ok",
+      Description: "accepted",
+    },
+    Message: newMsg,
   }); err != nil {
     log.Println(err)
     w.WriteHeader(http.StatusInternalServerError)
