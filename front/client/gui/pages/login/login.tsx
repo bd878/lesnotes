@@ -1,13 +1,15 @@
 import React, {Suspense, lazy} from 'react';
 import ReactDOM from 'react-dom/client';
+import Tag from '../../components/Tag';
 import i18n from '../../i18n';
-import "./index.sass";
 
 const LoginForm = lazy(() => import("../../components/LoginForm"));
 
 const Login = () => (
   <Suspense fallback={i18n('loading')}>
-    <div className="login_page">{i18n("login_form_header")}</div>
+    <Tag css="flex white bg-primary">
+      {i18n("login_form_header")}
+    </Tag>
 
     <LoginForm />
   </Suspense>

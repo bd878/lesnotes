@@ -9,7 +9,7 @@ import useragent from './handlers/useragent.js';
 import favicon from './handlers/favicon.js';
 
 import assets from './routes/assets.js';
-import index from './routes/index.js';
+import main from './routes/main.js';
 import login from './routes/login.js';
 import register from './routes/register.js';
 import home from './routes/home.js';
@@ -32,7 +32,7 @@ router
     ctx.redirect('/')
     ctx.status = 301
   })
-  .get('/', index)
+  .get('/', main)
   .get('/login', login)
   .get('/register', register)
   .get('/home', home)

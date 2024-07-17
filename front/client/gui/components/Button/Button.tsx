@@ -1,10 +1,11 @@
 import React from 'react'
+import Tag from '../Tag';
 
 const Button = props => {
   return (
-    <button type={props.button}>
+    <Tag el="button" type={props.button} onClick={props.onClick}>
       {props.text}
-    </button>
+    </Tag>
   )
 }
 

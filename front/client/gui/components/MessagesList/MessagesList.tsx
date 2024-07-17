@@ -1,21 +1,23 @@
 import React, {lazy} from 'react';
+import Tag from '../Tag';
 import i18n from '../../i18n';
 
-const List = lazy(() => import("../../components/List/List.tsx"));
-const ListItem = lazy(() => import("../../components/ListItem/ListItem.tsx"));
+const List = lazy(() => import("../../components/List"));
+const ListItem = lazy(() => import("../../components/ListItem"));
 
 const MessagesList = ({
+  css,
   messages,
   setMessages,
   loading,
   error,
 }) => {
-  let content = <div></div>;
+  let content = <Tag></Tag>;
   if (error) {
-    content = <div>{error}</div>
+    content = <Tag>{error}</Tag>
   } else {
     content = (
-      <List>
+      <List css={css}>
         {messages.map(message => (
           <ListItem key={message.id}>{message.value}</ListItem>
         ))}
@@ -25,9 +27,9 @@ const MessagesList = ({
 
   return (
     <>
-      <div>{i18n("messages_header")}</div>
+      <Tag>{i18n("messages_header")}</Tag>
 
-      {loading ? <div>{i18n("loading")}</div> : <>{content}</>}
+      {loading ? <Tag>{i18n("loading")}</Tag> : <>{content}</>}
     </>
   )
 }

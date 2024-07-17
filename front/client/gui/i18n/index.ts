@@ -1,5 +1,6 @@
 const i18n = {
   "en": {
+    logout: "Logout",
     login: "Login",
     register: "Register",
     loading: "Loading...",
@@ -19,6 +20,7 @@ const i18n = {
     msg_send_text: "Send",
   },
   "ru": {
+    logout: "Выйти",
     login: "Войти",
     register: "Зарегистрироваться",
     loading: "Загрузка...",

@@ -1,6 +1,13 @@
 @use 'palette'
+@use 'directives'
 
 body
   font: 100% palette.$font-stack
   color: palette.$primary-color
+  height: calc(100vh - 20px)
 
+#app
+  display: flex
+  flex-flow: column
+  align-items: flex-start
+  height: 100%

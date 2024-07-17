@@ -13,7 +13,7 @@ async function renderer(ctx) {
     ctx.set({ 'ETag': '1' })
 
     ctx.body = mustache.render(template, {
-      script: "/public/index.js",
+      script: "/public/main.js",
       styles: [
         "/public/styles.css",
       ],

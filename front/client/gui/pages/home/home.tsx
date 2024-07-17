@@ -1,6 +1,8 @@
 import React, {Suspense, lazy, useState, useEffect, useCallback} from 'react';
 import ReactDOM from 'react-dom/client';
 import api from '../../api';
+import Button from '../../components/Button';
+import Tag from '../../components/Tag';
 import Auth from '../../providers/Auth';
 import i18n from '../../i18n';
 
@@ -38,11 +40,22 @@ const Messages = () => {
 
   useEffect(reload, [reload]);
 
+  const exit = useCallback(() => {
+    /*TODO: implement*/
+    setTimeout(() => {location.href = "/login"}, 0)
+  }, []);
+
   return (
     <Auth fallback={i18n("messages_auth_fallback")}>
       <Suspense fallback={i18n("loading")}>
-        <div>
+        <Button
+          text={i18n("logout")}
+          onClick={exit}
+        />
+
+        <Tag css="flex column grow">
           <MessagesList
+            css="grow y-scroll"
             error={error}
             messages={messages}
             setMessages={setMessages}
@@ -53,7 +66,7 @@ const Messages = () => {
             onSend={reload}
             setError={setError}
           />
-        </div>
+        </Tag>
       </Suspense>
     </Auth>
   )

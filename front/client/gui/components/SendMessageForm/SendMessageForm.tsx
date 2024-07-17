@@ -1,10 +1,11 @@
 import React, {lazy, useCallback} from 'react';
 import api from '../../api';
+import Form from '../Form';
 import i18n from '../../i18n';
 
-const Form = lazy(() => import("../../components/Form/Form.tsx"));
-const FormField = lazy(() => import("../../components/FormField/FormField.tsx"));
-const Button = lazy(() => import("../../components/Button/Button.tsx"));
+const Form = lazy(() => import("../../components/Form"));
+const FormField = lazy(() => import("../../components/FormField"));
+const Button = lazy(() => import("../../components/Button"));
 
 const SendMessageForm = ({ setError, onSend }) => {
   const sendMessageRequest = useCallback(e => {
@@ -46,7 +47,7 @@ const SendMessageForm = ({ setError, onSend }) => {
       onSubmit={sendMessageRequest}
       enctype="multipart/form-data"
     >
-      <FormField required name="message" type="text" />
+      <FormField required name="message" type="textarea" />
       <FormField name="file" type="file" />
       <Button type="submit" text={i18n("msg_send_text")} />
     </Form>

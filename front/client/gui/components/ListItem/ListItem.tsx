@@ -1,10 +1,11 @@
 import React from 'react';
+import Tag from '../Tag';
 
 const ListItem = props => {
   return (
-    <div>
+    <Tag>
       {props.children}
-    </div>
+    </Tag>
   )
 }
 

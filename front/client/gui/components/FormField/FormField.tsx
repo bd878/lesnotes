@@ -1,8 +1,10 @@
 import React from 'react';
+import Tag from '../Tag';
 
 const FormField = (props) => {
   return (
-    <input
+    <Tag
+      el="input"
       name={props.name}
       type={props.type}
       required={props.required}
