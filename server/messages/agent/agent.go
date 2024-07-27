@@ -121,11 +121,10 @@ func (a *Agent) setupHTTPServer() error {
   }
   a.listener = l
 
-  http.Handle("/messages/v1/send", http.HandlerFunc(h.CheckAuth(h.SaveMessage)))
+  http.Handle("/messages/v1/send", http.HandlerFunc(h.CheckAuth(h.SendMessage)))
   http.Handle("/messages/v1/read", http.HandlerFunc(h.CheckAuth(h.ReadMessages)))
-  http.Handle("/messages/v1/status", http.HandlerFunc(h.ReportStatus))
-  // TODO: create separate "files" service to serve static
-  http.Handle("/messages/v1/read_file", http.HandlerFunc(h.CheckAuth(h.ReadMessageFile)))
+  http.Handle("/messages/v1/status", http.HandlerFunc(h.GetStatus))
+  http.Handle("/messages/v1/read_file", http.HandlerFunc(h.CheckAuth(h.ReadFile)))
 
   return nil
 }

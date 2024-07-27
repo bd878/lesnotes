@@ -23,11 +23,20 @@ func (r *Repository) Put(_ context.Context, msg *model.Message) error {
   return nil
 }
 
+func (r *Repository) HasByLog(_ contex.Context, logIndex, logTerm uint64) (bool, error) {
+  for _, msg := range msgs {
+    if msg.LogIndex == logIndex && msg.LogTerm == logTerm {
+      return true, nil
+    }
+  }
+  return false, nil
+}
+
 func (r *Repository) Get(_ context.Context, userId usermodel.UserId) ([]model.Message, error) {
   return r.messages[userId], nil
 }
 
-func (r *Repository) GetOne(_ context.Context, userId usermodel.UserId, id int) (model.Message, error) {
+func (r *Repository) GetOne(_ context.Context, userId usermodel.UserId, id model.MessageId) (model.Message, error) {
   var zero model.Message
 
   msgs, ok := r.messages[userId]

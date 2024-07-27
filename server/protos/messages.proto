@@ -16,6 +16,7 @@ message Message {
   string create_time = 3;
   bytes value = 4;
   string file = 5;
+  string file_id = 6;
 }
 
 message SendMessageRequest {}

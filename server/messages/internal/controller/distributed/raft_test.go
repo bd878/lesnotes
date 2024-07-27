@@ -62,13 +62,13 @@ func TestDistributed(t *testing.T) {
   }
 
   messages := []*model.Message{
-    {Id: 0, UserId: 1, Value: "first", File: "file1_1.pdf"},
-    {Id: 1, UserId: 2, Value: "second", File: "file2_1.pdf"},
-    {Id: 2, UserId: 1, Value: "third", File: "file1_2.pdf"},
+    {Id: 0, UserId: 1, Value: "first", FileName: "file1_1.pdf", FileId: model.FileId("file1_1.pdf")},
+    {Id: 1, UserId: 2, Value: "second", FileName: "file2_1.pdf", FileId: model.FileId("file2_1.pdf")},
+    {Id: 2, UserId: 1, Value: "third", FileName: "file1_2.pdf", FileId: model.FileId("file1_2.pdf")},
   }
 
   for _, msg := range messages {
-    err := logs[0].SaveMessage(context.Background(), msg)
+    _, err := logs[0].SaveMessage(context.Background(), msg)
     require.NoError(t, err)
     require.Eventually(t, func() bool {
       for j := 0; j < nodeCount; j++ {
@@ -105,7 +105,7 @@ func TestDistributed(t *testing.T) {
   require.NoError(t, err)
   require.Equal(t, nodeCount-1, len(servers))
 
-  err = logs[0].SaveMessage(context.Background(), &model.Message{
+  _, err = logs[0].SaveMessage(context.Background(), &model.Message{
     Id: 3,
     UserId: 1,
     Value: "third",

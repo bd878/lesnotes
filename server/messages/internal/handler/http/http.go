@@ -3,6 +3,7 @@ package http
 import (
   "log"
   "net/http"
+  "strings"
   "os"
   "io"
   "context"
@@ -13,6 +14,7 @@ import (
 
   usermodel "github.com/bd878/gallery/server/users/pkg/model"
   "github.com/bd878/gallery/server/messages/pkg/model"
+  "github.com/bd878/gallery/server/utils"
 )
 
 type userGateway interface {
@@ -20,7 +22,7 @@ type userGateway interface {
 }
 
 type Controller interface {
-  SaveMessage(ctx context.Context, msg *model.Message) error
+  SaveMessage(ctx context.Context, msg *model.Message) (model.MessageId, error)
   ReadUserMessages(ctx context.Context, userId usermodel.UserId) ([]model.Message, error)
 }
 
@@ -75,8 +77,9 @@ func (h *Handler) CheckAuth(
 
 type userContextKey struct {}
 
-func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
-  if err := req.ParseMultipartForm(1); err != nil {
+func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) {
+  var err error
+  if err = req.ParseMultipartForm(1); err != nil {
     log.Println(err)
     w.WriteHeader(http.StatusInternalServerError)
     return
@@ -88,7 +91,8 @@ func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
     return
   }
 
-  var filename string
+  var fileName string
+  var fileId string
   if _, ok := req.MultipartForm.File["file"]; ok {
     f, fh, err := req.FormFile("file")
     if err != nil {
@@ -97,11 +101,11 @@ func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
       return
     }
 
-    filename = fh.Filename
-    log.Println("filename=", filename)
+    fileName = filepath.Base(fh.Filename)
+    fileId = strings.ToLower(utils.RandomString(10) + filepath.Ext(fh.Filename))
 
     ff, err := os.OpenFile(
-      filepath.Join(h.dataPath, filename),
+      filepath.Join(h.dataPath, fileId),
       os.O_WRONLY|os.O_CREATE, 0666,
     )
     if err != nil {
@@ -118,7 +122,7 @@ func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
 
   msg := req.PostFormValue("message")
 
-  if filename == "" && msg == "" {
+  if fileName == "" && msg == "" {
     if err := json.NewEncoder(w).Encode(model.ServerResponse{
       Status: "ok",
       Description: "empty fields",
@@ -129,16 +133,21 @@ func (h *Handler) SaveMessage(w http.ResponseWriter, req *http.Request) {
     return
   }
 
+  var msgId model.MessageId
   newMsg := model.Message{
-    Id: rand.Intn(10e5), // TODO: return real message id or notify front it is fictional msgId
     UserId: user.Id,
     Value: msg,
-    File: filename,
+    FileName: fileName,
+    FileId: model.FileId(fileId),
   }
-  if err := h.ctrl.SaveMessage(context.Background(), &newMsg); err != nil {
+  if msgId, err = h.ctrl.SaveMessage(context.Background(), &newMsg); err != nil {
     log.Println(err)
     w.WriteHeader(http.StatusInternalServerError)
     return
+  }
+
+  if msgId > 0 { /* TODO: remove, temporary to fix duplicate Apply bug */
+    newMsg.Id = model.MessageId(rand.Intn(10e5))
   }
 
   if err := json.NewEncoder(w).Encode(model.NewMessageServerResponse{
@@ -175,21 +184,19 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) {
   }
 }
 
-func (h *Handler) ReadMessageFile(w http.ResponseWriter, req *http.Request) {
+func (h *Handler) ReadFile(w http.ResponseWriter, req *http.Request) {
   values := req.URL.Query()
-  filename := values.Get("name")
+  filename := values.Get("id")
   if filename == "" {
     if err := json.NewEncoder(w).Encode(model.ServerResponse{
       Status: "ok",
-      Description: "empty name",
+      Description: "empty file id",
     }); err != nil {
       log.Println(err)
       w.WriteHeader(http.StatusInternalServerError)
     }
     return
   }
-
-  log.Println("filename=", filename)
 
   ff, err := os.Open(filepath.Join(h.dataPath, filename))
   if err != nil {
@@ -212,8 +219,7 @@ func (h *Handler) ReadMessageFile(w http.ResponseWriter, req *http.Request) {
   }
 }
 
-func (h *Handler) ReportStatus(w http.ResponseWriter, _ *http.Request) {
-  log.Println("report ok status")
+func (h *Handler) GetStatus(w http.ResponseWriter, _ *http.Request) {
   if _, err := io.WriteString(w, "ok\n"); err != nil {
     log.Println(err)
     w.WriteHeader(http.StatusInternalServerError)

@@ -23,6 +23,7 @@ import (
 type Repository interface {
   Put(context.Context, *model.Message) error
   Get(context.Context, usermodel.UserId) ([]model.Message, error)
+  HasByLog(context.Context, uint64, uint64) (bool, error)
   PutBatch(context.Context, [](*model.Message)) error
   GetBatch(context.Context) ([]model.Message, error)
   GetOne(context.Context, usermodel.UserId, model.MessageId) (model.Message, error)
@@ -139,12 +140,12 @@ func (m *DistributedMessages) setupRaft() error {
   return err
 }
 
-func (m *DistributedMessages) SaveMessage(ctx context.Context, msg *model.Message) error {
+func (m *DistributedMessages) SaveMessage(ctx context.Context, msg *model.Message) (model.MessageId, error) {
   msg.CreateTime = time.Now().String()
   if err := m.apply(ctx, msg); err != nil {
-    return err
+    return 0, err
   }
-  return nil
+  return 0, nil
 }
 
 func (m *DistributedMessages) apply(ctx context.Context, msg *model.Message) error {
@@ -255,12 +256,23 @@ type fsm struct {
 }
 
 func (f *fsm) Apply(record *raft.Log) interface{} {
-  buf := record.Data
-  var msg model.Message
-  err := json.Unmarshal(buf, &msg)
+  has, err := f.repo.HasByLog(context.Background(), record.Index, record.Term)
   if err != nil {
     return err
   }
+  if has {
+    return nil
+  }
+
+  buf := record.Data
+  var msg model.Message
+  err = json.Unmarshal(buf, &msg)
+  if err != nil {
+    return err
+  }
+  msg.LogIndex = record.Index
+  msg.LogTerm = record.Term
+
   return f.repo.Put(context.Background(), &msg)
 }
 
@@ -268,9 +280,6 @@ func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {
   return &snapshot{repo: f.repo}, nil
 }
 
-// TODO: restore on messages2, then rename on messages.
-// By this time it first deletes all messages and restores
-// them from snapshot data. For testing purposes only
 func (f *fsm) Restore(r io.ReadCloser) error {
   var buf *bytes.Buffer
   var msgs []model.Message
