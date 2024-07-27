@@ -1,3 +1,4 @@
+PRAGMA user_version=1;
 PRAGMA foreign_keys=ON;
 CREATE TABLE IF NOT EXISTS messages(
   id INTEGER PRIMARY KEY,

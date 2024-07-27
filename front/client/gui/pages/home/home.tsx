@@ -67,7 +67,7 @@ const Messages = () => {
 
         <Tag css="flex column grow y-hidden w-100">
           <MessagesList
-            css="grow y-scroll"
+            css="grow y-scroll hidden"
             error={error}
             messages={messages}
             setMessages={setMessages}
