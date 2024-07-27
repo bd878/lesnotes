@@ -107,8 +107,8 @@ func (r *Repository) Get(ctx context.Context, userId usermodel.UserId) ([]model.
     var value string
     var fileCol sql.NullString
     var fileIdCol sql.NullString
-    var logIndex uint64
-    var logTerm uint64
+    var logIndexCol sql.NullInt64
+    var logTermCol sql.NullInt64
     if err := rows.Scan(
       &id,
       &userId,
@@ -116,8 +116,8 @@ func (r *Repository) Get(ctx context.Context, userId usermodel.UserId) ([]model.
       &value,
       &fileCol,
       &fileIdCol,
-      &logIndex,
-      &logTerm,
+      &logIndexCol,
+      &logTermCol,
     ); err != nil {
       return nil, err
     }
@@ -129,6 +129,14 @@ func (r *Repository) Get(ctx context.Context, userId usermodel.UserId) ([]model.
     var fileId string
     if fileIdCol.Valid {
       fileId = fileIdCol.String
+    }
+    var logIndex uint64
+    if logIndexCol.Valid {
+      logIndex = uint64(logIndexCol.Int64)
+    }
+    var logTerm uint64
+    if logTermCol.Valid {
+      logTerm = uint64(logTermCol.Int64)
     }
     res = append(res, model.Message{
       Id: model.MessageId(id),
@@ -154,6 +162,8 @@ func (r *Repository) GetOne(ctx context.Context, userId usermodel.UserId, id mod
   var msg model.Message
   var fileCol sql.NullString
   var fileIdCol sql.NullString
+  var logIndexCol sql.NullInt64
+  var logTermCol sql.NullInt64
   if err := row.Scan(
     &msg.Id,
     &msg.UserId,
@@ -161,8 +171,8 @@ func (r *Repository) GetOne(ctx context.Context, userId usermodel.UserId, id mod
     &msg.Value,
     &fileCol,
     &fileIdCol,
-    &msg.LogIndex,
-    &msg.LogTerm,
+    &logIndexCol,
+    &logTermCol,
   ); err != nil {
     if errors.Is(err, sql.ErrNoRows) {
       return msg, repository.ErrNotFound
@@ -174,6 +184,12 @@ func (r *Repository) GetOne(ctx context.Context, userId usermodel.UserId, id mod
   }
   if fileIdCol.Valid {
     msg.FileId = model.FileId(fileIdCol.String)
+  }
+  if logIndexCol.Valid {
+    msg.LogIndex = uint64(logIndexCol.Int64)
+  }
+  if logTermCol.Valid {
+    msg.LogTerm = uint64(logTermCol.Int64)
   }
   return msg, nil
 }
@@ -214,9 +230,8 @@ func (r *Repository) GetBatch(ctx context.Context) ([]model.Message, error) {
     var createtime string
     var fileCol sql.NullString
     var fileIdCol sql.NullString
-    var logIndex uint64
-    var logTerm uint64
-
+    var logIndexCol sql.NullInt64
+    var logTermCol sql.NullInt64
     if err := rows.Scan(
       &id,
       &userId,
@@ -224,8 +239,8 @@ func (r *Repository) GetBatch(ctx context.Context) ([]model.Message, error) {
       &value,
       &fileCol,
       &fileIdCol,
-      &logIndex,
-      &logTerm,
+      &logIndexCol,
+      &logTermCol,
     ); err != nil {
       return nil, err
     }
@@ -237,6 +252,14 @@ func (r *Repository) GetBatch(ctx context.Context) ([]model.Message, error) {
     var fileId string
     if fileIdCol.Valid {
       fileId = fileIdCol.String
+    }
+    var logIndex uint64
+    if logIndexCol.Valid {
+      logIndex = uint64(logIndexCol.Int64)
+    }
+    var logTerm uint64
+    if logTermCol.Valid {
+      logTerm = uint64(logTermCol.Int64)
     }
     res = append(res, model.Message{
       Id: model.MessageId(id),
