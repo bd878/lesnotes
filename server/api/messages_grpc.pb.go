@@ -13,155 +13,155 @@ import (
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion7
 
-// MessagesServiceClient is the client API for MessagesService service.
+// MessagesClient is the client API for Messages service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type MessagesServiceClient interface {
-	GetServers(ctx context.Context, in *GetMessagesServersRequest, opts ...grpc.CallOption) (*GetMessagesServersResponse, error)
-	SaveMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*SaveMessageResponse, error)
-	ReadMessage(ctx context.Context, in *ReadMessageRequest, opts ...grpc.CallOption) (*ReadMessageResponse, error)
+type MessagesClient interface {
+	GetServers(ctx context.Context, in *GetServersRequest, opts ...grpc.CallOption) (*GetServersResponse, error)
+	SaveMessage(ctx context.Context, in *SaveMessageRequest, opts ...grpc.CallOption) (*SaveMessageResponse, error)
+	ReadUserMessages(ctx context.Context, in *ReadUserMessagesRequest, opts ...grpc.CallOption) (*ReadUserMessagesResponse, error)
 }
 
-type messagesServiceClient struct {
+type messagesClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewMessagesServiceClient(cc grpc.ClientConnInterface) MessagesServiceClient {
-	return &messagesServiceClient{cc}
+func NewMessagesClient(cc grpc.ClientConnInterface) MessagesClient {
+	return &messagesClient{cc}
 }
 
-func (c *messagesServiceClient) GetServers(ctx context.Context, in *GetMessagesServersRequest, opts ...grpc.CallOption) (*GetMessagesServersResponse, error) {
-	out := new(GetMessagesServersResponse)
-	err := c.cc.Invoke(ctx, "/messages.v1.MessagesService/GetServers", in, out, opts...)
+func (c *messagesClient) GetServers(ctx context.Context, in *GetServersRequest, opts ...grpc.CallOption) (*GetServersResponse, error) {
+	out := new(GetServersResponse)
+	err := c.cc.Invoke(ctx, "/messages.v1.Messages/GetServers", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *messagesServiceClient) SaveMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*SaveMessageResponse, error) {
+func (c *messagesClient) SaveMessage(ctx context.Context, in *SaveMessageRequest, opts ...grpc.CallOption) (*SaveMessageResponse, error) {
 	out := new(SaveMessageResponse)
-	err := c.cc.Invoke(ctx, "/messages.v1.MessagesService/SaveMessage", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/messages.v1.Messages/SaveMessage", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *messagesServiceClient) ReadMessage(ctx context.Context, in *ReadMessageRequest, opts ...grpc.CallOption) (*ReadMessageResponse, error) {
-	out := new(ReadMessageResponse)
-	err := c.cc.Invoke(ctx, "/messages.v1.MessagesService/ReadMessage", in, out, opts...)
+func (c *messagesClient) ReadUserMessages(ctx context.Context, in *ReadUserMessagesRequest, opts ...grpc.CallOption) (*ReadUserMessagesResponse, error) {
+	out := new(ReadUserMessagesResponse)
+	err := c.cc.Invoke(ctx, "/messages.v1.Messages/ReadUserMessages", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// MessagesServiceServer is the server API for MessagesService service.
-// All implementations must embed UnimplementedMessagesServiceServer
+// MessagesServer is the server API for Messages service.
+// All implementations must embed UnimplementedMessagesServer
 // for forward compatibility
-type MessagesServiceServer interface {
-	GetServers(context.Context, *GetMessagesServersRequest) (*GetMessagesServersResponse, error)
-	SaveMessage(context.Context, *SendMessageRequest) (*SaveMessageResponse, error)
-	ReadMessage(context.Context, *ReadMessageRequest) (*ReadMessageResponse, error)
-	mustEmbedUnimplementedMessagesServiceServer()
+type MessagesServer interface {
+	GetServers(context.Context, *GetServersRequest) (*GetServersResponse, error)
+	SaveMessage(context.Context, *SaveMessageRequest) (*SaveMessageResponse, error)
+	ReadUserMessages(context.Context, *ReadUserMessagesRequest) (*ReadUserMessagesResponse, error)
+	mustEmbedUnimplementedMessagesServer()
 }
 
-// UnimplementedMessagesServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedMessagesServiceServer struct {
+// UnimplementedMessagesServer must be embedded to have forward compatible implementations.
+type UnimplementedMessagesServer struct {
 }
 
-func (UnimplementedMessagesServiceServer) GetServers(context.Context, *GetMessagesServersRequest) (*GetMessagesServersResponse, error) {
+func (UnimplementedMessagesServer) GetServers(context.Context, *GetServersRequest) (*GetServersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetServers not implemented")
 }
-func (UnimplementedMessagesServiceServer) SaveMessage(context.Context, *SendMessageRequest) (*SaveMessageResponse, error) {
+func (UnimplementedMessagesServer) SaveMessage(context.Context, *SaveMessageRequest) (*SaveMessageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveMessage not implemented")
 }
-func (UnimplementedMessagesServiceServer) ReadMessage(context.Context, *ReadMessageRequest) (*ReadMessageResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ReadMessage not implemented")
+func (UnimplementedMessagesServer) ReadUserMessages(context.Context, *ReadUserMessagesRequest) (*ReadUserMessagesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReadUserMessages not implemented")
 }
-func (UnimplementedMessagesServiceServer) mustEmbedUnimplementedMessagesServiceServer() {}
+func (UnimplementedMessagesServer) mustEmbedUnimplementedMessagesServer() {}
 
-// UnsafeMessagesServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to MessagesServiceServer will
+// UnsafeMessagesServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to MessagesServer will
 // result in compilation errors.
-type UnsafeMessagesServiceServer interface {
-	mustEmbedUnimplementedMessagesServiceServer()
+type UnsafeMessagesServer interface {
+	mustEmbedUnimplementedMessagesServer()
 }
 
-func RegisterMessagesServiceServer(s *grpc.Server, srv MessagesServiceServer) {
-	s.RegisterService(&_MessagesService_serviceDesc, srv)
+func RegisterMessagesServer(s *grpc.Server, srv MessagesServer) {
+	s.RegisterService(&_Messages_serviceDesc, srv)
 }
 
-func _MessagesService_GetServers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetMessagesServersRequest)
+func _Messages_GetServers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetServersRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MessagesServiceServer).GetServers(ctx, in)
+		return srv.(MessagesServer).GetServers(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/messages.v1.MessagesService/GetServers",
+		FullMethod: "/messages.v1.Messages/GetServers",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MessagesServiceServer).GetServers(ctx, req.(*GetMessagesServersRequest))
+		return srv.(MessagesServer).GetServers(ctx, req.(*GetServersRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MessagesService_SaveMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SendMessageRequest)
+func _Messages_SaveMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SaveMessageRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MessagesServiceServer).SaveMessage(ctx, in)
+		return srv.(MessagesServer).SaveMessage(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/messages.v1.MessagesService/SaveMessage",
+		FullMethod: "/messages.v1.Messages/SaveMessage",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MessagesServiceServer).SaveMessage(ctx, req.(*SendMessageRequest))
+		return srv.(MessagesServer).SaveMessage(ctx, req.(*SaveMessageRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MessagesService_ReadMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReadMessageRequest)
+func _Messages_ReadUserMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReadUserMessagesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MessagesServiceServer).ReadMessage(ctx, in)
+		return srv.(MessagesServer).ReadUserMessages(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/messages.v1.MessagesService/ReadMessage",
+		FullMethod: "/messages.v1.Messages/ReadUserMessages",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MessagesServiceServer).ReadMessage(ctx, req.(*ReadMessageRequest))
+		return srv.(MessagesServer).ReadUserMessages(ctx, req.(*ReadUserMessagesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-var _MessagesService_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "messages.v1.MessagesService",
-	HandlerType: (*MessagesServiceServer)(nil),
+var _Messages_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "messages.v1.Messages",
+	HandlerType: (*MessagesServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "GetServers",
-			Handler:    _MessagesService_GetServers_Handler,
+			Handler:    _Messages_GetServers_Handler,
 		},
 		{
 			MethodName: "SaveMessage",
-			Handler:    _MessagesService_SaveMessage_Handler,
+			Handler:    _Messages_SaveMessage_Handler,
 		},
 		{
-			MethodName: "ReadMessage",
-			Handler:    _MessagesService_ReadMessage_Handler,
+			MethodName: "ReadUserMessages",
+			Handler:    _Messages_ReadUserMessages_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

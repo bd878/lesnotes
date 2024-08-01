@@ -4,10 +4,10 @@ package messages.v1;
 
 option go_package = "github.com/bd878/gallery/server/api";
 
-service MessagesService {
-  rpc GetServers(GetMessagesServersRequest) returns (GetMessagesServersResponse) {}
-  rpc SaveMessage(SendMessageRequest) returns (SaveMessageResponse) {}
-  rpc ReadMessage(ReadMessageRequest) returns (ReadMessageResponse) {}
+service Messages {
+  rpc GetServers(GetServersRequest) returns (GetServersResponse) {}
+  rpc SaveMessage(SaveMessageRequest) returns (SaveMessageResponse) {}
+  rpc ReadUserMessages(ReadUserMessagesRequest) returns (ReadUserMessagesResponse) {}
 }
 
 message Message {
@@ -15,27 +15,33 @@ message Message {
   uint32 user_id = 2;
   string create_time = 3;
   bytes value = 4;
-  string file = 5;
+  string file_name = 5;
   string file_id = 6;
 }
 
-message SendMessageRequest {}
+message ReadUserMessagesRequest {
+  uint32 user_id = 1;
+}
+
+message ReadUserMessagesResponse {
+  repeated Message messages = 1;
+}
+
+message SaveMessageRequest {
+  Message message = 1;
+}
 
 message SaveMessageResponse {
+  uint32 id = 1;
 }
 
-message ReadMessageRequest {}
+message GetServersRequest {}
 
-message ReadMessageResponse {
+message GetServersResponse {
+  repeated Server servers = 3;
 }
 
-message GetMessagesServersRequest {}
-
-message GetMessagesServersResponse {
-  repeated MessagesServer servers = 3;
-}
-
-message MessagesServer {
+message Server {
   string id = 1;
   string rpc_addr = 2;
   bool is_leader = 3;
