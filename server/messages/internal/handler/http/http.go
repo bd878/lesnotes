@@ -10,7 +10,6 @@ import (
   "mime"
   "path/filepath"
   "encoding/json"
-  "math/rand"
 
   usermodel "github.com/bd878/gallery/server/users/pkg/model"
   "github.com/bd878/gallery/server/messages/pkg/model"
@@ -23,7 +22,7 @@ type userGateway interface {
 
 type Controller interface {
   SaveMessage(ctx context.Context, msg *model.Message) (model.MessageId, error)
-  ReadUserMessages(ctx context.Context, userId usermodel.UserId) ([]model.Message, error)
+  ReadUserMessages(ctx context.Context, userId usermodel.UserId) ([]*model.Message, error)
 }
 
 type Handler struct {
@@ -120,9 +119,9 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) {
     }
   }
 
-  msg := req.PostFormValue("message")
+  value := req.PostFormValue("message")
 
-  if fileName == "" && msg == "" {
+  if fileName == "" && value == "" {
     if err := json.NewEncoder(w).Encode(model.ServerResponse{
       Status: "ok",
       Description: "empty fields",
@@ -133,21 +132,16 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) {
     return
   }
 
-  var msgId model.MessageId
-  newMsg := model.Message{
+  msg := model.Message{
     UserId: user.Id,
-    Value: msg,
+    Value: value,
     FileName: fileName,
     FileId: model.FileId(fileId),
   }
-  if msgId, err = h.ctrl.SaveMessage(context.Background(), &newMsg); err != nil {
+  if _, err := h.ctrl.SaveMessage(context.Background(), &msg); err != nil {
     log.Println(err)
     w.WriteHeader(http.StatusInternalServerError)
     return
-  }
-
-  if msgId > 0 { /* TODO: remove, temporary to fix duplicate Apply bug */
-    newMsg.Id = model.MessageId(rand.Intn(10e5))
   }
 
   if err := json.NewEncoder(w).Encode(model.NewMessageServerResponse{
@@ -155,7 +149,7 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) {
       Status: "ok",
       Description: "accepted",
     },
-    Message: newMsg,
+    Message: msg,
   }); err != nil {
     log.Println(err)
     w.WriteHeader(http.StatusInternalServerError)

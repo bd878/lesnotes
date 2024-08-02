@@ -88,7 +88,7 @@ func (r *Repository) HasByLog(ctx context.Context, logIndex, logTerm uint64) (bo
   return true, nil
 }
 
-func (r *Repository) Get(ctx context.Context, userId usermodel.UserId) ([]model.Message, error) {
+func (r *Repository) Get(ctx context.Context, userId usermodel.UserId) ([]*model.Message, error) {
   rows, err := r.db.QueryContext(ctx,
     "SELECT id, user_id, createtime, message, file, file_id, log_index, log_term " +
     "FROM messages WHERE user_id = ?",
@@ -99,7 +99,7 @@ func (r *Repository) Get(ctx context.Context, userId usermodel.UserId) ([]model.
   }
   defer rows.Close()
 
-  var res []model.Message
+  var res []*model.Message
   for rows.Next() {
     var id int
     var userId int
@@ -138,7 +138,7 @@ func (r *Repository) Get(ctx context.Context, userId usermodel.UserId) ([]model.
     if logTermCol.Valid {
       logTerm = uint64(logTermCol.Int64)
     }
-    res = append(res, model.Message{
+    res = append(res, &model.Message{
       Id: model.MessageId(id),
       UserId: userId,
       CreateTime: createtime,
@@ -152,7 +152,7 @@ func (r *Repository) Get(ctx context.Context, userId usermodel.UserId) ([]model.
   return res, nil
 }
 
-func (r *Repository) GetOne(ctx context.Context, userId usermodel.UserId, id model.MessageId) (model.Message, error) {
+func (r *Repository) GetOne(ctx context.Context, userId usermodel.UserId, id model.MessageId) (*model.Message, error) {
   row := r.db.QueryRowContext(ctx,
     "SELECT id, user_id, createtime, message, file, file_id, log_index, log_term " +
     "FROM messages WHERE user_id = ? AND id = ?",
@@ -175,9 +175,9 @@ func (r *Repository) GetOne(ctx context.Context, userId usermodel.UserId, id mod
     &logTermCol,
   ); err != nil {
     if errors.Is(err, sql.ErrNoRows) {
-      return msg, repository.ErrNotFound
+      return &msg, repository.ErrNotFound
     }
-    return msg, err
+    return &msg, err
   }
   if fileCol.Valid {
     msg.FileName = fileCol.String
@@ -191,7 +191,7 @@ func (r *Repository) GetOne(ctx context.Context, userId usermodel.UserId, id mod
   if logTermCol.Valid {
     msg.LogTerm = uint64(logTermCol.Int64)
   }
-  return msg, nil
+  return &msg, nil
 }
 
 func (r *Repository) PutBatch(ctx context.Context, batch []*model.Message) error {
@@ -212,7 +212,7 @@ func (r *Repository) PutBatch(ctx context.Context, batch []*model.Message) error
   return nil
 }
 
-func (r *Repository) GetBatch(ctx context.Context) ([]model.Message, error) {
+func (r *Repository) GetBatch(ctx context.Context) ([]*model.Message, error) {
   rows, err := r.db.QueryContext(ctx,
     "SELECT id, user_id, createtime, message, file, file_id, log_index, log_term " +
     "FROM messages",
@@ -222,7 +222,7 @@ func (r *Repository) GetBatch(ctx context.Context) ([]model.Message, error) {
   }
   defer rows.Close()
 
-  var res []model.Message
+  var res []*model.Message
   for rows.Next() {
     var id int
     var userId int
@@ -261,7 +261,7 @@ func (r *Repository) GetBatch(ctx context.Context) ([]model.Message, error) {
     if logTermCol.Valid {
       logTerm = uint64(logTermCol.Int64)
     }
-    res = append(res, model.Message{
+    res = append(res, &model.Message{
       Id: model.MessageId(id),
       UserId: userId,
       CreateTime: createtime,

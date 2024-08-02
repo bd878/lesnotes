@@ -1,9 +1,11 @@
 {
   "port": 8083,
+  "leaderAddr": "0.0.0.0:8090",
   "useraddr": "0.0.0.0:8085",
   "streamPort": 8001,
   "debug": true,
   "logFile": "../../logs/log_messages.txt",
   "dbPath": "../../main.db",
-  "dataPath": "../../data"
+  "dataPath": "../../data",
+  "bootstrap": true
 }

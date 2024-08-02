@@ -22,11 +22,11 @@ import (
 
 type Repository interface {
   Put(context.Context, *model.Message) error
-  Get(context.Context, usermodel.UserId) ([]model.Message, error)
+  Get(context.Context, usermodel.UserId) ([]*model.Message, error)
   HasByLog(context.Context, uint64, uint64) (bool, error)
   PutBatch(context.Context, [](*model.Message)) error
-  GetBatch(context.Context) ([]model.Message, error)
-  GetOne(context.Context, usermodel.UserId, model.MessageId) (model.Message, error)
+  GetBatch(context.Context) ([]*model.Message, error)
+  GetOne(context.Context, usermodel.UserId, model.MessageId) (*model.Message, error)
   Truncate(context.Context) error
 }
 
@@ -143,9 +143,9 @@ func (m *DistributedMessages) setupRaft() error {
 func (m *DistributedMessages) SaveMessage(ctx context.Context, msg *model.Message) (model.MessageId, error) {
   msg.CreateTime = time.Now().String()
   if err := m.apply(ctx, msg); err != nil {
-    return 0, err
+    return model.MessageId(0), err
   }
-  return 0, nil
+  return model.MessageId(0), nil
 }
 
 func (m *DistributedMessages) apply(ctx context.Context, msg *model.Message) error {
@@ -168,14 +168,14 @@ func (m *DistributedMessages) apply(ctx context.Context, msg *model.Message) err
 }
 
 func (m *DistributedMessages) ReadUserMessages(ctx context.Context, userId usermodel.UserId) (
-  []model.Message,
+  []*model.Message,
   error,
 ) {
   return m.repo.Get(ctx, userId)
 }
 
 func (m *DistributedMessages) ReadOneMessage(ctx context.Context, userId usermodel.UserId, id model.MessageId) (
-  model.Message,
+  *model.Message,
   error,
 ) {
   return m.repo.GetOne(ctx, userId, id)
@@ -197,15 +197,15 @@ func (m *DistributedMessages) WaitForLeader(timeout time.Duration) error {
   }
 } 
 
-func (m *DistributedMessages) GetServers() ([](*api.MessagesServer), error) {
+func (m *DistributedMessages) GetServers(_ context.Context) ([](*api.Server), error) {
   future := m.raft.GetConfiguration()
   if err := future.Error(); err != nil {
     return nil, err
   }
-  var servers []*api.MessagesServer
+  var servers []*api.Server
   leaderAddr, _ := m.raft.LeaderWithID()
   for _, server := range future.Configuration().Servers {
-    servers = append(servers, &api.MessagesServer{
+    servers = append(servers, &api.Server{
       Id: string(server.ID),
       RpcAddr: string(server.Address),
       IsLeader: leaderAddr == server.Address,

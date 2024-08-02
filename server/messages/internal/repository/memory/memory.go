@@ -9,17 +9,17 @@ import (
 )
 
 type Repository struct {
-  messages map[usermodel.UserId][]model.Message
+  messages map[usermodel.UserId][]*model.Message
 }
 
 func New() *Repository {
   return &Repository{
-    messages: make(map[usermodel.UserId][]model.Message, 0),
+    messages: make(map[usermodel.UserId][]*model.Message, 0),
   }
 }
 
 func (r *Repository) Put(_ context.Context, msg *model.Message) error {
-  r.messages[usermodel.UserId(msg.UserId)] = append(r.messages[usermodel.UserId(msg.UserId)], *msg)
+  r.messages[usermodel.UserId(msg.UserId)] = append(r.messages[usermodel.UserId(msg.UserId)], msg)
   return nil
 }
 
@@ -32,11 +32,11 @@ func (r *Repository) HasByLog(_ contex.Context, logIndex, logTerm uint64) (bool,
   return false, nil
 }
 
-func (r *Repository) Get(_ context.Context, userId usermodel.UserId) ([]model.Message, error) {
-  return r.messages[userId], nil
+func (r *Repository) Get(_ context.Context, userId usermodel.UserId) ([]*model.Message, error) {
+  return &r.messages[userId], nil
 }
 
-func (r *Repository) GetOne(_ context.Context, userId usermodel.UserId, id model.MessageId) (model.Message, error) {
+func (r *Repository) GetOne(_ context.Context, userId usermodel.UserId, id model.MessageId) (*model.Message, error) {
   var zero model.Message
 
   msgs, ok := r.messages[userId]
@@ -46,10 +46,10 @@ func (r *Repository) GetOne(_ context.Context, userId usermodel.UserId, id model
 
   for _, msg := range msgs {
     if msg.Id == id {
-      return msg, nil
+      return &msg, nil
     }
   }
-  return zero, errors.New("no such message")
+  return &zero, errors.New("no such message")
 }
 
 func (r *Repository) PutBatch(ctx context.Context, msgs [](*model.Message)) error {
@@ -59,8 +59,8 @@ func (r *Repository) PutBatch(ctx context.Context, msgs [](*model.Message)) erro
   return nil
 }
 
-func (r *Repository) GetBatch(_ context.Context) ([]model.Message, error) {
-  var msgs []model.Message
+func (r *Repository) GetBatch(_ context.Context) ([]*model.Message, error) {
+  var msgs []*model.Message
   for _, userMsgs := range r.messages {
     msgs = append(msgs, userMsgs...)
   }

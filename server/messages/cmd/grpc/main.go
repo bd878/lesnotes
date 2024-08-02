@@ -5,10 +5,8 @@ import (
   "encoding/json"
   "os"
   "log"
-  "fmt"
 
-  config "github.com/bd878/gallery/server/messages/config"
-  agent "github.com/bd878/gallery/server/messages/agent"
+  "github.com/bd878/gallery/server/messages/config"
 )
 
 var (
@@ -31,28 +29,12 @@ func main() {
     }
   }
 
-  a, err := agent.New(agent.Config{
-    UserAddr: c.UserAddr,
-    BindAddr: fmt.Sprintf(":%d", c.Port),
-    StreamAddr: fmt.Sprintf(":%d", c.StreamPort),
-    DiscoveryAddr: fmt.Sprintf(":%d", c.DiscoveryPort),
-    DBPath: c.DBPath,
-    DataPath: c.DataPath,
+  server := New(c)
 
-    Bootstrap: true,
-    NodeName: "messages",
-    StartJoinAddrs: []string{},
-  })
-  if err != nil {
-    panic(err)
-  }
-
-  if err := a.Run(); err != nil {
-    panic(err)
-  }
+  server.Run()
 }
 
-func loadConfig() *config.Config {
+func loadConfig() config.Config {
   f, err := os.Open(*configPath)
   if err != nil {
     panic(err)
@@ -64,7 +46,7 @@ func loadConfig() *config.Config {
     panic(err)
   }
 
-  return &cfg
+  return cfg
 }
 
 func setLogOutput(p string) *os.File {
