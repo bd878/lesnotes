@@ -5,14 +5,9 @@ CREATE TABLE IF NOT EXISTS messages(
   createtime TEXT,
   message TEXT,
   file TEXT,
-  file_id TEXT,
   user_id INTEGER
     REFERENCES users(id)
     ON DELETE CASCADE
-    NOT NULL,
-  log_index INTEGER,
-  log_term INTEGER
+    NOT NULL
 );
 CREATE INDEX IF NOT EXISTS messagesindex ON messages(user_id);
-CREATE INDEX IF NOT EXISTS messages_logindex ON messages(log_index, log_term)
-  WHERE log_index IS NOT NULL AND log_term IS NOT NULL;

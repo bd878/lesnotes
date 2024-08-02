@@ -3,14 +3,14 @@
   "private_ip": "0.0.0.0",
 
   "http_port": 8083,
-  "grpc_port": 9001,
-  "raft_stream_port": 8001,
+  "grpc_port": 9002,
+  "raft_stream_port": 8002,
   "leader_port": 8090,
   "user_port": 8085,
 
   "debug": true,
   "log_file": "../../logs/log_messages.txt",
-  "db_path": "../../main.db",
-  "data_path": "../../data",
+  "db_path": "../../main2.db",
+  "data_path": "../../data2",
   "bootstrap": true
 }

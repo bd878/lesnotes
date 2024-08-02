@@ -20,12 +20,16 @@ type Agent struct {
 }
 
 func New(cfg config.Config) *Agent {
-  ln, err := net.Listen("tcp4", fmt.Sprintf(":%d", cfg.Port))
+  ln, err := net.Listen("tcp4",
+    fmt.Sprintf("%s:%d", cfg.PrivateIp, cfg.GrpcPort),
+  )
   if err != nil {
     panic(err)
   }
 
-  streamLn, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.StreamPort))
+  streamLn, err := net.Listen("tcp",
+    fmt.Sprintf("%s:%d", cfg.PrivateIp, cfg.RaftStreamPort),
+  )
   if err != nil {
     panic(err)
   }
@@ -37,7 +41,7 @@ func New(cfg config.Config) *Agent {
 
   ctrl, _ := controller.New(repo, controller.Config{
     Raft: raft.Config{
-      LocalID: raft.ServerID(fmt.Sprintf("%d", cfg.StreamPort)),
+      LocalID: raft.ServerID(fmt.Sprintf("%d", cfg.RaftStreamPort)),
     },
     StreamLayer: controller.NewStreamLayer(streamLn),
     Bootstrap:   cfg.Bootstrap,
@@ -60,4 +64,8 @@ func New(cfg config.Config) *Agent {
 func (a *Agent) Run() {
   defer a.ln.Close()
   a.srv.Serve(a.ln)
+}
+
+func (a *Agent) Addr() string {
+  return a.ln.Addr().String()
 }

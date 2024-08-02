@@ -31,6 +31,7 @@ func main() {
 
   server := New(c)
 
+  log.Printf("=== GRPC server is running on: %s\n", server.Addr())
   server.Run()
 }
 

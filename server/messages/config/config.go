@@ -1,14 +1,18 @@
 package config
 
 type Config struct {
-  Port            int `json:"port"`
-  LeaderAddr      string `json:"leaderAddr"`
-  DiscoveryPort   int `json:"discoveryPort"`
-  UserAddr        string `json:"useraddr"` // start joining from this server
-  StreamPort      int `json:"streamPort"`
+  PublicIp        string `json:"public_ip"`
+  PrivateIp       string `json:"private_ip"`
+
+  HttpPort        int `json:"http_port"`
+  GrpcPort        int `json:"grpc_port"`
+  LeaderPort      int `json:"leader_port"`
+  UserPort        int `json:"user_port"`
+  RaftStreamPort  int `json:"raft_stream_port"`
+
   Debug           bool `json:"debug"`
-  LogFile         string `json:"logFile"`
-  DBPath          string `json:"dbPath"`
-  DataPath        string `json:"dataPath"`
+  LogFile         string `json:"log_file"`
+  DBPath          string `json:"db_path"`
+  DataPath        string `json:"data_path"`
   Bootstrap       bool `json:"bootstrap"`
 }
