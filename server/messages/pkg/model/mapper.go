@@ -16,6 +16,7 @@ func MessageFromProto(proto *api.Message) *Message {
 func MessageToProto(msg *Message) *api.Message {
   return &api.Message{
     Id:          uint32(msg.Id),
+    UserId:      uint32(msg.UserId),
     CreateTime:  msg.CreateTime,
     Value:       []byte(msg.Value),
     FileName:    msg.FileName,

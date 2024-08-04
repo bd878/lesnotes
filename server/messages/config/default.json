@@ -1,16 +1,14 @@
 {
-  "public_ip": "0.0.0.0",
-  "private_ip": "0.0.0.0",
-
-  "http_port": 8083,
-  "grpc_port": 9001,
-  "raft_stream_port": 8001,
-  "leader_port": 8090,
-  "user_port": 8085,
+  "http_addr": "0.0.0.0:8083",
+  "grpc_addr": "0.0.0.0:9001",
+  "raft_addr": "0.0.0.0:8001",
+  "leader_addr": "0.0.0.0:9003",
+  "users_service_addr": "0.0.0.0:8085",
+  "join_addrs": ["0.0.0.0:8002", "0.0.0.0:8003"],
 
   "debug": true,
+  "bootstrap": true,
   "log_file": "../../logs/log_messages.txt",
   "db_path": "../../main.db",
-  "data_path": "../../data",
-  "bootstrap": true
+  "data_path": "../../data"
 }

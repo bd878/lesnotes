@@ -129,11 +129,20 @@ func (m *DistributedMessages) setupRaft() error {
     return err
   }
   if m.config.Bootstrap && !hasState {
+    servers := []raft.Server{{
+      ID: m.config.Raft.LocalID,
+      Address: transport.LocalAddr(),
+    }}
+
+    for _, addr := range m.config.JoinAddrs {
+      servers = append(servers, raft.Server{
+        ID: raft.ServerID(addr),
+        Address: raft.ServerAddress(addr),
+      })
+    }
+
     configuration := raft.Configuration{
-      Servers: []raft.Server{{
-        ID: m.config.Raft.LocalID,
-        Address: transport.LocalAddr(),
-      }},
+      Servers: servers,
     }
     err = m.raft.BootstrapCluster(configuration).Error()
   }

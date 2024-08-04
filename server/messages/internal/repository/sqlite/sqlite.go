@@ -57,12 +57,11 @@ func (r *Repository) Put(ctx context.Context, msg *model.Message) error {
     msg.LogTerm,
   )
   id, _ := res.LastInsertId()
-  fmt.Println("added msg with id:", id)
+  fmt.Printf("added message with id:%d\n", id)
   return err
 }
 
 func (r *Repository) Truncate(ctx context.Context) error {
-  fmt.Println("truncate")
   _, err := r.db.ExecContext(ctx,
     "DELETE FROM messages",
   )

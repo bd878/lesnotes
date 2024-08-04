@@ -1,18 +1,16 @@
 package config
 
 type Config struct {
-  PublicIp        string `json:"public_ip"`
-  PrivateIp       string `json:"private_ip"`
+  HttpAddr          string `json:"http_addr"`
+  GrpcAddr          string `json:"grpc_addr"`
+  LeaderAddr        string `json:"leader_addr"`
+  UsersServiceAddr  string `json:"users_service_addr"`
+  RaftAddr          string `json:"raft_addr"`
+  JoinAddrs         []string `json:"join_addrs"`
 
-  HttpPort        int `json:"http_port"`
-  GrpcPort        int `json:"grpc_port"`
-  LeaderPort      int `json:"leader_port"`
-  UserPort        int `json:"user_port"`
-  RaftStreamPort  int `json:"raft_stream_port"`
-
-  Debug           bool `json:"debug"`
-  LogFile         string `json:"log_file"`
-  DBPath          string `json:"db_path"`
-  DataPath        string `json:"data_path"`
-  Bootstrap       bool `json:"bootstrap"`
+  Debug             bool `json:"debug"`
+  Bootstrap         bool `json:"bootstrap"`
+  LogFile           string `json:"log_file"`
+  DBPath            string `json:"db_path"`
+  DataPath          string `json:"data_path"`
 }

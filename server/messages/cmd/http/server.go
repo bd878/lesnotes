@@ -1,7 +1,6 @@
 package main
 
 import (
-  "fmt"
   "net/http"
 
   config "github.com/bd878/gallery/server/messages/config"
@@ -14,11 +13,11 @@ func New(cfg config.Config) *http.Server {
   mux := http.NewServeMux()
 
   ctrlCfg := controller.Config{
-    ClusterNodeAddr: fmt.Sprintf("%s:%d", cfg.PrivateIp, cfg.LeaderPort),
+    ClusterNodeAddr: cfg.LeaderAddr,
   }
 
   grpcCtrl := controller.New(ctrlCfg)
-  userGateway := usergateway.New(fmt.Sprintf("%s:%d", cfg.PrivateIp, cfg.UserPort))
+  userGateway := usergateway.New(cfg.UsersServiceAddr)
   h := httphandler.New(grpcCtrl, userGateway, cfg.DataPath)
 
   mux.Handle("/messages/v1/send", http.HandlerFunc(h.CheckAuth(h.SendMessage)))
@@ -27,7 +26,7 @@ func New(cfg config.Config) *http.Server {
   mux.Handle("/messages/v1/read_file", http.HandlerFunc(h.CheckAuth(h.ReadFile)))
 
   srv := &http.Server{
-    Addr: fmt.Sprintf("%s:%d", cfg.PublicIp, cfg.HttpPort),
+    Addr: cfg.HttpAddr,
     Handler: mux,
   }
 
