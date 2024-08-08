@@ -1,8 +1,8 @@
 package discovery
 
 import (
+  "fmt"
   "net"
-  "log"
   "github.com/hashicorp/serf/serf"
 )
 
@@ -14,13 +14,13 @@ type Membership struct {
 }
 
 type Config struct {
-  NodeName string
-  BindAddr string
-  Tags map[string]string
-  StartJoinAddrs []string
+  NodeName       string
+  BindAddr       string
+  Tags           map[string]string
+  SerfJoinAddrs  []string
 }
 
-func New(handler Handler, config Config) (*Membership, error) {
+func New(config Config, handler Handler) (*Membership, error) {
   c := &Membership{
     Config: config,
     handler: handler,
@@ -50,22 +50,27 @@ func (m *Membership) setupSerf() error {
     return err
   }
 
-  go m.eventHandler()
-  if m.StartJoinAddrs != nil {
-    _, err = m.serf.Join(m.StartJoinAddrs, true)
+  if m.SerfJoinAddrs != nil {
+    _, err = m.serf.Join(m.SerfJoinAddrs, true)
     if err != nil {
       return err
     }
   }
+
+  go m.runHandler()
   return nil
 }
 
 type Handler interface {
   Join(name, addr string) error
   Leave(name string) error
+  /* TODO: derive these commands to separate cmd driver */
+  PrintLeader() error
+  PrintConfig() error
+  PrintMyAddr() error
 }
 
-func (m *Membership) eventHandler() {
+func (m *Membership) runHandler() {
   for e := range m.events {
     switch e.EventType() {
     case serf.EventMemberJoin:
@@ -82,6 +87,17 @@ func (m *Membership) eventHandler() {
         }
         m.handleLeave(member)
       }
+    case serf.EventUser:
+      switch e.(serf.UserEvent).Name {
+      case "leader":
+        m.handler.PrintLeader()
+      case "config":
+        m.handler.PrintConfig()
+      case "me":
+        m.handler.PrintMyAddr()
+      }
+    default:
+      fmt.Printf("Unknown event: %s\n", e.String())
     }
   }
 }
@@ -99,18 +115,9 @@ func (m *Membership) Leave() error {
 }
 
 func (m *Membership) handleJoin(member serf.Member) {
-  if err := m.handler.Join(
-    member.Name,
-    member.Tags["rpc_addr"],
-  ); err != nil {
-    log.Println(err, "failed to join", member)
-  }
+  m.handler.Join(member.Name, member.Tags["raft_addr"])
 }
 
 func (m *Membership) handleLeave(member serf.Member) {
-  if err := m.handler.Leave(
-    member.Name,
-  ); err != nil {
-    log.Println(err, "failed to leave", member)
-  }
+  m.handler.Leave(member.Name)
 }

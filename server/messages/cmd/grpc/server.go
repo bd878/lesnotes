@@ -7,7 +7,9 @@ import (
 
   "github.com/bd878/gallery/server/api"
   "github.com/bd878/gallery/server/messages/config"
+  hclog "github.com/hashicorp/go-hclog"
 
+  membership "github.com/bd878/gallery/server/messages/internal/discovery/serf"
   repository "github.com/bd878/gallery/server/messages/internal/repository/sqlite"
   controller "github.com/bd878/gallery/server/messages/internal/controller/distributed"
   grpchandler "github.com/bd878/gallery/server/messages/internal/handler/grpc"
@@ -16,6 +18,7 @@ import (
 type GRPCMessagesServer struct {
   ln   net.Listener
   srv *grpc.Server
+  m   *membership.Membership
 }
 
 func New(cfg config.Config) *GRPCMessagesServer {
@@ -34,20 +37,42 @@ func New(cfg config.Config) *GRPCMessagesServer {
     panic(err)
   }
 
+  raftLogLevel := hclog.Error.String()
+  switch cfg.RaftLogLevel {
+  case "debug":
+    raftLogLevel = hclog.Debug.String()
+  case "error":
+    raftLogLevel = hclog.Error.String()
+  case "info":
+    raftLogLevel = hclog.Info.String()
+  }
+
   ctrl, err := controller.New(repo, controller.Config{
     Raft: raft.Config{
       LocalID: raft.ServerID(cfg.RaftAddr),
+      LogLevel: raftLogLevel,
     },
     StreamLayer: controller.NewStreamLayer(streamLn),
     Bootstrap:   cfg.Bootstrap,
     DataDir:     cfg.DataPath,
-    JoinAddrs:   cfg.JoinAddrs,
+    Servers:     cfg.RaftServers,
   })
   if err != nil {
     panic(err)
   }
 
   h := grpchandler.New(ctrl)
+  m, err := membership.New(membership.Config{
+    NodeName: cfg.NodeName,
+    BindAddr: cfg.SerfAddr,
+    Tags: map[string]string{
+      "raft_addr": cfg.RaftAddr,
+    },
+    SerfJoinAddrs: cfg.SerfJoinAddrs,
+  }, ctrl)
+  if err != nil {
+    panic(err)
+  }
 
   srv := grpc.NewServer()
   api.RegisterMessagesServer(srv, h)
@@ -55,6 +80,7 @@ func New(cfg config.Config) *GRPCMessagesServer {
   a := &GRPCMessagesServer{
     ln: ln,
     srv: srv,
+    m: m,
   }
 
   return a

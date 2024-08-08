@@ -7,6 +7,7 @@ import (
   "net"
   "time"
   "bytes"
+  "errors"
   "encoding/json"
   "context"
   "path/filepath"
@@ -31,9 +32,9 @@ type Repository interface {
 }
 
 type DistributedMessages struct {
-  config Config
-  raft *raft.Raft
-  repo Repository
+  config   Config
+  raft    *raft.Raft
+  repo     Repository
 }
 
 func New(repo Repository, config Config) (
@@ -91,6 +92,7 @@ func (m *DistributedMessages) setupRaft() error {
 
   config := raft.DefaultConfig()
   config.LocalID = m.config.Raft.LocalID
+  config.LogLevel = m.config.Raft.LogLevel
   if m.config.Raft.HeartbeatTimeout != 0 {
     config.HeartbeatTimeout = m.config.Raft.HeartbeatTimeout
   }
@@ -134,7 +136,7 @@ func (m *DistributedMessages) setupRaft() error {
       Address: transport.LocalAddr(),
     }}
 
-    for _, addr := range m.config.JoinAddrs {
+    for _, addr := range m.config.Servers {
       servers = append(servers, raft.Server{
         ID: raft.ServerID(addr),
         Address: raft.ServerAddress(addr),
@@ -224,6 +226,11 @@ func (m *DistributedMessages) GetServers(_ context.Context) ([](*api.Server), er
 }
 
 func (m *DistributedMessages) Join(id, addr string) error {
+  leaderFuture := m.raft.VerifyLeader()
+  if err := leaderFuture.Error(); err != nil {
+    return errors.New("cannot join node to cluster: not a leader")
+  }
+
   configFuture := m.raft.GetConfiguration()
   if err := configFuture.Error(); err != nil {
     return err
@@ -254,8 +261,54 @@ func (m *DistributedMessages) Join(id, addr string) error {
 }
 
 func (m *DistributedMessages) Leave(id string) error {
+  leaderFuture := m.raft.VerifyLeader()
+  if err := leaderFuture.Error(); err != nil {
+    return errors.New("cannot remove node from cluster: not a leader")
+  }
+
   removeFuture := m.raft.RemoveServer(raft.ServerID(id), 0, 0)
   return removeFuture.Error()
+}
+
+func (m *DistributedMessages) PrintLeader() error {
+  addr, id := m.raft.LeaderWithID()
+  fmt.Println("=== LEADER ===")
+  if m.config.Raft.LocalID == raft.ServerID(id) {
+    fmt.Println("i am the leader")
+  }
+  fmt.Printf("Addr: %v\n", addr)
+  fmt.Printf("Id: %v\n", id)
+  fmt.Println()
+  return nil
+}
+
+func (m *DistributedMessages) PrintMyAddr() error {
+  addr := m.config.StreamLayer.Addr()
+  fmt.Println("=== ME ===")
+  fmt.Printf("Address: %v\n", addr)
+  fmt.Printf("ID: %v\n", m.config.Raft.LocalID)
+  fmt.Println()
+  return nil
+}
+
+func (m *DistributedMessages) PrintConfig() error {
+  future := m.raft.GetConfiguration()
+  err := future.Error()
+  if err != nil {
+    return err
+  }
+
+  fmt.Println("=== SERVERS ===")
+  conf := future.Configuration()
+  for i, serv := range conf.Servers {
+    fmt.Printf("# %d:\n", i)
+    fmt.Printf("Suffrage: %d\n", serv.Suffrage)
+    fmt.Printf("Id: %s\n", serv.ID)
+    fmt.Printf("Address: %s\n", serv.Address)
+    fmt.Println()
+  }
+
+  return nil
 }
 
 var _ raft.FSM = (*fsm)(nil)

@@ -43,6 +43,6 @@ message GetServersResponse {
 
 message Server {
   string id = 1;
-  string rpc_addr = 2;
+  string raft_addr = 2;
   bool is_leader = 3;
 }

@@ -7,5 +7,5 @@ type Config struct {
   StreamLayer *StreamLayer
   Bootstrap    bool
   DataDir      string
-  JoinAddrs    []string
+  Servers      []string
 }

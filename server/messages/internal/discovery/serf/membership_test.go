@@ -15,11 +15,11 @@ func TestMembership(t *testing.T) {
       NodeName: fmt.Sprintf("%d", i),
       BindAddr: addr,
       Tags: map[string]string{
-        "rpc_addr": addr,
+        "raft_addr": addr,
       },
     }
     if i > 0 {
-      config[i].StartJoinAddrs = []string{
+      config[i].SerfJoinAddrs = []string{
         config[0].BindAddr,
       }
     }
