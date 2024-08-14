@@ -18,15 +18,16 @@ func New() *Repository {
   }
 }
 
-func (r *Repository) Put(_ context.Context, msg *model.Message) error {
+func (r *Repository) Put(_ context.Context, msg *model.Message) (model.MessageId, error) {
+  msg.Id = model.MessageId(len(r.messages[usermodel.UserId(msg.UserId)]) + 1)
   r.messages[usermodel.UserId(msg.UserId)] = append(r.messages[usermodel.UserId(msg.UserId)], msg)
-  return nil
+  return msg.Id
 }
 
-func (r *Repository) HasByLog(_ contex.Context, logIndex, logTerm uint64) (bool, error) {
+func (r *Repository) FindByIndexTerm(_ contex.Context, logIndex, logTerm uint64) (*model.Message, error) {
   for _, msg := range msgs {
     if msg.LogIndex == logIndex && msg.LogTerm == logTerm {
-      return true, nil
+      return msg, nil
     }
   }
   return false, nil

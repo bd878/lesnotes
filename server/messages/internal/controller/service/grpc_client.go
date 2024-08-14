@@ -39,16 +39,16 @@ func (s *Messages) Close() {
 }
 
 func (s *Messages) SaveMessage(ctx context.Context, msg *model.Message) (
-  model.MessageId,
+  *model.Message,
   error,
 ) {
   res, err := s.client.SaveMessage(ctx, &api.SaveMessageRequest{
     Message: model.MessageToProto(msg),
   })
   if err != nil {
-    return model.MessageId(-1), err 
+    return nil, err 
   }
-  return model.MessageId(res.Id), nil
+  return model.MessageFromProto(res.Message), nil
 }
 
 func (s *Messages) ReadUserMessages(ctx context.Context, userId usermodel.UserId) (

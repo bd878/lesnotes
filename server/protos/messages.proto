@@ -32,7 +32,7 @@ message SaveMessageRequest {
 }
 
 message SaveMessageResponse {
-  uint32 id = 1;
+  Message message = 1;
 }
 
 message GetServersRequest {}

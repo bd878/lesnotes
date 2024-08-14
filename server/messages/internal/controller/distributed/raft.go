@@ -17,14 +17,17 @@ import (
 
   usermodel "github.com/bd878/gallery/server/users/pkg/model"
   "github.com/bd878/gallery/server/messages/pkg/model"
+  "github.com/bd878/gallery/server/messages/internal/repository"
 
   "github.com/bd878/gallery/server/api"
 )
 
+var ErrMsgExist = errors.New("message exists")
+
 type Repository interface {
-  Put(context.Context, *model.Message) error
+  Put(context.Context, *model.Message) (model.MessageId, error)
   Get(context.Context, usermodel.UserId) ([]*model.Message, error)
-  HasByLog(context.Context, uint64, uint64) (bool, error)
+  FindByIndexTerm(context.Context, uint64, uint64) (*model.Message, error)
   PutBatch(context.Context, [](*model.Message)) error
   GetBatch(context.Context) ([]*model.Message, error)
   GetOne(context.Context, usermodel.UserId, model.MessageId) (*model.Message, error)
@@ -151,31 +154,35 @@ func (m *DistributedMessages) setupRaft() error {
   return err
 }
 
-func (m *DistributedMessages) SaveMessage(ctx context.Context, msg *model.Message) (model.MessageId, error) {
+func (m *DistributedMessages) SaveMessage(ctx context.Context, msg *model.Message) (resMsg *model.Message, err error) {
   msg.CreateTime = time.Now().String()
-  if err := m.apply(ctx, msg); err != nil {
-    return model.MessageId(0), err
+  if resMsg, err = m.apply(ctx, msg); err != nil {
+    return nil, err
   }
-  return model.MessageId(0), nil
+  return resMsg, nil
 }
 
-func (m *DistributedMessages) apply(ctx context.Context, msg *model.Message) error {
+func (m *DistributedMessages) apply(ctx context.Context, msg *model.Message) (*model.Message, error) {
   b, err := json.Marshal(msg)
   if err != nil {
-    return err
+    return nil, err
   }
 
   timeout := 10*time.Second
   future := m.raft.Apply(b, timeout)
   if future.Error() != nil {
-    return future.Error()
+    return nil, future.Error()
   }
 
   res := future.Response()
-  if err, ok := res.(error); ok {
-    return err
+  switch val := res.(type) {
+  case error:
+    return nil, val
+  case model.Message:
+    return &val, nil
+  default:
+    return nil, errors.New("fsm.apply returns undefined result")
   }
-  return nil
 }
 
 func (m *DistributedMessages) ReadUserMessages(ctx context.Context, userId usermodel.UserId) (
@@ -218,7 +225,7 @@ func (m *DistributedMessages) GetServers(_ context.Context) ([](*api.Server), er
   for _, server := range future.Configuration().Servers {
     servers = append(servers, &api.Server{
       Id: string(server.ID),
-      RpcAddr: string(server.Address),
+      RaftAddr: string(server.Address),
       IsLeader: leaderAddr == server.Address,
     })
   }
@@ -283,8 +290,12 @@ func (m *DistributedMessages) PrintLeader() error {
 }
 
 func (m *DistributedMessages) PrintMyAddr() error {
+  _, id := m.raft.LeaderWithID()
   addr := m.config.StreamLayer.Addr()
   fmt.Println("=== ME ===")
+  if m.config.Raft.LocalID == raft.ServerID(id) {
+    fmt.Println("i am the leader")
+  }
   fmt.Printf("Address: %v\n", addr)
   fmt.Printf("ID: %v\n", m.config.Raft.LocalID)
   fmt.Println()
@@ -317,17 +328,29 @@ type fsm struct {
   repo Repository
 }
 
+/**
+ * Returns empty interface. It is either an error,
+ * or new msg with unique id, saved in repo.
+ * 
+ * Apply replicates log state from the bottom up.
+ * Leader makes Apply on start.
+ */
 func (f *fsm) Apply(record *raft.Log) interface{} {
-  has, err := f.repo.HasByLog(context.Background(), record.Index, record.Term)
+  var msg *model.Message
+  var err error
+
+  msg, err = f.repo.FindByIndexTerm(context.Background(), record.Index, record.Term)
   if err != nil {
-    return err
+    /* not found is expected behaviour */
+    if !errors.Is(err, repository.ErrNotFound) {
+      return err
+    }
   }
-  if has {
-    return nil
+  if msg != nil {
+    return ErrMsgExist
   }
 
   buf := record.Data
-  var msg model.Message
   err = json.Unmarshal(buf, &msg)
   if err != nil {
     return err
@@ -335,13 +358,20 @@ func (f *fsm) Apply(record *raft.Log) interface{} {
   msg.LogIndex = record.Index
   msg.LogTerm = record.Term
 
-  return f.repo.Put(context.Background(), &msg)
+  msg.Id, err = f.repo.Put(context.Background(), msg)
+  if err != nil {
+    return err
+  }
+
+  return *msg
 }
 
 func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {
   return &snapshot{repo: f.repo}, nil
 }
 
+// TODO: restore will reapply same messages with ids,
+// check whether msg with id exists
 func (f *fsm) Restore(r io.ReadCloser) error {
   var buf *bytes.Buffer
   var msgs []model.Message
@@ -363,7 +393,7 @@ func (f *fsm) Restore(r io.ReadCloser) error {
     return err
   }
   for _, msg := range msgs {
-    err := f.repo.Put(ctx, &msg)
+    _, err := f.repo.Put(ctx, &msg)
     if err != nil {
       return err
     }

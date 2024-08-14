@@ -26,3 +26,5 @@ type NewMessageServerResponse struct {
   ServerResponse
   Message Message `json:"message"`
 }
+
+const NullMsgId = MessageId(0)

@@ -3,7 +3,6 @@ package repository
 import (
   "context"
   "errors"
-  "fmt"
   "database/sql"
 
   _ "github.com/mattn/go-sqlite3"
@@ -46,7 +45,7 @@ func New(dbfilepath string) (*Repository, error) {
   }, nil
 }
 
-func (r *Repository) Put(ctx context.Context, msg *model.Message) error {
+func (r *Repository) Put(ctx context.Context, msg *model.Message) (model.MessageId, error) {
   res, err := r.insertSt.ExecContext(ctx,
     msg.UserId,
     msg.CreateTime,
@@ -56,9 +55,11 @@ func (r *Repository) Put(ctx context.Context, msg *model.Message) error {
     msg.LogIndex,
     msg.LogTerm,
   )
+  if err != nil {
+    return model.NullMsgId, err
+  }
   id, _ := res.LastInsertId()
-  fmt.Printf("added message with id:%d\n", id)
-  return err
+  return model.MessageId(id), nil
 }
 
 func (r *Repository) Truncate(ctx context.Context) error {
@@ -71,20 +72,46 @@ func (r *Repository) Truncate(ctx context.Context) error {
   return nil
 }
 
-func (r *Repository) HasByLog(ctx context.Context, logIndex, logTerm uint64) (bool, error) {
+func (r *Repository) FindByIndexTerm(ctx context.Context, logIndex, logTerm uint64) (*model.Message, error) {
   row := r.db.QueryRowContext(ctx,
-    "SELECT id FROM messages WHERE log_index = ? AND log_term = ?",
+    "SELECT id, user_id, createtime, message, file, file_id, log_index, log_term " +
+    "FROM messages WHERE log_index = ? AND log_term = ?",
     logIndex, logTerm,
   )
 
-  var id int
-  if err := row.Scan(&id); err != nil {
+  var msg model.Message
+  var fileCol sql.NullString
+  var fileIdCol sql.NullString
+  var logIndexCol sql.NullInt64
+  var logTermCol sql.NullInt64
+  if err := row.Scan(
+    &msg.Id,
+    &msg.UserId,
+    &msg.CreateTime,
+    &msg.Value,
+    &fileCol,
+    &fileIdCol,
+    &logIndexCol,
+    &logTermCol,
+  ); err != nil {
     if errors.Is(err, sql.ErrNoRows) {
-      return false, nil
+      return nil, repository.ErrNotFound
     }
-    return false, err
+    return nil, err
   }
-  return true, nil
+  if fileCol.Valid {
+    msg.FileName = fileCol.String
+  }
+  if fileIdCol.Valid {
+    msg.FileId = model.FileId(fileIdCol.String)
+  }
+  if logIndexCol.Valid {
+    msg.LogIndex = uint64(logIndexCol.Int64)
+  }
+  if logTermCol.Valid {
+    msg.LogTerm = uint64(logTermCol.Int64)
+  }
+  return &msg, nil
 }
 
 func (r *Repository) Get(ctx context.Context, userId usermodel.UserId) ([]*model.Message, error) {

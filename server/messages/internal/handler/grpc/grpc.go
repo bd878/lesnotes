@@ -9,7 +9,7 @@ import (
 )
 
 type Controller interface {
-  SaveMessage(ctx context.Context, msg *model.Message) (model.MessageId, error)
+  SaveMessage(ctx context.Context, msg *model.Message) (*model.Message, error)
   ReadUserMessages(ctx context.Context, userId usermodel.UserId) ([]*model.Message, error)
   GetServers(ctx context.Context) ([]*api.Server, error)
 }
@@ -29,11 +29,11 @@ func (h *Handler) SaveMessage(ctx context.Context, req *api.SaveMessageRequest) 
   *api.SaveMessageResponse,
   error,
 ) {
-  msgId, err := h.ctrl.SaveMessage(ctx, model.MessageFromProto(req.Message))
+  msg, err := h.ctrl.SaveMessage(ctx, model.MessageFromProto(req.Message))
   if err != nil {
-    return &api.SaveMessageResponse{Id: uint32(0)}, err
+    return &api.SaveMessageResponse{Message: req.Message}, err
   }
-  return &api.SaveMessageResponse{Id: uint32(msgId)}, nil
+  return &api.SaveMessageResponse{Message: model.MessageToProto(msg)}, nil
 }
 
 func (h *Handler) ReadUserMessages(ctx context.Context, req *api.ReadUserMessagesRequest) (

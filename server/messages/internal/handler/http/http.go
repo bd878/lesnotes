@@ -21,7 +21,7 @@ type userGateway interface {
 }
 
 type Controller interface {
-  SaveMessage(ctx context.Context, msg *model.Message) (model.MessageId, error)
+  SaveMessage(ctx context.Context, msg *model.Message) (*model.Message, error)
   ReadUserMessages(ctx context.Context, userId usermodel.UserId) ([]*model.Message, error)
 }
 
@@ -132,13 +132,13 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) {
     return
   }
 
-  msg := model.Message{
+  var msg *model.Message
+  if msg, err = h.ctrl.SaveMessage(context.Background(), &model.Message{
     UserId: user.Id,
     Value: value,
     FileName: fileName,
     FileId: model.FileId(fileId),
-  }
-  if _, err := h.ctrl.SaveMessage(context.Background(), &msg); err != nil {
+  }); err != nil {
     log.Println(err)
     w.WriteHeader(http.StatusInternalServerError)
     return
@@ -149,7 +149,7 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) {
       Status: "ok",
       Description: "accepted",
     },
-    Message: msg,
+    Message: *msg,
   }); err != nil {
     log.Println(err)
     w.WriteHeader(http.StatusInternalServerError)
