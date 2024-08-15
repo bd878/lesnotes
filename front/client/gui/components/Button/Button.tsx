@@ -1,12 +1,17 @@
-import React from 'react'
+import React, {forwardRef} from 'react'
 import Tag from '../Tag';
 
-const Button = props => {
+const Button = forwardRef((props, ref) => {
   return (
-    <Tag el="button" type={props.button} onClick={props.onClick}>
+    <Tag
+      el="button"
+      ref={ref}
+      type={props.button}
+      onClick={props.onClick}
+    >
       {props.text}
     </Tag>
   )
-}
+})
 
 export default Button;

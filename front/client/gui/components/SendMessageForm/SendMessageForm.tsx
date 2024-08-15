@@ -1,4 +1,4 @@
-import React, {lazy, useCallback} from 'react';
+import React, {lazy, useCallback, useState, useRef} from 'react';
 import api from '../../api';
 import Form from '../Form';
 import i18n from '../../i18n';
@@ -8,8 +8,24 @@ const FormField = lazy(() => import("../../components/FormField"));
 const Button = lazy(() => import("../../components/Button"));
 
 const SendMessageForm = ({ onError, onSuccess }) => {
+  const fileRef = useRef(null);
+
+  const [message, setMessage] = useState("");
+  const [file, setFile] = useState(null);
+
+  const onFileChange = useCallback(e => {
+    setFile(e.target.files[0])
+  }, [setFile]);
+
+  const onMessageChange = useCallback(e => {
+    setMessage(e.target.value);
+  }, [setMessage]);
+
+
   const sendMessageRequest = useCallback(e => {
     e.preventDefault();
+
+    console.log("send message request");
 
     const send = async form => {
       try {
@@ -19,36 +35,62 @@ const SendMessageForm = ({ onError, onSuccess }) => {
           body: form,
         });
         onSuccess(response)
+
+        fileRef.current.value = null
+        setMessage("")
+        setFile(null)
       } catch (e) {
         console.error(i18n("error_occured"), e);
         onError(e);
       }
     }
 
-    let message = e.target.elements['message'].value;
     if (!message) {console.error(i18n("msg_required_err")); return;}
-    let file = e.target.elements['file'].files[0];
-    let filename = e.target.elements['file'].value;
 
     const form = new FormData()
     form.append("message", message);
-    if (file) {
-      form.append('file', file, filename);
-    }
+    if (file.name != "") form.append('file', file, file.name);
 
     send(form)
-  }, [onSuccess, onError]);
+  }, [
+    onSuccess,
+    onError,
+    setMessage,
+    setFile,
+    message,
+    file,
+    fileRef,
+  ]);
 
   return (
-    <Form
-      name="send-message-form"
-      onSubmit={sendMessageRequest}
-      enctype="multipart/form-data"
-    >
-      <FormField required name="message" type="textarea" />
-      <FormField name="file" type="file" />
-      <Button type="submit" text={i18n("msg_send_text")} />
-    </Form>
+    <>
+      <Form
+        autoComplete="off"
+        css="row items-end"
+      >
+        <FormField
+          required
+          el="textarea"
+          name="message"
+          type="input"
+          value={message}
+          onChange={onMessageChange}
+        />
+        <FormField
+          ref={fileRef}
+          el="input"
+          name="file"
+          type="file"
+          onChange={onFileChange}
+        />
+      </Form>
+
+      <Button
+        type="button"
+        text={i18n("msg_send_text")}
+        onClick={sendMessageRequest}
+      />
+    </>
   );
 }
 

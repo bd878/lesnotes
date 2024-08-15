@@ -11,7 +11,7 @@ const Login = () => (
       {i18n("login_form_header")}
     </Tag>
 
-    <LoginForm />
+    <LoginForm onError={() => {}} />
   </Suspense>
 )
 

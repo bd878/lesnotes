@@ -8,7 +8,8 @@ const Form = props => (
     action=""
     name={props.name}
     onSubmit={props.onSubmit}
-    encType={props.enctype||null}
+    encType={props.encType||null}
+    autoComplete={props.autoComplete}
   >
     {props.children}
   </Tag>

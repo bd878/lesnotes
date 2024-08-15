@@ -37,8 +37,6 @@ let ctx = await esbuild.context({
 })
 
 await ctx.watch()
-if (Config.get("env") == "development") {
-  console.log("watching...")
-} else {
+if (Config.get("env") != "development") {
   await ctx.dispose()
 }
