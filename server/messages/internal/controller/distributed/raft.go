@@ -26,7 +26,7 @@ var ErrMsgExist = errors.New("message exists")
 
 type Repository interface {
   Put(context.Context, *model.Message) (model.MessageId, error)
-  Get(context.Context, usermodel.UserId) ([]*model.Message, error)
+  Get(context.Context, usermodel.UserId, int32, int32) ([]*model.Message, error)
   FindByIndexTerm(context.Context, uint64, uint64) (*model.Message, error)
   PutBatch(context.Context, [](*model.Message)) error
   GetBatch(context.Context) ([]*model.Message, error)
@@ -185,11 +185,11 @@ func (m *DistributedMessages) apply(ctx context.Context, msg *model.Message) (*m
   }
 }
 
-func (m *DistributedMessages) ReadUserMessages(ctx context.Context, userId usermodel.UserId) (
+func (m *DistributedMessages) ReadUserMessages(ctx context.Context, userId usermodel.UserId, limit, offset int32) (
   []*model.Message,
   error,
 ) {
-  return m.repo.Get(ctx, userId)
+  return m.repo.Get(ctx, userId, limit, offset)
 }
 
 func (m *DistributedMessages) ReadOneMessage(ctx context.Context, userId usermodel.UserId, id model.MessageId) (
@@ -273,6 +273,7 @@ func (m *DistributedMessages) Leave(id string) error {
     return errors.New("cannot remove node from cluster: not a leader")
   }
 
+  fmt.Println("remove from cluster serve with id ", id)
   removeFuture := m.raft.RemoveServer(raft.ServerID(id), 0, 0)
   return removeFuture.Error()
 }

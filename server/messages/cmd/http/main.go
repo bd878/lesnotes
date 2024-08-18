@@ -2,6 +2,8 @@ package main
 
 import (
   "flag"
+  "fmt"
+  "path/filepath"
   "encoding/json"
   "os"
   "log"
@@ -11,8 +13,6 @@ import (
 
 var (
   configPath = flag.String("config", "config/default.json", "config path")
-  interactive = flag.Bool("interactive", true, "ignore logFile in config " + 
-    "output log messages to stdout")
 )
 
 func main() {
@@ -20,18 +20,17 @@ func main() {
 
   c := loadConfig()
 
-  if c.Debug {
-    if *interactive {
-      log.SetOutput(os.Stdout)
-    } else {
-      f := setLogOutput(c.LogFile)
-      defer f.Close()
-    }
-  }
+  f := setLogOutput(c.LogPath, c.NodeName)
+  defer f.Close()
 
   server := New(c)
 
-  log.Printf("=== HTTP server is running on: %s\n", server.Addr)
+  fmt.Printf("=== HTTP %s\n", c.NodeName)
+  fmt.Println("Addr:", server.Addr)
+  fmt.Println("LogFile:", f.Name())
+  fmt.Println()
+
+  log.Printf("=== HTTP %s\n", c.NodeName)
   server.ListenAndServe()
 }
 
@@ -50,8 +49,18 @@ func loadConfig() config.Config {
   return cfg
 }
 
-func setLogOutput(p string) *os.File {
-  f, err := os.OpenFile(p, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+func setLogOutput(dir, nodeName string) *os.File {
+  if err := os.MkdirAll(dir, 0750); err != nil {
+    panic(err)
+  }
+
+  logFile := fmt.Sprintf("%s.log", nodeName)
+
+  f, err := os.OpenFile(
+    filepath.Join(dir, logFile),
+    os.O_APPEND|os.O_CREATE|os.O_WRONLY,
+    0644,
+  )
   if err != nil {
     panic(err)
   }

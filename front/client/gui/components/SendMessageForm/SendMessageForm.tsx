@@ -49,7 +49,9 @@ const SendMessageForm = ({ onError, onSuccess }) => {
 
     const form = new FormData()
     form.append("message", message);
-    if (file.name != "") form.append('file', file, file.name);
+    if (file != null && file.name != "") {
+      form.append('file', file, file.name);
+    }
 
     send(form)
   }, [

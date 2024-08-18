@@ -10,7 +10,7 @@ import (
 
 type Controller interface {
   SaveMessage(ctx context.Context, msg *model.Message) (*model.Message, error)
-  ReadUserMessages(ctx context.Context, userId usermodel.UserId) ([]*model.Message, error)
+  ReadUserMessages(ctx context.Context, userId usermodel.UserId, limit, offset int32) ([]*model.Message, error)
   GetServers(ctx context.Context) ([]*api.Server, error)
 }
 
@@ -40,7 +40,7 @@ func (h *Handler) ReadUserMessages(ctx context.Context, req *api.ReadUserMessage
   *api.ReadUserMessagesResponse,
   error,
 ) {
-  msgs, err := h.ctrl.ReadUserMessages(ctx, usermodel.UserId(req.UserId))
+  msgs, err := h.ctrl.ReadUserMessages(ctx, usermodel.UserId(req.UserId), req.Limit, req.Offset)
   if err != nil {
     return nil, err
   }

@@ -49,11 +49,11 @@ func New(cfg config.Config) *GRPCMessagesServer {
 
   ctrl, err := controller.New(repo, controller.Config{
     Raft: raft.Config{
-      LocalID: raft.ServerID(cfg.RaftAddr),
+      LocalID: raft.ServerID(cfg.NodeName),
       LogLevel: raftLogLevel,
     },
     StreamLayer: controller.NewStreamLayer(streamLn),
-    Bootstrap:   cfg.Bootstrap,
+    Bootstrap:   cfg.RaftBootstrap,
     DataDir:     cfg.DataPath,
     Servers:     cfg.RaftServers,
   })

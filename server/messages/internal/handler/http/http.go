@@ -3,9 +3,11 @@ package http
 import (
   "log"
   "net/http"
+  "strconv"
   "strings"
   "os"
   "io"
+  "fmt"
   "context"
   "mime"
   "path/filepath"
@@ -16,13 +18,15 @@ import (
   "github.com/bd878/gallery/server/utils"
 )
 
+const selectNoLimit int = -1
+
 type userGateway interface {
   Auth(ctx context.Context, token string) (*usermodel.User, error)
 }
 
 type Controller interface {
   SaveMessage(ctx context.Context, msg *model.Message) (*model.Message, error)
-  ReadUserMessages(ctx context.Context, userId usermodel.UserId) ([]*model.Message, error)
+  ReadUserMessages(ctx context.Context, userId usermodel.UserId, limit, offset int32) ([]*model.Message, error)
 }
 
 type Handler struct {
@@ -158,13 +162,55 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) {
-  var user *usermodel.User
+  var limitInt, offsetInt int
+  var err error
   var ok bool
+  var user *usermodel.User
+
   if user, ok = getUser(w, req); !ok {
     return
   }
 
-  v, err := h.ctrl.ReadUserMessages(context.Background(), usermodel.UserId(user.Id))
+  values := req.URL.Query()
+
+  if values.Has("limit") {
+    limitInt, err = strconv.Atoi(values.Get("limit"))
+    if err != nil {
+      if err = json.NewEncoder(w).Encode(model.ServerResponse{
+        Status: "ok",
+        Description: fmt.Sprintf("wrong \"%s\" query param", "limit"),
+      }); err != nil {
+        log.Println(err)
+        w.WriteHeader(http.StatusInternalServerError)
+      }
+      return
+    }
+
+    if values.Has("offset") {
+      offsetInt, err = strconv.Atoi(values.Get("offset"))
+      if err != nil {
+        if err = json.NewEncoder(w).Encode(model.ServerResponse{
+          Status: "ok",
+          Description: fmt.Sprintf("wrong \"%s\" query param", "offset"),
+        }); err != nil {
+          log.Println(err)
+          w.WriteHeader(http.StatusInternalServerError)
+        }
+        return
+      }
+    } else {
+      offsetInt = 0
+    }
+  } else {
+    limitInt = selectNoLimit
+  }
+
+  v, err := h.ctrl.ReadUserMessages(
+    context.Background(),
+    usermodel.UserId(user.Id),
+    int32(limitInt),
+    int32(offsetInt),
+  )
   if err != nil {
     log.Println(err)
     w.WriteHeader(http.StatusInternalServerError)

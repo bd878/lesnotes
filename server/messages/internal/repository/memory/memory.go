@@ -3,6 +3,7 @@ package memory
 import (
   "context"
   "errors"
+  "math"
 
   "github.com/bd878/gallery/server/messages/pkg/model"
   usermodel "github.com/bd878/gallery/server/users/pkg/model"
@@ -33,8 +34,26 @@ func (r *Repository) FindByIndexTerm(_ contex.Context, logIndex, logTerm uint64)
   return false, nil
 }
 
-func (r *Repository) Get(_ context.Context, userId usermodel.UserId) ([]*model.Message, error) {
-  return &r.messages[userId], nil
+func (r *Repository) Get(_ context.Context, userId usermodel.UserId, limit, offset int32) ([]*model.Message, error) {
+  msgs := r.messages[userId]
+  if offset >= len(msgs) {
+    return [], nil
+  }
+
+  threshold := int32(math.Min(
+    float32(len(msgs)),
+    float32(offset + limit),
+  )
+
+  result := make([]*model.Message, threshold - offset)
+
+  var j int32
+  for i := offset; i < threshold; i++ {
+    result[j] = msgs[i]
+    j += 1
+  }
+
+  return result, nil
 }
 
 func (r *Repository) GetOne(_ context.Context, userId usermodel.UserId, id model.MessageId) (*model.Message, error) {

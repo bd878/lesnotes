@@ -114,11 +114,11 @@ func (r *Repository) FindByIndexTerm(ctx context.Context, logIndex, logTerm uint
   return &msg, nil
 }
 
-func (r *Repository) Get(ctx context.Context, userId usermodel.UserId) ([]*model.Message, error) {
+func (r *Repository) Get(ctx context.Context, userId usermodel.UserId, limit, offset int32) ([]*model.Message, error) {
   rows, err := r.db.QueryContext(ctx,
     "SELECT id, user_id, createtime, message, file, file_id, log_index, log_term " +
-    "FROM messages WHERE user_id = ?",
-    int(userId),
+    "FROM messages WHERE user_id = ? LIMIT ? OFFSET ?",
+    int(userId), limit, offset,
   )
   if err != nil {
     return nil, err

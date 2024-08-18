@@ -1,5 +1,5 @@
 {
-  "node_name": "messages:9001",
+  "node_name": "messages.9001",
   "leader_addr": "0.0.0.0:9001",
   "http_addr": "0.0.0.0:8083",
   "grpc_addr": "0.0.0.0:9001",
@@ -7,10 +7,9 @@
   "serf_addr": "127.0.0.1:8071",
   "users_service_addr": "0.0.0.0:8085",
 
-  "debug": true,
-  "bootstrap": true,
-  "raft_log_level": "error",
-  "log_file": "../../logs/log_messages.txt",
+  "raft_bootstrap": true,
+  "raft_log_level": "debug",
+  "log_path": "../../logs",
   "db_path": "../../main.db",
   "data_path": "../../data"
 }
