@@ -213,7 +213,7 @@ func (m *DistributedMessages) WaitForLeader(timeout time.Duration) error {
       }
     }
   }
-} 
+}
 
 func (m *DistributedMessages) GetServers(_ context.Context) ([](*api.Server), error) {
   future := m.raft.GetConfiguration()
@@ -221,12 +221,12 @@ func (m *DistributedMessages) GetServers(_ context.Context) ([](*api.Server), er
     return nil, err
   }
   var servers []*api.Server
-  leaderAddr, _ := m.raft.LeaderWithID()
+  _, id := m.raft.LeaderWithID()
   for _, server := range future.Configuration().Servers {
     servers = append(servers, &api.Server{
       Id: string(server.ID),
       RaftAddr: string(server.Address),
-      IsLeader: leaderAddr == server.Address,
+      IsLeader: raft.ServerID(id) == server.ID,
     })
   }
   return servers, nil
@@ -433,16 +433,45 @@ func NewStreamLayer(ln net.Listener) *StreamLayer {
   return &StreamLayer{ln: ln}
 }
 
+/**
+ * Leading byte in rpc, signifies, that it is a call
+ * to raft node (not grpc)
+ */
+const RaftRPC = 1
+
 func (s *StreamLayer) Dial(
   addr raft.ServerAddress,
   timeout time.Duration,
 ) (net.Conn, error) {
   dialer := &net.Dialer{Timeout: timeout}
-  return dialer.Dial("tcp", string(addr))
+  conn, err := dialer.Dial("tcp", string(addr))
+  if err != nil {
+    return nil, err
+  }
+
+  _, err = conn.Write([]byte{byte(RaftRPC)})
+  if err != nil {
+    return nil, err
+  }
+
+  return conn, err
 }
 
 func (s *StreamLayer) Accept() (net.Conn, error) {
-  return s.ln.Accept()
+  conn, err := s.ln.Accept()
+  if err != nil {
+    return nil, err
+  }
+
+  b := make([]byte, 1)
+  if _, err := conn.Read(b); err != nil {
+    return nil, err
+  }
+  if bytes.Compare(b, []byte{byte(RaftRPC)}) != 0 {
+    return nil, errors.New("not a raft rpc")
+  }
+
+  return conn, nil
 }
 
 func (s *StreamLayer) Close() error {

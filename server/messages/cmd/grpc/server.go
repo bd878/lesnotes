@@ -2,8 +2,11 @@ package main
 
 import (
   "net"
+  "io"
+  "bytes"
   "google.golang.org/grpc"
   "github.com/hashicorp/raft"
+  "github.com/soheilhy/cmux"
 
   "github.com/bd878/gallery/server/api"
   "github.com/bd878/gallery/server/messages/config"
@@ -16,29 +19,42 @@ import (
 )
 
 type GRPCMessagesServer struct {
-  ln   net.Listener
-  srv *grpc.Server
-  m   *membership.Membership
+  cfg     config.Config
+  mux     cmux.CMux
+  ln      net.Listener
+  server *grpc.Server
+  ctrl   *controller.DistributedMessages
+  m      *membership.Membership
 }
 
 func New(cfg config.Config) *GRPCMessagesServer {
-  ln, err := net.Listen("tcp4", cfg.GrpcAddr)
+  ln, err := net.Listen("tcp4", cfg.RpcAddr)
   if err != nil {
     panic(err)
   }
 
-  streamLn, err := net.Listen("tcp", cfg.RaftAddr)
-  if err != nil {
-    panic(err)
+  mux := cmux.New(ln)
+
+  s := &GRPCMessagesServer{
+    cfg:  cfg,
+    mux:  mux,
+    ln:   ln,
   }
 
-  repo, err := repository.New(cfg.DBPath)
+  s.setupRaft()
+  s.setupGRPC()
+
+  return s
+}
+
+func (s *GRPCMessagesServer) setupRaft() {
+  repo, err := repository.New(s.cfg.DBPath)
   if err != nil {
     panic(err)
   }
 
   raftLogLevel := hclog.Error.String()
-  switch cfg.RaftLogLevel {
+  switch s.cfg.RaftLogLevel {
   case "debug":
     raftLogLevel = hclog.Debug.String()
   case "error":
@@ -47,50 +63,67 @@ func New(cfg config.Config) *GRPCMessagesServer {
     raftLogLevel = hclog.Info.String()
   }
 
-  ctrl, err := controller.New(repo, controller.Config{
+  raftLn := s.mux.Match(func(r io.Reader) bool {
+    b := make([]byte, 1)
+    if _, err := r.Read(b); err != nil {
+      return false
+    }
+    return bytes.Compare(b, []byte{byte(controller.RaftRPC)}) == 0
+  })
+
+  s.ctrl, err = controller.New(repo, controller.Config{
     Raft: raft.Config{
-      LocalID: raft.ServerID(cfg.NodeName),
+      LocalID: raft.ServerID(s.cfg.NodeName),
       LogLevel: raftLogLevel,
     },
-    StreamLayer: controller.NewStreamLayer(streamLn),
-    Bootstrap:   cfg.RaftBootstrap,
-    DataDir:     cfg.DataPath,
-    Servers:     cfg.RaftServers,
+    StreamLayer: controller.NewStreamLayer(raftLn),
+    Bootstrap:   s.cfg.RaftBootstrap,
+    DataDir:     s.cfg.DataPath,
+    Servers:     s.cfg.RaftServers,
   })
   if err != nil {
     panic(err)
   }
+}
 
-  h := grpchandler.New(ctrl)
-  m, err := membership.New(membership.Config{
-    NodeName: cfg.NodeName,
-    BindAddr: cfg.SerfAddr,
-    Tags: map[string]string{
-      "raft_addr": cfg.RaftAddr,
+func (s *GRPCMessagesServer) setupGRPC() {
+  var err error
+  h := grpchandler.New(s.ctrl)
+  s.m, err = membership.New(
+    membership.Config{
+      NodeName: s.cfg.NodeName,
+      BindAddr: s.cfg.SerfAddr,
+      Tags: map[string]string{
+        "raft_addr": s.cfg.RpcAddr,
+      },
+      SerfJoinAddrs: s.cfg.SerfJoinAddrs,
     },
-    SerfJoinAddrs: cfg.SerfJoinAddrs,
-  }, ctrl)
+    s.ctrl,
+  )
   if err != nil {
     panic(err)
   }
 
-  srv := grpc.NewServer()
-  api.RegisterMessagesServer(srv, h)
+  s.server = grpc.NewServer()
+  api.RegisterMessagesServer(s.server, h)
 
-  a := &GRPCMessagesServer{
-    ln: ln,
-    srv: srv,
-    m: m,
-  }
-
-  return a
+  grpcLn := s.mux.Match(cmux.Any())
+  go func() {
+    if err := s.server.Serve(grpcLn); err != nil {
+      s.Shutdown()
+    }
+  }()
 }
 
 func (s *GRPCMessagesServer) Run() {
-  defer s.ln.Close()
-  s.srv.Serve(s.ln)
+  defer s.mux.Close()
+  s.mux.Serve()
 }
 
 func (s *GRPCMessagesServer) Addr() string {
   return s.ln.Addr().String()
+}
+
+func (s *GRPCMessagesServer) Shutdown() {
+/* TODO: implement, Leave server from cluster */
 }

@@ -1,7 +1,6 @@
 {
   "node_name": "messages.9002",
-  "grpc_addr": "0.0.0.0:9002",
-  "raft_addr": "0.0.0.0:8002",
+  "rpc_addr": "0.0.0.0:9002",
   "serf_addr": "127.0.0.2:8072",
   "users_service_addr": "0.0.0.0:8085",
   "serf_join_addrs": ["127.0.0.1:8071"],

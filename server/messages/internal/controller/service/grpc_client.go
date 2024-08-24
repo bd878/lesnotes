@@ -2,17 +2,19 @@ package service
 
 import (
   "context"
+  "fmt"
 
   "google.golang.org/grpc"
   "google.golang.org/grpc/credentials/insecure"
 
   "github.com/bd878/gallery/server/api"
+  "github.com/bd878/gallery/server/messages/internal/loadbalance"
   "github.com/bd878/gallery/server/messages/pkg/model"
   usermodel "github.com/bd878/gallery/server/users/pkg/model"
 )
 
 type Config struct {
-  ClusterNodeAddr string
+  LeaderAddr string
 }
 
 type Messages struct {
@@ -22,7 +24,14 @@ type Messages struct {
 }
 
 func New(cfg Config) *Messages {
-  conn, err := grpc.Dial(cfg.ClusterNodeAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+  conn, err := grpc.Dial(
+    fmt.Sprintf(
+      "%s:///%s",
+      loadbalance.Name,
+      cfg.LeaderAddr,
+    ),
+    grpc.WithTransportCredentials(insecure.NewCredentials()),
+  )
   if err != nil {
     panic(err)
   }

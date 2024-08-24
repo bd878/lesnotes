@@ -13,7 +13,7 @@ func New(cfg config.Config) *http.Server {
   mux := http.NewServeMux()
 
   ctrlCfg := controller.Config{
-    ClusterNodeAddr: cfg.LeaderAddr,
+    LeaderAddr: cfg.LeaderAddr,
   }
 
   grpcCtrl := controller.New(ctrlCfg)

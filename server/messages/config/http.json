@@ -2,13 +2,8 @@
   "node_name": "messages.http",
   "leader_addr": "0.0.0.0:9001",
   "http_addr": "0.0.0.0:8083",
-  "grpc_addr": "0.0.0.0:9001",
-  "raft_addr": "0.0.0.0:8001",
-  "serf_addr": "127.0.0.1:8071",
   "users_service_addr": "0.0.0.0:8085",
 
-  "raft_bootstrap": true,
   "log_path": "../../logs",
-  "db_path": "../../main.db",
   "data_path": "../../data"
 }

@@ -3,10 +3,9 @@ package config
 type Config struct {
   NodeName          string `json:"node_name"`
   HttpAddr          string `json:"http_addr"`
-  GrpcAddr          string `json:"grpc_addr"`
   LeaderAddr        string `json:"leader_addr"`
   UsersServiceAddr  string `json:"users_service_addr"`
-  RaftAddr          string `json:"raft_addr"`
+  RpcAddr           string `json:"rpc_addr"`
   SerfAddr          string `json:"serf_addr"`
   RaftServers       []string `json:"raft_servers"`
   SerfJoinAddrs     []string `json:"serf_join_addrs"`

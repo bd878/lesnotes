@@ -24,7 +24,7 @@ func main() {
   defer f.Close()
 
   fmt.Printf("=== GRPC %s\n", c.NodeName)
-  fmt.Println("Addr:", c.GrpcAddr)
+  fmt.Println("Addr:", c.RpcAddr)
   fmt.Println("LogFile:", f.Name())
   fmt.Println()
 
