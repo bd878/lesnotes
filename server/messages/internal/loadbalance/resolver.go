@@ -3,12 +3,13 @@ package loadbalance
 import (
   "context"
   "sync"
-  // "fmt"
+  "fmt"
   "log"
 
   "google.golang.org/grpc"
   "google.golang.org/grpc/credentials/insecure"
   "google.golang.org/grpc/attributes"
+  "google.golang.org/grpc/serviceconfig"
   "google.golang.org/grpc/resolver"
 
   "github.com/bd878/gallery/server/api"
@@ -18,12 +19,13 @@ type Resolver struct {
   mu sync.Mutex
   clientConn resolver.ClientConn
   resolverConn *grpc.ClientConn
+  serviceConfig *serviceconfig.ParseResult
 }
 
 var _ resolver.Builder = (*Resolver)(nil)
 
 func (r *Resolver) Build(
-  target resolver.Target,
+  t resolver.Target,
   cc resolver.ClientConn,
   _ resolver.BuildOptions,
 ) (resolver.Resolver, error) {
@@ -31,8 +33,11 @@ func (r *Resolver) Build(
 
   r.clientConn = cc
   r.resolverConn, err = grpc.Dial(
-    target.Endpoint(),
+    t.Endpoint(),
     grpc.WithTransportCredentials(insecure.NewCredentials()),
+  )
+  r.serviceConfig = r.clientConn.ParseServiceConfig(
+    fmt.Sprintf(`{"loadBalancingConfig":[{"%s":{}}]}`, Name),
   )
   if err != nil {
     return nil, err
@@ -57,10 +62,10 @@ func (r *Resolver) ResolveNow(resolver.ResolveNowOptions) {
   r.mu.Lock()
   defer r.mu.Unlock()
 
-  client := api.NewMessagesServiceClient(r.resolverConn)
+  client := api.NewMessagesClient(r.resolverConn)
 
   ctx := context.Background()
-  res, err := client.GetServers(ctx, &api.GetMessagesServersRequest{})
+  res, err := client.GetServers(ctx, &api.GetServersRequest{})
   if err != nil {
     return
   }
@@ -68,7 +73,7 @@ func (r *Resolver) ResolveNow(resolver.ResolveNowOptions) {
   var addrs []resolver.Address
   for _, server := range res.Servers {
     addrs = append(addrs, resolver.Address{
-      Addr: server.RpcAddr,
+      Addr: server.RaftAddr,
       Attributes: attributes.New(
         "is_leader",
         server.IsLeader,
@@ -76,9 +81,8 @@ func (r *Resolver) ResolveNow(resolver.ResolveNowOptions) {
     })
   }
   r.clientConn.UpdateState(resolver.State{
-    Endpoints: []resolver.Endpoint{{
-      Addresses: addrs,
-    }},
+    Addresses: addrs,
+    ServiceConfig: r.serviceConfig,
   })
 }
 

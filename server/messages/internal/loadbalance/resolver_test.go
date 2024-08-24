@@ -87,19 +87,19 @@ func NewGRPCServer() *grpc.Server {
   return gsrv
 }
 
-func (s *grpcServer) GetServers(_ context.Context, _ *api.GetMessagesServersRequest) (
-  *api.GetMessagesServersResponse, error,
+func (s *grpcServer) GetServers(_ context.Context, _ *api.GetServersRequest) (
+  *api.GetServersResponse, error,
 ) {
-  servers := []*api.MessagesServer{{
+  servers := []*api.Server{{
     Id: "leader",
-    RpcAddr: "localhost:9001",
+    RaftAddr: "localhost:9001",
     IsLeader: true,
   }, {
     Id: "follower",
-    RpcAddr: "localhost:9002",
+    RaftAddr: "localhost:9002",
   }}
 
-  return &api.GetMessagesServersResponse{Servers: servers}, nil
+  return &api.GetServersResponse{Servers: servers}, nil
 }
 
 func (s *grpcServer) SaveMessage(_ context.Context, _ *api.SendMessageRequest) (
@@ -108,7 +108,7 @@ func (s *grpcServer) SaveMessage(_ context.Context, _ *api.SendMessageRequest) (
   return nil, nil
 }
 
-func (s *grpcServer) ReadMessage(_ context.Context, _ *api.ReadMessageRequest) (
+func (s *grpcServer) ReadUserMessages(_ context.Context, _ *api.ReadMessageRequest) (
   *api.ReadMessageResponse, error,
 ) {
   return nil, nil
