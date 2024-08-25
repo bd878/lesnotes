@@ -14,7 +14,7 @@ import (
 )
 
 type Config struct {
-  LeaderAddr string
+  RpcAddr string
 }
 
 type Messages struct {
@@ -28,7 +28,7 @@ func New(cfg Config) *Messages {
     fmt.Sprintf(
       "%s:///%s",
       loadbalance.Name,
-      cfg.LeaderAddr,
+      cfg.RpcAddr,
     ),
     grpc.WithTransportCredentials(insecure.NewCredentials()),
   )

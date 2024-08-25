@@ -1,4 +1,4 @@
-import React, {lazy, useCallback} from 'react';
+import React, {lazy, useCallback, useState} from 'react';
 import api from '../../api';
 import Tag from '../../components/Tag';
 import i18n from '../../i18n';
@@ -8,6 +8,17 @@ const FormField = lazy(() => import("../../components/FormField"));
 const Button = lazy(() => import("../../components/Button"));
 
 const LoginForm = ({ onError }) => {
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+
+  const onNameChange = useCallback(e => {
+    setName(e.target.value);
+  }, [setName]);
+
+  const onPasswordChange = useCallback(e => {
+    setPassword(e.target.value);
+  }, [setPassword]);
+
   const sendLoginRequest = useCallback(e => {
     e.preventDefault();
 
@@ -33,24 +44,55 @@ const LoginForm = ({ onError }) => {
       }
     }
 
-    let name = e.target.elements['name'].value;
-    let password = e.target.elements['password'].value;
     if (!name) {console.error(i18n("name_required_err")); return;}
     if (!password) {console.error(i18n("pass_required_err")); return;}
 
     send(name, password)
-  }, []);
+  }, [
+    name,
+    password,
+    setName,
+    setPassword,
+  ]);
 
   return (
-    <Tag>
-      <Form name="login-form" onSubmit={sendLoginRequest}>
-        <FormField required el="input" name="name" type="text" />
-        <FormField required el="input" name="password" type="password" />
-        <Button type="submit" text={i18n("login")} />
+    <>
+      <Form
+        autoComplete="off"
+        name="login-form"
+      >
+        <FormField
+          required
+          el="input"
+          name="name"
+          type="text"
+          value={name}
+          onChange={onNameChange}
+        />
+        <FormField
+          required
+          el="input"
+          name="password"
+          type="password"
+          value={password}
+          onChange={onPasswordChange}
+        />
       </Form>
 
-      <Tag el="a" href="/register" target="_self">{i18n("register")}</Tag>
-    </Tag>
+      <Button
+        type="button"
+        text={i18n("login")}
+        onClick={sendLoginRequest}
+      />
+
+      <Tag
+        el="a"
+        href="/register"
+        target="_self"
+      >
+        {i18n("register")}
+      </Tag>
+    </>
   );
 }
 

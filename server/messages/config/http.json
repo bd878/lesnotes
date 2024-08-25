@@ -1,6 +1,6 @@
 {
   "node_name": "messages.http",
-  "leader_addr": "0.0.0.0:9001",
+  "rpc_addr": "0.0.0.0:9001",
   "http_addr": "0.0.0.0:8083",
   "users_service_addr": "0.0.0.0:8085",
 
