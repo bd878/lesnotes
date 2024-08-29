@@ -7,9 +7,12 @@ if (ENV == "production" || ENV == "staging") {
   proto = "https"
 }
 
-function getFullUrl(url, isFullUrl) {
-  // TODO: replace backend url with value from config
+function getFullUrl(url: string, isFullUrl: string) {
   return isFullUrl ? url : `${proto}://${BACKENDURL}${url}`;
+}
+
+function getFileDownloadUrl(url: string) {
+  return getFullUrl(url, false);
 }
 
 function prepareBody(body, method) {
@@ -40,6 +43,8 @@ function getOptions(props) {
     ...otherOptions
   };
 }
+
+export {getFileDownloadUrl};
 
 export default function api(url, props = {}) {
   const { isFullUrl = false } = props;

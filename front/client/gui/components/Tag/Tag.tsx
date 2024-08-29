@@ -18,6 +18,7 @@ const Tag = forwardRef((props, ref) => {
       encType={props.encType}
       action={props.action}
       autoComplete={props.autoComplete}
+      download={props.download}
     >{props.children}</TagName>
   )
 });

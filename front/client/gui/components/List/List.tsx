@@ -2,7 +2,7 @@ import React from 'react';
 import Tag from '../Tag';
 
 const List = props => (
-  <Tag css={props.css}>
+  <Tag el={props.el} css={props.css}>
     {props.children}
   </Tag>
 );

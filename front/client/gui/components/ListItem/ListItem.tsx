@@ -3,7 +3,7 @@ import Tag from '../Tag';
 
 const ListItem = props => {
   return (
-    <Tag>
+    <Tag el={props.el}>
       {props.children}
     </Tag>
   )

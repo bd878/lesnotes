@@ -105,6 +105,11 @@ func (s *GRPCMessagesServer) setupGRPC() {
   }
 
   s.server = grpc.NewServer()
+  // TODO: MessagesSerivce &api.MessagesService{
+  //    Produce: s.server.Produce,
+  //    Consume: s.server.Consume,
+  //    ...
+  // }
   api.RegisterMessagesServer(s.server, h)
 
   grpcLn := s.mux.Match(cmux.Any())
