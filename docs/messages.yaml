@@ -1,0 +1,64 @@
+openapi: 3.0.0
+info:
+  title: API Specification for messages service
+  description: |
+    This API allows sending and reading user texts
+    from messages service.
+  version: 20.08.2024
+paths:
+  /send:
+    post:
+      summary: Send a message
+      description: |
+        Send a message and distribute it across
+        cluster nodes
+      responses:
+        "200":
+          description: Success response
+          content:
+            application/json:
+              schema:
+                type: string
+  /read:
+    parameters:
+      - name: filter 
+        in: query
+        schema:
+          $ref: '#/components/schemas/filter'
+      - name: offset
+        in: query
+        schema:
+          $ref: '#/components/schemas/offset'
+    get:
+      summary: Get all user messages
+      description: |
+        Read all messages of given user
+      responses:
+        "200":
+          description: All user messages
+          content:
+            application/json:
+              schema:
+                type: string
+  /status:
+    get:
+      summary: Show server status
+      responses:
+        "200":
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/status_ok'
+components:
+  schemas:
+    filter:
+      type: integer
+      minimum: 0
+      maximum: 100
+    offset:
+      type: integer
+      minimum: 0
+      maximum: 100
+    status_ok:
+      type: string

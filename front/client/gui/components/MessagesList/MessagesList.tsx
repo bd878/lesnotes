@@ -1,4 +1,4 @@
-import React, {lazy} from 'react';
+import React, {lazy, useRef, useEffect} from 'react';
 import Tag from '../Tag';
 import i18n from '../../i18n';
 import {getFileDownloadUrl} from "../../api";
@@ -13,12 +13,23 @@ const MessagesList = ({
   loading,
   error,
 }) => {
+  const listRef = useRef(null);
+
+  useEffect(() => {
+    if (listRef.current != null) {
+      listRef.current.scrollTo(0, listRef.current.scrollHeight);
+    }
+  }, [
+    messages.length,
+    listRef.current,
+  ]);
+
   let content = <Tag></Tag>;
   if (error) {
     content = <Tag>{error}</Tag>
   } else {
     content = (
-      <List el="ul" css={css}>
+      <List ref={listRef} el="ul" css={css}>
         {messages.map(message => (
           <Tag el="li" key={message.id}>
             <Tag
