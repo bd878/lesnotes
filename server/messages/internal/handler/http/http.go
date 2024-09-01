@@ -26,7 +26,16 @@ type userGateway interface {
 
 type Controller interface {
   SaveMessage(ctx context.Context, msg *model.Message) (*model.Message, error)
-  ReadUserMessages(ctx context.Context, userId usermodel.UserId, limit, offset int32) ([]*model.Message, error)
+  ReadUserMessages(
+    ctx context.Context,
+    userId usermodel.UserId,
+    limit int32,
+    offset int32,
+    asc bool,
+  ) (
+    *model.MessagesList,
+    error,
+  )
 }
 
 type Handler struct {
@@ -162,7 +171,8 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) {
-  var limitInt, offsetInt int
+  var limitInt, offsetInt, orderInt int
+  var ascending bool
   var err error
   var ok bool
   var user *usermodel.User
@@ -205,11 +215,37 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) {
     limitInt = selectNoLimit
   }
 
-  v, err := h.ctrl.ReadUserMessages(
+  if values.Has("asc") {
+    orderInt, err = strconv.Atoi(values.Get("asc"))
+    if err != nil {
+      if err = json.NewEncoder(w).Encode(model.ServerResponse{
+        Status: "ok",
+        Description: fmt.Sprintf("wrong \"%s\" query param", "asc"),
+      }); err != nil {
+        log.Println(err)
+        w.WriteHeader(http.StatusInternalServerError)
+      }
+      return
+    }
+
+    switch orderInt {
+    case 0:
+      ascending = false
+    case 1:
+      ascending = true
+    default:
+      ascending = true
+    }
+  } else {
+    ascending = true
+  }
+
+  res, err := h.ctrl.ReadUserMessages(
     context.Background(),
     usermodel.UserId(user.Id),
     int32(limitInt),
     int32(offsetInt),
+    ascending,
   )
   if err != nil {
     log.Println(err)
@@ -217,7 +253,13 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) {
     return
   }
 
-  if err := json.NewEncoder(w).Encode(v); err != nil {
+  if err := json.NewEncoder(w).Encode(model.MessagesListServerResponse{
+    ServerResponse: model.ServerResponse{
+      Status: "ok",
+    },
+    Messages: res.Messages,
+    IsLastPage: res.IsLastPage,
+  }); err != nil {
     log.Println(err)
     w.WriteHeader(http.StatusInternalServerError)
     return

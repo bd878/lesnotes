@@ -34,7 +34,9 @@ func (r *Repository) FindByIndexTerm(_ contex.Context, logIndex, logTerm uint64)
   return false, nil
 }
 
-func (r *Repository) Get(_ context.Context, userId usermodel.UserId, limit, offset int32) ([]*model.Message, error) {
+func (r *Repository) Get(_ context.Context, userId usermodel.UserId, limit, offset int32, ascending bool) (*model.MessagesList, error) {
+  var isLastPage bool
+
   msgs := r.messages[userId]
   if offset >= len(msgs) {
     return [], nil
@@ -45,15 +47,29 @@ func (r *Repository) Get(_ context.Context, userId usermodel.UserId, limit, offs
     float32(offset + limit),
   )
 
+  if limit+offset >= len(msgs) {
+    isLastPage = true
+  }
+
   result := make([]*model.Message, threshold - offset)
 
   var j int32
-  for i := offset; i < threshold; i++ {
-    result[j] = msgs[i]
-    j += 1
+  if ascending == false {
+    for i := len(msgs)-offset; i > len(msgs)-offset-threshold; i-- {
+      result[j] = msgs[i]
+      j += 1
+    }
+  } else {
+    for i := offset; i < threshold; i++ {
+      result[j] = msgs[i]
+      j += 1
+    }
   }
 
-  return result, nil
+  return &model.MessagesList{
+    Messages: result,
+    IsLastPage: isLastPage,
+  }, nil
 }
 
 func (r *Repository) GetOne(_ context.Context, userId usermodel.UserId, id model.MessageId) (*model.Message, error) {

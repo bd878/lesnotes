@@ -114,10 +114,28 @@ func (r *Repository) FindByIndexTerm(ctx context.Context, logIndex, logTerm uint
   return &msg, nil
 }
 
-func (r *Repository) Get(ctx context.Context, userId usermodel.UserId, limit, offset int32) ([]*model.Message, error) {
+func (r *Repository) Get(
+  ctx context.Context,
+  userId usermodel.UserId,
+  limit int32,
+  offset int32,
+  ascending bool,
+) (
+  *model.MessagesList,
+  error,
+) {
+  var isLastPage bool
+  var order string = "ASC "
+  if !ascending {
+    order = "DESC "
+  }
+
   rows, err := r.db.QueryContext(ctx,
     "SELECT id, user_id, createtime, message, file, file_id, log_index, log_term " +
-    "FROM messages WHERE user_id = ? LIMIT ? OFFSET ?",
+    "FROM messages " + 
+    "WHERE user_id = ? " +
+    "ORDER BY id " + order + 
+    "LIMIT ? OFFSET ?",
     int(userId), limit, offset,
   )
   if err != nil {
@@ -175,10 +193,42 @@ func (r *Repository) Get(ctx context.Context, userId usermodel.UserId, limit, of
       LogTerm: logTerm,
     })
   }
-  return res, nil
+
+  if int32(len(res)) < limit {
+    isLastPage = true
+  } else {
+    row := r.db.QueryRowContext(ctx,
+      "SELECT COUNT(*) FROM messages WHERE user_id = ?",
+      int(userId),
+    )
+    if err != nil {
+      isLastPage = false
+    } else {
+      var countMessages int32
+      if err := row.Scan(&countMessages); err != nil {
+        isLastPage = false
+      }
+
+      if countMessages <= offset + limit {
+        isLastPage = true
+      }
+    }
+  }
+
+  return &model.MessagesList{
+    Messages: res,
+    IsLastPage: isLastPage,
+  }, nil
 }
 
-func (r *Repository) GetOne(ctx context.Context, userId usermodel.UserId, id model.MessageId) (*model.Message, error) {
+func (r *Repository) GetOne(
+  ctx context.Context,
+  userId usermodel.UserId,
+  id model.MessageId,
+) (
+  *model.Message,
+  error,
+) {
   row := r.db.QueryRowContext(ctx,
     "SELECT id, user_id, createtime, message, file, file_id, log_index, log_term " +
     "FROM messages WHERE user_id = ? AND id = ?",

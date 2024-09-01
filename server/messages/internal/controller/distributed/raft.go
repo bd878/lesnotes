@@ -26,7 +26,7 @@ var ErrMsgExist = errors.New("message exists")
 
 type Repository interface {
   Put(context.Context, *model.Message) (model.MessageId, error)
-  Get(context.Context, usermodel.UserId, int32, int32) ([]*model.Message, error)
+  Get(context.Context, usermodel.UserId, int32, int32, bool) (*model.MessagesList, error)
   FindByIndexTerm(context.Context, uint64, uint64) (*model.Message, error)
   PutBatch(context.Context, [](*model.Message)) error
   GetBatch(context.Context) ([]*model.Message, error)
@@ -185,14 +185,30 @@ func (m *DistributedMessages) apply(ctx context.Context, msg *model.Message) (*m
   }
 }
 
-func (m *DistributedMessages) ReadUserMessages(ctx context.Context, userId usermodel.UserId, limit, offset int32) (
-  []*model.Message,
+func (m *DistributedMessages) ReadUserMessages(
+  ctx context.Context,
+  userId usermodel.UserId,
+  limit int32,
+  offset int32,
+  ascending bool,
+) (
+  *model.MessagesList,
   error,
 ) {
-  return m.repo.Get(ctx, userId, limit, offset)
+  return m.repo.Get(
+    ctx,
+    userId,
+    limit,
+    offset,
+    ascending,
+  )
 }
 
-func (m *DistributedMessages) ReadOneMessage(ctx context.Context, userId usermodel.UserId, id model.MessageId) (
+func (m *DistributedMessages) ReadOneMessage(
+  ctx context.Context,
+  userId usermodel.UserId,
+  id model.MessageId,
+) (
   *model.Message,
   error,
 ) {

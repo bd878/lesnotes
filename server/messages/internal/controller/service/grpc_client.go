@@ -60,8 +60,14 @@ func (s *Messages) SaveMessage(ctx context.Context, msg *model.Message) (
   return model.MessageFromProto(res.Message), nil
 }
 
-func (s *Messages) ReadUserMessages(ctx context.Context, userId usermodel.UserId, limit, offset int32) (
-  []*model.Message,
+func (s *Messages) ReadUserMessages(
+  ctx context.Context,
+  userId usermodel.UserId,
+  limit int32,
+  offset int32,
+  ascending bool,
+) (
+  *model.MessagesList,
   error,
 ) {
   var res *api.ReadUserMessagesResponse
@@ -71,9 +77,13 @@ func (s *Messages) ReadUserMessages(ctx context.Context, userId usermodel.UserId
     UserId: uint32(userId),
     Limit: limit,
     Offset: offset,
+    Asc: ascending,
   }); err != nil {
     return nil, err
   }
 
-  return model.MapMessagesFromProto(model.MessageFromProto, res.Messages), err
+  return &model.MessagesList{
+    Messages: model.MapMessagesFromProto(model.MessageFromProto, res.Messages),
+    IsLastPage: res.IsLastPage,
+  }, err
 }

@@ -6,6 +6,7 @@ const Tag = forwardRef((props, ref) => {
   return (
     <TagName
       ref={ref}
+      id={props.id}
       required={props.required}
       href={props.href}
       target={props.target}
@@ -15,6 +16,7 @@ const Tag = forwardRef((props, ref) => {
       value={props.value}
       onClick={props.onClick}
       onChange={props.onChange}
+      onScroll={props.onScroll}
       encType={props.encType}
       action={props.action}
       autoComplete={props.autoComplete}

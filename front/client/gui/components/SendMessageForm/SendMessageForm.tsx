@@ -34,7 +34,10 @@ const SendMessageForm = ({ onError, onSuccess }) => {
           credentials: "include",
           body: form,
         });
-        onSuccess(response)
+        console.log("[sendMessageRequest] response: ", response);
+        if (response.message != undefined) { 
+          onSuccess(response.message);
+        }
 
         fileRef.current.value = null
         setMessage("")

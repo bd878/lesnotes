@@ -15,6 +15,20 @@ function getFileDownloadUrl(url: string) {
   return getFullUrl(url, false);
 }
 
+function appendQueryParams(url: string, queryParams): string {
+  if (!queryParams) {
+    return url;
+  }
+  if (!(queryParams instanceof URLSearchParams)) {
+    return url;
+  }
+  if (queryParams.size == 0) {
+    return url;
+  }
+
+  return url + "?" + queryParams.toString();
+}
+
 function prepareBody(body, method) {
   if (!methodsWithBody.includes(method)) {
     return;
@@ -32,7 +46,7 @@ function getOptions(props) {
     headers,
     body,
     method,
-    ...otherOptions
+    credentials,
   } = props;
 
   return {
@@ -40,16 +54,17 @@ function getOptions(props) {
     body: prepareBody(body, method),
     mode: 'no-cors',
     method,
-    ...otherOptions
+    credentials,
   };
 }
 
 export {getFileDownloadUrl};
 
 export default function api(url, props = {}) {
-  const { isFullUrl = false } = props;
+  const { isFullUrl = false, queryParams } = props;
 
-  const fullUrl = getFullUrl(url, isFullUrl);
+  let fullUrl = getFullUrl(url, isFullUrl);
+  fullUrl = appendQueryParams(fullUrl, new URLSearchParams(queryParams));
   const options = getOptions(props);
 
   return fetch(fullUrl, options)

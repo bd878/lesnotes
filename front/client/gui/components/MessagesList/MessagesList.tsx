@@ -1,4 +1,4 @@
-import React, {lazy, useRef, useEffect} from 'react';
+import React, {lazy} from 'react';
 import Tag from '../Tag';
 import i18n from '../../i18n';
 import {getFileDownloadUrl} from "../../api";
@@ -8,30 +8,23 @@ const ListItem = lazy(() => import("../../components/ListItem"));
 
 const MessagesList = ({
   css,
+  liCss,
   messages,
-  setMessages,
   loading,
   error,
 }) => {
-  const listRef = useRef(null);
-
-  useEffect(() => {
-    if (listRef.current != null) {
-      listRef.current.scrollTo(0, listRef.current.scrollHeight);
-    }
-  }, [
-    messages.length,
-    listRef.current,
-  ]);
-
   let content = <Tag></Tag>;
   if (error) {
     content = <Tag>{error}</Tag>
   } else {
     content = (
-      <List ref={listRef} el="ul" css={css}>
+      <List el="ul" css={css}>
         {messages.map(message => (
-          <Tag el="li" key={message.id}>
+          <Tag
+            el="li"
+            css={liCss}
+            key={message.id}
+          >
             <Tag
               el="a"
               href={getFileDownloadUrl(`/messages/v1/read_file?id=${message.fileid}`, false)}
@@ -50,9 +43,8 @@ const MessagesList = ({
 
   return (
     <>
-      <Tag>{i18n("messages_header")}</Tag>
-
-      {loading ? <Tag>{i18n("loading")}</Tag> : <>{content}</>}
+      {loading ? <Tag>{i18n("loading")}</Tag> : null}
+      {content}
     </>
   )
 }
