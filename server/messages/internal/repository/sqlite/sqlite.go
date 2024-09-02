@@ -114,6 +114,22 @@ func (r *Repository) FindByIndexTerm(ctx context.Context, logIndex, logTerm uint
   return &msg, nil
 }
 
+const ascStmt = `
+SELECT id, user_id, createtime, message, file, file_id, log_index, log_term 
+FROM messages
+WHERE user_id = ?
+ORDER BY id ASC
+LIMIT ? OFFSET ?
+`
+
+const descStmt = `
+SELECT id, user_id, createtime, message, file, file_id, log_index, log_term 
+FROM messages
+WHERE user_id = ?
+ORDER BY id DESC
+LIMIT ? OFFSET ?
+`
+
 func (r *Repository) Get(
   ctx context.Context,
   userId usermodel.UserId,
@@ -124,23 +140,20 @@ func (r *Repository) Get(
   *model.MessagesList,
   error,
 ) {
+  var rows *sql.Rows
+  var err error
   var isLastPage bool
-  var order string = "ASC "
-  if !ascending {
-    order = "DESC "
+
+  if ascending {
+    rows, err = r.db.QueryContext(ctx, ascStmt, int(userId), limit, offset)
+  } else {
+    rows, err = r.db.QueryContext(ctx, descStmt, int(userId), limit, offset)
   }
 
-  rows, err := r.db.QueryContext(ctx,
-    "SELECT id, user_id, createtime, message, file, file_id, log_index, log_term " +
-    "FROM messages " + 
-    "WHERE user_id = ? " +
-    "ORDER BY id " + order + 
-    "LIMIT ? OFFSET ?",
-    int(userId), limit, offset,
-  )
   if err != nil {
     return nil, err
   }
+
   defer rows.Close()
 
   var res []*model.Message

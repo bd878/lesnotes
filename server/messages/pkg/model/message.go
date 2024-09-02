@@ -35,7 +35,7 @@ type NewMessageServerResponse struct {
 type MessagesListServerResponse struct {
   ServerResponse
   Messages   []*Message `json:"messages"`
-  IsLastPage bool      `json:"islastpage"`
+  IsLastPage bool       `json:"islastpage"`
 }
 
 const NullMsgId = MessageId(0)

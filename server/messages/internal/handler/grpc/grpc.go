@@ -62,6 +62,7 @@ func (h *Handler) ReadUserMessages(ctx context.Context, req *api.ReadUserMessage
   if err != nil {
     return nil, err
   }
+
   return &api.ReadUserMessagesResponse{
     Messages: model.MapMessagesToProto(model.MessageToProto, res.Messages),
     IsLastPage: res.IsLastPage,
