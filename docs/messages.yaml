@@ -4,61 +4,188 @@ info:
   description: |
     This API allows sending and reading user texts
     from messages service.
-  version: 20.08.2024
+  version: 1.0.0
 paths:
   /send:
     post:
       summary: Send a message
       description: |
-        Send a message and distribute it across
-        cluster nodes
+        Send a message and replicate throughout the cluster,
+        message with file possibly
+      operationId: sendRequest
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/sendBody'
       responses:
         "200":
-          description: Success response
+          description: OK
           content:
             application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/sendOk'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sendErr'
   /read:
     parameters:
-      - name: filter 
-        in: query
-        schema:
-          $ref: '#/components/schemas/filter'
-      - name: offset
-        in: query
-        schema:
-          $ref: '#/components/schemas/offset'
+      - $ref: '#/components/parameters/limitParam'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/ascParam'
     get:
-      summary: Get all user messages
+      summary: Get user messages
       description: |
-        Read all messages of given user
+        Read messages for a given user
       responses:
         "200":
-          description: All user messages
+          description: OK
           content:
             application/json:
               schema:
-                type: string
+                type: object
+                properties:
+                  status:
+                    type: string
+                    default: "ok"
+                  description:
+                    type: string
+                    default: ""
+                  islastpage:
+                    type: boolean
+                  messages:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/message_obj'
+        "4XX":
+          description: error 
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    default: "fail"
+                  description:
+                    type: string
+                    default: ""
+                  messages:
+                    type: array
+                    items:
+                      type: object
+                    example: []
   /status:
     get:
+      operationId: reportStatus
       summary: Show server status
       responses:
-        "200":
+        "2XX":
           description: Success response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/status_ok'
+        "4XX":
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/status_err'
+
 components:
+  parameters:
+    limitParam:
+      name: limit 
+      in: query
+      required: false
+      schema:
+        type: integer
+        example: 25
+    offsetParam:
+      name: offset
+      in: query
+      required: false
+      schema:
+        type: integer
+        example: 0
+    ascParam:
+      name: asc
+      in: query
+      required: false
+      schema:
+        enum: [1, 0]
+        type: integer
+
   schemas:
-    filter:
-      type: integer
-      minimum: 0
-      maximum: 100
-    offset:
-      type: integer
-      minimum: 0
-      maximum: 100
+    sendBody:
+      example:
+        message: test message
+      type: object
+      properties:
+        message:
+          type: string
+          default: ""
+
+    sendOk:
+      type: object
+      properties:
+        status:
+          type: string
+          default: ok
+        description:
+          type: string
+          default: ""
+        message:
+          $ref: '#/components/schemas/message_obj'
+    sendErr:
+      type: object
+      properties:
+        status:
+          type: string
+          default: fail
+        description:
+          type: string
+          default: ""
+    message_obj:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+          readOnly: true
+        userid:
+          type: integer
+          example: 1
+        value:
+          type: string
+          example: "test message"
+        createtime:
+          type: string
+          format: date-time
+        fileid:
+          type: string
+        filename:
+          type: string
     status_ok:
-      type: string
+      type: object
+      properties:
+        status:
+          type: string 
+          default: "ok"
+        description:
+          type: string 
+          default: ""
+    status_err:
+      type: object
+      properties:
+        status:
+          type: string
+          default: "error"
+        description:
+          type: string
+          default: ""
