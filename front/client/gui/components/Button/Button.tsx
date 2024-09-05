@@ -8,6 +8,7 @@ const Button = forwardRef((props, ref) => {
       ref={ref}
       type={props.button}
       onClick={props.onClick}
+      disabled={props.disabled}
     >
       {props.text}
     </Tag>

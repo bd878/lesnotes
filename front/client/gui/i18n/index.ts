@@ -18,6 +18,7 @@ const i18n = {
     pass_required_err: "Password required",
     msg_required_err: "Message required",
     msg_send_text: "Send",
+    load_more: "Load more",
   },
   "ru": {
     logout: "Выйти",
@@ -38,6 +39,7 @@ const i18n = {
     pass_required_err: "Необходимо ввести пароль",
     msg_required_err: "Необходимо ввести сообщение",
     msg_send_text: "Отправить",
+    load_more: "Загузить ещё",
   }
 }
 
