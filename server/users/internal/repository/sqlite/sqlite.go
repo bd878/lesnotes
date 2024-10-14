@@ -45,6 +45,8 @@ func (r *Repository) Has(ctx context.Context, user *model.User) (bool, error) {
 func (r *Repository) Get(ctx context.Context, user *model.User) (*model.User, error) {
   if user.Token != "" {
     return r.getByToken(ctx, user.Token)
+  } else if user.Name != "" {
+    return r.getByUserName(ctx, user.Name)
   }
   return nil, ErrNotImplemented
 }
@@ -55,21 +57,57 @@ func (r *Repository) Refresh(ctx context.Context, user *model.User) error {
   return err
 }
 
+func (r *Repository) getByUserName(ctx context.Context, name string) (*model.User, error) {
+  var password, token string
+  var expires sql.NullString
+  var id int
+
+  err := r.db.QueryRowContext(ctx, "SELECT id, name, password, token, expires FROM users WHERE " +
+    "name = ?", name).Scan(&id, &name, &password, &token, &expires)
+
+  msg := &model.User{
+    Id: model.UserId(id),
+    Name: name,
+    Password: password,
+    Token: token,
+  }
+
+  if expires.Valid {
+    msg.Expires = expires.String
+  }
+
+  switch {
+  case err == sql.ErrNoRows:
+    log.Printf("no rows for name %v\n", name)
+    return nil, repository.ErrNoUser
+
+  case err != nil:
+    log.Printf("query error: %v\n", err)
+    return nil, err
+
+  default:
+    return msg, nil
+  }
+}
+
 func (r *Repository) getByToken(ctx context.Context, token string) (*model.User, error) {
   var name, password, expires string
   var id int
+
   err := r.db.QueryRowContext(ctx, "SELECT id, name, password, token, expires FROM users WHERE " +
     "token = ?", token).Scan(&id, &name, &password, &token, &expires)
   switch {
   case err == sql.ErrNoRows:
     log.Printf("no rows for token %v\n", token)
     return nil, repository.ErrNoUser
+
   case err != nil:
     log.Printf("query error: %v\n", err)
     return nil, err
+
   default:
     return &model.User{
-      Id: id,
+      Id: model.UserId(id),
       Name: name,
       Password: password,
       Token: token,

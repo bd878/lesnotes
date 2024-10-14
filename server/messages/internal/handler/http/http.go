@@ -147,7 +147,7 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) {
 
   var msg *model.Message
   if msg, err = h.ctrl.SaveMessage(context.Background(), &model.Message{
-    UserId: user.Id,
+    UserId: int(user.Id),
     Value: value,
     FileName: fileName,
     FileId: model.FileId(fileId),

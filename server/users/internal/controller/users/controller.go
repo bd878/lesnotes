@@ -1,6 +1,7 @@
 package users
 
 import (
+  "time"
   "context"
 
   "github.com/bd878/gallery/server/users/pkg/model"
@@ -36,8 +37,11 @@ func (c *Controller) Refresh(ctx context.Context, user *model.User) error {
 }
 
 func (c *Controller) Get(ctx context.Context, user *model.User) (*model.User, error) {
+  var tokenExpiresTime time.Time
+
   result, err := c.repo.Get(ctx, &model.User{
     Token: user.Token,
+    Name: user.Name,
   })
   if err == repository.ErrNoUser {
     return nil, controller.ErrNotFound
@@ -45,14 +49,35 @@ func (c *Controller) Get(ctx context.Context, user *model.User) (*model.User, er
   if err != nil {
     return nil, err
   }
-  // TODO: check for expire
-  if result.Token == user.Token {
-    return &model.User{
-      Id: result.Id,
-      Name: result.Name,
-      Token: result.Token,
-      Expires: result.Expires,
-    }, nil
+
+  if result.Expires == "" {
+    return nil, controller.ErrTokenExpired
   }
-  return nil, controller.ErrTokenInvalid
+
+  err = tokenExpiresTime.UnmarshalText([]byte(result.Expires))
+  if err != nil {
+    return nil, err
+  }
+
+  if isTokenExpired(tokenExpiresTime) {
+    return nil, controller.ErrTokenExpired
+  }
+
+  return &model.User{
+    Id: result.Id,
+    Name: result.Name,
+    Token: result.Token,
+    Expires: result.Expires,
+  }, nil
+}
+
+func isTokenExpired(expiresAt time.Time) bool {
+  now := time.Now()
+  if expiresAt.Before(now) {
+    return true
+  }
+  if expiresAt.Equal(now) {
+    return true
+  }
+  return false
 }

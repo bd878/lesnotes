@@ -21,12 +21,12 @@ const Auth = props => {
         setLoading(false);
       }
 
-      if (response.valid) {
-        setAuthed(true);
-        console.log("welcome,", response.user.name)
-      } else {
+      if (response.expired) {
         setAuthed(false);
         setTimeout(() => {location.href = "/login"}, 1000)
+      } else {
+        setAuthed(true);
+        console.log("welcome,", response.user.name)
       }
     }
 

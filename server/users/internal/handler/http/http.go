@@ -30,48 +30,79 @@ func New(ctrl *users.Controller, cfg Config) *Handler {
 
 func (h *Handler) Authenticate(w http.ResponseWriter, req *http.Request) {
   var userName, password string 
-  var ok bool
+  var ok, exists bool
+  var user *model.User
+  var err error
 
   if userName, ok = getName(w, req); !ok {
+    log.Println("cannot get name")
     return
   }
 
   if password, ok = getPassword(w, req); !ok {
+    log.Println("cannot get password")
     return
   }
 
-  exists, err := h.ctrl.Has(context.Background(), &model.User{Name: userName, Password: password})
+  exists, err = h.ctrl.Has(context.Background(), &model.User{Name: userName, Password: password})
   if err != nil {
-    log.Println(err)
+    log.Println("failed to check if user exists:", err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
 
   if !exists {
-    if err := json.NewEncoder(w).Encode(model.ServerResponse{
+    if err = json.NewEncoder(w).Encode(model.ServerResponse{
       Status: "ok",
       Description: "no user,password pair",
     }); err != nil {
-      log.Println(err)
+      log.Println("failed to send no user,password pair:", err)
       w.WriteHeader(http.StatusInternalServerError)
       return
     }
     return
   }
 
-  token, expires := createToken(w, h.cfg.Domainname)
-  err = h.ctrl.Refresh(context.Background(), &model.User{Name: userName, Token: token, Expires: expires})
-  if err != nil {
-    log.Println(err)
+  user, err = h.ctrl.Get(context.Background(), &model.User{Name: userName})
+  switch err {
+  case controller.ErrTokenExpired:
+    log.Println("token expired")
+    err = refreshToken(h, w, userName)
+    if err != nil {
+      log.Println("Cannot refresh token: ", err)
+      w.WriteHeader(http.StatusInternalServerError)
+      return
+    }
+
+  case controller.ErrNotFound:
+    if err = json.NewEncoder(w).Encode(model.ServerResponse{
+      Status: "ok",
+      Description: "no user,password pair",
+    }); err != nil {
+      log.Println("cannot respond no user: ", err)
+      w.WriteHeader(http.StatusInternalServerError)
+      return
+    }
+
+  case nil:
+    err = attachTokenToResponse(w, user.Token, h.cfg.Domainname, user.Expires)
+    if err != nil {
+      log.Println("Cannot attach token to response: ", err)
+      w.WriteHeader(http.StatusInternalServerError)
+      return
+    }
+
+  default:
+    log.Println("Unknown error: ", err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
 
-  if err := json.NewEncoder(w).Encode(model.ServerResponse{
+  if err = json.NewEncoder(w).Encode(model.ServerResponse{
     Status: "ok",
     Description: "authenticated",
   }); err != nil {
-    log.Println(err)
+    log.Println("cannot send ok authenticated: ", err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
@@ -87,22 +118,23 @@ func (h *Handler) Auth(w http.ResponseWriter, req *http.Request) {
 
   log.Println("cookie value =", cookie.Value)
   user, err := h.ctrl.Get(context.Background(), &model.User{Token: cookie.Value})
-  if err == controller.ErrTokenInvalid {
+  if err == controller.ErrTokenExpired {
+    log.Println("token expired")
     if err := json.NewEncoder(w).Encode(model.ServerAuthorizeResponse{
       ServerResponse: model.ServerResponse{
         Status: "ok",
-        Description: "invalid token",
+        Description: "token expired",
       },
-      Valid: false,
+      Expired: true,
     }); err != nil {
-      log.Println(err)
+      log.Println("cannot send token expired error: ", err)
       w.WriteHeader(http.StatusInternalServerError)
       return
     }
   }
   // TODO: check for token expired error
   if err != nil {
-    log.Println(err)
+    log.Println("failed to get user by token: ", err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
@@ -112,7 +144,7 @@ func (h *Handler) Auth(w http.ResponseWriter, req *http.Request) {
       Status: "ok",
       Description: "token valid",
     },
-    Valid: true,
+    Expired: false,
     User: model.User{
       Id: -1,
       Name: user.Name,
@@ -120,7 +152,7 @@ func (h *Handler) Auth(w http.ResponseWriter, req *http.Request) {
       Expires: user.Expires,
     },
   }); err != nil {
-    log.Println(err)
+    log.Println("failed to send authorize response: ", err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
@@ -220,10 +252,23 @@ func getTextField(w http.ResponseWriter, req *http.Request, field string) (value
   return
 }
 
+func refreshToken(h *Handler, w http.ResponseWriter, userName string) (err error) {
+  var token, expires string
+
+  token, expires = createToken(w, h.cfg.Domainname)
+
+  return h.ctrl.Refresh(context.Background(), &model.User{Name: userName, Token: token, Expires: expires})
+}
+
 func createToken(w http.ResponseWriter, domain string) (token string, expires string) {
   token = utils.RandomString(10)
   expiresAt := time.Now().Add(time.Hour * 24 * 5)
-  expires = expiresAt.String()
+  expiresRaw, err := expiresAt.MarshalText()
+  if err != nil {
+    log.Println("failed to marshal text: ", err)
+  }
+
+  expires = string(expiresRaw)
 
   http.SetCookie(w, &http.Cookie{
     Name: "token",
@@ -233,5 +278,27 @@ func createToken(w http.ResponseWriter, domain string) (token string, expires st
     Path: "/",
     HttpOnly: true,
   })
+
   return
 }
+
+func attachTokenToResponse(w http.ResponseWriter, token, domain string, expires string) (err error) {
+  var tokenExpiresTime time.Time
+
+  err = tokenExpiresTime.UnmarshalText([]byte(expires))
+  if err != nil {
+    return
+  }
+
+  http.SetCookie(w, &http.Cookie{
+    Name: "token",
+    Value: token,
+    Domain: domain,
+    Expires: tokenExpiresTime,
+    Path: "/",
+    HttpOnly: true,
+  })
+
+  return
+}
+

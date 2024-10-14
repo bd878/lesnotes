@@ -15,7 +15,7 @@ func UserToProto(u *User) *api.User {
 
 func UserFromProto(u *api.User) *User {
   return &User{
-    Id: int(u.Id),
+    Id: UserId(u.Id),
     Name: u.Name,
     Token: u.Token,
     Expires: u.Expires,

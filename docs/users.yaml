@@ -1,0 +1,6 @@
+openapi: 3.0.0
+info:
+  title: API Specification for users service
+  description: |
+    This API allows authenticating requests.
+  version: 1.0.0

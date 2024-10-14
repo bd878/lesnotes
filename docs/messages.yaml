@@ -6,7 +6,7 @@ info:
     from messages service.
   version: 1.0.0
 paths:
-  /send:
+  /messages/v1/send:
     post:
       summary: Send a message
       description: |
@@ -31,7 +31,57 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/sendErr'
-  /read:
+
+  /messages/v1/update:
+    parameters:
+      - $ref: '#/components/parameters/messageId'
+    put:
+      summary: Update a message
+      description: |
+        Update a message text or file. Message text cannot be empty
+      operationId: updateMessage
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/updateMessage'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/statusOk'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/statusErr'
+
+  /messages/v1/delete:
+    parameters:
+      - $ref: '#/components/parameters/messageId'
+    delete:
+      summary: Delete a message
+      description: |
+        Delete a message and attached file
+      operationId: deleteMessage
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/statusOk'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/statusErr'
+
+  /messages/v1/read:
     parameters:
       - $ref: '#/components/parameters/limitParam'
       - $ref: '#/components/parameters/offsetParam'
@@ -60,7 +110,7 @@ paths:
                     type: array
                     items:
                       allOf:
-                        - $ref: '#/components/schemas/message_obj'
+                        - $ref: '#/components/schemas/messageObj'
         "4XX":
           description: error 
           content:
@@ -79,7 +129,7 @@ paths:
                     items:
                       type: object
                     example: []
-  /status:
+  /messages/v1/status:
     get:
       operationId: reportStatus
       summary: Show server status
@@ -89,16 +139,23 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/status_ok'
+                $ref: '#/components/schemas/statusOk'
         "4XX":
           description: Error response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/status_err'
+                $ref: '#/components/schemas/statusErr'
 
 components:
   parameters:
+    messageId:
+      name: id
+      in: query
+      required: true
+      schema:
+        type: integer
+        example: 1
     limitParam:
       name: limit 
       in: query
@@ -122,6 +179,15 @@ components:
         type: integer
 
   schemas:
+    updateMessage:
+      type: object
+      properties:
+        value:
+          type: string
+          example: "test message"
+        filename:
+          type: string
+
     sendBody:
       example:
         message: test message
@@ -141,7 +207,7 @@ components:
           type: string
           default: ""
         message:
-          $ref: '#/components/schemas/message_obj'
+          $ref: '#/components/schemas/messageObj'
     sendErr:
       type: object
       properties:
@@ -151,7 +217,7 @@ components:
         description:
           type: string
           default: ""
-    message_obj:
+    messageObj:
       type: object
       properties:
         id:
@@ -171,7 +237,7 @@ components:
           type: string
         filename:
           type: string
-    status_ok:
+    statusOk:
       type: object
       properties:
         status:
@@ -180,7 +246,7 @@ components:
         description:
           type: string 
           default: ""
-    status_err:
+    statusErr:
       type: object
       properties:
         status:

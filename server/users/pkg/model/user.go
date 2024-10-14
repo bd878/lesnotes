@@ -2,10 +2,11 @@ package model
 
 // TODO: UserId -> UserID
 type UserId int
+// TODO: type UserName string
 
 // User model
 type User struct {
-  Id int `json:"id"`
+  Id UserId `json:"id"`
   Name string `json:"name"`
   Password string `json:"password"`
   Token string `json:"token"`
@@ -20,6 +21,6 @@ type ServerResponse struct {
 
 type ServerAuthorizeResponse struct {
   ServerResponse
-  Valid bool `json:"valid"`
+  Expired bool `json:"expired"`
   User User `json:"user"`
 }
