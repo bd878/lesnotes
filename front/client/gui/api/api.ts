@@ -1,3 +1,5 @@
+import i18n from '../i18n';
+
 const methodsWithBody = [
   'POST', 'PUT', 'DELETE', 'PATCH',
 ]
@@ -60,7 +62,7 @@ function getOptions(props) {
 
 export {getFileDownloadUrl};
 
-export default function api(url, props = {}) {
+export default function api(url: string, props = {}) {
   const { isFullUrl = false, queryParams } = props;
 
   let fullUrl = getFullUrl(url, isFullUrl);
@@ -69,13 +71,32 @@ export default function api(url, props = {}) {
 
   return fetch(fullUrl, options)
     .then(res => {
+      if (!res.ok) {
+        console.error(`[api] request to ${url} returned ${res.status} status`)
+        return {
+          value: null,
+          error: i18n("bad_status_code"),
+          explain: i18n("token_expired_error"),
+        };
+      }
+
       return res
         .text()
         .then(text => {
           try {
-            return JSON.parse(text);
+            const value = JSON.parse(text);
+            return {
+              value,
+              error: "",
+              explain: "",
+            }
           } catch (e) {
-            return text;
+            console.error("[api]: error occured", e)
+            return {
+              value: text,
+              error: i18n("bad_response"),
+              explain: i18n("cannot_parse_response"),
+            }
           }
         })
     })

@@ -26,8 +26,12 @@ const sendRegisterRequest = async e => {
     })
   });
   console.log(response);
-  if (response.status == "ok") {
-    setTimeout(() => {location.href = "/home"}, 1000)
+  if (response.error != "") {
+    console.error("[RegisterForm]: /signup response returned error", response.error, response.explain)
+  } else {
+    if (response.value.status == "ok") {
+      setTimeout(() => {location.href = "/home"}, 1000)
+    }
   }
 }
 

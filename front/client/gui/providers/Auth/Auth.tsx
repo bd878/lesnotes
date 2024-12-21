@@ -8,7 +8,7 @@ const Auth = props => {
 
   useEffect(() => {
     async function call() {
-      let response = { valid: false };
+      let response = {};
       try {
         setLoading(true);
         response = await api("/users/v1/auth", {
@@ -21,12 +21,17 @@ const Auth = props => {
         setLoading(false);
       }
 
-      if (response.expired) {
-        setAuthed(false);
-        setTimeout(() => {location.href = "/login"}, 1000)
+      if (response.error == "") {
+        if (response.value.expired) {
+          setAuthed(false);
+          setTimeout(() => {location.href = "/login"}, 0)
+        } else {
+          setAuthed(true);
+          console.log("welcome,", response.value.user.name)
+        }
       } else {
-        setAuthed(true);
-        console.log("welcome,", response.user.name)
+        setAuthed(false);
+        setTimeout(() => {location.href = "/login"}, 0)
       }
     }
 

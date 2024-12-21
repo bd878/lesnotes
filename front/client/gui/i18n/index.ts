@@ -19,6 +19,10 @@ const i18n = {
     msg_required_err: "Message required",
     msg_send_text: "Send",
     load_more: "Load more",
+    bad_status_code: "Bad status code",
+    token_expired_error: "Token expired",
+    bad_response: "Bad response",
+    cannot_parse_response: "Cannot parse the response"
   },
   "ru": {
     logout: "Выйти",
@@ -40,6 +44,10 @@ const i18n = {
     msg_required_err: "Необходимо ввести сообщение",
     msg_send_text: "Отправить",
     load_more: "Загузить ещё",
+    bad_status_code: "Ошибка запроса",
+    token_expired_error: "Истекло время жизни токена",
+    bad_response: "Невалидный ответ от сервера",
+    cannot_parse_response: "Не получается разобрать ответ от сервера",
   }
 }
 

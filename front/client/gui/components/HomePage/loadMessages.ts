@@ -2,7 +2,14 @@ import i18n from '../../i18n';
 import api from '../../api';
 
 async function loadMessages(limit, offset, order) {
-  let response = [];
+  let response = {};
+  let result = {
+    error: "",
+    explain: "",
+    messages: [],
+    islastpage: false,
+  }
+
   try {
     response = await api('/messages/v1/read', {
       queryParams: {
@@ -13,19 +20,24 @@ async function loadMessages(limit, offset, order) {
       method: "GET",
       credentials: 'include',
     });
+
+    if (response.error != "") {
+      console.error('[loadMessages]: /read response returned error')
+      result.error = response.error
+      result.explain = response.explain
+    } else {
+      result.messages = response.value.messages
+    }
   } catch (e) {
     console.error(i18n("error_occured"), e);
     throw e
   }
 
-  if (Array.isArray(response.messages)) {
-    return response
+  if (Array.isArray(result.messages)) {
+    return result
   }
 
-  return {
-    messages: [],
-    islastpage: true,
-  };
+  return result;
 }
 
 export default loadMessages;

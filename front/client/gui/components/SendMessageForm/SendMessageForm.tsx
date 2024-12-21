@@ -35,13 +35,18 @@ const SendMessageForm = ({ onError, onSuccess }) => {
           body: form,
         });
         console.log("[sendMessageRequest] response: ", response);
-        if (response.message != undefined) { 
-          onSuccess(response.message);
-        }
+        if (response.error != "") {
+          console.error("[SendMessageForm]: /send returned error", response.error, response.explain)
+          onError(response.error)
+        } else {
+          if (response.value.message != undefined) { 
+            onSuccess(response.value.message);
+          }
 
-        fileRef.current.value = null
-        setMessage("")
-        setFile(null)
+          fileRef.current.value = null
+          setMessage("")
+          setFile(null)
+        }
       } catch (e) {
         console.error(i18n("error_occured"), e);
         onError(e);

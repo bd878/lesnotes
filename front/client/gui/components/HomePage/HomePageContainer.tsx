@@ -35,6 +35,11 @@ function HomePageContainer() {
       try {
         setLoading(true);
         const response = await loadMessages(LIMIT_LOAD_BY, 0, LOAD_ORDER);
+        if (response.error != "") {
+          console.error("[HomePageContainer]: failed to load messages",
+            response.error, response.explain);
+          throw(response.error);
+        }
         response.messages.reverse();
         appendMessages(response.messages);
         if (response.islastpage) {
@@ -60,6 +65,11 @@ function HomePageContainer() {
           getLoadOffset(),
           LOAD_ORDER,
         )
+        if (response.error != "") {
+          console.error("[HomePageContainer]: failed to load messages",
+            response.error, response.explain);
+          throw(response.error);
+        }
         response.messages.reverse();
         if (response.islastpage) {
           setIsLastPage(true)

@@ -34,9 +34,15 @@ const LoginForm = ({ onError }) => {
             'password': password,
           })
         });
-        console.log(response);
-        if (response.status == "ok") {
-          setTimeout(() => {location.href = "/home"}, 1000)
+
+        if (response.error == "") {
+          if (response.value.status == "ok") {
+            setTimeout(() => {location.href = "/home"}, 1000)
+          } else {
+            console.log("status not ok, value:", response.value)
+          }
+        } else {
+          console.error("error: ", response.error, response.explain)
         }
       } catch (e) {
         console.error(i18n("error_occured"), e);
