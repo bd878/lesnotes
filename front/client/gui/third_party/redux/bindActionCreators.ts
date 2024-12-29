@@ -7,7 +7,7 @@ function bindActionCreator(
   }
 }
 
-export default function bindActinoCreators(
+export default function bindActionCreators(
   actionCreators,
   dispatch
 ) {

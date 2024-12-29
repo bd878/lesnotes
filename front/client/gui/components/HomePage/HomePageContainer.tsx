@@ -7,12 +7,17 @@ import {
   LOAD_ORDER,
 } from './const';
 
-function HomePageContainer() {
+function HomePageContainer(props) {
+  const {
+    messages,
+    appendMessages,
+    pushBackMessages,
+  } = props
+
   const listRef = useRef(null);
   const [error, setError] = useState(false);
   const [isLastPage, setIsLastPage] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [messages, setMessages] = useState([]);
 
   const getLoadOffset = useCallback(() => messages.length, [messages]);
 
@@ -21,14 +26,6 @@ function HomePageContainer() {
       listRef.current.scrollTo(0, listRef.current.scrollHeight);
     }
   }, [listRef]);
-
-  const appendMessages = useCallback((messagesToAppend) => {
-    setMessages([ ...messages, ...messagesToAppend ]);
-  }, [messages, setMessages]);
-
-  const pushBackMessages = useCallback((messagesToPushBack) => {
-    setMessages([ ...messagesToPushBack, ...messages ]);
-  }, [messages, setMessages]);
 
   useEffect(() => {
     const init = async () => {

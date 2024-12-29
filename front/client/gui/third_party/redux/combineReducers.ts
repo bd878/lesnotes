@@ -16,10 +16,7 @@ export default function combineReducers(reducers) {
 
   /* TODO: reducers shape assertion */
 
-  return function combination(
-    state,
-    action
-  ) {
+  return function combination(state, action) {
     let hasChanged = false
     const nextState = {}
     for (let i = 0; i < finalreducerKeys.length; i++) {

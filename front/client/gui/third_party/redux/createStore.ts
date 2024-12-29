@@ -19,7 +19,7 @@ export function createStore(reducer, preloadedState, enhancer) {
   let isDispatching = false
 
   function getState() {
-    if (!isDispatching) {
+    if (isDispatching) {
       throw new Error("cannot call store.getState() while reducer is executing")
     }
 
@@ -94,6 +94,8 @@ export function createStore(reducer, preloadedState, enhancer) {
     try {
       isDispatching = true
       currentState = currentReducer(currentState, action)
+    } catch(e) {
+      console.log(e)
     } finally {
       isDispatching = false
     }
@@ -120,5 +122,6 @@ export function createStore(reducer, preloadedState, enhancer) {
     getState,
     replaceReducer
   }
+
   return store;
 }
