@@ -1,6 +1,6 @@
 import {messagesReducer} from './messagesReducer'
 import {
-  addMessagesActionCreator,
+  appendMessagesActionCreator,
   pushBackMessagesActionCreator,
 } from './messagesActionCreators'
 import {
@@ -9,7 +9,7 @@ import {
 
 export {
   messagesReducer,
-  addMessagesActionCreator,
+  appendMessagesActionCreator,
   pushBackMessagesActionCreator,
   selectMessages,
 }
