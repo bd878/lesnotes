@@ -2,10 +2,17 @@ import React, {useState, useRef, useEffect, useCallback} from 'react';
 import i18n from '../../i18n';
 import HomePageComponent from './HomePageComponent';
 import loadMessages from './loadMessages';
+import {connect} from '../../third_party/react-redux';
+import {bindActionCreators} from '../../third_party/redux';
 import {
   LIMIT_LOAD_BY,
   LOAD_ORDER,
 } from './const';
+import {
+  appendMessagesActionCreator,
+  pushBackMessagesActionCreator,
+  selectMessages,
+} from '../../features/messages';
 
 function HomePageContainer(props) {
   const {
@@ -133,4 +140,16 @@ function HomePageContainer(props) {
   )
 }
 
-export default HomePageContainer;
+const mapStateToProps = state => ({
+  messages: selectMessages(state),
+})
+
+const mapDispatchToProps = {
+  appendMessages: appendMessagesActionCreator,
+  pushBackMessages: pushBackMessagesActionCreator,
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(HomePageContainer);

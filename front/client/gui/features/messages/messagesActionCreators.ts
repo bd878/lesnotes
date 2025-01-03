@@ -3,7 +3,7 @@ import {
   PUSH_BACK_MESSAGES
 } from './messagesActions'
 
-export function addMessagesActionCreator(payload) {
+export function appendMessagesActionCreator(payload) {
   return {
     type: APPEND_MESSAGES,
     payload,

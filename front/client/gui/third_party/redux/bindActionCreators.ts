@@ -11,10 +11,6 @@ export default function bindActionCreators(
   actionCreators,
   dispatch
 ) {
-  if (typeof actionCreators === "function") {
-    return bindActionCreators(actionCreators, dispatch)
-  }
-
   if (typeof actionCreators !== "object" || actionCreators === null) {
     throw new Error("actionCreators must be a non-null object")
   }
