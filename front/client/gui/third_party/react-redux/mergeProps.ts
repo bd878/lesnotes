@@ -2,8 +2,6 @@ function defaultMergeProps(stateProps, dispatchProps, ownProps) {
   return { ...ownProps, ...stateProps, ...dispatchProps }
 }
 
-export function mergePropsFactory(mergeProps) {
-  return !mergeProps
-    ? () => defaultMergeProps
-    : throw new Error("mergeProps is not supported yet")
+export function mergePropsFactory(_mergeProps) {
+  return () => defaultMergeProps
 }

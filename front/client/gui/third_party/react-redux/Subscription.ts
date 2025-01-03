@@ -108,7 +108,7 @@ export function createSubscription(store, parentSub) {
     return selfSubscribed
   }
 
-  function tryUnsubscribe() {
+  function trySubscribe() {
     subscriptionsAmount++
     if (!unsubscribe) {
       unsubscribe = parentSub

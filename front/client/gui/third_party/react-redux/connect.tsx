@@ -1,6 +1,7 @@
 import React from 'react';
 import hoistStatics from './hoistStatics';
 import shallowEqual from './shallowEqual';
+import defaultSelectorFactory from './selectorFactory';
 import {mapStateToPropsFactory} from './mapStateToProps'
 import {mapDispatchToPropsFactory} from './mapDispatchToProps'
 import {mergePropsFactory} from './mergeProps'
@@ -57,7 +58,7 @@ function subscribeUpdates(
         latestStoreState,
         lastProps.current,
       )
-    } catch(e) {
+    } catch (e) {
       error = e
       lastThrownError = e
     }
@@ -76,7 +77,7 @@ function subscribeUpdates(
       childPropsFromStoreUpdate.current = newChildProps
       renderIsScheduled.current = true
 
-      // trigger React listener
+      // trigger React useSyncExternalStore listener
       listener()
     }
   }
@@ -100,7 +101,10 @@ function subscribeUpdates(
 }
 
 export function connect(mapStateToProps, mapDispatchToProps) {
+  // mapStateToProps, mapDispatchToProps might be an object, function or undefined,
+  // so wrap them in proxy object
   const initMapStateToProps = mapStateToPropsFactory(mapStateToProps)
+  // proxy for bindActionCreators and other...
   const initMapDispatchToProps = mapDispatchToPropsFactory(mapDispatchToProps)
   const initMergeProps = mergePropsFactory(mergeProps)
 
@@ -141,7 +145,7 @@ export function connect(mapStateToProps, mapDispatchToProps) {
         return [subscription, notifyNestedSubs]
       }, [store, contextValue])
 
-      const overriddenContextValue = React.useMemo(() => {
+      const overridenContextValue = React.useMemo(() => {
         return {
           ...contextValue,
           subscription,
@@ -172,13 +176,14 @@ export function connect(mapStateToProps, mapDispatchToProps) {
             return childPropsFromStoreUpdate.current
           }
 
-          // pass state to mapStateToProps
+          // merge props : pass state to mapStateToProps
           return childPropsSelector(store.getState(), props)
         }
 
         return selector
       }, [store, props])
 
+      // for useSyncExternalStore
       const subscribeForReact = React.useMemo(() => {
         const subscribe = reactListener => {
           if (!subscription) {
@@ -200,6 +205,9 @@ export function connect(mapStateToProps, mapDispatchToProps) {
         }
 
         return subscribe
+      // updates if subscription changes,
+      // since it depends on store and context, it changes very rarely
+      // (only if new store commes)
       }, [subscription])
 
       useIsomorphicLayoutEffect(captureWrapperProps, [
@@ -214,6 +222,8 @@ export function connect(mapStateToProps, mapDispatchToProps) {
       // props after all mapToState wrappers ++ own props
       let actualChildProps = {}
       try {
+        // React will call actualChildPropsSelector, when in 
+        // subscribeForReact(listener) given listener is called
         actualChildProps = React.useSyncExternalStore(
           subscribeForReact,
           actualChildPropsSelector,
@@ -238,11 +248,11 @@ export function connect(mapStateToProps, mapDispatchToProps) {
 
       const renderedChild = React.useMemo(() => {
         return (
-          <ReactReduxContext.Provider value={overriddenContextValue}>
+          <ReactReduxContext.Provider value={overridenContextValue}>
             {renderedWrappedComponent}
           </ReactReduxContext.Provider>
         )
-      }, [ReactReduxContext, renderedWrappedComponent, overriddenContextValue])
+      }, [ReactReduxContext, renderedWrappedComponent, overridenContextValue])
 
       return renderedChild
     }

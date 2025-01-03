@@ -1,5 +1,5 @@
 import {wrapMapToPropsConstant, wrapMapToPropsFunc} from './wrapMapToProps'
-import {bindActionCreators} from './bindActionCreators'
+import bindActionCreators from './bindActionCreators'
 
 export function mapDispatchToPropsFactory(mapDispatchToProps) {
   return mapDispatchToProps && typeof mapDispatchToProps === 'object'
