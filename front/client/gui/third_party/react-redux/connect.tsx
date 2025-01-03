@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {use} from 'react';
 import hoistStatics from './hoistStatics';
 import shallowEqual from './shallowEqual';
 import defaultSelectorFactory from './selectorFactory';
@@ -136,7 +136,7 @@ export function connect(mapStateToProps, mapDispatchToProps) {
     }
 
     function ConnectFunction(props) {
-      const contextValue = React.useContext(ReactReduxContext)
+      const contextValue = use(ReactReduxContext)
 
       const store = contextValue.store
 
@@ -252,7 +252,6 @@ export function connect(mapStateToProps, mapDispatchToProps) {
           <WrappedComponent {...actualChildProps} />
         )
       }, [WrappedComponent, actualChildProps])
-
 
       const renderedChild = React.useMemo(() => {
         return (

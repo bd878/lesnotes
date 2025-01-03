@@ -27,6 +27,7 @@ async function loadMessages(limit, offset, order) {
       result.explain = response.explain
     } else {
       result.messages = response.value.messages
+      result.islastpage = response.value.islastpage
     }
   } catch (e) {
     console.error(i18n("error_occured"), e);
