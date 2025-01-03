@@ -13,6 +13,14 @@ function strictEqual(a, b) {
   return a === b
 }
 
+function useIsomorphicLayoutEffectWithArgs(
+  effectFunc,
+  effectArgs,
+  dependencies,
+) {
+  useIsomorphicLayoutEffect(() => effectFunc(...effectArgs), dependencies)
+}
+
 function captureWrapperProps(
   lastProps,
   lastChildProps,
@@ -106,7 +114,7 @@ export function connect(mapStateToProps, mapDispatchToProps) {
   const initMapStateToProps = mapStateToPropsFactory(mapStateToProps)
   // proxy for bindActionCreators and other...
   const initMapDispatchToProps = mapDispatchToPropsFactory(mapDispatchToProps)
-  const initMergeProps = mergePropsFactory(mergeProps)
+  const initMergeProps = mergePropsFactory()
 
   const wrapWithConnect = (WrappedComponent) => {
     const wrappedComponentName =
@@ -152,9 +160,9 @@ export function connect(mapStateToProps, mapDispatchToProps) {
         }
       }, [contextValue, subscription])
 
-      const lastChildProps = React.useRef()
-      const lastProps = React.useRef()
-      const childPropsFromStoreUpdate = React.useRef()
+      const lastChildProps = React.useRef(undefined)
+      const lastProps = React.useRef(props)
+      const childPropsFromStoreUpdate = React.useRef(undefined)
       const renderIsScheduled = React.useRef(false)
       const isMounted = React.useRef(false)
 
@@ -210,7 +218,7 @@ export function connect(mapStateToProps, mapDispatchToProps) {
       // (only if new store commes)
       }, [subscription])
 
-      useIsomorphicLayoutEffect(captureWrapperProps, [
+      useIsomorphicLayoutEffectWithArgs(captureWrapperProps, [
         lastProps,
         lastChildProps,
         renderIsScheduled,

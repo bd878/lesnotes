@@ -28,7 +28,7 @@ export function wrapMapToPropsFunc(realMapToProps, methodName) {
       proxy.mapToProps = realMapToProps
       let props = proxy(stateOrDispatch, ownProps)
 
-      if (typeof proxy === "function") {
+      if (typeof props === "function") {
         proxy.mapToProps = props
         props = proxy(stateOrDispatch, ownProps)
       }

@@ -23,7 +23,7 @@ function pureFinalPropsSelectorFactory(
     dispatchProps = mapDispatchToProps(dispatch, ownProps)
     mergedProps = mergeProps(stateProps, dispatchProps, ownProps)
     hasRunAtLeastOnce = true
-    return mergeProps
+    return mergedProps
   }
 
   function handleNewPropsAndNewState() {
@@ -34,7 +34,7 @@ function pureFinalPropsSelectorFactory(
     }
 
     mergedProps = mergeProps(stateProps, dispatchProps, ownProps)
-    return mergeProps
+    return mergedProps
   }
 
   function handleNewProps() {
