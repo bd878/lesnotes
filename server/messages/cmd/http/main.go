@@ -3,68 +3,43 @@ package main
 import (
   "flag"
   "fmt"
-  "path/filepath"
-  "encoding/json"
+  "sync"
+  "context"
   "os"
-  "log"
 
   "github.com/bd878/gallery/server/messages/config"
+  "github.com/bd878/gallery/server/log"
 )
 
-var (
-  configPath = flag.String("config", "config/default.json", "config path")
-)
+func init() {
+  flag.Usage = func() {
+    fmt.Printf("Usage: %d config\n", os.Args[0])
+  }
+}
 
 func main() {
   flag.Parse()
 
-  c := loadConfig()
-
-  f := setLogOutput(c.LogPath, c.NodeName)
-  defer f.Close()
-
-  server := New(c)
-
-  fmt.Printf("=== HTTP %s\n", c.NodeName)
-  fmt.Println("Addr:", server.Addr)
-  fmt.Println("LogFile:", f.Name())
-  fmt.Println()
-
-  log.Printf("=== HTTP %s\n", c.NodeName)
-  server.ListenAndServe()
-}
-
-func loadConfig() config.Config {
-  f, err := os.Open(*configPath)
-  if err != nil {
-    panic(err)
-  }
-  defer f.Close()
-
-  var cfg config.Config
-  if err := json.NewDecoder(f).Decode(&cfg); err != nil {
-    panic(err)
+  if flag.NArg() != 1 {
+    flag.Usage()
+    os.Exit(1)
   }
 
-  return cfg
-}
+  cfg := config.Load(flag.Arg(0))
+  log.SetDefault(log.New(log.Config{
+    LogPath:   cfg.LogPath,
+    NodeName:  cfg.NodeName,
+  }))
 
-func setLogOutput(dir, nodeName string) *os.File {
-  if err := os.MkdirAll(dir, 0750); err != nil {
-    panic(err)
-  }
+  server := NewHTTPServer(HTTPServerConfig{
+    Addr:              cfg.HttpAddr,
+    RpcAddr:           cfg.RpcAddr,
+    DataPath:          cfg.DataPath,
+    UserServiceAddr:   cfg.UserServiceAddr,
+  })
 
-  logFile := fmt.Sprintf("%s.log", nodeName)
-
-  f, err := os.OpenFile(
-    filepath.Join(dir, logFile),
-    os.O_APPEND|os.O_CREATE|os.O_WRONLY,
-    0644,
-  )
-  if err != nil {
-    panic(err)
-  }
-
-  log.SetOutput(f)
-  return f
+  var wg *sync.WaitGroup
+  wg.Add(1)
+  go server.ListenAndServe(context.Background(), wg)
+  wg.Wait()
 }

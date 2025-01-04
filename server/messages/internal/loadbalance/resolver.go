@@ -4,7 +4,6 @@ import (
   "context"
   "sync"
   "fmt"
-  "log"
 
   "google.golang.org/grpc"
   "google.golang.org/grpc/credentials/insecure"
@@ -13,6 +12,7 @@ import (
   "google.golang.org/grpc/resolver"
 
   "github.com/bd878/gallery/server/api"
+  "github.com/bd878/gallery/server/log"
 )
 
 type Resolver struct {
@@ -88,6 +88,6 @@ func (r *Resolver) ResolveNow(resolver.ResolveNowOptions) {
 
 func (r *Resolver) Close() {
   if err := r.resolverConn.Close(); err != nil {
-    log.Println(err)
+    log.Error(err)
   }
 }

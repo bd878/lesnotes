@@ -1,7 +1,6 @@
 package http
 
 import (
-  "log"
   "net/http"
   "strconv"
   "strings"
@@ -16,6 +15,7 @@ import (
   usermodel "github.com/bd878/gallery/server/users/pkg/model"
   "github.com/bd878/gallery/server/messages/pkg/model"
   "github.com/bd878/gallery/server/utils"
+  "github.com/bd878/gallery/server/log"
 )
 
 const selectNoLimit int = -1
@@ -58,26 +58,26 @@ func (h *Handler) CheckAuth(
   return func(w http.ResponseWriter, req *http.Request) {
     cookie, err := req.Cookie("token")
     if err != nil {
-      log.Println("bad cookie")
+      log.Errorln("bad cookie")
       w.WriteHeader(http.StatusBadRequest)
       return
     }
 
-    log.Println("cookie value =", cookie.Value)
+    log.Infoln("cookie value", cookie.Value)
     user, err := h.userGateway.Auth(context.Background(), cookie.Value)
     if err != nil {
-      log.Println(err) // TODO: return invalid token response instead
+      log.Errorln(err) // TODO: return invalid token response instead
       if err := json.NewEncoder(w).Encode(model.ServerResponse{
         Status: "ok",
         Description: "token not found",
       }); err != nil {
-        log.Println(err)
+        log.Error(err)
         w.WriteHeader(http.StatusInternalServerError)
       }
       return
     }
 
-    log.Println("request for user id, name, token =", user.Id, user.Name, user.Token)
+    log.Infoln("user id", user.Id, "name", user.Name, "token", user.Token)
 
     req = req.WithContext(
       context.WithValue(context.Background(), userContextKey{}, user),
@@ -92,7 +92,7 @@ type userContextKey struct {}
 func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) {
   var err error
   if err = req.ParseMultipartForm(1); err != nil {
-    log.Println(err)
+    log.Error(err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
@@ -108,7 +108,7 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) {
   if _, ok := req.MultipartForm.File["file"]; ok {
     f, fh, err := req.FormFile("file")
     if err != nil {
-      log.Println(err)
+      log.Error(err)
       w.WriteHeader(http.StatusInternalServerError)
       return
     }
@@ -121,12 +121,12 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) {
       os.O_WRONLY|os.O_CREATE, 0666,
     )
     if err != nil {
-      log.Println(err)
+      log.Error(err)
       w.WriteHeader(http.StatusInternalServerError)
       return
     }
     if _, err := io.Copy(ff, f); err != nil {
-      log.Println(err)
+      log.Error(err)
       w.WriteHeader(http.StatusInternalServerError)
       return
     }
@@ -139,7 +139,7 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) {
       Status: "ok",
       Description: "empty fields",
     }); err != nil {
-      log.Println(err)
+      log.Error(err)
       w.WriteHeader(http.StatusInternalServerError)
     }
     return
@@ -152,7 +152,7 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) {
     FileName: fileName,
     FileId: model.FileId(fileId),
   }); err != nil {
-    log.Println(err)
+    log.Error(err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
@@ -164,7 +164,7 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) {
     },
     Message: *msg,
   }); err != nil {
-    log.Println(err)
+    log.Error(err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
@@ -190,7 +190,7 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) {
         Status: "ok",
         Description: fmt.Sprintf("wrong \"%s\" query param", "limit"),
       }); err != nil {
-        log.Println(err)
+        log.Error(err)
         w.WriteHeader(http.StatusInternalServerError)
       }
       return
@@ -203,7 +203,7 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) {
           Status: "ok",
           Description: fmt.Sprintf("wrong \"%s\" query param", "offset"),
         }); err != nil {
-          log.Println(err)
+          log.Error(err)
           w.WriteHeader(http.StatusInternalServerError)
         }
         return
@@ -222,7 +222,7 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) {
         Status: "ok",
         Description: fmt.Sprintf("wrong \"%s\" query param", "asc"),
       }); err != nil {
-        log.Println(err)
+        log.Error(err)
         w.WriteHeader(http.StatusInternalServerError)
       }
       return
@@ -248,7 +248,7 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) {
     ascending,
   )
   if err != nil {
-    log.Println(err)
+    log.Error(err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
@@ -260,7 +260,7 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) {
     Messages: res.Messages,
     IsLastPage: res.IsLastPage,
   }); err != nil {
-    log.Println(err)
+    log.Error(err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
@@ -274,7 +274,7 @@ func (h *Handler) ReadFile(w http.ResponseWriter, req *http.Request) {
       Status: "ok",
       Description: "empty file id",
     }); err != nil {
-      log.Println(err)
+      log.Error(err)
       w.WriteHeader(http.StatusInternalServerError)
     }
     return
@@ -282,7 +282,7 @@ func (h *Handler) ReadFile(w http.ResponseWriter, req *http.Request) {
 
   ff, err := os.Open(filepath.Join(h.dataPath, filename))
   if err != nil {
-    log.Println(err)
+    log.Error(err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
@@ -295,7 +295,7 @@ func (h *Handler) ReadFile(w http.ResponseWriter, req *http.Request) {
   w.Header().Set("Content-Type", mimetype)
 
   if _, err := io.Copy(w, ff); err != nil {
-    log.Println(err)
+    log.Error(err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
@@ -303,7 +303,7 @@ func (h *Handler) ReadFile(w http.ResponseWriter, req *http.Request) {
 
 func (h *Handler) GetStatus(w http.ResponseWriter, _ *http.Request) {
   if _, err := io.WriteString(w, "ok\n"); err != nil {
-    log.Println(err)
+    log.Error(err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }

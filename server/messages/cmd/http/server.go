@@ -1,6 +1,8 @@
 package main
 
 import (
+  "context"
+  "sync"
   "net/http"
 
   config "github.com/bd878/gallery/server/messages/config"
@@ -9,14 +11,24 @@ import (
   controller "github.com/bd878/gallery/server/messages/internal/controller/service"
 )
 
-func New(cfg config.Config) *http.Server {
+type HTTPServer struct {
+  *http.Server
+  config HTTPServerConfig
+}
+
+type HTTPServerConfig struct {
+  Addr            string
+  RpcAddr         string
+  UserServiceAddr string
+  DataPath        string
+}
+
+func NewHTTPServer(cfg HTTPServerConfig) *HTTPServer {
   mux := http.NewServeMux()
 
-  ctrlCfg := controller.Config{
+  grpcCtrl := controller.New(controller.Config{
     RpcAddr: cfg.RpcAddr,
-  }
-
-  grpcCtrl := controller.New(ctrlCfg)
+  })
   userGateway := usergateway.New(cfg.UsersServiceAddr)
   h := httphandler.New(grpcCtrl, userGateway, cfg.DataPath)
 
@@ -25,10 +37,18 @@ func New(cfg config.Config) *http.Server {
   mux.Handle("/messages/v1/status", http.HandlerFunc(h.GetStatus))
   mux.Handle("/messages/v1/read_file", http.HandlerFunc(h.CheckAuth(h.ReadFile)))
 
-  srv := &http.Server{
-    Addr: cfg.HttpAddr,
-    Handler: mux,
+  server := &HTTPServer{
+    Server: &http.Server{
+      Addr: cfg.Addr,
+      Handler: mux,
+    },
+    config: cfg,
   }
 
-  return srv
+  return server
+}
+
+func (s *HTTPServer) ListenAndServe(_ context.Context, wg *sync.WaitGroup) {
+  s.Server.ListenAndServe()
+  wg.Done()
 }

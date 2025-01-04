@@ -10,16 +10,7 @@ import (
 
 type Controller interface {
   SaveMessage(ctx context.Context, msg *model.Message) (*model.Message, error)
-  ReadUserMessages(
-    ctx context.Context,
-    userId usermodel.UserId,
-    limit int32,
-    offset int32,
-    ascending bool,
-  ) (
-    *model.MessagesList,
-    error,
-  )
+  ReadUserMessages(ctx context.Context, userId usermodel.UserId, limit int32, offset int32, ascending bool) (*model.MessagesList, error)
   GetServers(ctx context.Context) ([]*api.Server, error)
 }
 

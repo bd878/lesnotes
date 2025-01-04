@@ -1,9 +1,10 @@
 package discovery
 
 import (
-  "fmt"
   "net"
+
   "github.com/hashicorp/serf/serf"
+  "github.com/bd878/gallery/server/log"
 )
 
 type Membership struct {
@@ -97,7 +98,7 @@ func (m *Membership) runHandler() {
         m.handler.PrintMyAddr()
       }
     default:
-      fmt.Printf("Unknown event: %s\n", e.String())
+      log.Warnf("Unknown event: %s\n", e.String())
     }
   }
 }
