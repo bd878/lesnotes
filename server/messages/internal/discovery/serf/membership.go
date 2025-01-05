@@ -4,7 +4,7 @@ import (
   "net"
 
   "github.com/hashicorp/serf/serf"
-  "github.com/bd878/gallery/server/log"
+  "github.com/bd878/gallery/server/logger"
 )
 
 type Membership struct {
@@ -98,7 +98,7 @@ func (m *Membership) runHandler() {
         m.handler.PrintMyAddr()
       }
     default:
-      log.Warnf("Unknown event: %s\n", e.String())
+      logger.Warnf("Unknown event: %s\n", e.String())
     }
   }
 }

@@ -12,7 +12,7 @@ import (
   "google.golang.org/grpc/resolver"
 
   "github.com/bd878/gallery/server/api"
-  "github.com/bd878/gallery/server/log"
+  "github.com/bd878/gallery/server/logger"
 )
 
 type Resolver struct {
@@ -88,6 +88,6 @@ func (r *Resolver) ResolveNow(resolver.ResolveNowOptions) {
 
 func (r *Resolver) Close() {
   if err := r.resolverConn.Close(); err != nil {
-    log.Error(err)
+    logger.Error(err)
   }
 }

@@ -8,9 +8,9 @@ import (
   "google.golang.org/grpc/credentials/insecure"
 
   "github.com/bd878/gallery/server/api"
+  "github.com/bd878/gallery/server/logger"
   "github.com/bd878/gallery/server/messages/internal/loadbalance"
   "github.com/bd878/gallery/server/messages/pkg/model"
-  usermodel "github.com/bd878/gallery/server/users/pkg/model"
 )
 
 type Config struct {
@@ -18,8 +18,8 @@ type Config struct {
 }
 
 type Messages struct {
-  cfg    Config
-  client api.MessagesClient
+  conf    Config
+  client  api.MessagesClient
   conn   *grpc.ClientConn
 }
 
@@ -47,38 +47,32 @@ func (s *Messages) Close() {
   }
 }
 
-func (s *Messages) SaveMessage(ctx context.Context, msg *model.Message) (
-  *model.Message,
-  error,
+func (s *Messages) SaveMessage(ctx context.Context, log *logger.Logger, params *model.SaveMessageParams) (
+  *model.Message, error,
 ) {
   res, err := s.client.SaveMessage(ctx, &api.SaveMessageRequest{
-    Message: model.MessageToProto(msg),
+    Message: model.MessageToProto(params.Message),
   })
   if err != nil {
+    log.Error("message", "client failed to save message")
     return nil, err 
   }
   return model.MessageFromProto(res.Message), nil
 }
 
-func (s *Messages) ReadUserMessages(
-  ctx context.Context,
-  userId usermodel.UserId,
-  limit int32,
-  offset int32,
-  ascending bool,
-) (
-  *model.MessagesList,
-  error,
+func (s *Messages) ReadUserMessages(ctx context.Context, log *logger.Logger, params *model.ReadUserMessagesParams) (
+  *model.MessagesList, error,
 ) {
   var res *api.ReadUserMessagesResponse
   var err error
 
   if res, err = s.client.ReadUserMessages(ctx, &api.ReadUserMessagesRequest{
-    UserId: uint32(userId),
-    Limit: limit,
-    Offset: offset,
-    Asc: ascending,
+    UserId: uint32(params.UserId),
+    Limit:  params.Limit,
+    Offset: params.Offset,
+    Asc:    params.Ascending,
   }); err != nil {
+    log.Error("message", "client failed to read user messages")
     return nil, err
   }
 

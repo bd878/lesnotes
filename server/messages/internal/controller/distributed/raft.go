@@ -19,7 +19,7 @@ import (
   "github.com/bd878/gallery/server/messages/internal/repository"
 
   "github.com/bd878/gallery/server/api"
-  "github.com/bd878/gallery/server/log"
+  "github.com/bd878/gallery/server/logger"
 )
 
 var ErrMsgExist = errors.New("message exists")
@@ -33,36 +33,35 @@ type Config struct {
 }
 
 type Repository interface {
-  Put(context.Context, *model.Message) (model.MessageId, error)
-  Get(context.Context, usermodel.UserId, int32, int32, bool) (*model.MessagesList, error)
-  FindByIndexTerm(context.Context, uint64, uint64) (*model.Message, error)
-  PutBatch(context.Context, [](*model.Message)) error
-  GetBatch(context.Context) ([]*model.Message, error)
-  GetOne(context.Context, usermodel.UserId, model.MessageId) (*model.Message, error)
-  Truncate(context.Context) error
+  Put(ctx context.Context, log *logger.Logger, params *model.PutParams) (model.MessageId, error)
+  Get(ctx context.Context, log *logger.Logger, params *model.GetParams) (*model.MessagesList, error)
+  FindByIndexTerm(ctx context.Context, log *logger.Logger, params *model.FindByIndexParams) (*model.Message, error)
+  GetBatch(ctx context.Context, log *logger.Logger) ([]*model.Message, error)
+  GetOne(ctx context.Context, log *logger.Logger, params *model.GetOneParams) (*model.Message, error)
+  Truncate(ctx context.Context, log *logger.Logger) error
 }
 
 type DistributedMessages struct {
-  config   Config
+  conf     Config
   raft    *raft.Raft
   repo     Repository
 }
 
-func New(repo Repository, config Config) (*DistributedMessages, error) {
+func New(repo Repository, cfg Config) (*DistributedMessages, error) {
   m := &DistributedMessages{
     repo: repo,
-    config: config,
+    conf: cfg,
   }
-  if err := m.setupRaft(); err != nil {
+  if err := m.setupRaft(logger.Default()); err != nil {
     return nil, err
   }
   return m, nil
 }
 
-func (m *DistributedMessages) setupRaft() error {
+func (m *DistributedMessages) setupRaft(log *logger.Logger) error {
   fsm := &fsm{repo: m.repo}
 
-  raftPath := filepath.Join(m.config.DataDir, "raft")
+  raftPath := filepath.Join(m.conf.DataDir, "raft")
   if err := os.MkdirAll(raftPath, 0755); err != nil {
     return err
   }
@@ -92,29 +91,29 @@ func (m *DistributedMessages) setupRaft() error {
   maxPool := 5
   timeout := 10*time.Second
   transport := raft.NewNetworkTransport(
-    m.config.StreamLayer,
+    m.conf.StreamLayer,
     maxPool,
     timeout,
     os.Stderr,
   )
 
   config := raft.DefaultConfig()
-  config.LocalID = m.config.Raft.LocalID
-  config.LogLevel = m.config.Raft.LogLevel
-  if m.config.Raft.HeartbeatTimeout != 0 {
-    config.HeartbeatTimeout = m.config.Raft.HeartbeatTimeout
+  config.LocalID = m.conf.Raft.LocalID
+  config.LogLevel = m.conf.Raft.LogLevel
+  if m.conf.Raft.HeartbeatTimeout != 0 {
+    config.HeartbeatTimeout = m.conf.Raft.HeartbeatTimeout
   }
-  if m.config.Raft.ElectionTimeout != 0 {
-    config.ElectionTimeout = m.config.Raft.ElectionTimeout
+  if m.conf.Raft.ElectionTimeout != 0 {
+    config.ElectionTimeout = m.conf.Raft.ElectionTimeout
   }
-  if m.config.Raft.LeaderLeaseTimeout != 0 {
-    config.LeaderLeaseTimeout = m.config.Raft.LeaderLeaseTimeout
+  if m.conf.Raft.LeaderLeaseTimeout != 0 {
+    config.LeaderLeaseTimeout = m.conf.Raft.LeaderLeaseTimeout
   }
-  if m.config.Raft.CommitTimeout != 0 {
-    config.CommitTimeout = m.config.Raft.CommitTimeout
+  if m.conf.Raft.CommitTimeout != 0 {
+    config.CommitTimeout = m.conf.Raft.CommitTimeout
   }
-  if m.config.Raft.LeaderLeaseTimeout != 0 {
-    config.LeaderLeaseTimeout = m.config.Raft.LeaderLeaseTimeout
+  if m.conf.Raft.LeaderLeaseTimeout != 0 {
+    config.LeaderLeaseTimeout = m.conf.Raft.LeaderLeaseTimeout
   }
 
   m.raft, err = raft.NewRaft(
@@ -138,13 +137,13 @@ func (m *DistributedMessages) setupRaft() error {
   if err != nil {
     return err
   }
-  if m.config.Bootstrap && !hasState {
+  if m.conf.Bootstrap && !hasState {
     servers := []raft.Server{{
-      ID: m.config.Raft.LocalID,
+      ID: m.conf.Raft.LocalID,
       Address: transport.LocalAddr(),
     }}
 
-    for _, addr := range m.config.Servers {
+    for _, addr := range m.conf.Servers {
       servers = append(servers, raft.Server{
         ID: raft.ServerID(addr),
         Address: raft.ServerAddress(addr),
@@ -159,9 +158,10 @@ func (m *DistributedMessages) setupRaft() error {
   return err
 }
 
-func (m *DistributedMessages) SaveMessage(ctx context.Context, msg *model.Message) (resMsg *model.Message, err error) {
-  msg.CreateTime = time.Now().String()
-  if resMsg, err = m.apply(ctx, msg); err != nil {
+func (m *DistributedMessages) SaveMessage(ctx context.Context, log *logger.Logger, params *model.SaveMessageParams) (resMsg *model.Message, err error) {
+  params.Message.CreateTime = time.Now().String()
+  if resMsg, err = m.apply(ctx, params.Message); err != nil {
+    log.Error("message", "raft failed to apply message")
     return nil, err
   }
   return resMsg, nil
@@ -190,34 +190,25 @@ func (m *DistributedMessages) apply(ctx context.Context, msg *model.Message) (*m
   }
 }
 
-func (m *DistributedMessages) ReadUserMessages(
-  ctx context.Context,
-  userId usermodel.UserId,
-  limit int32,
-  offset int32,
-  ascending bool,
-) (
-  *model.MessagesList,
-  error,
+func (m *DistributedMessages) ReadUserMessages(ctx context.Context, log *logger.Logger, params *model.ReadUserMessagesParams) (
+  *model.MessagesList, error,
 ) {
   return m.repo.Get(
     ctx,
-    userId,
-    limit,
-    offset,
-    ascending,
+    log,
+    &model.GetParams{
+      UserId:    params.UserId,
+      Limit:     params.Limit,
+      Offset:    params.Offset,
+      Ascending: params.Ascending,
+    },
   )
 }
 
-func (m *DistributedMessages) ReadOneMessage(
-  ctx context.Context,
-  userId usermodel.UserId,
-  id model.MessageId,
-) (
-  *model.Message,
-  error,
+func (m *DistributedMessages) ReadOneMessage(ctx context.Context, userId usermodel.UserId, id model.MessageId) (
+  *model.Message, error,
 ) {
-  return m.repo.GetOne(ctx, userId, id)
+  return m.repo.GetOne(ctx, logger.Default(), &model.GetOneParams{userId, id})
 }
 
 func (m *DistributedMessages) WaitForLeader(timeout time.Duration) error {
@@ -227,7 +218,7 @@ func (m *DistributedMessages) WaitForLeader(timeout time.Duration) error {
   for {
     select {
     case <- timeoutc:
-      log.Error("no leader, timeout")
+      logger.Error("no leader, timeout")
       return nil
     case <-ticker.C:
       if lead, _ := m.raft.LeaderWithID(); lead != "" {
@@ -237,9 +228,10 @@ func (m *DistributedMessages) WaitForLeader(timeout time.Duration) error {
   }
 }
 
-func (m *DistributedMessages) GetServers(_ context.Context) ([](*api.Server), error) {
+func (m *DistributedMessages) GetServers(_ context.Context, log *logger.Logger) ([](*api.Server), error) {
   future := m.raft.GetConfiguration()
   if err := future.Error(); err != nil {
+    log.Error("message", "failed to get servers configuration")
     return nil, err
   }
   var servers []*api.Server
@@ -295,33 +287,33 @@ func (m *DistributedMessages) Leave(id string) error {
     return errors.New("cannot remove node from cluster: not a leader")
   }
 
-  log.Info("remove from cluster serve with id", id)
+  logger.Info("remove from cluster serve with id", id)
   removeFuture := m.raft.RemoveServer(raft.ServerID(id), 0, 0)
   return removeFuture.Error()
 }
 
 func (m *DistributedMessages) PrintLeader() error {
   addr, id := m.raft.LeaderWithID()
-  log.Infoln("=== LEADER ===")
-  if m.config.Raft.LocalID == raft.ServerID(id) {
-    log.Infoln("i am the leader")
+  logger.Infoln("=== LEADER ===")
+  if m.conf.Raft.LocalID == raft.ServerID(id) {
+    logger.Infoln("i am the leader")
   }
-  log.Info("Addr: %v\n", addr)
-  log.Info("Id: %v\n", id)
-  log.Infoln()
+  logger.Info("Addr: %v\n", addr)
+  logger.Info("Id: %v\n", id)
+  logger.Infoln()
   return nil
 }
 
 func (m *DistributedMessages) PrintMyAddr() error {
   _, id := m.raft.LeaderWithID()
-  addr := m.config.StreamLayer.Addr()
-  log.Infoln("=== ME ===")
-  if m.config.Raft.LocalID == raft.ServerID(id) {
-    log.Infoln("i am the leader")
+  addr := m.conf.StreamLayer.Addr()
+  logger.Infoln("=== ME ===")
+  if m.conf.Raft.LocalID == raft.ServerID(id) {
+    logger.Infoln("i am the leader")
   }
-  log.Infoln("Address: %v\n", addr)
-  log.Infoln("ID: %v\n", m.config.Raft.LocalID)
-  log.Infoln()
+  logger.Infoln("Address: %v\n", addr)
+  logger.Infoln("ID: %v\n", m.conf.Raft.LocalID)
+  logger.Infoln()
   return nil
 }
 
@@ -332,14 +324,14 @@ func (m *DistributedMessages) PrintConfig() error {
     return err
   }
 
-  log.Infoln("=== SERVERS ===")
+  logger.Infoln("=== SERVERS ===")
   conf := future.Configuration()
   for i, serv := range conf.Servers {
-    log.Info("# %d:\n", i)
-    log.Info("Suffrage: %d\n", serv.Suffrage)
-    log.Info("Id: %s\n", serv.ID)
-    log.Info("Address: %s\n", serv.Address)
-    log.Infoln()
+    logger.Info("# %d:\n", i)
+    logger.Info("Suffrage: %d\n", serv.Suffrage)
+    logger.Info("Id: %s\n", serv.ID)
+    logger.Info("Address: %s\n", serv.Address)
+    logger.Infoln()
   }
 
   return nil
@@ -362,7 +354,10 @@ func (f *fsm) Apply(record *raft.Log) interface{} {
   var msg *model.Message
   var err error
 
-  msg, err = f.repo.FindByIndexTerm(context.Background(), record.Index, record.Term)
+  msg, err = f.repo.FindByIndexTerm(context.Background(), logger.Default(), &model.FindByIndexParams{
+    LogIndex: record.Index,
+    LogTerm:  record.Term,
+  })
   if err != nil {
     /* not found is expected behaviour */
     if !errors.Is(err, repository.ErrNotFound) {
@@ -381,7 +376,7 @@ func (f *fsm) Apply(record *raft.Log) interface{} {
   msg.LogIndex = record.Index
   msg.LogTerm = record.Term
 
-  msg.Id, err = f.repo.Put(context.Background(), msg)
+  msg.Id, err = f.repo.Put(context.Background(), logger.Default(), &model.PutParams{Message: msg})
   if err != nil {
     return err
   }
@@ -411,12 +406,12 @@ func (f *fsm) Restore(r io.ReadCloser) error {
   }
 
   ctx := context.Background()
-  err = f.repo.Truncate(ctx)
+  err = f.repo.Truncate(ctx, logger.Default())
   if err != nil {
     return err
   }
   for _, msg := range msgs {
-    _, err := f.repo.Put(ctx, &msg)
+    _, err := f.repo.Put(ctx, logger.Default(), &model.PutParams{Message: &msg})
     if err != nil {
       return err
     }
@@ -429,7 +424,7 @@ type snapshot struct {
 }
 
 func (s *snapshot) Persist(sink raft.SnapshotSink) error {
-  msgs, err := s.repo.GetBatch(context.Background())
+  msgs, err := s.repo.GetBatch(context.Background(), logger.Default())
   if err != nil {
     return err
   }

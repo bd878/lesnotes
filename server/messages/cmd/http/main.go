@@ -8,12 +8,13 @@ import (
   "os"
 
   "github.com/bd878/gallery/server/messages/config"
-  "github.com/bd878/gallery/server/log"
+  "github.com/bd878/gallery/server/messages/internal/http"
+  "github.com/bd878/gallery/server/logger"
 )
 
 func init() {
   flag.Usage = func() {
-    fmt.Printf("Usage: %d config\n", os.Args[0])
+    fmt.Printf("Usage: %s config\n", os.Args[0])
   }
 }
 
@@ -26,16 +27,16 @@ func main() {
   }
 
   cfg := config.Load(flag.Arg(0))
-  log.SetDefault(log.New(log.Config{
+  logger.SetDefault(logger.New(logger.Config{
     LogPath:   cfg.LogPath,
     NodeName:  cfg.NodeName,
   }))
 
-  server := NewHTTPServer(HTTPServerConfig{
+  server := http.New(http.Config{
     Addr:              cfg.HttpAddr,
     RpcAddr:           cfg.RpcAddr,
     DataPath:          cfg.DataPath,
-    UserServiceAddr:   cfg.UserServiceAddr,
+    UsersServiceAddr:  cfg.UsersServiceAddr,
   })
 
   var wg *sync.WaitGroup

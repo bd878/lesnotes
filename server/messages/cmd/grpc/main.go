@@ -7,8 +7,9 @@ import (
   "context"
   "sync"
 
+  "github.com/bd878/gallery/server/messages/internal/grpc"
   "github.com/bd878/gallery/server/messages/config"
-  "github.com/bd878/gallery/server/log"
+  "github.com/bd878/gallery/server/logger"
 )
 
 func init() {
@@ -26,12 +27,12 @@ func main() {
   }
 
   cfg := config.Load(flag.Arg(0))
-  log.SetDefault(log.New(log.Config{
+  logger.SetDefault(logger.New(logger.Config{
     LogPath:   cfg.LogPath,
     NodeName:  cfg.NodeName,
   }))
 
-  server := NewGRPCServer(GRPCServerConfig{
+  server := grpc.New(grpc.Config{
     Addr:             cfg.RpcAddr,
     DBPath:           cfg.DBPath,
     NodeName:         cfg.NodeName,

@@ -6,9 +6,9 @@ import (
   "database/sql"
 
   _ "github.com/mattn/go-sqlite3"
+  "github.com/bd878/gallery/server/logger"
   "github.com/bd878/gallery/server/messages/pkg/model"
   "github.com/bd878/gallery/server/messages/internal/repository"
-  usermodel "github.com/bd878/gallery/server/users/pkg/model"
 )
 
 type Repository struct {
@@ -45,15 +45,17 @@ func New(dbfilepath string) (*Repository, error) {
   }, nil
 }
 
-func (r *Repository) Put(ctx context.Context, msg *model.Message) (model.MessageId, error) {
+func (r *Repository) Put(ctx context.Context, _ *logger.Logger, params *model.PutParams) (
+  model.MessageId, error,
+) {
   res, err := r.insertSt.ExecContext(ctx,
-    msg.UserId,
-    msg.CreateTime,
-    msg.Value,
-    msg.FileName,
-    msg.FileId,
-    msg.LogIndex,
-    msg.LogTerm,
+    params.Message.UserId,
+    params.Message.CreateTime,
+    params.Message.Value,
+    params.Message.FileName,
+    params.Message.FileId,
+    params.Message.LogIndex,
+    params.Message.LogTerm,
   )
   if err != nil {
     return model.NullMsgId, err
@@ -62,7 +64,7 @@ func (r *Repository) Put(ctx context.Context, msg *model.Message) (model.Message
   return model.MessageId(id), nil
 }
 
-func (r *Repository) Truncate(ctx context.Context) error {
+func (r *Repository) Truncate(ctx context.Context, _ *logger.Logger) error {
   _, err := r.db.ExecContext(ctx,
     "DELETE FROM messages",
   )
@@ -72,11 +74,13 @@ func (r *Repository) Truncate(ctx context.Context) error {
   return nil
 }
 
-func (r *Repository) FindByIndexTerm(ctx context.Context, logIndex, logTerm uint64) (*model.Message, error) {
+func (r *Repository) FindByIndexTerm(ctx context.Context, _ *logger.Logger, params *model.FindByIndexParams) (
+  *model.Message, error,
+) {
   row := r.db.QueryRowContext(ctx,
     "SELECT id, user_id, createtime, message, file, file_id, log_index, log_term " +
     "FROM messages WHERE log_index = ? AND log_term = ?",
-    logIndex, logTerm,
+    params.LogIndex, params.LogTerm,
   )
 
   var msg model.Message
@@ -130,24 +134,17 @@ ORDER BY id DESC
 LIMIT ? OFFSET ?
 `
 
-func (r *Repository) Get(
-  ctx context.Context,
-  userId usermodel.UserId,
-  limit int32,
-  offset int32,
-  ascending bool,
-) (
-  *model.MessagesList,
-  error,
+func (r *Repository) Get(ctx context.Context, _ *logger.Logger, params *model.GetParams) (
+  *model.MessagesList, error,
 ) {
   var rows *sql.Rows
   var err error
   var isLastPage bool
 
-  if ascending {
-    rows, err = r.db.QueryContext(ctx, ascStmt, int(userId), limit, offset)
+  if params.Ascending {
+    rows, err = r.db.QueryContext(ctx, ascStmt, int(params.UserId), params.Limit, params.Offset)
   } else {
-    rows, err = r.db.QueryContext(ctx, descStmt, int(userId), limit, offset)
+    rows, err = r.db.QueryContext(ctx, descStmt, int(params.UserId), params.Limit, params.Offset)
   }
 
   if err != nil {
@@ -207,12 +204,12 @@ func (r *Repository) Get(
     })
   }
 
-  if int32(len(res)) < limit {
+  if int32(len(res)) < params.Limit {
     isLastPage = true
   } else {
     row := r.db.QueryRowContext(ctx,
       "SELECT COUNT(*) FROM messages WHERE user_id = ?",
-      int(userId),
+      int(params.UserId),
     )
     if err != nil {
       isLastPage = false
@@ -222,7 +219,7 @@ func (r *Repository) Get(
         isLastPage = false
       }
 
-      if countMessages <= offset + limit {
+      if countMessages <= params.Offset + params.Limit {
         isLastPage = true
       }
     }
@@ -234,65 +231,60 @@ func (r *Repository) Get(
   }, nil
 }
 
-func (r *Repository) GetOne(
-  ctx context.Context,
-  userId usermodel.UserId,
-  id model.MessageId,
-) (
-  *model.Message,
-  error,
+func (r *Repository) GetOne(ctx context.Context, _ *logger.Logger, params *model.GetOneParams) (
+  *model.Message, error,
 ) {
   row := r.db.QueryRowContext(ctx,
     "SELECT id, user_id, createtime, message, file, file_id, log_index, log_term " +
     "FROM messages WHERE user_id = ? AND id = ?",
-    int(userId), int(id),
+    int(params.UserId), int(params.MessageId),
   )
 
-  var msg model.Message
+  var message model.Message
   var fileCol sql.NullString
   var fileIdCol sql.NullString
   var logIndexCol sql.NullInt64
   var logTermCol sql.NullInt64
   if err := row.Scan(
-    &msg.Id,
-    &msg.UserId,
-    &msg.CreateTime,
-    &msg.Value,
+    &message.Id,
+    &message.UserId,
+    &message.CreateTime,
+    &message.Value,
     &fileCol,
     &fileIdCol,
     &logIndexCol,
     &logTermCol,
   ); err != nil {
     if errors.Is(err, sql.ErrNoRows) {
-      return &msg, repository.ErrNotFound
+      return &message, repository.ErrNotFound
     }
-    return &msg, err
+    return &message, err
   }
   if fileCol.Valid {
-    msg.FileName = fileCol.String
+    message.FileName = fileCol.String
   }
   if fileIdCol.Valid {
-    msg.FileId = model.FileId(fileIdCol.String)
+    message.FileId = model.FileId(fileIdCol.String)
   }
   if logIndexCol.Valid {
-    msg.LogIndex = uint64(logIndexCol.Int64)
+    message.LogIndex = uint64(logIndexCol.Int64)
   }
   if logTermCol.Valid {
-    msg.LogTerm = uint64(logTermCol.Int64)
+    message.LogTerm = uint64(logTermCol.Int64)
   }
-  return &msg, nil
+  return &message, nil
 }
 
-func (r *Repository) PutBatch(ctx context.Context, batch []*model.Message) error {
-  for _, msg := range batch {
+func (r *Repository) PutBatch(ctx context.Context, _ *logger.Logger, params *model.PutBatchParams) error {
+  for _, message := range params.MessagesList {
     _, err := r.insertSt.ExecContext(ctx,
-      msg.UserId,
-      msg.CreateTime,
-      msg.Value,
-      msg.FileName,
-      msg.FileId,
-      msg.LogIndex,
-      msg.LogTerm,
+      message.UserId,
+      message.CreateTime,
+      message.Value,
+      message.FileName,
+      message.FileId,
+      message.LogIndex,
+      message.LogTerm,
     )
     if err != nil {
       return err
@@ -301,7 +293,7 @@ func (r *Repository) PutBatch(ctx context.Context, batch []*model.Message) error
   return nil
 }
 
-func (r *Repository) GetBatch(ctx context.Context) ([]*model.Message, error) {
+func (r *Repository) GetBatch(ctx context.Context, _ *logger.Logger) ([]*model.Message, error) {
   rows, err := r.db.QueryContext(ctx,
     "SELECT id, user_id, createtime, message, file, file_id, log_index, log_term " +
     "FROM messages",

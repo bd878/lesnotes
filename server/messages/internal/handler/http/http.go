@@ -15,47 +15,34 @@ import (
   usermodel "github.com/bd878/gallery/server/users/pkg/model"
   "github.com/bd878/gallery/server/messages/pkg/model"
   "github.com/bd878/gallery/server/utils"
-  "github.com/bd878/gallery/server/log"
+  "github.com/bd878/gallery/server/logger"
 )
 
 const selectNoLimit int = -1
 
 type userGateway interface {
-  Auth(ctx context.Context, token string) (*usermodel.User, error)
+  Auth(ctx context.Context, log *logger.Logger, params *model.AuthParams) (*usermodel.User, error)
 }
 
 type Controller interface {
-  SaveMessage(ctx context.Context, msg *model.Message) (*model.Message, error)
-  ReadUserMessages(
-    ctx context.Context,
-    userId usermodel.UserId,
-    limit int32,
-    offset int32,
-    asc bool,
-  ) (
-    *model.MessagesList,
-    error,
-  )
+  SaveMessage(ctx context.Context, log *logger.Logger, params *model.SaveMessageParams) (*model.Message, error)
+  ReadUserMessages(ctx context.Context, log *logger.Logger, params *model.ReadUserMessagesParams) (*model.MessagesList, error)
 }
 
 type Handler struct {
-  ctrl Controller
+  controller Controller
   userGateway userGateway
   dataPath string
 }
 
-func New(
-  ctrl Controller,
-  userGateway userGateway,
-  dataPath string,
-) *Handler {
-  return &Handler{ctrl, userGateway, dataPath}
+func New(controller Controller, userGateway userGateway, dataPath string) *Handler {
+  return &Handler{controller, userGateway, dataPath}
 }
 
-func (h *Handler) CheckAuth(
-  next func (w http.ResponseWriter, req *http.Request),
-) func (w http.ResponseWriter, req *http.Request) {
-  return func(w http.ResponseWriter, req *http.Request) {
+func (h *Handler) CheckAuth(next func (ctx context.Context, log *logger.Logger, w http.ResponseWriter, req *http.Request)) (
+  func (ctx context.Context, log *logger.Logger, w http.ResponseWriter, req *http.Request),
+) {
+  return func(ctx context.Context, log *logger.Logger, w http.ResponseWriter, req *http.Request) {
     cookie, err := req.Cookie("token")
     if err != nil {
       log.Errorln("bad cookie")
@@ -64,14 +51,14 @@ func (h *Handler) CheckAuth(
     }
 
     log.Infoln("cookie value", cookie.Value)
-    user, err := h.userGateway.Auth(context.Background(), cookie.Value)
+    user, err := h.userGateway.Auth(context.Background(), log, &model.AuthParams{Token: cookie.Value})
     if err != nil {
-      log.Errorln(err) // TODO: return invalid token response instead
+      logger.Errorln(err) // TODO: return invalid token response instead
       if err := json.NewEncoder(w).Encode(model.ServerResponse{
         Status: "ok",
         Description: "token not found",
       }); err != nil {
-        log.Error(err)
+        logger.Error(err)
         w.WriteHeader(http.StatusInternalServerError)
       }
       return
@@ -83,13 +70,13 @@ func (h *Handler) CheckAuth(
       context.WithValue(context.Background(), userContextKey{}, user),
     )
 
-    next(w, req)
+    next(ctx, log, w, req)
   }
 }
 
 type userContextKey struct {}
 
-func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) {
+func (h *Handler) SendMessage(ctx context.Context, log *logger.Logger, w http.ResponseWriter, req *http.Request) {
   var err error
   if err = req.ParseMultipartForm(1); err != nil {
     log.Error(err)
@@ -146,11 +133,13 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) {
   }
 
   var msg *model.Message
-  if msg, err = h.ctrl.SaveMessage(context.Background(), &model.Message{
-    UserId: int(user.Id),
-    Value: value,
-    FileName: fileName,
-    FileId: model.FileId(fileId),
+  if msg, err = h.controller.SaveMessage(context.Background(), log, &model.SaveMessageParams{
+    Message: &model.Message{
+      UserId: int(user.Id),
+      Value: value,
+      FileName: fileName,
+      FileId: model.FileId(fileId),
+    },
   }); err != nil {
     log.Error(err)
     w.WriteHeader(http.StatusInternalServerError)
@@ -170,7 +159,7 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) {
   }
 }
 
-func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) {
+func (h *Handler) ReadMessages(ctx context.Context, log *logger.Logger, w http.ResponseWriter, req *http.Request) {
   var limitInt, offsetInt, orderInt int
   var ascending bool
   var err error
@@ -240,12 +229,15 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) {
     ascending = true
   }
 
-  res, err := h.ctrl.ReadUserMessages(
+  res, err := h.controller.ReadUserMessages(
     context.Background(),
-    usermodel.UserId(user.Id),
-    int32(limitInt),
-    int32(offsetInt),
-    ascending,
+    log,
+    &model.ReadUserMessagesParams{
+      UserId: usermodel.UserId(user.Id),
+      Limit: int32(limitInt),
+      Offset: int32(offsetInt),
+      Ascending: ascending,
+    },
   )
   if err != nil {
     log.Error(err)
@@ -266,7 +258,7 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) {
   }
 }
 
-func (h *Handler) ReadFile(w http.ResponseWriter, req *http.Request) {
+func (h *Handler) ReadFile(ctx context.Context, log *logger.Logger, w http.ResponseWriter, req *http.Request) {
   values := req.URL.Query()
   filename := values.Get("id")
   if filename == "" {
@@ -301,7 +293,7 @@ func (h *Handler) ReadFile(w http.ResponseWriter, req *http.Request) {
   }
 }
 
-func (h *Handler) GetStatus(w http.ResponseWriter, _ *http.Request) {
+func (h *Handler) GetStatus(ctx context.Context, log *logger.Logger, w http.ResponseWriter, _ *http.Request) {
   if _, err := io.WriteString(w, "ok\n"); err != nil {
     log.Error(err)
     w.WriteHeader(http.StatusInternalServerError)
@@ -316,7 +308,7 @@ func getUser(w http.ResponseWriter, req *http.Request) (*usermodel.User, bool) {
       Status: "ok",
       Description: "user required",
     }); err != nil {
-      log.Println(err)
+      logger.Error(err)
       w.WriteHeader(http.StatusInternalServerError)
     }
     return nil, false
