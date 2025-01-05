@@ -14,6 +14,7 @@ import (
   "github.com/bd878/gallery/server/logger"
   hclog "github.com/hashicorp/go-hclog"
 
+  grpcmiddleware "github.com/bd878/gallery/server/messages/internal/middleware/grpc"
   membership "github.com/bd878/gallery/server/messages/internal/discovery/serf"
   repository "github.com/bd878/gallery/server/messages/internal/repository/sqlite"
   controller "github.com/bd878/gallery/server/messages/internal/controller/distributed"
@@ -125,7 +126,12 @@ func (s *Server) setupGRPC(log *logger.Logger) {
 
   s.membership = member
 
-  s.server = grpc.NewServer()
+  s.server = grpc.NewServer(
+    grpc.ChainUnaryInterceptor(
+      grpcmiddleware.UnaryServerInterceptor(grpcmiddleware.LogBuilder()),
+    ),
+  )
+
   api.RegisterMessagesServer(s.server, handler)
 
   grpcListener := s.mux.Match(cmux.Any())
