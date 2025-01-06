@@ -26,16 +26,18 @@ type Server struct {
 func New(cfg Config) *Server {
   mux := http.NewServeMux()
 
+  middleware := httpmiddleware.NewBuilder().WithLog().WithAuth()
+
   grpcCtrl := controller.New(controller.Config{
     RpcAddr: cfg.RpcAddr,
   })
   userGateway := usergateway.New(cfg.UsersServiceAddr)
   handler := httphandler.New(grpcCtrl, userGateway, cfg.DataPath)
 
-  mux.Handle("/messages/v1/send", http.HandlerFunc(httpmiddleware.Logging(handler.CheckAuth(handler.SendMessage))))
-  mux.Handle("/messages/v1/read", http.HandlerFunc(httpmiddleware.Logging(handler.CheckAuth(handler.ReadMessages))))
-  mux.Handle("/messages/v1/status", http.HandlerFunc(httpmiddleware.Logging(handler.GetStatus)))
-  mux.Handle("/messages/v1/read_file", http.HandlerFunc(httpmiddleware.Logging(handler.CheckAuth(handler.ReadFile))))
+  mux.Handle("/messages/v1/send", middleware.Build(handler.SendMessage))
+  mux.Handle("/messages/v1/read", middleware.Build(handler.ReadMessages))
+  mux.Handle("/messages/v1/status", middleware.NoAuth().Build(handler.GetStatus))
+  mux.Handle("/messages/v1/read_file", middleware.Build(handler.ReadFile))
 
   server := &Server{
     Server: &http.Server{

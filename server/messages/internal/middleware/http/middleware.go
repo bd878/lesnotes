@@ -1,17 +1,20 @@
 package middleware
 
 import (
-  "context"
   "net/http"
+  "context"
   "github.com/bd878/gallery/server/logger"
 )
 
-func Logging(
-  next func (ctx context.Context, log *logger.Logger, w http.ResponseWriter, req *http.Request),
-) (
-  func (w http.ResponseWriter, req *http.Request),
-) {
-  return func(w http.ResponseWriter, req *http.Request) {
-    next(context.Background(), logger.Default(), w, req)
+type Middleware struct {
+  handler  Handler
+  funcs    []MiddlewareFunc
+}
+
+func (m *Middleware) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+  var first Handler = m.handler
+  for i := len(m.funcs) - 1; i >= 0; i-- {
+    first = m.funcs[i](first)
   }
+  first(context.Background(), logger.Default(), w, req)
 }

@@ -3,23 +3,22 @@ package middleware
 import (
   "context"
   "github.com/bd878/gallery/server/logger"
-  "github.com/bd878/gallery/server/messages/internal/middleware"
 )
 
 type LogReporter struct {
 }
 
-func (_ *LogReporter) MsgReceive(_ any, _ *middleware.MsgReceiveParams) {
+func (_ *LogReporter) MsgReceive(_ any, _ *MsgReceiveParams) {
   logger.Infoln("request start")
 }
 
-func (_ *LogReporter) MsgSend(_ any, _ *middleware.MsgSendParams) {
+func (_ *LogReporter) MsgSend(_ any, _ *MsgSendParams) {
   logger.Infoln("request end")
 }
 
-func LogBuilder() middleware.ReporterBuilder {
-  return func(ctx context.Context, _ *middleware.Meta) (
-    middleware.Reporter, context.Context,
+func LogBuilder() ReporterBuilder {
+  return func(ctx context.Context, _ *Meta) (
+    Reporter, context.Context,
   ) {
     return &LogReporter{}, ctx
   }
