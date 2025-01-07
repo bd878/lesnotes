@@ -1,12 +1,11 @@
 package middleware
 
 import (
-  "context"
   "net/http"
   "github.com/bd878/gallery/server/logger"
 )
 
-type Handler func(ctx context.Context, log *logger.Logger, w http.ResponseWriter, req *http.Request)
+type Handler func(log *logger.Logger, w http.ResponseWriter, req *http.Request)
 type MiddlewareFunc func(next Handler) Handler
 
 type builder struct {
@@ -19,7 +18,7 @@ func NewBuilder() builder {
   }
 }
 
-func (b builder) Build(handler Handler) *Middleware {
+func (b builder) Build(handler Handler) *middleware {
   funcs := make([]MiddlewareFunc, 0)
   b.funcs.Traverse(func (n *node) bool {
     if n.f != nil {
@@ -28,7 +27,7 @@ func (b builder) Build(handler Handler) *Middleware {
     return false
   })
 
-  return &Middleware{
+  return &middleware{
     handler: handler,
     funcs: funcs,
   }
@@ -58,7 +57,7 @@ func (b builder) NoLog() builder {
   return b
 }
 
-func (b builder) WithLog() builder {
+func (b builder) WithLog(f MiddlewareFunc) builder {
   found := b.funcs.Traverse(func(n *node) bool {
     if n.name == "log" {
       n.f = nil
@@ -70,14 +69,14 @@ func (b builder) WithLog() builder {
   if !found {
     b.funcs.Append(&node{
       name: "log",
-      f: Log,
+      f: f,
     })
   }
 
   return b
 }
 
-func (b builder) WithAuth() builder {
+func (b builder) WithAuth(f MiddlewareFunc) builder {
   found := b.funcs.Traverse(func(n *node) bool {
     if n.name == "auth" {
       n.f = nil
@@ -89,7 +88,7 @@ func (b builder) WithAuth() builder {
   if !found {
     b.funcs.Append(&node{
       name: "auth",
-      f: Auth,
+      f: f,
     })
   }
 

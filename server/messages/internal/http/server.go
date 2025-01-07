@@ -26,13 +26,16 @@ type Server struct {
 func New(cfg Config) *Server {
   mux := http.NewServeMux()
 
-  middleware := httpmiddleware.NewBuilder().WithLog().WithAuth()
+  middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log)
+
+  userGateway := usergateway.New(cfg.UsersServiceAddr)
+  authBuilder := &httpmiddleware.AuthBuilder{Gateway: userGateway}
+  middleware = middleware.WithAuth(authBuilder.Auth)
 
   grpcCtrl := controller.New(controller.Config{
     RpcAddr: cfg.RpcAddr,
   })
-  userGateway := usergateway.New(cfg.UsersServiceAddr)
-  handler := httphandler.New(grpcCtrl, userGateway, cfg.DataPath)
+  handler := httphandler.New(grpcCtrl, cfg.DataPath)
 
   mux.Handle("/messages/v1/send", middleware.Build(handler.SendMessage))
   mux.Handle("/messages/v1/read", middleware.Build(handler.ReadMessages))

@@ -12,6 +12,7 @@ import (
   "path/filepath"
   "encoding/json"
 
+  httpmiddleware "github.com/bd878/gallery/server/messages/internal/middleware/http"
   usermodel "github.com/bd878/gallery/server/users/pkg/model"
   "github.com/bd878/gallery/server/messages/pkg/model"
   "github.com/bd878/gallery/server/utils"
@@ -20,10 +21,6 @@ import (
 
 const selectNoLimit int = -1
 
-type userGateway interface {
-  Auth(ctx context.Context, log *logger.Logger, params *model.AuthParams) (*usermodel.User, error)
-}
-
 type Controller interface {
   SaveMessage(ctx context.Context, log *logger.Logger, params *model.SaveMessageParams) (*model.Message, error)
   ReadUserMessages(ctx context.Context, log *logger.Logger, params *model.ReadUserMessagesParams) (*model.MessagesList, error)
@@ -31,52 +28,14 @@ type Controller interface {
 
 type Handler struct {
   controller Controller
-  userGateway userGateway
   dataPath string
 }
 
-func New(controller Controller, userGateway userGateway, dataPath string) *Handler {
-  return &Handler{controller, userGateway, dataPath}
+func New(controller Controller, dataPath string) *Handler {
+  return &Handler{controller, dataPath}
 }
 
-func (h *Handler) CheckAuth(next func (ctx context.Context, log *logger.Logger, w http.ResponseWriter, req *http.Request)) (
-  func (ctx context.Context, log *logger.Logger, w http.ResponseWriter, req *http.Request),
-) {
-  return func(ctx context.Context, log *logger.Logger, w http.ResponseWriter, req *http.Request) {
-    cookie, err := req.Cookie("token")
-    if err != nil {
-      log.Errorln("bad cookie")
-      w.WriteHeader(http.StatusBadRequest)
-      return
-    }
-
-    log.Infoln("cookie value", cookie.Value)
-    user, err := h.userGateway.Auth(context.Background(), log, &model.AuthParams{Token: cookie.Value})
-    if err != nil {
-      logger.Errorln(err) // TODO: return invalid token response instead
-      if err := json.NewEncoder(w).Encode(model.ServerResponse{
-        Status: "ok",
-        Description: "token not found",
-      }); err != nil {
-        logger.Error(err)
-        w.WriteHeader(http.StatusInternalServerError)
-      }
-      return
-    }
-
-    log.Infoln("user id", user.Id, "name", user.Name, "token", user.Token)
-
-    req = req.WithContext(
-      context.WithValue(context.Background(), userContextKey{}, user),
-    )
-
-    next(ctx, log, w, req)
-  }
-}
-
-type userContextKey struct {}
-
-func (h *Handler) SendMessage(ctx context.Context, log *logger.Logger, w http.ResponseWriter, req *http.Request) {
+func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
   var err error
   if err = req.ParseMultipartForm(1); err != nil {
     log.Error(err)
@@ -159,7 +118,7 @@ func (h *Handler) SendMessage(ctx context.Context, log *logger.Logger, w http.Re
   }
 }
 
-func (h *Handler) ReadMessages(ctx context.Context, log *logger.Logger, w http.ResponseWriter, req *http.Request) {
+func (h *Handler) ReadMessages(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
   var limitInt, offsetInt, orderInt int
   var ascending bool
   var err error
@@ -258,7 +217,7 @@ func (h *Handler) ReadMessages(ctx context.Context, log *logger.Logger, w http.R
   }
 }
 
-func (h *Handler) ReadFile(ctx context.Context, log *logger.Logger, w http.ResponseWriter, req *http.Request) {
+func (h *Handler) ReadFile(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
   values := req.URL.Query()
   filename := values.Get("id")
   if filename == "" {
@@ -281,7 +240,7 @@ func (h *Handler) ReadFile(ctx context.Context, log *logger.Logger, w http.Respo
 
   mimetype := mime.TypeByExtension(filepath.Ext(filename))
   if mimetype == "" {
-    mimetype = "text/plain"
+    mimetype = "application/octet-stream"
   }
 
   w.Header().Set("Content-Type", mimetype)
@@ -293,7 +252,7 @@ func (h *Handler) ReadFile(ctx context.Context, log *logger.Logger, w http.Respo
   }
 }
 
-func (h *Handler) GetStatus(ctx context.Context, log *logger.Logger, w http.ResponseWriter, _ *http.Request) {
+func (h *Handler) GetStatus(log *logger.Logger, w http.ResponseWriter, _ *http.Request) {
   if _, err := io.WriteString(w, "ok\n"); err != nil {
     log.Error(err)
     w.WriteHeader(http.StatusInternalServerError)
@@ -302,7 +261,7 @@ func (h *Handler) GetStatus(ctx context.Context, log *logger.Logger, w http.Resp
 }
 
 func getUser(w http.ResponseWriter, req *http.Request) (*usermodel.User, bool) {
-  user, ok := req.Context().Value(userContextKey{}).(*usermodel.User)
+  user, ok := req.Context().Value(httpmiddleware.UserContextKey{}).(*usermodel.User)
   if !ok {
     if err := json.NewEncoder(w).Encode(model.ServerResponse{
       Status: "ok",
