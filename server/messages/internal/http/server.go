@@ -39,6 +39,7 @@ func New(cfg Config) *Server {
 
   mux.Handle("/messages/v1/send", middleware.Build(handler.SendMessage))
   mux.Handle("/messages/v1/read", middleware.Build(handler.ReadMessages))
+  mux.Handle("/messages/v1/update", middleware.Build(handler.UpdateMessage))
   mux.Handle("/messages/v1/status", middleware.NoAuth().Build(handler.GetStatus))
   mux.Handle("/messages/v1/read_file", middleware.Build(handler.ReadFile))
 

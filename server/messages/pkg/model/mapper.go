@@ -4,23 +4,25 @@ import "github.com/bd878/gallery/server/api"
 
 func MessageFromProto(proto *api.Message) *Message {
   return &Message{
-    Id:          MessageId(proto.Id),
-    CreateTime:  proto.CreateTime,
-    UserId:      int(proto.UserId),
-    Value:       string(proto.Value),
-    FileName:    proto.FileName,
-    FileId:      FileId(proto.FileId),
+    Id:             MessageId(proto.Id),
+    CreateTime:     proto.CreateTime,
+    UpdateUtcNano:  proto.UpdateUtcNano,
+    UserId:         int(proto.UserId),
+    Value:          string(proto.Value),
+    FileName:       proto.FileName,
+    FileId:         FileId(proto.FileId),
   }
 }
 
 func MessageToProto(msg *Message) *api.Message {
   return &api.Message{
-    Id:          uint32(msg.Id),
-    UserId:      uint32(msg.UserId),
-    CreateTime:  msg.CreateTime,
-    Value:       []byte(msg.Value),
-    FileName:    msg.FileName,
-    FileId:      string(msg.FileId),
+    Id:               uint32(msg.Id),
+    UserId:           uint32(msg.UserId),
+    CreateTime:       msg.CreateTime,
+    UpdateUtcNano:    msg.UpdateUtcNano,
+    Value:            []byte(msg.Value),
+    FileName:         msg.FileName,
+    FileId:           string(msg.FileId),
   }
 }
 

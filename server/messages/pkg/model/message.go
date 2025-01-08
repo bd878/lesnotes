@@ -6,14 +6,15 @@ type FileId string
 
 // This message handler passes to repository
 type Message struct {
-  Id MessageId       `json:"id"`
-  CreateTime string  `json:"createtime"`
-  UserId int         `json:"userid"`
-  Value string       `json:"value"`
-  FileName string    `json:"filename"`
-  FileId FileId      `json:"fileid"`
-  LogIndex uint64    `json:"logindex,omitempty"`
-  LogTerm uint64     `json:"logterm,omitempty"`
+  Id MessageId          `json:"id"`
+  CreateTime string     `json:"createtime"`
+  UpdateUtcNano uint64  `json:"update_utc_nano"`
+  UserId int            `json:"userid"`
+  Value string          `json:"value"`
+  FileName string       `json:"filename"`
+  FileId FileId         `json:"fileid"`
+  LogIndex uint64       `json:"logindex,omitempty"`
+  LogTerm uint64        `json:"logterm,omitempty"`
 }
 
 type MessagesList struct {
@@ -28,6 +29,11 @@ type ServerResponse struct {
 }
 
 type NewMessageServerResponse struct {
+  ServerResponse
+  Message Message `json:"message"`
+}
+
+type UpdateMessageServerResponse struct {
   ServerResponse
   Message Message `json:"message"`
 }

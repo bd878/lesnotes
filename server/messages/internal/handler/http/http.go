@@ -23,6 +23,7 @@ const selectNoLimit int = -1
 
 type Controller interface {
   SaveMessage(ctx context.Context, log *logger.Logger, params *model.SaveMessageParams) (*model.Message, error)
+  UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (*model.Message, error)
   ReadUserMessages(ctx context.Context, log *logger.Logger, params *model.ReadUserMessagesParams) (*model.MessagesList, error)
 }
 
@@ -92,7 +93,7 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
   }
 
   var msg *model.Message
-  if msg, err = h.controller.SaveMessage(context.Background(), log, &model.SaveMessageParams{
+  if msg, err = h.controller.SaveMessage(req.Context(), log, &model.SaveMessageParams{
     Message: &model.Message{
       UserId: int(user.Id),
       Value: value,
@@ -112,6 +113,64 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
     },
     Message: *msg,
   }); err != nil {
+    log.Error(err)
+    w.WriteHeader(http.StatusInternalServerError)
+    return
+  }
+}
+
+func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
+  user, ok := getUser(w, req)
+  if !ok {
+    log.Error("user not found")
+    return
+  }
+
+  values := req.URL.Query()
+  id := values.Get("id")
+  if id == "" {
+    if err := json.NewEncoder(w).Encode(model.ServerResponse{
+      Status: "ok",
+      Description: "empty message id",
+    }); err != nil {
+      log.Error(err)
+      w.WriteHeader(http.StatusInternalServerError)
+    }
+    return
+  }
+
+  value := req.PostFormValue("message")
+  if value == "" {
+    if err := json.NewEncoder(w).Encode(model.ServerResponse{
+      Status: "ok",
+      Description: "empty message field",
+    }); err != nil {
+      log.Error(err)
+      w.WriteHeader(http.StatusInternalServerError)
+    }
+    return
+  }
+
+  msg, err := h.controller.UpdateMessage(req.Context(), log, &model.UpdateMessageParams{
+    Message: &model.Message{
+      UserId: int(user.Id),
+      Value: value,
+    },
+  })
+  if err != nil {
+    log.Error(err)
+    w.WriteHeader(http.StatusInternalServerError)
+    return
+  }
+
+  err = json.NewEncoder(w).Encode(model.UpdateMessageServerResponse{
+    ServerResponse: model.ServerResponse{
+      Status: "ok",
+      Description: "accepted",
+    },
+    Message: *msg,
+  })
+  if err != nil {
     log.Error(err)
     w.WriteHeader(http.StatusInternalServerError)
     return

@@ -7,6 +7,7 @@ option go_package = "github.com/bd878/gallery/server/api";
 service Messages {
   rpc GetServers(GetServersRequest) returns (GetServersResponse) {}
   rpc SaveMessage(SaveMessageRequest) returns (SaveMessageResponse) {}
+  rpc UpdateMessage(UpdateMessageRequest) returns (UpdateMessageResponse) {}
   rpc ReadUserMessages(ReadUserMessagesRequest) returns (ReadUserMessagesResponse) {}
 }
 
@@ -17,6 +18,7 @@ message Message {
   bytes value = 4;
   string file_name = 5;
   string file_id = 6;
+  uint64 update_utc_nano = 7;
 }
 
 message ReadUserMessagesRequest {
@@ -29,6 +31,14 @@ message ReadUserMessagesRequest {
 message ReadUserMessagesResponse {
   repeated Message messages = 1;
   bool is_last_page = 2;
+}
+
+message UpdateMessageRequest {
+  Message message = 1;
+}
+
+message UpdateMessageResponse {
+  Message message = 1;
 }
 
 message SaveMessageRequest {

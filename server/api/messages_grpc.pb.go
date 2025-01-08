@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 type MessagesClient interface {
 	GetServers(ctx context.Context, in *GetServersRequest, opts ...grpc.CallOption) (*GetServersResponse, error)
 	SaveMessage(ctx context.Context, in *SaveMessageRequest, opts ...grpc.CallOption) (*SaveMessageResponse, error)
+	UpdateMessage(ctx context.Context, in *UpdateMessageRequest, opts ...grpc.CallOption) (*UpdateMessageResponse, error)
 	ReadUserMessages(ctx context.Context, in *ReadUserMessagesRequest, opts ...grpc.CallOption) (*ReadUserMessagesResponse, error)
 }
 
@@ -48,6 +49,15 @@ func (c *messagesClient) SaveMessage(ctx context.Context, in *SaveMessageRequest
 	return out, nil
 }
 
+func (c *messagesClient) UpdateMessage(ctx context.Context, in *UpdateMessageRequest, opts ...grpc.CallOption) (*UpdateMessageResponse, error) {
+	out := new(UpdateMessageResponse)
+	err := c.cc.Invoke(ctx, "/messages.v1.Messages/UpdateMessage", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *messagesClient) ReadUserMessages(ctx context.Context, in *ReadUserMessagesRequest, opts ...grpc.CallOption) (*ReadUserMessagesResponse, error) {
 	out := new(ReadUserMessagesResponse)
 	err := c.cc.Invoke(ctx, "/messages.v1.Messages/ReadUserMessages", in, out, opts...)
@@ -63,6 +73,7 @@ func (c *messagesClient) ReadUserMessages(ctx context.Context, in *ReadUserMessa
 type MessagesServer interface {
 	GetServers(context.Context, *GetServersRequest) (*GetServersResponse, error)
 	SaveMessage(context.Context, *SaveMessageRequest) (*SaveMessageResponse, error)
+	UpdateMessage(context.Context, *UpdateMessageRequest) (*UpdateMessageResponse, error)
 	ReadUserMessages(context.Context, *ReadUserMessagesRequest) (*ReadUserMessagesResponse, error)
 	mustEmbedUnimplementedMessagesServer()
 }
@@ -76,6 +87,9 @@ func (UnimplementedMessagesServer) GetServers(context.Context, *GetServersReques
 }
 func (UnimplementedMessagesServer) SaveMessage(context.Context, *SaveMessageRequest) (*SaveMessageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveMessage not implemented")
+}
+func (UnimplementedMessagesServer) UpdateMessage(context.Context, *UpdateMessageRequest) (*UpdateMessageResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateMessage not implemented")
 }
 func (UnimplementedMessagesServer) ReadUserMessages(context.Context, *ReadUserMessagesRequest) (*ReadUserMessagesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadUserMessages not implemented")
@@ -129,6 +143,24 @@ func _Messages_SaveMessage_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Messages_UpdateMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateMessageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MessagesServer).UpdateMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/messages.v1.Messages/UpdateMessage",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MessagesServer).UpdateMessage(ctx, req.(*UpdateMessageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Messages_ReadUserMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ReadUserMessagesRequest)
 	if err := dec(in); err != nil {
@@ -158,6 +190,10 @@ var _Messages_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SaveMessage",
 			Handler:    _Messages_SaveMessage_Handler,
+		},
+		{
+			MethodName: "UpdateMessage",
+			Handler:    _Messages_UpdateMessage_Handler,
 		},
 		{
 			MethodName: "ReadUserMessages",

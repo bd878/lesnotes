@@ -60,6 +60,19 @@ func (s *Messages) SaveMessage(ctx context.Context, log *logger.Logger, params *
   return model.MessageFromProto(res.Message), nil
 }
 
+func (s *Messages) UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (
+  *model.Message, error,
+) {
+  res, err := s.client.UpdateMessage(ctx, &api.UpdateMessageRequest{
+    Message: model.MessageToProto(params.Message),
+  })
+  if err != nil {
+    log.Error("message", "client failed to save message")
+    return nil, err 
+  }
+  return model.MessageFromProto(res.Message), nil
+}
+
 func (s *Messages) ReadUserMessages(ctx context.Context, log *logger.Logger, params *model.ReadUserMessagesParams) (
   *model.MessagesList, error,
 ) {

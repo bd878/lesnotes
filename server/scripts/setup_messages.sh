@@ -17,6 +17,7 @@ esac
 
 sqlite3 $DB_FILE < ./schema/messages.sql
 sqlite3 $DB_FILE < ./schema/messages_add_log_columns.sql
+sqlite3 $DB_FILE < ./schema/messages_add_update_utc_nano_column.sql
 
 echo "done."
 

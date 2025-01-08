@@ -8,6 +8,10 @@ type SaveMessageParams struct {
   Message *Message
 }
 
+type UpdateMessageParams struct {
+  Message *Message
+}
+
 type ReadUserMessagesParams struct {
   UserId    usermodel.UserId
   Limit     int32

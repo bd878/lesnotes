@@ -11,6 +11,7 @@ import (
 
 type Controller interface {
   SaveMessage(ctx context.Context, log *logger.Logger, params *model.SaveMessageParams) (*model.Message, error)
+  UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (*model.Message, error)
   ReadUserMessages(ctx context.Context, log *logger.Logger, params *model.ReadUserMessagesParams) (*model.MessagesList, error)
   GetServers(ctx context.Context, log *logger.Logger) ([]*api.Server, error)
 }
@@ -37,6 +38,19 @@ func (h *Handler) SaveMessage(ctx context.Context, req *api.SaveMessageRequest) 
     return &api.SaveMessageResponse{Message: req.Message}, err
   }
   return &api.SaveMessageResponse{Message: model.MessageToProto(msg)}, nil
+}
+
+func (h *Handler) UpdateMessage(ctx context.Context, req *api.UpdateMessageRequest) (
+  *api.UpdateMessageResponse, error,
+) {
+  msg, err := h.controller.UpdateMessage(ctx, logger.Default(), &model.UpdateMessageParams{
+    Message: model.MessageFromProto(req.Message),
+  })
+  if err != nil {
+    logger.Error("message", "failed to update message")
+    return &api.UpdateMessageResponse{Message: req.Message}, err
+  }
+  return &api.UpdateMessageResponse{Message: model.MessageToProto(msg)}, nil
 }
 
 func (h *Handler) ReadUserMessages(ctx context.Context, req *api.ReadUserMessagesRequest) (

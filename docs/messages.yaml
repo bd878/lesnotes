@@ -12,7 +12,7 @@ paths:
       description: |
         Send a message and replicate throughout the cluster,
         message with file possibly
-      operationId: sendRequest
+      operationId: sendMessage
       requestBody:
         content:
           multipart/form-data:
@@ -63,10 +63,10 @@ paths:
     parameters:
       - $ref: '#/components/parameters/messageId'
     delete:
+      operationId: deleteMessage
       summary: Delete a message
       description: |
         Delete a message and attached file
-      operationId: deleteMessage
       responses:
         "200":
           description: OK
@@ -90,6 +90,7 @@ paths:
       summary: Get user messages
       description: |
         Read messages for a given user
+      operationId: readMessage
       responses:
         "200":
           description: OK
@@ -129,6 +130,7 @@ paths:
                     items:
                       type: object
                     example: []
+
   /messages/v1/status:
     get:
       operationId: reportStatus
@@ -147,8 +149,35 @@ paths:
               schema:
                 $ref: '#/components/schemas/statusErr'
 
+  /messages/v1/read_file:
+    parameters:
+      - $ref: '#/components/parameters/fileId'
+    get:
+      operationId: readFile
+      summary: Read attached file
+      description: |
+        Read file attached to message
+      responses:
+        "2XX":
+          description: |
+            Success response. Returns an octet stream.
+            Content-Type is a mime-type of a given file,
+            or application/octet-stream
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+
 components:
   parameters:
+    fileId:
+      name: file_id
+      in: query
+      required: true
+      schema:
+        type: integer
+        example: 1
     messageId:
       name: id
       in: query
@@ -182,7 +211,7 @@ components:
     updateMessage:
       type: object
       properties:
-        value:
+        message:
           type: string
           example: "test message"
         filename:
