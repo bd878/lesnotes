@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+import "protos/messages.proto";
+
+option go_package = "github.com/bd878/gallery/server/messages/internal/controller/distributed";
+
+message AppendCommand {
+  messages.v1.Message message = 1;
+}
+
+message UpdateCommand {
+  messages.v1.Message message = 1;
+}
