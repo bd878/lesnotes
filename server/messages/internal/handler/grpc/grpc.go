@@ -1,6 +1,7 @@
 package grpc
 
 import (
+  "time"
   "context"
 
   "github.com/bd878/gallery/server/api"
@@ -30,6 +31,7 @@ func New(ctrl Controller) *Handler {
 func (h *Handler) SaveMessage(ctx context.Context, req *api.SaveMessageRequest) (
   *api.SaveMessageResponse, error,
 ) {
+  req.Message.CreateTime = time.Now().String()
   msg, err := h.controller.SaveMessage(ctx, logger.Default(), &model.SaveMessageParams{
     Message: model.MessageFromProto(req.Message),
   })

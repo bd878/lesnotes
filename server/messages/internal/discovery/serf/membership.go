@@ -65,10 +65,6 @@ func (m *Membership) setupSerf() error {
 type Handler interface {
   Join(name, addr string) error
   Leave(name string) error
-  /* TODO: derive these commands to separate cmd driver */
-  PrintLeader() error
-  PrintConfig() error
-  PrintMyAddr() error
 }
 
 func (m *Membership) runHandler() {
@@ -87,15 +83,6 @@ func (m *Membership) runHandler() {
           return
         }
         m.handleLeave(member)
-      }
-    case serf.EventUser:
-      switch e.(serf.UserEvent).Name {
-      case "leader":
-        m.handler.PrintLeader()
-      case "config":
-        m.handler.PrintConfig()
-      case "me":
-        m.handler.PrintMyAddr()
       }
     default:
       logger.Warnf("Unknown event: %s\n", e.String())

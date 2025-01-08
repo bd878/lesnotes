@@ -3,15 +3,21 @@ package distributed
 import (
   "io"
   "context"
-  "errors"
   "encoding/json"
   "bytes"
 
   "github.com/hashicorp/raft"
+  "google.golang.org/protobuf/proto"
   "github.com/bd878/gallery/server/messages/pkg/model"
   "github.com/bd878/gallery/server/logger"
-  "github.com/bd878/gallery/server/messages/internal/repository"
 )
+
+type Repository interface {
+  Put(ctx context.Context, log *logger.Logger, params *model.PutParams) (model.MessageId, error)
+  Get(ctx context.Context, log *logger.Logger, params *model.GetParams) (*model.MessagesList, error)
+  GetBatch(ctx context.Context, log *logger.Logger) ([]*model.Message, error)
+  Truncate(ctx context.Context, log *logger.Logger) error
+}
 
 var _ raft.FSM = (*fsm)(nil)
 
@@ -27,45 +33,53 @@ type fsm struct {
  * Leader makes Apply on start.
  */
 func (f *fsm) Apply(record *raft.Log) interface{} {
-  var msg *model.Message
-  var err error
+  buf := record.Data
+  reqType := RequestType(buf[0])
+  switch reqType {
+  case AppendRequest:
+    return f.applyAppend(buf[1:])
+  case UpdateRequest:
+    return f.applyUpdate(buf[1:])
+  case DeleteRequest:
+    return f.applyDelete(buf[1:])
+  default:
+    logger.Error("unknown request type: ", reqType)
+  }
+  return nil
+}
 
-  msg, err = f.repo.FindByIndexTerm(context.Background(), logger.Default(), &model.FindByIndexParams{
-    LogIndex: record.Index,
-    LogTerm:  record.Term,
+func (f *fsm) applyAppend(raw []byte) interface{} {
+  var cmd AppendCommand
+  err := proto.Unmarshal(raw, &cmd)
+  if err != nil {
+    return err
+  }
+  res, err := f.repo.Put(context.Background(), logger.Default(), &model.PutParams{
+    Message: model.MessageFromProto(cmd.Message),
   })
   if err != nil {
-    /* not found is expected behaviour */
-    if !errors.Is(err, repository.ErrNotFound) {
-      return err
-    }
+    return nil
   }
-  if msg != nil {
-    return ErrMsgExist
+  return &AppendCommandResult{
+    Id: uint32(res),
   }
+}
 
-  buf := record.Data
-  err = json.Unmarshal(buf, &msg)
-  if err != nil {
-    return err
-  }
-  msg.LogIndex = record.Index
-  msg.LogTerm = record.Term
+func (f *fsm) applyUpdate(_ []byte) interface{} {
+  /* not implemented */
+  return nil
+}
 
-  msg.Id, err = f.repo.Put(context.Background(), logger.Default(), &model.PutParams{Message: msg})
-  if err != nil {
-    return err
-  }
-
-  return *msg
+func (f *fsm) applyDelete(_ []byte) interface{} {
+  /* not implemented */
+  return nil
 }
 
 func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {
   return &snapshot{repo: f.repo}, nil
 }
 
-// TODO: restore will reapply same messages with ids,
-// check whether msg with id exists
+// restore will reapply same messages with ids
 func (f *fsm) Restore(r io.ReadCloser) error {
   var buf *bytes.Buffer
   var msgs []model.Message

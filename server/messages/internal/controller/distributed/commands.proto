@@ -8,6 +8,14 @@ message AppendCommand {
   messages.v1.Message message = 1;
 }
 
+message AppendCommandResult {
+  uint32 id = 1;
+}
+
 message UpdateCommand {
   messages.v1.Message message = 1;
+}
+
+message UpdateCommandResult {
+  uint32 id = 1;
 }

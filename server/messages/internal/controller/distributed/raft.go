@@ -2,19 +2,13 @@ package distributed
 
 import (
   "os"
-  "net"
   "time"
-  "bytes"
   "errors"
-  "encoding/json"
   "context"
   "path/filepath"
 
   raftboltdb "github.com/hashicorp/raft-boltdb"
   "github.com/hashicorp/raft"
-
-  usermodel "github.com/bd878/gallery/server/users/pkg/model"
-  "github.com/bd878/gallery/server/messages/pkg/model"
 
   "github.com/bd878/gallery/server/api"
   "github.com/bd878/gallery/server/logger"
@@ -28,15 +22,6 @@ type Config struct {
   Bootstrap    bool
   DataDir      string
   Servers      []string
-}
-
-type Repository interface {
-  Put(ctx context.Context, log *logger.Logger, params *model.PutParams) (model.MessageId, error)
-  Get(ctx context.Context, log *logger.Logger, params *model.GetParams) (*model.MessagesList, error)
-  FindByIndexTerm(ctx context.Context, log *logger.Logger, params *model.FindByIndexParams) (*model.Message, error)
-  GetBatch(ctx context.Context, log *logger.Logger) ([]*model.Message, error)
-  GetOne(ctx context.Context, log *logger.Logger, params *model.GetOneParams) (*model.Message, error)
-  Truncate(ctx context.Context, log *logger.Logger) error
 }
 
 type DistributedMessages struct {
@@ -156,37 +141,6 @@ func (m *DistributedMessages) setupRaft(log *logger.Logger) error {
   return err
 }
 
-func (m *DistributedMessages) apply(ctx context.Context, msg *model.Message) (
-  *model.Message, error,
-) {
-  b, err := json.Marshal(msg)
-  if err != nil {
-    return nil, err
-  }
-
-  timeout := 10*time.Second
-  future := m.raft.Apply(b, timeout)
-  if future.Error() != nil {
-    return nil, future.Error()
-  }
-
-  res := future.Response()
-  switch val := res.(type) {
-  case error:
-    return nil, val
-  case model.Message:
-    return &val, nil
-  default:
-    return nil, errors.New("fsm.apply returns undefined result")
-  }
-}
-
-func (m *DistributedMessages) ReadOneMessage(ctx context.Context, userId usermodel.UserId, id model.MessageId) (
-  *model.Message, error,
-) {
-  return m.repo.GetOne(ctx, logger.Default(), &model.GetOneParams{userId, id})
-}
-
 func (m *DistributedMessages) WaitForLeader(timeout time.Duration) error {
   timeoutc := time.After(timeout)
   ticker := time.NewTicker(time.Second)
@@ -266,106 +220,4 @@ func (m *DistributedMessages) Leave(id string) error {
   logger.Info("remove from cluster serve with id", id)
   removeFuture := m.raft.RemoveServer(raft.ServerID(id), 0, 0)
   return removeFuture.Error()
-}
-
-func (m *DistributedMessages) PrintLeader() error {
-  addr, id := m.raft.LeaderWithID()
-  logger.Infoln("=== LEADER ===")
-  if m.conf.Raft.LocalID == raft.ServerID(id) {
-    logger.Infoln("i am the leader")
-  }
-  logger.Info("Addr: %v\n", addr)
-  logger.Info("Id: %v\n", id)
-  logger.Infoln()
-  return nil
-}
-
-func (m *DistributedMessages) PrintMyAddr() error {
-  _, id := m.raft.LeaderWithID()
-  addr := m.conf.StreamLayer.Addr()
-  logger.Infoln("=== ME ===")
-  if m.conf.Raft.LocalID == raft.ServerID(id) {
-    logger.Infoln("i am the leader")
-  }
-  logger.Infoln("Address: %v\n", addr)
-  logger.Infoln("ID: %v\n", m.conf.Raft.LocalID)
-  logger.Infoln()
-  return nil
-}
-
-func (m *DistributedMessages) PrintConfig() error {
-  future := m.raft.GetConfiguration()
-  err := future.Error()
-  if err != nil {
-    return err
-  }
-
-  logger.Infoln("=== SERVERS ===")
-  conf := future.Configuration()
-  for i, serv := range conf.Servers {
-    logger.Info("# %d:\n", i)
-    logger.Info("Suffrage: %d\n", serv.Suffrage)
-    logger.Info("Id: %s\n", serv.ID)
-    logger.Info("Address: %s\n", serv.Address)
-    logger.Infoln()
-  }
-
-  return nil
-}
-
-type StreamLayer struct {
-  ln net.Listener
-}
-
-func NewStreamLayer(ln net.Listener) *StreamLayer {
-  return &StreamLayer{ln: ln}
-}
-
-/**
- * Leading byte in rpc, signifies, that it is a call
- * to raft node (not grpc)
- */
-const RaftRPC = 1
-
-func (s *StreamLayer) Dial(
-  addr raft.ServerAddress,
-  timeout time.Duration,
-) (net.Conn, error) {
-  dialer := &net.Dialer{Timeout: timeout}
-  conn, err := dialer.Dial("tcp", string(addr))
-  if err != nil {
-    return nil, err
-  }
-
-  _, err = conn.Write([]byte{byte(RaftRPC)})
-  if err != nil {
-    return nil, err
-  }
-
-  return conn, err
-}
-
-func (s *StreamLayer) Accept() (net.Conn, error) {
-  conn, err := s.ln.Accept()
-  if err != nil {
-    return nil, err
-  }
-
-  b := make([]byte, 1)
-  if _, err := conn.Read(b); err != nil {
-    return nil, err
-  }
-  if bytes.Compare(b, []byte{byte(RaftRPC)}) != 0 {
-    return nil, errors.New("not a raft rpc")
-  }
-
-  return conn, nil
-}
-
-func (s *StreamLayer) Close() error {
-  return s.ln.Close()
-}
-
-func (s *StreamLayer) Addr() net.Addr {
-  return s.ln.Addr()
 }
