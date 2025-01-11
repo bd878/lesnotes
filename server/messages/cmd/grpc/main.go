@@ -28,8 +28,9 @@ func main() {
 
   cfg := config.Load(flag.Arg(0))
   logger.SetDefault(logger.New(logger.Config{
-    LogPath:   cfg.LogPath,
-    NodeName:  cfg.NodeName,
+    LogPath:    cfg.LogPath,
+    NodeName:   cfg.NodeName,
+    SkipCaller: 1,
   }))
 
   server := grpc.New(grpc.Config{
@@ -44,8 +45,8 @@ func main() {
     SerfJoinAddrs:    cfg.SerfJoinAddrs,
   })
 
-  var wg *sync.WaitGroup
+  var wg sync.WaitGroup
   wg.Add(1)
-  go server.Run(context.Background(), wg)
+  go server.Run(context.Background(), &wg)
   wg.Wait()
 }

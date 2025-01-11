@@ -2,6 +2,7 @@ package repository
 
 import (
   "context"
+  "errors"
   "database/sql"
 
   _ "github.com/mattn/go-sqlite3"
@@ -44,6 +45,11 @@ func New(dbFilePath string) (*Repository, error) {
   }, nil
 }
 
+/**
+ * Receives message id from params;
+ * Does not put message with same id
+ * twice
+ */
 func (r *Repository) Put(ctx context.Context, log *logger.Logger, params *model.PutParams) (
   int32, error,
 ) {
@@ -57,7 +63,8 @@ func (r *Repository) Put(ctx context.Context, log *logger.Logger, params *model.
   )
   if err != nil {
     log.Error("failed to insert new message")
-    return NullMessageID, err
+    log.Error(err)
+    return NullMessageID, errors.New("failed to put message")
   }
   return params.Message.ID, nil
 }

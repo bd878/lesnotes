@@ -3,8 +3,6 @@ package distributed
 import (
   "io"
   "context"
-  "encoding/json"
-  "bytes"
 
   "github.com/hashicorp/raft"
   "google.golang.org/protobuf/proto"
@@ -54,6 +52,7 @@ func (f *fsm) applyAppend(raw []byte) interface{} {
   if err != nil {
     return err
   }
+  // Put does not put message with same id twice
   res, err := f.repo.Put(context.Background(), logger.Default(), &model.PutParams{
     Message: model.MessageFromProto(cmd.Message),
   })
@@ -79,32 +78,8 @@ func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {
   return &snapshot{repo: f.repo}, nil
 }
 
-// restore will reapply same messages with ids
-func (f *fsm) Restore(r io.ReadCloser) error {
-  var buf *bytes.Buffer
-  var msgs []model.Message
-
-  _, err := io.Copy(buf, r)
-  if err == io.EOF {
-    return err
-  } else if err != nil {
-    return err
-  }
-  err = json.Unmarshal(buf.Bytes(), &msgs)
-  if err != nil {
-    return err
-  }
-
-  ctx := context.Background()
-  err = f.repo.Truncate(ctx, logger.Default())
-  if err != nil {
-    return err
-  }
-  for _, msg := range msgs {
-    _, err := f.repo.Put(ctx, logger.Default(), &model.PutParams{Message: &msg})
-    if err != nil {
-      return err
-    }
-  }
+// restore from snapshot (db .dump)
+func (f *fsm) Restore(_ io.ReadCloser) error {
+  /* TODO: make repository dump */
   return nil
 }

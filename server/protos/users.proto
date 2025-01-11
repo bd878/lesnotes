@@ -4,15 +4,15 @@ package users.v1;
 
 option go_package = "github.com/bd878/gallery/server/api";
 
-message User {
-  int32 id = 1;
-  string name = 2;
-  string token = 3;
-  string expires = 4;
-}
-
 service UserService {
   rpc Auth(AuthUserRequest) returns (AuthUserResponse);
+}
+
+message User {
+  int32     id = 1;
+  string    name = 2;
+  string    token = 3;
+  int64     expires_utc_nano = 4;
 }
 
 message AuthUserRequest {

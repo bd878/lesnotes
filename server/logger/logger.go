@@ -6,8 +6,9 @@ import (
 )
 
 type Config struct {
-  LogPath  string
-  NodeName string
+  LogPath    string
+  NodeName   string
+  SkipCaller int
 }
 
 type Logger struct {
@@ -18,7 +19,7 @@ type Logger struct {
 var defaultLogger atomic.Pointer[Logger]
 
 func init() {
-  defaultLogger.Store(New(Config{}))
+  defaultLogger.Store(New(Config{SkipCaller: 2}))
 }
 
 func Default() *Logger {
@@ -30,9 +31,14 @@ func SetDefault(l *Logger) {
 }
 
 func New(cfg Config) *Logger {
+  var options []zap.Option
+  if cfg.SkipCaller > 0 {
+    options = append(options, zap.AddCallerSkip(cfg.SkipCaller))
+  }
+
   zapConfig := zap.NewDevelopmentConfig()
   return &Logger{
-    SugaredLogger: zap.Must(zapConfig.Build()).Sugar(),
+    SugaredLogger: zap.Must(zapConfig.Build(options...)).Sugar(),
     conf: cfg,
   }
 }

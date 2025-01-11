@@ -28,8 +28,9 @@ func main() {
 
   cfg := config.Load(flag.Arg(0))
   logger.SetDefault(logger.New(logger.Config{
-    LogPath:   cfg.LogPath,
-    NodeName:  cfg.NodeName,
+    LogPath:    cfg.LogPath,
+    NodeName:   cfg.NodeName,
+    SkipCaller: 1,
   }))
 
   server := http.New(http.Config{
@@ -39,8 +40,9 @@ func main() {
     UsersServiceAddr:  cfg.UsersServiceAddr,
   })
 
-  var wg *sync.WaitGroup
+  var wg sync.WaitGroup
   wg.Add(1)
-  go server.ListenAndServe(context.Background(), wg)
+  logger.Infoln("server is listening on:", server.Addr)
+  go server.ListenAndServe(context.Background(), &wg)
   wg.Wait()
 }
