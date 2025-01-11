@@ -6,6 +6,7 @@ import (
 
   "github.com/bd878/gallery/server/api"
   "github.com/bd878/gallery/server/logger"
+  "github.com/bd878/gallery/server/utils"
   "github.com/bd878/gallery/server/messages/pkg/model"
   usermodel "github.com/bd878/gallery/server/users/pkg/model"
 )
@@ -31,7 +32,10 @@ func New(ctrl Controller) *Handler {
 func (h *Handler) SaveMessage(ctx context.Context, req *api.SaveMessageRequest) (
   *api.SaveMessageResponse, error,
 ) {
-  req.Message.CreateTime = time.Now().String()
+  req.Message.CreateUtcNano = time.Now().UnixNano()
+  req.Message.UpdateUtcNano = time.Now().UnixNano()
+  req.Message.Id = utils.RandomID()
+
   msg, err := h.controller.SaveMessage(ctx, logger.Default(), &model.SaveMessageParams{
     Message: model.MessageFromProto(req.Message),
   })
@@ -45,6 +49,7 @@ func (h *Handler) SaveMessage(ctx context.Context, req *api.SaveMessageRequest) 
 func (h *Handler) UpdateMessage(ctx context.Context, req *api.UpdateMessageRequest) (
   *api.UpdateMessageResponse, error,
 ) {
+  req.Message.UpdateUtcNano = time.Now().UnixNano()
   msg, err := h.controller.UpdateMessage(ctx, logger.Default(), &model.UpdateMessageParams{
     Message: model.MessageFromProto(req.Message),
   })
@@ -59,7 +64,7 @@ func (h *Handler) ReadUserMessages(ctx context.Context, req *api.ReadUserMessage
   *api.ReadUserMessagesResponse, error,
 ) {
   res, err := h.controller.ReadUserMessages(ctx, logger.Default(), &model.ReadUserMessagesParams{
-    UserId:    usermodel.UserId(req.UserId),
+    UserID:    usermodel.UserId(req.UserId),
     Limit:     req.Limit,
     Offset:    req.Offset,
     Ascending: req.Asc,

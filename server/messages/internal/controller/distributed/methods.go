@@ -54,7 +54,7 @@ func (m *DistributedMessages) SaveMessage(ctx context.Context, log *logger.Logge
     return nil, err
   }
 
-  params.Message.Id = model.MessageId(res.(*AppendCommandResult).Id)
+  params.Message.ID = res.(*AppendCommandResult).Id
 
   return params.Message, nil
 }
@@ -87,7 +87,7 @@ func (m *DistributedMessages) ReadUserMessages(ctx context.Context, log *logger.
     ctx,
     log,
     &model.GetParams{
-      UserId:    params.UserId,
+      UserID:    params.UserID,
       Limit:     params.Limit,
       Offset:    params.Offset,
       Ascending: params.Ascending,

@@ -13,7 +13,7 @@ import (
 )
 
 type Repository interface {
-  Put(ctx context.Context, log *logger.Logger, params *model.PutParams) (model.MessageId, error)
+  Put(ctx context.Context, log *logger.Logger, params *model.PutParams) (int32, error)
   Get(ctx context.Context, log *logger.Logger, params *model.GetParams) (*model.MessagesList, error)
   GetBatch(ctx context.Context, log *logger.Logger) ([]*model.Message, error)
   Truncate(ctx context.Context, log *logger.Logger) error
@@ -61,7 +61,7 @@ func (f *fsm) applyAppend(raw []byte) interface{} {
     return nil
   }
   return &AppendCommandResult{
-    Id: uint32(res),
+    Id: res,
   }
 }
 

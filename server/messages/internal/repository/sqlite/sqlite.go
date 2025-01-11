@@ -2,139 +2,92 @@ package repository
 
 import (
   "context"
-  "errors"
   "database/sql"
 
   _ "github.com/mattn/go-sqlite3"
   "github.com/bd878/gallery/server/logger"
   "github.com/bd878/gallery/server/messages/pkg/model"
-  "github.com/bd878/gallery/server/messages/internal/repository"
 )
 
-type Repository struct {
-  db *sql.DB
+const NullMessageID int32 = 0
 
-  insertSt *sql.Stmt
+type Repository struct {
+  db           *sql.DB
+  insertStmt   *sql.Stmt
 }
 
-func New(dbfilepath string) (*Repository, error) {
-  db, err := sql.Open("sqlite3", "file:" + dbfilepath)
+func New(dbFilePath string) (*Repository, error) {
+  db, err := sql.Open("sqlite3", "file:" + dbFilePath)
   if err != nil {
+    logger.Error("failed to establish connection with sql by given path", dbFilePath)
     return nil, err
   }
 
-  insertSt, err := db.Prepare(
+  insertStmt, err := db.Prepare(
     "INSERT INTO messages(" +
+      "id, " +
       "user_id, " +
-      "createtime, " +
-      "message, " +
-      "file, " +
-      "file_id, " +
-      "log_index, " +
-      "log_term" +
-    ") VALUES (?,?,?,?,?,?,?)",
+      "create_utc_nano, " +
+      "update_utc_nano, " +
+      "text, " +
+      "file_id " +
+    ") VALUES (?,?,?,?,?,?)",
   )
   if err != nil {
+    logger.Error("failed to prepare insert statement")
     return nil, err
   }
 
   return &Repository{
     db: db,
-
-    insertSt: insertSt,
+    insertStmt: insertStmt,
   }, nil
 }
 
-func (r *Repository) Put(ctx context.Context, _ *logger.Logger, params *model.PutParams) (
-  model.MessageId, error,
+func (r *Repository) Put(ctx context.Context, log *logger.Logger, params *model.PutParams) (
+  int32, error,
 ) {
-  res, err := r.insertSt.ExecContext(ctx,
-    params.Message.UserId,
-    params.Message.CreateTime,
-    params.Message.Value,
-    params.Message.FileName,
-    params.Message.FileId,
-    params.Message.LogIndex,
-    params.Message.LogTerm,
+  _, err := r.insertStmt.ExecContext(ctx,
+    params.Message.ID,
+    params.Message.UserID,
+    params.Message.CreateUTCNano,
+    params.Message.UpdateUTCNano,
+    params.Message.Text,
+    params.Message.FileID,
   )
   if err != nil {
-    return model.NullMsgId, err
+    log.Error("failed to insert new message")
+    return NullMessageID, err
   }
-  id, _ := res.LastInsertId()
-  return model.MessageId(id), nil
+  return params.Message.ID, nil
 }
 
-func (r *Repository) Truncate(ctx context.Context, _ *logger.Logger) error {
-  _, err := r.db.ExecContext(ctx,
-    "DELETE FROM messages",
-  )
+func (r *Repository) Truncate(ctx context.Context, log *logger.Logger) error {
+  _, err := r.db.ExecContext(ctx, "DELETE FROM messages")
   if err != nil {
+    log.Error("failed to delete messages")
     return err
   }
   return nil
 }
 
-func (r *Repository) FindByIndexTerm(ctx context.Context, _ *logger.Logger, params *model.FindByIndexParams) (
-  *model.Message, error,
-) {
-  row := r.db.QueryRowContext(ctx,
-    "SELECT id, user_id, createtime, message, file, file_id, log_index, log_term " +
-    "FROM messages WHERE log_index = ? AND log_term = ?",
-    params.LogIndex, params.LogTerm,
-  )
-
-  var msg model.Message
-  var fileCol sql.NullString
-  var fileIdCol sql.NullString
-  var logIndexCol sql.NullInt64
-  var logTermCol sql.NullInt64
-  if err := row.Scan(
-    &msg.Id,
-    &msg.UserId,
-    &msg.CreateTime,
-    &msg.Value,
-    &fileCol,
-    &fileIdCol,
-    &logIndexCol,
-    &logTermCol,
-  ); err != nil {
-    if errors.Is(err, sql.ErrNoRows) {
-      return nil, repository.ErrNotFound
-    }
-    return nil, err
-  }
-  if fileCol.Valid {
-    msg.FileName = fileCol.String
-  }
-  if fileIdCol.Valid {
-    msg.FileId = model.FileId(fileIdCol.String)
-  }
-  if logIndexCol.Valid {
-    msg.LogIndex = uint64(logIndexCol.Int64)
-  }
-  if logTermCol.Valid {
-    msg.LogTerm = uint64(logTermCol.Int64)
-  }
-  return &msg, nil
-}
-
-const ascStmt = `
-SELECT id, user_id, createtime, message, file, file_id, log_index, log_term 
+const ascendingStmt = `
+SELECT id, user_id, create_utc_nano, update_utc_nano, text, file_id
 FROM messages
 WHERE user_id = ?
 ORDER BY id ASC
 LIMIT ? OFFSET ?
 `
 
-const descStmt = `
-SELECT id, user_id, createtime, message, file, file_id, log_index, log_term 
+const descendingStmt = `
+SELECT id, user_id, create_utc_nano, update_utc_nano, text, file_id
 FROM messages
 WHERE user_id = ?
 ORDER BY id DESC
 LIMIT ? OFFSET ?
 `
 
-func (r *Repository) Get(ctx context.Context, _ *logger.Logger, params *model.GetParams) (
+func (r *Repository) Get(ctx context.Context, log *logger.Logger, params *model.GetParams) (
   *model.MessagesList, error,
 ) {
   var rows *sql.Rows
@@ -142,12 +95,13 @@ func (r *Repository) Get(ctx context.Context, _ *logger.Logger, params *model.Ge
   var isLastPage bool
 
   if params.Ascending {
-    rows, err = r.db.QueryContext(ctx, ascStmt, int(params.UserId), params.Limit, params.Offset)
+    rows, err = r.db.QueryContext(ctx, ascendingStmt, params.UserID, params.Limit, params.Offset)
   } else {
-    rows, err = r.db.QueryContext(ctx, descStmt, int(params.UserId), params.Limit, params.Offset)
+    rows, err = r.db.QueryContext(ctx, descendingStmt, params.UserID, params.Limit, params.Offset)
   }
 
   if err != nil {
+    log.Error("failed to query messages context")
     return nil, err
   }
 
@@ -155,52 +109,35 @@ func (r *Repository) Get(ctx context.Context, _ *logger.Logger, params *model.Ge
 
   var res []*model.Message
   for rows.Next() {
-    var id int
-    var userId int
-    var createtime string
-    var value string
-    var fileCol sql.NullString
-    var fileIdCol sql.NullString
-    var logIndexCol sql.NullInt64
-    var logTermCol sql.NullInt64
+    var id int32
+    var userId int32
+    var createUtcNano int64
+    var updateUtcNano int64
+    var text string
+    var fileIdCol sql.NullInt32
     if err := rows.Scan(
       &id,
       &userId,
-      &createtime,
-      &value,
-      &fileCol,
+      &createUtcNano,
+      &updateUtcNano,
+      &text,
       &fileIdCol,
-      &logIndexCol,
-      &logTermCol,
     ); err != nil {
+      log.Error("failed to scan row")
       return nil, err
     }
 
-    var fileName string
-    if fileCol.Valid {
-      fileName = fileCol.String
-    }
-    var fileId string
+    var fileId int32
     if fileIdCol.Valid {
-      fileId = fileIdCol.String
-    }
-    var logIndex uint64
-    if logIndexCol.Valid {
-      logIndex = uint64(logIndexCol.Int64)
-    }
-    var logTerm uint64
-    if logTermCol.Valid {
-      logTerm = uint64(logTermCol.Int64)
+      fileId = fileIdCol.Int32
     }
     res = append(res, &model.Message{
-      Id: model.MessageId(id),
-      UserId: userId,
-      CreateTime: createtime,
-      Value: value,
-      FileName: fileName,
-      FileId: model.FileId(fileId),
-      LogIndex: logIndex,
-      LogTerm: logTerm,
+      ID: id,
+      UserID: userId,
+      CreateUTCNano: createUtcNano,
+      UpdateUTCNano: updateUtcNano,
+      Text: text,
+      FileID: fileId,
     })
   }
 
@@ -209,7 +146,7 @@ func (r *Repository) Get(ctx context.Context, _ *logger.Logger, params *model.Ge
   } else {
     row := r.db.QueryRowContext(ctx,
       "SELECT COUNT(*) FROM messages WHERE user_id = ?",
-      int(params.UserId),
+      params.UserID,
     )
     if err != nil {
       isLastPage = false
@@ -231,126 +168,47 @@ func (r *Repository) Get(ctx context.Context, _ *logger.Logger, params *model.Ge
   }, nil
 }
 
-func (r *Repository) GetOne(ctx context.Context, _ *logger.Logger, params *model.GetOneParams) (
-  *model.Message, error,
-) {
-  row := r.db.QueryRowContext(ctx,
-    "SELECT id, user_id, createtime, message, file, file_id, log_index, log_term " +
-    "FROM messages WHERE user_id = ? AND id = ?",
-    int(params.UserId), int(params.MessageId),
-  )
-
-  var message model.Message
-  var fileCol sql.NullString
-  var fileIdCol sql.NullString
-  var logIndexCol sql.NullInt64
-  var logTermCol sql.NullInt64
-  if err := row.Scan(
-    &message.Id,
-    &message.UserId,
-    &message.CreateTime,
-    &message.Value,
-    &fileCol,
-    &fileIdCol,
-    &logIndexCol,
-    &logTermCol,
-  ); err != nil {
-    if errors.Is(err, sql.ErrNoRows) {
-      return &message, repository.ErrNotFound
-    }
-    return &message, err
-  }
-  if fileCol.Valid {
-    message.FileName = fileCol.String
-  }
-  if fileIdCol.Valid {
-    message.FileId = model.FileId(fileIdCol.String)
-  }
-  if logIndexCol.Valid {
-    message.LogIndex = uint64(logIndexCol.Int64)
-  }
-  if logTermCol.Valid {
-    message.LogTerm = uint64(logTermCol.Int64)
-  }
-  return &message, nil
-}
-
-func (r *Repository) PutBatch(ctx context.Context, _ *logger.Logger, params *model.PutBatchParams) error {
-  for _, message := range params.MessagesList {
-    _, err := r.insertSt.ExecContext(ctx,
-      message.UserId,
-      message.CreateTime,
-      message.Value,
-      message.FileName,
-      message.FileId,
-      message.LogIndex,
-      message.LogTerm,
-    )
-    if err != nil {
-      return err
-    }
-  }
-  return nil
-}
-
-func (r *Repository) GetBatch(ctx context.Context, _ *logger.Logger) ([]*model.Message, error) {
+func (r *Repository) GetBatch(ctx context.Context, log *logger.Logger) ([]*model.Message, error) {
   rows, err := r.db.QueryContext(ctx,
-    "SELECT id, user_id, createtime, message, file, file_id, log_index, log_term " +
+    "SELECT id, user_id, create_utc_nano, update_utc_nano, text, file_id " +
     "FROM messages",
   )
   if err != nil {
+    log.Error("failed to query get batch context")
     return nil, err
   }
   defer rows.Close()
 
   var res []*model.Message
   for rows.Next() {
-    var id int
-    var userId int
-    var value string
-    var createtime string
-    var fileCol sql.NullString
-    var fileIdCol sql.NullString
-    var logIndexCol sql.NullInt64
-    var logTermCol sql.NullInt64
+    var id int32
+    var userId int32
+    var createUtcNano int64
+    var updateUtcNano int64
+    var text string
+    var fileIdCol sql.NullInt32
     if err := rows.Scan(
       &id,
       &userId,
-      &createtime,
-      &value,
-      &fileCol,
+      &createUtcNano,
+      &updateUtcNano,
+      &text,
       &fileIdCol,
-      &logIndexCol,
-      &logTermCol,
     ); err != nil {
+      log.Error("failed to scan row")
       return nil, err
     }
-
-    var fileName string
-    if fileCol.Valid {
-      fileName = fileCol.String
-    }
-    var fileId string
+    var fileId int32
     if fileIdCol.Valid {
-      fileId = fileIdCol.String
-    }
-    var logIndex uint64
-    if logIndexCol.Valid {
-      logIndex = uint64(logIndexCol.Int64)
-    }
-    var logTerm uint64
-    if logTermCol.Valid {
-      logTerm = uint64(logTermCol.Int64)
+      fileId = fileIdCol.Int32
     }
     res = append(res, &model.Message{
-      Id: model.MessageId(id),
-      UserId: userId,
-      CreateTime: createtime,
-      Value: value,
-      FileName: fileName,
-      FileId: model.FileId(fileId),
-      LogIndex: logIndex,
-      LogTerm: logTerm,
+      ID: id,
+      UserID: userId,
+      CreateUTCNano: createUtcNano,
+      UpdateUTCNano: updateUtcNano,
+      Text: text,
+      FileID: fileId,
     })
   }
 

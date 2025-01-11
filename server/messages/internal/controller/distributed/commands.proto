@@ -9,7 +9,7 @@ message AppendCommand {
 }
 
 message AppendCommandResult {
-  uint32 id = 1;
+  int32 id = 1;
 }
 
 message UpdateCommand {
@@ -17,5 +17,5 @@ message UpdateCommand {
 }
 
 message UpdateCommandResult {
-  uint32 id = 1;
+  int32 id = 1;
 }

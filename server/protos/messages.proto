@@ -12,41 +12,40 @@ service Messages {
 }
 
 message Message {
-  uint32 id = 1;
-  uint32 user_id = 2;
-  string create_time = 3;
-  bytes value = 4;
-  string file_name = 5;
-  string file_id = 6;
-  uint64 update_utc_nano = 7;
+  int32    id = 1;
+  int32    user_id = 2;
+  int64    create_utc_nano = 3;
+  int64    update_utc_nano = 4;
+  string   text = 5;
+  int32    file_id = 7;
 }
 
 message ReadUserMessagesRequest {
-  uint32 user_id = 1;
-  int32 offset = 2;
-  int32 limit = 3;
-  bool asc = 4;
+  int32    user_id = 1;
+  int32    offset = 2;
+  int32    limit = 3;
+  bool     asc = 4;
 }
 
 message ReadUserMessagesResponse {
   repeated Message messages = 1;
-  bool is_last_page = 2;
+  bool             is_last_page = 2;
 }
 
 message UpdateMessageRequest {
-  Message message = 1;
+  Message  message = 1;
 }
 
 message UpdateMessageResponse {
-  Message message = 1;
+  Message  message = 1;
 }
 
 message SaveMessageRequest {
-  Message message = 1;
+  Message  message = 1;
 }
 
 message SaveMessageResponse {
-  Message message = 1;
+  Message  message = 1;
 }
 
 message GetServersRequest {}
@@ -58,5 +57,5 @@ message GetServersResponse {
 message Server {
   string id = 1;
   string raft_addr = 2;
-  bool is_leader = 3;
+  bool   is_leader = 3;
 }

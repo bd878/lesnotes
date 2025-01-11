@@ -105,7 +105,7 @@ paths:
                   description:
                     type: string
                     default: ""
-                  islastpage:
+                  is_last_page:
                     type: boolean
                   messages:
                     type: array
@@ -219,12 +219,16 @@ components:
 
     sendBody:
       example:
-        message: test message
+        text: test message
+        file: ""
       type: object
       properties:
-        message:
+        text:
           type: string
           default: ""
+        file:
+          type: string
+          format: binary
 
     sendOk:
       type: object
@@ -253,16 +257,19 @@ components:
           type: integer
           example: 1
           readOnly: true
-        userid:
+        user_id:
           type: integer
           example: 1
-        value:
+        text:
           type: string
           example: "test message"
-        createtime:
-          type: string
-          format: date-time
-        fileid:
+        create_utc_nano:
+          type: integer
+          format: integer
+        update_utc_nano:
+          type: integer
+          format: integer
+        file_id:
           type: string
         filename:
           type: string

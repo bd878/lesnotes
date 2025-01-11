@@ -44,14 +44,14 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
     return
   }
 
-  var user *usermodel.User
-  var ok bool
-  if user, ok = getUser(w, req); !ok {
+  user, ok := getUser(w, req)
+  if !ok {
     return
   }
 
   var fileName string
-  var fileId string
+  var fileID int32
+  var fileUID string
   if _, ok := req.MultipartForm.File["file"]; ok {
     f, fh, err := req.FormFile("file")
     if err != nil {
@@ -61,10 +61,11 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
     }
 
     fileName = filepath.Base(fh.Filename)
-    fileId = strings.ToLower(utils.RandomString(10) + filepath.Ext(fh.Filename))
+    fileID = utils.RandomID()
+    fileUID = strings.ToLower(utils.RandomString(10) + filepath.Ext(fh.Filename))
 
     ff, err := os.OpenFile(
-      filepath.Join(h.dataPath, fileId),
+      filepath.Join(h.dataPath, fileUID),
       os.O_WRONLY|os.O_CREATE, 0666,
     )
     if err != nil {
@@ -79,9 +80,9 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
     }
   }
 
-  value := req.PostFormValue("message")
+  text := req.PostFormValue("text")
 
-  if fileName == "" && value == "" {
+  if fileName == "" && text == "" {
     if err := json.NewEncoder(w).Encode(model.ServerResponse{
       Status: "ok",
       Description: "empty fields",
@@ -92,15 +93,14 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
     return
   }
 
-  var msg *model.Message
-  if msg, err = h.controller.SaveMessage(req.Context(), log, &model.SaveMessageParams{
+  msg, err := h.controller.SaveMessage(req.Context(), log, &model.SaveMessageParams{
     Message: &model.Message{
-      UserId: int(user.Id),
-      Value: value,
-      FileName: fileName,
-      FileId: model.FileId(fileId),
+      UserID: int32(user.Id),
+      Text:   text,
+      FileID: fileID,
     },
-  }); err != nil {
+  })
+  if err != nil {
     log.Error(err)
     w.WriteHeader(http.StatusInternalServerError)
     return
@@ -139,8 +139,8 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
     return
   }
 
-  value := req.PostFormValue("message")
-  if value == "" {
+  text := req.PostFormValue("text")
+  if text == "" {
     if err := json.NewEncoder(w).Encode(model.ServerResponse{
       Status: "ok",
       Description: "empty message field",
@@ -153,8 +153,8 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 
   msg, err := h.controller.UpdateMessage(req.Context(), log, &model.UpdateMessageParams{
     Message: &model.Message{
-      UserId: int(user.Id),
-      Value: value,
+      UserID: int32(user.Id),
+      Text: text,
     },
   })
   if err != nil {
@@ -251,7 +251,7 @@ func (h *Handler) ReadMessages(log *logger.Logger, w http.ResponseWriter, req *h
     context.Background(),
     log,
     &model.ReadUserMessagesParams{
-      UserId: usermodel.UserId(user.Id),
+      UserID: usermodel.UserId(user.Id),
       Limit: int32(limitInt),
       Offset: int32(offsetInt),
       Ascending: ascending,

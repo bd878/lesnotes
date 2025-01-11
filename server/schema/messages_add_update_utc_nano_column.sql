@@ -1,1 +1,0 @@
-ALTER TABLE messages ADD COLUMN update_utc_nano INTEGER;

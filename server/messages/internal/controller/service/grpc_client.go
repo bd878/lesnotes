@@ -80,7 +80,7 @@ func (s *Messages) ReadUserMessages(ctx context.Context, log *logger.Logger, par
   var err error
 
   if res, err = s.client.ReadUserMessages(ctx, &api.ReadUserMessagesRequest{
-    UserId: uint32(params.UserId),
+    UserId: int32(params.UserID),
     Limit:  params.Limit,
     Offset: params.Offset,
     Asc:    params.Ascending,
