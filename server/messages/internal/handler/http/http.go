@@ -12,7 +12,7 @@ import (
   "path/filepath"
   "encoding/json"
 
-  httpmiddleware "github.com/bd878/gallery/server/messages/internal/middleware/http"
+  httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
   usermodel "github.com/bd878/gallery/server/users/pkg/model"
   "github.com/bd878/gallery/server/messages/pkg/model"
   "github.com/bd878/gallery/server/utils"

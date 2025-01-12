@@ -5,6 +5,7 @@ import (
   "sync"
   "net/http"
 
+  httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
   repository "github.com/bd878/gallery/server/users/internal/repository/sqlite"
   httphandler "github.com/bd878/gallery/server/users/internal/handler/http"
   controller "github.com/bd878/gallery/server/users/internal/controller/users"
@@ -26,16 +27,18 @@ type Server struct {
 func New(cfg Config) *Server {
   mux := http.NewServeMux()
 
+  middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log)
+
   repo := repository.New(cfg.DBPath)
   grpcCtrl := controller.New(repo)
   handler := httphandler.New(grpcCtrl, httphandler.Config{
     Domain:    cfg.Domain,
   })
 
-  mux.Handle("/users/v1/signup", http.HandlerFunc(handler.Register))
-  mux.Handle("/users/v1/login",  http.HandlerFunc(handler.Authenticate))
-  mux.Handle("/users/v1/auth",   http.HandlerFunc(handler.Auth))
-  mux.Handle("/users/v1/status", http.HandlerFunc(handler.ReportStatus))
+  mux.Handle("/users/v1/signup", middleware.Build(handler.Register))
+  mux.Handle("/users/v1/login",  middleware.Build(handler.Authenticate))
+  mux.Handle("/users/v1/auth",   middleware.Build(handler.Auth))
+  mux.Handle("/users/v1/status", middleware.Build(handler.ReportStatus))
 
   server := &Server{
     Server: &http.Server{

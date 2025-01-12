@@ -10,6 +10,7 @@ import (
   "github.com/bd878/gallery/server/api"
   "github.com/bd878/gallery/server/logger"
 
+  grpcmiddleware "github.com/bd878/gallery/server/internal/middleware/grpc"
   controller "github.com/bd878/gallery/server/users/internal/controller/users"
   repository "github.com/bd878/gallery/server/users/internal/repository/sqlite"
   grpchandler "github.com/bd878/gallery/server/users/internal/handler/grpc"
@@ -54,7 +55,11 @@ func (s *Server) setupGRPC(log *logger.Logger) {
   control := controller.New(repo)
   handler := grpchandler.New(control)
 
-  s.Server = grpc.NewServer()
+  s.Server = grpc.NewServer(
+    grpc.ChainUnaryInterceptor(
+      grpcmiddleware.UnaryServerInterceptor(grpcmiddleware.LogBuilder()),
+    ),
+  )
 
   api.RegisterUsersServer(s.Server, handler)
 

@@ -28,17 +28,17 @@ func main() {
 
   cfg := config.Load(flag.Arg(0))
   logger.SetDefault(logger.New(logger.Config{
-    LogPath:           cfg.LogPath,
-    NodeName:          cfg.NodeName,
-    SkipCaller:        1,
+    LogPath:          cfg.LogPath,
+    NodeName:         cfg.NodeName,
+    SkipCaller:       1,
   }))
 
   server := http.New(http.Config{
-    Addr:              cfg.HttpAddr,
-    RpcAddr:           cfg.RpcAddr,
-    DataPath:          cfg.DataPath,
-    DBPath:            cfg.DBPath,
-    Domain:            cfg.Domain,
+    Addr:             cfg.HttpAddr,
+    RpcAddr:          cfg.RpcAddr,
+    DataPath:         cfg.DataPath,
+    DBPath:           cfg.DBPath,
+    Domain:           cfg.Domain,
   })
 
   var wg sync.WaitGroup

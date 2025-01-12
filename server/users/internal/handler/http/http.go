@@ -33,27 +33,27 @@ func New(controller Controller, config Config) *Handler {
   return &Handler{controller, config}
 }
 
-func (h *Handler) Authenticate(w http.ResponseWriter, req *http.Request) {
+func (h *Handler) Authenticate(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
   userName, ok := getName(w, req)
   if !ok {
-    logger.Error("cannot get name")
+    log.Error("cannot get name")
     return
   }
 
   password, ok := getPassword(w, req)
   if !ok {
-    logger.Error("cannot get password")
+    log.Error("cannot get password")
     return
   }
 
-  exists, err := h.controller.HasUser(context.Background(), logger.Default(), &model.HasUserParams{
+  exists, err := h.controller.HasUser(context.Background(), log, &model.HasUserParams{
     User: &model.User{
       Name: userName,
       Password: password,
     },
   })
   if err != nil {
-    logger.Error("failed to check if user exists:", err)
+    log.Error("failed to check if user exists:", err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
@@ -63,22 +63,22 @@ func (h *Handler) Authenticate(w http.ResponseWriter, req *http.Request) {
       Status: "ok",
       Description: "no user,password pair",
     }); err != nil {
-      logger.Error("failed to send no user,password pair:", err)
+      log.Error("failed to send no user,password pair:", err)
       w.WriteHeader(http.StatusInternalServerError)
       return
     }
     return
   }
 
-  user, err := h.controller.GetUser(context.Background(), logger.Default(), &model.GetUserParams{
+  user, err := h.controller.GetUser(context.Background(), log, &model.GetUserParams{
     User: &model.User{Name: userName},
   })
   switch err {
   case controller.ErrTokenExpired:
-    logger.Infoln("token expired")
+    log.Infoln("token expired")
     err := refreshToken(h, w, userName)
     if err != nil {
-      logger.Error("Cannot refresh token: ", err)
+      log.Error("Cannot refresh token: ", err)
       w.WriteHeader(http.StatusInternalServerError)
       return
     }
@@ -88,7 +88,7 @@ func (h *Handler) Authenticate(w http.ResponseWriter, req *http.Request) {
       Status: "ok",
       Description: "no user,password pair",
     }); err != nil {
-      logger.Error("cannot respond no user: ", err)
+      log.Error("cannot respond no user: ", err)
       w.WriteHeader(http.StatusInternalServerError)
       return
     }
@@ -96,13 +96,13 @@ func (h *Handler) Authenticate(w http.ResponseWriter, req *http.Request) {
   case nil:
     err := attachTokenToResponse(w, user.Token, h.config.Domain, user.ExpiresUTCNano)
     if err != nil {
-      logger.Error("Cannot attach token to response: ", err)
+      log.Error("Cannot attach token to response: ", err)
       w.WriteHeader(http.StatusInternalServerError)
       return
     }
 
   default:
-    logger.Error("Unknown error: ", err)
+    log.Error("Unknown error: ", err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
@@ -111,26 +111,26 @@ func (h *Handler) Authenticate(w http.ResponseWriter, req *http.Request) {
     Status: "ok",
     Description: "authenticated",
   }); err != nil {
-    logger.Error("cannot send ok authenticated: ", err)
+    log.Error("cannot send ok authenticated: ", err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
 }
 
-func (h *Handler) Auth(w http.ResponseWriter, req *http.Request) {
+func (h *Handler) Auth(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
   cookie, err := req.Cookie("token")
   if err != nil {
-    logger.Error("bad cookie")
+    log.Error("bad cookie")
     w.WriteHeader(http.StatusBadRequest)
     return
   }
 
-  logger.Infoln("cookie value", cookie.Value)
-  user, err := h.controller.GetUser(context.Background(), logger.Default(), &model.GetUserParams{
+  log.Infoln("cookie value", cookie.Value)
+  user, err := h.controller.GetUser(context.Background(), log, &model.GetUserParams{
     User: &model.User{Token: cookie.Value},
   })
   if err == controller.ErrTokenExpired {
-    logger.Infoln("token expired")
+    log.Infoln("token expired")
     if err := json.NewEncoder(w).Encode(model.ServerAuthorizeResponse{
       ServerResponse: model.ServerResponse{
         Status: "ok",
@@ -138,13 +138,13 @@ func (h *Handler) Auth(w http.ResponseWriter, req *http.Request) {
       },
       Expired: true,
     }); err != nil {
-      logger.Error("cannot send token expired error: ", err)
+      log.Error("cannot send token expired error: ", err)
       w.WriteHeader(http.StatusInternalServerError)
       return
     }
   }
   if err != nil {
-    logger.Error("failed to get user by token: ", err)
+    log.Error("failed to get user by token: ", err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
@@ -162,24 +162,24 @@ func (h *Handler) Auth(w http.ResponseWriter, req *http.Request) {
       ExpiresUTCNano: user.ExpiresUTCNano,
     },
   }); err != nil {
-    logger.Error("failed to send authorize response: ", err)
+    log.Error("failed to send authorize response: ", err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
 }
 
-func (h *Handler) Register(w http.ResponseWriter, req *http.Request) {
+func (h *Handler) Register(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
   userName, ok := getName(w, req)
   if !ok {
-    logger.Error("cannot get user name")
+    log.Error("cannot get user name")
     return
   }
 
-  exists, err := h.controller.HasUser(context.Background(), logger.Default(), &model.HasUserParams{
+  exists, err := h.controller.HasUser(context.Background(), log, &model.HasUserParams{
     User: &model.User{Name: userName},
   })
   if err != nil {
-    logger.Error(err)
+    log.Error(err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
@@ -189,7 +189,7 @@ func (h *Handler) Register(w http.ResponseWriter, req *http.Request) {
       Status: "ok",
       Description: "name exists",
     }); err != nil {
-      logger.Error(err)
+      log.Error(err)
       w.WriteHeader(http.StatusInternalServerError)
       return
     }
@@ -198,14 +198,14 @@ func (h *Handler) Register(w http.ResponseWriter, req *http.Request) {
 
   password, ok := getPassword(w, req)
   if !ok {
-    logger.Error("cannot get password from request")
+    log.Error("cannot get password from request")
     return
   }
 
   token, expiresUtcNano := createToken(w, h.config.Domain)
 
-  logger.Infoln("user, password, token, expires", userName, password, token, expiresUtcNano)
-  err = h.controller.AddUser(context.Background(), logger.Default(), &model.AddUserParams{
+  log.Infoln("user, password, token, expires", userName, password, token, expiresUtcNano)
+  err = h.controller.AddUser(context.Background(), log, &model.AddUserParams{
     User: &model.User{
       Name:                  userName,
       Password:              password,
@@ -214,7 +214,7 @@ func (h *Handler) Register(w http.ResponseWriter, req *http.Request) {
     },
   })
   if err != nil {
-    logger.Error(err)
+    log.Error(err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
@@ -223,15 +223,15 @@ func (h *Handler) Register(w http.ResponseWriter, req *http.Request) {
     Status: "ok",
     Description: "created",
   }); err != nil {
-    logger.Error(err)
+    log.Error(err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
 }
 
-func (h *Handler) ReportStatus(w http.ResponseWriter, _ *http.Request) {
+func (h *Handler) ReportStatus(log *logger.Logger, w http.ResponseWriter, _ *http.Request) {
   if _, err := io.WriteString(w, "ok\n"); err != nil {
-    logger.Error(err)
+    log.Error(err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }

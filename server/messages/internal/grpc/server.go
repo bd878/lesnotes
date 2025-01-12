@@ -14,7 +14,7 @@ import (
   "github.com/bd878/gallery/server/logger"
   hclog "github.com/hashicorp/go-hclog"
 
-  grpcmiddleware "github.com/bd878/gallery/server/messages/internal/middleware/grpc"
+  grpcmiddleware "github.com/bd878/gallery/server/internal/middleware/grpc"
   membership "github.com/bd878/gallery/server/messages/internal/discovery/serf"
   repository "github.com/bd878/gallery/server/messages/internal/repository/sqlite"
   controller "github.com/bd878/gallery/server/messages/internal/controller/distributed"

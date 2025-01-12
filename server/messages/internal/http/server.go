@@ -5,7 +5,7 @@ import (
   "sync"
   "net/http"
 
-  httpmiddleware "github.com/bd878/gallery/server/messages/internal/middleware/http"
+  httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
   httphandler "github.com/bd878/gallery/server/messages/internal/handler/http"
   usergateway "github.com/bd878/gallery/server/messages/internal/gateway/user/mock"
   controller "github.com/bd878/gallery/server/messages/internal/controller/service"
