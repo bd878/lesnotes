@@ -1,9 +1,5 @@
 package model
 
-import (
-  usermodel "github.com/bd878/gallery/server/users/pkg/model"
-)
-
 type SaveMessageParams struct {
   Message          *Message
 }
@@ -13,7 +9,7 @@ type UpdateMessageParams struct {
 }
 
 type ReadUserMessagesParams struct {
-  UserID            usermodel.UserId
+  UserID            int32
   Limit             int32
   Offset            int32
   Ascending         bool
@@ -28,7 +24,7 @@ type PutParams struct {
 }
 
 type GetParams struct {
-  UserID            usermodel.UserId
+  UserID            int32
   Limit             int32
   Offset            int32
   Ascending         bool

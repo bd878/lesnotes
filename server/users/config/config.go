@@ -1,10 +1,11 @@
 package config
 
 type Config struct {
-  HttpPort int `json:"httpport"`
-  GrpcPort int `json:"grpcport"`
-  Debug bool `json:"debug"`
-  LogFile string `json:"logFile"`
-  DBPath string `json:"dbPath"`
-  Domainname string `json:"domainname"`
+  HttpAddr          string          `json:"http_addr"`
+  RpcAddr           string          `json:"rpc_addr"`
+  NodeName          string          `json:"node_name"`
+  LogPath           string          `json:"log_path"`
+  DataPath          string          `json:"data_path"`
+  DBPath            string          `json:"db_path"`
+  Domain            string          `json:"domain"`
 }

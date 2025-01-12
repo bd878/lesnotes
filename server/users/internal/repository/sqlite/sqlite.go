@@ -3,86 +3,80 @@ package repository
 import (
   "errors"
   "context"
-  "log"
   "database/sql"
 
   _ "github.com/mattn/go-sqlite3"
+  "github.com/bd878/gallery/server/logger"
   "github.com/bd878/gallery/server/users/pkg/model"
-  "github.com/bd878/gallery/server/users/internal/repository"
 )
 
-var ErrNotImplemented = errors.New("not implemented")
-
 type Repository struct {
-  db *sql.DB
+  db          *sql.DB
 }
 
-func New(dbpath string) (*Repository, error) {
-  db, err := sql.Open("sqlite3", "file:" + dbpath)
+func New(dbPath string) *Repository {
+  db, err := sql.Open("sqlite3", "file:" + dbPath)
   if err != nil {
-    return nil, err
+    panic(err)
   }
-  return &Repository{db}, nil
+  return &Repository{db}
 }
 
-func (r *Repository) Add(ctx context.Context, user *model.User) error {
-  _, err := r.db.ExecContext(ctx, "INSERT INTO users(name,password,token,expires)" +
-    "VALUES(?,?,?,?)", user.Name, user.Password, user.Token, user.Expires)
+func (r *Repository) AddUser(ctx context.Context, log *logger.Logger, user *model.User) error {
+  _, err := r.db.ExecContext(ctx, "INSERT INTO users(name,password,token,expires_utc_nano)" +
+    "VALUES(?,?,?,?)", user.Name, user.Password, user.Token, user.ExpiresUTCNano)
   if err != nil {
-    log.Printf("query error: %v\n", err)
+    log.Error("query error: %v\n", err)
   }
   return err
 }
 
-func (r *Repository) Has(ctx context.Context, user *model.User) (bool, error) {
+func (r *Repository) HasUser(ctx context.Context, log *logger.Logger, user *model.User) (bool, error) {
   if user.Password == "" {
-    return r.hasUser(ctx, user.Name)
+    return r.hasUser(ctx, log, user.Name)
   }
 
-  return r.hasUserAndPassword(ctx, user)
+  return r.hasUserAndPassword(ctx, log, user)
 }
 
-func (r *Repository) Get(ctx context.Context, user *model.User) (*model.User, error) {
+func (r *Repository) GetUser(ctx context.Context, log *logger.Logger, user *model.User) (*model.User, error) {
   if user.Token != "" {
-    return r.getByToken(ctx, user.Token)
+    return r.getByToken(ctx, log, user.Token)
   } else if user.Name != "" {
-    return r.getByUserName(ctx, user.Name)
+    return r.getByUserName(ctx, log, user.Name)
   }
-  return nil, ErrNotImplemented
+  return nil, errors.New("not implemented")
 }
 
-func (r *Repository) Refresh(ctx context.Context, user *model.User) error {
-  _, err := r.db.ExecContext(ctx, "UPDATE users SET token = ?, expires = ? WHERE name = ?",
-    user.Token, user.Expires, user.Name)
+func (r *Repository) RefreshToken(ctx context.Context, log *logger.Logger, user *model.User) error {
+  _, err := r.db.ExecContext(ctx, "UPDATE users SET token = ?, expires_utc_nano = ? WHERE name = ?",
+    user.Token, user.ExpiresUTCNano, user.Name)
   return err
 }
 
-func (r *Repository) getByUserName(ctx context.Context, name string) (*model.User, error) {
+func (r *Repository) getByUserName(ctx context.Context, log *logger.Logger, name string) (*model.User, error) {
   var password, token string
-  var expires sql.NullString
-  var id int
+  var expiresUtcNano int64
+  var id int32
 
-  err := r.db.QueryRowContext(ctx, "SELECT id, name, password, token, expires FROM users WHERE " +
-    "name = ?", name).Scan(&id, &name, &password, &token, &expires)
+  err := r.db.QueryRowContext(ctx, "SELECT id, name, password, token, expires_utc_nano FROM users WHERE " +
+    "name = ?", name).Scan(&id, &name, &password, &token, &expiresUtcNano)
 
   msg := &model.User{
-    Id: model.UserId(id),
-    Name: name,
-    Password: password,
-    Token: token,
-  }
-
-  if expires.Valid {
-    msg.Expires = expires.String
+    ID:                id,
+    Name:              name,
+    Password:          password,
+    Token:             token,
+    ExpiresUTCNano:    expiresUtcNano,
   }
 
   switch {
   case err == sql.ErrNoRows:
-    log.Printf("no rows for name %v\n", name)
-    return nil, repository.ErrNoUser
+    log.Error("no rows for name %v\n", name)
+    return nil, errors.New("no user")
 
   case err != nil:
-    log.Printf("query error: %v\n", err)
+    log.Error("query error: %v\n", err)
     return nil, err
 
   default:
@@ -90,60 +84,61 @@ func (r *Repository) getByUserName(ctx context.Context, name string) (*model.Use
   }
 }
 
-func (r *Repository) getByToken(ctx context.Context, token string) (*model.User, error) {
-  var name, password, expires string
-  var id int
+func (r *Repository) getByToken(ctx context.Context, log *logger.Logger, token string) (*model.User, error) {
+  var name, password string
+  var expiresUtcNano int64
+  var id int32
 
-  err := r.db.QueryRowContext(ctx, "SELECT id, name, password, token, expires FROM users WHERE " +
-    "token = ?", token).Scan(&id, &name, &password, &token, &expires)
+  err := r.db.QueryRowContext(ctx, "SELECT id, name, password, token, expires_utc_nano FROM users WHERE " +
+    "token = ?", token).Scan(&id, &name, &password, &token, &expiresUtcNano)
   switch {
   case err == sql.ErrNoRows:
-    log.Printf("no rows for token %v\n", token)
-    return nil, repository.ErrNoUser
+    log.Error("no rows for token %v\n", token)
+    return nil, errors.New("no user")
 
   case err != nil:
-    log.Printf("query error: %v\n", err)
+    log.Error("query error: %v\n", err)
     return nil, err
 
   default:
     return &model.User{
-      Id: model.UserId(id),
-      Name: name,
-      Password: password,
-      Token: token,
-      Expires: expires,
+      ID:                     id,
+      Name:                   name,
+      Password:               password,
+      Token:                  token,
+      ExpiresUTCNano:         expiresUtcNano,
     }, nil
   }
 }
 
-func (r *Repository) hasUserAndPassword(ctx context.Context, user *model.User) (bool, error) {
+func (r *Repository) hasUserAndPassword(ctx context.Context, log *logger.Logger, user *model.User) (bool, error) {
   var count int
   err := r.db.QueryRowContext(ctx, "SELECT count(*) FROM users WHERE " +
     "name = ? AND password = ?", user.Name, user.Password).Scan(&count)
   switch {
   case err != nil:
-    log.Printf("query error: %v\n", err)
+    log.Error("query error: %v\n", err)
     return false, err
   default:
     if count == 0 {
-      log.Printf("no user with given user/password pair, user: %v\n", user.Name)
+      log.Error("no user with given user/password pair, user: %v\n", user.Name)
       return false, nil
     }
     return true, nil
   }
 }
 
-func (r *Repository) hasUser(ctx context.Context, name string) (bool, error) {
+func (r *Repository) hasUser(ctx context.Context, log *logger.Logger, name string) (bool, error) {
   var count int
   err := r.db.QueryRowContext(ctx, "SELECT count(*) FROM users WHERE " +
     "name = ?", name).Scan(&count)
   switch {
   case err != nil:
-    log.Printf("query error: %v\n", err)
+    log.Error("query error: %v\n", err)
     return false, err
   default:
     if count == 0 {
-      log.Printf("no user with name %v\n", name)
+      log.Error("no user with name %v\n", name)
       return false, nil
     }
     return true, nil

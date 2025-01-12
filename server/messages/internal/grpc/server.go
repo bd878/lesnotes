@@ -34,11 +34,11 @@ type Config struct {
 }
 
 type Server struct {
+  *grpc.Server
   conf             Config
   mux              cmux.CMux
   listener         net.Listener
   grpcListener     net.Listener
-  server          *grpc.Server
   controller      *controller.DistributedMessages
   membership      *membership.Membership
 }
@@ -126,20 +126,20 @@ func (s *Server) setupGRPC(log *logger.Logger) {
 
   s.membership = member
 
-  s.server = grpc.NewServer(
+  s.Server = grpc.NewServer(
     grpc.ChainUnaryInterceptor(
       grpcmiddleware.UnaryServerInterceptor(grpcmiddleware.LogBuilder()),
     ),
   )
 
-  api.RegisterMessagesServer(s.server, handler)
+  api.RegisterMessagesServer(s.Server, handler)
 
   grpcListener := s.mux.Match(cmux.Any())
   s.grpcListener = grpcListener
 }
 
 func (s *Server) Run(ctx context.Context, wg *sync.WaitGroup) {
-  go s.server.Serve(s.grpcListener)
+  go s.Serve(s.grpcListener)
   defer s.mux.Close()
   s.mux.Serve()
   wg.Done()

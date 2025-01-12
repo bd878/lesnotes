@@ -1,0 +1,8 @@
+{
+  "rpc_addr":       "0.0.0.0:8085",
+  "node_name":      "users.8085",
+  "log_path":       "../../logs/",
+  "db_path":        "../../main.db",
+  "data_path":      "../../data",
+  "domain":         "galleryexample.com"
+}

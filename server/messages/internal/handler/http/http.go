@@ -95,7 +95,7 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 
   msg, err := h.controller.SaveMessage(req.Context(), log, &model.SaveMessageParams{
     Message: &model.Message{
-      UserID: int32(user.Id),
+      UserID: user.ID,
       Text:   text,
       FileID: fileID,
     },
@@ -153,8 +153,8 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 
   msg, err := h.controller.UpdateMessage(req.Context(), log, &model.UpdateMessageParams{
     Message: &model.Message{
-      UserID: int32(user.Id),
-      Text: text,
+      UserID: user.ID,
+      Text:   text,
     },
   })
   if err != nil {
@@ -251,9 +251,9 @@ func (h *Handler) ReadMessages(log *logger.Logger, w http.ResponseWriter, req *h
     context.Background(),
     log,
     &model.ReadUserMessagesParams{
-      UserID: usermodel.UserId(user.Id),
-      Limit: int32(limitInt),
-      Offset: int32(offsetInt),
+      UserID:    user.ID,
+      Limit:     int32(limitInt),
+      Offset:    int32(offsetInt),
       Ascending: ascending,
     },
   )

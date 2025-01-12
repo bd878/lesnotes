@@ -49,7 +49,7 @@ func (b *AuthBuilder) Auth(next Handler) Handler {
       return
     }
 
-    log.Infoln("user id", user.Id, "name", user.Name, "token", user.Token)
+    log.Infoln("user id", user.ID, "name", user.Name, "token", user.Token)
 
     req = req.WithContext(
       context.WithValue(context.Background(), UserContextKey{}, user),

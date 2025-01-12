@@ -18,10 +18,10 @@ func New(userAddr string) *Gateway {
 
 func (g *Gateway) Auth(_ context.Context, _ *logger.Logger, params *model.AuthParams) (*usersmodel.User, error) {
   return &usersmodel.User{
-    Id: 1,
+    ID:    1,
     Name: "test",
     Password: "12345",
     Token: "AAAAAA",
-    Expires: "never",
+    ExpiresUTCNano: 1234566700000000,
   }, nil
 }

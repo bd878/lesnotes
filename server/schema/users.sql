@@ -5,5 +5,5 @@ CREATE TABLE IF NOT EXISTS users(
   name                  TEXT,
   password              TEXT,
   token                 TEXT,
-  expires_utc_nano      INTEGER
+  expires_utc_nano      INTEGER NOT NULL
 );

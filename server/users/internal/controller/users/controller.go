@@ -4,16 +4,16 @@ import (
   "time"
   "context"
 
+  "github.com/bd878/gallery/server/logger"
   "github.com/bd878/gallery/server/users/pkg/model"
-  "github.com/bd878/gallery/server/users/internal/repository"
   "github.com/bd878/gallery/server/users/internal/controller"
 )
 
 type Repository interface {
-  Add(context.Context, *model.User) error
-  Has(context.Context, *model.User) (bool, error)
-  Refresh(context.Context, *model.User) error
-  Get(context.Context, *model.User) (*model.User, error)
+  AddUser(ctx context.Context, log *logger.Logger, user *model.User) error
+  HasUser(ctx context.Context, log *logger.Logger, user *model.User) (bool, error)
+  RefreshToken(ctx context.Context, log *logger.Logger, user *model.User) error
+  GetUser(ctx context.Context, log *logger.Logger, user *model.User) (*model.User, error)
 }
 
 type Controller struct {
@@ -24,60 +24,44 @@ func New(repo Repository) *Controller {
   return &Controller{repo}
 }
 
-func (c *Controller) Add(ctx context.Context, user *model.User) error {
-  return c.repo.Add(ctx, user)
+func (c *Controller) AddUser(ctx context.Context, log *logger.Logger, params *model.AddUserParams) error {
+  return c.repo.AddUser(ctx, log, params.User)
 }
 
-func (c *Controller) Has(ctx context.Context, user *model.User) (bool, error) {
-  return c.repo.Has(ctx, user)
+func (c *Controller) HasUser(ctx context.Context, log *logger.Logger, params *model.HasUserParams) (bool, error) {
+  return c.repo.HasUser(ctx, log, params.User)
 }
 
-func (c *Controller) Refresh(ctx context.Context, user *model.User) error {
-  return c.repo.Refresh(ctx, user)
+func (c *Controller) RefreshToken(ctx context.Context, log *logger.Logger, params *model.RefreshTokenParams) error {
+  return c.repo.RefreshToken(ctx, log, params.User)
 }
 
-func (c *Controller) Get(ctx context.Context, user *model.User) (*model.User, error) {
-  var tokenExpiresTime time.Time
-
-  result, err := c.repo.Get(ctx, &model.User{
-    Token: user.Token,
-    Name: user.Name,
+func (c *Controller) GetUser(ctx context.Context, log *logger.Logger, params *model.GetUserParams) (*model.User, error) {
+  result, err := c.repo.GetUser(ctx, log, &model.User{
+    Token: params.User.Token,
+    Name: params.User.Name,
   })
-  if err == repository.ErrNoUser {
-    return nil, controller.ErrNotFound
-  }
   if err != nil {
+    log.Error("failed to get user", err)
     return nil, err
   }
 
-  if result.Expires == "" {
+  if result.ExpiresUTCNano == 0 {
     return nil, controller.ErrTokenExpired
   }
 
-  err = tokenExpiresTime.UnmarshalText([]byte(result.Expires))
-  if err != nil {
-    return nil, err
-  }
-
-  if isTokenExpired(tokenExpiresTime) {
+  if isTokenExpired(result.ExpiresUTCNano) {
     return nil, controller.ErrTokenExpired
   }
 
   return &model.User{
-    Id: result.Id,
-    Name: result.Name,
-    Token: result.Token,
-    Expires: result.Expires,
+    ID:              result.ID,
+    Name:            result.Name,
+    Token:           result.Token,
+    ExpiresUTCNano:  result.ExpiresUTCNano,
   }, nil
 }
 
-func isTokenExpired(expiresAt time.Time) bool {
-  now := time.Now()
-  if expiresAt.Before(now) {
-    return true
-  }
-  if expiresAt.Equal(now) {
-    return true
-  }
-  return false
+func isTokenExpired(expiresUtcNano int64) bool {
+  return time.Now().UnixNano() > expiresUtcNano
 }

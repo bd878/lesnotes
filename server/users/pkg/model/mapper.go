@@ -6,18 +6,18 @@ import (
 
 func UserToProto(u *User) *api.User {
   return &api.User{
-    Id: int32(u.Id),
-    Name: u.Name,
-    Token: u.Token,
-    Expires: u.Expires,
+    Id:               u.ID,
+    Name:             u.Name,
+    Token:            u.Token,
+    ExpiresUtcNano:   u.ExpiresUTCNano,
   }
 }
 
 func UserFromProto(u *api.User) *User {
   return &User{
-    Id: UserId(u.Id),
-    Name: u.Name,
-    Token: u.Token,
-    Expires: u.Expires,
+    ID:               u.Id,
+    Name:             u.Name,
+    Token:            u.Token,
+    ExpiresUTCNano:   u.ExpiresUtcNano,
   }
 }

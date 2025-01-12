@@ -8,7 +8,6 @@ import (
   "github.com/bd878/gallery/server/logger"
   "github.com/bd878/gallery/server/utils"
   "github.com/bd878/gallery/server/messages/pkg/model"
-  usermodel "github.com/bd878/gallery/server/users/pkg/model"
 )
 
 type Controller interface {
@@ -64,7 +63,7 @@ func (h *Handler) ReadUserMessages(ctx context.Context, req *api.ReadUserMessage
   *api.ReadUserMessagesResponse, error,
 ) {
   res, err := h.controller.ReadUserMessages(ctx, logger.Default(), &model.ReadUserMessagesParams{
-    UserID:    usermodel.UserId(req.UserId),
+    UserID:    req.UserId,
     Limit:     req.Limit,
     Offset:    req.Offset,
     Ascending: req.Asc,

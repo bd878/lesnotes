@@ -4,7 +4,7 @@ package users.v1;
 
 option go_package = "github.com/bd878/gallery/server/api";
 
-service UserService {
+service Users {
   rpc Auth(AuthUserRequest) returns (AuthUserResponse);
 }
 
@@ -16,9 +16,9 @@ message User {
 }
 
 message AuthUserRequest {
-  string token = 1;
+  string    token = 1;
 }
 
 message AuthUserResponse {
-  User user = 1;
+  User      user = 1;
 }
