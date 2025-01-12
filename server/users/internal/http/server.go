@@ -35,10 +35,10 @@ func New(cfg Config) *Server {
     Domain:    cfg.Domain,
   })
 
-  mux.Handle("/users/v1/signup", middleware.Build(handler.Register))
-  mux.Handle("/users/v1/login",  middleware.Build(handler.Authenticate))
+  mux.Handle("/users/v1/signup", middleware.Build(handler.Signup))
+  mux.Handle("/users/v1/login",  middleware.Build(handler.Login))
   mux.Handle("/users/v1/auth",   middleware.Build(handler.Auth))
-  mux.Handle("/users/v1/status", middleware.Build(handler.ReportStatus))
+  mux.Handle("/users/v1/status", middleware.Build(handler.Status))
 
   server := &Server{
     Server: &http.Server{

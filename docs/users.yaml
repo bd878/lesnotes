@@ -4,3 +4,220 @@ info:
   description: |
     This API allows authenticating requests.
   version: 1.0.0
+
+paths:
+  /users/v1/auth:
+    parameters:
+      - in: header
+        name: Cookie
+        schema:
+          type: string
+          example: token=AAAAAA
+    get:
+      summary: Check if token is still valid
+      description: |
+        Finds user with given token,
+        is token valid, returns associated user
+      operationId: authUser
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/authOk'
+        "401":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/authErr'
+
+  /users/v1/signup:
+    post:
+      summary: Registers user
+      description: |
+        Records user & password in database
+      operationId: signupUser
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/signupUser'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/signupOk'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/signupErr'
+
+  /users/v1/login:
+    post:
+      summary: Logins user
+      description: |
+        Verifies that user is valid with given user & password
+      operationId: loginUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/loginUser'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/loginOk'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/loginErr'
+
+  /users/v1/status:
+    get:
+      summary: Returns operational status
+      operationId: status
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              type: object
+              status:
+                type: string
+                default: "ok"
+              description:
+                type: string
+                default: "working"
+
+components:
+  schemas:
+    loginErr:
+      type: object
+      oneOf:
+      - type: object
+        status:
+          type: string
+          default: "ok"
+        description:
+          type: string
+          default: "user not found"
+      - type: object
+        status:
+          type: string
+          default: "ok"
+        description:
+          type: string
+          default: "no password"
+
+    loginOk:
+      type: object
+      status:
+        type: string
+        default: ok
+      description:
+        type: string
+        default: "authenticated"
+
+    loginUser:
+      type: object
+      name:
+        type: string
+        example: test
+      password:
+        type: string
+        example: "12345"
+
+    signupUser:
+      type: object
+      name:
+        type: string
+        example: test
+      password:
+        type: string
+        example: "12345"
+
+    signupErr:
+      oneOf:
+      - type: object
+        status:
+          type: string
+          default: "ok"
+        description:
+          type: string
+          default: "name exists"
+      - type: object
+        status:
+          type: string
+          default: "ok"
+        description:
+          type: string
+          default: "no name"
+      - type: object
+        status:
+          type: string
+          default: "ok"
+        description:
+          type: string
+          default: "no password"
+
+    signupOk:
+      type: object
+      status:
+        type: string
+        default: "ok"
+      description:
+        type: string
+        default: "created"
+
+    authErr:
+      type: object
+      status:
+        type: string
+        default: "ok"
+      description:
+        type: string
+        default: "token expired"
+      expired:
+        type: boolean
+        default: true
+
+    authOk:
+      type: object
+      status:
+        type: string
+        default: "ok"
+      description:
+        type: string
+        default: "token valid"
+      expired:
+        type: boolean
+        default: false
+      user:
+        $ref: '#/components/schemas/user'
+
+    user:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: test
+        token:
+          type: string
+          example: AAAAAA
+        expires_utc_nano:
+          type: integer
+          example: 1234598000000

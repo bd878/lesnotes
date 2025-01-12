@@ -2,7 +2,6 @@ package http
 
 import (
   "net/http"
-  "io"
   "time"
   "context"
   "encoding/json"
@@ -33,16 +32,26 @@ func New(controller Controller, config Config) *Handler {
   return &Handler{controller, config}
 }
 
-func (h *Handler) Authenticate(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
-  userName, ok := getName(w, req)
+func (h *Handler) Login(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
+  userName, ok := getTextField(w, req, "name")
   if !ok {
     log.Error("cannot get name")
+    w.WriteHeader(http.StatusBadRequest)
+    json.NewEncoder(w).Encode(model.ServerResponse{
+      Status: "ok",
+      Description: "no name",
+    })
     return
   }
 
-  password, ok := getPassword(w, req)
+  password, ok := getTextField(w, req, "password")
   if !ok {
     log.Error("cannot get password")
+    w.WriteHeader(http.StatusBadRequest)
+    json.NewEncoder(w).Encode(model.ServerResponse{
+      Status: "ok",
+      Description: "no password",
+    })
     return
   }
 
@@ -59,14 +68,10 @@ func (h *Handler) Authenticate(log *logger.Logger, w http.ResponseWriter, req *h
   }
 
   if !exists {
-    if err := json.NewEncoder(w).Encode(model.ServerResponse{
+    json.NewEncoder(w).Encode(model.ServerResponse{
       Status: "ok",
       Description: "no user,password pair",
-    }); err != nil {
-      log.Error("failed to send no user,password pair:", err)
-      w.WriteHeader(http.StatusInternalServerError)
-      return
-    }
+    })
     return
   }
 
@@ -84,14 +89,10 @@ func (h *Handler) Authenticate(log *logger.Logger, w http.ResponseWriter, req *h
     }
 
   case controller.ErrNotFound:
-    if err := json.NewEncoder(w).Encode(model.ServerResponse{
+    json.NewEncoder(w).Encode(model.ServerResponse{
       Status: "ok",
       Description: "no user,password pair",
-    }); err != nil {
-      log.Error("cannot respond no user: ", err)
-      w.WriteHeader(http.StatusInternalServerError)
-      return
-    }
+    })
 
   case nil:
     err := attachTokenToResponse(w, user.Token, h.config.Domain, user.ExpiresUTCNano)
@@ -107,14 +108,10 @@ func (h *Handler) Authenticate(log *logger.Logger, w http.ResponseWriter, req *h
     return
   }
 
-  if err := json.NewEncoder(w).Encode(model.ServerResponse{
+  json.NewEncoder(w).Encode(model.ServerResponse{
     Status: "ok",
     Description: "authenticated",
-  }); err != nil {
-    log.Error("cannot send ok authenticated: ", err)
-    w.WriteHeader(http.StatusInternalServerError)
-    return
-  }
+  })
 }
 
 func (h *Handler) Auth(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
@@ -125,53 +122,51 @@ func (h *Handler) Auth(log *logger.Logger, w http.ResponseWriter, req *http.Requ
     return
   }
 
-  log.Infoln("cookie value", cookie.Value)
   user, err := h.controller.GetUser(context.Background(), log, &model.GetUserParams{
     User: &model.User{Token: cookie.Value},
   })
   if err == controller.ErrTokenExpired {
     log.Infoln("token expired")
-    if err := json.NewEncoder(w).Encode(model.ServerAuthorizeResponse{
+    w.WriteHeader(http.StatusUnauthorized)
+    json.NewEncoder(w).Encode(model.ServerAuthorizeResponse{
       ServerResponse: model.ServerResponse{
         Status: "ok",
         Description: "token expired",
       },
       Expired: true,
-    }); err != nil {
-      log.Error("cannot send token expired error: ", err)
-      w.WriteHeader(http.StatusInternalServerError)
-      return
-    }
+    })
   }
+
   if err != nil {
     log.Error("failed to get user by token: ", err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
 
-  if err := json.NewEncoder(w).Encode(model.ServerAuthorizeResponse{
+  json.NewEncoder(w).Encode(model.ServerAuthorizeResponse{
     ServerResponse: model.ServerResponse{
       Status: "ok",
       Description: "token valid",
     },
     Expired: false,
     User: model.User{
-      ID: -1,
-      Name: user.Name,
-      Token: user.Token,
-      ExpiresUTCNano: user.ExpiresUTCNano,
+      ID:               user.ID,
+      Name:             user.Name,
+      Token:            user.Token,
+      ExpiresUTCNano:   user.ExpiresUTCNano,
     },
-  }); err != nil {
-    log.Error("failed to send authorize response: ", err)
-    w.WriteHeader(http.StatusInternalServerError)
-    return
-  }
+  })
 }
 
-func (h *Handler) Register(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
-  userName, ok := getName(w, req)
+func (h *Handler) Signup(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
+  userName, ok := getTextField(w, req, "name")
   if !ok {
     log.Error("cannot get user name")
+    w.WriteHeader(http.StatusBadRequest)
+    json.NewEncoder(w).Encode(model.ServerResponse{
+      Status: "ok",
+      Description: "no name",
+    })
     return
   }
 
@@ -185,20 +180,22 @@ func (h *Handler) Register(log *logger.Logger, w http.ResponseWriter, req *http.
   }
 
   if exists {
-    if err := json.NewEncoder(w).Encode(model.ServerResponse{
+    w.WriteHeader(http.StatusBadRequest)
+    json.NewEncoder(w).Encode(model.ServerResponse{
       Status: "ok",
       Description: "name exists",
-    }); err != nil {
-      log.Error(err)
-      w.WriteHeader(http.StatusInternalServerError)
-      return
-    }
+    })
     return
   }
 
-  password, ok := getPassword(w, req)
+  password, ok := getTextField(w, req, "password")
   if !ok {
     log.Error("cannot get password from request")
+    w.WriteHeader(http.StatusBadRequest)
+    json.NewEncoder(w).Encode(model.ServerResponse{
+      Status: "ok",
+      Description: "no password",
+    })
     return
   }
 
@@ -219,43 +216,26 @@ func (h *Handler) Register(log *logger.Logger, w http.ResponseWriter, req *http.
     return
   }
 
-  if err := json.NewEncoder(w).Encode(model.ServerResponse{
+  json.NewEncoder(w).Encode(model.ServerResponse{
     Status: "ok",
     Description: "created",
-  }); err != nil {
-    log.Error(err)
-    w.WriteHeader(http.StatusInternalServerError)
-    return
-  }
+  })
 }
 
-func (h *Handler) ReportStatus(log *logger.Logger, w http.ResponseWriter, _ *http.Request) {
-  if _, err := io.WriteString(w, "ok\n"); err != nil {
-    log.Error(err)
-    w.WriteHeader(http.StatusInternalServerError)
-    return
-  }
-}
-
-func getName(w http.ResponseWriter, req *http.Request) (name string, ok bool) {
-  return getTextField(w, req, "name")
-}
-
-func getPassword(w http.ResponseWriter, req *http.Request) (pass string, ok bool) {
-  return getTextField(w, req, "password")
+func (h *Handler) Status(log *logger.Logger, w http.ResponseWriter, _ *http.Request) {
+  json.NewEncoder(w).Encode(model.ServerResponse{
+    Status: "ok",
+    Description: "working",
+  })
 }
 
 func getTextField(w http.ResponseWriter, req *http.Request, field string) (value string, ok bool) {
   value = req.PostFormValue(field)
   if value == "" {
-    if err := json.NewEncoder(w).Encode(model.ServerResponse{
+    json.NewEncoder(w).Encode(model.ServerResponse{
       Status: "ok",
       Description: "no " + field,
-    }); err != nil {
-      logger.Error(err)
-      w.WriteHeader(http.StatusInternalServerError)
-    }
-    ok = false
+    })
   } else {
     ok = true
   }
