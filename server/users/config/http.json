@@ -5,5 +5,5 @@
   "log_path":       "../../logs/",
   "db_path":        "../../main.db",
   "data_path":      "../../data",
-  "domain":         "galleryexample.com"
+  "cookie_domain":  ""
 }

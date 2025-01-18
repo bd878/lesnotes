@@ -77,8 +77,7 @@ func (f *fsm) applyUpdate(raw []byte) interface{} {
     return err
   }
 
-  return &UpdateCommandResult{
-  }
+  return &UpdateCommandResult{}
 }
 
 func (f *fsm) applyDelete(raw []byte) interface{} {

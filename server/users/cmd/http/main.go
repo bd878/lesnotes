@@ -38,7 +38,7 @@ func main() {
     RpcAddr:          cfg.RpcAddr,
     DataPath:         cfg.DataPath,
     DBPath:           cfg.DBPath,
-    Domain:           cfg.Domain,
+    CookieDomain:     cfg.CookieDomain,
   })
 
   var wg sync.WaitGroup

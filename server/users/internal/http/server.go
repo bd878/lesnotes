@@ -15,7 +15,7 @@ type Config struct {
   Addr             string
   RpcAddr          string
   DataPath         string
-  Domain           string
+  CookieDomain     string
   DBPath           string
 }
 
@@ -32,7 +32,7 @@ func New(cfg Config) *Server {
   repo := repository.New(cfg.DBPath)
   grpcCtrl := controller.New(repo)
   handler := httphandler.New(grpcCtrl, httphandler.Config{
-    Domain:    cfg.Domain,
+    CookieDomain:    cfg.CookieDomain,
   })
 
   mux.Handle("/users/v1/signup", middleware.Build(handler.Signup))

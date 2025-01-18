@@ -70,6 +70,7 @@ func (s *Messages) DeleteMessage(ctx context.Context, log *logger.Logger, params
 ) {
   _, err := s.client.DeleteMessage(ctx, &api.DeleteMessageRequest{
     Id: params.ID,
+    UserId: params.UserID,
   })
   if err != nil {
     log.Error("message", "client failed to delete message")

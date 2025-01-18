@@ -7,5 +7,5 @@ type Config struct {
   LogPath           string          `json:"log_path"`
   DataPath          string          `json:"data_path"`
   DBPath            string          `json:"db_path"`
-  Domain            string          `json:"domain"`
+  CookieDomain      string          `json:"cookie_domain"`
 }

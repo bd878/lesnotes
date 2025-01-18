@@ -40,7 +40,7 @@ func New(dbFilePath string) *Repository {
   updateStmt, err := db.Prepare(
     "UPDATE messages SET " +
       "text = ?, " +
-      "update_utc_nano = ?, " +
+      "update_utc_nano = ? " +
       "WHERE id = ? AND user_id = ?",
   )
   if err != nil {
@@ -120,7 +120,7 @@ const ascendingStmt = `
 SELECT id, user_id, create_utc_nano, update_utc_nano, text, file_id
 FROM messages
 WHERE user_id = ?
-ORDER BY id ASC
+ORDER BY update_utc_nano ASC
 LIMIT ? OFFSET ?
 `
 
@@ -128,7 +128,7 @@ const descendingStmt = `
 SELECT id, user_id, create_utc_nano, update_utc_nano, text, file_id
 FROM messages
 WHERE user_id = ?
-ORDER BY id DESC
+ORDER BY update_utc_nano DESC
 LIMIT ? OFFSET ?
 `
 

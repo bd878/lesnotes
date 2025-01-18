@@ -77,6 +77,7 @@ func (h *Handler) DeleteMessage(ctx context.Context, req *api.DeleteMessageReque
 ) {
   err := h.controller.DeleteMessage(ctx, logger.Default(), &model.DeleteMessageParams{
     ID: req.Id,
+    UserID: req.UserId,
   })
   if err != nil {
     logger.Error("message", "failed to delete message")

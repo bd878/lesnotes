@@ -20,7 +20,7 @@ type Controller interface {
 }
 
 type Config struct {
-  Domain string
+  CookieDomain string
 }
 
 type Handler struct {
@@ -36,22 +36,12 @@ func (h *Handler) Login(log *logger.Logger, w http.ResponseWriter, req *http.Req
   userName, ok := getTextField(w, req, "name")
   if !ok {
     log.Error("cannot get name")
-    w.WriteHeader(http.StatusBadRequest)
-    json.NewEncoder(w).Encode(model.ServerResponse{
-      Status: "ok",
-      Description: "no name",
-    })
     return
   }
 
   password, ok := getTextField(w, req, "password")
   if !ok {
     log.Error("cannot get password")
-    w.WriteHeader(http.StatusBadRequest)
-    json.NewEncoder(w).Encode(model.ServerResponse{
-      Status: "ok",
-      Description: "no password",
-    })
     return
   }
 
@@ -95,7 +85,7 @@ func (h *Handler) Login(log *logger.Logger, w http.ResponseWriter, req *http.Req
     })
 
   case nil:
-    err := attachTokenToResponse(w, user.Token, h.config.Domain, user.ExpiresUTCNano)
+    err := attachTokenToResponse(w, user.Token, h.config.CookieDomain, user.ExpiresUTCNano)
     if err != nil {
       log.Error("Cannot attach token to response: ", err)
       w.WriteHeader(http.StatusInternalServerError)
@@ -108,6 +98,7 @@ func (h *Handler) Login(log *logger.Logger, w http.ResponseWriter, req *http.Req
     return
   }
 
+  w.Header().Add("Content-Type", "application/json")
   json.NewEncoder(w).Encode(model.ServerResponse{
     Status: "ok",
     Description: "authenticated",
@@ -162,11 +153,6 @@ func (h *Handler) Signup(log *logger.Logger, w http.ResponseWriter, req *http.Re
   userName, ok := getTextField(w, req, "name")
   if !ok {
     log.Error("cannot get user name")
-    w.WriteHeader(http.StatusBadRequest)
-    json.NewEncoder(w).Encode(model.ServerResponse{
-      Status: "ok",
-      Description: "no name",
-    })
     return
   }
 
@@ -191,15 +177,10 @@ func (h *Handler) Signup(log *logger.Logger, w http.ResponseWriter, req *http.Re
   password, ok := getTextField(w, req, "password")
   if !ok {
     log.Error("cannot get password from request")
-    w.WriteHeader(http.StatusBadRequest)
-    json.NewEncoder(w).Encode(model.ServerResponse{
-      Status: "ok",
-      Description: "no password",
-    })
     return
   }
 
-  token, expiresUtcNano := createToken(w, h.config.Domain)
+  token, expiresUtcNano := createToken(w, h.config.CookieDomain)
 
   log.Infoln("user, password, token, expires", userName, password, token, expiresUtcNano)
   err = h.controller.AddUser(context.Background(), log, &model.AddUserParams{
@@ -232,6 +213,7 @@ func (h *Handler) Status(log *logger.Logger, w http.ResponseWriter, _ *http.Requ
 func getTextField(w http.ResponseWriter, req *http.Request, field string) (value string, ok bool) {
   value = req.PostFormValue(field)
   if value == "" {
+    w.WriteHeader(http.StatusBadRequest)
     json.NewEncoder(w).Encode(model.ServerResponse{
       Status: "ok",
       Description: "no " + field,
@@ -243,7 +225,7 @@ func getTextField(w http.ResponseWriter, req *http.Request, field string) (value
 }
 
 func refreshToken(h *Handler, w http.ResponseWriter, userName string) error {
-  token, expiresUtcNano := createToken(w, h.config.Domain)
+  token, expiresUtcNano := createToken(w, h.config.CookieDomain)
 
   return h.controller.RefreshToken(context.Background(), logger.Default(), &model.RefreshTokenParams{
     User: &model.User{
@@ -254,14 +236,14 @@ func refreshToken(h *Handler, w http.ResponseWriter, userName string) error {
   })
 }
 
-func createToken(w http.ResponseWriter, domain string) (token string, expires int64) {
+func createToken(w http.ResponseWriter, cookieDomain string) (token string, expires int64) {
   token = utils.RandomString(10)
   expiresAt := time.Now().Add(time.Hour * 24 * 5)
 
   http.SetCookie(w, &http.Cookie{
     Name:             "token",
     Value:             token,
-    Domain:            domain,
+    Domain:            cookieDomain,
     Expires:           expiresAt,
     Path:             "/",
     HttpOnly:          true,
@@ -270,11 +252,11 @@ func createToken(w http.ResponseWriter, domain string) (token string, expires in
   return token, expiresAt.UnixNano()
 }
 
-func attachTokenToResponse(w http.ResponseWriter, token, domain string, expiresUtcNano int64) (err error) {
+func attachTokenToResponse(w http.ResponseWriter, token, cookieDomain string, expiresUtcNano int64) (err error) {
   http.SetCookie(w, &http.Cookie{
     Name:          "token",
     Value:          token,
-    Domain:         domain,
+    Domain:         cookieDomain,
     Expires:        time.Unix(0, expiresUtcNano),
     Path:          "/",
     HttpOnly:       true,

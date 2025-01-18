@@ -9,3 +9,4 @@ test.txt
 headers.txt
 *.patch
 *.curl
+*.token
