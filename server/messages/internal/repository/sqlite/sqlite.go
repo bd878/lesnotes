@@ -10,18 +10,17 @@ import (
   "github.com/bd878/gallery/server/messages/pkg/model"
 )
 
-const NullMessageID int32 = 0
-
 type Repository struct {
   db           *sql.DB
   insertStmt   *sql.Stmt
+  updateStmt   *sql.Stmt
+  deleteStmt   *sql.Stmt
 }
 
-func New(dbFilePath string) (*Repository, error) {
+func New(dbFilePath string) *Repository {
   db, err := sql.Open("sqlite3", "file:" + dbFilePath)
   if err != nil {
-    logger.Error("failed to establish connection with sql by given path", dbFilePath)
-    return nil, err
+    panic(err)
   }
 
   insertStmt, err := db.Prepare(
@@ -35,14 +34,33 @@ func New(dbFilePath string) (*Repository, error) {
     ") VALUES (?,?,?,?,?,?)",
   )
   if err != nil {
-    logger.Error("failed to prepare insert statement")
-    return nil, err
+    panic(err)
+  }
+
+  updateStmt, err := db.Prepare(
+    "UPDATE messages SET " +
+      "text = ?, " +
+      "update_utc_nano = ?, " +
+      "WHERE id = ? AND user_id = ?",
+  )
+  if err != nil {
+    panic(err)
+  }
+
+  deleteStmt, err := db.Prepare(
+    "DELETE FROM messages " +
+    "WHERE id = ? AND user_id = ?",
+  )
+  if err != nil {
+    panic(err)
   }
 
   return &Repository{
     db: db,
     insertStmt: insertStmt,
-  }, nil
+    updateStmt: updateStmt,
+    deleteStmt: deleteStmt,
+  }
 }
 
 /**
@@ -50,9 +68,7 @@ func New(dbFilePath string) (*Repository, error) {
  * Does not put message with same id
  * twice
  */
-func (r *Repository) Put(ctx context.Context, log *logger.Logger, params *model.PutParams) (
-  int32, error,
-) {
+func (r *Repository) Create(ctx context.Context, log *logger.Logger, params *model.SaveMessageParams) error {
   _, err := r.insertStmt.ExecContext(ctx,
     params.Message.ID,
     params.Message.UserID,
@@ -62,11 +78,33 @@ func (r *Repository) Put(ctx context.Context, log *logger.Logger, params *model.
     params.Message.FileID,
   )
   if err != nil {
-    log.Error("failed to insert new message")
-    log.Error(err)
-    return NullMessageID, errors.New("failed to put message")
+    log.Error("failed to insert new message", err)
+    return errors.New("failed to put message")
   }
-  return params.Message.ID, nil
+  return nil
+}
+
+func (r *Repository) Delete(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error {
+  _, err := r.deleteStmt.ExecContext(ctx, params.ID, params.UserID)
+  if err != nil {
+    log.Error("failed to delete message", err)
+    return errors.New("failed to delete message")
+  }
+  return nil
+}
+
+func (r *Repository) Update(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) error {
+  _, err := r.updateStmt.ExecContext(ctx,
+    params.Text,
+    params.UpdateUTCNano,
+    params.ID,
+    params.UserID,
+  )
+  if err != nil {
+    log.Error("failed to update message", err)
+    return errors.New("failed to update message")
+  }
+  return nil
 }
 
 func (r *Repository) Truncate(ctx context.Context, log *logger.Logger) error {
@@ -94,8 +132,8 @@ ORDER BY id DESC
 LIMIT ? OFFSET ?
 `
 
-func (r *Repository) Get(ctx context.Context, log *logger.Logger, params *model.GetParams) (
-  *model.MessagesList, error,
+func (r *Repository) ReadUserMessages(ctx context.Context, log *logger.Logger, params *model.ReadUserMessagesParams) (
+  *model.ReadUserMessagesResult, error,
 ) {
   var rows *sql.Rows
   var err error
@@ -169,7 +207,7 @@ func (r *Repository) Get(ctx context.Context, log *logger.Logger, params *model.
     }
   }
 
-  return &model.MessagesList{
+  return &model.ReadUserMessagesResult{
     Messages: res,
     IsLastPage: isLastPage,
   }, nil

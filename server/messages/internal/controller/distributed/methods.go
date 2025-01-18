@@ -38,55 +38,61 @@ func (m *DistributedMessages) apply(ctx context.Context, reqType RequestType, cm
   return res, nil
 }
 
-func (m *DistributedMessages) SaveMessage(ctx context.Context, log *logger.Logger, params *model.SaveMessageParams) (
-  *model.Message, error,
-) {
-  cmd, err := proto.Marshal(&AppendCommand{
+func (m *DistributedMessages) SaveMessage(ctx context.Context, log *logger.Logger, params *model.SaveMessageParams) error {
+  cmd, _ := proto.Marshal(&AppendCommand{
     Message: model.MessageToProto(params.Message),
   })
-  if err != nil {
-    return nil, err
-  }
 
-  res, err := m.apply(ctx, AppendRequest, cmd)
+  _, err := m.apply(ctx, AppendRequest, cmd)
   if err != nil {
     log.Error("message", "raft failed to apply save message")
-    return nil, err
+    return err
   }
 
-  params.Message.ID = res.(*AppendCommandResult).Id
-
-  return params.Message, nil
+  return nil
 }
 
-func (m *DistributedMessages) UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (
-  *model.Message, error,
-) {
-  cmd, err := proto.Marshal(&UpdateCommand{
-    Message: model.MessageToProto(params.Message),
+func (m *DistributedMessages) UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) error {
+  cmd, _ := proto.Marshal(&UpdateCommand{
+    Id: params.ID,
+    UserId: params.UserID,
+    FileId: params.FileID,
+    Text:   params.Text,
+    UpdateUtcNano: params.UpdateUTCNano,
   })
-  if err != nil {
-    return nil, err
-  }
 
-  _, err = m.apply(ctx, UpdateRequest, cmd)
+  _, err := m.apply(ctx, UpdateRequest, cmd)
   if err != nil {
     log.Error("message", "raft failed to apply save message")
-    return nil, err
+    return err
   }
 
-  /* TODO: map res interface{} to model.Message */
+  return nil
+}
 
-  return nil, nil
+func (m *DistributedMessages) DeleteMessage(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error {
+  cmd, _ := proto.Marshal(&DeleteCommand{
+    Id: params.ID,
+    UserId: params.UserID,
+    FileId: params.FileID,
+  })
+
+  _, err := m.apply(ctx, DeleteRequest, cmd)
+  if err != nil {
+    log.Error("message", "raft failed to apply delete message")
+    return err
+  }
+
+  return nil
 }
 
 func (m *DistributedMessages) ReadUserMessages(ctx context.Context, log *logger.Logger, params *model.ReadUserMessagesParams) (
-  *model.MessagesList, error,
+  *model.ReadUserMessagesResult, error,
 ) {
-  return m.repo.Get(
+  return m.repo.ReadUserMessages(
     ctx,
     log,
-    &model.GetParams{
+    &model.ReadUserMessagesParams{
       UserID:    params.UserID,
       Limit:     params.Limit,
       Offset:    params.Offset,

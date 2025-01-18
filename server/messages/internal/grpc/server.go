@@ -64,10 +64,7 @@ func New(cfg Config) *Server {
 }
 
 func (s *Server) setupRaft(log *logger.Logger) {
-  repo, err := repository.New(s.conf.DBPath)
-  if err != nil {
-    panic(err)
-  }
+  repo := repository.New(s.conf.DBPath)
 
   raftLogLevel := hclog.Error.String()
   switch s.conf.RaftLogLevel {

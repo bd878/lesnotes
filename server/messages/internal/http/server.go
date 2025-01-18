@@ -7,7 +7,7 @@ import (
 
   httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
   httphandler "github.com/bd878/gallery/server/messages/internal/handler/http"
-  usergateway "github.com/bd878/gallery/server/messages/internal/gateway/user/user"
+  usergateway "github.com/bd878/gallery/server/messages/internal/gateway/user/grpc"
   controller "github.com/bd878/gallery/server/messages/internal/controller/service"
 )
 
@@ -40,6 +40,7 @@ func New(cfg Config) *Server {
   mux.Handle("/messages/v1/send", middleware.Build(handler.SendMessage))
   mux.Handle("/messages/v1/read", middleware.Build(handler.ReadMessages))
   mux.Handle("/messages/v1/update", middleware.Build(handler.UpdateMessage))
+  mux.Handle("/messages/v1/delete", middleware.Build(handler.DeleteMessage))
   mux.Handle("/messages/v1/status", middleware.NoAuth().Build(handler.GetStatus))
   mux.Handle("/messages/v1/read_file", middleware.Build(handler.ReadFile))
 

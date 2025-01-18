@@ -21,12 +21,20 @@ type ServerResponse struct {
 
 type NewMessageServerResponse struct {
   ServerResponse
-  Message             Message       `json:"message"`
+  ID                  int32         `json:"id"`
+  UpdateUTCNano       int64         `json:"update_utc_nano"`
+  CreateUTCNano       int64         `json:"create_utc_nano"`
 }
 
 type UpdateMessageServerResponse struct {
   ServerResponse
-  Message             Message       `json:"message"`
+  ID                  int32         `json:"id"`
+  UpdateUTCNano       int64         `json:"update_utc_nano"`
+}
+
+type DeleteMessageServerResponse struct {
+  ServerResponse
+  ID                  int32         `json:"id"`
 }
 
 type MessagesListServerResponse struct {

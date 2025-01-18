@@ -48,7 +48,7 @@ func (s *Messages) Close() {
 }
 
 func (s *Messages) SaveMessage(ctx context.Context, log *logger.Logger, params *model.SaveMessageParams) (
-  *model.Message, error,
+  *model.SaveMessageResult, error,
 ) {
   res, err := s.client.SaveMessage(ctx, &api.SaveMessageRequest{
     Message: model.MessageToProto(params.Message),
@@ -57,39 +57,62 @@ func (s *Messages) SaveMessage(ctx context.Context, log *logger.Logger, params *
     log.Error("message", "client failed to save message")
     return nil, err 
   }
-  return model.MessageFromProto(res.Message), nil
+
+  return &model.SaveMessageResult{
+    ID: res.Id,
+    UpdateUTCNano: res.UpdateUtcNano,
+    CreateUTCNano: res.CreateUtcNano,
+  }, nil
+}
+
+func (s *Messages) DeleteMessage(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) (
+  *model.DeleteMessageResult, error,
+) {
+  _, err := s.client.DeleteMessage(ctx, &api.DeleteMessageRequest{
+    Id: params.ID,
+  })
+  if err != nil {
+    log.Error("message", "client failed to delete message")
+    return nil, err
+  }
+
+  return &model.DeleteMessageResult{}, nil
 }
 
 func (s *Messages) UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (
-  *model.Message, error,
+  *model.UpdateMessageResult, error,
 ) {
   res, err := s.client.UpdateMessage(ctx, &api.UpdateMessageRequest{
-    Message: model.MessageToProto(params.Message),
+    Id: params.ID,
+    UserId: params.UserID,
+    FileId: params.FileID,
+    Text: params.Text,
   })
   if err != nil {
     log.Error("message", "client failed to save message")
     return nil, err 
   }
-  return model.MessageFromProto(res.Message), nil
+
+  return &model.UpdateMessageResult{
+    UpdateUTCNano: res.UpdateUtcNano,
+  }, nil
 }
 
 func (s *Messages) ReadUserMessages(ctx context.Context, log *logger.Logger, params *model.ReadUserMessagesParams) (
-  *model.MessagesList, error,
+  *model.ReadUserMessagesResult, error,
 ) {
-  var res *api.ReadUserMessagesResponse
-  var err error
-
-  if res, err = s.client.ReadUserMessages(ctx, &api.ReadUserMessagesRequest{
+  res, err := s.client.ReadUserMessages(ctx, &api.ReadUserMessagesRequest{
     UserId: int32(params.UserID),
     Limit:  params.Limit,
     Offset: params.Offset,
     Asc:    params.Ascending,
-  }); err != nil {
+  })
+  if err != nil {
     log.Error("message", "client failed to read user messages")
     return nil, err
   }
 
-  return &model.MessagesList{
+  return &model.ReadUserMessagesResult{
     Messages: model.MapMessagesFromProto(model.MessageFromProto, res.Messages),
     IsLastPage: res.IsLastPage,
   }, err

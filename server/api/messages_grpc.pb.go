@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 type MessagesClient interface {
 	GetServers(ctx context.Context, in *GetServersRequest, opts ...grpc.CallOption) (*GetServersResponse, error)
 	SaveMessage(ctx context.Context, in *SaveMessageRequest, opts ...grpc.CallOption) (*SaveMessageResponse, error)
+	DeleteMessage(ctx context.Context, in *DeleteMessageRequest, opts ...grpc.CallOption) (*DeleteMessageResponse, error)
 	UpdateMessage(ctx context.Context, in *UpdateMessageRequest, opts ...grpc.CallOption) (*UpdateMessageResponse, error)
 	ReadUserMessages(ctx context.Context, in *ReadUserMessagesRequest, opts ...grpc.CallOption) (*ReadUserMessagesResponse, error)
 }
@@ -49,6 +50,15 @@ func (c *messagesClient) SaveMessage(ctx context.Context, in *SaveMessageRequest
 	return out, nil
 }
 
+func (c *messagesClient) DeleteMessage(ctx context.Context, in *DeleteMessageRequest, opts ...grpc.CallOption) (*DeleteMessageResponse, error) {
+	out := new(DeleteMessageResponse)
+	err := c.cc.Invoke(ctx, "/messages.v1.Messages/DeleteMessage", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *messagesClient) UpdateMessage(ctx context.Context, in *UpdateMessageRequest, opts ...grpc.CallOption) (*UpdateMessageResponse, error) {
 	out := new(UpdateMessageResponse)
 	err := c.cc.Invoke(ctx, "/messages.v1.Messages/UpdateMessage", in, out, opts...)
@@ -73,6 +83,7 @@ func (c *messagesClient) ReadUserMessages(ctx context.Context, in *ReadUserMessa
 type MessagesServer interface {
 	GetServers(context.Context, *GetServersRequest) (*GetServersResponse, error)
 	SaveMessage(context.Context, *SaveMessageRequest) (*SaveMessageResponse, error)
+	DeleteMessage(context.Context, *DeleteMessageRequest) (*DeleteMessageResponse, error)
 	UpdateMessage(context.Context, *UpdateMessageRequest) (*UpdateMessageResponse, error)
 	ReadUserMessages(context.Context, *ReadUserMessagesRequest) (*ReadUserMessagesResponse, error)
 	mustEmbedUnimplementedMessagesServer()
@@ -87,6 +98,9 @@ func (UnimplementedMessagesServer) GetServers(context.Context, *GetServersReques
 }
 func (UnimplementedMessagesServer) SaveMessage(context.Context, *SaveMessageRequest) (*SaveMessageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveMessage not implemented")
+}
+func (UnimplementedMessagesServer) DeleteMessage(context.Context, *DeleteMessageRequest) (*DeleteMessageResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteMessage not implemented")
 }
 func (UnimplementedMessagesServer) UpdateMessage(context.Context, *UpdateMessageRequest) (*UpdateMessageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateMessage not implemented")
@@ -143,6 +157,24 @@ func _Messages_SaveMessage_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Messages_DeleteMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteMessageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MessagesServer).DeleteMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/messages.v1.Messages/DeleteMessage",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MessagesServer).DeleteMessage(ctx, req.(*DeleteMessageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Messages_UpdateMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateMessageRequest)
 	if err := dec(in); err != nil {
@@ -190,6 +222,10 @@ var _Messages_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SaveMessage",
 			Handler:    _Messages_SaveMessage_Handler,
+		},
+		{
+			MethodName: "DeleteMessage",
+			Handler:    _Messages_DeleteMessage_Handler,
 		},
 		{
 			MethodName: "UpdateMessage",

@@ -51,7 +51,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/statusOk'
+                $ref: '#/components/schemas/updateOk'
         "4XX":
           description: error
           content:
@@ -239,8 +239,15 @@ components:
         description:
           type: string
           default: ""
-        message:
-          $ref: '#/components/schemas/message'
+        id:
+          type: integer
+          example: 1
+        create_utc_nano:
+          type: integer
+          example: 1234566700000000
+        update_utc_nano:
+          type: integer
+          example: 1234566700000000
     sendErr:
       type: object
       properties:
@@ -250,6 +257,43 @@ components:
         description:
           type: string
           default: ""
+
+    updateOk:
+      type: object
+      properties:
+        status:
+          type: string 
+          default: "ok"
+        description:
+          type: string 
+          default: ""
+        id:
+          type: integer
+          example: 1
+        update_utc_nano:
+          type: integer
+          example: 1234566700000000
+
+    statusOk:
+      type: object
+      properties:
+        status:
+          type: string 
+          default: "ok"
+        description:
+          type: string 
+          default: ""
+
+    statusErr:
+      type: object
+      properties:
+        status:
+          type: string
+          default: "error"
+        description:
+          type: string
+          default: ""
+
     message:
       type: object
       properties:
@@ -273,21 +317,3 @@ components:
           type: string
         filename:
           type: string
-    statusOk:
-      type: object
-      properties:
-        status:
-          type: string 
-          default: "ok"
-        description:
-          type: string 
-          default: ""
-    statusErr:
-      type: object
-      properties:
-        status:
-          type: string
-          default: "error"
-        description:
-          type: string
-          default: ""

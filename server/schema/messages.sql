@@ -6,7 +6,8 @@ CREATE TABLE IF NOT EXISTS messages(
   update_utc_nano     INTEGER NOT NULL,
   text                TEXT,
   file_id             INTEGER REFERENCES files(id) ON DELETE CASCADE,
-  user_id             INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL
+  user_id             INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+  _deleted            INTEGER DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS messages_index ON messages(user_id);
 

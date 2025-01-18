@@ -25,7 +25,7 @@ func (g *Gateway) Auth(ctx context.Context, log *logger.Logger, params *model.Au
     return nil, err
   }
   defer conn.Close()
-  client := api.NewUserServiceClient(conn)
+  client := api.NewUsersClient(conn)
   resp, err := client.Auth(ctx, &api.AuthUserRequest{Token: params.Token})
   if err != nil {
     log.Error("message", "failed to authenticate on client")

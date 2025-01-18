@@ -11,8 +11,10 @@ import (
 )
 
 type Repository interface {
-  Put(ctx context.Context, log *logger.Logger, params *model.PutParams) (int32, error)
-  Get(ctx context.Context, log *logger.Logger, params *model.GetParams) (*model.MessagesList, error)
+  Create(ctx context.Context, log *logger.Logger, params *model.SaveMessageParams) error
+  Update(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) error
+  Delete(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error
+  ReadUserMessages(ctx context.Context, log *logger.Logger, params *model.ReadUserMessagesParams) (*model.ReadUserMessagesResult, error)
   GetBatch(ctx context.Context, log *logger.Logger) ([]*model.Message, error)
   Truncate(ctx context.Context, log *logger.Logger) error
 }
@@ -48,30 +50,51 @@ func (f *fsm) Apply(record *raft.Log) interface{} {
 
 func (f *fsm) applyAppend(raw []byte) interface{} {
   var cmd AppendCommand
-  err := proto.Unmarshal(raw, &cmd)
-  if err != nil {
-    return err
-  }
+  proto.Unmarshal(raw, &cmd)
+
   // Put does not put message with same id twice
-  res, err := f.repo.Put(context.Background(), logger.Default(), &model.PutParams{
+  err := f.repo.Create(context.Background(), logger.Default(), &model.SaveMessageParams{
     Message: model.MessageFromProto(cmd.Message),
   })
   if err != nil {
-    return nil
+    return err
   }
-  return &AppendCommandResult{
-    Id: res,
+  return &AppendCommandResult{}
+}
+
+func (f *fsm) applyUpdate(raw []byte) interface{} {
+  var cmd UpdateCommand
+  proto.Unmarshal(raw, &cmd)
+
+  err := f.repo.Update(context.Background(), logger.Default(), &model.UpdateMessageParams{
+    ID: cmd.Id,
+    UserID: cmd.UserId,
+    FileID: cmd.FileId,
+    Text: cmd.Text,
+    UpdateUTCNano: cmd.UpdateUtcNano,
+  })
+  if err != nil {
+    return err
+  }
+
+  return &UpdateCommandResult{
   }
 }
 
-func (f *fsm) applyUpdate(_ []byte) interface{} {
-  /* not implemented */
-  return nil
-}
+func (f *fsm) applyDelete(raw []byte) interface{} {
+  var cmd DeleteCommand
+  proto.Unmarshal(raw, &cmd)
 
-func (f *fsm) applyDelete(_ []byte) interface{} {
-  /* not implemented */
-  return nil
+  err := f.repo.Delete(context.Background(), logger.Default(), &model.DeleteMessageParams{
+    ID: cmd.Id,
+    UserID: cmd.UserId,
+    FileID: cmd.FileId,
+  })
+  if err != nil {
+    return err
+  }
+
+  return &DeleteCommandResult{}
 }
 
 func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {

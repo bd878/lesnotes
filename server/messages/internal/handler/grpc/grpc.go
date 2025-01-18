@@ -11,9 +11,10 @@ import (
 )
 
 type Controller interface {
-  SaveMessage(ctx context.Context, log *logger.Logger, params *model.SaveMessageParams) (*model.Message, error)
-  UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (*model.Message, error)
-  ReadUserMessages(ctx context.Context, log *logger.Logger, params *model.ReadUserMessagesParams) (*model.MessagesList, error)
+  SaveMessage(ctx context.Context, log *logger.Logger, params *model.SaveMessageParams) error
+  UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) error
+  DeleteMessage(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error
+  ReadUserMessages(ctx context.Context, log *logger.Logger, params *model.ReadUserMessagesParams) (*model.ReadUserMessagesResult, error)
   GetServers(ctx context.Context, log *logger.Logger) ([]*api.Server, error)
 }
 
@@ -35,28 +36,54 @@ func (h *Handler) SaveMessage(ctx context.Context, req *api.SaveMessageRequest) 
   req.Message.UpdateUtcNano = time.Now().UnixNano()
   req.Message.Id = utils.RandomID()
 
-  msg, err := h.controller.SaveMessage(ctx, logger.Default(), &model.SaveMessageParams{
+  err := h.controller.SaveMessage(ctx, logger.Default(), &model.SaveMessageParams{
     Message: model.MessageFromProto(req.Message),
-  })
+  }) 
   if err != nil {
     logger.Error("message", "failed to save message")
-    return &api.SaveMessageResponse{Message: req.Message}, err
+    return nil, err
   }
-  return &api.SaveMessageResponse{Message: model.MessageToProto(msg)}, nil
+
+  return &api.SaveMessageResponse{
+    Id: req.Message.Id,
+    CreateUtcNano: req.Message.CreateUtcNano,
+    UpdateUtcNano: req.Message.UpdateUtcNano,
+  }, nil
 }
 
 func (h *Handler) UpdateMessage(ctx context.Context, req *api.UpdateMessageRequest) (
   *api.UpdateMessageResponse, error,
 ) {
-  req.Message.UpdateUtcNano = time.Now().UnixNano()
-  msg, err := h.controller.UpdateMessage(ctx, logger.Default(), &model.UpdateMessageParams{
-    Message: model.MessageFromProto(req.Message),
+  updateUTCNano := time.Now().UnixNano()
+
+  err := h.controller.UpdateMessage(ctx, logger.Default(), &model.UpdateMessageParams{
+    ID: req.Id,
+    UserID: req.UserId,
+    Text: req.Text,
+    UpdateUTCNano: updateUTCNano,
   })
   if err != nil {
     logger.Error("message", "failed to update message")
-    return &api.UpdateMessageResponse{Message: req.Message}, err
+    return nil, err
   }
-  return &api.UpdateMessageResponse{Message: model.MessageToProto(msg)}, nil
+
+  return &api.UpdateMessageResponse{
+    UpdateUtcNano: updateUTCNano,
+  }, nil
+}
+
+func (h *Handler) DeleteMessage(ctx context.Context, req *api.DeleteMessageRequest) (
+  *api.DeleteMessageResponse, error,
+) {
+  err := h.controller.DeleteMessage(ctx, logger.Default(), &model.DeleteMessageParams{
+    ID: req.Id,
+  })
+  if err != nil {
+    logger.Error("message", "failed to delete message")
+    return nil, err
+  }
+
+  return &api.DeleteMessageResponse{}, nil
 }
 
 func (h *Handler) ReadUserMessages(ctx context.Context, req *api.ReadUserMessagesRequest) (
@@ -85,8 +112,9 @@ func (h *Handler) GetServers(ctx context.Context, _ *api.GetServersRequest) (
   srvs, err := h.controller.GetServers(ctx, logger.Default())
   if err != nil {
     logger.Error("message", "failed to get servers")
-    return &api.GetServersResponse{Servers: nil}, err
+    return nil, err
   }
+
   return &api.GetServersResponse{
     Servers: srvs,
   }, nil
