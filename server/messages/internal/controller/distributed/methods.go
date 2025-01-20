@@ -38,6 +38,14 @@ func (m *DistributedMessages) apply(ctx context.Context, reqType RequestType, cm
   return res, nil
 }
 
+func (m *DistributedMessages) MakeSnapshot(ctx context.Context, log *logger.Logger) error {
+  future := m.raft.Snapshot()
+  if future.Error() != nil {
+    return future.Error()
+  }
+  return nil
+}
+
 func (m *DistributedMessages) SaveMessage(ctx context.Context, log *logger.Logger, params *model.SaveMessageParams) error {
   cmd, _ := proto.Marshal(&AppendCommand{
     Message: model.MessageToProto(params.Message),

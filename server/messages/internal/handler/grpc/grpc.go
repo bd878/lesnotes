@@ -16,6 +16,7 @@ type Controller interface {
   DeleteMessage(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error
   ReadUserMessages(ctx context.Context, log *logger.Logger, params *model.ReadUserMessagesParams) (*model.ReadUserMessagesResult, error)
   GetServers(ctx context.Context, log *logger.Logger) ([]*api.Server, error)
+  MakeSnapshot(ctx context.Context, log *logger.Logger) error
 }
 
 type Handler struct {
@@ -27,6 +28,17 @@ func New(ctrl Controller) *Handler {
   handler := &Handler{controller: ctrl}
 
   return handler
+}
+
+func (h *Handler) MakeSnapshot(ctx context.Context, req *api.SnapshotRequest) (
+  *api.SnapshotResponse, error,
+) {
+  err := h.controller.MakeSnapshot(ctx, logger.Default())
+  if err != nil {
+    logger.Error("failed to make snapshot")
+    return nil, err
+  }
+  return &api.SnapshotResponse{}, nil
 }
 
 func (h *Handler) SaveMessage(ctx context.Context, req *api.SaveMessageRequest) (

@@ -22,6 +22,7 @@ type MessagesClient interface {
 	DeleteMessage(ctx context.Context, in *DeleteMessageRequest, opts ...grpc.CallOption) (*DeleteMessageResponse, error)
 	UpdateMessage(ctx context.Context, in *UpdateMessageRequest, opts ...grpc.CallOption) (*UpdateMessageResponse, error)
 	ReadUserMessages(ctx context.Context, in *ReadUserMessagesRequest, opts ...grpc.CallOption) (*ReadUserMessagesResponse, error)
+	MakeSnapshot(ctx context.Context, in *SnapshotRequest, opts ...grpc.CallOption) (*SnapshotResponse, error)
 }
 
 type messagesClient struct {
@@ -77,6 +78,15 @@ func (c *messagesClient) ReadUserMessages(ctx context.Context, in *ReadUserMessa
 	return out, nil
 }
 
+func (c *messagesClient) MakeSnapshot(ctx context.Context, in *SnapshotRequest, opts ...grpc.CallOption) (*SnapshotResponse, error) {
+	out := new(SnapshotResponse)
+	err := c.cc.Invoke(ctx, "/messages.v1.Messages/MakeSnapshot", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MessagesServer is the server API for Messages service.
 // All implementations must embed UnimplementedMessagesServer
 // for forward compatibility
@@ -86,6 +96,7 @@ type MessagesServer interface {
 	DeleteMessage(context.Context, *DeleteMessageRequest) (*DeleteMessageResponse, error)
 	UpdateMessage(context.Context, *UpdateMessageRequest) (*UpdateMessageResponse, error)
 	ReadUserMessages(context.Context, *ReadUserMessagesRequest) (*ReadUserMessagesResponse, error)
+	MakeSnapshot(context.Context, *SnapshotRequest) (*SnapshotResponse, error)
 	mustEmbedUnimplementedMessagesServer()
 }
 
@@ -107,6 +118,9 @@ func (UnimplementedMessagesServer) UpdateMessage(context.Context, *UpdateMessage
 }
 func (UnimplementedMessagesServer) ReadUserMessages(context.Context, *ReadUserMessagesRequest) (*ReadUserMessagesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadUserMessages not implemented")
+}
+func (UnimplementedMessagesServer) MakeSnapshot(context.Context, *SnapshotRequest) (*SnapshotResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MakeSnapshot not implemented")
 }
 func (UnimplementedMessagesServer) mustEmbedUnimplementedMessagesServer() {}
 
@@ -211,6 +225,24 @@ func _Messages_ReadUserMessages_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Messages_MakeSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SnapshotRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MessagesServer).MakeSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/messages.v1.Messages/MakeSnapshot",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MessagesServer).MakeSnapshot(ctx, req.(*SnapshotRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Messages_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "messages.v1.Messages",
 	HandlerType: (*MessagesServer)(nil),
@@ -234,6 +266,10 @@ var _Messages_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReadUserMessages",
 			Handler:    _Messages_ReadUserMessages_Handler,
+		},
+		{
+			MethodName: "MakeSnapshot",
+			Handler:    _Messages_MakeSnapshot_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

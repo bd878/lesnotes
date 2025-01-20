@@ -10,7 +10,12 @@ service Messages {
   rpc DeleteMessage(DeleteMessageRequest) returns (DeleteMessageResponse) {}
   rpc UpdateMessage(UpdateMessageRequest) returns (UpdateMessageResponse) {}
   rpc ReadUserMessages(ReadUserMessagesRequest) returns (ReadUserMessagesResponse) {}
+  rpc MakeSnapshot(SnapshotRequest) returns (SnapshotResponse) {}
 }
+
+message SnapshotRequest {}
+
+message SnapshotResponse {}
 
 message Message {
   int32    id = 1;

@@ -42,6 +42,7 @@ func New(cfg Config) *Server {
   mux.Handle("/messages/v1/update", middleware.Build(handler.UpdateMessage))
   mux.Handle("/messages/v1/delete", middleware.Build(handler.DeleteMessage))
   mux.Handle("/messages/v1/status", middleware.NoAuth().Build(handler.GetStatus))
+  mux.Handle("/messages/v1/_snapshot", middleware.NoAuth().Build(handler.MakeSnapshot))
   mux.Handle("/messages/v1/read_file", middleware.Build(handler.ReadFile))
 
   server := &Server{

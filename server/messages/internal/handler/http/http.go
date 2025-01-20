@@ -26,6 +26,7 @@ type Controller interface {
   UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (*model.UpdateMessageResult, error)
   DeleteMessage(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) (*model.DeleteMessageResult, error)
   ReadUserMessages(ctx context.Context, log *logger.Logger, params *model.ReadUserMessagesParams) (*model.ReadUserMessagesResult, error)
+  MakeSnapshot(ctx context.Context, log *logger.Logger) error
 }
 
 type Handler struct {
@@ -35,6 +36,26 @@ type Handler struct {
 
 func New(controller Controller, dataPath string) *Handler {
   return &Handler{controller, dataPath}
+}
+
+func (h *Handler) MakeSnapshot(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
+  err := h.controller.MakeSnapshot(req.Context(), log)
+  if err != nil {
+      log.Error(err)
+      w.WriteHeader(http.StatusBadRequest)
+      json.NewEncoder(w).Encode(model.ServerResponse{
+        Status: "error",
+        Description: "cannot read file",
+      })
+      return
+  }
+
+  json.NewEncoder(w).Encode(model.NewMessageServerResponse{
+    ServerResponse: model.ServerResponse{
+      Status: "ok",
+      Description: "done",
+    },
+  })
 }
 
 func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request) {

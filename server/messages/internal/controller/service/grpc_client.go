@@ -47,6 +47,18 @@ func (s *Messages) Close() {
   }
 }
 
+func (s *Messages) MakeSnapshot(ctx context.Context, log *logger.Logger) (
+  error,
+) {
+  _, err := s.client.MakeSnapshot(ctx, &api.SnapshotRequest{})
+  if err != nil {
+    log.Error("failed to make snapshot")
+    return err
+  }
+
+  return nil
+}
+
 func (s *Messages) SaveMessage(ctx context.Context, log *logger.Logger, params *model.SaveMessageParams) (
   *model.SaveMessageResult, error,
 ) {
