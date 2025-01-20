@@ -8,6 +8,6 @@
   "raftlbootstrap": false,
   "raft_log_level": "debug",
   "log_path": "../../logs",
-  "db_path": "../../main3.db",
-  "data_path": "../../data3"
+  "db_path": "../../messages@3.db",
+  "data_path": "../../data@3"
 }

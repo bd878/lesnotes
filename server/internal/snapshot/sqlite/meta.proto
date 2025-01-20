@@ -1,7 +1,0 @@
-syntax = "proto3";
-
-option go_package = "github.com/bd878/gallery/server/internal/snapshot/sqlite";
-
-message BackupParams {
-  string     db_file_path = 1;
-}

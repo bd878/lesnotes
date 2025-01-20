@@ -11,52 +11,55 @@ import (
 )
 
 type Repository struct {
-  db           *sql.DB
+  pool         *sql.DB
   insertStmt   *sql.Stmt
   updateStmt   *sql.Stmt
   deleteStmt   *sql.Stmt
 }
 
 func New(dbFilePath string) *Repository {
-  db, err := sql.Open("sqlite3", "file:" + dbFilePath)
+  pool, err := sql.Open("sqlite3", "file:" + dbFilePath)
   if err != nil {
     panic(err)
   }
 
-  insertStmt, err := db.Prepare(
-    "INSERT INTO messages(" +
-      "id, " +
-      "user_id, " +
-      "create_utc_nano, " +
-      "update_utc_nano, " +
-      "text, " +
-      "file_id " +
-    ") VALUES (?,?,?,?,?,?)",
+  insertStmt, err := pool.Prepare(`
+INSERT INTO messages( 
+  id,
+  user_id,
+  create_utc_nano,
+  update_utc_nano,
+  text,
+  file_id
+) VALUES (:id, :userId, :createUtcNano, :updateUtcNano, :text, :fileId)
+;`,
   )
   if err != nil {
     panic(err)
   }
 
-  updateStmt, err := db.Prepare(
-    "UPDATE messages SET " +
-      "text = ?, " +
-      "update_utc_nano = ? " +
-      "WHERE id = ? AND user_id = ?",
+  updateStmt, err := pool.Prepare(`
+UPDATE messages SET 
+  text = :text 
+  update_utc_nano = :updateUtcNano 
+WHERE id = :id AND user_id = :userId
+;`,
   )
   if err != nil {
     panic(err)
   }
 
-  deleteStmt, err := db.Prepare(
-    "DELETE FROM messages " +
-    "WHERE id = ? AND user_id = ?",
+  deleteStmt, err := pool.Prepare(`
+DELETE FROM messages 
+WHERE id = :id AND user_id = :userId
+;`,
   )
   if err != nil {
     panic(err)
   }
 
   return &Repository{
-    db: db,
+    pool: pool,
     insertStmt: insertStmt,
     updateStmt: updateStmt,
     deleteStmt: deleteStmt,
@@ -70,12 +73,12 @@ func New(dbFilePath string) *Repository {
  */
 func (r *Repository) Create(ctx context.Context, log *logger.Logger, params *model.SaveMessageParams) error {
   _, err := r.insertStmt.ExecContext(ctx,
-    params.Message.ID,
-    params.Message.UserID,
-    params.Message.CreateUTCNano,
-    params.Message.UpdateUTCNano,
-    params.Message.Text,
-    params.Message.FileID,
+    sql.Named("id", params.Message.ID),
+    sql.Named("userId", params.Message.UserID),
+    sql.Named("createUtcNano", params.Message.CreateUTCNano),
+    sql.Named("updateUtcNano", params.Message.UpdateUTCNano),
+    sql.Named("text", params.Message.Text),
+    sql.Named("fileId", params.Message.FileID),
   )
   if err != nil {
     log.Error("failed to insert new message", err)
@@ -85,7 +88,7 @@ func (r *Repository) Create(ctx context.Context, log *logger.Logger, params *mod
 }
 
 func (r *Repository) Delete(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error {
-  _, err := r.deleteStmt.ExecContext(ctx, params.ID, params.UserID)
+  _, err := r.deleteStmt.ExecContext(ctx, sql.Named("id", params.ID), sql.Named("userId", params.UserID))
   if err != nil {
     log.Error("failed to delete message", err)
     return errors.New("failed to delete message")
@@ -95,10 +98,10 @@ func (r *Repository) Delete(ctx context.Context, log *logger.Logger, params *mod
 
 func (r *Repository) Update(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) error {
   _, err := r.updateStmt.ExecContext(ctx,
-    params.Text,
-    params.UpdateUTCNano,
-    params.ID,
-    params.UserID,
+    sql.Named("text", params.Text),
+    sql.Named("updateUtcNano", params.UpdateUTCNano),
+    sql.Named("id", params.ID),
+    sql.Named("userId", params.UserID),
   )
   if err != nil {
     log.Error("failed to update message", err)
@@ -108,7 +111,7 @@ func (r *Repository) Update(ctx context.Context, log *logger.Logger, params *mod
 }
 
 func (r *Repository) Truncate(ctx context.Context, log *logger.Logger) error {
-  _, err := r.db.ExecContext(ctx, "DELETE FROM messages")
+  _, err := r.pool.ExecContext(ctx, "DELETE FROM messages")
   if err != nil {
     log.Error("failed to delete messages")
     return err
@@ -119,17 +122,17 @@ func (r *Repository) Truncate(ctx context.Context, log *logger.Logger) error {
 const ascendingStmt = `
 SELECT id, user_id, create_utc_nano, update_utc_nano, text, file_id
 FROM messages
-WHERE user_id = ?
+WHERE user_id = :userId
 ORDER BY update_utc_nano ASC
-LIMIT ? OFFSET ?
+LIMIT :limit OFFSET :offset
 `
 
 const descendingStmt = `
 SELECT id, user_id, create_utc_nano, update_utc_nano, text, file_id
 FROM messages
-WHERE user_id = ?
+WHERE user_id = :userId
 ORDER BY update_utc_nano DESC
-LIMIT ? OFFSET ?
+LIMIT :limit OFFSET :offset
 `
 
 func (r *Repository) ReadUserMessages(ctx context.Context, log *logger.Logger, params *model.ReadUserMessagesParams) (
@@ -140,9 +143,13 @@ func (r *Repository) ReadUserMessages(ctx context.Context, log *logger.Logger, p
   var isLastPage bool
 
   if params.Ascending {
-    rows, err = r.db.QueryContext(ctx, ascendingStmt, params.UserID, params.Limit, params.Offset)
+    rows, err = r.pool.QueryContext(ctx, ascendingStmt,
+      sql.Named("userId", params.UserID), sql.Named("limit", params.Limit), sql.Named("offset", params.Offset),
+    )
   } else {
-    rows, err = r.db.QueryContext(ctx, descendingStmt, params.UserID, params.Limit, params.Offset)
+    rows, err = r.pool.QueryContext(ctx, descendingStmt,
+      sql.Named("userId", params.UserID), sql.Named("limit", params.Limit), sql.Named("offset", params.Offset),
+    )
   }
 
   if err != nil {
@@ -189,9 +196,9 @@ func (r *Repository) ReadUserMessages(ctx context.Context, log *logger.Logger, p
   if int32(len(res)) < params.Limit {
     isLastPage = true
   } else {
-    row := r.db.QueryRowContext(ctx,
-      "SELECT COUNT(*) FROM messages WHERE user_id = ?",
-      params.UserID,
+    row := r.pool.QueryRowContext(ctx,
+      "SELECT COUNT(*) FROM messages WHERE user_id = :userId",
+      sql.Named("userId", params.UserID),
     )
     if err != nil {
       isLastPage = false
@@ -214,7 +221,7 @@ func (r *Repository) ReadUserMessages(ctx context.Context, log *logger.Logger, p
 }
 
 func (r *Repository) GetBatch(ctx context.Context, log *logger.Logger) ([]*model.Message, error) {
-  rows, err := r.db.QueryContext(ctx,
+  rows, err := r.pool.QueryContext(ctx,
     "SELECT id, user_id, create_utc_nano, update_utc_nano, text, file_id " +
     "FROM messages",
   )

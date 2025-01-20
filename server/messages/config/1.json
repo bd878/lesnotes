@@ -7,6 +7,6 @@
   "raft_bootstrap": true,
   "raft_log_level": "debug",
   "log_path": "../../logs",
-  "db_path": "../../main.db",
-  "data_path": "../../data"
+  "db_path": "../../messages@1.db",
+  "data_path": "../../data@1"
 }

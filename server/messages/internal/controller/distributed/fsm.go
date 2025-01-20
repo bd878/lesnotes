@@ -97,11 +97,9 @@ func (f *fsm) applyDelete(raw []byte) interface{} {
 }
 
 func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {
-  return &snapshot{repo: f.repo}, nil
+  return &snapshot{}, nil
 }
 
-// restore from snapshot (db .dump)
 func (f *fsm) Restore(_ io.ReadCloser) error {
-  /* TODO: make repository dump */
   return nil
 }

@@ -94,6 +94,7 @@ func (s *Server) setupRaft(log *logger.Logger) {
     StreamLayer: controller.NewStreamLayer(raftListener),
     Bootstrap:   s.conf.RaftBootstrap,
     DataDir:     s.conf.DataPath,
+    DBPath:      s.conf.DBPath,
     Servers:     s.conf.RaftServers,
   })
   if err != nil {

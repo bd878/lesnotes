@@ -4,13 +4,14 @@ import (
   "github.com/hashicorp/raft"
 )
 
-type snapshot struct {
-  repo Repository
-}
+type snapshot struct {}
 
-func (s *snapshot) Persist(_ raft.SnapshotSink) error {
-  // TODO: .dump entier database from fsm.Restore()
-  return nil
+func (s *snapshot) Persist(sink raft.SnapshotSink) error {
+  if _, err := sink.Write([]byte{}); err != nil {
+    _ = sink.Cancel()
+    return err
+  }
+  return sink.Close()
 }
 
 func (s *snapshot) Release() {}

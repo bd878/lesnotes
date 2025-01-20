@@ -10,6 +10,7 @@ import (
   raftboltdb "github.com/hashicorp/raft-boltdb"
   "github.com/hashicorp/raft"
 
+  sqlitestore "github.com/bd878/gallery/server/internal/snapshot/sqlite"
   "github.com/bd878/gallery/server/api"
   "github.com/bd878/gallery/server/logger"
 )
@@ -22,6 +23,7 @@ type Config struct {
   Bootstrap    bool
   DataDir      string
   Servers      []string
+  DBPath       string
 }
 
 type DistributedMessages struct {
@@ -49,36 +51,20 @@ func (m *DistributedMessages) setupRaft(log *logger.Logger) error {
     return err
   }
 
-  logStore, err := raftboltdb.NewBoltStore(
-    filepath.Join(raftPath, "log"),
-  )
+  logStore, err := raftboltdb.NewBoltStore(filepath.Join(raftPath, "log"))
   if err != nil {
     return err
   }
-  stableStore, err := raftboltdb.NewBoltStore(
-    filepath.Join(raftPath, "stable"),
-  )
+  stableStore, err := raftboltdb.NewBoltStore(filepath.Join(raftPath, "stable"))
   if err != nil {
     return err
   }
-  retain := 1
-  snapshotStore, err := raft.NewFileSnapshotStore(
-    filepath.Join(raftPath, "raft"),
-    retain,
-    nil,
-  )
-  if err != nil {
-    return err
-  }
+  snapshotStore := sqlitestore.New(filepath.Join(raftPath, "raft"), m.conf.DBPath, log)
 
   maxPool := 5
   timeout := 10*time.Second
-  transport := raft.NewNetworkTransport(
-    m.conf.StreamLayer,
-    maxPool,
-    timeout,
-    os.Stderr,
-  )
+  transport := raft.NewNetworkTransport(m.conf.StreamLayer, maxPool, timeout,
+    os.Stderr)
 
   config := raft.DefaultConfig()
   config.LocalID = m.conf.Raft.LocalID
@@ -99,24 +85,14 @@ func (m *DistributedMessages) setupRaft(log *logger.Logger) error {
     config.LeaderLeaseTimeout = m.conf.Raft.LeaderLeaseTimeout
   }
 
-  m.raft, err = raft.NewRaft(
-    config,
-    fsm,
-    logStore,
-    stableStore,
-    snapshotStore,
-    transport,
-  )
+  m.raft, err = raft.NewRaft(config, fsm, logStore,
+    stableStore, snapshotStore, transport)
   if err != nil {
     return err
   }
 
   var hasState bool
-  hasState, err = raft.HasExistingState(
-    logStore,
-    stableStore,
-    snapshotStore,
-  )
+  hasState, err = raft.HasExistingState(logStore, stableStore, snapshotStore)
   if err != nil {
     return err
   }

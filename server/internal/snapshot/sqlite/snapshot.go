@@ -3,13 +3,18 @@ package sqlite
 import (
   "time"
   "fmt"
+  "io"
   "bufio"
+  "errors"
   "strings"
-  "bytes"
   "os"
   "sort"
   "path/filepath"
   "encoding/json"
+  "database/sql"
+
+  sqlite3 "github.com/mattn/go-sqlite3"
+
   "github.com/hashicorp/raft"
   "github.com/bd878/gallery/server/logger"
 )
@@ -22,11 +27,14 @@ const (
 )
 
 type SqliteSnapshotStore struct {
-  log  *logger.Logger
-  path string
+  log         *logger.Logger
+  path         string
+  dbFilePath   string
 }
 
 var _ raft.SnapshotStore = (*SqliteSnapshotStore)(nil)
+
+type snapMetaSlice []*sqliteSnapshotMeta
 
 type sqliteSnapshotMeta struct {
   raft.SnapshotMeta
@@ -36,25 +44,28 @@ type SqliteSnapshotSink struct {
   log         *logger.Logger
   dir          string
   parentDir    string
+  srcConn     *sqlite3.SQLiteConn
+  targetConn  *sqlite3.SQLiteConn
+  backup      *sqlite3.SQLiteBackup
   store       *SqliteSnapshotStore
   meta         sqliteSnapshotMeta
-  stateFile   *os.File
-  buffered    *bufio.Writer
+  statePath    string
 
   closed       bool
 }
 
 var _ raft.SnapshotSink = (*SqliteSnapshotSink)(nil)
 
-func New(base string, log *logger.Logger) *SqliteSnapshotStore {
+func New(base, dbFilePath string, log *logger.Logger) *SqliteSnapshotStore {
   path := filepath.Join(base, snapPath)
   if err := os.MkdirAll(path, 0o755); err != nil && !os.IsExist(err) {
     panic(err)
   }
 
   store := &SqliteSnapshotStore{
-    path: path,
-    log:  log,
+    path:       path,
+    dbFilePath: dbFilePath,
+    log:        log,
   }
 
   return store
@@ -68,7 +79,7 @@ func (s *SqliteSnapshotStore) Create(version raft.SnapshotVersion, index, term u
 
   name := snapshotName(term, index)
 
-  path := filepath.Join(f.path, name+tmpSuffix)
+  path := filepath.Join(s.path, name+tmpSuffix)
   s.log.Info("creating new snapshot", "path", path)
 
   sink := &SqliteSnapshotSink{
@@ -94,14 +105,42 @@ func (s *SqliteSnapshotStore) Create(version raft.SnapshotVersion, index, term u
   }
 
   statePath := filepath.Join(path, stateFilePath)
-  fh, err := os.Create(statePath)
+
+  srcDb, err := sql.Open("sqlite3", "file:" + s.dbFilePath)
   if err != nil {
-    s.log.Error("failed to create state file", "error", err)
     return nil, err
   }
-  sink.stateFile = fh
 
-  sink.buffered = bufio.NewWriter(sink.stateFile)
+  srcConn, err := srcDb.Driver().Open("sqlite3")
+  defer srcConn.Close()
+  if err != nil {
+    return nil, err
+  }
+
+  sqliteSrcConn, ok := srcConn.(*sqlite3.SQLiteConn)
+  if !ok {
+    return nil, errors.New("driver conn is not SQLiteConn")
+  }
+
+  targetDb, err := sql.Open("sqlite3", "file:" + statePath)
+  if err != nil {
+    return nil, err
+  }
+
+  targetConn, err := targetDb.Driver().Open("sqlite3")
+  defer targetConn.Close()
+  if err != nil {
+    return nil, err
+  }
+
+  sqliteTargetConn, ok := targetConn.(*sqlite3.SQLiteConn)
+  if !ok {
+    return nil, errors.New("driver conn is not SQLiteConn")
+  }
+
+  sink.statePath = statePath
+  sink.srcConn = sqliteSrcConn
+  sink.targetConn = sqliteTargetConn
 
   return sink, nil
 }
@@ -114,7 +153,7 @@ func (sink *SqliteSnapshotSink) writeMeta() error {
   }
   defer fh.Close()
 
-  buffered := bufio.NewWriter
+  buffered := bufio.NewWriter(fh)
 
   enc := json.NewEncoder(buffered)
   if err := enc.Encode(&sink.meta); err != nil {
@@ -145,7 +184,7 @@ func (s *SqliteSnapshotStore) List() ([]*raft.SnapshotMeta, error) {
     return nil, err
   }
 
-  var snapMeta []*SnapshotMeta
+  var snapMeta []*raft.SnapshotMeta
   for _, meta := range snapshots {
     snapMeta = append(snapMeta, &meta.SnapshotMeta)
   }
@@ -215,15 +254,27 @@ func (s *SqliteSnapshotStore) ReapSnapshots() error {
     return err
   }
 
-  for i := s.retain; i < len(snapshots); i++ {
-    path := filepath.Join(s.path, snapshots[i].ID)
-    s.log.Info("reaping snapshot", "path", path)
-    if err := os.RemoveAll(path); err != nil {
-      s.log.Error("failed to reap snapshot", "path", path, "error", err)
-      return err
-    }
+  path := filepath.Join(s.path, snapshots[0].ID)
+  s.log.Info("reaping snapshot", "path", path)
+  if err := os.RemoveAll(path); err != nil {
+    s.log.Error("failed to reap snapshot", "path", path, "error", err)
+    return err
   }
+
   return nil
+}
+
+type bufferedFile struct {
+  bh *bufio.Reader
+  fh *os.File
+}
+
+func (b *bufferedFile) Read(p []byte) (n int, err error) {
+  return b.bh.Read(p)
+}
+
+func (b *bufferedFile) Close() error {
+  return b.fh.Close()
 }
 
 func (s *SqliteSnapshotStore) Open(id string) (*raft.SnapshotMeta, io.ReadCloser, error) {
@@ -233,7 +284,7 @@ func (s *SqliteSnapshotStore) Open(id string) (*raft.SnapshotMeta, io.ReadCloser
     return nil, nil, err
   }
 
-  statePath := filepath.Join(f.path, id, stateFilePath)
+  statePath := filepath.Join(s.path, id, stateFilePath)
   fh, err := os.Open(statePath)
   if err != nil {
     s.log.Error("failed to open state file", "error", err)
@@ -246,7 +297,7 @@ func (s *SqliteSnapshotStore) Open(id string) (*raft.SnapshotMeta, io.ReadCloser
     return nil, nil, err
   }
 
-  buffered := bufio.NewReader(fh)
+  buffered := &bufferedFile{bufio.NewReader(fh), fh}
 
   return &meta.SnapshotMeta, buffered, nil
 }
@@ -316,20 +367,16 @@ func (s *SqliteSnapshotSink) Cancel() error {
 }
 
 func (s *SqliteSnapshotSink) finalize() error {
-  if err := s.buffered.Flush(); err != nil {
+  if err := s.backup.Finish(); err != nil {
     return err
   }
 
-  if err := s.stateFile.Sync(); err != nil {
+  fh, err := os.Open(s.statePath)
+  if err != nil {
     return err
   }
 
-  stat, stateErr := s.stateFile.Stat()
-
-  if err := s.stateFile.Close(); err != nil {
-    return err
-  }
-
+  stat, stateErr := fh.Stat()
   if stateErr != nil {
     return stateErr
   }
