@@ -39,8 +39,10 @@ func (m *DistributedMessages) apply(ctx context.Context, reqType RequestType, cm
 }
 
 func (m *DistributedMessages) MakeSnapshot(ctx context.Context, log *logger.Logger) error {
+  log.Info("raft make snapshot")
   future := m.raft.Snapshot()
   if future.Error() != nil {
+    log.Error("raft failed to make snapshot")
     return future.Error()
   }
   return nil

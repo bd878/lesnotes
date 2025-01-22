@@ -1,6 +1,7 @@
 package repository
 
 import (
+  "sync/atomic"
   "context"
   "errors"
   "database/sql"
@@ -11,7 +12,8 @@ import (
 )
 
 type Repository struct {
-  pool         *sql.DB
+  dbFilePath    string
+  pool          atomic.Pointer[sql.DB]
   insertStmt   *sql.Stmt
   updateStmt   *sql.Stmt
   deleteStmt   *sql.Stmt
@@ -40,7 +42,7 @@ INSERT INTO messages(
 
   updateStmt, err := pool.Prepare(`
 UPDATE messages SET 
-  text = :text 
+  text = :text,
   update_utc_nano = :updateUtcNano 
 WHERE id = :id AND user_id = :userId
 ;`,
@@ -58,12 +60,34 @@ WHERE id = :id AND user_id = :userId
     panic(err)
   }
 
-  return &Repository{
-    pool: pool,
+  repo := &Repository{
+    dbFilePath: dbFilePath,
     insertStmt: insertStmt,
     updateStmt: updateStmt,
     deleteStmt: deleteStmt,
   }
+
+  repo.pool.Store(pool)
+  return repo
+}
+
+func (r *Repository) Restore(nextDBFilePath string) error {
+  // TODO: mv snapshot replica to main destination
+  nextPool, err := sql.Open("sqlite3", "file:" + nextDBFilePath)
+  if err != nil {
+    logger.Error("failed to open next pool")
+    return err
+  }
+
+  r.dbFilePath = nextDBFilePath
+
+  go func(pool *sql.DB) {
+    if err := pool.Close(); err != nil {
+      logger.Error("failed to close current pool", "error=", err)
+    }
+  }(r.pool.Swap(nextPool))
+
+  return nil
 }
 
 /**
@@ -111,7 +135,7 @@ func (r *Repository) Update(ctx context.Context, log *logger.Logger, params *mod
 }
 
 func (r *Repository) Truncate(ctx context.Context, log *logger.Logger) error {
-  _, err := r.pool.ExecContext(ctx, "DELETE FROM messages")
+  _, err := r.pool.Load().ExecContext(ctx, "DELETE FROM messages")
   if err != nil {
     log.Error("failed to delete messages")
     return err
@@ -143,11 +167,11 @@ func (r *Repository) ReadUserMessages(ctx context.Context, log *logger.Logger, p
   var isLastPage bool
 
   if params.Ascending {
-    rows, err = r.pool.QueryContext(ctx, ascendingStmt,
+    rows, err = r.pool.Load().QueryContext(ctx, ascendingStmt,
       sql.Named("userId", params.UserID), sql.Named("limit", params.Limit), sql.Named("offset", params.Offset),
     )
   } else {
-    rows, err = r.pool.QueryContext(ctx, descendingStmt,
+    rows, err = r.pool.Load().QueryContext(ctx, descendingStmt,
       sql.Named("userId", params.UserID), sql.Named("limit", params.Limit), sql.Named("offset", params.Offset),
     )
   }
@@ -196,7 +220,7 @@ func (r *Repository) ReadUserMessages(ctx context.Context, log *logger.Logger, p
   if int32(len(res)) < params.Limit {
     isLastPage = true
   } else {
-    row := r.pool.QueryRowContext(ctx,
+    row := r.pool.Load().QueryRowContext(ctx,
       "SELECT COUNT(*) FROM messages WHERE user_id = :userId",
       sql.Named("userId", params.UserID),
     )
@@ -221,7 +245,7 @@ func (r *Repository) ReadUserMessages(ctx context.Context, log *logger.Logger, p
 }
 
 func (r *Repository) GetBatch(ctx context.Context, log *logger.Logger) ([]*model.Message, error) {
-  rows, err := r.pool.QueryContext(ctx,
+  rows, err := r.pool.Load().QueryContext(ctx,
     "SELECT id, user_id, create_utc_nano, update_utc_nano, text, file_id " +
     "FROM messages",
   )

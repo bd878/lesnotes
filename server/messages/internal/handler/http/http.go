@@ -41,13 +41,13 @@ func New(controller Controller, dataPath string) *Handler {
 func (h *Handler) MakeSnapshot(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
   err := h.controller.MakeSnapshot(req.Context(), log)
   if err != nil {
-      log.Error(err)
-      w.WriteHeader(http.StatusBadRequest)
-      json.NewEncoder(w).Encode(model.ServerResponse{
-        Status: "error",
-        Description: "cannot read file",
-      })
-      return
+    log.Error(err)
+    w.WriteHeader(http.StatusBadRequest)
+    json.NewEncoder(w).Encode(model.ServerResponse{
+      Status: "error",
+      Description: "cannot read file",
+    })
+    return
   }
 
   json.NewEncoder(w).Encode(model.NewMessageServerResponse{

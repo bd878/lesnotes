@@ -33,6 +33,7 @@ func New(ctrl Controller) *Handler {
 func (h *Handler) MakeSnapshot(ctx context.Context, req *api.SnapshotRequest) (
   *api.SnapshotResponse, error,
 ) {
+  logger.Info("make snapshot")
   err := h.controller.MakeSnapshot(ctx, logger.Default())
   if err != nil {
     logger.Error("failed to make snapshot")

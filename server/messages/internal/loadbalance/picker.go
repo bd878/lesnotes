@@ -53,7 +53,8 @@ func (p *Picker) Pick(info balancer.PickInfo) (
      strings.Contains(info.FullMethodName, "UpdateMessage") ||
     len(p.followers) == 0 {
       result.SubConn = p.leader
-  } else if strings.Contains(info.FullMethodName, "ReadUserMessages") {
+  } else if strings.Contains(info.FullMethodName, "ReadUserMessages") ||
+            strings.Contains(info.FullMethodName, "MakeSnapshot") {
     result.SubConn = p.nextFollower()
   }
   if result.SubConn == nil {

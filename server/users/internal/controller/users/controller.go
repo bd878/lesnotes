@@ -5,6 +5,7 @@ import (
   "context"
 
   "github.com/bd878/gallery/server/logger"
+  "github.com/bd878/gallery/server/utils"
   "github.com/bd878/gallery/server/users/pkg/model"
   "github.com/bd878/gallery/server/users/internal/controller"
 )
@@ -25,6 +26,7 @@ func New(repo Repository) *Controller {
 }
 
 func (c *Controller) AddUser(ctx context.Context, log *logger.Logger, params *model.AddUserParams) error {
+  params.User.ID = utils.RandomID()
   return c.repo.AddUser(ctx, log, params.User)
 }
 

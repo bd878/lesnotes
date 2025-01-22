@@ -17,6 +17,7 @@ type Repository interface {
   ReadUserMessages(ctx context.Context, log *logger.Logger, params *model.ReadUserMessagesParams) (*model.ReadUserMessagesResult, error)
   GetBatch(ctx context.Context, log *logger.Logger) ([]*model.Message, error)
   Truncate(ctx context.Context, log *logger.Logger) error
+  Restore(dbFilePath string) error
 }
 
 var _ raft.FSM = (*fsm)(nil)

@@ -5,6 +5,7 @@ import (
   "fmt"
   "io"
   "bufio"
+  "bytes"
   "errors"
   "strings"
   "os"
@@ -14,6 +15,7 @@ import (
   "database/sql"
 
   sqlite3 "github.com/mattn/go-sqlite3"
+  "google.golang.org/protobuf/proto"
 
   "github.com/hashicorp/raft"
   "github.com/bd878/gallery/server/logger"
@@ -30,6 +32,7 @@ type SqliteSnapshotStore struct {
   log         *logger.Logger
   path         string
   dbFilePath   string
+  retain       int
 }
 
 var _ raft.SnapshotStore = (*SqliteSnapshotStore)(nil)
@@ -66,6 +69,7 @@ func New(base, dbFilePath string, log *logger.Logger) *SqliteSnapshotStore {
     path:       path,
     dbFilePath: dbFilePath,
     log:        log,
+    retain:     1,
   }
 
   return store
@@ -79,8 +83,16 @@ func (s *SqliteSnapshotStore) Create(version raft.SnapshotVersion, index, term u
 
   name := snapshotName(term, index)
 
+  logger.Info("snapshot name=", name)
+
   path := filepath.Join(s.path, name+tmpSuffix)
   s.log.Info("creating new snapshot", "path", path)
+
+  // Make the directory
+  if err := os.MkdirAll(path, 0o755); err != nil {
+    s.log.Error("failed to make snapshot directly", "error", err)
+    return nil, err
+  }
 
   sink := &SqliteSnapshotSink{
     log:        s.log,
@@ -111,8 +123,7 @@ func (s *SqliteSnapshotStore) Create(version raft.SnapshotVersion, index, term u
     return nil, err
   }
 
-  srcConn, err := srcDb.Driver().Open("sqlite3")
-  defer srcConn.Close()
+  srcConn, err := srcDb.Driver().Open(s.dbFilePath)
   if err != nil {
     return nil, err
   }
@@ -127,8 +138,7 @@ func (s *SqliteSnapshotStore) Create(version raft.SnapshotVersion, index, term u
     return nil, err
   }
 
-  targetConn, err := targetDb.Driver().Open("sqlite3")
-  defer targetConn.Close()
+  targetConn, err := targetDb.Driver().Open(statePath)
   if err != nil {
     return nil, err
   }
@@ -187,6 +197,9 @@ func (s *SqliteSnapshotStore) List() ([]*raft.SnapshotMeta, error) {
   var snapMeta []*raft.SnapshotMeta
   for _, meta := range snapshots {
     snapMeta = append(snapMeta, &meta.SnapshotMeta)
+    if len(snapMeta) == s.retain {
+      break
+    }
   }
   return snapMeta, nil
 }
@@ -254,19 +267,20 @@ func (s *SqliteSnapshotStore) ReapSnapshots() error {
     return err
   }
 
-  path := filepath.Join(s.path, snapshots[0].ID)
-  s.log.Info("reaping snapshot", "path", path)
-  if err := os.RemoveAll(path); err != nil {
-    s.log.Error("failed to reap snapshot", "path", path, "error", err)
-    return err
+  for i := s.retain; i < len(snapshots); i++ {
+    path := filepath.Join(s.path, snapshots[i].ID)
+    s.log.Info("reaping snapshot", "path", path)
+    if err := os.RemoveAll(path); err != nil {
+      s.log.Error("failed to reap snapshot", "path", path, "error", err)
+      return err
+    }
   }
 
   return nil
 }
 
 type bufferedFile struct {
-  bh *bufio.Reader
-  fh *os.File
+  bh *bytes.Reader
 }
 
 func (b *bufferedFile) Read(p []byte) (n int, err error) {
@@ -274,7 +288,7 @@ func (b *bufferedFile) Read(p []byte) (n int, err error) {
 }
 
 func (b *bufferedFile) Close() error {
-  return b.fh.Close()
+  return nil
 }
 
 func (s *SqliteSnapshotStore) Open(id string) (*raft.SnapshotMeta, io.ReadCloser, error) {
@@ -285,19 +299,15 @@ func (s *SqliteSnapshotStore) Open(id string) (*raft.SnapshotMeta, io.ReadCloser
   }
 
   statePath := filepath.Join(s.path, id, stateFilePath)
-  fh, err := os.Open(statePath)
+
+  data, err := proto.Marshal(&RestoreCommand{
+    BackupFilePath: statePath,
+  })
   if err != nil {
-    s.log.Error("failed to open state file", "error", err)
     return nil, nil, err
   }
 
-  if _, err := fh.Seek(0, 0); err != nil {
-    s.log.Error("state file seek failed", "error", err)
-    fh.Close()
-    return nil, nil, err
-  }
-
-  buffered := &bufferedFile{bufio.NewReader(fh), fh}
+  buffered := &bufferedFile{bytes.NewReader(data)}
 
   return &meta.SnapshotMeta, buffered, nil
 }
@@ -307,6 +317,15 @@ func (s *SqliteSnapshotSink) Close() error {
     return nil
   }
   s.closed = true
+
+  logger.Info("close sink")
+
+  if err := s.srcConn.Close(); err != nil {
+    return err
+  }
+  if err := s.targetConn.Close(); err != nil {
+    return err
+  }
 
   if err := s.finalize(); err != nil {
     s.log.Error("failed to finalize snapshot", "error", err)
