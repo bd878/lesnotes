@@ -10,7 +10,6 @@ import (
   raftboltdb "github.com/hashicorp/raft-boltdb"
   "github.com/hashicorp/raft"
 
-  sqlitestore "github.com/bd878/gallery/server/internal/snapshot/sqlite"
   "github.com/bd878/gallery/server/api"
   "github.com/bd878/gallery/server/logger"
 )
@@ -59,7 +58,8 @@ func (m *DistributedMessages) setupRaft(log *logger.Logger) error {
   if err != nil {
     return err
   }
-  snapshotStore := sqlitestore.New(filepath.Join(raftPath, "raft"), m.conf.DBPath, log)
+  // TODO: rewrite on SqliteSnapshotStore from sqlite_snapshot branch
+  snapshotStore := raft.NewDiscardSnapshotStore()
 
   maxPool := 5
   timeout := 10*time.Second
