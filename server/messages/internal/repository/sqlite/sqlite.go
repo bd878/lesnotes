@@ -40,7 +40,7 @@ INSERT INTO messages(
 
   updateStmt, err := pool.Prepare(`
 UPDATE messages SET 
-  text = :text 
+  text = :text,
   update_utc_nano = :updateUtcNano 
 WHERE id = :id AND user_id = :userId
 ;`,

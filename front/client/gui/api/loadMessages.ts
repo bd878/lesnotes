@@ -1,13 +1,20 @@
-import i18n from '../../i18n';
-import api from '../../api';
+import i18n from '../i18n';
+import api from './api';
 
-async function loadMessages(limit, offset, order) {
+interface LoadMessagesResult {
+  error: string;
+  explain: string;
+  messages: any[];
+  isLastPage: boolean;
+}
+
+async function loadMessages(limit: number, offset: number, order: number): LoadMessagesResult {
   let response = {};
-  let result = {
+  let result: LoadMessagesResult = {
     error: "",
     explain: "",
     messages: [],
-    islastpage: false,
+    isLastPage: false,
   }
 
   try {
@@ -27,7 +34,7 @@ async function loadMessages(limit, offset, order) {
       result.explain = response.explain
     } else {
       result.messages = response.value.messages
-      result.islastpage = response.value.islastpage
+      result.isLastPage = response.value.islastpage
     }
   } catch (e) {
     console.error(i18n("error_occured"), e);

@@ -1,1 +1,1 @@
-export {default} from "./SendMessageForm";
+export {default} from "./SendMessageFormContainer";

@@ -24,7 +24,7 @@ const LoginForm = ({ onError }) => {
 
     const send = async (name, password) => {
       try {
-        const response = await api("/users/v1/login", {
+        const response = await api.api("/users/v1/login", {
           method: "POST",
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'

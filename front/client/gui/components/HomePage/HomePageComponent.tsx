@@ -16,8 +16,6 @@ function HomePageComponent(props) {
     error,
     messages,
     loading,
-    onSendSuccess,
-    onSendError,
   } = props;
 
   return (
@@ -50,10 +48,7 @@ function HomePageComponent(props) {
           />
         </Tag>
 
-        <SendMessageForm
-          onSuccess={onSendSuccess}
-          onError={onSendError}
-        />
+        <SendMessageForm />
       </Tag>
     </>
   )

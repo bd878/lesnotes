@@ -1,32 +1,30 @@
-import React, {useState, useRef, useEffect, useCallback} from 'react';
-import i18n from '../../i18n';
+import React, {useRef, useEffect, useCallback} from 'react';
 import HomePageComponent from './HomePageComponent';
-import loadMessages from './loadMessages';
 import {connect} from '../../third_party/react-redux';
-import {bindActionCreators} from '../../third_party/redux';
 import {
   LIMIT_LOAD_BY,
   LOAD_ORDER,
 } from './const';
 import {
-  appendMessagesActionCreator,
-  pushBackMessagesActionCreator,
+  fetchMessagesActionCreator,
   selectMessages,
+  selectIsLastPage,
+  selectIsLoading,
+  selectError,
+  selectLoadOffset,
 } from '../../features/messages';
 
 function HomePageContainer(props) {
   const {
     messages,
-    appendMessages,
-    pushBackMessages,
+    error,
+    isLastPage,
+    isLoading,
+    loadOffset,
+    fetchMessages,
   } = props
 
   const listRef = useRef(null);
-  const [error, setError] = useState(false);
-  const [isLastPage, setIsLastPage] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  const getLoadOffset = useCallback(() => messages.length, [messages]);
 
   const scrollToTop = useCallback(() => {
     if (listRef.current != null) {
@@ -35,77 +33,18 @@ function HomePageContainer(props) {
   }, [listRef]);
 
   useEffect(() => {
-    const init = async () => {
-      try {
-        setLoading(true);
-        const response = await loadMessages(LIMIT_LOAD_BY, 0, LOAD_ORDER);
-        if (response.error != "") {
-          console.error("[HomePageContainer]: failed to load messages",
-            response.error, response.explain);
-          throw(response.error);
-        }
-        response.messages.reverse();
-        appendMessages(response.messages);
-        if (response.islastpage) {
-          setIsLastPage(true)
-        }
-        setTimeout(scrollToTop, 300);
-      } catch (_1) {
-        setError(true)
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    init();
-  }, []);
+    fetchMessages(LIMIT_LOAD_BY, 0, LOAD_ORDER)
+  }, [fetchMessages]);
 
   const loadMore = useCallback(() => {
-    const load = async () => {
-      try {
-        setLoading(true);
-        const response = await loadMessages(
-          LIMIT_LOAD_BY,
-          getLoadOffset(),
-          LOAD_ORDER,
-        )
-        if (response.error != "") {
-          console.error("[HomePageContainer]: failed to load messages",
-            response.error, response.explain);
-          throw(response.error);
-        }
-        response.messages.reverse();
-        if (response.islastpage) {
-          setIsLastPage(true)
-        }
-        pushBackMessages(response.messages);
-      } catch (_1) {
-        setError(true)
-      } finally {
-        setLoading(false);
-      }
+    if (listRef.current != null && !isLoading && !isLastPage) {
+      fetchMessages(LIMIT_LOAD_BY, loadOffset, LOAD_ORDER)
     }
-
-    if (
-      (listRef.current != null) && 
-      !loading &&
-      !isLastPage
-    ) {
-      load()
-    }
-  }, [
-    listRef.current,
-    loading,
-    isLastPage,
-    getLoadOffset,
-    setIsLastPage,
-  ]);
+  }, [listRef.current, fetchMessages,
+    loadOffset, isLoading, isLastPage]);
 
   const onListScroll = useCallback(() => {
-    if (
-      listRef.current != null &&
-      (listRef.current.scrollTop == 0)
-    ) {
+    if (listRef.current != null && listRef.current.scrollTop == 0) {
       loadMore()
     }
   }, [listRef.current, loadMore]);
@@ -115,38 +54,30 @@ function HomePageContainer(props) {
     setTimeout(() => {location.href = "/login"}, 0)
   }, []);
 
-  const onSendSuccess = useCallback((newMessage) => {
-    appendMessages([newMessage]);
-    setTimeout(scrollToTop, 0);
-  }, [appendMessages]);
-
-  const onSendError = useCallback(() => {
-    setError(i18n("loading_messages_error"))
-  }, [setError])
-
   return (
     <HomePageComponent
       listRef={listRef}
       onExitClick={onExitClick}
-      onSendSuccess={onSendSuccess}
-      onSendError={onSendError}
       onListScroll={onListScroll}
       onLoadMoreClick={loadMore}
       isAllLoaded={isLastPage}
       error={error}
       messages={messages}
-      loading={loading}
+      loading={isLoading}
     />
   )
 }
 
 const mapStateToProps = state => ({
   messages: selectMessages(state),
+  isLoading: selectIsLoading(state),
+  isLastPage: selectIsLastPage(state),
+  loadOffset: selectLoadOffset(state),
+  error: selectError(state),
 })
 
 const mapDispatchToProps = {
-  appendMessages: appendMessagesActionCreator,
-  pushBackMessages: pushBackMessagesActionCreator,
+  fetchMessages: fetchMessagesActionCreator,
 }
 
 export default connect(

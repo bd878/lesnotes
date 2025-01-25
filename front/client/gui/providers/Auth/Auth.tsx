@@ -11,7 +11,7 @@ const Auth = props => {
       let response = {};
       try {
         setLoading(true);
-        response = await api("/users/v1/auth", {
+        response = await api.api("/users/v1/auth", {
           method: 'POST',
           credentials: 'include',
         });

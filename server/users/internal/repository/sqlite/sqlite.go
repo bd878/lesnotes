@@ -23,8 +23,8 @@ func New(dbPath string) *Repository {
 }
 
 func (r *Repository) AddUser(ctx context.Context, log *logger.Logger, user *model.User) error {
-  _, err := r.db.ExecContext(ctx, "INSERT INTO users(name,password,token,expires_utc_nano)" +
-    "VALUES(?,?,?,?)", user.Name, user.Password, user.Token, user.ExpiresUTCNano)
+  _, err := r.db.ExecContext(ctx, "INSERT INTO users(id,name,password,token,expires_utc_nano)" +
+    "VALUES(?,?,?,?,?)", user.ID, user.Name, user.Password, user.Token, user.ExpiresUTCNano)
   if err != nil {
     log.Error("query error: %v\n", err)
   }
