@@ -34,15 +34,11 @@ async function loadMessages(limit: number, offset: number, order: number): LoadM
       result.explain = response.explain
     } else {
       result.messages = response.value.messages
-      result.isLastPage = response.value.islastpage
+      result.isLastPage = response.value.is_last_page
     }
   } catch (e) {
     console.error(i18n("error_occured"), e);
     throw e
-  }
-
-  if (Array.isArray(result.messages)) {
-    return result
   }
 
   return result;

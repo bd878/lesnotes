@@ -24,29 +24,15 @@ const LoginForm = ({ onError }) => {
 
     const send = async (name, password) => {
       try {
-        const response = await api.api("/users/v1/login", {
-          method: "POST",
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-          },
-          body: new URLSearchParams({
-            'name': name,
-            'password': password,
-          })
-        });
-
-        if (response.error == "") {
-          if (response.value.status == "ok") {
-            setTimeout(() => {location.href = "/home"}, 1000)
-          } else {
-            console.log("status not ok, value:", response.value)
-          }
+        const result = await api.login(name, password)
+        if (result.isOk) {
+          setTimeout(() => {location.href = "/home"}, 0)
         } else {
-          console.error("error: ", response.error, response.explain)
+          console.log("login result not ok")
+          console.error(result.explain)
         }
       } catch (e) {
-        console.error(i18n("error_occured"), e);
-        onError(e);
+        console.error(e)
       }
     }
 

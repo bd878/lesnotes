@@ -29,8 +29,6 @@ function SendMessageFormContainer(props) {
   const sendMessageRequest = useCallback(e => {
     e.preventDefault();
 
-    console.log("send message request");
-
     const send = async () => {
       try {
         const response = await api.sendMessage(message, file)

@@ -26,23 +26,15 @@ function RegisterForm(props) {
       if (!name) {console.error(i18n("name_required_err")); return;}
       if (!password) {console.error(i18n("pass_required_err")); return;}
 
-      const response = await api.api("/users/v1/signup", {
-        method: "POST",
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-        },
-        body: new URLSearchParams({
-          'name': name,
-          'password': password,
-        })
-      });
-      console.log(response);
-      if (response.error != "") {
-        console.error("[RegisterForm]: /signup response returned error", response.error, response.explain)
-      } else {
-        if (response.value.status == "ok") {
+      try {
+        const response = await api.register(name, password)
+        if (response.isOk) {
           setTimeout(() => {location.href = "/home"}, 1000)
+        } else {
+          console.log(response.error, response.explain)
         }
+      } catch (e) {
+        console.error(e)
       }
     }
 

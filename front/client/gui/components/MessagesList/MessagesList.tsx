@@ -34,7 +34,7 @@ const MessagesList = ({
               {message.filename}
             </Tag>
 
-            <ListItem key={message.id}>{message.value}</ListItem>
+            <ListItem key={message.id}>{message.text}</ListItem>
           </Tag>
         ))}
       </List>

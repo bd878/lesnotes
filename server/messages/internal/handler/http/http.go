@@ -87,6 +87,8 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 
   text := req.PostFormValue("text")
 
+  log.Infoln("text=", text, "user name=", user.Name)
+
   if fileName == "" && text == "" {
     w.WriteHeader(http.StatusBadRequest)
     json.NewEncoder(w).Encode(model.ServerResponse{

@@ -13,10 +13,10 @@ interface FetchMessagesPayload {
   order:  number;
 }
 
-function* fetchMessages(action: FetchMessagesPayload) {
+function* fetchMessages({payload}: {payload: FetchMessagesPayload}) {
   try {
     const response = yield call(api.loadMessages,
-      action.limit, action.offset, action.order)
+      payload.limit, payload.offset, payload.order)
 
     if (response.error != "") {
       yield put(fetchMessagesFailedActionCreator(response.error))

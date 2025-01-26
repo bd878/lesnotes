@@ -5,38 +5,27 @@ import i18n from '../../i18n';
 const Auth = props => {
   const [authed, setAuthed] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [_, setError] = useState(null)
 
   useEffect(() => {
     async function call() {
-      let response = {};
+      setLoading(true)
       try {
-        setLoading(true);
-        response = await api.api("/users/v1/auth", {
-          method: 'POST',
-          credentials: 'include',
-        });
-      } catch(e) {
-        console.error("error occured on authing:", e);
-      } finally {
-        setLoading(false);
-      }
-
-      if (response.error == "") {
-        if (response.value.expired) {
-          setAuthed(false);
-          setTimeout(() => {location.href = "/login"}, 0)
+        let response = await api.auth()
+        if (response.error == "") {
+          setAuthed(true)
         } else {
-          setAuthed(true);
-          console.log("welcome,", response.value.user.name)
+          setError(response.error)
         }
-      } else {
-        setAuthed(false);
-        setTimeout(() => {location.href = "/login"}, 0)
+      } catch (e) {
+        setError(e)
+      } finally {
+        setLoading(false)
       }
     }
 
     call();
-  }, [setAuthed, setLoading])
+  }, [setAuthed, setLoading, setError])
 
   if (loading) {
     return (<>{i18n('auth_process')}</>)

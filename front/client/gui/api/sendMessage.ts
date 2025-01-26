@@ -6,29 +6,28 @@ async function sendMessage(message = "", file = null) {
   let result: SendMessageResult = {
     error: "",
     explain: "",
-    message: "",
+    message: {},
   }
 
   const form = new FormData()
-  form.append("message", message);
+  form.append("text", message);
   if (file != null && file.name != "") {
     form.append('file', file, file.name);
   }
 
   try {
-    const response = await api("/messages/v1/send", {
+    response = await api("/messages/v1/send", {
       method: "POST",
       credentials: "include",
       body: form,
     });
-    console.log("[sendMessage] response: ", response);
+
     if (response.error != "") {
-      console.error("[sendMessage]: /send returned error", response.error, response.explain)
       result.error = response.error
       result.explain = response.explain
     } else {
-      if (response.value.message != undefined) { 
-        result.message = response.value.message
+      if (response.value != undefined) { 
+        result.message = response.value
       }
     }
   } catch (e) {

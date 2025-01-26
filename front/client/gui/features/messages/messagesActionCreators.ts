@@ -20,16 +20,10 @@ export function pushBackMessagesActionCreator(payload) {
   }
 }
 
-interface FetchMessagesPayload {
-  limit:  number;
-  offset: number;
-  order:  number;
-}
-
-export function fetchMessagesActionCreator(payload: FetchMessagesPayload) {
+export function fetchMessagesActionCreator(limit: number, offset: number, order: number) {
   return {
     type: FETCH_MESSAGES,
-    payload,
+    payload: {limit, offset, order},
   }
 }
 
