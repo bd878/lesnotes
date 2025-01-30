@@ -116,9 +116,13 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
       Status: "ok",
       Description: "accepted",
     },
-    ID: resp.ID,
-    UpdateUTCNano: resp.UpdateUTCNano,
-    CreateUTCNano: resp.CreateUTCNano,
+    Message: model.Message{
+      ID:            resp.ID,
+      FileID:        fileID,
+      Text:          text,
+      UpdateUTCNano: resp.UpdateUTCNano,
+      CreateUTCNano: resp.CreateUTCNano,
+    },
   })
 }
 

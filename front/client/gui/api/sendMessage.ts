@@ -26,8 +26,8 @@ async function sendMessage(message = "", file = null) {
       result.error = response.error
       result.explain = response.explain
     } else {
-      if (response.value != undefined) { 
-        result.message = response.value
+      if (response.value != undefined && response.value.message != undefined) { 
+        result.message = response.value.message
       }
     }
   } catch (e) {

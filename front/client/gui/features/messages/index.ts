@@ -1,5 +1,6 @@
 import {messagesReducer} from './messagesReducer'
 import {
+  sendMessageActionCreator,
   fetchMessagesActionCreator,
   appendMessagesActionCreator,
   pushBackMessagesActionCreator,
@@ -15,6 +16,7 @@ import {messagesSaga} from './messagesSagas';
 
 export {
   messagesReducer,
+  sendMessageActionCreator,
   fetchMessagesActionCreator,
   appendMessagesActionCreator,
   pushBackMessagesActionCreator,

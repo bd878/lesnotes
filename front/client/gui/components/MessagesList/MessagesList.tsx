@@ -6,13 +6,17 @@ import {getFileDownloadUrl} from "../../api";
 const List = lazy(() => import("../../components/List"));
 const ListItem = lazy(() => import("../../components/ListItem"));
 
-const MessagesList = ({
-  css,
-  liCss,
-  messages,
-  loading,
-  error,
-}) => {
+function MessagesList(props) {
+  const {
+    css,
+    liCss,
+    messages,
+    loading,
+    error,
+  } = props
+
+  console.log(messages)
+
   let content = <Tag></Tag>;
   if (error) {
     content = <Tag>{error}</Tag>

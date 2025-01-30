@@ -1,4 +1,6 @@
 import React, {lazy, useState, useCallback} from 'react';
+import {connect} from '../../third_party/react-redux';
+import {registerActionCreator} from '../../features/me'
 import api from '../../api';
 import Tag from '../Tag';
 import i18n from '../../i18n';
@@ -8,6 +10,10 @@ const FormField = lazy(() => import("../../components/FormField"));
 const Button = lazy(() => import("../../components/Button"));
 
 function RegisterForm(props) {
+  const {
+    register,
+  } = props
+
   const [name, setName] = useState("")
   const [password, setPassword] = useState("")
 
@@ -22,24 +28,11 @@ function RegisterForm(props) {
   const sendRegisterRequest = useCallback(e => {
     e.preventDefault();
 
-    const send = async (name, password) => {
-      if (!name) {console.error(i18n("name_required_err")); return;}
-      if (!password) {console.error(i18n("pass_required_err")); return;}
+    if (!name) {console.error(i18n("name_required_err")); return;}
+    if (!password) {console.error(i18n("pass_required_err")); return;}
 
-      try {
-        const response = await api.register(name, password)
-        if (response.isOk) {
-          setTimeout(() => {location.href = "/home"}, 1000)
-        } else {
-          console.log(response.error, response.explain)
-        }
-      } catch (e) {
-        console.error(e)
-      }
-    }
-
-    send(name, password)
-  }, [name, password])
+    register(name, password)
+  }, [register, name, password])
 
   return (
     <Tag>
@@ -53,4 +46,10 @@ function RegisterForm(props) {
   );
 }
 
-export default RegisterForm;
+const mapStateToProps = () => {}
+
+const mapDispatchToProps = ({
+  register: registerActionCreator,
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(RegisterForm);

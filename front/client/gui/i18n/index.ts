@@ -43,7 +43,7 @@ const i18n = {
     pass_required_err: "Необходимо ввести пароль",
     msg_required_err: "Необходимо ввести сообщение",
     msg_send_text: "Отправить",
-    load_more: "Загузить ещё",
+    load_more: "Загрузить ещё",
     bad_status_code: "Ошибка запроса",
     token_expired_error: "Истекло время жизни токена",
     bad_response: "Невалидный ответ от сервера",

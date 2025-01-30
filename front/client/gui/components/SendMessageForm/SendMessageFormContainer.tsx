@@ -1,16 +1,15 @@
-import React, {lazy, useCallback, useState, useRef} from 'react';
+import React, {useCallback, useState, useRef} from 'react';
 import {connect} from '../../third_party/react-redux';
-import api from '../../api';
 import Form from '../Form';
 import i18n from '../../i18n';
 import SendMessageFormComponent from './SendMessageFormComponent';
-import {appendMessagesActionCreator} from '../../features/messages';
+import {sendMessageActionCreator} from '../../features/messages';
 
 function SendMessageFormContainer(props) {
   const {
     onSuccess,
     onError,
-    appendMessage,
+    sendMessage,
   } = props
 
   const fileRef = useRef(null);
@@ -29,38 +28,16 @@ function SendMessageFormContainer(props) {
   const sendMessageRequest = useCallback(e => {
     e.preventDefault();
 
-    const send = async () => {
-      try {
-        const response = await api.sendMessage(message, file)
-        if (response.error != "") {
-          console.error(i18n("error_occured"), response.error)
-          console.log(response.explain)
-          return
-        }
-        fileRef.current.value = null
-        setMessage("")
-        setFile(null)
-
-        appendMessage([response.message])
-      } catch (e) {
-        console.error(i18n("error_occured"), e)
-        return
-      }
-    }
-
     if (!message) {console.error(i18n("msg_required_err")); return;}
 
-    send()
-  }, [
-    appendMessage,
-    onSuccess,
-    onError,
-    setMessage,
-    setFile,
-    message,
-    file,
-    fileRef,
-  ]);
+    console.log("message=", message, "file=", file)
+    sendMessage(message, file)
+
+    fileRef.current.value = null
+    setMessage("")
+    setFile(null)
+  }, [sendMessage, setMessage, setFile,
+    message, file, fileRef]);
 
   return (
     <SendMessageFormComponent
@@ -76,7 +53,7 @@ function SendMessageFormContainer(props) {
 const mapStateToProps = () => ({})
 
 const mapDispatchToProps = ({
-  appendMessage: appendMessagesActionCreator,
+  sendMessage: sendMessageActionCreator,
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(

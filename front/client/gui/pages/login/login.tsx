@@ -1,6 +1,7 @@
 import React, {Suspense, lazy} from 'react';
 import ReactDOM from 'react-dom/client';
 import Tag from '../../components/Tag';
+import StoreProvider from '../../providers/Store';
 import i18n from '../../i18n';
 
 const LoginForm = lazy(() => import("../../components/LoginForm"));
@@ -11,7 +12,9 @@ const Login = () => (
       {i18n("login_form_header")}
     </Tag>
 
-    <LoginForm onError={() => {}} />
+    <StoreProvider>
+      <LoginForm />
+    </StoreProvider>
   </Suspense>
 )
 

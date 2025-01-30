@@ -21,9 +21,7 @@ type ServerResponse struct {
 
 type NewMessageServerResponse struct {
   ServerResponse
-  ID                  int32         `json:"id"`
-  UpdateUTCNano       int64         `json:"update_utc_nano"`
-  CreateUTCNano       int64         `json:"create_utc_nano"`
+  Message             Message       `json:"message"`
 }
 
 type UpdateMessageServerResponse struct {
