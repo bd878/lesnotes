@@ -5,6 +5,7 @@ import {
   fetchMessagesFailedActionCreator,
   fetchMessagesSucceededActionCreator,
   pushBackMessagesActionCreator,
+  appendMessagesActionCreator,
 } from './messagesActionCreators'
 import api from '../../api'
 
@@ -44,7 +45,7 @@ function* sendMessage({payload}: {payload: SendMessagePayload}) {
     if (response.error != "") {
       yield put(sendMessageFailedActionCreator(response.error))
     } else {
-      yield put(pushBackMessagesActionCreator([response.message]))
+      yield put(appendMessagesActionCreator([response.message]))
     }
   } catch (e) {
     yield put(sendMessageFailedActionCreator(e.message))
