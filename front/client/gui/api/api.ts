@@ -5,7 +5,7 @@ const methodsWithBody = [
 ]
 
 let proto = "http";
-if (ENV == "production" || ENV == "staging") {
+if (ENV && (ENV.includes("prod") || ENV.includes("stag"))) {
   proto = "https"
 }
 

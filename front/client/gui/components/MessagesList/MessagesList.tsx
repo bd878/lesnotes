@@ -15,8 +15,6 @@ function MessagesList(props) {
     error,
   } = props
 
-  console.log(messages)
-
   let content = <Tag></Tag>;
   if (error) {
     content = <Tag>{error}</Tag>

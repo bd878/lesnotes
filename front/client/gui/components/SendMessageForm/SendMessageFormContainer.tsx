@@ -30,7 +30,6 @@ function SendMessageFormContainer(props) {
 
     if (!message) {console.error(i18n("msg_required_err")); return;}
 
-    console.log("message=", message, "file=", file)
     sendMessage(message, file)
 
     fileRef.current.value = null

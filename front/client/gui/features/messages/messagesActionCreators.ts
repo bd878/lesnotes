@@ -10,7 +10,6 @@ import {
 } from './messagesActions'
 
 export function sendMessageActionCreator(message, file) {
-  console.log("action creator", "message=", message, "file=", file)
   return {
     type: SEND_MESSAGE,
     payload: {message, file},
