@@ -47,6 +47,10 @@ func Error(args ...any) {
   Default().Error(args...)
 }
 
+func Errorw(msg string, args ...any) {
+  Default().Errorw(msg, args...)
+}
+
 func Errorf(msg string, args ...any) {
   Default().Errorf(msg, args...)
 }
@@ -57,6 +61,10 @@ func Errorln(args ...any) {
 
 func Info(args ...any) {
   Default().Info(args...)
+}
+
+func Infow(msg string, args ...any) {
+  Default().Infow(msg, args...)
 }
 
 func Infoln(args ...any) {
