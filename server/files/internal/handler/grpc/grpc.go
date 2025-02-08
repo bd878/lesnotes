@@ -37,24 +37,24 @@ func New(repo Repository, dataPath string) *Handler {
 func (h *Handler) ReadBatchFiles(ctx context.Context, req *api.ReadBatchFilesRequest) (
   *api.ReadBatchFilesResponse, error,
 ) {
-  files := make([]*model.File, len(req.Ids))
-  for i, id := range req.Ids {
-    files[i] = &model.File{
+  files := make(map[int32]*model.File, len(req.Ids))
+  for _, id := range req.Ids {
+    files[id] = &model.File{
       ID: id,
     }
 
     file, err := h.repo.ReadFile(ctx, logger.Default(), &model.ReadFileParams{ID: id})
     if err != nil {
-      files[i].Error = "can not found file"
+      files[id].Error = "can not found file"
       logger.Errorw("failed to read file", "id", id, "error", err)
       continue
     }
 
-    files[i] = file
+    files[id] = file
   }
 
   return &api.ReadBatchFilesResponse{
-    Files: model.MapFilesToProto(model.FileToProto, files),
+    Files: model.MapFilesDictToProto(model.FileToProto, files),
   }, nil
 }
 

@@ -238,6 +238,15 @@ components:
         update_utc_nano:
           type: integer
           example: 1234566700000000
+        file_id:
+          type: integer
+          example: 1234
+        file_name:
+          type: string
+          example: "image.jpg"
+        text:
+          type: string
+          example: "message text"
     sendErr:
       type: object
       properties:

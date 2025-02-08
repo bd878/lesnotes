@@ -2,10 +2,10 @@ package model
 
 type User struct {
   ID               int32            `json:"id"`
-  Name             string           `json:"name"`
-  Password         string           `json:"password"`
-  Token            string           `json:"token"`
-  ExpiresUTCNano   int64            `json:"expires_utc_nano"`
+  Name             string           `json:"name,omitempty"`
+  Password         string           `json:"password,omitempty"`
+  Token            string           `json:"token,omitempty"`
+  ExpiresUTCNano   int64            `json:"expires_utc_nano,omitempty"`
 }
 
 type ServerResponse struct {

@@ -41,5 +41,5 @@ message ReadBatchFilesRequest {
 }
 
 message ReadBatchFilesResponse {
-  repeated File   files = 1;
+  map<int32, File>   files = 1;
 }

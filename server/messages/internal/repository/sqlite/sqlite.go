@@ -8,6 +8,7 @@ import (
   _ "github.com/mattn/go-sqlite3"
   "github.com/bd878/gallery/server/logger"
   "github.com/bd878/gallery/server/messages/pkg/model"
+  filesmodel "github.com/bd878/gallery/server/files/pkg/model"
 )
 
 type Repository struct {
@@ -78,7 +79,7 @@ func (r *Repository) Create(ctx context.Context, log *logger.Logger, params *mod
     sql.Named("createUtcNano", params.Message.CreateUTCNano),
     sql.Named("updateUtcNano", params.Message.UpdateUTCNano),
     sql.Named("text", params.Message.Text),
-    sql.Named("fileId", params.Message.FileID),
+    sql.Named("fileId", params.Message.File.ID),
   )
   if err != nil {
     log.Error("failed to insert new message", err)
@@ -189,7 +190,9 @@ func (r *Repository) ReadUserMessages(ctx context.Context, log *logger.Logger, p
       CreateUTCNano: createUtcNano,
       UpdateUTCNano: updateUtcNano,
       Text: text,
-      FileID: fileId,
+      File: &filesmodel.File{
+        ID: fileId,
+      },
     })
   }
 
@@ -260,7 +263,9 @@ func (r *Repository) GetBatch(ctx context.Context, log *logger.Logger) ([]*model
       CreateUTCNano: createUtcNano,
       UpdateUTCNano: updateUtcNano,
       Text: text,
-      FileID: fileId,
+      File: &filesmodel.File{
+        ID: fileId,
+      },
     })
   }
 

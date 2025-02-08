@@ -1,12 +1,16 @@
 package model
 
+import (
+  filesmodel "github.com/bd878/gallery/server/files/pkg/model"
+)
+
 type Message struct {
-  ID                  int32         `json:"id"`
-  CreateUTCNano       int64         `json:"create_utc_nano"`
-  UpdateUTCNano       int64         `json:"update_utc_nano"`
-  UserID              int32         `json:"user_id"`
-  FileID              int32         `json:"file_id"`
-  Text                string        `json:"text"`
+  ID                  int32               `json:"id"`
+  CreateUTCNano       int64               `json:"create_utc_nano,omitmempty"`
+  UpdateUTCNano       int64               `json:"update_utc_nano,omitmempty"`
+  UserID              int32               `json:"user_id,omitmempty"`
+  File                *filesmodel.File    `json:"file,omitmempty"`
+  Text                string              `json:"text,omitmempty"`
 }
 
 type MessagesList struct {

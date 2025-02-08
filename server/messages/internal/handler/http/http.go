@@ -3,19 +3,16 @@ package http
 import (
   "net/http"
   "strconv"
-  "strings"
-  "os"
   "io"
   "fmt"
   "context"
-  "mime"
   "path/filepath"
   "encoding/json"
 
   httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
   usermodel "github.com/bd878/gallery/server/users/pkg/model"
+  filesmodel "github.com/bd878/gallery/server/files/pkg/model"
   "github.com/bd878/gallery/server/messages/pkg/model"
-  "github.com/bd878/gallery/server/utils"
   "github.com/bd878/gallery/server/logger"
 )
 
@@ -28,13 +25,20 @@ type Controller interface {
   ReadUserMessages(ctx context.Context, log *logger.Logger, params *model.ReadUserMessagesParams) (*model.ReadUserMessagesResult, error)
 }
 
-type Handler struct {
-  controller Controller
-  dataPath string
+// TODO: move files into controller?
+type FilesGateway interface {
+  SaveFileStream(ctx context.Context, log *logger.Logger, stream io.Reader, params *model.SaveFileParams) (*model.SaveFileResult, error)
+  ReadBatchFiles(ctx context.Context, log *logger.Logger, params *model.ReadBatchFilesParams) (*model.ReadBatchFilesResult, error)
+  // TODO: DeleteFile
 }
 
-func New(controller Controller, dataPath string) *Handler {
-  return &Handler{controller, dataPath}
+type Handler struct {
+  controller    Controller
+  filesGateway  FilesGateway
+}
+
+func New(controller Controller, filesGateway FilesGateway) *Handler {
+  return &Handler{controller, filesGateway}
 }
 
 func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
@@ -52,7 +56,6 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 
   var fileName string
   var fileID int32
-  var fileUID string
   if _, ok := req.MultipartForm.File["file"]; ok {
     f, fh, err := req.FormFile("file")
     if err != nil {
@@ -66,23 +69,22 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
     }
 
     fileName = filepath.Base(fh.Filename)
-    fileID = utils.RandomID()
-    fileUID = strings.ToLower(utils.RandomString(10) + filepath.Ext(fh.Filename))
 
-    ff, err := os.OpenFile(
-      filepath.Join(h.dataPath, fileUID),
-      os.O_WRONLY|os.O_CREATE, 0666,
-    )
+    // TODO: create fileID here, pipe in goroutine
+    fileResult, err := h.filesGateway.SaveFileStream(context.Background(), log, f, &model.SaveFileParams{
+      Name: fileName,
+    })
     if err != nil {
       log.Error(err)
       w.WriteHeader(http.StatusInternalServerError)
+      json.NewEncoder(w).Encode(model.ServerResponse{
+        Status: "error",
+        Description: "cannot save file",
+      })
       return
     }
-    if _, err := io.Copy(ff, f); err != nil {
-      log.Error(err)
-      w.WriteHeader(http.StatusInternalServerError)
-      return
-    }
+
+    fileID = fileResult.ID
   }
 
   text := req.PostFormValue("text")
@@ -102,7 +104,9 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
     Message: &model.Message{
       UserID: user.ID,
       Text:   text,
-      FileID: fileID,
+      File:   &filesmodel.File{
+        ID:     fileID,
+      },
     },
   })
   if err != nil {
@@ -118,7 +122,10 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
     },
     Message: model.Message{
       ID:            resp.ID,
-      FileID:        fileID,
+      File:          &filesmodel.File{
+        ID:          fileID,
+        Name:        fileName,
+      },
       Text:          text,
       UpdateUTCNano: resp.UpdateUTCNano,
       CreateUTCNano: resp.CreateUTCNano,
@@ -294,20 +301,38 @@ func (h *Handler) ReadMessages(log *logger.Logger, w http.ResponseWriter, req *h
     ascending = true
   }
 
-  res, err := h.controller.ReadUserMessages(
-    context.Background(),
-    log,
-    &model.ReadUserMessagesParams{
-      UserID:    user.ID,
-      Limit:     int32(limitInt),
-      Offset:    int32(offsetInt),
-      Ascending: ascending,
-    },
-  )
+  res, err := h.controller.ReadUserMessages(context.Background(), log, &model.ReadUserMessagesParams{
+    UserID:    user.ID,
+    Limit:     int32(limitInt),
+    Offset:    int32(offsetInt),
+    Ascending: ascending,
+  })
   if err != nil {
     log.Error(err)
     w.WriteHeader(http.StatusInternalServerError)
     return
+  }
+
+  fileIds := make([]int32, len(res.Messages))
+  for i, message := range res.Messages {
+    fileIds[i] = message.File.ID
+  }
+
+  filesRes, err := h.filesGateway.ReadBatchFiles(context.Background(), log, &model.ReadBatchFilesParams{
+    IDs: fileIds,
+  })
+  if err != nil {
+    log.Error("failed to read batch files", "error=", err)
+    w.WriteHeader(http.StatusBadRequest)
+    json.NewEncoder(w).Encode(model.ServerResponse{
+      Status: "error",
+      Description: "failed to read files",
+    })
+    return
+  }
+
+  for _, message := range res.Messages {
+    message.File.Name = filesRes.Files[message.File.ID].Name
   }
 
   json.NewEncoder(w).Encode(model.MessagesListServerResponse{
@@ -317,39 +342,6 @@ func (h *Handler) ReadMessages(log *logger.Logger, w http.ResponseWriter, req *h
     Messages: res.Messages,
     IsLastPage: res.IsLastPage,
   })
-}
-
-func (h *Handler) ReadFile(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
-  values := req.URL.Query()
-  filename := values.Get("id")
-  if filename == "" {
-    w.WriteHeader(http.StatusBadRequest)
-    json.NewEncoder(w).Encode(model.ServerResponse{
-      Status: "ok",
-      Description: "empty file id",
-    })
-    return
-  }
-
-  ff, err := os.Open(filepath.Join(h.dataPath, filename))
-  if err != nil {
-    log.Error(err)
-    w.WriteHeader(http.StatusInternalServerError)
-    return
-  }
-
-  mimetype := mime.TypeByExtension(filepath.Ext(filename))
-  if mimetype == "" {
-    mimetype = "application/octet-stream"
-  }
-
-  w.Header().Set("Content-Type", mimetype)
-
-  if _, err := io.Copy(w, ff); err != nil {
-    log.Error(err)
-    w.WriteHeader(http.StatusInternalServerError)
-    return
-  }
 }
 
 func (h *Handler) GetStatus(log *logger.Logger, w http.ResponseWriter, _ *http.Request) {

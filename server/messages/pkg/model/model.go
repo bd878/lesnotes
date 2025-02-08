@@ -1,5 +1,9 @@
 package model
 
+import (
+  filesmodel "github.com/bd878/gallery/server/files/pkg/model"
+)
+
 type SaveMessageParams struct {
   Message          *Message
 }
@@ -46,4 +50,25 @@ type ReadUserMessagesResult struct {
 
 type AuthParams struct {
   Token             string
+}
+
+type SaveFileParams struct {
+  Name              string
+}
+
+type SaveFileResult struct {
+  ID                int32
+  CreateUTCNano     int64
+}
+
+type ReadFileParams struct {
+  ID                int32
+}
+
+type ReadBatchFilesParams struct {
+  IDs               []int32
+}
+
+type ReadBatchFilesResult struct {
+  Files             map[int32](*filesmodel.File)
 }

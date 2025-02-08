@@ -5,7 +5,7 @@
   "users_service_addr": "0.0.0.0:8085",
   "serf_join_addrs": ["127.0.0.1:8071"],
 
-  "raftlbootstrap": false,
+  "raft_bootstrap": false,
   "raft_log_level": "debug",
   "log_path": "../../logs",
   "db_path": "../../messages@3.db",

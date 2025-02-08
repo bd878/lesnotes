@@ -38,6 +38,7 @@ func main() {
     RpcAddr:           cfg.RpcAddr,
     DataPath:          cfg.DataPath,
     UsersServiceAddr:  cfg.UsersServiceAddr,
+    FilesServiceAddr:  cfg.FilesServiceAddr,
   })
 
   var wg sync.WaitGroup

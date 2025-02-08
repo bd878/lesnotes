@@ -22,18 +22,34 @@ func FileFromProto(proto *api.File) *File {
   }
 }
 
+func MapFilesDictFromProto(mapper (func(*api.File) *File), files map[int32]*api.File) map[int32]*File {
+  res := make(map[int32]*File, len(files))
+  for id, file := range files {
+    res[id] = mapper(file)
+  }
+  return res
+}
+
+func MapFilesDictToProto(mapper (func(*File) *api.File), files map[int32]*File) map[int32]*api.File {
+  res := make(map[int32]*api.File, len(files))
+  for id, file := range files {
+    res[id] = mapper(file)
+  }
+  return res
+}
+
 func MapFilesFromProto(mapper (func(*api.File) *File), files []*api.File) []*File {
   res := make([]*File, len(files))
-  for i, msg := range files {
-    res[i] = mapper(msg)
+  for i, file := range files {
+    res[i] = mapper(file)
   }
   return res
 }
 
 func MapFilesToProto(mapper (func(*File) *api.File), files []*File) []*api.File {
   res := make([]*api.File, len(files))
-  for i, msg := range files {
-    res[i] = mapper(msg)
+  for i, file := range files {
+    res[i] = mapper(file)
   }
   return res
 }
