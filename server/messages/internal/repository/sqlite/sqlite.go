@@ -82,7 +82,7 @@ func (r *Repository) Create(ctx context.Context, log *logger.Logger, params *mod
     sql.Named("fileId", params.Message.File.ID),
   )
   if err != nil {
-    log.Error("failed to insert new message", err)
+    log.Errorw("failed to insert new message ", "error", err)
     return errors.New("failed to put message")
   }
   return nil
@@ -91,7 +91,7 @@ func (r *Repository) Create(ctx context.Context, log *logger.Logger, params *mod
 func (r *Repository) Delete(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error {
   _, err := r.deleteStmt.ExecContext(ctx, sql.Named("id", params.ID), sql.Named("userId", params.UserID))
   if err != nil {
-    log.Error("failed to delete message", err)
+    log.Errorw("failed to delete message", "error", err)
     return errors.New("failed to delete message")
   }
   return nil
@@ -105,7 +105,7 @@ func (r *Repository) Update(ctx context.Context, log *logger.Logger, params *mod
     sql.Named("userId", params.UserID),
   )
   if err != nil {
-    log.Error("failed to update message", err)
+    log.Errorw("failed to update message", "error", err)
     return errors.New("failed to update message")
   }
   return nil

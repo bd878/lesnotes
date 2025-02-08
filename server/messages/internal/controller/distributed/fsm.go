@@ -43,7 +43,7 @@ func (f *fsm) Apply(record *raft.Log) interface{} {
   case DeleteRequest:
     return f.applyDelete(buf[1:])
   default:
-    logger.Error("unknown request type: ", reqType)
+    logger.Errorw("unknown request type", "type", reqType)
   }
   return nil
 }

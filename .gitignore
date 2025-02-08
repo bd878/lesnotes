@@ -1,5 +1,6 @@
 *.db
 data/*
+files/*
 data*/*
 config/*
 raft/*

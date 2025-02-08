@@ -40,7 +40,7 @@ func (h *Handler) SaveMessage(ctx context.Context, req *api.SaveMessageRequest) 
     Message: model.MessageFromProto(req.Message),
   }) 
   if err != nil {
-    logger.Error("message", "failed to save message")
+    logger.Errorw("failed to save message", "error", err)
     return nil, err
   }
 
@@ -63,7 +63,7 @@ func (h *Handler) UpdateMessage(ctx context.Context, req *api.UpdateMessageReque
     UpdateUTCNano: updateUTCNano,
   })
   if err != nil {
-    logger.Error("message", "failed to update message")
+    logger.Errorw("failed to update message", "error", err)
     return nil, err
   }
 
@@ -80,7 +80,7 @@ func (h *Handler) DeleteMessage(ctx context.Context, req *api.DeleteMessageReque
     UserID: req.UserId,
   })
   if err != nil {
-    logger.Error("message", "failed to delete message")
+    logger.Errorw("failed to delete message", "error", err)
     return nil, err
   }
 
@@ -97,7 +97,7 @@ func (h *Handler) ReadUserMessages(ctx context.Context, req *api.ReadUserMessage
     Ascending: req.Asc,
   })
   if err != nil {
-    logger.Error("message", "failed to read user messages")
+    logger.Errorw("failed to read user messages", "error", err)
     return nil, err
   }
 
@@ -112,7 +112,7 @@ func (h *Handler) GetServers(ctx context.Context, _ *api.GetServersRequest) (
 ) {
   srvs, err := h.controller.GetServers(ctx, logger.Default())
   if err != nil {
-    logger.Error("message", "failed to get servers")
+    logger.Errorw("failed to get servers", "error", err)
     return nil, err
   }
 

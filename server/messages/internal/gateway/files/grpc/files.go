@@ -35,7 +35,7 @@ func (g *Gateway) SaveFileStream(ctx context.Context, log *logger.Logger, fileSt
 ) {
   stream, err := g.client.SaveFileStream(ctx)
   if err != nil {
-    log.Error("message", "client failed to obtain file stream")
+    log.Errorw("client failed to obtain file stream", "error", err)
     return nil, err
   }
 
@@ -47,7 +47,7 @@ func (g *Gateway) SaveFileStream(ctx context.Context, log *logger.Logger, fileSt
     },
   })
   if err != nil {
-    log.Error("message", "failed to save file meta")
+    log.Errorw("failed to save file meta", "error", err)
     return nil, err
   }
 
@@ -58,7 +58,7 @@ func (g *Gateway) SaveFileStream(ctx context.Context, log *logger.Logger, fileSt
       break
     }
     if err != nil {
-      log.Error("filestream", "failed to read file data in buffer")
+      log.Errorw("failed to read file data in buffer", "error", err)
       return nil, err
     }
 
@@ -68,14 +68,14 @@ func (g *Gateway) SaveFileStream(ctx context.Context, log *logger.Logger, fileSt
       },
     })
     if err != nil {
-      log.Error("filestream", "failed to send chunk fil file server")
+      log.Errorw("failed to send chunk fil file server", "error", err)
       return nil, err
     }
   }
 
   res, err := stream.CloseAndRecv()
   if err != nil {
-    log.Error("filestream", "failed to close and recv result")
+    log.Errorw("failed to close and recv result", "error", err)
     return nil, err
   }
 
@@ -92,7 +92,7 @@ func (g *Gateway) ReadBatchFiles(ctx context.Context, log *logger.Logger, params
     Ids: params.IDs,
   })
   if err != nil {
-    log.Error("message", "client failed to read batch files")
+    log.Errorw("client failed to read batch files", "error", err)
     return nil, err
   }
 

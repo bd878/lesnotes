@@ -56,6 +56,7 @@ func (s *Server) setupGRPC(log *logger.Logger) {
 }
 
 func (s *Server) Run(ctx context.Context, wg *sync.WaitGroup) {
+  logger.Info("server is listening on ", s.config.Addr)
   s.Serve(s.listener)
   wg.Done()
 }

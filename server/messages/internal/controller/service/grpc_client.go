@@ -54,7 +54,7 @@ func (s *Messages) SaveMessage(ctx context.Context, log *logger.Logger, params *
     Message: model.MessageToProto(params.Message),
   })
   if err != nil {
-    log.Error("message", "client failed to save message")
+    log.Errorw("client failed to save message", "error", err)
     return nil, err 
   }
 
@@ -73,7 +73,7 @@ func (s *Messages) DeleteMessage(ctx context.Context, log *logger.Logger, params
     UserId: params.UserID,
   })
   if err != nil {
-    log.Error("message", "client failed to delete message")
+    log.Errorw("client failed to delete message", "error", err)
     return nil, err
   }
 
@@ -90,7 +90,7 @@ func (s *Messages) UpdateMessage(ctx context.Context, log *logger.Logger, params
     Text: params.Text,
   })
   if err != nil {
-    log.Error("message", "client failed to save message")
+    log.Errorw("client failed to save message", "error", err)
     return nil, err 
   }
 
@@ -109,7 +109,7 @@ func (s *Messages) ReadUserMessages(ctx context.Context, log *logger.Logger, par
     Asc:    params.Ascending,
   })
   if err != nil {
-    log.Error("message", "client failed to read user messages")
+    log.Errorw("client failed to read user messages", "error", err)
     return nil, err
   }
 

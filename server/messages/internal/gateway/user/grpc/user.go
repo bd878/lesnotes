@@ -21,14 +21,14 @@ func New(userAddr string) *Gateway {
 func (g *Gateway) Auth(ctx context.Context, log *logger.Logger, params *model.AuthParams) (*usersmodel.User, error) {
   conn, err := grpcutil.ServiceConnection(ctx, g.userAddr)
   if err != nil {
-    log.Error("message", "failed to establish connection with user service")
+    log.Errorw("failed to establish connection with user service", "error", err)
     return nil, err
   }
   defer conn.Close()
   client := api.NewUsersClient(conn)
   resp, err := client.Auth(ctx, &api.AuthUserRequest{Token: params.Token})
   if err != nil {
-    log.Error("message", "failed to authenticate on client")
+    log.Errorw("failed to authenticate on client", "error", err)
     return nil, err
   }
   return usersmodel.UserFromProto(resp.User), nil

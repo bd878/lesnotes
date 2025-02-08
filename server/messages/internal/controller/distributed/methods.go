@@ -45,7 +45,7 @@ func (m *DistributedMessages) SaveMessage(ctx context.Context, log *logger.Logge
 
   _, err := m.apply(ctx, AppendRequest, cmd)
   if err != nil {
-    log.Error("message", "raft failed to apply save message")
+    log.Errorw("raft failed to apply save message", "error", err)
     return err
   }
 
@@ -63,7 +63,7 @@ func (m *DistributedMessages) UpdateMessage(ctx context.Context, log *logger.Log
 
   _, err := m.apply(ctx, UpdateRequest, cmd)
   if err != nil {
-    log.Error("message", "raft failed to apply save message")
+    log.Errorw("raft failed to apply save message", "error", err)
     return err
   }
 
@@ -79,7 +79,7 @@ func (m *DistributedMessages) DeleteMessage(ctx context.Context, log *logger.Log
 
   _, err := m.apply(ctx, DeleteRequest, cmd)
   if err != nil {
-    log.Error("message", "raft failed to apply delete message")
+    log.Errorw("raft failed to apply delete message", "error", err)
     return err
   }
 

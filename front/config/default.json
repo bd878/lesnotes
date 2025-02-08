@@ -3,5 +3,5 @@
   "addr": "127.0.0.1",
   "basedir": "",
   "backendurl": "galleryexample.com",
-  "env": "dev"
+  "env": "development"
 }

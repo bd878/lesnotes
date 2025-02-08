@@ -67,7 +67,7 @@ func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.F
 
   ff, err := os.Open(filepath.Join(h.dataPath, fmt.Sprintf("%d", file.ID)))
   if err != nil {
-    logger.Error("failed to open file", "id", file.ID, "name", file.Name, "error", err)
+    logger.Errorw("failed to open file", "id", file.ID, "name", file.Name, "error", err)
     return err
   }
 
@@ -80,7 +80,7 @@ func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.F
     },
   })
   if err != nil {
-    logger.Error("stream failed to send filedata", "id", file.ID, "error", err)
+    logger.Errorw("stream failed to send filedata", "id", file.ID, "error", err)
     return err
   }
 
@@ -91,7 +91,7 @@ func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.F
       break
     }
     if err != nil {
-      logger.Error("filestream", "failed to read file data in buffer")
+      logger.Errorw("filestream", "failed to read file data in buffer")
       return err
     }
 
@@ -101,7 +101,7 @@ func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.F
       },
     })
     if err != nil {
-      logger.Error("filestream", "failed to send chunk fil file server")
+      logger.Errorw("filestream", "failed to send chunk fil file server")
       return err
     }
   }
@@ -112,13 +112,13 @@ func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.F
 func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) error {
   meta, err := stream.Recv()
   if err != nil {
-    logger.Error("save file stream failed to receive meta", "error", err)
+    logger.Errorw("save file stream failed to receive meta", "error", err)
     return err
   }
 
   file, ok := meta.Data.(*api.FileData_File)
   if !ok {
-    logger.Error("wrong format", "send file data first, then chunk")
+    logger.Errorw("wrong format", "send file data first, then chunk")
     return errors.New("wrong format: file meta expected")
   }
 
@@ -131,13 +131,13 @@ func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) error {
     CreateUTCNano:   timeCreated,
   })
   if err != nil {
-    logger.Error("failed to save file meta", "name", file.File.Name, "error", err)
+    logger.Errorw("failed to save file meta", "name", file.File.Name, "error", err)
     return err
   }
 
   ff, err := os.Create(filepath.Join(h.dataPath, fmt.Sprintf("%d", id)))
   if err != nil {
-    logger.Error("failed to create file", "id", id, "error", err)
+    logger.Errorw("failed to create file", "id", id, "error", err)
     return err
   }
 
@@ -147,19 +147,19 @@ func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) error {
       break
     }
     if err != nil {
-      logger.Error("failed to receive next file chunk", "error", err)
+      logger.Errorw("failed to receive next file chunk", "error", err)
       return err
     }
 
     chunk, ok := fileData.Data.(*api.FileData_Chunk)
     if !ok {
-      logger.Error("wrong format", "file data chunk expected")
+      logger.Errorw("wrong format", "file data chunk expected")
       return nil
     }
 
     n, err := ff.Write(chunk.Chunk)
     if err != nil {
-      logger.Error("failed to write next file chunk in buffer", "error", err)
+      logger.Errorw("failed to write next file chunk in buffer", "error", err)
       return err
     }
 

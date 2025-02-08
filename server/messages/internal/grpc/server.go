@@ -118,7 +118,7 @@ func (s *Server) setupGRPC(log *logger.Logger) {
     s.controller,
   )
   if err != nil {
-    log.Error("message", "failed to establish membership connection")
+    log.Errorw("failed to establish membership connection", "error", err)
     panic(err)
   }
 
