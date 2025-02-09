@@ -1,0 +1,33 @@
+openapi: 3.0.0
+info:
+  title: API Specification for files service
+  description: |
+    This API handles files requests.
+  version: 1.0.0
+
+paths:
+  /files/v1/{user_id}/{file_id}:
+    security:
+      - apiKey: []
+    parameters:
+      user_id:
+        in: path
+        required: true
+        type: string
+      file_id:
+        in: path
+        required: true
+        type: string
+    get:
+      summary: Download a file
+      description: |
+        Download a file for a provided user
+      operationId: downloadFile
+
+components:
+  securitySchemes:
+    apiKey:
+      description: Cookie-based api authorization key
+      type: API key
+      name: api-key
+      in: header

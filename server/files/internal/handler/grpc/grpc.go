@@ -40,13 +40,14 @@ func (h *Handler) ReadBatchFiles(ctx context.Context, req *api.ReadBatchFilesReq
   files := make(map[int32]*model.File, len(req.Ids))
   for _, id := range req.Ids {
     files[id] = &model.File{
-      ID: id,
+      ID:     id,
+      UserID: req.UserId,
     }
 
-    file, err := h.repo.ReadFile(ctx, logger.Default(), &model.ReadFileParams{ID: id})
+    file, err := h.repo.ReadFile(ctx, logger.Default(), &model.ReadFileParams{ID: id, UserID: req.UserId})
     if err != nil {
       files[id].Error = "can not found file"
-      logger.Errorw("failed to read file", "id", id, "error", err)
+      logger.Errorw("failed to read file", "user_id", req.UserId, "id", id, "error", err)
       continue
     }
 
@@ -59,28 +60,30 @@ func (h *Handler) ReadBatchFiles(ctx context.Context, req *api.ReadBatchFilesReq
 }
 
 func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.Files_ReadFileStreamServer) error {
-  file, err := h.repo.ReadFile(context.Background(), logger.Default(), &model.ReadFileParams{ID: params.Id})
+  file, err := h.repo.ReadFile(context.Background(), logger.Default(), &model.ReadFileParams{ID: params.Id, UserID: params.UserId})
   if err != nil {
-    logger.Errorw("failed to read file", "id", params.Id, "error", err)
+    logger.Errorw("failed to read file", "user_id", params.UserId, "id", params.Id, "error", err)
     return err
   }
 
-  ff, err := os.Open(filepath.Join(h.dataPath, fmt.Sprintf("%d", file.ID)))
+  ff, err := os.Open(filepath.Join(h.dataPath, fmt.Sprintf("%d/%d", file.UserID, file.ID)))
   if err != nil {
-    logger.Errorw("failed to open file", "id", file.ID, "name", file.Name, "error", err)
+    logger.Errorw("failed to open file", "user_id", file.UserID, "id", file.ID, "name", file.Name, "error", err)
     return err
   }
 
   err = stream.Send(&api.FileData{
     Data: &api.FileData_File{
       File: &api.File{
+        Id:             file.ID,
+        UserId:         file.UserID,
         Name:           file.Name,
         CreateUtcNano:  file.CreateUTCNano,
       },
     },
   })
   if err != nil {
-    logger.Errorw("stream failed to send filedata", "id", file.ID, "error", err)
+    logger.Errorw("stream failed to send filedata", "user_id", file.UserID, "id", file.ID, "error", err)
     return err
   }
 
@@ -91,7 +94,7 @@ func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.F
       break
     }
     if err != nil {
-      logger.Errorw("filestream", "failed to read file data in buffer")
+      logger.Errorw("failed to read file data in buffer", "error", err)
       return err
     }
 
@@ -101,7 +104,7 @@ func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.F
       },
     })
     if err != nil {
-      logger.Errorw("filestream", "failed to send chunk fil file server")
+      logger.Errorw("failed to send chunk fil file server", "error", err)
       return err
     }
   }
@@ -118,7 +121,7 @@ func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) error {
 
   file, ok := meta.Data.(*api.FileData_File)
   if !ok {
-    logger.Errorw("wrong format", "send file data first, then chunk")
+    logger.Errorw("send file data first, then chunk", "error", "wrong format")
     return errors.New("wrong format: file meta expected")
   }
 
@@ -127,17 +130,18 @@ func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) error {
   
   err = h.repo.SaveFile(context.Background(), logger.Default(), &model.File{
     ID:              id,
+    UserID:          file.File.UserId,
     Name:            file.File.Name,
     CreateUTCNano:   timeCreated,
   })
   if err != nil {
-    logger.Errorw("failed to save file meta", "name", file.File.Name, "error", err)
+    logger.Errorw("failed to save file meta", "user_id", file.File.UserId, "name", file.File.Name, "error", err)
     return err
   }
 
-  ff, err := os.Create(filepath.Join(h.dataPath, fmt.Sprintf("%d", id)))
+  ff, err := os.Create(filepath.Join(h.dataPath, fmt.Sprintf("%d/%d", file.File.UserId, id)))
   if err != nil {
-    logger.Errorw("failed to create file", "id", id, "error", err)
+    logger.Errorw("failed to create file", "user_id", file.File.UserId, "id", id, "error", err)
     return err
   }
 
@@ -153,7 +157,7 @@ func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) error {
 
     chunk, ok := fileData.Data.(*api.FileData_Chunk)
     if !ok {
-      logger.Errorw("wrong format", "file data chunk expected")
+      logger.Errorw("file data chunk expected", "error", "wrong format")
       return nil
     }
 
@@ -163,7 +167,7 @@ func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) error {
       return err
     }
 
-    logger.Infow("write file", "id", id, "name", file.File.Name, "n", n)
+    logger.Infow("write file", "user_id", file.File.UserId, "id", id, "name", file.File.Name, "n", n)
   }
 
   return stream.SendAndClose(&api.SaveFileStreamResponse{

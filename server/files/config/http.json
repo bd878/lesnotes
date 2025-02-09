@@ -1,0 +1,9 @@
+{
+  "node_name":             "files.http",
+  "rpc_addr":              "0.0.0.0:8086",
+  "http_addr":             "0.0.0.0:8084",
+  "users_service_addr":    "0.0.0.0:8085",
+
+  "log_path":              "../../logs",
+  "data_path":             "../../files"
+}

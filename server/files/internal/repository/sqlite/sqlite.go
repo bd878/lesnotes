@@ -23,8 +23,8 @@ func New(dbPath string) *Repository {
 }
 
 func (r *Repository) SaveFile(ctx context.Context, log *logger.Logger, file *model.File) error {
-  _, err := r.db.ExecContext(ctx, "INSERT INTO files(id,name,create_utc_nano)" +
-    "VALUES(?,?,?)", file.ID, file.Name, file.CreateUTCNano)
+  _, err := r.db.ExecContext(ctx, "INSERT INTO files(id,user_id,name,create_utc_nano)" +
+    "VALUES(?,?,?,?)", file.ID, file.UserID, file.Name, file.CreateUTCNano)
   if err != nil {
     log.Error("query error: %v\n", err)
   }
@@ -38,11 +38,12 @@ func (r *Repository) ReadFile(ctx context.Context, log *logger.Logger, params *m
   var name string
   var createUTCNano int64
 
-  err := r.db.QueryRowContext(ctx, "SELECT id, name, create_utc_nano FROM files WHERE " +
-    "id = ?", params.ID).Scan(&id, &name, &createUTCNano)
+  err := r.db.QueryRowContext(ctx, "SELECT id, user_id, name, create_utc_nano FROM files WHERE " +
+    "id = ? AND user_id = ?", params.ID, params.UserID).Scan(&id, &name, &createUTCNano)
 
   msg := &model.File{
     ID:                id,
+    UserID:            params.UserID,
     Name:              name,
     CreateUTCNano:     createUTCNano,
   }

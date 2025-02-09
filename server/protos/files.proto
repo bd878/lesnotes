@@ -14,7 +14,8 @@ message File {
   string        name = 1;
   int64         create_utc_nano = 2;
   int32         id = 3;
-  string        error = 4;
+  int32         user_id = 4;
+  string        error = 5;
 }
 
 message FileChunk {
@@ -34,10 +35,12 @@ message SaveFileStreamResponse {
 
 message ReadFileStreamRequest {
   int32    id = 1;
+  int32    user_id = 2;
 }
 
 message ReadBatchFilesRequest {
-  repeated int32  ids = 1;
+  int32    user_id = 1;
+  repeated int32  ids = 2;
 }
 
 message ReadBatchFilesResponse {
