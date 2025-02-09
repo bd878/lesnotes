@@ -77,7 +77,8 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 
     // TODO: create fileID here, pipe in goroutine
     fileResult, err := h.filesGateway.SaveFileStream(context.Background(), log, f, &model.SaveFileParams{
-      Name: fileName,
+      UserID: user.ID,
+      Name:   fileName,
     })
     if err != nil {
       log.Error(err)
@@ -338,7 +339,8 @@ func (h *Handler) ReadMessages(log *logger.Logger, w http.ResponseWriter, req *h
   }
 
   filesRes, err := h.filesGateway.ReadBatchFiles(context.Background(), log, &model.ReadBatchFilesParams{
-    IDs: fileIds,
+    UserID: user.ID,
+    IDs:    fileIds,
   })
   if err != nil {
     log.Error("failed to read batch files", "error=", err)

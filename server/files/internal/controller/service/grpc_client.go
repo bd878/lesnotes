@@ -7,6 +7,7 @@ import (
   "io"
 
   "google.golang.org/grpc"
+  "google.golang.org/grpc/connectivity"
 
   "github.com/bd878/gallery/server/internal/grpcutil"
   "github.com/bd878/gallery/server/api"
@@ -25,14 +26,26 @@ type Files struct {
 }
 
 func New(cfg Config) *Files {
-  conn, err := grpcutil.ServiceConnection(context.Background(), cfg.RpcAddr)
+  f := &Files{conf: cfg}
+  f.setupConnection()
+  return f
+}
+
+func (f *Files) setupConnection() {
+  conn, err := grpcutil.ServiceConnection(context.Background(), f.conf.RpcAddr)
   if err != nil {
     panic(err)
   }
 
   client := api.NewFilesClient(conn)
 
-  return &Files{cfg, client, conn}
+  f.conn = conn
+  f.client = client
+}
+
+func (f *Files) isConnFailed() bool {
+  state := f.conn.GetState()
+  return state == connectivity.Shutdown || state == connectivity.TransientFailure
 }
 
 func (f *Files) Close() {
@@ -43,7 +56,7 @@ func (f *Files) Close() {
 
 type streamReader struct {
   api.Files_ReadFileStreamClient
-  buf *bytes.Buffer
+  buf bytes.Buffer
 }
 
 func (s *streamReader) Read(p []byte) (int, error) {
@@ -75,6 +88,11 @@ func (s *streamReader) Read(p []byte) (int, error) {
 }
 
 func (f *Files) ReadFileStream(ctx context.Context, log *logger.Logger, params *model.ReadFileStreamParams) (*model.File, io.Reader, error) {
+  if f.isConnFailed() {
+    log.Info("conn failed, setup new connection")
+    f.setupConnection()
+  }
+
   stream, err := f.client.ReadFileStream(ctx, &api.ReadFileStreamRequest{
     Id:      params.FileID,
     UserId:  params.UserID,

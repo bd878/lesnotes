@@ -50,6 +50,7 @@ type ReadUserMessagesResult struct {
 
 type SaveFileParams struct {
   Name              string
+  UserID            int32
 }
 
 type SaveFileResult struct {
@@ -57,11 +58,8 @@ type SaveFileResult struct {
   CreateUTCNano     int64
 }
 
-type ReadFileParams struct {
-  ID                int32
-}
-
 type ReadBatchFilesParams struct {
+  UserID            int32
   IDs               []int32
 }
 

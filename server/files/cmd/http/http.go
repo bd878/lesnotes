@@ -35,6 +35,7 @@ func main() {
 
   server := http.New(http.Config{
     Addr:              cfg.HttpAddr,
+    RpcAddr:           cfg.RpcAddr,
     UsersServiceAddr:  cfg.UsersServiceAddr,
   })
 

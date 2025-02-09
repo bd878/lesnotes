@@ -37,6 +37,7 @@ func New(cfg Config) *Server {
   })
   handler := httphandler.New(grpcCtrl)
 
+  // TODO: specify /files/v1/{file_id}/{file_name} to download with file_name
   mux.Handle("/files/v1/{file_id}", middleware.Build(handler.DownloadFile))
   mux.Handle("/files/v1/status", middleware.NoAuth().Build(handler.GetStatus))
 
@@ -52,6 +53,9 @@ func New(cfg Config) *Server {
 }
 
 func (s *Server) ListenAndServe(_ context.Context, wg *sync.WaitGroup) {
-  s.Server.ListenAndServe()
+  err := s.Server.ListenAndServe()
+  if err != nil {
+    panic(err)
+  }
   wg.Done()
 }

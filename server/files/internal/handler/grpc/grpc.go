@@ -139,6 +139,13 @@ func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) error {
     return err
   }
 
+  userDir := filepath.Join(h.dataPath, fmt.Sprintf("%d", file.File.UserId))
+  err = os.MkdirAll(userDir, 0755)
+  if err != nil {
+    logger.Errorw("cannot create user files dir", "user_id", file.File.UserId, "error", err)
+    return err
+  }
+
   ff, err := os.Create(filepath.Join(h.dataPath, fmt.Sprintf("%d/%d", file.File.UserId, id)))
   if err != nil {
     logger.Errorw("failed to create file", "user_id", file.File.UserId, "id", id, "error", err)
@@ -161,13 +168,11 @@ func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) error {
       return nil
     }
 
-    n, err := ff.Write(chunk.Chunk)
+    _, err = ff.Write(chunk.Chunk)
     if err != nil {
       logger.Errorw("failed to write next file chunk in buffer", "error", err)
       return err
     }
-
-    logger.Infow("write file", "user_id", file.File.UserId, "id", id, "name", file.File.Name, "n", n)
   }
 
   return stream.SendAndClose(&api.SaveFileStreamResponse{

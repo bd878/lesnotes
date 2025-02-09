@@ -5,6 +5,7 @@ import (
   "io"
 
   "google.golang.org/grpc"
+  "google.golang.org/grpc/connectivity"
 
   "github.com/bd878/gallery/server/api"
   "github.com/bd878/gallery/server/logger"
@@ -20,19 +21,34 @@ type Gateway struct {
 }
 
 func New(filesAddr string) *Gateway {
-  conn, err := grpcutil.ServiceConnection(context.Background(), filesAddr)
+  g := &Gateway{filesAddr: filesAddr}
+  g.setupConnection()
+  return g
+}
+
+func (g *Gateway) setupConnection() {
+  conn, err := grpcutil.ServiceConnection(context.Background(), g.filesAddr)
   if err != nil {
     panic(err)
   }
 
-  client := api.NewFilesClient(conn)
+  g.conn = conn
+  g.client = api.NewFilesClient(conn)
+}
 
-  return &Gateway{filesAddr, client, conn}
+func (g *Gateway) isConnFailed() bool {
+  state := g.conn.GetState()
+  return state == connectivity.Shutdown || state == connectivity.TransientFailure
 }
 
 func (g *Gateway) SaveFileStream(ctx context.Context, log *logger.Logger, fileStream io.Reader, params *model.SaveFileParams) (
   *model.SaveFileResult, error,
 ) {
+  if g.isConnFailed() {
+    log.Info("conn failed, setup new connection")
+    g.setupConnection()
+  }
+
   stream, err := g.client.SaveFileStream(ctx)
   if err != nil {
     log.Errorw("client failed to obtain file stream", "error", err)
@@ -42,7 +58,8 @@ func (g *Gateway) SaveFileStream(ctx context.Context, log *logger.Logger, fileSt
   err = stream.Send(&api.FileData{
     Data: &api.FileData_File{
       File: &api.File{
-        Name: params.Name,
+        Name:    params.Name,
+        UserId:  params.UserID,
       },
     },
   })
@@ -88,8 +105,14 @@ func (g *Gateway) SaveFileStream(ctx context.Context, log *logger.Logger, fileSt
 func (g *Gateway) ReadBatchFiles(ctx context.Context, log *logger.Logger, params *model.ReadBatchFilesParams) (
   *model.ReadBatchFilesResult, error,
 ) {
+  if g.isConnFailed() {
+    log.Info("conn failed, setup new connection")
+    g.setupConnection()
+  }
+
   batch, err := g.client.ReadBatchFiles(ctx, &api.ReadBatchFilesRequest{
-    Ids: params.IDs,
+    UserId: params.UserID,
+    Ids:    params.IDs,
   })
   if err != nil {
     log.Errorw("client failed to read batch files", "error", err)
