@@ -1,6 +1,7 @@
 package model
 
 import (
+  "github.com/bd878/gallery/server/pkg/model"
   filesmodel "github.com/bd878/gallery/server/files/pkg/model"
 )
 
@@ -18,29 +19,24 @@ type MessagesList struct {
   IsLastPage          bool          `json:"is_last_page"`
 }
 
-type ServerResponse struct {
-  Status              string        `json:"status"`
-  Description         string        `json:"description"`
-}
-
 type NewMessageServerResponse struct {
-  ServerResponse
+  model.ServerResponse
   Message             Message       `json:"message"`
 }
 
 type UpdateMessageServerResponse struct {
-  ServerResponse
+  model.ServerResponse
   ID                  int32         `json:"id"`
   UpdateUTCNano       int64         `json:"update_utc_nano"`
 }
 
 type DeleteMessageServerResponse struct {
-  ServerResponse
+  model.ServerResponse
   ID                  int32         `json:"id"`
 }
 
 type MessagesListServerResponse struct {
-  ServerResponse
+  model.ServerResponse
   Messages            []*Message    `json:"messages"`
   IsLastPage          bool          `json:"is_last_page"`
 }

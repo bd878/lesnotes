@@ -9,10 +9,10 @@ import (
   "path/filepath"
   "encoding/json"
 
-  httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
-  usermodel "github.com/bd878/gallery/server/users/pkg/model"
   filesmodel "github.com/bd878/gallery/server/files/pkg/model"
+  servermodel "github.com/bd878/gallery/server/pkg/model"
   "github.com/bd878/gallery/server/messages/pkg/model"
+  "github.com/bd878/gallery/server/utils"
   "github.com/bd878/gallery/server/logger"
 )
 
@@ -49,8 +49,13 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
     return
   }
 
-  user, ok := getUser(w, req)
+  user, ok := utils.GetUser(w, req)
   if !ok {
+    w.WriteHeader(http.StatusBadRequest)
+    json.NewEncoder(w).Encode(servermodel.ServerResponse{
+      Status: "ok",
+      Description: "user required",
+    })
     return
   }
 
@@ -61,7 +66,7 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
     if err != nil {
       log.Error(err)
       w.WriteHeader(http.StatusBadRequest)
-      json.NewEncoder(w).Encode(model.ServerResponse{
+      json.NewEncoder(w).Encode(servermodel.ServerResponse{
         Status: "error",
         Description: "cannot read file",
       })
@@ -77,7 +82,7 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
     if err != nil {
       log.Error(err)
       w.WriteHeader(http.StatusInternalServerError)
-      json.NewEncoder(w).Encode(model.ServerResponse{
+      json.NewEncoder(w).Encode(servermodel.ServerResponse{
         Status: "error",
         Description: "cannot save file",
       })
@@ -93,7 +98,7 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 
   if fileName == "" && text == "" {
     w.WriteHeader(http.StatusBadRequest)
-    json.NewEncoder(w).Encode(model.ServerResponse{
+    json.NewEncoder(w).Encode(servermodel.ServerResponse{
       Status: "error",
       Description: "text or file are empty",
     })
@@ -116,7 +121,7 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
   }
 
   json.NewEncoder(w).Encode(model.NewMessageServerResponse{
-    ServerResponse: model.ServerResponse{
+    ServerResponse: servermodel.ServerResponse{
       Status: "ok",
       Description: "accepted",
     },
@@ -134,16 +139,21 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 }
 
 func (h *Handler) DeleteMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
-  user, ok := getUser(w, req)
+  user, ok := utils.GetUser(w, req)
   if !ok {
     log.Error("user not found")
+    w.WriteHeader(http.StatusBadRequest)
+    json.NewEncoder(w).Encode(servermodel.ServerResponse{
+      Status: "ok",
+      Description: "user required",
+    })
     return
   }
 
   values := req.URL.Query()
   if values.Get("id") == "" {
     w.WriteHeader(http.StatusBadRequest)
-    json.NewEncoder(w).Encode(model.ServerResponse{
+    json.NewEncoder(w).Encode(servermodel.ServerResponse{
       Status: "ok",
       Description: "empty message id",
     })
@@ -153,7 +163,7 @@ func (h *Handler) DeleteMessage(log *logger.Logger, w http.ResponseWriter, req *
   id, err := strconv.Atoi(values.Get("id"))
   if err != nil {
     w.WriteHeader(http.StatusBadRequest)
-    json.NewEncoder(w).Encode(model.ServerResponse{
+    json.NewEncoder(w).Encode(servermodel.ServerResponse{
       Status: "ok",
       Description: "invalid id",
     })
@@ -171,7 +181,7 @@ func (h *Handler) DeleteMessage(log *logger.Logger, w http.ResponseWriter, req *
   }
 
   json.NewEncoder(w).Encode(model.DeleteMessageServerResponse{
-    ServerResponse: model.ServerResponse{
+    ServerResponse: servermodel.ServerResponse{
       Status: "ok",
       Description: "deleted",
     },
@@ -180,16 +190,21 @@ func (h *Handler) DeleteMessage(log *logger.Logger, w http.ResponseWriter, req *
 }
 
 func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
-  user, ok := getUser(w, req)
+  user, ok := utils.GetUser(w, req)
   if !ok {
     log.Error("user not found")
+    w.WriteHeader(http.StatusBadRequest)
+    json.NewEncoder(w).Encode(servermodel.ServerResponse{
+      Status: "ok",
+      Description: "user required",
+    })
     return
   }
 
   values := req.URL.Query()
   if values.Get("id") == "" {
     w.WriteHeader(http.StatusBadRequest)
-    json.NewEncoder(w).Encode(model.ServerResponse{
+    json.NewEncoder(w).Encode(servermodel.ServerResponse{
       Status: "ok",
       Description: "empty message id",
     })
@@ -199,7 +214,7 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
   id, err := strconv.Atoi(values.Get("id"))
   if err != nil {
     w.WriteHeader(http.StatusBadRequest)
-    json.NewEncoder(w).Encode(model.ServerResponse{
+    json.NewEncoder(w).Encode(servermodel.ServerResponse{
       Status: "ok",
       Description: "invalid id",
     })
@@ -209,7 +224,7 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
   text := req.PostFormValue("text")
   if text == "" {
     w.WriteHeader(http.StatusBadRequest)
-    json.NewEncoder(w).Encode(model.ServerResponse{
+    json.NewEncoder(w).Encode(servermodel.ServerResponse{
       Status: "ok",
       Description: "empty message field",
     })
@@ -228,7 +243,7 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
   }
 
   json.NewEncoder(w).Encode(model.UpdateMessageServerResponse{
-    ServerResponse: model.ServerResponse{
+    ServerResponse: servermodel.ServerResponse{
       Status: "ok",
       Description: "accepted",
     },
@@ -241,10 +256,14 @@ func (h *Handler) ReadMessages(log *logger.Logger, w http.ResponseWriter, req *h
   var limitInt, offsetInt, orderInt int
   var ascending bool
   var err error
-  var ok bool
-  var user *usermodel.User
 
-  if user, ok = getUser(w, req); !ok {
+  user, ok := utils.GetUser(w, req)
+  if !ok {
+    w.WriteHeader(http.StatusBadRequest)
+    json.NewEncoder(w).Encode(servermodel.ServerResponse{
+      Status: "ok",
+      Description: "user required",
+    })
     return
   }
 
@@ -254,7 +273,7 @@ func (h *Handler) ReadMessages(log *logger.Logger, w http.ResponseWriter, req *h
     limitInt, err = strconv.Atoi(values.Get("limit"))
     if err != nil {
       w.WriteHeader(http.StatusBadRequest)
-      json.NewEncoder(w).Encode(model.ServerResponse{
+      json.NewEncoder(w).Encode(servermodel.ServerResponse{
         Status: "error",
         Description: fmt.Sprintf("wrong \"%s\" query param", "limit"),
       })
@@ -265,7 +284,7 @@ func (h *Handler) ReadMessages(log *logger.Logger, w http.ResponseWriter, req *h
       offsetInt, err = strconv.Atoi(values.Get("offset"))
       if err != nil {
         w.WriteHeader(http.StatusBadRequest)
-        json.NewEncoder(w).Encode(model.ServerResponse{
+        json.NewEncoder(w).Encode(servermodel.ServerResponse{
           Status: "error",
           Description: fmt.Sprintf("wrong \"%s\" query param", "offset"),
         })
@@ -282,7 +301,7 @@ func (h *Handler) ReadMessages(log *logger.Logger, w http.ResponseWriter, req *h
     orderInt, err = strconv.Atoi(values.Get("asc"))
     if err != nil {
       w.WriteHeader(http.StatusBadRequest)
-      json.NewEncoder(w).Encode(model.ServerResponse{
+      json.NewEncoder(w).Encode(servermodel.ServerResponse{
         Status: "error",
         Description: fmt.Sprintf("wrong \"%s\" query param", "asc"),
       })
@@ -324,7 +343,7 @@ func (h *Handler) ReadMessages(log *logger.Logger, w http.ResponseWriter, req *h
   if err != nil {
     log.Error("failed to read batch files", "error=", err)
     w.WriteHeader(http.StatusBadRequest)
-    json.NewEncoder(w).Encode(model.ServerResponse{
+    json.NewEncoder(w).Encode(servermodel.ServerResponse{
       Status: "error",
       Description: "failed to read files",
     })
@@ -336,7 +355,7 @@ func (h *Handler) ReadMessages(log *logger.Logger, w http.ResponseWriter, req *h
   }
 
   json.NewEncoder(w).Encode(model.MessagesListServerResponse{
-    ServerResponse: model.ServerResponse{
+    ServerResponse: servermodel.ServerResponse{
       Status: "ok",
     },
     Messages: res.Messages,
@@ -350,17 +369,4 @@ func (h *Handler) GetStatus(log *logger.Logger, w http.ResponseWriter, _ *http.R
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
-}
-
-func getUser(w http.ResponseWriter, req *http.Request) (*usermodel.User, bool) {
-  user, ok := req.Context().Value(httpmiddleware.UserContextKey{}).(*usermodel.User)
-  if !ok {
-    w.WriteHeader(http.StatusBadRequest)
-    json.NewEncoder(w).Encode(model.ServerResponse{
-      Status: "ok",
-      Description: "user required",
-    })
-    return nil, false
-  }
-  return user, true
 }

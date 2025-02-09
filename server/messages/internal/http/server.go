@@ -7,7 +7,7 @@ import (
 
   httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
   httphandler "github.com/bd878/gallery/server/messages/internal/handler/http"
-  usergateway "github.com/bd878/gallery/server/messages/internal/gateway/user/grpc"
+  usergateway "github.com/bd878/gallery/server/internal/gateway/user"
   filesgateway "github.com/bd878/gallery/server/messages/internal/gateway/files/grpc"
   controller "github.com/bd878/gallery/server/messages/internal/controller/service"
 )

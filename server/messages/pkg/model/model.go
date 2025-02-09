@@ -48,10 +48,6 @@ type ReadUserMessagesResult struct {
   IsLastPage        bool
 }
 
-type AuthParams struct {
-  Token             string
-}
-
 type SaveFileParams struct {
   Name              string
 }
