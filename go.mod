@@ -1,6 +1,6 @@
 module github.com/bd878/gallery
 
-go 1.21.1
+go 1.23.6
 
 require (
 	github.com/hashicorp/raft v1.6.0
