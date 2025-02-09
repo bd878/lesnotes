@@ -27,13 +27,13 @@ function MessagesList(props) {
             css={liCss}
             key={message.id}
           >
-            {(message.fileid && message.filename) ? <Tag
+            {(message.file && message.file.id && message.file.name) ? <Tag
               el="a"
-              href={getFileDownloadUrl(`/messages/v1/read_file?id=${message.fileid}`, false)}
-              download={message.filename}
+              href={getFileDownloadUrl(`/files/v1/${message.file.id}`, false)}
+              download={message.file.name}
               target="_blank"
             >
-              {message.filename}
+              {message.file.name}
             </Tag> : null}
 
             <ListItem key={message.id}>{message.text}</ListItem>

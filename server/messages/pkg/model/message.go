@@ -7,11 +7,11 @@ import (
 
 type Message struct {
   ID                  int32               `json:"id"`
-  CreateUTCNano       int64               `json:"create_utc_nano,omitmempty"`
-  UpdateUTCNano       int64               `json:"update_utc_nano,omitmempty"`
-  UserID              int32               `json:"user_id,omitmempty"`
-  File                *filesmodel.File    `json:"file,omitmempty"`
-  Text                string              `json:"text,omitmempty"`
+  CreateUTCNano       int64               `json:"create_utc_nano,omitempty"`
+  UpdateUTCNano       int64               `json:"update_utc_nano,omitempty"`
+  UserID              int32               `json:"user_id,omitempty"`
+  File                *filesmodel.File    `json:"file,omitempty"`
+  Text                string              `json:"text,omitempty"`
 }
 
 type MessagesList struct {

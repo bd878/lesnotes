@@ -2,7 +2,7 @@ package model
 
 type File struct {
   ID             int32         `json:"id"`
-  UserID         int32         `json:"user_id"`
+  UserID         int32         `json:"user_id,omitempty"`
   Name           string        `json:"name,omitempty"`
   CreateUTCNano  int64         `json:"create_utc_nano,omitempty"`
   Error          string        `json:"error,omitempty"`
