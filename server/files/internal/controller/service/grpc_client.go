@@ -8,8 +8,8 @@ import (
 
   "google.golang.org/grpc"
   "google.golang.org/grpc/connectivity"
+  "google.golang.org/grpc/credentials/insecure"
 
-  "github.com/bd878/gallery/server/internal/grpcutil"
   "github.com/bd878/gallery/server/api"
   "github.com/bd878/gallery/server/logger"
   "github.com/bd878/gallery/server/files/pkg/model"
@@ -32,7 +32,8 @@ func New(cfg Config) *Files {
 }
 
 func (f *Files) setupConnection() {
-  conn, err := grpcutil.ServiceConnection(context.Background(), f.conf.RpcAddr)
+  conn, err := grpc.Dial(f.conf.RpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()),
+    grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(1024*1024*20), grpc.MaxCallSendMsgSize(1024*1024*20)))
   if err != nil {
     panic(err)
   }
