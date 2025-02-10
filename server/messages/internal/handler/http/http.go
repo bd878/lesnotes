@@ -333,9 +333,11 @@ func (h *Handler) ReadMessages(log *logger.Logger, w http.ResponseWriter, req *h
     return
   }
 
-  fileIds := make([]int32, len(res.Messages))
-  for i, message := range res.Messages {
-    fileIds[i] = message.File.ID
+  fileIds := make([]int32, 0)
+  for _, message := range res.Messages {
+    if message.File != nil && message.File.ID != 0 {
+      fileIds = append(fileIds, message.File.ID)
+    }
   }
 
   filesRes, err := h.filesGateway.ReadBatchFiles(context.Background(), log, &model.ReadBatchFilesParams{
@@ -343,7 +345,7 @@ func (h *Handler) ReadMessages(log *logger.Logger, w http.ResponseWriter, req *h
     IDs:    fileIds,
   })
   if err != nil {
-    log.Error("failed to read batch files", "error=", err)
+    log.Errorw("failed to read batch files", "error", err)
     w.WriteHeader(http.StatusBadRequest)
     json.NewEncoder(w).Encode(servermodel.ServerResponse{
       Status: "error",
@@ -353,7 +355,12 @@ func (h *Handler) ReadMessages(log *logger.Logger, w http.ResponseWriter, req *h
   }
 
   for _, message := range res.Messages {
-    message.File.Name = filesRes.Files[message.File.ID].Name
+    if message.File != nil {
+      file := filesRes.Files[message.File.ID]
+      if file != nil {
+        message.File.Name = file.Name
+      }
+    }
   }
 
   json.NewEncoder(w).Encode(model.MessagesListServerResponse{
