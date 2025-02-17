@@ -87,7 +87,7 @@ func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.F
     return err
   }
 
-  buffer := make([]byte, 1024*1024*20 /* 20 MB */)
+  buffer := make([]byte, 1024*1024*50 /* 50 MB */)
   for {
     n, err := ff.Read(buffer)
     if err == io.EOF {

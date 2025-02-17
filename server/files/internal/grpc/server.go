@@ -51,8 +51,8 @@ func (s *Server) setupGRPC(log *logger.Logger) {
     grpc.ChainUnaryInterceptor(
       grpcmiddleware.UnaryServerInterceptor(grpcmiddleware.LogBuilder()),
     ),
-    grpc.MaxRecvMsgSize(1024*1024*20),
-    grpc.MaxSendMsgSize(1024*1024*20),
+    grpc.MaxRecvMsgSize(1024*1024*50),
+    grpc.MaxSendMsgSize(1024*1024*50),
   )
 
   api.RegisterFilesServer(s.Server, handler)

@@ -33,7 +33,7 @@ func New(cfg Config) *Files {
 
 func (f *Files) setupConnection() {
   conn, err := grpc.Dial(f.conf.RpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()),
-    grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(1024*1024*20), grpc.MaxCallSendMsgSize(1024*1024*20)))
+    grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(1024*1024*50), grpc.MaxCallSendMsgSize(1024*1024*50)))
   if err != nil {
     panic(err)
   }
