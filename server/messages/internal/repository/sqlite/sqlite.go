@@ -180,20 +180,20 @@ func (r *Repository) ReadUserMessages(ctx context.Context, log *logger.Logger, p
       return nil, err
     }
 
-    var fileId int32
-    if fileIdCol.Valid {
-      fileId = fileIdCol.Int32
-    }
-    res = append(res, &model.Message{
+    msg := &model.Message{
       ID: id,
       UserID: userId,
       CreateUTCNano: createUtcNano,
       UpdateUTCNano: updateUtcNano,
       Text: text,
-      File: &filesmodel.File{
-        ID: fileId,
-      },
-    })
+      File: &filesmodel.File{},
+    }
+
+    if fileIdCol.Valid {
+      msg.File.ID = fileIdCol.Int32
+    }
+
+    res = append(res, msg)
   }
 
   if int32(len(res)) < params.Limit {

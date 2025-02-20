@@ -312,7 +312,10 @@ components:
         update_utc_nano:
           type: integer
           format: integer
-        file_id:
-          type: string
-        filename:
-          type: string
+        file:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
