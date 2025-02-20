@@ -1,5 +1,6 @@
 import i18n from '../i18n';
 import api from './api';
+import models from './models';
 
 interface LoadMessagesResult {
   error: string;
@@ -33,7 +34,7 @@ async function loadMessages(limit: number, offset: number, order: number): LoadM
       result.error = response.error
       result.explain = response.explain
     } else {
-      result.messages = response.value.messages
+      result.messages = response.value.messages.map(models.message)
       result.isLastPage = response.value.is_last_page
     }
   } catch (e) {
@@ -41,6 +42,7 @@ async function loadMessages(limit: number, offset: number, order: number): LoadM
     throw e
   }
 
+  console.log(result.messages)
   return result;
 }
 
