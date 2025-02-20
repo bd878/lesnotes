@@ -4,5 +4,5 @@
   "log_path":       "../../logs/",
   "db_path":        "../../users.db",
   "data_path":      "../../data",
-  "domain":         "galleryexample.com"
+  "domain":         "dev.lesnotes.space"
 }

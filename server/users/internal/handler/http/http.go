@@ -3,6 +3,7 @@ package http
 import (
   "net/http"
   "time"
+  "io"
   "context"
   "encoding/json"
 
@@ -204,10 +205,11 @@ func (h *Handler) Signup(log *logger.Logger, w http.ResponseWriter, req *http.Re
 }
 
 func (h *Handler) Status(log *logger.Logger, w http.ResponseWriter, _ *http.Request) {
-  json.NewEncoder(w).Encode(model.ServerResponse{
-    Status: "ok",
-    Description: "working",
-  })
+  if _, err := io.WriteString(w, "ok\n"); err != nil {
+    log.Error(err)
+    w.WriteHeader(http.StatusInternalServerError)
+    return
+  }
 }
 
 func getTextField(w http.ResponseWriter, req *http.Request, field string) (value string, ok bool) {

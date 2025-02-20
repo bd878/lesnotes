@@ -26,6 +26,7 @@ let ctx = await esbuild.context({
   define: {
     BACKENDURL: '"' + Config.get("backendurl") + '"',
     ENV: '"' + Config.get("env") + '"',
+    HTTPS: '"' + Config.get("https") + '"',
   },
   sourcemap: true,
   bundle: true,

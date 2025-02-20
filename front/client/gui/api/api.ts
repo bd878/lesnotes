@@ -8,6 +8,9 @@ let proto = "http";
 if (ENV && (ENV.includes("prod") || ENV.includes("stag"))) {
   proto = "https"
 }
+if (HTTPS && (HTTPS !== "")) {
+  proto = "https"
+}
 
 function getFullUrl(url: string, isFullUrl: string) {
   return isFullUrl ? url : `${proto}://${BACKENDURL}${url}`;
