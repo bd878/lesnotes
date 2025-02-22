@@ -42,7 +42,6 @@ async function loadMessages(limit: number, offset: number, order: number): LoadM
     throw e
   }
 
-  console.log(result.messages)
   return result;
 }
 

@@ -1,42 +1,34 @@
-import React, {useEffect, useState} from 'react';
-import api from '../../api';
+import React, {useEffect} from 'react';
 import i18n from '../../i18n';
+import {connect} from '../../third_party/react-redux';
+import {authActionCreator} from '../../features/me'
+import {selectIsAuth, selectIsLoading} from '../../features/me'
 
-const Auth = props => {
-  const [authed, setAuthed] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [_, setError] = useState(null)
+function Auth(props) {
+  const {auth, isAuth, isLoading} = props
 
-  useEffect(() => {
-    async function call() {
-      setLoading(true)
-      try {
-        let response = await api.auth()
-        if (response.error == "") {
-          setAuthed(true)
-        } else {
-          setError(response.error)
-        }
-      } catch (e) {
-        setError(e)
-      } finally {
-        setLoading(false)
-      }
-    }
+  useEffect(() => {auth()}, [auth])
 
-    call();
-  }, [setAuthed, setLoading, setError])
-
-  if (loading) {
+  if (isLoading) {
     return (<>{i18n('auth_process')}</>)
   }
 
   return (
-    <>{authed
+    <>{isAuth
       ? props.children
       : (props.fallback || i18n("not_authed"))
     }</>
   );
 }
 
-export default Auth;
+const mapStateToProps = state => ({
+  isAuth: selectIsAuth(state),
+  isLoading: selectIsLoading(state),
+})
+
+const mapDispatchToProps = ({
+  auth: authActionCreator,
+})
+
+export default connect(
+  mapStateToProps, mapDispatchToProps)(Auth);

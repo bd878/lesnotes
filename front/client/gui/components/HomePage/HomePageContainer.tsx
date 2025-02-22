@@ -13,10 +13,12 @@ import {
   selectError,
   selectLoadOffset,
 } from '../../features/messages';
+import {selectUser} from '../../features/me';
 
 function HomePageContainer(props) {
   const {
     messages,
+    user,
     error,
     isLastPage,
     isLoading,
@@ -74,6 +76,7 @@ const mapStateToProps = state => ({
   isLastPage: selectIsLastPage(state),
   loadOffset: selectLoadOffset(state),
   error: selectError(state),
+  user: selectUser(state),
 })
 
 const mapDispatchToProps = {

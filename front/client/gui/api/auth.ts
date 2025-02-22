@@ -1,5 +1,6 @@
 import i18n from '../i18n';
 import api from './api';
+import models from './models';
 
 async function auth() {
   let response = {};
@@ -7,10 +8,6 @@ async function auth() {
     error: "",
     explain: "",
     expired: false,
-    user: {
-      id: "",
-      name: "",
-    },
   }
 
   try {
@@ -27,7 +24,7 @@ async function auth() {
     if (response.value.expired) {
       result.expired = true
     } else {
-      result.user = response.user
+      result.user = models.user(response.value.user)
     }
   } else {
     result.error = response.error
