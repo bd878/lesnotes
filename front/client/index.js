@@ -28,7 +28,7 @@ app.use(useragent);
 app.use(favicon);
 
 router
-  .get('/public/:filename', assets)
+  .get('/public/:filename', etag, assets)
   .get('/index', ctx => {
     ctx.redirect('/')
     ctx.status = 301

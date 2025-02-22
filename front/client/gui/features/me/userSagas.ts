@@ -5,9 +5,11 @@ import {
   LOGOUT,
   AUTH,
   REGISTER,
+  AUTH_FAILED,
   AUTH_SUCCEEDED,
   LOGIN_SUCCEEDED,
   REGISTER_SUCCEEDED,
+  WILL_REDIRECT,
 } from './userActions'
 import {
   logoutActionCreator,
@@ -17,6 +19,8 @@ import {
   loginFailedActionCreator,
   registerFailedActionCreator,
   registerSucceededActionCreator,
+  willRedirectActionCreator,
+  resetRedirectActionCreator,
 } from './userActionCreators';
 import api from '../../api'
 
@@ -40,7 +44,10 @@ function* login({payload}: {payload: LoginPayload}) {
 }
 
 function* redirectHome() {
-  setTimeout(() => {location.href = "/home"}, 0)
+  if (location && !location.pathname.includes("/home"))
+    setTimeout(() => {location.href = "/home"})
+  else
+    yield put(resetRedirectActionCreator())
 }
 
 interface RegisterPayload {
@@ -68,6 +75,7 @@ function* auth() {
   try {
     const response = yield call(api.auth)
 
+    yield put(willRedirectActionCreator())
     if (response.error !== "")
       yield put(authFailedActionCreator(response.error))
     else
@@ -77,10 +85,17 @@ function* auth() {
   }
 }
 
+function* redirectLogin() {
+  if (location && !location.pathname.includes("/login"))
+    setTimeout(() => {location.href = "/login"})
+  else
+    yield put(resetRedirectActionCreator())
+}
+
 function* logout() {
   try {
     yield call(api.logout)
-    setTimeout(() => {location.href = "/login"}, 0)
+    setTimeout(() => {location.href = "/login"})
   } catch (e) {
     console.error(i18n("error_occured"), e);
   }
@@ -91,6 +106,8 @@ function* userSaga() {
   yield takeLatest(AUTH, auth)
   yield takeLatest(LOGIN, login)
   yield takeLatest(REGISTER, register)
+  yield takeLatest(AUTH_FAILED, redirectLogin)
+  yield takeLatest(AUTH_SUCCEEDED, redirectHome)
   yield takeLatest(LOGIN_SUCCEEDED, redirectHome)
   yield takeLatest(REGISTER_SUCCEEDED, redirectHome)
 }

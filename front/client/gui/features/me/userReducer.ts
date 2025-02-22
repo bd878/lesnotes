@@ -9,6 +9,8 @@ import {
   AUTH,
   AUTH_FAILED,
   AUTH_SUCCEEDED,
+  WILL_REDIRECT,
+  RESET_REDIRECT,
 } from './userActions';
 import models from '../../api/models'
 
@@ -17,6 +19,7 @@ const initialState = {
   isAuth: false,
   loading: false,
   error: "",
+  willRedirect: true,
 }
 
 export function userReducer(userState = initialState, action) {
@@ -94,6 +97,18 @@ export function userReducer(userState = initialState, action) {
       loading: false,
       error: "",
       user: action.payload.user,
+    }
+  }
+  case WILL_REDIRECT: {
+    return {
+      ...userState,
+      willRedirect: true,
+    }
+  }
+  case RESET_REDIRECT: {
+    return {
+      ...userState,
+      willRedirect: false,
     }
   }
   }

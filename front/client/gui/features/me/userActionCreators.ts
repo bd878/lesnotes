@@ -9,6 +9,8 @@ import {
   AUTH,
   AUTH_FAILED,
   AUTH_SUCCEEDED,
+  WILL_REDIRECT,
+  RESET_REDIRECT,
 } from './userActions'
 
 export function registerActionCreator(name, password) {
@@ -77,6 +79,20 @@ export function authSucceededActionCreator(payload) {
 export function logoutActionCreator(payload = {}) {
   return {
     type: LOGOUT,
+    payload,
+  }
+}
+
+export function willRedirectActionCreator(payload = {}) {
+  return {
+    type: WILL_REDIRECT,
+    payload,
+  }
+}
+
+export function resetRedirectActionCreator(payload = {}) {
+  return {
+    type: RESET_REDIRECT,
     payload,
   }
 }

@@ -9,6 +9,8 @@ import {
   selectUser,
   selectIsAuth,
   selectIsLoading,
+  selectIsError,
+  selectWillRedirect,
 } from './userSelectors';
 import {userSaga} from './userSagas';
 
@@ -22,4 +24,6 @@ export {
   selectUser,
   selectIsAuth,
   selectIsLoading,
+  selectIsError,
+  selectWillRedirect,
 }
