@@ -25,9 +25,15 @@ function MessagesList(props) {
           <Tag
             el="li"
             css={liCss}
-            key={message.id}
+            key={message.ID}
           >
-            {(message.file && message.file.id && message.file.name) ? <Tag
+            {message.createUTCNano ? (
+              <Tag>
+                <Tag el="div">{message.createUTCNano}</Tag>
+                <Tag el="div">{message.updateUTCNano}</Tag>
+              </Tag>
+            ) : null}
+            {(message.file && message.file.ID && message.file.name) ? <Tag
               el="a"
               href={getFileDownloadUrl(`/files/v1/${message.file.id}`, false)}
               download={message.file.name}
@@ -36,7 +42,7 @@ function MessagesList(props) {
               {message.file.name}
             </Tag> : null}
 
-            <ListItem key={message.id}>{message.text}</ListItem>
+            <ListItem key={message.ID}>{message.text}</ListItem>
           </Tag>
         ))}
       </List>

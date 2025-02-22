@@ -37,6 +37,7 @@ func New(cfg Config) *Server {
 
   mux.Handle("/users/v1/signup", middleware.Build(handler.Signup))
   mux.Handle("/users/v1/login",  middleware.Build(handler.Login))
+  mux.Handle("/users/v1/logout", middleware.Build(handler.Logout))
   mux.Handle("/users/v1/auth",   middleware.Build(handler.Auth))
   mux.Handle("/users/v1/status", middleware.Build(handler.Status))
 

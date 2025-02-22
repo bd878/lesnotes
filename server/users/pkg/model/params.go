@@ -12,6 +12,10 @@ type RefreshTokenParams struct {
   User      *User
 }
 
+type DeleteTokenParams struct {
+  Token string
+}
+
 type GetUserParams struct {
   User      *User
 }

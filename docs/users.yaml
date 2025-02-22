@@ -60,7 +60,7 @@ paths:
 
   /users/v1/login:
     post:
-      summary: Logins user
+      summary: Logs in user
       description: |
         Verifies that user is valid with given user & password
       operationId: loginUser
@@ -82,6 +82,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/loginErr'
+
+  /users/v1/logout:
+    parameters:
+      - in: header
+        name: Cookie
+        schema:
+          type: string
+          example: token=AAAAAA
+    post:
+      summary: Logs out user
+      description: |
+        Logs user out, makes Cookie token expired
+      operationId: logoutUser
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              type: object
+              status:
+                type: string
+                default: "ok"
+              description:
+                type: string
+                default: "deleted"
+        "4XX":
+          description: error
+          content:
+            application/json:
+              type: object
+              status:
+                type: string
+                default: "fail"
+              description:
+                type: string
+                default: "failed to logout"
 
   /users/v1/status:
     get:

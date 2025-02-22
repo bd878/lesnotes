@@ -10,8 +10,6 @@ async function renderer(ctx) {
     const template = await readFile(filePath, { encoding: 'utf-8' });
 
     ctx.set({ 'Cache-Control': 'no-cache, max-age=0' })
-    ctx.set({ 'ETag': '1' })
-    // TODO: ctx.set({ 'Last-Modified': 'ls -l templates/index.mustache' })
     ctx.body = mustache.render(template, {
       script: "/public/home.js",
       styles: [

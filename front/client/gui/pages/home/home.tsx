@@ -5,13 +5,15 @@ import HomePage from '../../components/HomePage';
 import AuthProvider from '../../providers/Auth';
 import StoreProvider from '../../providers/Store';
 
-const Home = () => (
-  <AuthProvider fallback={i18n("messages_auth_fallback")}>
+function Home() {
+  return (
     <StoreProvider>
-      <HomePage />
+      <AuthProvider fallback={i18n("messages_auth_fallback")}>
+        <HomePage />
+      </AuthProvider>
     </StoreProvider>
-  </AuthProvider>
-)
+  )
+}
 
 const root = ReactDOM.createRoot(document.getElementById('app'));
 root.render(<Home />);
