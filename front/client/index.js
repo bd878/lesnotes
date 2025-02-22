@@ -7,6 +7,7 @@ import logger from './handlers/logger.js';
 import bodyParser from './handlers/bodyParser.js';
 import useragent from './handlers/useragent.js';
 import favicon from './handlers/favicon.js';
+import etag from './handlers/etag.js';
 
 import assets from './routes/assets.js';
 import main from './routes/main.js';
@@ -32,10 +33,10 @@ router
     ctx.redirect('/')
     ctx.status = 301
   })
-  .get('/', main)
-  .get('/login', login)
-  .get('/register', register)
-  .get('/home', home)
+  .get('/', etag, main)
+  .get('/login', etag, login)
+  .get('/register', etag, register)
+  .get('/home', etag, home)
   .get('/status', status)
   .get('/:any*', xxx)
 

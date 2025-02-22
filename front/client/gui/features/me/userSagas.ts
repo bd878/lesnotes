@@ -1,6 +1,8 @@
+import i18n from '../../i18n';
 import {takeLatest,put,call} from 'redux-saga/effects'
 import {
   LOGIN,
+  LOGOUT,
   AUTH,
   REGISTER,
   AUTH_SUCCEEDED,
@@ -8,6 +10,7 @@ import {
   REGISTER_SUCCEEDED,
 } from './userActions'
 import {
+  logoutActionCreator,
   authSucceededActionCreator,
   authFailedActionCreator,
   loginSucceededActionCreator,
@@ -61,7 +64,7 @@ function* register({payload}: {payload: RegisterPayload}) {
 
 interface AuthPayload {}
 
-function* auth({payload}) {
+function* auth() {
   try {
     const response = yield call(api.auth)
 
@@ -74,7 +77,17 @@ function* auth({payload}) {
   }
 }
 
+function* logout() {
+  try {
+    yield call(api.logout)
+    setTimeout(() => {location.href = "/login"}, 0)
+  } catch (e) {
+    console.error(i18n("error_occured"), e);
+  }
+}
+
 function* userSaga() {
+  yield takeLatest(LOGOUT, logout)
   yield takeLatest(AUTH, auth)
   yield takeLatest(LOGIN, login)
   yield takeLatest(REGISTER, register)

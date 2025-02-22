@@ -1,4 +1,5 @@
 import {
+  LOGOUT,
   LOGIN,
   LOGIN_FAILED,
   LOGIN_SUCCEEDED,
@@ -60,6 +61,15 @@ export function userReducer(userState = initialState, action) {
       ...userState,
       loading: false,
       error: ""
+    }
+  }
+  case LOGOUT: {
+    return {
+      ...userState,
+      user: models.user(),
+      isAuth: false,
+      loading: false,
+      error: "",
     }
   }
   case AUTH: {

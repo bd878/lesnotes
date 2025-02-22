@@ -13,13 +13,14 @@ import {
   selectError,
   selectLoadOffset,
 } from '../../features/messages';
-import {selectUser} from '../../features/me';
+import {selectUser, logoutActionCreator} from '../../features/me';
 
 function HomePageContainer(props) {
   const {
     messages,
     user,
     error,
+    logout,
     isLastPage,
     isLoading,
     loadOffset,
@@ -51,10 +52,7 @@ function HomePageContainer(props) {
     }
   }, [listRef.current, loadMore]);
 
-  const onExitClick = useCallback(() => {
-    /*TODO: implement*/
-    setTimeout(() => {location.href = "/login"}, 0)
-  }, []);
+  const onExitClick = useCallback(() => {logout()}, [logout]);
 
   return (
     <HomePageComponent
@@ -81,6 +79,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = {
   fetchMessages: fetchMessagesActionCreator,
+  logout: logoutActionCreator,
 }
 
 export default connect(

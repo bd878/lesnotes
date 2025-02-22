@@ -1,4 +1,5 @@
 import {
+  LOGOUT,
   LOGIN,
   LOGIN_SUCCEEDED,
   LOGIN_FAILED,
@@ -69,6 +70,13 @@ export function authFailedActionCreator(payload) {
 export function authSucceededActionCreator(payload) {
   return {
     type: AUTH_SUCCEEDED,
+    payload,
+  }
+}
+
+export function logoutActionCreator(payload = {}) {
+  return {
+    type: LOGOUT,
     payload,
   }
 }

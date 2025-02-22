@@ -3,6 +3,7 @@ import {
   authActionCreator,
   loginActionCreator,
   registerActionCreator,
+  logoutActionCreator,
 } from './userActionCreators'
 import {
   selectUser,
@@ -12,6 +13,7 @@ import {
 import {userSaga} from './userSagas';
 
 export {
+  logoutActionCreator,
   authActionCreator,
   userReducer,
   loginActionCreator,
