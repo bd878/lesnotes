@@ -14,6 +14,7 @@ type Repository interface {
   AddUser(ctx context.Context, log *logger.Logger, user *model.User) error
   HasUser(ctx context.Context, log *logger.Logger, user *model.User) (bool, error)
   RefreshToken(ctx context.Context, log *logger.Logger, user *model.User) error
+  DeleteToken(ctx context.Context,  log *logger.Logger, params *model.DeleteTokenParams) error
   GetUser(ctx context.Context, log *logger.Logger, user *model.User) (*model.User, error)
 }
 
@@ -38,13 +39,17 @@ func (c *Controller) RefreshToken(ctx context.Context, log *logger.Logger, param
   return c.repo.RefreshToken(ctx, log, params.User)
 }
 
+func (c *Controller) DeleteToken(ctx context.Context, log *logger.Logger, params *model.DeleteTokenParams) error {
+  return c.repo.DeleteToken(ctx, log, params)
+}
+
 func (c *Controller) GetUser(ctx context.Context, log *logger.Logger, params *model.GetUserParams) (*model.User, error) {
   result, err := c.repo.GetUser(ctx, log, &model.User{
     Token: params.User.Token,
     Name: params.User.Name,
   })
   if err != nil {
-    log.Error("failed to get user", err)
+    log.Errorln("failed to get user")
     return nil, err
   }
 

@@ -6,12 +6,14 @@ import (
   "database/sql"
 
   _ "github.com/mattn/go-sqlite3"
+  "github.com/bd878/gallery/server/utils"
   "github.com/bd878/gallery/server/logger"
   "github.com/bd878/gallery/server/users/pkg/model"
 )
 
 type Repository struct {
   db          *sql.DB
+  resetTokenStmt *sql.Stmt
 }
 
 func New(dbPath string) *Repository {
@@ -19,7 +21,17 @@ func New(dbPath string) *Repository {
   if err != nil {
     panic(err)
   }
-  return &Repository{db}
+  resetTokenStmt := utils.Must(db.Prepare(`
+UPDATE users SET
+  token = "",
+  expires_utc_nano = 0
+WHERE token = :token
+;`,
+  ))
+  return &Repository{
+    db: db,
+    resetTokenStmt: resetTokenStmt,
+  }
 }
 
 func (r *Repository) AddUser(ctx context.Context, log *logger.Logger, user *model.User) error {
@@ -51,6 +63,14 @@ func (r *Repository) GetUser(ctx context.Context, log *logger.Logger, user *mode
 func (r *Repository) RefreshToken(ctx context.Context, log *logger.Logger, user *model.User) error {
   _, err := r.db.ExecContext(ctx, "UPDATE users SET token = ?, expires_utc_nano = ? WHERE name = ?",
     user.Token, user.ExpiresUTCNano, user.Name)
+  return err
+}
+
+func (r *Repository) DeleteToken(ctx context.Context, log *logger.Logger, params *model.DeleteTokenParams) error {
+  _, err := r.resetTokenStmt.ExecContext(ctx, sql.Named("token", params.Token))
+  if err != nil {
+    log.Error("cannot delete token")
+  }
   return err
 }
 

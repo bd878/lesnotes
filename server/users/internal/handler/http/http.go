@@ -17,6 +17,7 @@ type Controller interface {
   AddUser(ctx context.Context, log *logger.Logger, params *model.AddUserParams) error
   HasUser(ctx context.Context, log *logger.Logger, params *model.HasUserParams) (bool, error)
   RefreshToken(ctx context.Context, log *logger.Logger, params *model.RefreshTokenParams) error
+  DeleteToken(ctx context.Context, log *logger.Logger, params *model.DeleteTokenParams) error
   GetUser(ctx context.Context, log *logger.Logger, params *model.GetUserParams) (*model.User, error)
 }
 
@@ -31,6 +32,30 @@ type Handler struct {
 
 func New(controller Controller, config Config) *Handler {
   return &Handler{controller, config}
+}
+
+func (h *Handler) Logout(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
+  cookie, err := req.Cookie("token")
+  if err != nil {
+    log.Error("bad cookie")
+    w.WriteHeader(http.StatusBadRequest)
+    return
+  }
+  token := cookie.Value
+
+  deleteToken(w, h.config.CookieDomain)
+
+  err = h.controller.DeleteToken(context.Background(), log, &model.DeleteTokenParams{
+    Token: token,
+  })
+  if err != nil {
+    log.Errorw("failed to delete token, continue", "error", err)
+  }
+
+  json.NewEncoder(w).Encode(model.ServerResponse{
+    Status: "ok",
+    Description: "deleted",
+  })
 }
 
 func (h *Handler) Login(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
@@ -86,12 +111,7 @@ func (h *Handler) Login(log *logger.Logger, w http.ResponseWriter, req *http.Req
     })
 
   case nil:
-    err := attachTokenToResponse(w, user.Token, h.config.CookieDomain, user.ExpiresUTCNano)
-    if err != nil {
-      log.Error("Cannot attach token to response: ", err)
-      w.WriteHeader(http.StatusInternalServerError)
-      return
-    }
+    attachTokenToResponse(w, user.Token, h.config.CookieDomain, user.ExpiresUTCNano)
 
   default:
     log.Error("Unknown error: ", err)
@@ -113,9 +133,10 @@ func (h *Handler) Auth(log *logger.Logger, w http.ResponseWriter, req *http.Requ
     w.WriteHeader(http.StatusBadRequest)
     return
   }
+  token := cookie.Value
 
   user, err := h.controller.GetUser(context.Background(), log, &model.GetUserParams{
-    User: &model.User{Token: cookie.Value},
+    User: &model.User{Token: token},
   })
   if err == controller.ErrTokenExpired {
     log.Infoln("token expired")
@@ -130,7 +151,7 @@ func (h *Handler) Auth(log *logger.Logger, w http.ResponseWriter, req *http.Requ
   }
 
   if err != nil {
-    log.Error("failed to get user by token: ", err)
+    log.Errorw("failed to get user by token", "token", token, "error", err)
     w.WriteHeader(http.StatusInternalServerError)
     return
   }
@@ -254,7 +275,7 @@ func createToken(w http.ResponseWriter, cookieDomain string) (token string, expi
   return token, expiresAt.UnixNano()
 }
 
-func attachTokenToResponse(w http.ResponseWriter, token, cookieDomain string, expiresUtcNano int64) (err error) {
+func attachTokenToResponse(w http.ResponseWriter, token, cookieDomain string, expiresUtcNano int64) {
   http.SetCookie(w, &http.Cookie{
     Name:          "token",
     Value:          token,
@@ -263,7 +284,15 @@ func attachTokenToResponse(w http.ResponseWriter, token, cookieDomain string, ex
     Path:          "/",
     HttpOnly:       true,
   })
-
-  return
 }
 
+func deleteToken(w http.ResponseWriter, cookieDomain string) {
+  http.SetCookie(w, &http.Cookie{
+    Name:           "token",
+    Value:          "",
+    Domain:         cookieDomain,
+    Expires:        time.Unix(0, 0),
+    Path: "/",
+    HttpOnly: true,
+  })
+}
