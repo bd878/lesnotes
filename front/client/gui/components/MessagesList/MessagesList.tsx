@@ -24,7 +24,7 @@ function MessagesList(props) {
         {messages.map(message => (
           <Tag
             el="li"
-            css={liCss}
+            css={liCss + " " + "br-12 p-8 bg-list-grey hover:bg-list-grey pointer"}
             key={message.ID}
           >
             {message.createUTCNano ? (

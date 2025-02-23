@@ -1,12 +1,13 @@
 import i18n from '../i18n';
 import api from './api';
+import models from './models';
 
 async function sendMessage(message = "", file = null) {
   let response = {};
   let result: SendMessageResult = {
     error: "",
     explain: "",
-    message: {},
+    message: models.message(),
   }
 
   const form = new FormData()
@@ -27,7 +28,7 @@ async function sendMessage(message = "", file = null) {
       result.explain = response.explain
     } else {
       if (response.value != undefined && response.value.message != undefined) { 
-        result.message = response.value.message
+        result.message = models.message(response.value.message)
       }
     }
   } catch (e) {
