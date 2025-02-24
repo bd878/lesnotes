@@ -1,1 +1,1 @@
-export {default} from "./MessagesList";
+export {default} from "./MessagesListContainer";

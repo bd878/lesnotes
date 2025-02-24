@@ -124,7 +124,7 @@ const ascendingStmt = `
 SELECT id, user_id, create_utc_nano, update_utc_nano, text, file_id
 FROM messages
 WHERE user_id = :userId
-ORDER BY update_utc_nano ASC
+ORDER BY create_utc_nano ASC
 LIMIT :limit OFFSET :offset
 `
 
@@ -132,7 +132,7 @@ const descendingStmt = `
 SELECT id, user_id, create_utc_nano, update_utc_nano, text, file_id
 FROM messages
 WHERE user_id = :userId
-ORDER BY update_utc_nano DESC
+ORDER BY create_utc_nano DESC
 LIMIT :limit OFFSET :offset
 `
 

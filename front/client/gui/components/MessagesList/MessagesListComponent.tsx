@@ -6,13 +6,14 @@ import {getFileDownloadUrl} from "../../api";
 const List = lazy(() => import("../../components/List"));
 const ListItem = lazy(() => import("../../components/ListItem"));
 
-function MessagesList(props) {
+function MessagesListComponent(props) {
   const {
     css,
     liCss,
     messages,
     loading,
     error,
+    onListItemClick,
   } = props
 
   let content = <Tag></Tag>;
@@ -35,14 +36,14 @@ function MessagesList(props) {
             ) : null}
             {(message.file && message.file.ID && message.file.name) ? <Tag
               el="a"
-              href={getFileDownloadUrl(`/files/v1/${message.file.id}`, false)}
+              href={getFileDownloadUrl(`/files/v1/${message.file.ID}`, false)}
               download={message.file.name}
               target="_blank"
             >
               {message.file.name}
             </Tag> : null}
 
-            <ListItem key={message.ID}>{message.text}</ListItem>
+            <ListItem onClick={() => onListItemClick(message)} key={message.ID}>{message.text}</ListItem>
           </Tag>
         ))}
       </List>
@@ -57,4 +58,4 @@ function MessagesList(props) {
   )
 }
 
-export default MessagesList;
+export default MessagesListComponent;

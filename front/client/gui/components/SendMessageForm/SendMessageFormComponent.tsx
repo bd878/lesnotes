@@ -12,7 +12,7 @@ function SendMessageFormComponent(props) {
     message,
     onMessageChange,
     onFileChange,
-    sendMessageRequest,
+    onSubmit,
   } = props
 
   return (
@@ -41,7 +41,7 @@ function SendMessageFormComponent(props) {
       <Button
         type="button"
         text={i18n("msg_send_text")}
-        onClick={sendMessageRequest}
+        onClick={onSubmit}
       />
     </>
   );
