@@ -56,7 +56,6 @@ function* sendMessage({payload}: {payload: SendMessagePayload}) {
 
 function* updateMessage({payload}) {
   try {
-    debugger
     const response = yield call(api.updateMessage,
       payload.ID, payload.text)
 
