@@ -1,9 +1,14 @@
 import React from 'react';
 import Tag from '../Tag';
 
-const ListItem = props => {
+function ListItem(props){
+  const {
+    el,
+    onClick,
+  } = props
+
   return (
-    <Tag el={props.el}>
+    <Tag el={el} onClick={onClick}>
       {props.children}
     </Tag>
   )
