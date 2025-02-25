@@ -96,3 +96,7 @@ export function setEditMessageActionCreator(payload) {
     payload,
   }
 }
+
+export function resetEditMessageActionCreator() {
+  return setEditMessageActionCreator({})
+}

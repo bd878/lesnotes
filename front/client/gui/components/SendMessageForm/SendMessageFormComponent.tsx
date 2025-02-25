@@ -13,6 +13,8 @@ function SendMessageFormComponent(props) {
     onMessageChange,
     onFileChange,
     onSubmit,
+    shouldShowCancelButton,
+    onCancel,
   } = props
 
   return (
@@ -43,6 +45,13 @@ function SendMessageFormComponent(props) {
         text={i18n("msg_send_text")}
         onClick={onSubmit}
       />
+      {(shouldShowCancelButton && onCancel) ? (
+        <Button
+          type="button"
+          text={i18n("msg_cancel_text")}
+          onClick={onCancel}
+        />
+      ) : null}
     </>
   );
 }

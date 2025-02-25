@@ -126,6 +126,12 @@ func (h *Handler) Login(log *logger.Logger, w http.ResponseWriter, req *http.Req
   })
 }
 
+// TODO: Invalidate stale sessions.
+// User logs in in one device, get token,
+// then logs in in another device, receives new token.
+// Old token invalidates, though not expired...
+// Check if stage.lesnotes.space tokens influences on
+// lesnotes.space (it has .lesnotes.space domain)
 func (h *Handler) Auth(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
   cookie, err := req.Cookie("token")
   if err != nil {

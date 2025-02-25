@@ -6,6 +6,7 @@ import {
   appendMessagesActionCreator,
   pushBackMessagesActionCreator,
   updateMessageActionCreator,
+  resetEditMessageActionCreator,
 } from './messagesActionCreators'
 import {
   selectMessages,
@@ -21,6 +22,7 @@ import {messagesSaga} from './messagesSagas';
 export {
   messagesReducer,
   setEditMessageActionCreator,
+  resetEditMessageActionCreator,
   sendMessageActionCreator,
   fetchMessagesActionCreator,
   appendMessagesActionCreator,

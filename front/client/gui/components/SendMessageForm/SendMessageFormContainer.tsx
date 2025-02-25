@@ -7,6 +7,8 @@ import {
   sendMessageActionCreator,
   updateMessageActionCreator,
   selectMessageForEdit,
+  selectIsEditMode,
+  resetEditMessageActionCreator,
 } from '../../features/messages';
 
 function SendMessageFormContainer(props) {
@@ -16,6 +18,8 @@ function SendMessageFormContainer(props) {
     sendMessage,
     updateMessage,
     messageForEdit,
+    isEditMode,
+    resetEditMessage,
   } = props
 
   const fileRef = useRef(null);
@@ -60,6 +64,11 @@ function SendMessageFormContainer(props) {
   }, [sendMessageRequest, updateMessageRequest,
       message, messageForEdit])
 
+  const onEditCancel = useCallback(() => {
+    resetEditMessage()
+    setMessage("")
+  }, [resetEditMessage, setMessage])
+
   return (
     <SendMessageFormComponent
       fileRef={fileRef}
@@ -67,17 +76,21 @@ function SendMessageFormContainer(props) {
       onMessageChange={onMessageChange}
       onFileChange={onFileChange}
       onSubmit={onSubmit}
+      shouldShowCancelButton={isEditMode}
+      onCancel={onEditCancel}
     />
   )
 }
 
 const mapStateToProps = state => ({
   messageForEdit: selectMessageForEdit(state),
+  isEditMode: selectIsEditMode(state),
 })
 
 const mapDispatchToProps = ({
   sendMessage: sendMessageActionCreator,
   updateMessage: updateMessageActionCreator,
+  resetEditMessage: resetEditMessageActionCreator,
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(
