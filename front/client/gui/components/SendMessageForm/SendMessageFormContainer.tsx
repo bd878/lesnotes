@@ -42,7 +42,10 @@ function SendMessageFormContainer(props) {
 
   const updateMessageRequest = useCallback(e => {
     updateMessage(messageForEdit.ID, message)
-  }, [updateMessage, setMessage, messageForEdit, message])
+    setMessage("")
+    setFile(null)
+  }, [updateMessage, setMessage,
+    setFile, messageForEdit, message])
 
   const sendMessageRequest = useCallback(e => {
     if (!message) {console.error(i18n("msg_required_err")); return;}
@@ -57,7 +60,7 @@ function SendMessageFormContainer(props) {
 
   const onSubmit = useCallback(e => {
     e.preventDefault()
-    if (messageForEdit && messageForEdit.ID)
+    if (messageForEdit && messageForEdit.ID) 
       updateMessageRequest(e) // update mode
     else
       sendMessageRequest(e) // save mode

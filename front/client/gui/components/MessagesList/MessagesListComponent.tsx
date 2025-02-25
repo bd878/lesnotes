@@ -17,9 +17,9 @@ function MessagesListComponent(props) {
   } = props
 
   let content = <Tag></Tag>;
-  if (error) {
+  if (error)
     content = <Tag>{error}</Tag>
-  } else {
+  else
     content = (
       <List el="ul" css={css}>
         {messages.map(message => (
@@ -48,7 +48,6 @@ function MessagesListComponent(props) {
         ))}
       </List>
     )
-  }
 
   return (
     <>

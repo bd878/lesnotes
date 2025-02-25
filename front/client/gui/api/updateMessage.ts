@@ -28,9 +28,9 @@ async function updateMessage(id = "", message = "") {
       result.error = response.error
       result.explain = response.explain
     } else {
-      if (response.value && response.value.id) {
-        const model = models.message({ID: response.value.id, update_utc_nano: response.value.update_utc_nano})
-        result.ID = model.ID
+      if (response.value) {
+        const model = models.message({update_utc_nano: response.value.update_utc_nano})
+        result.ID = id
         result.updateUTCNano = model.updateUTCNano
       }
     }

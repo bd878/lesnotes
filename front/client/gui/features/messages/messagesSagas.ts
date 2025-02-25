@@ -1,4 +1,4 @@
-import {takeLatest,put,call} from 'redux-saga/effects'
+import {takeLatest,put,call,select} from 'redux-saga/effects'
 import {UPDATE_MESSAGE, FETCH_MESSAGES, SEND_MESSAGE} from './messagesActions'
 import {
   updateMessageActionCreator,
@@ -10,6 +10,7 @@ import {
   pushBackMessagesActionCreator,
   appendMessagesActionCreator,
 } from './messagesActionCreators'
+import {selectMessages} from './messagesSelectors';
 import api from '../../api'
 
 interface FetchMessagesPayload {
@@ -59,10 +60,20 @@ function* updateMessage({payload}) {
     const response = yield call(api.updateMessage,
       payload.ID, payload.text)
 
+    const messages = yield select(selectMessages)
+    let idx = messages.findIndex(({ID}) => ID === payload.ID)
+    if (idx !== -1)
+      messages[idx] = {
+        ...messages[idx],
+        ID: response.ID,
+        text: payload.text,
+        updateUTCNano: response.updateUTCNano,
+      }
+
     if (response.error !== "")
       yield put(updateMessageFailedActionCreator(response.error))
     else
-      yield put(updateMessageSucceededActionCreator(response.message))
+      yield put(updateMessageSucceededActionCreator(messages))
   } catch (e) {
     yield put(updateMessageFailedActionCreator(e.message))
   }
