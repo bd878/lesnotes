@@ -1,13 +1,16 @@
 import {
+  DELETE_MESSAGE,
   FETCH_MESSAGES,
-  FETCH_MESSAGES_FAILED,
-  FETCH_MESSAGES_SUCCEEDED,
-  APPEND_MESSAGES,
   UPDATE_MESSAGE,
-  UPDATE_MESSAGE_FAILED,
-  UPDATE_MESSAGE_SUCCEEDED,
-  PUSH_BACK_MESSAGES,
+  SEND_MESSAGE,
   SET_MESSAGE_FOR_EDIT,
+
+  MESSAGES_FAILED,
+
+  FETCH_MESSAGES_SUCCEEDED,
+  SEND_MESSAGE_SUCCEEDED,
+  UPDATE_MESSAGE_SUCCEEDED,
+  DELETE_MESSAGE_SUCCEEDED,
 } from './messagesActions';
 
 const initialState = {
@@ -20,6 +23,13 @@ const initialState = {
 
 export function messagesReducer(messagesState = initialState, action) {
   switch (action.type) {
+    case MESSAGES_FAILED: {
+      return {
+        ...messagesState,
+        error: action.payload,
+        loading: false,
+      }
+    }
     case FETCH_MESSAGES: {
       return {
         ...messagesState,
@@ -30,28 +40,23 @@ export function messagesReducer(messagesState = initialState, action) {
     case FETCH_MESSAGES_SUCCEEDED: {
       return {
         ...messagesState,
+        list: [ ...action.payload.messages, ...messagesState.list ],
         isLastPage: action.payload.isLastPage,
         loading: false,
         error: "",
       }
     }
-    case FETCH_MESSAGES_FAILED: {
+    case SEND_MESSAGE: {
       return {
         ...messagesState,
-        loading: false,
-        errors: action.payload,
+        loading: true,
+        error: "",
       }
     }
-    case APPEND_MESSAGES: {
+    case SEND_MESSAGE_SUCCEEDED: {
       return {
         ...messagesState,
         list: [ ...messagesState.list, ...action.payload ],
-      }
-    }
-    case PUSH_BACK_MESSAGES: {
-      return {
-        ...messagesState,
-        list: [ ...action.payload, ...messagesState.list ],
       }
     }
     case UPDATE_MESSAGE: {
@@ -69,17 +74,25 @@ export function messagesReducer(messagesState = initialState, action) {
         error: "",
       }
     }
-    case UPDATE_MESSAGE_FAILED: {
-      return {
-        ...messagesState,
-        loading: false,
-        error: action.payload,
-      }
-    }
     case SET_MESSAGE_FOR_EDIT: {
       return {
         ...messagesState,
         messageForEdit: action.payload,
+      }
+    }
+    case DELETE_MESSAGE: {
+      return {
+        ...messagesState,
+        loading: true,
+        error: "",
+      }
+    }
+    case DELETE_MESSAGE_SUCCEEDED: {
+      return {
+        ...messagesState,
+        list: [ ...action.payload ],
+        loading: false,
+        error: "",
       }
     }
   }

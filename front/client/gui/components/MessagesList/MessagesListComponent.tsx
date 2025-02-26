@@ -14,6 +14,7 @@ function MessagesListComponent(props) {
     loading,
     error,
     onListItemClick,
+    onDeleteClick,
   } = props
 
   let content = <Tag></Tag>;
@@ -44,6 +45,13 @@ function MessagesListComponent(props) {
             </Tag> : null}
 
             <ListItem onClick={() => onListItemClick(message)} key={message.ID}>{message.text}</ListItem>
+
+            <Tag
+              el="button"
+              css="pointer"
+              type="button"
+              onClick={() => onDeleteClick(message)}
+            >{i18n("delete_message")}</Tag>
           </Tag>
         ))}
       </List>

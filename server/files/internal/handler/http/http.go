@@ -78,7 +78,7 @@ func (h *Handler) DownloadFile(log *logger.Logger, w http.ResponseWriter, req *h
   log.Infow("downloading file", "name", file.Name, "mimetype", mimetype)
 
   w.Header().Set("Content-Type", mimetype)
-  w.Header().Set("Content-Disposition", "attachment; " + "filename=\"" + file.Name + "\"")
+  w.Header().Set("Content-Disposition", "attachment; " + "filename*=UTF-8\"" + file.Name + "\"")
 
   _, err = io.Copy(w, stream)
   if err != nil {

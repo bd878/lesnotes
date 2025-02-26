@@ -1,14 +1,16 @@
 import {takeLatest,put,call,select} from 'redux-saga/effects'
-import {UPDATE_MESSAGE, FETCH_MESSAGES, SEND_MESSAGE} from './messagesActions'
 import {
-  updateMessageActionCreator,
-  updateMessageSucceededActionCreator,
-  updateMessageFailedActionCreator,
-  sendMessageFailedActionCreator,
-  fetchMessagesFailedActionCreator,
+  UPDATE_MESSAGE,
+  FETCH_MESSAGES,
+  SEND_MESSAGE,
+  DELETE_MESSAGE,
+} from './messagesActions'
+import {
+  messagesFailedActionCreator,
   fetchMessagesSucceededActionCreator,
-  pushBackMessagesActionCreator,
-  appendMessagesActionCreator,
+  sendMessageSucceededActionCreator,
+  updateMessageSucceededActionCreator,
+  deleteMessageSucceededActionCreator,
 } from './messagesActionCreators'
 import {selectMessages} from './messagesSelectors';
 import api from '../../api'
@@ -24,15 +26,13 @@ function* fetchMessages({payload}: {payload: FetchMessagesPayload}) {
     const response = yield call(api.loadMessages,
       payload.limit, payload.offset, payload.order)
 
-    if (response.error != "") {
-      yield put(fetchMessagesFailedActionCreator(response.error))
-    } else {
-      response.messages.reverse();
+    response.messages.reverse();
+    if (response.error != "")
+      yield put(messagesFailedActionCreator(response.error))
+    else
       yield put(fetchMessagesSucceededActionCreator(response))
-      yield put(pushBackMessagesActionCreator(response.messages))
-    }
   } catch (e) {
-    yield put(fetchMessagesFailedActionCreator(e.message))
+    yield put(messagesFailedActionCreator(e.message))
   }
 }
 
@@ -47,11 +47,11 @@ function* sendMessage({payload}: {payload: SendMessagePayload}) {
         payload.message, payload.file)
 
     if (response.error != "")
-      yield put(sendMessageFailedActionCreator(response.error))
+      yield put(messagesFailedActionCreator(response.error))
     else
-      yield put(appendMessagesActionCreator([response.message]))
+      yield put(sendMessageSucceededActionCreator(response.message))
   } catch (e) {
-    yield put(sendMessageFailedActionCreator(e.message))
+    yield put(messagesFailedActionCreator(e.message))
   }
 }
 
@@ -71,15 +71,32 @@ function* updateMessage({payload}) {
       }
 
     if (response.error !== "")
-      yield put(updateMessageFailedActionCreator(response.error))
+      yield put(messagesFailedActionCreator(response.error))
     else
       yield put(updateMessageSucceededActionCreator(messages))
   } catch (e) {
-    yield put(updateMessageFailedActionCreator(e.message))
+    yield put(messagesFailedActionCreator(e.message))
+  }
+}
+
+function* deleteMessage({payload}) {
+  try {
+    const response = yield call(api.deleteMessage, payload.ID)
+
+    let messages = yield select(selectMessages)
+    messages = messages.filter(({ID}) => ID !== payload.ID)
+
+    if (response.error !== "")
+      yield put(messagesFailedActionCreator(response.error))
+    else
+      yield put(deleteMessageSucceededActionCreator(messages))
+  } catch (e) {
+    yield put(messagesFailedActionCreator(e.message))
   }
 }
 
 function* messagesSaga() {
+  yield takeLatest(DELETE_MESSAGE, deleteMessage)
   yield takeLatest(UPDATE_MESSAGE, updateMessage)
   yield takeLatest(FETCH_MESSAGES, fetchMessages)
   yield takeLatest(SEND_MESSAGE, sendMessage)

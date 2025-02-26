@@ -3,10 +3,9 @@ import {
   setEditMessageActionCreator,
   sendMessageActionCreator,
   fetchMessagesActionCreator,
-  appendMessagesActionCreator,
-  pushBackMessagesActionCreator,
   updateMessageActionCreator,
   resetEditMessageActionCreator,
+  deleteMessageActionCreator,
 } from './messagesActionCreators'
 import {
   selectMessages,
@@ -23,10 +22,9 @@ export {
   messagesReducer,
   setEditMessageActionCreator,
   resetEditMessageActionCreator,
+  deleteMessageActionCreator,
   sendMessageActionCreator,
   fetchMessagesActionCreator,
-  appendMessagesActionCreator,
-  pushBackMessagesActionCreator,
   updateMessageActionCreator,
   selectMessages,
   selectError,

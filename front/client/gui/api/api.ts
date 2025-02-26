@@ -57,7 +57,7 @@ function getOptions(props) {
   return {
     headers: new Headers({ ...headers }),
     body: prepareBody(body, method),
-    mode: 'no-cors',
+    mode: 'cors',
     method,
     credentials,
   };
