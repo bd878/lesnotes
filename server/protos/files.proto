@@ -16,6 +16,7 @@ message File {
   int32         id = 3;
   int32         user_id = 4;
   string        error = 5;
+  int64         size = 6;
 }
 
 message FileChunk {

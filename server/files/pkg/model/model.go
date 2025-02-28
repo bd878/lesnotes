@@ -6,6 +6,7 @@ type File struct {
   Name           string        `json:"name,omitempty"`
   CreateUTCNano  int64         `json:"create_utc_nano,omitempty"`
   Error          string        `json:"error,omitempty"`
+  Size           int64         `json:"size,omitempty"`
 }
 
 type ReadFileParams struct {

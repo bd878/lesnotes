@@ -9,6 +9,7 @@ func FileToProto(file *File) *api.File {
     Id:            file.ID,
     Name:          file.Name,
     CreateUtcNano: file.CreateUTCNano,
+    Size:          file.Size,
     Error:         file.Error,
   }
 }
@@ -19,6 +20,7 @@ func FileFromProto(proto *api.File) *File {
     Name:              proto.Name,
     CreateUTCNano:     proto.CreateUtcNano,
     Error:             proto.Error,
+    Size:              proto.Size,
   }
 }
 

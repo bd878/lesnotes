@@ -67,6 +67,7 @@ func (s *streamReader) Read(p []byte) (int, error) {
 
   data, err := s.Recv()
   if err != nil {
+    logger.Errorln("failed to receive next data")
     return 0, err
   }
 
@@ -78,6 +79,7 @@ func (s *streamReader) Read(p []byte) (int, error) {
 
   n := copy(p, chunk.Chunk)
   if n < len(chunk.Chunk) {
+    s.buf.Grow(len(chunk.Chunk))
     _, err := s.buf.Write(chunk.Chunk[n:])
     if err != nil {
       logger.Errorf("failed to write file chunks to buffer", "error", err)

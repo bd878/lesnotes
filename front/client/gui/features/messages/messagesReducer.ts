@@ -56,7 +56,7 @@ export function messagesReducer(messagesState = initialState, action) {
     case SEND_MESSAGE_SUCCEEDED: {
       return {
         ...messagesState,
-        list: [ ...messagesState.list, ...action.payload ],
+        list: [ ...messagesState.list, action.payload ],
       }
     }
     case UPDATE_MESSAGE: {

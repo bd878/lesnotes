@@ -2,11 +2,10 @@ package http
 
 import (
   "io"
+  "fmt"
   "strconv"
   "net/http"
-  "mime"
   "context"
-  "path/filepath"
   "encoding/json"
 
   "github.com/bd878/gallery/server/logger"
@@ -70,15 +69,10 @@ func (h *Handler) DownloadFile(log *logger.Logger, w http.ResponseWriter, req *h
     return
   }
 
-  mimetype := mime.TypeByExtension(filepath.Ext(file.Name))
-  if mimetype == "" {
-    mimetype = "application/octet-stream"
-  }
+  log.Infow("downloading file", "name", file.Name)
 
-  log.Infow("downloading file", "name", file.Name, "mimetype", mimetype)
-
-  w.Header().Set("Content-Type", mimetype)
-  w.Header().Set("Content-Disposition", "attachment; " + "filename*=UTF-8\"" + file.Name + "\"")
+  w.Header().Set("Content-Disposition", "attachment; " + "filename*=UTF-8''" + file.Name)
+  w.Header().Set("Content-Length", fmt.Sprintf("%d", file.Size))
 
   _, err = io.Copy(w, stream)
   if err != nil {

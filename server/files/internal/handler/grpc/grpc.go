@@ -72,6 +72,14 @@ func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.F
     return err
   }
 
+  var size int64
+  stat, err := ff.Stat()
+  if err != nil {
+    logger.Errorw("cannot stat file", "error", err, "name", file.Name, "id", file.ID)
+  } else {
+    size = stat.Size()
+  }
+
   err = stream.Send(&api.FileData{
     Data: &api.FileData_File{
       File: &api.File{
@@ -79,6 +87,7 @@ func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.F
         UserId:         file.UserID,
         Name:           file.Name,
         CreateUtcNano:  file.CreateUTCNano,
+        Size:           size,
       },
     },
   })
