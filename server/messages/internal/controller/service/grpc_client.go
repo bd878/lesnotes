@@ -47,11 +47,11 @@ func (s *Messages) Close() {
   }
 }
 
-func (s *Messages) SaveMessage(ctx context.Context, log *logger.Logger, params *model.SaveMessageParams) (
+func (s *Messages) SaveMessage(ctx context.Context, log *logger.Logger, message *model.Message) (
   *model.SaveMessageResult, error,
 ) {
   res, err := s.client.SaveMessage(ctx, &api.SaveMessageRequest{
-    Message: model.MessageToProto(params.Message),
+    Message: model.MessageToProto(message),
   })
   if err != nil {
     log.Errorw("client failed to save message", "error", err)
@@ -99,10 +99,10 @@ func (s *Messages) UpdateMessage(ctx context.Context, log *logger.Logger, params
   }, nil
 }
 
-func (s *Messages) ReadUserMessages(ctx context.Context, log *logger.Logger, params *model.ReadUserMessagesParams) (
-  *model.ReadUserMessagesResult, error,
+func (s *Messages) ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadAllMessagesParams) (
+  *model.ReadAllMessagesResult, error,
 ) {
-  res, err := s.client.ReadUserMessages(ctx, &api.ReadUserMessagesRequest{
+  res, err := s.client.ReadAllMessages(ctx, &api.ReadAllMessagesRequest{
     UserId: int32(params.UserID),
     Limit:  params.Limit,
     Offset: params.Offset,
@@ -113,7 +113,7 @@ func (s *Messages) ReadUserMessages(ctx context.Context, log *logger.Logger, par
     return nil, err
   }
 
-  return &model.ReadUserMessagesResult{
+  return &model.ReadAllMessagesResult{
     Messages: model.MapMessagesFromProto(model.MessageFromProto, res.Messages),
     IsLastPage: res.IsLastPage,
   }, err

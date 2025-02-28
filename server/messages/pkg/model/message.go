@@ -7,6 +7,7 @@ import (
 
 type Message struct {
   ID                  int32               `json:"id"`
+  ThreadID            int32               `json:"thread_id,omitempty"`
   CreateUTCNano       int64               `json:"create_utc_nano,omitempty"`
   UpdateUTCNano       int64               `json:"update_utc_nano,omitempty"`
   UserID              int32               `json:"user_id,omitempty"`

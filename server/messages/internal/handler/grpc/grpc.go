@@ -11,10 +11,10 @@ import (
 )
 
 type Controller interface {
-  SaveMessage(ctx context.Context, log *logger.Logger, params *model.SaveMessageParams) error
+  SaveMessage(ctx context.Context, log *logger.Logger, message *model.Message) error
   UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) error
   DeleteMessage(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error
-  ReadUserMessages(ctx context.Context, log *logger.Logger, params *model.ReadUserMessagesParams) (*model.ReadUserMessagesResult, error)
+  ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadAllMessagesParams) (*model.ReadAllMessagesResult, error)
   GetServers(ctx context.Context, log *logger.Logger) ([]*api.Server, error)
 }
 
@@ -36,9 +36,7 @@ func (h *Handler) SaveMessage(ctx context.Context, req *api.SaveMessageRequest) 
   req.Message.UpdateUtcNano = time.Now().UnixNano()
   req.Message.Id = utils.RandomID()
 
-  err := h.controller.SaveMessage(ctx, logger.Default(), &model.SaveMessageParams{
-    Message: model.MessageFromProto(req.Message),
-  }) 
+  err := h.controller.SaveMessage(ctx, logger.Default(), model.MessageFromProto(req.Message)) 
   if err != nil {
     logger.Errorw("failed to save message", "error", err)
     return nil, err
@@ -87,10 +85,10 @@ func (h *Handler) DeleteMessage(ctx context.Context, req *api.DeleteMessageReque
   return &api.DeleteMessageResponse{}, nil
 }
 
-func (h *Handler) ReadUserMessages(ctx context.Context, req *api.ReadUserMessagesRequest) (
-  *api.ReadUserMessagesResponse, error,
+func (h *Handler) ReadAllMessages(ctx context.Context, req *api.ReadAllMessagesRequest) (
+  *api.ReadAllMessagesResponse, error,
 ) {
-  res, err := h.controller.ReadUserMessages(ctx, logger.Default(), &model.ReadUserMessagesParams{
+  res, err := h.controller.ReadAllMessages(ctx, logger.Default(), &model.ReadAllMessagesParams{
     UserID:    req.UserId,
     Limit:     req.Limit,
     Offset:    req.Offset,
@@ -101,7 +99,7 @@ func (h *Handler) ReadUserMessages(ctx context.Context, req *api.ReadUserMessage
     return nil, err
   }
 
-  return &api.ReadUserMessagesResponse{
+  return &api.ReadAllMessagesResponse{
     Messages: model.MapMessagesToProto(model.MessageToProto, res.Messages),
     IsLastPage: res.IsLastPage,
   }, nil

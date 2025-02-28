@@ -11,10 +11,10 @@ import (
 )
 
 type Repository interface {
-  Create(ctx context.Context, log *logger.Logger, params *model.SaveMessageParams) error
+  Create(ctx context.Context, log *logger.Logger, message *model.Message) error
   Update(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) error
   Delete(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error
-  ReadUserMessages(ctx context.Context, log *logger.Logger, params *model.ReadUserMessagesParams) (*model.ReadUserMessagesResult, error)
+  ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadAllMessagesParams) (*model.ReadAllMessagesResult, error)
   GetBatch(ctx context.Context, log *logger.Logger) ([]*model.Message, error)
   Truncate(ctx context.Context, log *logger.Logger) error
 }
@@ -53,9 +53,7 @@ func (f *fsm) applyAppend(raw []byte) interface{} {
   proto.Unmarshal(raw, &cmd)
 
   // Put does not put message with same id twice
-  err := f.repo.Create(context.Background(), logger.Default(), &model.SaveMessageParams{
-    Message: model.MessageFromProto(cmd.Message),
-  })
+  err := f.repo.Create(context.Background(), logger.Default(), model.MessageFromProto(cmd.Message))
   if err != nil {
     return err
   }

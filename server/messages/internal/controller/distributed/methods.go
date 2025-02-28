@@ -38,9 +38,9 @@ func (m *DistributedMessages) apply(ctx context.Context, reqType RequestType, cm
   return res, nil
 }
 
-func (m *DistributedMessages) SaveMessage(ctx context.Context, log *logger.Logger, params *model.SaveMessageParams) error {
+func (m *DistributedMessages) SaveMessage(ctx context.Context, log *logger.Logger, message *model.Message) error {
   cmd, _ := proto.Marshal(&AppendCommand{
-    Message: model.MessageToProto(params.Message),
+    Message: model.MessageToProto(message),
   })
 
   _, err := m.apply(ctx, AppendRequest, cmd)
@@ -86,13 +86,13 @@ func (m *DistributedMessages) DeleteMessage(ctx context.Context, log *logger.Log
   return nil
 }
 
-func (m *DistributedMessages) ReadUserMessages(ctx context.Context, log *logger.Logger, params *model.ReadUserMessagesParams) (
-  *model.ReadUserMessagesResult, error,
+func (m *DistributedMessages) ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadAllMessagesParams) (
+  *model.ReadAllMessagesResult, error,
 ) {
-  return m.repo.ReadUserMessages(
+  return m.repo.ReadAllMessages(
     ctx,
     log,
-    &model.ReadUserMessagesParams{
+    &model.ReadAllMessagesParams{
       UserID:    params.UserID,
       Limit:     params.Limit,
       Offset:    params.Offset,

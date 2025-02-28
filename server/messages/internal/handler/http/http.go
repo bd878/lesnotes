@@ -19,10 +19,10 @@ import (
 const selectNoLimit int = -1
 
 type Controller interface {
-  SaveMessage(ctx context.Context, log *logger.Logger, params *model.SaveMessageParams) (*model.SaveMessageResult, error)
+  SaveMessage(ctx context.Context, log *logger.Logger, message *model.Message) (*model.SaveMessageResult, error)
   UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (*model.UpdateMessageResult, error)
   DeleteMessage(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) (*model.DeleteMessageResult, error)
-  ReadUserMessages(ctx context.Context, log *logger.Logger, params *model.ReadUserMessagesParams) (*model.ReadUserMessagesResult, error)
+  ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadAllMessagesParams) (*model.ReadAllMessagesResult, error)
 }
 
 // TODO: move files into controller?
@@ -106,13 +106,11 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
     return
   }
 
-  resp, err := h.controller.SaveMessage(req.Context(), log, &model.SaveMessageParams{
-    Message: &model.Message{
-      UserID: user.ID,
-      Text:   text,
-      File:   &filesmodel.File{
-        ID:     fileID,
-      },
+  resp, err := h.controller.SaveMessage(req.Context(), log, &model.Message{
+    UserID: user.ID,
+    Text:   text,
+    File:   &filesmodel.File{
+      ID:     fileID,
     },
   })
   if err != nil {
@@ -321,7 +319,7 @@ func (h *Handler) ReadMessages(log *logger.Logger, w http.ResponseWriter, req *h
     ascending = true
   }
 
-  res, err := h.controller.ReadUserMessages(context.Background(), log, &model.ReadUserMessagesParams{
+  res, err := h.controller.ReadAllMessages(context.Background(), log, &model.ReadAllMessagesParams{
     UserID:    user.ID,
     Limit:     int32(limitInt),
     Offset:    int32(offsetInt),

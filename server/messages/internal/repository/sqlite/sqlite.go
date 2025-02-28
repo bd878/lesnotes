@@ -7,6 +7,7 @@ import (
 
   _ "github.com/mattn/go-sqlite3"
   "github.com/bd878/gallery/server/logger"
+  "github.com/bd878/gallery/server/utils"
   "github.com/bd878/gallery/server/messages/pkg/model"
   filesmodel "github.com/bd878/gallery/server/files/pkg/model"
 )
@@ -16,6 +17,10 @@ type Repository struct {
   insertStmt   *sql.Stmt
   updateStmt   *sql.Stmt
   deleteStmt   *sql.Stmt
+  ascStmt *sql.Stmt
+  descStmt *sql.Stmt
+  ascThreadStmt *sql.Stmt
+  descThreadStmt *sql.Stmt
 }
 
 func New(dbFilePath string) *Repository {
@@ -24,46 +29,79 @@ func New(dbFilePath string) *Repository {
     panic(err)
   }
 
-  insertStmt, err := pool.Prepare(`
+  insertStmt := utils.Must(pool.Prepare(`
 INSERT INTO messages( 
   id,
+  thread_id,
   user_id,
   create_utc_nano,
   update_utc_nano,
   text,
   file_id
-) VALUES (:id, :userId, :createUtcNano, :updateUtcNano, :text, :fileId)
+) VALUES (:id, :threadId, :userId, :createUtcNano, :updateUtcNano, :text, :fileId)
 ;`,
-  )
-  if err != nil {
-    panic(err)
-  }
+  ))
 
-  updateStmt, err := pool.Prepare(`
+  updateStmt := utils.Must(pool.Prepare(`
 UPDATE messages SET 
   text = :text,
-  update_utc_nano = :updateUtcNano 
+  update_utc_nano = :updateUtcNano ,
+  thread_id = :threadId
 WHERE id = :id AND user_id = :userId
 ;`,
-  )
-  if err != nil {
-    panic(err)
-  }
+  ))
 
-  deleteStmt, err := pool.Prepare(`
+  deleteStmt := utils.Must(pool.Prepare(`
 DELETE FROM messages 
 WHERE id = :id AND user_id = :userId
 ;`,
-  )
-  if err != nil {
-    panic(err)
-  }
+  ))
+
+  ascStmt := utils.Must(pool.Prepare(`
+SELECT id, user_id, create_utc_nano, update_utc_nano, text, file_id
+FROM messages
+WHERE user_id = :userId
+ORDER BY create_utc_nano ASC
+LIMIT :limit OFFSET :offset
+;`,
+  ))
+
+  descStmt := utils.Must(pool.Prepare(`
+SELECT id, user_id, create_utc_nano, update_utc_nano, text, file_id
+FROM messages
+WHERE user_id = :userId
+ORDER BY create_utc_nano DESC
+LIMIT :limit OFFSET :offset
+;`,
+  ))
+
+  ascThreadStmt := utils.Must(pool.Prepare(`
+SELECT id, user_id, create_utc_nano, update_utc_nano, text, file_id
+FROM messages
+WHERE user_id = :userId AND thread_id = :threadId
+ORDER BY create_utc_nano ASC
+LIMIT :limit OFFSET :offset
+;`,
+  ))
+
+  descThreadStmt := utils.Must(pool.Prepare(`
+SELECT id, user_id, create_utc_nano, update_utc_nano, text, file_id
+FROM messages
+WHERE user_id = :userId AND thread_id = :threadId
+ORDER BY create_utc_nano DESC
+LIMIT :limit OFFSET :offset
+;`,
+  ))
 
   return &Repository{
     pool: pool,
     insertStmt: insertStmt,
     updateStmt: updateStmt,
     deleteStmt: deleteStmt,
+    ascStmt: ascStmt,
+    descStmt: descStmt,
+    ascThreadStmt: ascThreadStmt,
+    descThreadStmt: descThreadStmt,
   }
 }
 
@@ -72,14 +110,15 @@ WHERE id = :id AND user_id = :userId
  * Does not put message with same id
  * twice
  */
-func (r *Repository) Create(ctx context.Context, log *logger.Logger, params *model.SaveMessageParams) error {
+func (r *Repository) Create(ctx context.Context, log *logger.Logger, message *model.Message) error {
   _, err := r.insertStmt.ExecContext(ctx,
-    sql.Named("id", params.Message.ID),
-    sql.Named("userId", params.Message.UserID),
-    sql.Named("createUtcNano", params.Message.CreateUTCNano),
-    sql.Named("updateUtcNano", params.Message.UpdateUTCNano),
-    sql.Named("text", params.Message.Text),
-    sql.Named("fileId", params.Message.File.ID),
+    sql.Named("id", message.ID),
+    sql.Named("threadId", message.ThreadID),
+    sql.Named("userId", message.UserID),
+    sql.Named("createUtcNano", message.CreateUTCNano),
+    sql.Named("updateUtcNano", message.UpdateUTCNano),
+    sql.Named("text", message.Text),
+    sql.Named("fileId", message.File.ID),
   )
   if err != nil {
     log.Errorw("failed to insert new message ", "error", err)
@@ -100,6 +139,7 @@ func (r *Repository) Delete(ctx context.Context, log *logger.Logger, params *mod
 func (r *Repository) Update(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) error {
   _, err := r.updateStmt.ExecContext(ctx,
     sql.Named("text", params.Text),
+    sql.Named("threadId", params.ThreadID),
     sql.Named("updateUtcNano", params.UpdateUTCNano),
     sql.Named("id", params.ID),
     sql.Named("userId", params.UserID),
@@ -120,35 +160,60 @@ func (r *Repository) Truncate(ctx context.Context, log *logger.Logger) error {
   return nil
 }
 
-const ascendingStmt = `
-SELECT id, user_id, create_utc_nano, update_utc_nano, text, file_id
-FROM messages
-WHERE user_id = :userId
-ORDER BY create_utc_nano ASC
-LIMIT :limit OFFSET :offset
-`
-
-const descendingStmt = `
-SELECT id, user_id, create_utc_nano, update_utc_nano, text, file_id
-FROM messages
-WHERE user_id = :userId
-ORDER BY create_utc_nano DESC
-LIMIT :limit OFFSET :offset
-`
-
-func (r *Repository) ReadUserMessages(ctx context.Context, log *logger.Logger, params *model.ReadUserMessagesParams) (
-  *model.ReadUserMessagesResult, error,
+func (r *Repository) ReadThreadMessages(ctx context.Context, log *logger.Logger, params *model.ReadThreadMessagesParams) (
+  *model.ReadThreadMessagesResult, error,
 ) {
   var rows *sql.Rows
   var err error
-  var isLastPage bool
 
   if params.Ascending {
-    rows, err = r.pool.QueryContext(ctx, ascendingStmt,
+    rows, err = r.ascThreadStmt.QueryContext(ctx,
+      sql.Named("userId", params.UserID), sql.Named("threadId", params.ThreadID),
+      sql.Named("limit", params.Limit), sql.Named("offset", params.Offset),
+    )
+  } else {
+    rows, err = r.descStmt.QueryContext(ctx,
+      sql.Named("userId", params.UserID), sql.Named("threadId", params.ThreadID),
+      sql.Named("limit", params.Limit), sql.Named("offset", params.Offset),
+    )
+  }
+
+  if err != nil {
+    log.Errorln("failed to query messages context")
+    return nil, err
+  }
+
+  defer rows.Close()
+
+  selected, err := r.selectMessages(ctx, log, rows, params.UserID, params.Limit, params.Offset)
+  if err != nil {
+    log.Errorln("cannot select messages")
+    return nil, err
+  }
+
+  return &model.ReadThreadMessagesResult{
+    Messages: selected.List,
+    IsLastPage: selected.IsLastPage,
+  }, nil
+}
+
+type selectedMessages struct {
+  List []*model.Message
+  IsLastPage bool
+}
+
+func (r *Repository) ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadAllMessagesParams) (
+  *model.ReadAllMessagesResult, error,
+) {
+  var rows *sql.Rows
+  var err error
+
+  if params.Ascending {
+    rows, err = r.ascStmt.QueryContext(ctx,
       sql.Named("userId", params.UserID), sql.Named("limit", params.Limit), sql.Named("offset", params.Offset),
     )
   } else {
-    rows, err = r.pool.QueryContext(ctx, descendingStmt,
+    rows, err = r.descStmt.QueryContext(ctx,
       sql.Named("userId", params.UserID), sql.Named("limit", params.Limit), sql.Named("offset", params.Offset),
     )
   }
@@ -159,6 +224,24 @@ func (r *Repository) ReadUserMessages(ctx context.Context, log *logger.Logger, p
   }
 
   defer rows.Close()
+
+  selected, err := r.selectMessages(ctx, log, rows, params.UserID, params.Limit, params.Offset)
+  if err != nil {
+    log.Errorln("cannot select messages")
+    return nil, err
+  }
+
+  return &model.ReadAllMessagesResult{
+    Messages: selected.List,
+    IsLastPage: selected.IsLastPage,
+  }, nil
+}
+
+func (r *Repository) selectMessages(ctx context.Context, log *logger.Logger, rows *sql.Rows, userID, limit, offset int32) (
+  *selectedMessages, error,
+) {
+  var isLastPage bool
+  var err error
 
   var res []*model.Message
   for rows.Next() {
@@ -196,12 +279,12 @@ func (r *Repository) ReadUserMessages(ctx context.Context, log *logger.Logger, p
     res = append(res, msg)
   }
 
-  if int32(len(res)) < params.Limit {
+  if int32(len(res)) < limit {
     isLastPage = true
   } else {
     row := r.pool.QueryRowContext(ctx,
       "SELECT COUNT(*) FROM messages WHERE user_id = :userId",
-      sql.Named("userId", params.UserID),
+      sql.Named("userId", userID),
     )
     if err != nil {
       isLastPage = false
@@ -211,14 +294,14 @@ func (r *Repository) ReadUserMessages(ctx context.Context, log *logger.Logger, p
         isLastPage = false
       }
 
-      if countMessages <= params.Offset + params.Limit {
+      if countMessages <= offset + limit {
         isLastPage = true
       }
     }
   }
 
-  return &model.ReadUserMessagesResult{
-    Messages: res,
+  return &selectedMessages{
+    List: res,
     IsLastPage: isLastPage,
   }, nil
 }

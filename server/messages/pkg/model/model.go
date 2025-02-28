@@ -4,10 +4,6 @@ import (
   filesmodel "github.com/bd878/gallery/server/files/pkg/model"
 )
 
-type SaveMessageParams struct {
-  Message          *Message
-}
-
 type SaveMessageResult struct {
   ID                int32
   CreateUTCNano     int64
@@ -16,6 +12,7 @@ type SaveMessageResult struct {
 
 type UpdateMessageParams struct {
   ID                int32
+  ThreadID          int32
   UserID            int32
   FileID            int32
   Text              string
@@ -36,14 +33,27 @@ type DeleteMessageParams struct {
 type DeleteMessageResult struct {
 }
 
-type ReadUserMessagesParams struct {
+type ReadThreadMessagesParams struct {
+  UserID            int32
+  ThreadID          int32
+  Limit             int32
+  Offset            int32
+  Ascending         bool
+}
+
+type ReadThreadMessagesResult struct {
+  Messages          []*Message
+  IsLastPage        bool
+}
+
+type ReadAllMessagesParams struct {
   UserID            int32
   Limit             int32
   Offset            int32
   Ascending         bool
 }
 
-type ReadUserMessagesResult struct {
+type ReadAllMessagesResult struct {
   Messages          []*Message
   IsLastPage        bool
 }
