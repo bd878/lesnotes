@@ -20,6 +20,7 @@ message Message {
   int64    update_utc_nano = 4;
   string   text = 5;
   int32    file_id = 7;
+  int32    thread_id = 8;
 }
 
 message ReadThreadMessagesRequest {

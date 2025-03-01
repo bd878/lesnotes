@@ -7,6 +7,8 @@ info:
   version: 1.0.0
 paths:
   /messages/v1/send:
+    parameters:
+      - $ref: '#/components/parameters/threadId'
     post:
       summary: Send a message
       description: |
@@ -83,6 +85,7 @@ paths:
 
   /messages/v1/read:
     parameters:
+      - $ref: '#/components/parameters/threadId'
       limit:
         in: query
         required: false
@@ -100,7 +103,7 @@ paths:
     get:
       summary: Get user messages
       description: |
-        Read messages for a given user
+        Read messages for a given user, or a specific thread
       operationId: readMessage
       responses:
         "200":
@@ -196,6 +199,10 @@ components:
       schema:
         type: integer
         example: 1
+    thread_id:
+      in: query
+      required: false
+      type: integer
 
   schemas:
     updateMessage:
@@ -230,6 +237,9 @@ components:
           type: string
           default: ""
         id:
+          type: integer
+          example: 1
+        thread_id:
           type: integer
           example: 1
         create_utc_nano:

@@ -86,6 +86,22 @@ func (m *DistributedMessages) DeleteMessage(ctx context.Context, log *logger.Log
   return nil
 }
 
+func (m *DistributedMessages) ReadThreadMessages(ctx context.Context, log *logger.Logger, params *model.ReadThreadMessagesParams) (
+  *model.ReadThreadMessagesResult, error,
+) {
+  return m.repo.ReadThreadMessages(
+    ctx,
+    log,
+    &model.ReadThreadMessagesParams{
+      UserID:    params.UserID,
+      ThreadID:  params.ThreadID,
+      Limit:     params.Limit,
+      Offset:    params.Offset,
+      Ascending: params.Ascending,
+    },
+  )
+}
+
 func (m *DistributedMessages) ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadAllMessagesParams) (
   *model.ReadAllMessagesResult, error,
 ) {
