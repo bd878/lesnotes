@@ -45,7 +45,6 @@ function MessagesListComponent(props) {
             </Tag> : null}
 
             <ListItem onClick={() => onListItemClick(message)} key={message.ID}>{message.text}</ListItem>
-
             <Tag
               el="button"
               css="pointer"

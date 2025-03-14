@@ -95,6 +95,34 @@ export function messagesReducer(messagesState = initialState, action) {
         error: "",
       }
     }
+    case UPDATE_MESSAGE: {
+      return {
+        ...messagesState,
+        loading: true,
+        error: "",
+      }
+    }
+    case UPDATE_MESSAGE_SUCCEEDED: {
+      return {
+        ...messagesState,
+        list: [ ...action.payload ],
+        loading: false,
+        error: "",
+      }
+    }
+    case UPDATE_MESSAGE_FAILED: {
+      return {
+        ...messagesState,
+        loading: false,
+        error: action.payload,
+      }
+    }
+    case SET_MESSAGE_FOR_EDIT: {
+      return {
+        ...messagesState,
+        messageForEdit: action.payload,
+      }
+    }
   }
   /* init */
   return messagesState
