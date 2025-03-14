@@ -9,9 +9,6 @@ async function renderer(ctx) {
     const filePath = resolve(path.join(Config.get('basedir'), 'templates/index.mustache'));
     const template = await readFile(filePath, { encoding: 'utf-8' });
 
-    ctx.set({ 'Cache-Control': 'no-cache, max-age=0' })
-    ctx.set({ 'ETag': '1' })
-
     ctx.body = mustache.render(template, {
       script: "/public/login.js",
       styles: [

@@ -4,13 +4,13 @@ import path from 'path';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
-async function renderer(ctx) {
+async function renderMessage(ctx) {
 	try {
-		const filePath = resolve(path.join(Config.get('basedir'), 'templates/index.mustache'));
+		const filePath = resolve(path.join(Config.get('basedir'), 'templates/message.mustache'));
 		const template = await readFile(filePath, { encoding: 'utf-8' });
 
 		ctx.body = mustache.render(template, {
-			script: "/public/home.js",
+			script: "/public/message.js",
 			styles: [
 				"/public/styles.css",
 			],
@@ -19,9 +19,9 @@ async function renderer(ctx) {
 	} catch (err) {
 		ctx.body = "<html>Pas de template</html>";
 		ctx.status = 500;
-		console.log("failed to return index template");
+		console.log("failed to return message template");
 		throw Error(err);
 	}
 }
 
-export default renderer;
+export default renderMessage;

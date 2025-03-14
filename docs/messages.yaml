@@ -86,24 +86,15 @@ paths:
   /messages/v1/read:
     parameters:
       - $ref: '#/components/parameters/threadId'
-      limit:
-        in: query
-        required: false
-        type: integer
-      offset:
-        in: query
-        required: false
-        type: integer
-      asc:
-        in: query
-        required: false
-        schema:
-          enum: [1, 0]
-          type: integer
+      - $ref: '#/components/parameters/messageId'
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
+      - $ref: '#/components/parameters/asc'
     get:
       summary: Get user messages
       description: |
-        Read messages for a given user, or a specific thread
+        Read messages for a given user, or a specific thread, or
+        one single message, if messageId param given
       operationId: readMessage
       responses:
         "200":
@@ -111,21 +102,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    default: "ok"
-                  description:
-                    type: string
-                    default: ""
-                  is_last_page:
-                    type: boolean
-                  messages:
-                    type: array
-                    items:
-                      allOf:
-                        - $ref: '#/components/schemas/message'
+                oneOf:
+                  - $ref: '#/components/schemas/messagesList'
+                  - $ref: '#/components/schemas/message'
         "4XX":
           description: error 
           content:
@@ -199,12 +178,53 @@ components:
       schema:
         type: integer
         example: 1
-    thread_id:
+    threadId:
+      name: thread_id
       in: query
       required: false
-      type: integer
+      schema:
+        type: integer
+        example: 1
+    limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        example: 1
+    offset:
+      name: offset
+      in: query
+      required: false
+      schema:
+        type: integer
+        example: 1
+    asc:
+      name: asc
+      in: query
+      required: false
+      schema:
+        enum: [1, 0]
+        type: integer
 
   schemas:
+    messagesList:
+      type: object
+      properties:
+        status:
+          type: string
+          default: "ok"
+        description:
+          type: string
+          default: ""
+        is_last_page:
+          type: boolean
+        messages:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/message'
+
     updateMessage:
       type: object
       properties:

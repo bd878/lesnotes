@@ -16,6 +16,7 @@ import register from './routes/register.js';
 import home from './routes/home.js';
 import status from './routes/status.js';
 import xxx from './routes/xxx.js';
+import message from './routes/message.js';
 
 const app = new Koa();
 const router = new Router();
@@ -38,6 +39,7 @@ router
   .get('/register', etag, register)
   .get('/home', etag, home)
   .get('/status', status)
+  .get("/:id", etag, message)
   .get('/:any*', xxx)
 
 app.use(router.routes());

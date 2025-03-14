@@ -1,5 +1,6 @@
 import api, {getFileDownloadUrl} from "./api";
 import loadMessages from './loadMessages';
+import loadOneMessage from './loadOneMessage';
 import sendMessage from './sendMessage';
 import updateMessage from './updateMessage';
 import deleteMessage from './deleteMessage';
@@ -15,6 +16,7 @@ export default {
   logout,
   auth,
   loadMessages,
+  loadOneMessage,
   sendMessage,
   updateMessage,
   deleteMessage,
