@@ -59,6 +59,17 @@ func (h *Handler) ReadBatchFiles(ctx context.Context, req *api.ReadBatchFilesReq
   }, nil
 }
 
+func (h *Handler) ReadFile(ctx context.Context, req *api.ReadFileRequest) (
+  *api.File, error,
+) {
+  file, err := h.repo.ReadFile(ctx, logger.Default(), &model.ReadFileParams{ID: req.Id, UserID: req.UserId})
+  if err != nil {
+    logger.Errorw("failed to read one file", "user_id", req.UserId, "file_id", req.Id, "error", err)
+    return nil, err
+  }
+  return model.FileToProto(file), nil
+}
+
 func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.Files_ReadFileStreamServer) error {
   file, err := h.repo.ReadFile(context.Background(), logger.Default(), &model.ReadFileParams{ID: params.Id, UserID: params.UserId})
   if err != nil {

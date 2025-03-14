@@ -16,9 +16,10 @@ import (
 	"github.com/bd878/gallery/server/logger"
 )
 
-const selectNoLimit int = -1
+const selectNoLimit int = 0
 
 type Controller interface {
+	ReadOneMessage(ctx context.Context, log *logger.Logger, userID, messageID int32) (*model.Message, error)
 	SaveMessage(ctx context.Context, log *logger.Logger, message *model.Message) (*model.SaveMessageResult, error)
 	UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (*model.UpdateMessageResult, error)
 	DeleteMessage(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) (*model.DeleteMessageResult, error)
@@ -30,6 +31,7 @@ type Controller interface {
 type FilesGateway interface {
 	SaveFileStream(ctx context.Context, log *logger.Logger, stream io.Reader, params *model.SaveFileParams) (*model.SaveFileResult, error)
 	ReadBatchFiles(ctx context.Context, log *logger.Logger, params *model.ReadBatchFilesParams) (*model.ReadBatchFilesResult, error)
+	ReadFile(ctx context.Context, log *logger.Logger, userID, fileID int32) (*filesmodel.File, error)
 	// TODO: DeleteFile
 }
 
@@ -111,7 +113,7 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 	var threadID int32
 	values := req.URL.Query()
 	if values.Get("thread_id") != "" {
-		threadID, err = strconv.Atoi(values.Get("thread_id"))
+		threadid, err := strconv.Atoi(values.Get("thread_id"))
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(servermodel.ServerResponse{
@@ -120,6 +122,7 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 			})
 			return
 		}
+		threadID = int32(threadid)
 	}
 
 	resp, err := h.controller.SaveMessage(req.Context(), log, &model.Message{
@@ -141,7 +144,7 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 			Status: "ok",
 			Description: "accepted",
 		},
-		Message: model.Message{
+		Message: &model.Message{
 			ID:            resp.ID,
 			ThreadID:      threadID,
 			File:          &filesmodel.File{
@@ -269,10 +272,11 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 	})
 }
 
-func (h *Handler) ReadMessages(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
+func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
 	var limitInt, offsetInt, orderInt int
-	var threadID int32
+	var threadID, messageID int32
 	var ascending bool
+	var message *model.Message
 	var messages []*model.Message
 	var isLastPage bool
 	var err error
@@ -317,9 +321,21 @@ func (h *Handler) ReadMessages(log *logger.Logger, w http.ResponseWriter, req *h
 		limitInt = selectNoLimit
 	}
 
-	values := req.URL.Query()
+	if values.Get("message_id") != "" {
+		messageid, err := strconv.Atoi(values.Get("message_id"))
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+				Status: "ok",
+				Description: "invalid message id",
+			})
+			return
+		}
+		messageID = int32(messageid)
+	}
+
 	if values.Get("thread_id") != "" {
-		threadID, err = strconv.Atoi(values.Get("thread_id"))
+		threadid, err := strconv.Atoi(values.Get("thread_id"))
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(servermodel.ServerResponse{
@@ -328,6 +344,7 @@ func (h *Handler) ReadMessages(log *logger.Logger, w http.ResponseWriter, req *h
 			})
 			return
 		}
+		threadID = int32(threadid)
 	}
 
 	if values.Has("asc") {
@@ -353,6 +370,24 @@ func (h *Handler) ReadMessages(log *logger.Logger, w http.ResponseWriter, req *h
 		ascending = true
 	}
 
+	if messageID != 0 && threadID != 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			Status: "error",
+			Description: "both message_id and thread_id params given",
+		})
+		return
+	}
+
+	if messageID != 0 && (ascending != false || limitInt > 0 || offsetInt > 0) {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			Status: "error",
+			Description: "both message_id and limit/offset params given",
+		})
+		return
+	}
+
 	if threadID != 0 {
 		// read thread messages
 		res, err := h.controller.ReadThreadMessages(context.Background(), log, &model.ReadThreadMessagesParams{
@@ -362,9 +397,24 @@ func (h *Handler) ReadMessages(log *logger.Logger, w http.ResponseWriter, req *h
 			Offset:    int32(offsetInt),
 			Ascending: ascending,
 		})
+		if err != nil {
+			log.Errorw("failed to read thread messages, controller returned error", "user_id", user.ID, "thread_id", threadID, "error", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 
 		messages = res.Messages
 		isLastPage = res.IsLastPage
+	} else if messageID != 0 {
+		// read one message
+		res, err := h.controller.ReadOneMessage(context.Background(), log, user.ID, messageID)
+		if err != nil {
+			log.Errorw("failed to read one message", "user_id", user.ID, "message_id", messageID, "error", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		message = res
 	} else {
 		// read all messages
 		res, err := h.controller.ReadAllMessages(context.Background(), log, &model.ReadAllMessagesParams{
@@ -383,9 +433,34 @@ func (h *Handler) ReadMessages(log *logger.Logger, w http.ResponseWriter, req *h
 		isLastPage = res.IsLastPage
 	}
 
+	if message != nil {
+		// one message
+		if message.File != nil && message.File.ID != 0 {
+			fileRes, err := h.filesGateway.ReadFile(context.Background(), log, user.ID, message.File.ID)
+			if err != nil {
+				log.Errorw("failed to read file for a message", "user_id", user.ID, "message_id", messageID, "error", err)
+				w.WriteHeader(http.StatusBadRequest)
+				json.NewEncoder(w).Encode(servermodel.ServerResponse{
+					Status: "error",
+					Description: "failed to read a file",
+				})
+				return
+			}
+			message.File.Name = fileRes.Name
+		}
+
+		json.NewEncoder(w).Encode(model.ReadMessageServerResponse{
+			ServerResponse: servermodel.ServerResponse{
+				Status: "ok",
+			},
+			Message: message,
+		})
+		return
+	}
+
 
 	fileIds := make([]int32, 0)
-	for _, message := range res.Messages {
+	for _, message := range messages {
 		if message.File != nil && message.File.ID != 0 {
 			fileIds = append(fileIds, message.File.ID)
 		}
@@ -405,7 +480,7 @@ func (h *Handler) ReadMessages(log *logger.Logger, w http.ResponseWriter, req *h
 		return
 	}
 
-	for _, message := range res.Messages {
+	for _, message := range messages {
 		if message.File != nil {
 			file := filesRes.Files[message.File.ID]
 			if file != nil {
@@ -418,8 +493,8 @@ func (h *Handler) ReadMessages(log *logger.Logger, w http.ResponseWriter, req *h
 		ServerResponse: servermodel.ServerResponse{
 			Status: "ok",
 		},
-		Messages: res.Messages,
-		IsLastPage: res.IsLastPage,
+		Messages: messages,
+		IsLastPage: isLastPage,
 	})
 }
 

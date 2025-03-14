@@ -17,6 +17,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type FilesClient interface {
+	ReadFile(ctx context.Context, in *ReadFileRequest, opts ...grpc.CallOption) (*File, error)
 	ReadBatchFiles(ctx context.Context, in *ReadBatchFilesRequest, opts ...grpc.CallOption) (*ReadBatchFilesResponse, error)
 	SaveFileStream(ctx context.Context, opts ...grpc.CallOption) (Files_SaveFileStreamClient, error)
 	ReadFileStream(ctx context.Context, in *ReadFileStreamRequest, opts ...grpc.CallOption) (Files_ReadFileStreamClient, error)
@@ -28,6 +29,15 @@ type filesClient struct {
 
 func NewFilesClient(cc grpc.ClientConnInterface) FilesClient {
 	return &filesClient{cc}
+}
+
+func (c *filesClient) ReadFile(ctx context.Context, in *ReadFileRequest, opts ...grpc.CallOption) (*File, error) {
+	out := new(File)
+	err := c.cc.Invoke(ctx, "/files.v1.Files/ReadFile", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *filesClient) ReadBatchFiles(ctx context.Context, in *ReadBatchFilesRequest, opts ...grpc.CallOption) (*ReadBatchFilesResponse, error) {
@@ -109,6 +119,7 @@ func (x *filesReadFileStreamClient) Recv() (*FileData, error) {
 // All implementations must embed UnimplementedFilesServer
 // for forward compatibility
 type FilesServer interface {
+	ReadFile(context.Context, *ReadFileRequest) (*File, error)
 	ReadBatchFiles(context.Context, *ReadBatchFilesRequest) (*ReadBatchFilesResponse, error)
 	SaveFileStream(Files_SaveFileStreamServer) error
 	ReadFileStream(*ReadFileStreamRequest, Files_ReadFileStreamServer) error
@@ -119,6 +130,9 @@ type FilesServer interface {
 type UnimplementedFilesServer struct {
 }
 
+func (UnimplementedFilesServer) ReadFile(context.Context, *ReadFileRequest) (*File, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReadFile not implemented")
+}
 func (UnimplementedFilesServer) ReadBatchFiles(context.Context, *ReadBatchFilesRequest) (*ReadBatchFilesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadBatchFiles not implemented")
 }
@@ -139,6 +153,24 @@ type UnsafeFilesServer interface {
 
 func RegisterFilesServer(s *grpc.Server, srv FilesServer) {
 	s.RegisterService(&_Files_serviceDesc, srv)
+}
+
+func _Files_ReadFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReadFileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FilesServer).ReadFile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/files.v1.Files/ReadFile",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FilesServer).ReadFile(ctx, req.(*ReadFileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Files_ReadBatchFiles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -210,6 +242,10 @@ var _Files_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "files.v1.Files",
 	HandlerType: (*FilesServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "ReadFile",
+			Handler:    _Files_ReadFile_Handler,
+		},
 		{
 			MethodName: "ReadBatchFiles",
 			Handler:    _Files_ReadBatchFiles_Handler,

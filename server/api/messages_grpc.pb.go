@@ -21,6 +21,7 @@ type MessagesClient interface {
 	SaveMessage(ctx context.Context, in *SaveMessageRequest, opts ...grpc.CallOption) (*SaveMessageResponse, error)
 	DeleteMessage(ctx context.Context, in *DeleteMessageRequest, opts ...grpc.CallOption) (*DeleteMessageResponse, error)
 	UpdateMessage(ctx context.Context, in *UpdateMessageRequest, opts ...grpc.CallOption) (*UpdateMessageResponse, error)
+	ReadOneMessage(ctx context.Context, in *ReadOneMessageRequest, opts ...grpc.CallOption) (*Message, error)
 	ReadAllMessages(ctx context.Context, in *ReadAllMessagesRequest, opts ...grpc.CallOption) (*ReadAllMessagesResponse, error)
 	ReadThreadMessages(ctx context.Context, in *ReadThreadMessagesRequest, opts ...grpc.CallOption) (*ReadThreadMessagesResponse, error)
 }
@@ -69,6 +70,15 @@ func (c *messagesClient) UpdateMessage(ctx context.Context, in *UpdateMessageReq
 	return out, nil
 }
 
+func (c *messagesClient) ReadOneMessage(ctx context.Context, in *ReadOneMessageRequest, opts ...grpc.CallOption) (*Message, error) {
+	out := new(Message)
+	err := c.cc.Invoke(ctx, "/messages.v1.Messages/ReadOneMessage", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *messagesClient) ReadAllMessages(ctx context.Context, in *ReadAllMessagesRequest, opts ...grpc.CallOption) (*ReadAllMessagesResponse, error) {
 	out := new(ReadAllMessagesResponse)
 	err := c.cc.Invoke(ctx, "/messages.v1.Messages/ReadAllMessages", in, out, opts...)
@@ -95,6 +105,7 @@ type MessagesServer interface {
 	SaveMessage(context.Context, *SaveMessageRequest) (*SaveMessageResponse, error)
 	DeleteMessage(context.Context, *DeleteMessageRequest) (*DeleteMessageResponse, error)
 	UpdateMessage(context.Context, *UpdateMessageRequest) (*UpdateMessageResponse, error)
+	ReadOneMessage(context.Context, *ReadOneMessageRequest) (*Message, error)
 	ReadAllMessages(context.Context, *ReadAllMessagesRequest) (*ReadAllMessagesResponse, error)
 	ReadThreadMessages(context.Context, *ReadThreadMessagesRequest) (*ReadThreadMessagesResponse, error)
 	mustEmbedUnimplementedMessagesServer()
@@ -115,6 +126,9 @@ func (UnimplementedMessagesServer) DeleteMessage(context.Context, *DeleteMessage
 }
 func (UnimplementedMessagesServer) UpdateMessage(context.Context, *UpdateMessageRequest) (*UpdateMessageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateMessage not implemented")
+}
+func (UnimplementedMessagesServer) ReadOneMessage(context.Context, *ReadOneMessageRequest) (*Message, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReadOneMessage not implemented")
 }
 func (UnimplementedMessagesServer) ReadAllMessages(context.Context, *ReadAllMessagesRequest) (*ReadAllMessagesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadAllMessages not implemented")
@@ -207,6 +221,24 @@ func _Messages_UpdateMessage_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Messages_ReadOneMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReadOneMessageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MessagesServer).ReadOneMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/messages.v1.Messages/ReadOneMessage",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MessagesServer).ReadOneMessage(ctx, req.(*ReadOneMessageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Messages_ReadAllMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ReadAllMessagesRequest)
 	if err := dec(in); err != nil {
@@ -262,6 +294,10 @@ var _Messages_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateMessage",
 			Handler:    _Messages_UpdateMessage_Handler,
+		},
+		{
+			MethodName: "ReadOneMessage",
+			Handler:    _Messages_ReadOneMessage_Handler,
 		},
 		{
 			MethodName: "ReadAllMessages",

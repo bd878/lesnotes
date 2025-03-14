@@ -20,9 +20,14 @@ type MessagesList struct {
   IsLastPage          bool          `json:"is_last_page"`
 }
 
+type ReadMessageServerResponse struct {
+  model.ServerResponse
+  Message             *Message       `json:"message"`
+}
+
 type NewMessageServerResponse struct {
   model.ServerResponse
-  Message             Message       `json:"message"`
+  Message             *Message       `json:"message"`
 }
 
 type UpdateMessageServerResponse struct {

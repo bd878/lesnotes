@@ -170,7 +170,7 @@ func (r *Repository) Delete(ctx context.Context, log *logger.Logger, params *mod
 		}
 	}()
 
-	msg, err := r.selectOneMessage(ctx, log, params.ID)
+	msg, err := r.Read(ctx, log, params.ID)
 	if err != nil {
 		log.Errorln("cannot delete, no message found")
 		return err
@@ -304,7 +304,7 @@ func (r *Repository) ReadAllMessages(ctx context.Context, log *logger.Logger, pa
 	}, nil
 }
 
-func (r *Repository) selectOneMessage(ctx context.Context, log *logger.Logger, id int32) (
+func (r *Repository) Read(ctx context.Context, log *logger.Logger, id int32) (
 	*model.Message, error,
 ) {
 	var _id int32

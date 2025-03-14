@@ -139,3 +139,18 @@ func (s *Messages) ReadAllMessages(ctx context.Context, log *logger.Logger, para
 		IsLastPage: res.IsLastPage,
 	}, err
 }
+
+func (s *Messages) ReadOneMessage(ctx context.Context, log *logger.Logger, userID, messageID int32) (
+	*model.Message, error,
+) {
+	res, err := s.client.ReadOneMessage(ctx, &api.ReadOneMessageRequest{
+		UserId: userID,
+		Id: messageID,
+	})
+	if err != nil {
+		log.Errorw("client failed to read user message", "user_id", userID, "message_id", messageID, "error", err)
+		return nil, err
+	}
+
+	return model.MessageFromProto(res), nil
+}
