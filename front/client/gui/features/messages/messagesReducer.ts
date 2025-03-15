@@ -110,13 +110,6 @@ export function messagesReducer(messagesState = initialState, action) {
         error: "",
       }
     }
-    case UPDATE_MESSAGE_FAILED: {
-      return {
-        ...messagesState,
-        loading: false,
-        error: action.payload,
-      }
-    }
     case SET_MESSAGE_FOR_EDIT: {
       return {
         ...messagesState,
