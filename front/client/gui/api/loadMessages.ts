@@ -9,7 +9,20 @@ interface LoadMessagesResult {
   isLastPage: boolean;
 }
 
-async function loadMessages(limit: number, offset: number, order: number): LoadMessagesResult {
+interface LoadMessagesParams {
+  limit: number;
+  offset: number;
+  order: number;
+  threadID: number;
+}
+
+async function loadMessages(params: LoadMessagesParams): LoadMessagesResult {
+  const {
+    limit,
+    offset,
+    order
+  } = params
+
   let response = {};
   let result: LoadMessagesResult = {
     error: "",

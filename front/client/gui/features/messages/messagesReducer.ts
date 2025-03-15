@@ -1,6 +1,7 @@
 import {
   DELETE_MESSAGE,
   FETCH_MESSAGES,
+  FETCH_THREAD_MESSAGES,
   UPDATE_MESSAGE,
   SEND_MESSAGE,
   SET_MESSAGE_FOR_EDIT,
@@ -15,6 +16,8 @@ import {
 
 const initialState = {
   list: [],
+  threadList: [],
+  threadMessage: {},
   messageForEdit: {},
   isLastPage: false,
   loading: false,
