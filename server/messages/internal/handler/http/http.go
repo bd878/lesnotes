@@ -388,6 +388,8 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 		return
 	}
 
+	log.Infow("read messages", "user_id", user.ID, "thread_id", threadID)
+
 	if threadID != 0 {
 		// read thread messages
 		res, err := h.controller.ReadThreadMessages(context.Background(), log, &model.ReadThreadMessagesParams{
@@ -432,6 +434,8 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 		messages = res.Messages
 		isLastPage = res.IsLastPage
 	}
+
+	log.Infow("read messages", "thread_id", threadID, "len_messages", len(messages))
 
 	if message != nil {
 		// one message
@@ -493,6 +497,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 		ServerResponse: servermodel.ServerResponse{
 			Status: "ok",
 		},
+		ThreadID: threadID,
 		Messages: messages,
 		IsLastPage: isLastPage,
 	})

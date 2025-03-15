@@ -236,13 +236,11 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, log *logger.Logger,
 	if params.Ascending {
 		rows, err = r.ascThreadStmt.QueryContext(ctx,
 			sql.Named("userId", params.UserID), sql.Named("threadId", params.ThreadID),
-			sql.Named("limit", params.Limit), sql.Named("offset", params.Offset),
-		)
+			sql.Named("limit", params.Limit), sql.Named("offset", params.Offset))
 	} else {
 		rows, err = r.descThreadStmt.QueryContext(ctx,
 			sql.Named("userId", params.UserID), sql.Named("threadId", params.ThreadID),
-			sql.Named("limit", params.Limit), sql.Named("offset", params.Offset),
-		)
+			sql.Named("limit", params.Limit), sql.Named("offset", params.Offset))
 	}
 
 	if err != nil {
@@ -251,6 +249,8 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, log *logger.Logger,
 	}
 
 	defer rows.Close()
+
+	log.Infow("repository read thread messages", "user_id", params.UserID, "thread_id", params.ThreadID)
 
 	selected, err := r.selectMessages(ctx, log, rows, params.UserID, params.Limit, params.Offset)
 	if err != nil {

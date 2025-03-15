@@ -14,7 +14,7 @@ type Repository interface {
   Create(ctx context.Context, log *logger.Logger, message *model.Message) error
   Update(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) error
   Delete(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error
-  Read(ctx context.Context, log *logger.Logger, userID, messageID int32) (*model.Message, error)
+  Read(ctx context.Context, log *logger.Logger, messageID int32) (*model.Message, error)
   ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadAllMessagesParams) (*model.ReadAllMessagesResult, error)
   ReadThreadMessages(ctx context.Context, log *logger.Logger, params *model.ReadThreadMessagesParams) (*model.ReadThreadMessagesResult, error)
   GetBatch(ctx context.Context, log *logger.Logger) ([]*model.Message, error)

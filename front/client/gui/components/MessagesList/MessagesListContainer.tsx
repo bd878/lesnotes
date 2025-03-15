@@ -1,6 +1,12 @@
 import React, {useCallback} from 'react';
 import MessagesListComponent from './MessagesListComponent';
-import {setEditMessageActionCreator, deleteMessageActionCreator} from '../../features/messages';
+import {
+	setEditMessageActionCreator,
+	deleteMessageActionCreator,
+} from '../../features/messages';
+import {
+	setThreadMessageActionCreator,
+} from '../../features/threads';
 import {connect} from '../../third_party/react-redux';
 
 function MessagesListContainer(props) {
@@ -10,12 +16,14 @@ function MessagesListContainer(props) {
 		messages,
 		loading,
 		error,
+		setThreadMessage,
 		setEditMessage,
 		deleteMessage,
 	} = props
 
-	const onListItemClick = useCallback(setEditMessage, [setEditMessage])
+	const onListItemClick = useCallback(setThreadMessage, [setThreadMessage])
 	const onDeleteClick = useCallback(deleteMessage, [deleteMessage])
+	const onEditClick = useCallback(setEditMessage, [setEditMessage])
 
 	return (
 		<MessagesListComponent
@@ -25,6 +33,7 @@ function MessagesListContainer(props) {
 			loading={loading}
 			error={error}
 			onListItemClick={onListItemClick}
+			onEditClick={onEditClick}
 			onDeleteClick={onDeleteClick}
 		/>
 	)
@@ -33,6 +42,7 @@ function MessagesListContainer(props) {
 const mapStateToProps = () => {}
 
 const mapDispatchToProps = {
+	setThreadMessage: setThreadMessageActionCreator,
 	setEditMessage: setEditMessageActionCreator,
 	deleteMessage: deleteMessageActionCreator,
 }

@@ -1,5 +1,6 @@
 import {messagesReducer} from './messagesReducer'
 import {
+  setThreadMessageActionCreator,
   setEditMessageActionCreator,
   sendMessageActionCreator,
   fetchMessagesActionCreator,
@@ -8,6 +9,7 @@ import {
   deleteMessageActionCreator,
 } from './messagesActionCreators'
 import {
+  selectThreadMessage,
   selectMessages,
   selectError,
   selectIsLastPage,
@@ -20,6 +22,7 @@ import {messagesSaga} from './messagesSagas';
 
 export {
   messagesReducer,
+  setThreadMessageActionCreator,
   setEditMessageActionCreator,
   resetEditMessageActionCreator,
   deleteMessageActionCreator,
