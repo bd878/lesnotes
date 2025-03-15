@@ -95,6 +95,7 @@ func (m *DistributedMessages) ReadMessage(ctx context.Context, log *logger.Logge
 func (m *DistributedMessages) ReadThreadMessages(ctx context.Context, log *logger.Logger, params *model.ReadThreadMessagesParams) (
   *model.ReadThreadMessagesResult, error,
 ) {
+  log.Infow("distributed methods. read thread messages", "user_id", params.UserID, "thread_id", params.ThreadID)
   return m.repo.ReadThreadMessages(
     ctx,
     log,

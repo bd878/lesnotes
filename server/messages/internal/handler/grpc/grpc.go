@@ -90,6 +90,7 @@ func (h *Handler) DeleteMessage(ctx context.Context, req *api.DeleteMessageReque
 func (h *Handler) ReadThreadMessages(ctx context.Context, req *api.ReadThreadMessagesRequest) (
 	*api.ReadThreadMessagesResponse, error,
 ) {
+	logger.Infow("grpc read thread messages", "user_id", req.UserId, "thread_id", req.ThreadId)
 	res, err := h.controller.ReadThreadMessages(ctx, logger.Default(), &model.ReadThreadMessagesParams{
 		UserID:    req.UserId,
 		ThreadID:  req.ThreadId,

@@ -435,6 +435,8 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 		isLastPage = res.IsLastPage
 	}
 
+	log.Infow("read messages", "thread_id", threadID, "len_messages", len(messages))
+
 	if message != nil {
 		// one message
 		if message.File != nil && message.File.ID != 0 {

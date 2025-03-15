@@ -102,6 +102,7 @@ func (s *Messages) UpdateMessage(ctx context.Context, log *logger.Logger, params
 func (s *Messages) ReadThreadMessages(ctx context.Context, log *logger.Logger, params *model.ReadThreadMessagesParams) (
 	*model.ReadThreadMessagesResult, error,
 ) {
+	log.Infow("grpc client read thread messages", "user_id", params.UserID, "thread_id", params.ThreadID)
 	res, err := s.client.ReadThreadMessages(ctx, &api.ReadThreadMessagesRequest{
 		UserId: params.UserID,
 		ThreadId: params.ThreadID,

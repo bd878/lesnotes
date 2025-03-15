@@ -39,7 +39,7 @@ async function loadMessages(params: LoadMessagesParams): LoadMessagesResult {
 	}
 
 	if (threadID)
-		queryParams.threadID = threadID
+		queryParams.thread_id = threadID
 
 	try {
 		response = await api('/messages/v1/read', {
