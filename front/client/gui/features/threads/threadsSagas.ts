@@ -19,7 +19,8 @@ function* fetchMessages({payload}: {payload: FetchMessagesPayload}) {
 		// TODO: check of threadID is not set, fetch is valid with threadID
 		const threadID = yield select(selectThreadID)
 		const response = yield call(api.loadMessages,
-			{limit: limit, offset: offset, order: order, threadID: threadID})
+			{limit: payload.limit, offset: payload.offset,
+			order: payload.order, threadID: threadID})
 
 		response.messages.reverse();
 		if (response.error != "")

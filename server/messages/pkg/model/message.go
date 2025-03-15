@@ -43,6 +43,7 @@ type DeleteMessageServerResponse struct {
 
 type MessagesListServerResponse struct {
   model.ServerResponse
+  ThreadID            int32         `json:"thread_id,omitempty"`
   Messages            []*Message    `json:"messages"`
   IsLastPage          bool          `json:"is_last_page"`
 }

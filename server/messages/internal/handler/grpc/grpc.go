@@ -14,7 +14,7 @@ type Controller interface {
 	SaveMessage(ctx context.Context, log *logger.Logger, message *model.Message) error
 	UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) error
 	DeleteMessage(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error
-	ReadMessage(ctx context.Context, log *logger.Logger, userID, messageID int32) error
+	ReadMessage(ctx context.Context, log *logger.Logger, userID, messageID int32) (*model.Message, error)
 	ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadAllMessagesParams) (*model.ReadAllMessagesResult, error)
 	ReadThreadMessages(ctx context.Context, log *logger.Logger, params *model.ReadThreadMessagesParams) (*model.ReadThreadMessagesResult, error)
 	GetServers(ctx context.Context, log *logger.Logger) ([]*api.Server, error)
@@ -143,9 +143,9 @@ func (h *Handler) GetServers(ctx context.Context, _ *api.GetServersRequest) (
 }
 
 func (h *Handler) ReadOneMessage(ctx context.Context, req *api.ReadOneMessageRequest) (
-	*api.ReadOneMessageResponse, error,
+	*api.Message, error,
 ) {
-	message, err := h.controller.ReadOneMessage(ctx, logger.Default(), req.UserId, req.Id)
+	message, err := h.controller.ReadMessage(ctx, logger.Default(), req.UserId, req.Id)
 	if err != nil {
 		logger.Errorw("failed to read one message", "user_id", req.UserId, "message_id", req.Id)
 		return nil, err

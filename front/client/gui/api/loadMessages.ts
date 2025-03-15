@@ -20,7 +20,8 @@ async function loadMessages(params: LoadMessagesParams): LoadMessagesResult {
   const {
     limit,
     offset,
-    order
+    order,
+    threadID,
   } = params
 
   let response = {};
@@ -37,6 +38,7 @@ async function loadMessages(params: LoadMessagesParams): LoadMessagesResult {
         limit: limit,
         offset: offset,
         asc: order,
+        thread_id: threadID,
       },
       method: "GET",
       credentials: 'include',
