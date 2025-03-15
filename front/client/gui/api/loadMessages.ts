@@ -3,61 +3,65 @@ import api from './api';
 import models from './models';
 
 interface LoadMessagesResult {
-  error: string;
-  explain: string;
-  messages: any[];
-  isLastPage: boolean;
+	error: string;
+	explain: string;
+	messages: any[];
+	isLastPage: boolean;
 }
 
 interface LoadMessagesParams {
-  limit: number;
-  offset: number;
-  order: number;
-  threadID: number;
+	limit: number;
+	offset: number;
+	order: number;
+	threadID: number;
 }
 
 async function loadMessages(params: LoadMessagesParams): LoadMessagesResult {
-  const {
-    limit,
-    offset,
-    order,
-    threadID,
-  } = params
+	const {
+		limit,
+		offset,
+		order,
+		threadID,
+	} = params
 
-  let response = {};
-  let result: LoadMessagesResult = {
-    error: "",
-    explain: "",
-    messages: [],
-    isLastPage: false,
-  }
+	let response = {};
+	let result: LoadMessagesResult = {
+		error: "",
+		explain: "",
+		messages: [],
+		isLastPage: false,
+	}
 
-  try {
-    response = await api('/messages/v1/read', {
-      queryParams: {
-        limit: limit,
-        offset: offset,
-        asc: order,
-        thread_id: threadID,
-      },
-      method: "GET",
-      credentials: 'include',
-    });
+	const queryParams = {
+		limit: limit,
+		offset: offset,
+		asc: order,
+	}
 
-    if (response.error != "") {
-      console.error('[loadMessages]: /read response returned error')
-      result.error = response.error
-      result.explain = response.explain
-    } else {
-      result.messages = response.value.messages.map(models.message)
-      result.isLastPage = response.value.is_last_page
-    }
-  } catch (e) {
-    console.error(i18n("error_occured"), e);
-    throw e
-  }
+	if (threadID)
+		queryParams.threadID = threadID
 
-  return result;
+	try {
+		response = await api('/messages/v1/read', {
+			queryParams: queryParams,
+			method: "GET",
+			credentials: 'include',
+		});
+
+		if (response.error != "") {
+			console.error('[loadMessages]: /read response returned error')
+			result.error = response.error
+			result.explain = response.explain
+		} else {
+			result.messages = response.value.messages.map(models.message)
+			result.isLastPage = response.value.is_last_page
+		}
+	} catch (e) {
+		console.error(i18n("error_occured"), e);
+		throw e
+	}
+
+	return result;
 }
 
 export default loadMessages;
