@@ -12,6 +12,7 @@ function ThreadsPanelComponent(props) {
 		threadMessage,
 		messages,
 		close,
+		send,
 	} = props
 
 	return (
@@ -23,7 +24,7 @@ function ThreadsPanelComponent(props) {
 			/>
 			<MainMessage message={threadMessage} />
 			<MessagesList messages={messages} 	/>
-			<MessageForm messageForEdit={{}} reset={() => {}} send={() => {}} update={() => {}} edit={() => {}} />
+			<MessageForm messageForEdit={{}} reset={() => {}} send={send} update={() => {}} edit={() => {}} />
 		</Tag>
 	)
 }

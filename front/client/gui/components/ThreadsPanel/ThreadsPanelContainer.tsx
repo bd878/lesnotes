@@ -6,6 +6,7 @@ import {
 } from './const';
 import {
 	fetchMessagesActionCreator,
+	sendMessageActionCreator,
 	resetActionCreator,
 	selectMessages,
 	selectThreadMessage,
@@ -19,6 +20,7 @@ function ThreadsPanelContainer(props) {
 		fetch,
 		threadMessage,
 		reset,
+		send,
 		messages,
 		threadID,
 		shouldShowThreadsPanel,
@@ -40,6 +42,7 @@ function ThreadsPanelContainer(props) {
 			close={onResetClick}
 			threadMessage={threadMessage}
 			messages={messages}
+			send={send}
 		/>
 	)
 }
@@ -53,6 +56,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = ({
 	reset: resetActionCreator,
 	fetch: fetchMessagesActionCreator,
+	send: sendMessageActionCreator,
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ThreadsPanelContainer);

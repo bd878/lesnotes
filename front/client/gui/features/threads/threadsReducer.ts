@@ -1,8 +1,10 @@
 import {
 	RESET,
+	FAILED,
+	SEND_MESSAGE,
+	SEND_MESSAGE_SUCCEEDED,
 	SET_THREAD_MESSAGE,
 	FETCH_MESSAGES,
-	MESSAGES_FAILED,
 	FETCH_MESSAGES_SUCCEEDED,
 } from './threadsActions';
 
@@ -17,7 +19,7 @@ const initialState = {
 
 export function threadsReducer(state = initialState, action) {
 	switch (action.type) {
-		case MESSAGES_FAILED: {
+		case FAILED: {
 			return {
 				...state,
 				error: action.payload,
@@ -53,6 +55,19 @@ export function threadsReducer(state = initialState, action) {
 				threadID: 0,
 				message: {},
 				list: [],
+			}
+		}
+		case SEND_MESSAGE: {
+			return {
+				...state,
+				loading: true,
+				error: "",
+			}
+		}
+		case SEND_MESSAGE_SUCCEEDED: {
+			return {
+				...state,
+				list: [ ...state.list, action.payload ],
 			}
 		}
 	}

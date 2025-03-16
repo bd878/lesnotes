@@ -4,6 +4,7 @@ import {
 	setThreadMessageActionCreator,
 	fetchMessagesActionCreator,
 	resetActionCreator,
+	sendMessageActionCreator,
 } from './threadsActionCreators';
 import {
 	selectMessages,
@@ -21,6 +22,7 @@ export {
 	resetActionCreator,
 	setThreadMessageActionCreator,
 	fetchMessagesActionCreator,
+	sendMessageActionCreator,
 	selectMessages,
 	selectIsLastPage,
 	selectIsLoading,
