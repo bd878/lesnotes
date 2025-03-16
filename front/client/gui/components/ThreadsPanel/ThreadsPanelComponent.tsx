@@ -1,6 +1,8 @@
 import React from 'react'
+import Tag from '../Tag';
 import MessagesList from '../MessagesList';
 import MainMessage from '../MainMessage';
+import MessageForm from '../MessageForm';
 
 function ThreadsPanelComponent(props) {
 	const {
@@ -9,10 +11,11 @@ function ThreadsPanelComponent(props) {
 	} = props
 
 	return (
-		<div>
+		<Tag>
 			<MainMessage message={threadMessage} />
 			<MessagesList messages={messages} 	/>
-		</div>
+			<MessageForm messageForEdit={{}} reset={() => {}} send={() => {}} update={() => {}} edit={() => {}} />
+		</Tag>
 	)
 }
 
