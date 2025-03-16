@@ -34,7 +34,7 @@ func New(dbFilePath string) *Repository {
 	selectStmt := utils.Must(pool.Prepare(`
 SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id
 FROM messages
-WHERE id = :id
+WHERE id = :id AND thread_id ISNULL
 ;`,
 	))
 

@@ -1,10 +1,12 @@
 import {takeLatest,put,call,select} from 'redux-saga/effects'
-import {FETCH_MESSAGES} from './threadsActions'
+import {FETCH_MESSAGES, SEND_MESSAGE} from './threadsActions'
 import {selectThreadID} from './threadsSelectors'
 import {
-	messagesFailedActionCreator,
+	sendMessageActionCreator,
+	failedActionCreator,
 	fetchMessagesSucceededActionCreator,
-	messagesFailedActionCreator,
+	sendMessageSucceededActionCreator,
+	failedActionCreator,
 } from './threadsActionCreators'
 import api from '../../api'
 
@@ -24,16 +26,37 @@ function* fetchMessages({payload}: {payload: FetchMessagesPayload}) {
 
 		response.messages.reverse();
 		if (response.error != "")
-			yield put(messagesFailedActionCreator(response.error))
+			yield put(failedActionCreator(response.error))
 		else
 			yield put(fetchMessagesSucceededActionCreator(response))
 	} catch (e) {
-		yield put(messagesFailedActionCreator(e.message))
+		yield put(failedActionCreator(e.message))
+	}
+}
+
+interface SendMessagePayload {
+	message: any;
+	file:    any;
+}
+
+function* sendMessage({payload}: {payload: SendMessagePayload}) {
+	try {
+		const threadID = yield select(selectThreadID)
+		const response = yield call(api.sendMessage,
+				{message: payload.message, file: payload.file, threadID: threadID})
+
+		if (response.error != "")
+			yield put(failedActionCreator(response.error))
+		else
+			yield put(sendMessageSucceededActionCreator(response.message))
+	} catch (e) {
+		yield put(failedActionCreator(e.message))
 	}
 }
 
 function* threadsSaga() {
 	yield takeLatest(FETCH_MESSAGES, fetchMessages)
+	yield takeLatest(SEND_MESSAGE, sendMessage)
 }
 
 export {threadsSaga}

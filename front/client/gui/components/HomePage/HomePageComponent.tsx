@@ -4,7 +4,7 @@ import Button from '../Button';
 import Tag from '../Tag';
 
 const MessagesList = lazy(() => import("../MessagesList"));
-const SendMessageForm = lazy(() => import("../SendMessageForm"));
+const MessageForm = lazy(() => import("../MessageForm"));
 const ThreadsPanel = lazy(() => import("../ThreadsPanel"));
 
 function HomePageComponent(props) {
@@ -14,10 +14,13 @@ function HomePageComponent(props) {
 		onListScroll,
 		onLoadMoreClick,
 		isAllLoaded,
-		shouldShowThreadsPanel,
 		error,
 		messages,
 		loading,
+		sendMessage,
+		updateMessage,
+		resetEditMessage,
+		messageForEdit,
 	} = props;
 
 	return (
@@ -51,14 +54,17 @@ function HomePageComponent(props) {
 						/>
 					</Tag>
 
-					<SendMessageForm />
+					<MessageForm
+						send={sendMessage}
+						update={updateMessage}
+						resetEdit={resetEditMessage}
+						messageForEdit={messageForEdit}
+					/>
 				</Tag>
 
-				{shouldShowThreadsPanel ? (
-					<Tag>
-						<ThreadsPanel />
-					</Tag>
-				) : null}
+				<Tag>
+					<ThreadsPanel />
+				</Tag>
 			</Tag>
 		</>
 	)
