@@ -3,6 +3,7 @@ import {threadsReducer} from './threadsReducer';
 import {
 	setThreadMessageActionCreator,
 	fetchMessagesActionCreator,
+	resetActionCreator,
 } from './threadsActionCreators';
 import {
 	selectMessages,
@@ -17,6 +18,7 @@ import {
 export {
 	threadsReducer,
 	threadsSaga,
+	resetActionCreator,
 	setThreadMessageActionCreator,
 	fetchMessagesActionCreator,
 	selectMessages,

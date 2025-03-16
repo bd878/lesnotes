@@ -1,4 +1,5 @@
 import {
+	RESET,
 	SET_THREAD_MESSAGE,
 	FETCH_MESSAGES,
 	MESSAGES_FAILED,
@@ -44,6 +45,14 @@ export function threadsReducer(state = initialState, action) {
 				...state,
 				threadID: action.payload.ID,
 				message: action.payload,
+			}
+		}
+		case RESET: {
+			return {
+				...state,
+				threadID: 0,
+				message: {},
+				list: [],
 			}
 		}
 	}

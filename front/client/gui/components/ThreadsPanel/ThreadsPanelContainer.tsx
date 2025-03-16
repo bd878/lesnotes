@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useCallback} from 'react';
 import ThreadsPanelComponent from './ThreadsPanelComponent'
 import {
   LIMIT_LOAD_BY,
@@ -6,6 +6,7 @@ import {
 } from './const';
 import {
 	fetchMessagesActionCreator,
+	resetActionCreator,
 	selectMessages,
 	selectThreadMessage,
 	selectThreadID,
@@ -15,17 +16,20 @@ import * as is from '../../third_party/is';
 
 function ThreadsPanelContainer(props) {
 	const {
-		fetchMessages,
+		fetch,
 		threadMessage,
+		reset,
 		messages,
 		threadID,
 		shouldShowThreadsPanel,
 	} = props
 
 	useEffect(() => {
-		if (threadID != 0)
-			fetchMessages(LIMIT_LOAD_BY, 0, LOAD_ORDER)
+		if (threadID !== 0)
+			fetch(LIMIT_LOAD_BY, 0, LOAD_ORDER)
 	}, [threadID])
+
+	const onResetClick = useCallback(() => reset(), [reset])
 
 	if (threadID == 0 && !shouldShowThreadsPanel) {
 		return null
@@ -33,6 +37,7 @@ function ThreadsPanelContainer(props) {
 
 	return (
 		<ThreadsPanelComponent
+			close={onResetClick}
 			threadMessage={threadMessage}
 			messages={messages}
 		/>
@@ -46,7 +51,8 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = ({
-	fetchMessages: fetchMessagesActionCreator,
+	reset: resetActionCreator,
+	fetch: fetchMessagesActionCreator,
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ThreadsPanelContainer);
