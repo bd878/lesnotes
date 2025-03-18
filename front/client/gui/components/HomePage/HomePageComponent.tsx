@@ -57,6 +57,7 @@ function HomePageComponent(props) {
 					<MessageForm
 						send={sendMessage}
 						update={updateMessage}
+						reset={resetEditMessage}
 						resetEdit={resetEditMessage}
 						messageForEdit={messageForEdit}
 					/>
