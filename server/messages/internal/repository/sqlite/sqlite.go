@@ -74,7 +74,7 @@ WHERE thread_id = :threadId
 	ascStmt := utils.Must(pool.Prepare(`
 SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id
 FROM messages
-WHERE user_id = :userId
+WHERE user_id = :userId AND (thread_id ISNULL OR thread_id = 0)
 ORDER BY create_utc_nano ASC
 LIMIT :limit OFFSET :offset
 ;`,
@@ -84,7 +84,7 @@ LIMIT :limit OFFSET :offset
 SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id
 FROM messages
 WHERE user_id = :userId
-ORDER BY create_utc_nano DESC
+ORDER BY create_utc_nano DESC (thread_id ISNULL OR thread_id = 0)
 LIMIT :limit OFFSET :offset
 ;`,
 	))
