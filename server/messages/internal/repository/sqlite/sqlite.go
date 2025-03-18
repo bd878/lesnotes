@@ -83,8 +83,8 @@ LIMIT :limit OFFSET :offset
 	descStmt := utils.Must(pool.Prepare(`
 SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id
 FROM messages
-WHERE user_id = :userId
-ORDER BY create_utc_nano DESC (thread_id ISNULL OR thread_id = 0)
+WHERE user_id = :userId AND (thread_id ISNULL OR thread_id = 0)
+ORDER BY create_utc_nano DESC
 LIMIT :limit OFFSET :offset
 ;`,
 	))
