@@ -28,7 +28,7 @@ function MessagesListComponent(props) {
 					<Tag
 						el="li"
 						css={liCss + " " + "br-12 p-8 bg-list-grey hover:bg-list-grey pointer"}
-						key={message.ID}
+						key={`tag_${message.ID}`}
 						onClick={(e) => {e.stopPropagation(); onListItemClick(message)}} 
 					>
 						{message.createUTCNano ? (
@@ -46,7 +46,7 @@ function MessagesListComponent(props) {
 							{message.file.name}
 						</Tag> : null}
 
-						<ListItem key={message.ID}>{message.text}</ListItem>
+						<ListItem key={`item_${message.ID}`}>{message.text}</ListItem>
 						<Tag
 							el="button"
 							css="pointer"

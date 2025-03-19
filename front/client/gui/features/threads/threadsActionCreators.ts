@@ -8,6 +8,8 @@ import {
 	SEND_MESSAGE_SUCCEEDED,
 } from './threadsActions'
 
+// export const __setThreadMessageActionCreator = payload => ({action:__SET_THREAD_MESSAGE, payload}) 
+
 export function setThreadMessageActionCreator(payload) {
 	return {
 		type: SET_THREAD_MESSAGE,
@@ -29,10 +31,10 @@ export function fetchMessagesSucceededActionCreator(payload) {
 	}
 }
 
-export function resetActionCreator(payload) {
+export function resetActionCreator(_payload) {
 	return {
 		type: RESET,
-		payload,
+		payload: {},
 	}
 }
 

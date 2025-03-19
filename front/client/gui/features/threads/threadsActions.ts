@@ -1,5 +1,6 @@
 export const FETCH_MESSAGES = "@threads/FETCH_MESSAGES"
 export const SET_THREAD_MESSAGE = "@threads/SET_MESSAGE"
+export const __SET_THREAD_MESSAGE = "@threads/__SET_MESSAGE"
 
 export const FAILED = "@threads/failed"
 
