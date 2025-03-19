@@ -40,7 +40,7 @@ router
   .get('/register', etag, register)
   .get('/home', etag, home)
   .get('/status', status)
-  .get("/t/new", etag. newThread)
+  .get("/t/new", etag, newThread)
   .get("/t/:id", etag, message)
   .get('/:any*', xxx)
 
