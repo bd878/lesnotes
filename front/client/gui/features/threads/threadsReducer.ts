@@ -3,7 +3,7 @@ import {
 	FAILED,
 	SEND_MESSAGE,
 	SEND_MESSAGE_SUCCEEDED,
-	SET_THREAD_MESSAGE,
+	__SET_THREAD_MESSAGE,
 	FETCH_MESSAGES,
 	FETCH_MESSAGES_SUCCEEDED,
 } from './threadsActions';
@@ -42,7 +42,7 @@ export function threadsReducer(state = initialState, action) {
 				error: "",
 			}
 		}
-		case SET_THREAD_MESSAGE: {
+		case __SET_THREAD_MESSAGE: {
 			return {
 				...state,
 				threadID: action.payload.ID,

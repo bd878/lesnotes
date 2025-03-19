@@ -1,5 +1,5 @@
-import {takeLatest,put,call,select} from 'redux-saga/effects'
-import {FETCH_MESSAGES, SEND_MESSAGE} from './threadsActions'
+import {takeLatest,takeEvery,put,call,select} from 'redux-saga/effects'
+import {FETCH_MESSAGES, SEND_MESSAGE, SET_THREAD_MESSAGE, __SET_THREAD_MESSAGE} from './threadsActions'
 import {selectThreadID} from './threadsSelectors'
 import {
 	sendMessageActionCreator,
@@ -7,6 +7,7 @@ import {
 	fetchMessagesSucceededActionCreator,
 	sendMessageSucceededActionCreator,
 	failedActionCreator,
+	resetActionCreator,
 } from './threadsActionCreators'
 import api from '../../api'
 
@@ -18,11 +19,9 @@ interface FetchMessagesPayload {
 
 function* fetchMessages({payload}: {payload: FetchMessagesPayload}) {
 	try {
-		// TODO: check of threadID is not set, fetch is valid with threadID
 		const threadID = yield select(selectThreadID)
 		const response = yield call(api.loadMessages,
-			{limit: payload.limit, offset: payload.offset,
-			order: payload.order, threadID: threadID})
+			{limit: payload.limit, offset: payload.offset, order: payload.order, threadID: threadID})
 
 		response.messages.reverse();
 		if (response.error != "")
@@ -54,7 +53,24 @@ function* sendMessage({payload}: {payload: SendMessagePayload}) {
 	}
 }
 
+interface SetThreadMessagePayload {
+	ID: number;
+	[String]: any;
+}
+
+function* setThreadMessage({payload}: {payload: SetThreadMessagePayload}) {
+	const threadID = yield select(selectThreadID)
+	if (threadID !== payload.ID) {
+		yield put(resetActionCreator())
+	}
+	yield put({
+		type: __SET_THREAD_MESSAGE,
+		payload,
+	})
+}
+
 function* threadsSaga() {
+	yield takeEvery(SET_THREAD_MESSAGE, setThreadMessage)
 	yield takeLatest(FETCH_MESSAGES, fetchMessages)
 	yield takeLatest(SEND_MESSAGE, sendMessage)
 }

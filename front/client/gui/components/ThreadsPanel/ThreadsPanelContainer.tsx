@@ -31,7 +31,7 @@ function ThreadsPanelContainer(props) {
 			fetch(LIMIT_LOAD_BY, 0, LOAD_ORDER)
 	}, [threadID])
 
-	const onResetClick = useCallback(() => reset(), [reset])
+	const onResetClick = useCallback(reset, [reset])
 
 	if (threadID == 0 && !shouldShowThreadsPanel) {
 		return null
