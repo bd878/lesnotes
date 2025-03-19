@@ -1,8 +1,21 @@
 import i18n from '../i18n';
 import api from './api';
+import * as is from '../third_party/is'
 import models from './models';
 
-async function sendMessage(message = "", file = null) {
+interface SendMessageParams {
+  message: any;
+  file: any;
+  threadID?: number;
+}
+
+async function sendMessage(params: SendMessageParams) {
+  const {
+    message,
+    file,
+    threadID,
+  } = params
+
   let response = {};
   let result: SendMessageResult = {
     error: "",
@@ -16,8 +29,13 @@ async function sendMessage(message = "", file = null) {
     form.append('file', file, file.name);
   }
 
+  const queryParams = {}
+  if (threadID !== 0 && is.notUndef(threadID))
+    queryParams.thread_id = threadID
+
   try {
     response = await api("/messages/v1/send", {
+      queryParams: queryParams,
       method: "POST",
       credentials: "include",
       body: form,

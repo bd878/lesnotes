@@ -12,6 +12,11 @@ import {
 	selectIsLoading,
 	selectError,
 	selectLoadOffset,
+	sendMessageActionCreator,
+	updateMessageActionCreator,
+	selectMessageForEdit,
+	selectIsEditMode,
+	resetEditMessageActionCreator,
 } from '../../features/messages';
 import {
 	selectThreadID
@@ -28,7 +33,10 @@ function HomePageContainer(props) {
 		isLoading,
 		loadOffset,
 		fetchMessages,
-		shouldShowThreadsPanel,
+		sendMessage,
+		updateMessage,
+		resetEditMessage,
+		messageForEdit,
 	} = props
 
 	const listRef = useRef(null);
@@ -65,10 +73,13 @@ function HomePageContainer(props) {
 			onListScroll={onListScroll}
 			onLoadMoreClick={loadMore}
 			isAllLoaded={isLastPage}
-			shouldShowThreadsPanel={shouldShowThreadsPanel}
 			error={error}
 			messages={messages}
 			loading={isLoading}
+			sendMessage={sendMessage}
+			updateMessage={updateMessage}
+			resetEditMessage={resetEditMessage}
+			messageForEdit={messageForEdit}
 		/>
 	)
 }
@@ -78,14 +89,18 @@ const mapStateToProps = state => ({
 	isLoading: selectIsLoading(state),
 	isLastPage: selectIsLastPage(state),
 	loadOffset: selectLoadOffset(state),
-	shouldShowThreadsPanel: selectThreadID(state),
 	error: selectError(state),
 	user: selectUser(state),
+	messageForEdit: selectMessageForEdit(state),
+	isEditMode: selectIsEditMode(state),
 })
 
 const mapDispatchToProps = {
 	fetchMessages: fetchMessagesActionCreator,
 	logout: logoutActionCreator,
+	sendMessage: sendMessageActionCreator,
+	updateMessage: updateMessageActionCreator,
+	resetEditMessage: resetEditMessageActionCreator,
 }
 
 export default connect(

@@ -34,7 +34,7 @@ func New(dbFilePath string) *Repository {
 	selectStmt := utils.Must(pool.Prepare(`
 SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id
 FROM messages
-WHERE id = :id
+WHERE id = :id AND (thread_id ISNULL OR thread_id = 0)
 ;`,
 	))
 
@@ -74,7 +74,7 @@ WHERE thread_id = :threadId
 	ascStmt := utils.Must(pool.Prepare(`
 SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id
 FROM messages
-WHERE user_id = :userId
+WHERE user_id = :userId AND (thread_id ISNULL OR thread_id = 0)
 ORDER BY create_utc_nano ASC
 LIMIT :limit OFFSET :offset
 ;`,
@@ -83,7 +83,7 @@ LIMIT :limit OFFSET :offset
 	descStmt := utils.Must(pool.Prepare(`
 SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id
 FROM messages
-WHERE user_id = :userId
+WHERE user_id = :userId AND (thread_id ISNULL OR thread_id = 0)
 ORDER BY create_utc_nano DESC
 LIMIT :limit OFFSET :offset
 ;`,
@@ -127,14 +127,26 @@ LIMIT :limit OFFSET :offset
  * twice
  */
 func (r *Repository) Create(ctx context.Context, log *logger.Logger, message *model.Message) error {
+	var threadIdCol sql.NullInt32
+	if message.ThreadID != 0 {
+		threadIdCol.Int32 = int32(message.ThreadID)
+		threadIdCol.Valid = true
+	}
+
+	var fileIdCol sql.NullInt32
+	if message.File != nil && message.File.ID != 0 {
+		fileIdCol.Int32 = int32(message.File.ID)
+		fileIdCol.Valid = true
+	}
+
 	_, err := r.insertStmt.ExecContext(ctx,
 		sql.Named("id", message.ID),
-		sql.Named("threadId", message.ThreadID),
+		sql.Named("threadId", threadIdCol),
 		sql.Named("userId", message.UserID),
 		sql.Named("createUtcNano", message.CreateUTCNano),
 		sql.Named("updateUtcNano", message.UpdateUTCNano),
 		sql.Named("text", message.Text),
-		sql.Named("fileId", message.File.ID),
+		sql.Named("fileId", fileIdCol),
 	)
 	if err != nil {
 		log.Errorw("failed to insert new message ", "error", err)

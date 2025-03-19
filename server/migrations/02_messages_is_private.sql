@@ -1,0 +1,1 @@
+ALTER TABLE messages ADD COLUMN is_private INT DEFAULT 1;

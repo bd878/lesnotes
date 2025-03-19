@@ -9,6 +9,7 @@ paths:
   /messages/v1/send:
     parameters:
       - $ref: '#/components/parameters/threadId'
+      - $ref: '#/components/parameters/public'
     post:
       summary: Send a message
       description: |
@@ -37,6 +38,7 @@ paths:
   /messages/v1/update:
     parameters:
       - $ref: '#/components/parameters/messageId'
+      - $ref: '#/components/parameters/public'
     put:
       summary: Update a message
       description: |
@@ -64,6 +66,7 @@ paths:
   /messages/v1/delete:
     parameters:
       - $ref: '#/components/parameters/messageId'
+      - $ref: '#/components/parameters/public'
     delete:
       operationId: deleteMessage
       summary: Delete a message
@@ -206,6 +209,13 @@ components:
       schema:
         enum: [1, 0]
         type: integer
+    public:
+    	name: public
+    	in: query
+    	required: false
+    	schema:
+    		type: integer
+    		example: 1
 
   schemas:
     messagesList:
