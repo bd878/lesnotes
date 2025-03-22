@@ -435,7 +435,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 		return
 	}
 
-	log.Infow("read messages", "user_id", user.ID, "thread_id", threadID)
+	log.Infow("read messages", "user_id", user.ID, "thread_id", threadID, "message_id", messageID)
 
 	if threadID != 0 {
 		// read thread messages
