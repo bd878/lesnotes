@@ -44,6 +44,7 @@ func (c *Controller) DeleteToken(ctx context.Context, log *logger.Logger, params
 }
 
 func (c *Controller) GetUser(ctx context.Context, log *logger.Logger, params *model.GetUserParams) (*model.User, error) {
+	log.Debugw("controller get user", "id", params.ID, "token", params.Token)
 	user, err := c.repo.GetUser(ctx, log, params)
 	if err != nil {
 		log.Errorln("failed to get user")
@@ -58,6 +59,7 @@ func (c *Controller) GetUser(ctx context.Context, log *logger.Logger, params *mo
 		return nil, controller.ErrTokenExpired
 	}
 
+	log.Debugw("controller get user ok", "id", params.ID, "token", params.Token)
 	return user, nil
 }
 

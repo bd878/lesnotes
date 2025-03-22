@@ -439,7 +439,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 
 	if threadID != 0 {
 		// read thread messages
-		res, err := h.controller.ReadThreadMessages(context.Background(), log, &model.ReadThreadMessagesParams{
+		res, err := h.controller.ReadThreadMessages(req.Context(), log, &model.ReadThreadMessagesParams{
 			UserID:    user.ID,
 			ThreadID:  threadID,
 			Limit:     int32(limitInt),
@@ -456,7 +456,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 		isLastPage = res.IsLastPage
 	} else if messageID != 0 {
 		// read one message
-		res, err := h.controller.ReadOneMessage(context.Background(), log, user.ID, messageID)
+		res, err := h.controller.ReadOneMessage(req.Context(), log, user.ID, messageID)
 		if err != nil {
 			log.Errorw("failed to read one message", "user_id", user.ID, "message_id", messageID, "error", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -466,7 +466,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 		message = res
 	} else {
 		// read all messages
-		res, err := h.controller.ReadAllMessages(context.Background(), log, &model.ReadAllMessagesParams{
+		res, err := h.controller.ReadAllMessages(req.Context(), log, &model.ReadAllMessagesParams{
 			UserID:    user.ID,
 			Limit:     int32(limitInt),
 			Offset:    int32(offsetInt),
@@ -487,7 +487,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 	if message != nil {
 		// one message
 		if message.File != nil && message.File.ID != 0 {
-			fileRes, err := h.filesGateway.ReadFile(context.Background(), log, user.ID, message.File.ID)
+			fileRes, err := h.filesGateway.ReadFile(req.Context(), log, user.ID, message.File.ID)
 			if err != nil {
 				log.Errorw("failed to read file for a message", "user_id", user.ID, "message_id", messageID, "error", err)
 				w.WriteHeader(http.StatusBadRequest)
@@ -517,7 +517,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 		}
 	}
 
-	filesRes, err := h.filesGateway.ReadBatchFiles(context.Background(), log, &model.ReadBatchFilesParams{
+	filesRes, err := h.filesGateway.ReadBatchFiles(req.Context(), log, &model.ReadBatchFilesParams{
 		UserID: user.ID,
 		IDs:    fileIds,
 	})

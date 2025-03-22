@@ -41,12 +41,16 @@ func (h *Handler) Auth(ctx context.Context, req *api.AuthUserRequest) (*api.Auth
 }
 
 func (h *Handler) GetUser(ctx context.Context, req *api.GetUserRequest) (*api.User, error) {
+	logger.Debugw("get user")
+
 	params := &model.GetUserParams{}
 
 	switch key := req.SearchKey.(type) {
 	case *api.GetUserRequest_Id:
+		logger.Debugw("get user by id", "id", key.Id)
 		params.ID = key.Id
 	case *api.GetUserRequest_Token:
+		logger.Debugw("get user by token", "token", key.Token)
 		params.Token = key.Token
 	}
 
@@ -55,6 +59,7 @@ func (h *Handler) GetUser(ctx context.Context, req *api.GetUserRequest) (*api.Us
 	case controller.ErrTokenInvalid:
 		return nil, status.Errorf(codes.InvalidArgument, "wrong token")
 	case nil:
+		logger.Debugw("ger user ok", "id", user.ID)
 		return model.UserToProto(user), nil
 	default:
 		return nil, status.Errorf(codes.Internal, err.Error())

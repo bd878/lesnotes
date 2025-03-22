@@ -86,3 +86,7 @@ func Warnf(msg string, args ...any) {
 func Warnln(args ...any) {
 	Default().Warnln(args...)
 }
+
+func Debugw(msg string, args ...any) {
+	Default().Debugw(msg, args...)
+}
