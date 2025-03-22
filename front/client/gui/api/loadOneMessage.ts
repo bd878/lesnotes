@@ -19,7 +19,7 @@ async function loadOneMessage(messageID: number): LoadOneMessageResult {
 	try {
 		response = await api('/messages/v1/read', {
 			queryParams: {
-				message_id: messageID,
+				id: messageID,
 			},
 			method: "GET",
 			credentials: 'include',

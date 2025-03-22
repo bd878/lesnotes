@@ -368,8 +368,8 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 		limitInt = selectNoLimit
 	}
 
-	if values.Get("message_id") != "" {
-		messageid, err := strconv.Atoi(values.Get("message_id"))
+	if values.Get("id") != "" {
+		messageid, err := strconv.Atoi(values.Get("id"))
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(servermodel.ServerResponse{
@@ -426,7 +426,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 		return
 	}
 
-	if messageID != 0 && (ascending != false || limitInt > 0 || offsetInt > 0) {
+	if messageID != 0 && (limitInt > 0 || offsetInt > 0) {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status: "error",

@@ -5,7 +5,8 @@ import MessagePage from '../../components/MessagePage';
 import StoreProvider from '../../providers/Store';
 
 function Message() {
-	const id = document.body.dataset.Id
+	const id = document.body.dataset.id
+
 	return (
 		<StoreProvider>
 			<MessagePage id={id} />
