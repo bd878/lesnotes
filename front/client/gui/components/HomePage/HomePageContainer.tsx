@@ -39,9 +39,8 @@ function HomePageContainer(props) {
 	const listRef = useRef(null);
 
 	const scrollToTop = useCallback(() => {
-		if (listRef.current != null) {
+		if (listRef.current != null)
 			listRef.current.scrollTo(0, listRef.current.scrollHeight);
-		}
 	}, [listRef]);
 
 	useEffect(() => {
@@ -49,16 +48,14 @@ function HomePageContainer(props) {
 	}, [fetchMessages]);
 
 	const loadMore = useCallback(() => {
-		if (listRef.current != null && !isLoading && !isLastPage) {
+		if (listRef.current != null && !isLoading && !isLastPage)
 			fetchMessages(LIMIT_LOAD_BY, loadOffset, LOAD_ORDER)
-		}
 	}, [listRef.current, fetchMessages,
 		loadOffset, isLoading, isLastPage]);
 
 	const onListScroll = useCallback(() => {
-		if (listRef.current != null && listRef.current.scrollTop == 0) {
+		if (listRef.current != null && listRef.current.scrollTop == 0)
 			loadMore()
-		}
 	}, [listRef.current, loadMore]);
 
 	const onExitClick = useCallback(() => {logout()}, [logout]);

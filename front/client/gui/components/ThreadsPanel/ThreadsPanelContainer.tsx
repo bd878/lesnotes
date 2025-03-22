@@ -1,8 +1,8 @@
 import React, {useEffect, useCallback} from 'react';
 import ThreadsPanelComponent from './ThreadsPanelComponent'
 import {
-  LIMIT_LOAD_BY,
-  LOAD_ORDER,
+	LIMIT_LOAD_BY,
+	LOAD_ORDER,
 } from './const';
 import {
 	fetchMessagesActionCreator,
@@ -33,9 +33,8 @@ function ThreadsPanelContainer(props) {
 
 	const onResetClick = useCallback(reset, [reset])
 
-	if (threadID == 0 && !shouldShowThreadsPanel) {
+	if (threadID == 0 && !shouldShowThreadsPanel)
 		return null
-	}
 
 	return (
 		<ThreadsPanelComponent

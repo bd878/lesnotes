@@ -5,9 +5,10 @@ import MessagePage from '../../components/MessagePage';
 import StoreProvider from '../../providers/Store';
 
 function Message() {
+	const id = document.body.dataset.Id
 	return (
 		<StoreProvider>
-			<MessagePage />
+			<MessagePage id={id} />
 		</StoreProvider>
 	)
 }

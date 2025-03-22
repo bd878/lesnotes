@@ -8,15 +8,15 @@ import createSagaMiddleware from 'redux-saga'
 const sagaMiddleware = createSagaMiddleware()
 
 export default createStore(combineReducers({
-  messages: messagesReducer,
-  threads: threadsReducer,
-  me: userReducer,
+	messages: messagesReducer,
+	threads: threadsReducer,
+	me: userReducer,
 }), {}, applyMiddleware(sagaMiddleware))
 
 sagaMiddleware.run(function* rootSaga() {
-  yield all([
-    threadsSaga(),
-    userSaga(),
-    messagesSaga(),
-  ])
+	yield all([
+		threadsSaga(),
+		userSaga(),
+		messagesSaga(),
+	])
 })
