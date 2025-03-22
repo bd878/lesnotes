@@ -1,6 +1,7 @@
 import React, {useCallback, useMemo, useEffect, useState, useRef} from 'react';
 import Form from '../Form';
 import i18n from '../../i18n';
+import * as is from '../../third_party/is';
 import MessageFormComponent from './MessageFormComponent';
 
 function MessageFormContainer(props) {
@@ -16,7 +17,7 @@ function MessageFormContainer(props) {
 	const [message, setMessage] = useState("");
 	const [file, setFile] = useState(null);
 
-	const isEditMode = useMemo(() => messageForEdit && messageForEdit.ID, [messageForEdit])
+	const isEditMode = useMemo(() => is.notEmpty(messageForEdit) && is.notEmpty(messageForEdit.text), [messageForEdit])
 
 	useEffect(() => {
 		if (isEditMode)

@@ -2,36 +2,35 @@ import i18n from '../i18n';
 import api from './api';
 
 async function deleteMessage(id = "") {
-  let response = {};
-  let result: DeleteMessageResult = {
-    error: "",
-    explain: "",
-    ID: "",
-  }
+	let response = {};
+	let result: DeleteMessageResult = {
+		error: "",
+		explain: "",
+		ID: "",
+	}
 
-  try {
-    response = await api("/messages/v1/delete", {
-      queryParams: {
-        id: id,
-      },
-      method: "DELETE",
-      credentials: "include",
-    });
+	try {
+		response = await api("/messages/v1/delete", {
+			queryParams: {
+				id: id,
+			},
+			method: "DELETE",
+			credentials: "include",
+		});
 
-    if (response.error != "") {
-      result.error = response.error
-      result.explain = response.explain
-    } else {
-      if (response.value) {
-        result.ID = id
-      }
-    }
-  } catch (e) {
-    console.error(i18n("error_occured"), e);
-    throw e
-  }
+		if (response.error != "") {
+			result.error = response.error
+			result.explain = response.explain
+		} else {
+			if (response.value)
+				result.ID = id
+		}
+	} catch (e) {
+		console.error(i18n("error_occured"), e);
+		result.error = e
+	}
 
-  return result
+	return result
 }
 
 export default deleteMessage

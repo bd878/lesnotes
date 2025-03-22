@@ -5,6 +5,7 @@ import (
 	"sync"
 	"net/http"
 
+	usermodel "github.com/bd878/gallery/server/users/pkg/model"
 	httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
 	httphandler "github.com/bd878/gallery/server/messages/internal/handler/http"
 	usergateway "github.com/bd878/gallery/server/internal/gateway/user"
@@ -32,7 +33,7 @@ func New(cfg Config) *Server {
 
 	userGateway := usergateway.New(cfg.UsersServiceAddr)
 	filesGateway := filesgateway.New(cfg.FilesServiceAddr)
-	authBuilder := &httpmiddleware.AuthBuilder{Gateway: userGateway, PublicUserID: 0}
+	authBuilder := &httpmiddleware.AuthBuilder{Gateway: userGateway, PublicUserID: usermodel.PublicUserID}
 	middleware = middleware.WithAuth(authBuilder.Auth)
 
 	grpcCtrl := controller.New(controller.Config{

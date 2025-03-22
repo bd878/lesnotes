@@ -44,7 +44,7 @@ interface SendMessagePayload {
 function* sendMessage({payload}: {payload: SendMessagePayload}) {
 	try {
 		const response = yield call(api.sendMessage,
-				{message: payload.message, file: payload.file})
+				{text: payload.message, file: payload.file})
 
 		if (response.error != "")
 			yield put(messagesFailedActionCreator(response.error))
