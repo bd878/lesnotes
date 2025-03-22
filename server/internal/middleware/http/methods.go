@@ -42,7 +42,7 @@ func (b *AuthBuilder) Auth(next Handler) Handler {
 
 		cookie, err := req.Cookie("token")
 		switch err {
-		case ErrEmptyToken:
+		case http.ErrNoCookie:
 			user, err = b.restorePublicUser(log, w, req)
 		case nil:
 			user, err = b.restoreAuthorizedUser(log, w, req, cookie)
