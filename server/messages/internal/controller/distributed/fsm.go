@@ -17,7 +17,6 @@ type Repository interface {
 	Read(ctx context.Context, log *logger.Logger, messageID int32) (*model.Message, error)
 	ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadAllMessagesParams) (*model.ReadAllMessagesResult, error)
 	ReadThreadMessages(ctx context.Context, log *logger.Logger, params *model.ReadThreadMessagesParams) (*model.ReadThreadMessagesResult, error)
-	GetBatch(ctx context.Context, log *logger.Logger) ([]*model.Message, error)
 	Truncate(ctx context.Context, log *logger.Logger) error
 }
 
@@ -72,6 +71,7 @@ func (f *fsm) applyUpdate(raw []byte) interface{} {
 		FileID: cmd.FileId,
 		Text: cmd.Text,
 		UpdateUTCNano: cmd.UpdateUtcNano,
+		Private: cmd.Private,
 	})
 	if err != nil {
 		return err

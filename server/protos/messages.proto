@@ -22,6 +22,7 @@ message Message {
 	string   text = 5;
 	int32    file_id = 7;
 	int32    thread_id = 8;
+	bool     private = 9;
 }
 
 message ReadThreadMessagesRequest {
@@ -54,6 +55,7 @@ message UpdateMessageRequest {
 	int32    user_id = 2;
 	int32    file_id = 3;
 	string   text = 4;
+	bool     private = 5;
 }
 
 message UpdateMessageResponse {

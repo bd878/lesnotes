@@ -27,12 +27,10 @@ type Controller interface {
 	ReadThreadMessages(ctx context.Context, log *logger.Logger, params *model.ReadThreadMessagesParams) (*model.ReadThreadMessagesResult, error)
 }
 
-// TODO: move files into controller?
 type FilesGateway interface {
 	SaveFileStream(ctx context.Context, log *logger.Logger, stream io.Reader, params *model.SaveFileParams) (*model.SaveFileResult, error)
 	ReadBatchFiles(ctx context.Context, log *logger.Logger, params *model.ReadBatchFilesParams) (*model.ReadBatchFilesResult, error)
 	ReadFile(ctx context.Context, log *logger.Logger, userID, fileID int32) (*filesmodel.File, error)
-	// TODO: DeleteFile
 }
 
 type Handler struct {
@@ -46,7 +44,13 @@ func New(controller Controller, filesGateway FilesGateway) *Handler {
 
 // TODO: rewrite on builder pattern
 func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
-	var err error
+	var (
+		err error
+		fileName string
+		fileID, threadID int32
+		private bool
+	)
+
 	if err = req.ParseMultipartForm(1); err != nil {
 		log.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -63,8 +67,6 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 		return
 	}
 
-	var fileName string
-	var fileID int32
 	if _, ok := req.MultipartForm.File["file"]; ok {
 		f, fh, err := req.FormFile("file")
 		if err != nil {
@@ -79,7 +81,6 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 
 		fileName = filepath.Base(fh.Filename)
 
-		// TODO: create fileID here, pipe in goroutine
 		fileResult, err := h.filesGateway.SaveFileStream(context.Background(), log, f, &model.SaveFileParams{
 			UserID: user.ID,
 			Name:   fileName,
@@ -110,7 +111,6 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 		return
 	}
 
-	var threadID int32
 	values := req.URL.Query()
 	if values.Get("thread_id") != "" {
 		threadid, err := strconv.Atoi(values.Get("thread_id"))
@@ -125,6 +125,26 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 		threadID = int32(threadid)
 	}
 
+	if values.Get("public") != "" {
+		public, err := strconv.Atoi(values.Get("public"))
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+				Status: "ok",
+				Description: "invalid public param",
+			})
+			return
+		}
+
+		if public > 0 {
+			private = false
+		} else if public == 0 {
+			private = true
+		} else {
+			private = true
+		}
+	}
+
 	resp, err := h.controller.SaveMessage(req.Context(), log, &model.Message{
 		UserID: user.ID,
 		ThreadID: threadID,
@@ -132,6 +152,7 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 		File:   &filesmodel.File{
 			ID:     fileID,
 		},
+		Private: private,
 	})
 	if err != nil {
 		log.Error(err)
@@ -154,6 +175,7 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 			Text:          text,
 			UpdateUTCNano: resp.UpdateUTCNano,
 			CreateUTCNano: resp.CreateUTCNano,
+			Private:       resp.Private,
 		},
 	})
 }
@@ -210,6 +232,8 @@ func (h *Handler) DeleteMessage(log *logger.Logger, w http.ResponseWriter, req *
 }
 
 func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
+	var private bool
+
 	user, ok := utils.GetUser(w, req)
 	if !ok {
 		log.Error("user not found")
@@ -251,10 +275,31 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 		return
 	}
 
+	if values.Get("public") != "" {
+		public, err := strconv.Atoi(values.Get("public"))
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+				Status: "ok",
+				Description: "invalid public param",
+			})
+			return
+		}
+
+		if public > 0 {
+			private = false
+		} else if public == 0 {
+			private = true
+		} else {
+			private = true
+		}
+	}
+
 	resp, err := h.controller.UpdateMessage(req.Context(), log, &model.UpdateMessageParams{
 		ID:     int32(id),
 		UserID: user.ID,
 		Text:   text,
+		Private: private,
 	})
 	if err != nil {
 		log.Error(err)
@@ -273,13 +318,15 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 }
 
 func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
-	var limitInt, offsetInt, orderInt int
-	var threadID, messageID int32
-	var ascending bool
-	var message *model.Message
-	var messages []*model.Message
-	var isLastPage bool
-	var err error
+	var (
+		limitInt, offsetInt, orderInt int
+		threadID, messageID int32
+		ascending bool
+		message *model.Message
+		messages []*model.Message
+		isLastPage bool
+		err error
+	)
 
 	user, ok := utils.GetUser(w, req)
 	if !ok {

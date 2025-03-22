@@ -59,6 +59,7 @@ func (m *DistributedMessages) UpdateMessage(ctx context.Context, log *logger.Log
 		FileId: params.FileID,
 		Text:   params.Text,
 		UpdateUtcNano: params.UpdateUTCNano,
+		Private: params.Private,
 	})
 
 	_, err := m.apply(ctx, UpdateRequest, cmd)

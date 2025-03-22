@@ -8,6 +8,7 @@ type SaveMessageResult struct {
 	ID                int32
 	CreateUTCNano     int64
 	UpdateUTCNano     int64
+	Private           bool
 }
 
 type UpdateMessageParams struct {
@@ -17,6 +18,7 @@ type UpdateMessageParams struct {
 	FileID            int32
 	Text              string
 	UpdateUTCNano     int64
+	Private           bool
 }
 
 type UpdateMessageResult struct {

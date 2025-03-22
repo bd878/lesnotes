@@ -88,6 +88,7 @@ func (s *Messages) UpdateMessage(ctx context.Context, log *logger.Logger, params
 		UserId: params.UserID,
 		FileId: params.FileID,
 		Text: params.Text,
+		Private: params.Private,
 	})
 	if err != nil {
 		log.Errorw("client failed to save message", "error", err)

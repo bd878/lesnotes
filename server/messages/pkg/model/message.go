@@ -13,6 +13,7 @@ type Message struct {
 	UserID              int32               `json:"user_id,omitempty"`
 	File                *filesmodel.File    `json:"file,omitempty"`
 	Text                string              `json:"text,omitempty"`
+	Private             bool                `json:"private,omitempty"`
 }
 
 type MessagesList struct {

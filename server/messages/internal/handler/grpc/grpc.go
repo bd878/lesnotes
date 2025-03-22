@@ -61,6 +61,7 @@ func (h *Handler) UpdateMessage(ctx context.Context, req *api.UpdateMessageReque
 		UserID: req.UserId,
 		Text: req.Text,
 		UpdateUTCNano: updateUTCNano,
+		Private: req.Private,
 	})
 	if err != nil {
 		logger.Errorw("failed to update message", "error", err)

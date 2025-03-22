@@ -32,7 +32,7 @@ func New(dbFilePath string) *Repository {
 	}
 
 	selectStmt := utils.Must(pool.Prepare(`
-SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id
+SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id, private
 FROM messages
 WHERE id = :id AND (thread_id ISNULL OR thread_id = 0)
 ;`,
@@ -46,7 +46,8 @@ INSERT INTO messages(
 	create_utc_nano,
 	update_utc_nano,
 	text,
-	file_id
+	file_id,
+	private
 ) VALUES (:id, :threadId, :userId, :createUtcNano, :updateUtcNano, :text, :fileId)
 ;`,
 	))
@@ -55,6 +56,7 @@ INSERT INTO messages(
 UPDATE messages SET 
 	text = :text,
 	update_utc_nano = :updateUtcNano
+	private = :private
 WHERE id = :id AND user_id = :userId
 ;`,
 	))
@@ -72,7 +74,7 @@ WHERE thread_id = :threadId
 	))
 
 	ascStmt := utils.Must(pool.Prepare(`
-SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id
+SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id, private
 FROM messages
 WHERE user_id = :userId AND (thread_id ISNULL OR thread_id = 0)
 ORDER BY create_utc_nano ASC
@@ -81,7 +83,7 @@ LIMIT :limit OFFSET :offset
 	))
 
 	descStmt := utils.Must(pool.Prepare(`
-SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id
+SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id, private
 FROM messages
 WHERE user_id = :userId AND (thread_id ISNULL OR thread_id = 0)
 ORDER BY create_utc_nano DESC
@@ -90,7 +92,7 @@ LIMIT :limit OFFSET :offset
 	))
 
 	ascThreadStmt := utils.Must(pool.Prepare(`
-SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id
+SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id, private
 FROM messages
 WHERE user_id = :userId AND thread_id = :threadId
 ORDER BY create_utc_nano ASC
@@ -99,7 +101,7 @@ LIMIT :limit OFFSET :offset
 	))
 
 	descThreadStmt := utils.Must(pool.Prepare(`
-SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id
+SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id, private
 FROM messages
 WHERE user_id = :userId AND thread_id = :threadId
 ORDER BY create_utc_nano DESC
@@ -139,6 +141,11 @@ func (r *Repository) Create(ctx context.Context, log *logger.Logger, message *mo
 		fileIdCol.Valid = true
 	}
 
+	var privateCol int32
+	if message.Private {
+		privateCol = 1
+	}
+
 	_, err := r.insertStmt.ExecContext(ctx,
 		sql.Named("id", message.ID),
 		sql.Named("threadId", threadIdCol),
@@ -147,6 +154,7 @@ func (r *Repository) Create(ctx context.Context, log *logger.Logger, message *mo
 		sql.Named("updateUtcNano", message.UpdateUTCNano),
 		sql.Named("text", message.Text),
 		sql.Named("fileId", fileIdCol),
+		sql.Named("private", privateCol),
 	)
 	if err != nil {
 		log.Errorw("failed to insert new message ", "error", err)
@@ -217,15 +225,19 @@ func (r *Repository) deleteThreadMessages(ctx context.Context, log *logger.Logge
 }
 
 func (r *Repository) Update(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) error {
+	var private int
+	if params.Private {
+		private = 1
+	}
 	_, err := r.updateStmt.ExecContext(ctx,
 		sql.Named("text", params.Text),
 		sql.Named("updateUtcNano", params.UpdateUTCNano),
 		sql.Named("id", params.ID),
 		sql.Named("userId", params.UserID),
-	)
+		sql.Named("private", private))
 	if err != nil {
-		log.Errorw("failed to update message", "error", err)
-		return errors.New("failed to update message")
+		log.Errorln("failed to update message")
+		return err
 	}
 	return nil
 }
@@ -242,8 +254,10 @@ func (r *Repository) Truncate(ctx context.Context, log *logger.Logger) error {
 func (r *Repository) ReadThreadMessages(ctx context.Context, log *logger.Logger, params *model.ReadThreadMessagesParams) (
 	*model.ReadThreadMessagesResult, error,
 ) {
-	var rows *sql.Rows
-	var err error
+	var (
+		rows *sql.Rows
+		err error
+	)
 
 	if params.Ascending {
 		rows, err = r.ascThreadStmt.QueryContext(ctx,
@@ -284,8 +298,10 @@ type selectedMessages struct {
 func (r *Repository) ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadAllMessagesParams) (
 	*model.ReadAllMessagesResult, error,
 ) {
-	var rows *sql.Rows
-	var err error
+	var (
+		rows *sql.Rows
+		err error
+	)
 
 	if params.Ascending {
 		rows, err = r.ascStmt.QueryContext(ctx,
@@ -319,16 +335,19 @@ func (r *Repository) ReadAllMessages(ctx context.Context, log *logger.Logger, pa
 func (r *Repository) Read(ctx context.Context, log *logger.Logger, id int32) (
 	*model.Message, error,
 ) {
-	var _id int32
-	var userId int32
-	var threadIdCol sql.NullInt32
-	var createUtcNano int64
-	var updateUtcNano int64
-	var text string
-	var fileIdCol sql.NullInt32
+	var (
+		_id int32
+		userId int32
+		threadIdCol sql.NullInt32
+		createUtcNano int64
+		updateUtcNano int64
+		text string
+		fileIdCol sql.NullInt32
+		privateCol int32
+	)
 
 	err := r.selectStmt.QueryRowContext(ctx, sql.Named("id", id)).Scan(
-		&_id, &userId, &threadIdCol, &createUtcNano, &updateUtcNano, &text, &fileIdCol)
+		&_id, &userId, &threadIdCol, &createUtcNano, &updateUtcNano, &text, &fileIdCol, &privateCol)
 	if err != nil {
 		log.Errorln("failed to select one message")
 		return nil, err
@@ -341,6 +360,7 @@ func (r *Repository) Read(ctx context.Context, log *logger.Logger, id int32) (
 		UpdateUTCNano: updateUtcNano,
 		Text: text,
 		File: &filesmodel.File{},
+		Private: true,
 	}
 
 	if threadIdCol.Valid {
@@ -349,6 +369,10 @@ func (r *Repository) Read(ctx context.Context, log *logger.Logger, id int32) (
 
 	if fileIdCol.Valid {
 		msg.File.ID = fileIdCol.Int32
+	}
+
+	if privateCol == 0 {
+		msg.Private = false
 	}
 
 	return msg, nil
@@ -362,13 +386,16 @@ func (r *Repository) selectMessages(ctx context.Context, log *logger.Logger, row
 
 	var res []*model.Message
 	for rows.Next() {
-		var id int32
-		var userId int32
-		var threadIdCol sql.NullInt32
-		var createUtcNano int64
-		var updateUtcNano int64
-		var text string
-		var fileIdCol sql.NullInt32
+		var (
+			id int32
+			userId int32
+			threadIdCol sql.NullInt32
+			createUtcNano int64
+			updateUtcNano int64
+			text string
+			fileIdCol sql.NullInt32
+			privateCol int32
+		)
 		if err := rows.Scan(
 			&id,
 			&userId,
@@ -377,6 +404,7 @@ func (r *Repository) selectMessages(ctx context.Context, log *logger.Logger, row
 			&updateUtcNano,
 			&text,
 			&fileIdCol,
+			&privateCol,
 		); err != nil {
 			log.Error("failed to scan row")
 			return nil, err
@@ -389,6 +417,7 @@ func (r *Repository) selectMessages(ctx context.Context, log *logger.Logger, row
 			UpdateUTCNano: updateUtcNano,
 			Text: text,
 			File: &filesmodel.File{},
+			Private: true,
 		}
 
 		if threadIdCol.Valid {
@@ -397,6 +426,10 @@ func (r *Repository) selectMessages(ctx context.Context, log *logger.Logger, row
 
 		if fileIdCol.Valid {
 			msg.File.ID = fileIdCol.Int32
+		}
+
+		if privateCol == 0 {
+			msg.Private = false
 		}
 
 		res = append(res, msg)
@@ -427,53 +460,4 @@ func (r *Repository) selectMessages(ctx context.Context, log *logger.Logger, row
 		List: res,
 		IsLastPage: isLastPage,
 	}, nil
-}
-
-func (r *Repository) GetBatch(ctx context.Context, log *logger.Logger) ([]*model.Message, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		"SELECT id, user_id, create_utc_nano, update_utc_nano, text, file_id " +
-		"FROM messages",
-	)
-	if err != nil {
-		log.Error("failed to query get batch context")
-		return nil, err
-	}
-	defer rows.Close()
-
-	var res []*model.Message
-	for rows.Next() {
-		var id int32
-		var userId int32
-		var createUtcNano int64
-		var updateUtcNano int64
-		var text string
-		var fileIdCol sql.NullInt32
-		if err := rows.Scan(
-			&id,
-			&userId,
-			&createUtcNano,
-			&updateUtcNano,
-			&text,
-			&fileIdCol,
-		); err != nil {
-			log.Error("failed to scan row")
-			return nil, err
-		}
-		var fileId int32
-		if fileIdCol.Valid {
-			fileId = fileIdCol.Int32
-		}
-		res = append(res, &model.Message{
-			ID: id,
-			UserID: userId,
-			CreateUTCNano: createUtcNano,
-			UpdateUTCNano: updateUtcNano,
-			Text: text,
-			File: &filesmodel.File{
-				ID: fileId,
-			},
-		})
-	}
-
-	return res, nil
 }

@@ -16,6 +16,7 @@ func MessageFromProto(proto *api.Message) *Message {
 		File:           &filesmodel.File{
 			ID:             proto.FileId,
 		},
+		Private:        proto.Private,
 	}
 }
 
@@ -28,6 +29,7 @@ func MessageToProto(msg *Message) *api.Message {
 		UpdateUtcNano:  msg.UpdateUTCNano,
 		Text:           msg.Text,
 		FileId:         msg.File.ID,
+		Private:        msg.Private,
 	}
 }
 
