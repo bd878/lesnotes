@@ -3,7 +3,7 @@ package distributed
 type RequestType uint16
 
 const (
-  AppendRequest RequestType = iota
-  UpdateRequest
-  DeleteRequest
+	AppendRequest RequestType = iota
+	UpdateRequest
+	DeleteRequest
 )

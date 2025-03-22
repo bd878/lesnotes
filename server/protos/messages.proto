@@ -5,74 +5,74 @@ package messages.v1;
 option go_package = "github.com/bd878/gallery/server/api";
 
 service Messages {
-  rpc GetServers(GetServersRequest) returns (GetServersResponse) {}
-  rpc SaveMessage(SaveMessageRequest) returns (SaveMessageResponse) {}
-  rpc DeleteMessage(DeleteMessageRequest) returns (DeleteMessageResponse) {}
-  rpc UpdateMessage(UpdateMessageRequest) returns (UpdateMessageResponse) {}
-  rpc ReadOneMessage(ReadOneMessageRequest) returns (Message) {}
-  rpc ReadAllMessages(ReadAllMessagesRequest) returns (ReadAllMessagesResponse) {}
-  rpc ReadThreadMessages(ReadThreadMessagesRequest) returns (ReadThreadMessagesResponse) {}
+	rpc GetServers(GetServersRequest) returns (GetServersResponse) {}
+	rpc SaveMessage(SaveMessageRequest) returns (SaveMessageResponse) {}
+	rpc DeleteMessage(DeleteMessageRequest) returns (DeleteMessageResponse) {}
+	rpc UpdateMessage(UpdateMessageRequest) returns (UpdateMessageResponse) {}
+	rpc ReadOneMessage(ReadOneMessageRequest) returns (Message) {}
+	rpc ReadAllMessages(ReadAllMessagesRequest) returns (ReadAllMessagesResponse) {}
+	rpc ReadThreadMessages(ReadThreadMessagesRequest) returns (ReadThreadMessagesResponse) {}
 }
 
 message Message {
-  int32    id = 1;
-  int32    user_id = 2;
-  int64    create_utc_nano = 3;
-  int64    update_utc_nano = 4;
-  string   text = 5;
-  int32    file_id = 7;
-  int32    thread_id = 8;
+	int32    id = 1;
+	int32    user_id = 2;
+	int64    create_utc_nano = 3;
+	int64    update_utc_nano = 4;
+	string   text = 5;
+	int32    file_id = 7;
+	int32    thread_id = 8;
 }
 
 message ReadThreadMessagesRequest {
-  int32    user_id = 1;
-  int32    thread_id = 2;
-  int32    offset = 3;
-  int32    limit = 4;
-  bool     asc = 5;
+	int32    user_id = 1;
+	int32    thread_id = 2;
+	int32    offset = 3;
+	int32    limit = 4;
+	bool     asc = 5;
 }
 
 message ReadThreadMessagesResponse {
-  repeated Message messages = 1;
-  bool             is_last_page = 2;
+	repeated Message messages = 1;
+	bool             is_last_page = 2;
 }
 
 message ReadAllMessagesRequest {
-  int32    user_id = 1;
-  int32    offset = 2;
-  int32    limit = 3;
-  bool     asc = 4;
+	int32    user_id = 1;
+	int32    offset = 2;
+	int32    limit = 3;
+	bool     asc = 4;
 }
 
 message ReadAllMessagesResponse {
-  repeated Message messages = 1;
-  bool             is_last_page = 2;
+	repeated Message messages = 1;
+	bool             is_last_page = 2;
 }
 
 message UpdateMessageRequest {
-  int32    id = 1;
-  int32    user_id = 2;
-  int32    file_id = 3;
-  string   text = 4;
+	int32    id = 1;
+	int32    user_id = 2;
+	int32    file_id = 3;
+	string   text = 4;
 }
 
 message UpdateMessageResponse {
-  int64    update_utc_nano = 1;
+	int64    update_utc_nano = 1;
 }
 
 message SaveMessageRequest {
-  Message  message = 1;
+	Message  message = 1;
 }
 
 message SaveMessageResponse {
-  int32    id = 1;
-  int64    create_utc_nano = 2;
-  int64    update_utc_nano = 3;
+	int32    id = 1;
+	int64    create_utc_nano = 2;
+	int64    update_utc_nano = 3;
 }
 
 message DeleteMessageRequest {
-  int32    id = 1;
-  int32    user_id = 2;
+	int32    id = 1;
+	int32    user_id = 2;
 }
 
 message DeleteMessageResponse {
@@ -81,16 +81,16 @@ message DeleteMessageResponse {
 message GetServersRequest {}
 
 message GetServersResponse {
-  repeated Server servers = 3;
+	repeated Server servers = 3;
 }
 
 message Server {
-  string id = 1;
-  string raft_addr = 2;
-  bool   is_leader = 3;
+	string id = 1;
+	string raft_addr = 2;
+	bool   is_leader = 3;
 }
 
 message ReadOneMessageRequest {
-  int32  id = 1;
-  int32  user_id = 2;
+	int32  id = 1;
+	int32  user_id = 2;
 }

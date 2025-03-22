@@ -1,8 +1,8 @@
 {
-  "rpc_addr":       "0.0.0.0:8085",
-  "node_name":      "users.8085",
-  "log_path":       "../../logs/",
-  "db_path":        "../../users.db",
-  "data_path":      "../../data",
-  "domain":         "dev.lesnotes.space"
+	"rpc_addr":       "0.0.0.0:8085",
+	"node_name":      "users.8085",
+	"log_path":       "../../logs/",
+	"db_path":        "../../users.db",
+	"data_path":      "../../data",
+	"domain":         "dev.lesnotes.space"
 }
