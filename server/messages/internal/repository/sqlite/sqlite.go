@@ -55,7 +55,7 @@ INSERT INTO messages(
 	updateStmt := utils.Must(pool.Prepare(`
 UPDATE messages SET 
 	text = :text,
-	update_utc_nano = :updateUtcNano
+	update_utc_nano = :updateUtcNano,
 	private = :private
 WHERE id = :id AND user_id = :userId
 ;`,
