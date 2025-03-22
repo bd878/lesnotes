@@ -5,28 +5,28 @@ import "protos/messages.proto";
 option go_package = "github.com/bd878/gallery/server/messages/internal/controller/distributed";
 
 message AppendCommand {
-  messages.v1.Message message = 1;
+	messages.v1.Message message = 1;
 }
 
 message AppendCommandResult {
-  int32   id = 1;
+	int32   id = 1;
 }
 
 message UpdateCommand {
-  int32   id = 1;
-  int32   user_id = 2;
-  int32   file_id = 3;
-  string  text = 4;
-  int64   update_utc_nano = 5;
+	int32   id = 1;
+	int32   user_id = 2;
+	int32   file_id = 3;
+	string  text = 4;
+	int64   update_utc_nano = 5;
 }
 
 message UpdateCommandResult {
 }
 
 message DeleteCommand {
-  int32   id = 1;
-  int32   user_id = 2;
-  int32   file_id = 3;
+	int32   id = 1;
+	int32   user_id = 2;
+	int32   file_id = 3;
 }
 
 message DeleteCommandResult {

@@ -1,20 +1,26 @@
 package model
 
-type User struct {
-  ID               int32            `json:"id"`
-  Name             string           `json:"name,omitempty"`
-  Password         string           `json:"password,omitempty"`
-  Token            string           `json:"token,omitempty"`
-  ExpiresUTCNano   int64            `json:"expires_utc_nano,omitempty"`
-}
+const (
+	PublicUserID int32 = 9_999_999
+)
 
-type ServerResponse struct {
-  Status           string           `json:"status"`
-  Description      string           `json:"description"`
-}
+type (
+	User struct {
+		ID               int32            `json:"id"`
+		Name             string           `json:"name,omitempty"`
+		Password         string           `json:"password,omitempty"`
+		Token            string           `json:"token,omitempty"`
+		ExpiresUTCNano   int64            `json:"expires_utc_nano,omitempty"`
+	}
 
-type ServerAuthorizeResponse struct {
-  ServerResponse
-  Expired          bool             `json:"expired"`
-  User             User             `json:"user"`
-}
+	ServerResponse struct {
+		Status           string           `json:"status"`
+		Description      string           `json:"description"`
+	}
+
+	ServerAuthorizeResponse struct {
+		ServerResponse
+		Expired          bool             `json:"expired"`
+		User             User             `json:"user"`
+	}
+)

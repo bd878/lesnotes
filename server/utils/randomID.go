@@ -1,9 +1,9 @@
 package utils
 
 import (
-  "math/rand"
+	"math/rand"
 )
 
 func RandomID() int32 {
-  return rand.Int31()
+	return rand.Int31()
 }

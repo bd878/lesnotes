@@ -30,19 +30,19 @@ app.use(useragent);
 app.use(favicon);
 
 router
-  .get('/public/:filename', etag, assets)
-  .get('/index', ctx => {
-    ctx.redirect('/')
-    ctx.status = 301
-  })
-  .get('/', etag, main)
-  .get('/login', etag, login)
-  .get('/register', etag, register)
-  .get('/home', etag, home)
-  .get('/status', status)
-  .get("/t/new", etag. newThread)
-  .get("/t/:id", etag, message)
-  .get('/:any*', xxx)
+	.get('/public/:filename', etag, assets)
+	.get('/index', ctx => {
+		ctx.redirect('/')
+		ctx.status = 301
+	})
+	.get('/', etag, main)
+	.get('/login', etag, login)
+	.get('/register', etag, register)
+	.get('/home', etag, home)
+	.get('/status', status)
+	.get("/new", etag, newThread)
+	.get("/t/:id", etag, message)
+	.get('/:any*', xxx)
 
 app.use(router.routes());
 
@@ -50,5 +50,5 @@ const port = process.env.PORT || Config.get("port") || 8080;
 const host = process.env.HOST || Config.get("addr") || "localhost";
 
 app.listen(port, host, () => {
-  console.log(`App is listening on ${port} port`);
+	console.log(`App is listening on ${port} port`);
 });
