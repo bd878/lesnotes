@@ -91,9 +91,9 @@ func (r *Repository) getByID(ctx context.Context, log *logger.Logger, id int32) 
 	var (
 		_id int32
 		expiresUtcNano int64
-		passwordCol *sql.NullString
-		tokenCol *sql.NullString
-		nameCol *sql.NullString
+		passwordCol sql.NullString
+		tokenCol sql.NullString
+		nameCol sql.NullString
 	)
 
 	err := r.selectByIDStmt.QueryRowContext(ctx, sql.Named("id", id)).Scan(
