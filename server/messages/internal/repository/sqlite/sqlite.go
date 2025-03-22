@@ -48,7 +48,7 @@ INSERT INTO messages(
 	text,
 	file_id,
 	private
-) VALUES (:id, :threadId, :userId, :createUtcNano, :updateUtcNano, :text, :fileId)
+) VALUES (:id, :threadId, :userId, :createUtcNano, :updateUtcNano, :text, :fileId, :private)
 ;`,
 	))
 
