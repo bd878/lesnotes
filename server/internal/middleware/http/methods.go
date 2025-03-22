@@ -47,7 +47,7 @@ func (b *AuthBuilder) Auth(next Handler) Handler {
 		case nil:
 			user, err = b.restoreAuthorizedUser(log, w, req, cookie)
 		default:
-			log.Errorln("bad cookie")
+			log.Errorw("bad cookie", "cookie", cookie, "error", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
