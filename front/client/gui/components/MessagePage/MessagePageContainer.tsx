@@ -6,7 +6,7 @@ import MessagePageComponent from './MessagePageComponent';
 
 function MessagePageContainer(props) {
 	const {
-		id
+		id,
 	} = props
 
 	const [message, setMessage] = useState(models.message())
@@ -16,6 +16,8 @@ function MessagePageContainer(props) {
 
 	useEffect(() => {
 		async function loadMessage(id) {
+			setLoading(true)
+
 			const result = await api.loadOneMessage(id)
 			if (is.notEmpty(result.error)) {
 				console.error(result.error, result.explain)
@@ -23,17 +25,19 @@ function MessagePageContainer(props) {
 				return
 			}
 			setMessage(result.message)
-		}
 
-		if (is.notEmpty(id)) {
-			setLoading(true)
-			loadMessage(id)
 			setLoading(false)
 		}
+
+		if (is.notEmpty(id))
+			loadMessage(id)
 	}, [id, setError, setMessage, setLoading])
 
 	const sendMessage = useCallback((text, file) => {
 		async function sendMessage(text, file) {
+			setError(false)
+			setLoading(true)
+
 			const result = await api.sendMessage({text, file})
 			if (is.notEmpty(result.error)) {
 				console.error(result.error, result.explain)
@@ -41,12 +45,10 @@ function MessagePageContainer(props) {
 				return
 			}
 			setMessage(result.message)
+			setLoading(false)
 		}
 
-		setError(false)
-		setLoading(true)
 		sendMessage(text, file)
-		setLoading(false)
 	}, [setLoading, setError, setMessage])
 
 	const updateMessage = useCallback(() => {}, [])
@@ -62,6 +64,7 @@ function MessagePageContainer(props) {
 			updateMessage={updateMessage}
 			sendMessage={sendMessage}
 			messageForEdit={messageForEdit}
+			shouldRenderEditForm={is.empty(id)}
 		/>
 	)
 }

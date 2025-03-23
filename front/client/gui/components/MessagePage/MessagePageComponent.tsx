@@ -11,6 +11,7 @@ function MessagePageComponent(props) {
 		updateMessage,
 		resetEditMessage,
 		messageForEdit,
+		shouldRenderEditForm,
 	} = props
 
 	return (
@@ -18,12 +19,14 @@ function MessagePageComponent(props) {
 			<MainMessage
 				message={message}
 			/>
-			<MessageForm
-				send={sendMessage}
-				update={updateMessage}
-				reset={resetEditMessage}
-				messageForEdit={messageForEdit}
-			/>
+			{shouldRenderEditForm ? (
+				<MessageForm
+					send={sendMessage}
+					update={updateMessage}
+					reset={resetEditMessage}
+					messageForEdit={messageForEdit}
+				/>
+			) : null}
 		</Tag>
 	)
 }

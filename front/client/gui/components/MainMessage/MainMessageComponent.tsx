@@ -7,7 +7,7 @@ function MainMessageComponent(props) {
 		message
 	} = props
 
-	if (is.notEmpty(message) && is.notEmpty(message.text))
+	if (is.empty(message) || (is.notEmpty(message) && is.empty(message.text)))
 		return null
 
 	return (
