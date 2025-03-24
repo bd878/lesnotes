@@ -3,7 +3,7 @@ import Tag from '../Tag';
 import i18n from '../../i18n';
 
 const List = lazy(() => import("../../components/List"));
-const MessageElement = lasy(() => import("../../components/MessageElement"))
+const MessageElement = lazy(() => import("../../components/MessageElement"))
 
 function MessagesListComponent(props) {
 	const {
