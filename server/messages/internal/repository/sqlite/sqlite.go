@@ -141,9 +141,10 @@ func (r *Repository) Create(ctx context.Context, log *logger.Logger, message *mo
 		fileIdCol.Valid = true
 	}
 
-	var privateCol int32
+	var privateCol sql.NullInt32
 	if message.Private {
-		privateCol = 1
+		privateCol.Int32 = 1
+		privateCol.Valid = true
 	}
 
 	_, err := r.insertStmt.ExecContext(ctx,
@@ -165,8 +166,10 @@ func (r *Repository) Create(ctx context.Context, log *logger.Logger, message *mo
 
 // TODO: utilise ctx timeout
 func (r *Repository) Delete(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error {
-	var tx *sql.Tx
-	var err error
+	var (
+		tx *sql.Tx
+		err error
+	)
 
 	tx, err = r.pool.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
@@ -225,16 +228,17 @@ func (r *Repository) deleteThreadMessages(ctx context.Context, log *logger.Logge
 }
 
 func (r *Repository) Update(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) error {
-	var private int
+	var privateCol sql.NullInt32
 	if params.Private {
-		private = 1
+		privateCol.Int32 = 1
+		privateCol.Valid = true
 	}
 	_, err := r.updateStmt.ExecContext(ctx,
 		sql.Named("text", params.Text),
 		sql.Named("updateUtcNano", params.UpdateUTCNano),
 		sql.Named("id", params.ID),
 		sql.Named("userId", params.UserID),
-		sql.Named("private", private))
+		sql.Named("private", privateCol))
 	if err != nil {
 		log.Errorln("failed to update message")
 		return err

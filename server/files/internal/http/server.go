@@ -5,6 +5,7 @@ import (
 	"sync"
 	"net/http"
 
+	usermodel "github.com/bd878/gallery/server/users/pkg/model"
 	usergateway "github.com/bd878/gallery/server/internal/gateway/user"
 	httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
 	httphandler "github.com/bd878/gallery/server/files/internal/handler/http"
@@ -29,7 +30,7 @@ func New(cfg Config) *Server {
 	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log)
 
 	userGateway := usergateway.New(cfg.UsersServiceAddr)
-	authBuilder := &httpmiddleware.AuthBuilder{Gateway: userGateway}
+	authBuilder := &httpmiddleware.AuthBuilder{Gateway: userGateway, PublicUserID: usermodel.PublicUserID}
 	middleware = middleware.WithAuth(authBuilder.Auth)
 
 	grpcCtrl := controller.New(controller.Config{
@@ -37,8 +38,7 @@ func New(cfg Config) *Server {
 	})
 	handler := httphandler.New(grpcCtrl)
 
-	// TODO: specify /files/v1/{file_id}/{file_name} to download with file_name
-	mux.Handle("/files/v1/{file_id}", middleware.Build(handler.DownloadFile))
+	mux.Handle("/files/v1/download", middleware.Build(handler.DownloadFile))
 	mux.Handle("/files/v1/status", middleware.NoAuth().Build(handler.GetStatus))
 
 	server := &Server{

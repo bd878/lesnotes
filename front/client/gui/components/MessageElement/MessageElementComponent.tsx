@@ -29,7 +29,7 @@ function MessageElementComponent(props) {
 			) : null}
 			{(message.file && message.file.ID && message.file.name) ? <Tag
 				el="a"
-				href={getFileDownloadUrl(`/files/v1/${message.file.ID}`, false)}
+				href={getFileDownloadUrl(`/files/v1/download?id=${message.file.ID}`, false)}
 				download={message.file.name}
 				target="_blank"
 			>

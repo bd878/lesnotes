@@ -46,6 +46,8 @@ function MessagePageContainer(props) {
 			}
 			setMessage(result.message)
 			setLoading(false)
+
+			setTimeout(() => {location.href = "/m/" + result.message.ID}, 0)
 		}
 
 		sendMessage(text, file)

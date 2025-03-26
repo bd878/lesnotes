@@ -18,6 +18,7 @@ message File {
 	int32         user_id = 4;
 	string        error = 5;
 	int64         size = 6;
+	bool          private = 7;
 }
 
 message FileChunk {

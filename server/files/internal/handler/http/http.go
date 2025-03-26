@@ -26,26 +26,22 @@ func New(controller Controller) *Handler {
 }
 
 func (h *Handler) DownloadFile(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
-	fileId := req.PathValue("file_id")
+	var (
+		fileID int32
+	)
 
-	if fileId == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(model.ServerResponse{
-			Status: "error",
-			Description: "file_id is empty",
-		})
-		return
-	}
-
-	fileIdInt, err := strconv.Atoi(fileId)
-	if err != nil {
-		log.Errorln("cannot convert file_id to int")
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(model.ServerResponse{
-			Status: "error",
-			Description: "file_id is malformed",
-		})
-		return
+	values := req.URL.Query()
+	if values.Get("id") != "" {
+		fileid, err := strconv.Atoi(values.Get("id"))
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(model.ServerResponse{
+				Status: "ok",
+				Description: "id is empty",
+			})
+			return
+		}
+		fileID = int32(fileid)
 	}
 
 	user, ok := utils.GetUser(w, req)
@@ -58,9 +54,9 @@ func (h *Handler) DownloadFile(log *logger.Logger, w http.ResponseWriter, req *h
 		return
 	}
 
-	file, stream, err := h.controller.ReadFileStream(context.Background(), log, &model.ReadFileStreamParams{FileID: int32(fileIdInt), UserID: user.ID})
+	file, stream, err := h.controller.ReadFileStream(req.Context(), log, &model.ReadFileStreamParams{FileID: fileID, UserID: user.ID})
 	if err != nil {
-		log.Errorw("failed to read file stream", "id", fileId, "user_id", user.ID, "error", err)
+		log.Errorw("failed to read file stream", "id", fileID, "user_id", user.ID, "error", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(model.ServerResponse{
 			Status:      "error",
@@ -76,7 +72,7 @@ func (h *Handler) DownloadFile(log *logger.Logger, w http.ResponseWriter, req *h
 
 	_, err = io.Copy(w, stream)
 	if err != nil {
-		log.Errorw("failed to write file stream to response", "id", fileId, "user_id", user.ID, "error", err)
+		log.Errorw("failed to write file stream to response", "id", fileID, "user_id", user.ID, "error", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(model.ServerResponse{
 			Status:      "error",
