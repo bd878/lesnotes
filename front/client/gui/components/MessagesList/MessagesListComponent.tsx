@@ -25,6 +25,7 @@ function MessagesListComponent(props) {
 			<List el="ul" css={css}>
 				{messages.map(message => (
 					<MessageElement
+						key={message.ID}
 						css={liCss}
 						message={message}
 						onClick={onListItemClick}

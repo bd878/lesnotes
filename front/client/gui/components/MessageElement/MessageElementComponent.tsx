@@ -7,6 +7,7 @@ const ListItem = lazy(() => import("../../components/ListItem"));
 
 function MessageElementComponent(props) {
 	const {
+		message,
 		css,
 		onClick,
 		onEditClick,
