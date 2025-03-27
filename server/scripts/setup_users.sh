@@ -7,7 +7,7 @@ DB_FILE=${1?"Usage: $0 sqlite_file.db"}
 
 run_migrations() {
 	local file=${1?"Usage: run_migrations db_file.sql"}
-	for f in `ls ./migrations/*.sql`
+	for f in `ls ./migrations/*users*.sql`
 	do
 		printf "%s\n" $f
 		sqlite3 $file < $f
