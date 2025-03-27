@@ -11,6 +11,7 @@ type Message struct {
 	CreateUTCNano       int64               `json:"create_utc_nano,omitempty"`
 	UpdateUTCNano       int64               `json:"update_utc_nano,omitempty"`
 	UserID              int32               `json:"user_id,omitempty"`
+	FileID              int32               `json:"file_id,omitempty"`
 	File                *filesmodel.File    `json:"file,omitempty"`
 	Text                string              `json:"text,omitempty"`
 	Private             bool                `json:"private,omitempty"`

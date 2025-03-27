@@ -2,7 +2,6 @@ package model
 
 import (
 	"github.com/bd878/gallery/server/api"
-	filesmodel "github.com/bd878/gallery/server/files/pkg/model"
 )
 
 func MessageFromProto(proto *api.Message) *Message {
@@ -13,9 +12,7 @@ func MessageFromProto(proto *api.Message) *Message {
 		UserID:         proto.UserId,
 		ThreadID:       proto.ThreadId,
 		Text:           proto.Text,
-		File:           &filesmodel.File{
-			ID:             proto.FileId,
-		},
+		FileID:         proto.FileId,
 		Private:        proto.Private,
 	}
 }
@@ -28,7 +25,7 @@ func MessageToProto(msg *Message) *api.Message {
 		CreateUtcNano:  msg.CreateUTCNano,
 		UpdateUtcNano:  msg.UpdateUTCNano,
 		Text:           msg.Text,
-		FileId:         msg.File.ID,
+		FileId:         msg.FileID,
 		Private:        msg.Private,
 	}
 }

@@ -8,7 +8,7 @@ const empty = {
 	updateUTCNano: 0,
 	userID: 0,
 	text: "",
-	file: file(),
+	fileID: 0,
 }
 
 export default function mapMessageFromProto(message) {
@@ -34,8 +34,8 @@ export default function mapMessageFromProto(message) {
 		userID: message.user_id,
 		text: message.text,
 	}
-	if (message.file && message.file.id)
-		res.file = file(message.file)
+	if (message.file && message.file_id)
+		res.fileID = message.file_id
 
 	return res
 }

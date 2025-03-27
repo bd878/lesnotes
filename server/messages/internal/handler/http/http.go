@@ -127,9 +127,7 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 		UserID: user.ID,
 		ThreadID: threadID,
 		Text:   text,
-		File:   &filesmodel.File{
-			ID:     fileID,
-		},
+		FileID: fileID,
 		Private: private,
 	})
 	if err != nil {
@@ -146,9 +144,7 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 		Message: &model.Message{
 			ID:            resp.ID,
 			ThreadID:      threadID,
-			File:          &filesmodel.File{
-				ID:          fileID,
-			},
+			FileID:        fileID,
 			Text:          text,
 			UpdateUTCNano: resp.UpdateUTCNano,
 			CreateUTCNano: resp.CreateUTCNano,
@@ -463,8 +459,8 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 
 	if message != nil {
 		// one message
-		if message.File != nil && message.File.ID != 0 {
-			fileRes, err := h.filesGateway.ReadFile(req.Context(), log, user.ID, message.File.ID)
+		if message.File != nil && message.FileID != 0 {
+			fileRes, err := h.filesGateway.ReadFile(req.Context(), log, user.ID, message.FileID)
 			if err != nil {
 				log.Errorw("failed to read file for a message", "user_id", user.ID, "message_id", messageID, "error", err)
 				w.WriteHeader(http.StatusBadRequest)
@@ -475,6 +471,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 				return
 			}
 			message.File.Name = fileRes.Name
+			message.File.ID = message.FileID
 		}
 
 		json.NewEncoder(w).Encode(model.ReadMessageServerResponse{
@@ -489,8 +486,8 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 
 	fileIds := make([]int32, 0)
 	for _, message := range messages {
-		if message.File != nil && message.File.ID != 0 {
-			fileIds = append(fileIds, message.File.ID)
+		if message.File != nil && message.FileID != 0 {
+			fileIds = append(fileIds, message.FileID)
 		}
 	}
 
@@ -510,7 +507,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 
 	for _, message := range messages {
 		if message.File != nil {
-			file := filesRes.Files[message.File.ID]
+			file := filesRes.Files[message.FileID]
 			if file != nil {
 				message.File.Name = file.Name
 			}

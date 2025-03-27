@@ -9,7 +9,6 @@ import (
 	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/utils"
 	"github.com/bd878/gallery/server/messages/pkg/model"
-	filesmodel "github.com/bd878/gallery/server/files/pkg/model"
 )
 
 type Repository struct {
@@ -136,8 +135,8 @@ func (r *Repository) Create(ctx context.Context, log *logger.Logger, message *mo
 	}
 
 	var fileIdCol sql.NullInt32
-	if message.File != nil && message.File.ID != 0 {
-		fileIdCol.Int32 = int32(message.File.ID)
+	if message.FileID != 0 {
+		fileIdCol.Int32 = int32(message.FileID)
 		fileIdCol.Valid = true
 	}
 
@@ -361,7 +360,6 @@ func (r *Repository) Read(ctx context.Context, log *logger.Logger, id int32) (
 		CreateUTCNano: createUtcNano,
 		UpdateUTCNano: updateUtcNano,
 		Text: text,
-		File: &filesmodel.File{},
 		Private: true,
 	}
 
@@ -370,7 +368,7 @@ func (r *Repository) Read(ctx context.Context, log *logger.Logger, id int32) (
 	}
 
 	if fileIdCol.Valid {
-		msg.File.ID = fileIdCol.Int32
+		msg.FileID = fileIdCol.Int32
 	}
 
 	if privateCol == 0 {
@@ -418,7 +416,6 @@ func (r *Repository) selectMessages(ctx context.Context, log *logger.Logger, row
 			CreateUTCNano: createUtcNano,
 			UpdateUTCNano: updateUtcNano,
 			Text: text,
-			File: &filesmodel.File{},
 			Private: true,
 		}
 
@@ -427,7 +424,7 @@ func (r *Repository) selectMessages(ctx context.Context, log *logger.Logger, row
 		}
 
 		if fileIdCol.Valid {
-			msg.File.ID = fileIdCol.Int32
+			msg.FileID = fileIdCol.Int32
 		}
 
 		if privateCol == 0 {
