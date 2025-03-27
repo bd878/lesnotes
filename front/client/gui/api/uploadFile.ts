@@ -33,7 +33,7 @@ async function uploadFile(file: any) {
 			if (response.value) {
 				const model = models.file(response.value)
 				result.ID = model.ID
-				result.Name = model.Name
+				result.Name = model.name
 			}
 		}
 	} catch (e) {

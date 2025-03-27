@@ -65,9 +65,8 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 
 	text := req.PostFormValue("text")
 
-	values := req.URL.Query()
-	if values.Get("file_id") != "" {
-		fileid, err := strconv.Atoi(values.Get("file_id"))
+	if req.PostFormValue("file_id") != "" {
+		fileid, err := strconv.Atoi(req.PostFormValue("file_id"))
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(servermodel.ServerResponse{
@@ -90,6 +89,7 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 		return
 	}
 
+	values := req.URL.Query()
 	if values.Get("thread_id") != "" {
 		threadid, err := strconv.Atoi(values.Get("thread_id"))
 		if err != nil {
