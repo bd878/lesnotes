@@ -6,7 +6,6 @@ import (
 	"io"
 	"fmt"
 	"context"
-	"path/filepath"
 	"encoding/json"
 
 	filesmodel "github.com/bd878/gallery/server/files/pkg/model"
@@ -28,7 +27,6 @@ type Controller interface {
 }
 
 type FilesGateway interface {
-	SaveFileStream(ctx context.Context, log *logger.Logger, stream io.Reader, params *model.SaveFileParams) (*model.SaveFileResult, error)
 	ReadBatchFiles(ctx context.Context, log *logger.Logger, params *model.ReadBatchFilesParams) (*model.ReadBatchFilesResult, error)
 	ReadFile(ctx context.Context, log *logger.Logger, userID, fileID int32) (*filesmodel.File, error)
 }
@@ -42,11 +40,9 @@ func New(controller Controller, filesGateway FilesGateway) *Handler {
 	return &Handler{controller, filesGateway}
 }
 
-// TODO: rewrite on builder pattern
 func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
 	var (
 		err error
-		fileName string
 		fileID, threadID int32
 		private bool
 	)
@@ -67,51 +63,33 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 		return
 	}
 
-	if _, ok := req.MultipartForm.File["file"]; ok {
-		f, fh, err := req.FormFile("file")
-		if err != nil {
-			log.Error(err)
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(servermodel.ServerResponse{
-				Status: "error",
-				Description: "cannot read file",
-			})
-			return
-		}
-
-		fileName = filepath.Base(fh.Filename)
-
-		fileResult, err := h.filesGateway.SaveFileStream(context.Background(), log, f, &model.SaveFileParams{
-			UserID: user.ID,
-			Name:   fileName,
-		})
-		if err != nil {
-			log.Error(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(servermodel.ServerResponse{
-				Status: "error",
-				Description: "cannot save file",
-			})
-			return
-		}
-
-		fileID = fileResult.ID
-	}
-
 	text := req.PostFormValue("text")
 
-	log.Infoln("text=", text, "user name=", user.Name)
+	values := req.URL.Query()
+	if values.Get("file_id") != "" {
+		fileid, err := strconv.Atoi(values.Get("file_id"))
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+				Status: "ok",
+				Description: "invalid file id",
+			})
+			return
+		}
+		fileID = int32(fileid)
+	}
 
-	if fileName == "" && text == "" {
+	log.Infow("text", text, "name", user.Name, "file_id", fileID)
+
+	if fileID == 0 && text == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status: "error",
-			Description: "text or file are empty",
+			Description: "text or file_id are empty",
 		})
 		return
 	}
 
-	values := req.URL.Query()
 	if values.Get("thread_id") != "" {
 		threadid, err := strconv.Atoi(values.Get("thread_id"))
 		if err != nil {
@@ -170,7 +148,6 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 			ThreadID:      threadID,
 			File:          &filesmodel.File{
 				ID:          fileID,
-				Name:        fileName,
 			},
 			Text:          text,
 			UpdateUTCNano: resp.UpdateUTCNano,

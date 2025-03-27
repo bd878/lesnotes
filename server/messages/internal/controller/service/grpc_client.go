@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api"
@@ -24,21 +25,9 @@ type Messages struct {
 }
 
 func New(cfg Config) *Messages {
-	conn, err := grpc.Dial(
-		fmt.Sprintf(
-			"%s:///%s",
-			loadbalance.Name,
-			cfg.RpcAddr,
-		),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	client := api.NewMessagesClient(conn)
-
-	return &Messages{cfg, client, conn}
+	msg := &Messages{conf: cfg}
+	msg.setupConnection()
+	return msg
 }
 
 func (s *Messages) Close() {
@@ -47,9 +36,42 @@ func (s *Messages) Close() {
 	}
 }
 
+func (s *Messages) setupConnection() error {
+	conn, err := grpc.Dial(
+		fmt.Sprintf(
+			"%s:///%s",
+			loadbalance.Name,
+			s.conf.RpcAddr,
+		),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		logger.Error("messages cannot setup grpc client connection, exit")
+		return err
+	}
+
+	client := api.NewMessagesClient(conn)
+
+	s.conn = conn
+	s.client = client
+	return nil
+}
+
+func (s *Messages) isConnFailed() bool {
+	state := s.conn.GetState()
+	return state == connectivity.Shutdown || state == connectivity.TransientFailure
+}
+
 func (s *Messages) SaveMessage(ctx context.Context, log *logger.Logger, message *model.Message) (
 	*model.SaveMessageResult, error,
 ) {
+	if s.isConnFailed() {
+		log.Info("conn failed, setup new connection")
+		if err := s.setupConnection(); err != nil {
+			return nil, err
+		}
+	}
+
 	res, err := s.client.SaveMessage(ctx, &api.SaveMessageRequest{
 		Message: model.MessageToProto(message),
 	})
@@ -68,6 +90,13 @@ func (s *Messages) SaveMessage(ctx context.Context, log *logger.Logger, message 
 func (s *Messages) DeleteMessage(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) (
 	*model.DeleteMessageResult, error,
 ) {
+	if s.isConnFailed() {
+		log.Info("conn failed, setup new connection")
+		if err := s.setupConnection(); err != nil {
+			return nil, err
+		}
+	}
+
 	_, err := s.client.DeleteMessage(ctx, &api.DeleteMessageRequest{
 		Id: params.ID,
 		UserId: params.UserID,
@@ -83,6 +112,13 @@ func (s *Messages) DeleteMessage(ctx context.Context, log *logger.Logger, params
 func (s *Messages) UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (
 	*model.UpdateMessageResult, error,
 ) {
+	if s.isConnFailed() {
+		log.Info("conn failed, setup new connection")
+		if err := s.setupConnection(); err != nil {
+			return nil, err
+		}
+	}
+
 	res, err := s.client.UpdateMessage(ctx, &api.UpdateMessageRequest{
 		Id: params.ID,
 		UserId: params.UserID,
@@ -103,6 +139,13 @@ func (s *Messages) UpdateMessage(ctx context.Context, log *logger.Logger, params
 func (s *Messages) ReadThreadMessages(ctx context.Context, log *logger.Logger, params *model.ReadThreadMessagesParams) (
 	*model.ReadThreadMessagesResult, error,
 ) {
+	if s.isConnFailed() {
+		log.Info("conn failed, setup new connection")
+		if err := s.setupConnection(); err != nil {
+			return nil, err
+		}
+	}
+
 	log.Infow("grpc client read thread messages", "user_id", params.UserID, "thread_id", params.ThreadID)
 	res, err := s.client.ReadThreadMessages(ctx, &api.ReadThreadMessagesRequest{
 		UserId: params.UserID,
@@ -125,6 +168,13 @@ func (s *Messages) ReadThreadMessages(ctx context.Context, log *logger.Logger, p
 func (s *Messages) ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadAllMessagesParams) (
 	*model.ReadAllMessagesResult, error,
 ) {
+	if s.isConnFailed() {
+		log.Info("conn failed, setup new connection")
+		if err := s.setupConnection(); err != nil {
+			return nil, err
+		}
+	}
+
 	res, err := s.client.ReadAllMessages(ctx, &api.ReadAllMessagesRequest{
 		UserId: int32(params.UserID),
 		Limit:  params.Limit,
@@ -145,6 +195,13 @@ func (s *Messages) ReadAllMessages(ctx context.Context, log *logger.Logger, para
 func (s *Messages) ReadOneMessage(ctx context.Context, log *logger.Logger, userID, messageID int32) (
 	*model.Message, error,
 ) {
+	if s.isConnFailed() {
+		log.Info("conn failed, setup new connection")
+		if err := s.setupConnection(); err != nil {
+			return nil, err
+		}
+	}
+
 	res, err := s.client.ReadOneMessage(ctx, &api.ReadOneMessageRequest{
 		UserId: userID,
 		Id: messageID,

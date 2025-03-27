@@ -60,16 +60,6 @@ type ReadAllMessagesResult struct {
 	IsLastPage        bool
 }
 
-type SaveFileParams struct {
-	Name              string
-	UserID            int32
-}
-
-type SaveFileResult struct {
-	ID                int32
-	CreateUTCNano     int64
-}
-
 type ReadBatchFilesParams struct {
 	UserID            int32
 	IDs               []int32

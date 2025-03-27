@@ -38,6 +38,7 @@ func New(cfg Config) *Server {
 	})
 	handler := httphandler.New(grpcCtrl)
 
+	mux.Handle("/files/v1/upload", middleware.Build(handler.UploadFile))
 	mux.Handle("/files/v1/download", middleware.Build(handler.DownloadFile))
 	mux.Handle("/files/v1/status", middleware.NoAuth().Build(handler.GetStatus))
 
