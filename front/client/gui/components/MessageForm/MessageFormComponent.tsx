@@ -9,7 +9,7 @@ const Button = lazy(() => import("../../components/Button"));
 function MessageFormComponent(props) {
 	const {
 		fileRef,
-		message,
+		text,
 		onMessageChange,
 		onFileChange,
 		onSubmit,
@@ -28,7 +28,7 @@ function MessageFormComponent(props) {
 					el="textarea"
 					name="message"
 					type="input"
-					value={message}
+					value={text}
 					onChange={onMessageChange}
 				/>
 				<FormField

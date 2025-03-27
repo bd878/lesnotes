@@ -38,8 +38,8 @@ function* fetchMessages({payload}: {payload: FetchMessagesPayload}) {
 }
 
 interface SendMessagePayload {
-	message: any;
-	file:    any;
+	text: any;
+	file?: any;
 }
 
 function* sendMessage({payload}: {payload: SendMessagePayload}) {
@@ -52,11 +52,10 @@ function* sendMessage({payload}: {payload: SendMessagePayload}) {
 				return
 			}
 
-			response = yield call(api.sendMessage, {text: payload.message, fileID: response.ID})
+			response = yield call(api.sendMessage, {text: payload.text, fileID: response.ID})
 		} else {
-			response = yield call(api.sendMessage, {text: payload.message})
+			response = yield call(api.sendMessage, {text: payload.text})
 		}
-
 
 		if (response.error != "")
 			yield put(messagesFailedActionCreator(response.error))
@@ -69,8 +68,7 @@ function* sendMessage({payload}: {payload: SendMessagePayload}) {
 
 function* updateMessage({payload}) {
 	try {
-		const response = yield call(api.updateMessage,
-			payload.ID, payload.text)
+		const response = yield call(api.updateMessage, payload.ID, payload.text)
 
 		const messages = yield select(selectMessages)
 		let idx = messages.findIndex(({ID}) => ID === payload.ID)

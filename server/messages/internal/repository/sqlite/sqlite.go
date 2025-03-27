@@ -141,10 +141,9 @@ func (r *Repository) Create(ctx context.Context, log *logger.Logger, message *mo
 		fileIdCol.Valid = true
 	}
 
-	var privateCol sql.NullInt32
+	var privateCol int32
 	if message.Private {
-		privateCol.Int32 = 1
-		privateCol.Valid = true
+		privateCol = 1
 	}
 
 	_, err := r.insertStmt.ExecContext(ctx,
@@ -228,10 +227,9 @@ func (r *Repository) deleteThreadMessages(ctx context.Context, log *logger.Logge
 }
 
 func (r *Repository) Update(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) error {
-	var privateCol sql.NullInt32
+	var privateCol int32
 	if params.Private {
-		privateCol.Int32 = 1
-		privateCol.Valid = true
+		privateCol = 1
 	}
 	_, err := r.updateStmt.ExecContext(ctx,
 		sql.Named("text", params.Text),

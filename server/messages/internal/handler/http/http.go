@@ -79,7 +79,7 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 		fileID = int32(fileid)
 	}
 
-	log.Infow("text", text, "name", user.Name, "file_id", fileID)
+	log.Infow("received message", "text", text, "name", user.Name, "file_id", fileID)
 
 	if fileID == 0 && text == "" {
 		w.WriteHeader(http.StatusBadRequest)

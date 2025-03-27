@@ -20,10 +20,10 @@ export function messagesFailedActionCreator(payload) {
 	}
 }
 
-export function sendMessageActionCreator(message, file) {
+export function sendMessageActionCreator(text, file) {
 	return {
 		type: SEND_MESSAGE,
-		payload: {message, file},
+		payload: {text, file},
 	}
 }
 
