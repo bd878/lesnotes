@@ -5,14 +5,14 @@ import models from './models';
 
 interface SendMessageParams {
 	text: any;
-	file: any;
+	fileID: any;
 	threadID?: number;
 }
 
 async function sendMessage(params: SendMessageParams) {
 	const {
 		text,
-		file,
+		fileID,
 		threadID,
 	} = params
 
@@ -25,9 +25,8 @@ async function sendMessage(params: SendMessageParams) {
 
 	const form = new FormData()
 	form.append("text", text);
-	if (file != null && file.name != "") {
-		form.append('file', file, file.name);
-	}
+	if (is.notUndef(fileID))
+		form.append("file_id", fileID);
 
 	const queryParams = {}
 	if (threadID !== 0 && is.notUndef(threadID))

@@ -6,7 +6,16 @@ info:
   version: 1.0.0
 
 paths:
-  /files/v1/{user_id}/{file_id}:
+  /files/v1/upload:
+    security:
+      - apiKey: []
+    post:
+      operationId: uploadFile
+      summary: Uploads a file
+      description: |
+        Uploads a file on server
+
+  /files/v1/download:
     security:
       - apiKey: []
     parameters:
