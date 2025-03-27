@@ -35,4 +35,5 @@ type SaveFileResult struct {
 type UploadFileServerResponse struct {
 	model.ServerResponse
 	ID                int32      `json:"id"`
+	Name              string     `json:"name,omitempty"`
 }

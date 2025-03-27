@@ -87,6 +87,7 @@ func (h *Handler) UploadFile(log *logger.Logger, w http.ResponseWriter, req *htt
 			Description: "saved",
 		},
 		ID: fileResult.ID,
+		Name: fileName,
 	})
 }
 

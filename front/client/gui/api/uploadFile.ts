@@ -8,7 +8,7 @@ async function uploadFile(file: any) {
 		error: "",
 		explain: "",
 		ID: "",
-		updateUTCNano: 0,
+		Name: "",
 	}
 
 	const form = new FormData()
@@ -31,9 +31,9 @@ async function uploadFile(file: any) {
 			result.explain = response.explain
 		} else {
 			if (response.value) {
-				const model = models.message({update_utc_nano: response.value.update_utc_nano})
-				result.ID = id
-				result.updateUTCNano = model.updateUTCNano
+				const model = models.file(response.value)
+				result.ID = model.ID
+				result.Name = model.Name
 			}
 		}
 	} catch (e) {
