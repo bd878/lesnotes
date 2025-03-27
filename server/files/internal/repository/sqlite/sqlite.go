@@ -36,7 +36,7 @@ INSERT INTO files(
 	selectStmt := utils.Must(pool.Prepare(`
 SELECT id, user_id, name, create_utc_nano, private
 FROM files
-WHERE id = :id AND userId = :userId
+WHERE id = :id AND user_id = :userId
 ;`,
 	))
 
