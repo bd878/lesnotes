@@ -29,14 +29,14 @@ INSERT INTO files(
 	name,
 	create_utc_nano,
 	private
-) VALUES (:id,	:userId, :name, :createUtcNano, :private)
+) VALUES (:id, :userId, :name, :createUtcNano, :private)
 ;`,
 	))
 
 	selectStmt := utils.Must(pool.Prepare(`
 SELECT id, user_id, name, create_utc_nano, private
 FROM files
-WHERE id = :id AND user_id = :userId
+WHERE id = :id AND userId = :userId
 ;`,
 	))
 
@@ -58,7 +58,7 @@ func (r *Repository) SaveFile(ctx context.Context, log *logger.Logger, file *mod
 		sql.Named("id", file.ID),
 		sql.Named("userId", file.UserID),
 		sql.Named("name", file.Name),
-		sql.Named("create_utc_nano", file.CreateUTCNano),
+		sql.Named("createUtcNano", file.CreateUTCNano),
 		sql.Named("private", privateCol),
 	)
 	if err != nil {
@@ -79,7 +79,7 @@ func (r *Repository) ReadFile(ctx context.Context, log *logger.Logger, params *m
 	)
 
 	err := r.selectStmt.QueryRowContext(ctx, sql.Named("id", params.ID),
-		sql.Named("user_id", params.UserID)).Scan(&id, &userId, &name, &createUTCNano, &privateCol)
+		sql.Named("userId", params.UserID)).Scan(&id, &userId, &name, &createUTCNano, &privateCol)
 
 	msg := &model.File{
 		ID:                id,

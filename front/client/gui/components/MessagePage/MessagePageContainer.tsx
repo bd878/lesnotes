@@ -38,19 +38,33 @@ function MessagePageContainer(props) {
 			setError(false)
 			setLoading(true)
 
-			let response = await api.uploadFile(file)
-			if (is.notEmpty(response.error)) {
-				console.error(response.error, response.explain)
-				setError(response.error)
-				return
+			let response
+			if (is.notUndef(file)) {
+				response = await api.uploadFile(file)
+				if (is.notEmpty(response.error)) {
+					console.error(response.error, response.explain)
+					setLoading(false)
+					setError(response.error)
+					return
+				}
+
+				response = await api.sendMessage({text, fileID: response.ID})
+				if (is.notEmpty(response.error)) {
+					console.error(response.error, response.explain)
+					setLoading(false)
+					setError(response.error)
+					return
+				}
+			} else {
+				response = await api.sendMessage({text})
+				if (is.notEmpty(response.error)) {
+					console.error(response.error, response.explain)
+					setLoading(false)
+					setError(response.error)
+					return
+				}				
 			}
 
-			response = await api.sendMessage({text, fileID: response.ID})
-			if (is.notEmpty(response.error)) {
-				console.error(response.error, response.explain)
-				setError(response.error)
-				return
-			}
 			setMessage(response.message)
 			setLoading(false)
 

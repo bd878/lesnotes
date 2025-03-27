@@ -5,7 +5,7 @@ import models from './models';
 
 interface SendMessageParams {
 	text: any;
-	fileID: any;
+	fileID?: any;
 	threadID?: number;
 }
 

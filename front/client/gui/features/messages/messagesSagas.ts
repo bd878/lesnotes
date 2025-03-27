@@ -12,6 +12,7 @@ import {
 	updateMessageSucceededActionCreator,
 	deleteMessageSucceededActionCreator,
 } from './messagesActionCreators'
+import * as is from '../../third_party/is'
 import {selectMessages} from './messagesSelectors';
 import api from '../../api'
 
@@ -43,14 +44,19 @@ interface SendMessagePayload {
 
 function* sendMessage({payload}: {payload: SendMessagePayload}) {
 	try {
-		let response = yield call(api.uploadFile, payload.file)
-		if (response.error != "") {
-			yield put(messagesFailedActionCreator(response.error))
-			return
+		let response
+		if (is.notUndef(payload.file)) {
+			response = yield call(api.uploadFile, payload.file)
+			if (response.error != "") {
+				yield put(messagesFailedActionCreator(response.error))
+				return
+			}
+
+			response = yield call(api.sendMessage, {text: payload.message, fileID: response.ID})
+		} else {
+			response = yield call(api.sendMessage, {text: payload.message})
 		}
 
-		response = yield call(api.sendMessage,
-				{text: payload.message, fileID: response.ID})
 
 		if (response.error != "")
 			yield put(messagesFailedActionCreator(response.error))

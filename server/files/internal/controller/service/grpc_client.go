@@ -167,7 +167,7 @@ func (f *Files) SaveFileStream(ctx context.Context, log *logger.Logger, fileStre
 			},
 		})
 		if err != nil {
-			log.Errorw("failed to send chunk fil file server", "error", err)
+			log.Errorw("failed to send chunk on file server", "error", err)
 			return nil, err
 		}
 	}

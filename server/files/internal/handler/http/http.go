@@ -67,7 +67,7 @@ func (h *Handler) UploadFile(log *logger.Logger, w http.ResponseWriter, req *htt
 
 	fileName := filepath.Base(fh.Filename)
 
-	fileResult, err := h.controller.SaveFileStream(context.Background(), log, f, &model.SaveFileParams{
+	fileResult, err := h.controller.SaveFileStream(req.Context(), log, f, &model.SaveFileParams{
 		UserID: user.ID,
 		Name:   fileName,
 	})
