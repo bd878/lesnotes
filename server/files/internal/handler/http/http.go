@@ -29,6 +29,12 @@ func New(controller Controller) *Handler {
 }
 
 func (h *Handler) UploadFile(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
+	if err := req.ParseMultipartForm(1); err != nil {
+		log.Error(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	user, ok := utils.GetUser(w, req)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
