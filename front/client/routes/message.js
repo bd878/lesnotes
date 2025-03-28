@@ -10,6 +10,7 @@ async function renderMessage(ctx) {
 		const template = await readFile(filePath, { encoding: 'utf-8' });
 
 		ctx.body = mustache.render(template, {
+			id: ctx.params.id || "",
 			script: "/public/message.js",
 			styles: [
 				"/public/styles.css",

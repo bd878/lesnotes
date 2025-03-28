@@ -1,1 +1,1 @@
-ALTER TABLE messages ADD COLUMN is_private INT DEFAULT 1;
+ALTER TABLE messages ADD COLUMN private INT DEFAULT 1;

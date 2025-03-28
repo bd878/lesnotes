@@ -1,0 +1,1 @@
+ALTER TABLE files ADD COLUMN private INT DEFAULT 1;

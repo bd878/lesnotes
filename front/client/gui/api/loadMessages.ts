@@ -58,7 +58,7 @@ async function loadMessages(params: LoadMessagesParams): LoadMessagesResult {
 		}
 	} catch (e) {
 		console.error(i18n("error_occured"), e);
-		throw e
+		result.error = e
 	}
 
 	return result;

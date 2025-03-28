@@ -2,23 +2,25 @@ import i18n from '../i18n';
 import api from './api';
 import models from './models';
 
-async function updateMessage(id = "", message = "") {
+async function uploadFile(file: any) {
 	let response = {};
-	let result: UpdateMessageResult = {
+	let result: uploadFileResult = {
 		error: "",
 		explain: "",
 		ID: "",
-		updateUTCNano: 0,
+		Name: "",
 	}
 
 	const form = new FormData()
-	form.append("text", message);
+	if (file != null && file.name != "") {
+		form.append('file', file, file.name);
+	} else {
+		result.error = "file required"
+		return result
+	}
 
 	try {
-		response = await api("/messages/v1/update", {
-			queryParams: {
-				id: id,
-			},
+		response = await api("/files/v1/upload", {
 			method: "POST",
 			credentials: "include",
 			body: form,
@@ -29,9 +31,9 @@ async function updateMessage(id = "", message = "") {
 			result.explain = response.explain
 		} else {
 			if (response.value) {
-				const model = models.message({update_utc_nano: response.value.update_utc_nano})
-				result.ID = id
-				result.updateUTCNano = model.updateUTCNano
+				const model = models.file(response.value)
+				result.ID = model.ID
+				result.Name = model.name
 			}
 		}
 	} catch (e) {
@@ -42,4 +44,4 @@ async function updateMessage(id = "", message = "") {
 	return result
 }
 
-export default updateMessage
+export default uploadFile

@@ -2,17 +2,19 @@ import file from './file';
 
 const ns_in_ms = 10**6
 
+const empty = {
+	ID: 0,
+	createUTCNano: 0,
+	updateUTCNano: 0,
+	userID: 0,
+	text: "",
+	fileID: 0,
+	file: file(),
+}
+
 export default function mapMessageFromProto(message) {
-	if (!message) {
-		return {
-			ID: -1,
-			createUTCNano: -1,
-			updateUTCNano: -1,
-			userID: 0,
-			text: "",
-			file: file(),
-		}
-	}
+	if (!message)
+		return empty
 
 	let createUTCNano = 0
 	if (message.create_utc_nano) {
@@ -33,8 +35,10 @@ export default function mapMessageFromProto(message) {
 		userID: message.user_id,
 		text: message.text,
 	}
-	if (message.file && message.file.id)
+	if (message.file && message.file_id) {
+		res.fileID = message.file_id
 		res.file = file(message.file)
+	}
 
 	return res
 }

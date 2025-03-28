@@ -7,7 +7,7 @@ DB_FILE=${1?"Usage: $0 sqlite_file.db"}
 
 run_migrations() {
 	local file=${1?"Usage: run_migrations db_file.sql"}
-	for f in `ls ./migrations/*.sql`
+	for f in `ls ./migrations/*messages*.sql`
 	do
 		printf "%s\n" $f
 		sqlite3 $file < $f
@@ -19,6 +19,7 @@ read agree
 case "$agree" in
 	[yY])
 		echo "Running migration on $DB_FILE..."
+		sqlite3 $DB_FILE < ./schema/messages.sql
 		run_migrations $DB_FILE
 		;;
 
@@ -27,8 +28,6 @@ case "$agree" in
 		exit 0
 		;;
 esac
-
-sqlite3 $DB_FILE < ./schema/messages.sql
 
 echo "done."
 

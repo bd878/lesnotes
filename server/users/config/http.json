@@ -1,9 +1,9 @@
 {
-  "http_addr":      "0.0.0.0:8084",
-  "rpc_addr":       "0.0.0.0:8085",
-  "node_name":      "users.http",
-  "log_path":       "../../logs/",
-  "db_path":        "../../users.db",
-  "data_path":      "../../data",
-  "cookie_domain":  ""
+	"http_addr":      "0.0.0.0:8084",
+	"rpc_addr":       "0.0.0.0:8085",
+	"node_name":      "users.http",
+	"log_path":       "../../logs/",
+	"db_path":        "../../users.db",
+	"data_path":      "../../data",
+	"cookie_domain":  ""
 }

@@ -1,29 +1,29 @@
 package middleware
 
 import (
-  "time"
-  "context"
+	"time"
+	"context"
 )
 
 type Meta struct {
 }
 
 type MsgReceiveParams struct {
-  Time time.Time
+	Time time.Time
 }
 
 type MsgSendParams struct {
-  Time         time.Time
-  HandlerError error
+	Time         time.Time
+	HandlerError error
 }
 
 type Reporter interface {
-  MsgReceive(req any, params *MsgReceiveParams)
-  MsgSend(resp any, params *MsgSendParams)
+	MsgReceive(req any, params *MsgReceiveParams)
+	MsgSend(resp any, params *MsgSendParams)
 }
 
 type ReporterBuilder func(context.Context, *Meta) (Reporter, context.Context)
 
 func (builder ReporterBuilder) Build(ctx context.Context, meta *Meta) (Reporter, context.Context) {
-  return builder(ctx, meta)
+	return builder(ctx, meta)
 }

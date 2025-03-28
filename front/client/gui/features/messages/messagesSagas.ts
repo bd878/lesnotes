@@ -12,6 +12,7 @@ import {
 	updateMessageSucceededActionCreator,
 	deleteMessageSucceededActionCreator,
 } from './messagesActionCreators'
+import * as is from '../../third_party/is'
 import {selectMessages} from './messagesSelectors';
 import api from '../../api'
 
@@ -37,14 +38,24 @@ function* fetchMessages({payload}: {payload: FetchMessagesPayload}) {
 }
 
 interface SendMessagePayload {
-	message: any;
-	file:    any;
+	text: any;
+	file?: any;
 }
 
 function* sendMessage({payload}: {payload: SendMessagePayload}) {
 	try {
-		const response = yield call(api.sendMessage,
-				{message: payload.message, file: payload.file})
+		let response
+		if (is.notUndef(payload.file)) {
+			response = yield call(api.uploadFile, payload.file)
+			if (response.error != "") {
+				yield put(messagesFailedActionCreator(response.error))
+				return
+			}
+
+			response = yield call(api.sendMessage, {text: payload.text, fileID: response.ID})
+		} else {
+			response = yield call(api.sendMessage, {text: payload.text})
+		}
 
 		if (response.error != "")
 			yield put(messagesFailedActionCreator(response.error))
@@ -57,8 +68,7 @@ function* sendMessage({payload}: {payload: SendMessagePayload}) {
 
 function* updateMessage({payload}) {
 	try {
-		const response = yield call(api.updateMessage,
-			payload.ID, payload.text)
+		const response = yield call(api.updateMessage, payload.ID, payload.text)
 
 		const messages = yield select(selectMessages)
 		let idx = messages.findIndex(({ID}) => ID === payload.ID)

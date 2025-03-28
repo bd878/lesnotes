@@ -241,21 +241,22 @@ components:
         message:
           type: string
           example: "test message"
-        filename:
+        file_id:
           type: string
+          example: ""
 
     sendBody:
       example:
         text: test message
-        file: ""
+        file_id: ""
       type: object
       properties:
         text:
           type: string
           default: ""
-        file:
+        file_id:
           type: string
-          format: binary
+          default: ""
 
     sendOk:
       type: object

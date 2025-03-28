@@ -34,6 +34,8 @@ func New(ctrl Controller) *Handler {
 func (h *Handler) SaveMessage(ctx context.Context, req *api.SaveMessageRequest) (
 	*api.SaveMessageResponse, error,
 ) {
+	logger.Debugw("save message", "text", req.Message)
+
 	req.Message.CreateUtcNano = time.Now().UnixNano()
 	req.Message.UpdateUtcNano = time.Now().UnixNano()
 	req.Message.Id = utils.RandomID()
@@ -44,6 +46,7 @@ func (h *Handler) SaveMessage(ctx context.Context, req *api.SaveMessageRequest) 
 		return nil, err
 	}
 
+	logger.Debugw("save message ok", "id", req.Message.Id)
 	return &api.SaveMessageResponse{
 		Id: req.Message.Id,
 		CreateUtcNano: req.Message.CreateUtcNano,
@@ -54,6 +57,8 @@ func (h *Handler) SaveMessage(ctx context.Context, req *api.SaveMessageRequest) 
 func (h *Handler) UpdateMessage(ctx context.Context, req *api.UpdateMessageRequest) (
 	*api.UpdateMessageResponse, error,
 ) {
+	logger.Debugw("update message", "id", req.Id)
+
 	updateUTCNano := time.Now().UnixNano()
 
 	err := h.controller.UpdateMessage(ctx, logger.Default(), &model.UpdateMessageParams{
@@ -61,12 +66,14 @@ func (h *Handler) UpdateMessage(ctx context.Context, req *api.UpdateMessageReque
 		UserID: req.UserId,
 		Text: req.Text,
 		UpdateUTCNano: updateUTCNano,
+		Private: req.Private,
 	})
 	if err != nil {
 		logger.Errorw("failed to update message", "error", err)
 		return nil, err
 	}
 
+	logger.Debugw("update message ok", "id", req.Id)
 	return &api.UpdateMessageResponse{
 		UpdateUtcNano: updateUTCNano,
 	}, nil
@@ -90,7 +97,7 @@ func (h *Handler) DeleteMessage(ctx context.Context, req *api.DeleteMessageReque
 func (h *Handler) ReadThreadMessages(ctx context.Context, req *api.ReadThreadMessagesRequest) (
 	*api.ReadThreadMessagesResponse, error,
 ) {
-	logger.Infow("grpc read thread messages", "user_id", req.UserId, "thread_id", req.ThreadId)
+	logger.Debugw("grpc read thread messages", "user_id", req.UserId, "thread_id", req.ThreadId)
 	res, err := h.controller.ReadThreadMessages(ctx, logger.Default(), &model.ReadThreadMessagesParams{
 		UserID:    req.UserId,
 		ThreadID:  req.ThreadId,
@@ -103,6 +110,7 @@ func (h *Handler) ReadThreadMessages(ctx context.Context, req *api.ReadThreadMes
 		return nil, err
 	}
 
+	logger.Debugw("grpc read thread messages ok", "thread_id", req.ThreadId)
 	return &api.ReadThreadMessagesResponse{
 		Messages: model.MapMessagesToProto(model.MessageToProto, res.Messages),
 		IsLastPage: res.IsLastPage,
@@ -146,10 +154,14 @@ func (h *Handler) GetServers(ctx context.Context, _ *api.GetServersRequest) (
 func (h *Handler) ReadOneMessage(ctx context.Context, req *api.ReadOneMessageRequest) (
 	*api.Message, error,
 ) {
+	logger.Debugw("read one message", "user_id", req.UserId, "id", req.Id)
+
 	message, err := h.controller.ReadMessage(ctx, logger.Default(), req.UserId, req.Id)
 	if err != nil {
 		logger.Errorw("failed to read one message", "user_id", req.UserId, "message_id", req.Id)
 		return nil, err
 	}
+
+	logger.Debugw("read one message ok", "user_id", req.UserId, "id", req.Id)
 	return model.MessageToProto(message), nil
 }

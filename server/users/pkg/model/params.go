@@ -1,21 +1,23 @@
 package model
 
 type AddUserParams struct {
-  User      *User
+	User      *User
 }
 
 type HasUserParams struct {
-  User      *User
+	User      *User
 }
 
 type RefreshTokenParams struct {
-  User      *User
+	User      *User
 }
 
 type DeleteTokenParams struct {
-  Token string
+	Token string
 }
 
 type GetUserParams struct {
-  User      *User
+	ID  int32
+	Name string
+	Token string
 }

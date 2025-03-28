@@ -5,51 +5,52 @@ package files.v1;
 option go_package = "github.com/bd878/gallery/server/api";
 
 service Files {
-  rpc ReadFile(ReadFileRequest) returns (File) {}
-  rpc ReadBatchFiles(ReadBatchFilesRequest) returns (ReadBatchFilesResponse) {}
-  rpc SaveFileStream(stream FileData) returns (SaveFileStreamResponse) {}
-  rpc ReadFileStream(ReadFileStreamRequest) returns (stream FileData) {}
+	rpc ReadFile(ReadFileRequest) returns (File) {}
+	rpc ReadBatchFiles(ReadBatchFilesRequest) returns (ReadBatchFilesResponse) {}
+	rpc SaveFileStream(stream FileData) returns (SaveFileStreamResponse) {}
+	rpc ReadFileStream(ReadFileStreamRequest) returns (stream FileData) {}
 }
 
 message File {
-  string        name = 1;
-  int64         create_utc_nano = 2;
-  int32         id = 3;
-  int32         user_id = 4;
-  string        error = 5;
-  int64         size = 6;
+	string        name = 1;
+	int64         create_utc_nano = 2;
+	int32         id = 3;
+	int32         user_id = 4;
+	string        error = 5;
+	int64         size = 6;
+	bool          private = 7;
 }
 
 message FileChunk {
-  bytes         chunk = 1;
+	bytes         chunk = 1;
 }
 
 message FileData {
-  oneof data {
-    File        file = 1;
-    bytes       chunk = 2;
-  };
+	oneof data {
+		File        file = 1;
+		bytes       chunk = 2;
+	};
 }
 
 message SaveFileStreamResponse {
-  File     file = 1;
+	File     file = 1;
 }
 
 message ReadFileStreamRequest {
-  int32    id = 1;
-  int32    user_id = 2;
+	int32    id = 1;
+	int32    user_id = 2;
 }
 
 message ReadBatchFilesRequest {
-  int32    user_id = 1;
-  repeated int32  ids = 2;
+	int32    user_id = 1;
+	repeated int32  ids = 2;
 }
 
 message ReadBatchFilesResponse {
-  map<int32, File>   files = 1;
+	map<int32, File>   files = 1;
 }
 
 message ReadFileRequest {
-  int32    id = 1;
-  int32    user_id = 2;
+	int32    id = 1;
+	int32    user_id = 2;
 }

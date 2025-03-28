@@ -1,10 +1,10 @@
 {
-  "node_name":             "messages.http",
-  "rpc_addr":              "0.0.0.0:9001",
-  "http_addr":             "0.0.0.0:8083",
-  "users_service_addr":    "0.0.0.0:8085",
-  "files_service_addr":    "0.0.0.0:8086",
+	"node_name":             "messages.http",
+	"rpc_addr":              "0.0.0.0:9001",
+	"http_addr":             "0.0.0.0:8083",
+	"users_service_addr":    "0.0.0.0:8085",
+	"files_service_addr":    "0.0.0.0:8086",
 
-  "log_path":              "../../logs",
-  "data_path":             "../../data"
+	"log_path":              "../../logs",
+	"data_path":             "../../data"
 }

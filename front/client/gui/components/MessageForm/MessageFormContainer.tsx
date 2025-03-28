@@ -1,6 +1,7 @@
 import React, {useCallback, useMemo, useEffect, useState, useRef} from 'react';
 import Form from '../Form';
 import i18n from '../../i18n';
+import * as is from '../../third_party/is';
 import MessageFormComponent from './MessageFormComponent';
 
 function MessageFormContainer(props) {
@@ -13,39 +14,39 @@ function MessageFormContainer(props) {
 
 	const fileRef = useRef(null);
 
-	const [message, setMessage] = useState("");
+	const [text, setText] = useState("");
 	const [file, setFile] = useState(null);
 
-	const isEditMode = useMemo(() => messageForEdit && messageForEdit.ID, [messageForEdit])
+	const isEditMode = useMemo(() => is.notEmpty(messageForEdit) && is.notEmpty(messageForEdit.text), [messageForEdit])
 
 	useEffect(() => {
 		if (isEditMode)
-			setMessage(messageForEdit.text)
-	}, [setMessage, isEditMode]);
+			setText(messageForEdit.text)
+	}, [setText, isEditMode]);
 
 	const onFileChange = useCallback(e => {
 		setFile(e.target.files[0])
 	}, [setFile]);
 
 	const onMessageChange = useCallback(e => {
-		setMessage(e.target.value);
-	}, [setMessage]);
+		setText(e.target.value);
+	}, [setText]);
 
 	const updateMessageRequest = useCallback(e => {
-		update(messageForEdit.ID, message)
-		setMessage("")
+		update(messageForEdit.ID, text)
+		setText("")
 		setFile(null)
-	}, [update, setMessage, setFile, messageForEdit, message])
+	}, [update, setText, setFile, messageForEdit, text])
 
 	const sendMessageRequest = useCallback(e => {
-		if (!message) {console.error(i18n("msg_required_err")); return;}
+		if (!text) {console.error(i18n("msg_required_err")); return;}
 
-		send(message, file)
+		send(text, file)
 
 		fileRef.current.value = null
-		setMessage("")
+		setText("")
 		setFile(null)
-	}, [send, setMessage, setFile, message, file, fileRef]);
+	}, [send, setText, setFile, text, file, fileRef]);
 
 	const onSubmit = useCallback(e => {
 		e.preventDefault()
@@ -53,17 +54,17 @@ function MessageFormContainer(props) {
 			updateMessageRequest(e) // update mode
 		else
 			sendMessageRequest(e) // save mode
-	}, [sendMessageRequest, updateMessageRequest, message, messageForEdit])
+	}, [sendMessageRequest, updateMessageRequest, text, messageForEdit])
 
 	const onEditCancel = useCallback(() => {
 		reset()
-		setMessage("")
-	}, [reset, setMessage])
+		setText("")
+	}, [reset, setText])
 
 	return (
 		<MessageFormComponent
 			fileRef={fileRef}
-			message={message}
+			text={text}
 			onMessageChange={onMessageChange}
 			onFileChange={onFileChange}
 			onSubmit={onSubmit}
