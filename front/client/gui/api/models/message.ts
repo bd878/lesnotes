@@ -9,6 +9,7 @@ const empty = {
 	userID: 0,
 	text: "",
 	fileID: 0,
+	file: file(),
 }
 
 export default function mapMessageFromProto(message) {
@@ -34,8 +35,10 @@ export default function mapMessageFromProto(message) {
 		userID: message.user_id,
 		text: message.text,
 	}
-	if (message.file && message.file_id)
+	if (message.file && message.file_id) {
 		res.fileID = message.file_id
+		res.file = file(message.file)
+	}
 
 	return res
 }
