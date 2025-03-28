@@ -459,7 +459,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 
 	if message != nil {
 		// one message
-		if message.File != nil && message.FileID != 0 {
+		if message.FileID != 0 {
 			fileRes, err := h.filesGateway.ReadFile(req.Context(), log, user.ID, message.FileID)
 			if err != nil {
 				log.Errorw("failed to read file for a message", "user_id", user.ID, "message_id", messageID, "error", err)
@@ -470,8 +470,10 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 				})
 				return
 			}
-			message.File.Name = fileRes.Name
-			message.File.ID = message.FileID
+			message.File = &filesmodel.File{
+				Name: fileRes.Name,
+				ID: message.FileID,
+			}
 		}
 
 		json.NewEncoder(w).Encode(model.ReadMessageServerResponse{
@@ -486,7 +488,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 
 	fileIds := make([]int32, 0)
 	for _, message := range messages {
-		if message.File != nil && message.FileID != 0 {
+		if message.FileID != 0 {
 			fileIds = append(fileIds, message.FileID)
 		}
 	}
@@ -506,10 +508,13 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 	}
 
 	for _, message := range messages {
-		if message.File != nil {
+		if message.FileID != 0 {
 			file := filesRes.Files[message.FileID]
 			if file != nil {
-				message.File.Name = file.Name
+				message.File = &filesmodel.File{
+					ID: file.ID,
+					Name: file.Name,
+				}
 			}
 		}
 	}
