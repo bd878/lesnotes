@@ -462,7 +462,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 		if message.FileID != 0 {
 			fileRes, err := h.filesGateway.ReadFile(req.Context(), log, user.ID, message.FileID)
 			if err != nil {
-				log.Errorw("failed to read file for a message", "user_id", user.ID, "message_id", messageID, "error", err)
+				log.Errorw("failed to read file for a message", "user_id", user.ID, "file_id", message.FileID, "message_id", messageID, "error", err)
 				w.WriteHeader(http.StatusBadRequest)
 				json.NewEncoder(w).Encode(servermodel.ServerResponse{
 					Status: "error",

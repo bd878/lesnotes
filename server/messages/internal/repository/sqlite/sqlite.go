@@ -344,7 +344,7 @@ func (r *Repository) Read(ctx context.Context, log *logger.Logger, id int32) (
 		updateUtcNano int64
 		text string
 		fileIdCol sql.NullInt32
-		privateCol int32
+		privateCol sql.NullInt32
 	)
 
 	err := r.selectStmt.QueryRowContext(ctx, sql.Named("id", id)).Scan(
@@ -371,9 +371,12 @@ func (r *Repository) Read(ctx context.Context, log *logger.Logger, id int32) (
 		msg.FileID = fileIdCol.Int32
 	}
 
-	if privateCol == 0 {
-		msg.Private = false
+	if privateCol.Valid {
+		if privateCol.Int32 == 0 {
+			msg.Private = false
+		}
 	}
+
 
 	return msg, nil
 }
@@ -394,7 +397,7 @@ func (r *Repository) selectMessages(ctx context.Context, log *logger.Logger, row
 			updateUtcNano int64
 			text string
 			fileIdCol sql.NullInt32
-			privateCol int32
+			privateCol sql.NullInt32
 		)
 		if err := rows.Scan(
 			&id,
@@ -427,8 +430,10 @@ func (r *Repository) selectMessages(ctx context.Context, log *logger.Logger, row
 			msg.FileID = fileIdCol.Int32
 		}
 
-		if privateCol == 0 {
-			msg.Private = false
+		if privateCol.Valid {
+			if privateCol.Int32 == 0 {
+				msg.Private = false
+			}
 		}
 
 		res = append(res, msg)
