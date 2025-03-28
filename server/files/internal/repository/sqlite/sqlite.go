@@ -75,7 +75,7 @@ func (r *Repository) ReadFile(ctx context.Context, log *logger.Logger, params *m
 		id, userId int32
 		name string
 		createUTCNano int64
-		privateCol int32
+		privateCol sql.NullInt32
 	)
 
 	err := r.selectStmt.QueryRowContext(ctx, sql.Named("id", params.ID),
@@ -89,8 +89,10 @@ func (r *Repository) ReadFile(ctx context.Context, log *logger.Logger, params *m
 		Private:           true,
 	}
 
-	if privateCol == 0 {
-		msg.Private = false
+	if privateCol.Valid {
+		if privateCol.Int32 == 0 {
+			msg.Private = false
+		}
 	}
 
 	switch {
