@@ -1,6 +1,6 @@
 import React, {Suspense} from 'react';
 import ReactDOM from 'react-dom/client';
-import i18n from '../../i18n';
+import i18n from '../../../i18n';
 import NewThreadPage from '../../components/NewThreadPage';
 import StoreProvider from '../../providers/Store';
 

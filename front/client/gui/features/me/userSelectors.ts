@@ -1,4 +1,4 @@
-import models from '../../api/models'
+import models from '../../../api/models'
 
 export const selectIsLoading = state => state.me.loading || false
 export const selectError = state => state.me.error || ""

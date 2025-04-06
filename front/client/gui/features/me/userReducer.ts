@@ -12,7 +12,7 @@ import {
 	WILL_REDIRECT,
 	RESET_REDIRECT,
 } from './userActions';
-import models from '../../api/models'
+import models from '../../../api/models'
 
 const initialState = {
 	user: models.user(),

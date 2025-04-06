@@ -1,7 +1,7 @@
 import React from 'react';
 import Tag from '../Tag';
-import * as is from '../../third_party/is'
-import {getFileDownloadUrl} from "../../api";
+import * as is from '../../../third_party/is'
+import {getFileDownloadUrl} from "../../../api";
 
 function MainMessageComponent(props) {
 	const {

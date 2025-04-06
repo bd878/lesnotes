@@ -1,6 +1,6 @@
 import React, {useRef, useEffect, useCallback} from 'react';
 import HomePageComponent from './HomePageComponent';
-import {connect} from '../../third_party/react-redux';
+import {connect} from '../../../third_party/react-redux';
 import {
 	LIMIT_LOAD_BY,
 	LOAD_ORDER,

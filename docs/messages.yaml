@@ -89,25 +89,30 @@ paths:
   /messages/v1/read:
     parameters:
       - $ref: '#/components/parameters/threadId'
-      - $ref: '#/components/parameters/messageId'
       - $ref: '#/components/parameters/limit'
       - $ref: '#/components/parameters/offset'
       - $ref: '#/components/parameters/asc'
     get:
       summary: Get user messages
       description: |
-        Read messages for a given user, or a specific thread, or
-        one single message, if messageId param given
-      operationId: readMessage
+        Read messages for a given user, or a specific thread
+      operationId: readMessages
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/messagesList'
-                  - $ref: '#/components/schemas/message'
+                type: object
+                properties:
+                  status:
+                    type: string
+                    default: "ok"
+                  description:
+                    type: string
+                    default: ""
+                  messages:
+                    - $ref: '#/components/schemas/messagesList'
         "4XX":
           description: error 
           content:
@@ -126,6 +131,47 @@ paths:
                     items:
                       type: object
                     example: []
+
+  /messages/v1/read:
+    parameters:
+      - $ref: '#/components/parameters/messageId'
+    get:
+      summary: Get single message
+      description: |
+        Read one message
+      operationId: readMessage
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    default: "ok"
+                  description:
+                    type: string
+                    default: ""
+                  message:
+                    - $ref: '#/components/schemas/message'
+        "4XX":
+          description: error 
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    default: "fail"
+                  description:
+                    type: string
+                    default: ""
+                  message:
+                    type: object
+                    default: {}
 
   /messages/v1/status:
     get:

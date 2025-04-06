@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useCallback} from 'react';
-import api from '../../api';
-import models from '../../api/models';
-import * as is from '../../third_party/is'
+import api from '../../../api';
+import models from '../../../api/models';
+import * as is from '../../../third_party/is'
 import MessagePageComponent from './MessagePageComponent';
 
 function MessagePageContainer(props) {

@@ -1,9 +1,8 @@
 import React, {lazy, useState, useCallback} from 'react';
-import {connect} from '../../third_party/react-redux';
+import {connect} from '../../../third_party/react-redux';
 import {registerActionCreator} from '../../features/me'
-import api from '../../api';
 import Tag from '../Tag';
-import i18n from '../../i18n';
+import i18n from '../../../i18n';
 
 const Form = lazy(() => import("../../components/Form"));
 const FormField = lazy(() => import("../../components/FormField"));

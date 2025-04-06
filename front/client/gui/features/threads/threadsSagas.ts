@@ -9,7 +9,7 @@ import {
 	failedActionCreator,
 	resetActionCreator,
 } from './threadsActionCreators'
-import api from '../../api'
+import api from '../../../api'
 
 interface FetchMessagesPayload {
 	limit:  number;

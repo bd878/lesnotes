@@ -1,4 +1,4 @@
-import {createStore, combineReducers, applyMiddleware} from './third_party/redux'
+import {createStore, combineReducers, applyMiddleware} from '../third_party/redux'
 import {all} from 'redux-saga/effects'
 import {messagesReducer, messagesSaga} from './features/messages'
 import {threadsReducer, threadsSaga} from './features/threads'

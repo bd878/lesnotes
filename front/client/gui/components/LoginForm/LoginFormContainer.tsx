@@ -1,8 +1,8 @@
 import React, {useCallback, useState} from 'react';
-import {connect} from '../../third_party/react-redux';
+import {connect} from '../../../third_party/react-redux';
 import LoginFormComponent from './LoginFormComponent';
 import Tag from '../../components/Tag';
-import i18n from '../../i18n';
+import i18n from '../../../i18n';
 import {loginActionCreator} from '../../features/me'
 
 function LoginFormContainer(props) {

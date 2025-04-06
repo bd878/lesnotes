@@ -7,7 +7,7 @@ import {
 import {
 	setThreadMessageActionCreator,
 } from '../../features/threads';
-import {connect} from '../../third_party/react-redux';
+import {connect} from '../../../third_party/react-redux';
 
 function MessagesListContainer(props) {
 	const {

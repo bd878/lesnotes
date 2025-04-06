@@ -1,6 +1,6 @@
 import React, {lazy} from 'react';
 import Tag from '../Tag';
-import i18n from '../../i18n';
+import i18n from '../../../i18n';
 
 const List = lazy(() => import("../../components/List"));
 const MessageElement = lazy(() => import("../../components/MessageElement"))
