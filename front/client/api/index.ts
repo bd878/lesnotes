@@ -12,15 +12,15 @@ import {getFileDownloadUrl} from './api';
 
 export {getFileDownloadUrl}
 export default {
-  register,
-  login,
-  logout,
-  auth,
-  loadMessages,
-  loadOneMessage,
-  sendMessage,
-  updateMessage,
-  deleteMessage,
-  uploadFile,
-  getFileDownloadUrl,
+	register,
+	login,
+	logout,
+	auth,
+	loadMessages,
+	loadOneMessage,
+	sendMessage,
+	updateMessage,
+	deleteMessage,
+	uploadFile,
+	getFileDownloadUrl,
 }
