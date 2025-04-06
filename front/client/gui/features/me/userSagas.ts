@@ -1,4 +1,4 @@
-import i18n from '../../i18n';
+import i18n from '../../../i18n';
 import {takeLatest,put,call} from 'redux-saga/effects'
 import {
 	LOGIN,
@@ -22,7 +22,7 @@ import {
 	willRedirectActionCreator,
 	resetRedirectActionCreator,
 } from './userActionCreators';
-import api from '../../api'
+import api from '../../../api'
 
 interface LoginPayload {
 	name:   string;

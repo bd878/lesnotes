@@ -1,5 +1,5 @@
 import React from 'react';
-import {Provider} from '../../third_party/react-redux'
+import {Provider} from '../../../third_party/react-redux'
 import store from '../../store';
 
 function StoreProvider(props) {

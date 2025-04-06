@@ -12,8 +12,8 @@ import {
 	selectThreadMessage,
 	selectThreadID,
 } from '../../features/threads';
-import {connect} from '../../third_party/react-redux';
-import * as is from '../../third_party/is';
+import {connect} from '../../../third_party/react-redux';
+import * as is from '../../../third_party/is';
 
 function ThreadsPanelContainer(props) {
 	const {

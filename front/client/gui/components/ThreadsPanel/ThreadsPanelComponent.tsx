@@ -1,6 +1,6 @@
 import React, {lazy} from 'react'
 import Tag from '../Tag';
-import i18n from '../../i18n';
+import i18n from '../../../i18n';
 import MessagesList from '../MessagesList';
 import MainMessage from '../MainMessage';
 import MessageForm from '../MessageForm';

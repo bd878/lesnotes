@@ -1,6 +1,6 @@
 import React, {lazy} from 'react';
 import Form from '../Form';
-import i18n from '../../i18n';
+import i18n from '../../../i18n';
 
 const Form = lazy(() => import("../../components/Form"));
 const FormField = lazy(() => import("../../components/FormField"));

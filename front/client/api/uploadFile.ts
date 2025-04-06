@@ -4,7 +4,7 @@ import models from './models';
 
 async function uploadFile(file: any) {
 	let response = {};
-	let result: uploadFileResult = {
+	let result = {
 		error: "",
 		explain: "",
 		ID: "",

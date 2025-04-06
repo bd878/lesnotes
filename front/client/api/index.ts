@@ -1,4 +1,3 @@
-import api, {getFileDownloadUrl} from "./api";
 import loadMessages from './loadMessages';
 import loadOneMessage from './loadOneMessage';
 import sendMessage from './sendMessage';
@@ -9,6 +8,7 @@ import auth from './auth';
 import login from './login';
 import logout from './logout';
 import register from './register';
+import {getFileDownloadUrl} from './api';
 
 export {getFileDownloadUrl}
 export default {
@@ -23,5 +23,4 @@ export default {
   deleteMessage,
   uploadFile,
   getFileDownloadUrl,
-  api,
 }

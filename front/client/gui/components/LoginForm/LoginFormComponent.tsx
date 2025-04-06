@@ -1,5 +1,5 @@
 import React, {lazy} from 'react'
-import i18n from '../../i18n';
+import i18n from '../../../i18n';
 import Tag from '../../components/Tag';
 
 const Form = lazy(() => import("../../components/Form"));

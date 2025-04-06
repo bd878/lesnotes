@@ -12,9 +12,9 @@ import {
 	updateMessageSucceededActionCreator,
 	deleteMessageSucceededActionCreator,
 } from './messagesActionCreators'
-import * as is from '../../third_party/is'
+import * as is from '../../../third_party/is'
 import {selectMessages} from './messagesSelectors';
-import api from '../../api'
+import api from '../../../api'
 
 interface FetchMessagesPayload {
 	limit:  number;

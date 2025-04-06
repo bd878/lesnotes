@@ -1,7 +1,7 @@
 import React, {useCallback, useMemo, useEffect, useState, useRef} from 'react';
 import Form from '../Form';
-import i18n from '../../i18n';
-import * as is from '../../third_party/is';
+import i18n from '../../../i18n';
+import * as is from '../../../third_party/is';
 import MessageFormComponent from './MessageFormComponent';
 
 function MessageFormContainer(props) {

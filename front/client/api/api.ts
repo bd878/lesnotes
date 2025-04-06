@@ -13,7 +13,7 @@ if (HTTPS && (HTTPS !== "")) {
 }
 
 function getFullUrl(url: string, isFullUrl: string) {
-	return isFullUrl ? url : `${proto}://${BACKENDURL}${url}`;
+	return isFullUrl ? url : `${proto}://${BACKEND_URL}${url}`;
 }
 
 function getFileDownloadUrl(url: string) {

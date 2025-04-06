@@ -1,7 +1,7 @@
 import React, {lazy} from 'react';
 import Tag from '../Tag';
-import i18n from '../../i18n';
-import {getFileDownloadUrl} from "../../api";
+import i18n from '../../../i18n';
+import {getFileDownloadUrl} from "../../../api";
 
 const ListItem = lazy(() => import("../../components/ListItem"));
 

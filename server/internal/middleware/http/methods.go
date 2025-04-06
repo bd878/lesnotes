@@ -89,10 +89,6 @@ func (b *AuthBuilder) restoreAuthorizedUser(log *logger.Logger, w http.ResponseW
 	user, err := b.Gateway.Auth(req.Context(), log, cookie.Value)
 	if err != nil {
 		log.Errorw("middleware failed to authorize user, gateway error", "cookie", cookie.Value)
-		json.NewEncoder(w).Encode(model.ServerResponse{
-			Status: "ok",
-			Description: "token not found",
-		})
 		return nil, ErrNoUser
 	}
 
