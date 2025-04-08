@@ -1,3 +1,6 @@
+*
+!*/
+!*.*
 *.db
 data/*
 files/*
@@ -8,6 +11,8 @@ logs/*
 server/raft/*
 test.txt
 headers.txt
+*.swp
+*.swo
+*.swn
 *.patch
-*.curl
 *.token
