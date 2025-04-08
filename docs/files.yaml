@@ -4,7 +4,6 @@ info:
   description: |
     This API handles files requests.
   version: 1.0.0
-
 paths:
   /files/v1/upload:
     security:
@@ -33,7 +32,46 @@ paths:
         Download a file for a provided user
       operationId: downloadFile
 
+  /files/v1/status:
+    get:
+      operationId: getStatus
+      summary: Shows server status
+      responses:
+        "2XX":
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/statusOk'
+        "4XX":
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/statusErr'
+
 components:
+  schemas:
+    statusOk:
+      type: object
+      properties:
+        status:
+          type: string 
+          default: "ok"
+        description:
+          type: string 
+          default: ""
+
+    statusErr:
+      type: object
+      properties:
+        status:
+          type: string
+          default: "error"
+        description:
+          type: string
+          default: ""
+
   securitySchemes:
     apiKey:
       description: Cookie-based api authorization key
