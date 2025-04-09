@@ -11,6 +11,7 @@ logs/*
 server/raft/*
 test.txt
 headers.txt
+cookie.txt
 *.swp
 *.swo
 *.swn

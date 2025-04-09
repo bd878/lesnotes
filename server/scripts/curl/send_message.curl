@@ -1,0 +1,4 @@
+url = https://%STAGE%lesnotes.space/messages/v1/send
+-H "Content-Type: multipart/form-data;boundary=---------BOUNDARY"
+-XPOST
+--data-binary @./curl/message_form.txt
