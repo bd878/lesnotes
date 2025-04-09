@@ -32,6 +32,11 @@ func (h *Handler) UploadFile(log *logger.Logger, w http.ResponseWriter, req *htt
 	if err := req.ParseMultipartForm(1); err != nil {
 		log.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			Status: "error",
+			Description: "failed to parse form",
+		})
+
 		return
 	}
 
@@ -39,18 +44,20 @@ func (h *Handler) UploadFile(log *logger.Logger, w http.ResponseWriter, req *htt
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "ok",
+			Status: "error",
 			Description: "user required",
 		})
+
 		return
 	}
 
 	if _, ok := req.MultipartForm.File["file"]; !ok {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "ok",
+			Status: "error",
 			Description: "file required",
 		})
+
 		return
 	}
 
@@ -62,6 +69,7 @@ func (h *Handler) UploadFile(log *logger.Logger, w http.ResponseWriter, req *htt
 			Status: "error",
 			Description: "cannot read file",
 		})
+
 		return
 	}
 
@@ -78,6 +86,7 @@ func (h *Handler) UploadFile(log *logger.Logger, w http.ResponseWriter, req *htt
 			Status: "error",
 			Description: "cannot save file",
 		})
+
 		return
 	}
 

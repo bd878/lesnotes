@@ -19,7 +19,7 @@ type Logger struct {
 var defaultLogger atomic.Pointer[Logger]
 
 func init() {
-	defaultLogger.Store(New(Config{SkipCaller: 2}))
+	defaultLogger.Store(New(Config{SkipCaller: 1}))
 }
 
 func Default() *Logger {

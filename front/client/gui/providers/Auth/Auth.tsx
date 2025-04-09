@@ -8,7 +8,7 @@ import {
 	selectIsLoading,
 } from '../../features/me'
 
-function Auth(props) {
+function AuthProvider(props) {
 	const {inverted, auth, isAuth, willRedirect, isLoading} = props
 
 	useEffect(() => {auth()}, [auth])
@@ -46,4 +46,4 @@ const mapDispatchToProps = ({
 })
 
 export default connect(
-	mapStateToProps, mapDispatchToProps)(Auth);
+	mapStateToProps, mapDispatchToProps)(AuthProvider);

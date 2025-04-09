@@ -3,7 +3,7 @@ import {unlink, readdir, stat, rm} from "node:fs/promises";
 import Config from "config";
 import path from "node:path";
 import esbuild from 'esbuild';
-import {sassPlugin} from 'esbuild-sass-plugin';
+import postcss from 'esbuild-postcss';
 
 /*remove stale files except favicon.ico*/
 const files = await readdir('public', {withFileTypes: true});
@@ -20,7 +20,7 @@ for (const file of files) {
 let ctx = await esbuild.context({
 	entryPoints: [
 		'client/gui/pages/**/*.tsx',
-		'client/gui/styles/*.sass',
+		'client/styles/styles.css'
 	],
 	entryNames: '[name]',
 	define: {
@@ -34,7 +34,7 @@ let ctx = await esbuild.context({
 	outdir: "public",
 	format: 'esm',
 	outbase: 'client/gui/',
-	plugins: [sassPlugin()],
+	plugins: [postcss()],
 })
 
 await ctx.watch()

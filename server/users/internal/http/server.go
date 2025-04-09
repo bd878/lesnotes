@@ -35,6 +35,7 @@ func New(cfg Config) *Server {
 		CookieDomain:    cfg.CookieDomain,
 	})
 
+	mux.Handle("/users/v1/get", middleware.Build(handler.GetUser))
 	mux.Handle("/users/v1/signup", middleware.Build(handler.Signup))
 	mux.Handle("/users/v1/login",  middleware.Build(handler.Login))
 	mux.Handle("/users/v1/logout", middleware.Build(handler.Logout))

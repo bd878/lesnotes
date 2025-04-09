@@ -1,0 +1,3 @@
+url = https://%STAGE%lesnotes.space/users/v1/signup
+-F name=%NAME%
+-F password=%PASSWORD%

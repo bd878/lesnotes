@@ -1,0 +1,2 @@
+url = https://%STAGE%lesnotes.space/users/v1/logout
+-XPOST

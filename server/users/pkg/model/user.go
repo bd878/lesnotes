@@ -1,5 +1,7 @@
 package model
 
+import "github.com/bd878/gallery/server/pkg/model"
+
 const (
 	PublicUserID int32 = 9_999_999
 )
@@ -13,14 +15,14 @@ type (
 		ExpiresUTCNano   int64            `json:"expires_utc_nano,omitempty"`
 	}
 
-	ServerResponse struct {
-		Status           string           `json:"status"`
-		Description      string           `json:"description"`
+	ServerAuthorizeResponse struct {
+		model.ServerResponse
+		Expired          bool             `json:"expired"`
+		User             User             `json:"user"`
 	}
 
-	ServerAuthorizeResponse struct {
-		ServerResponse
-		Expired          bool             `json:"expired"`
+	ServerUserResponse struct {
+		model.ServerResponse
 		User             User             `json:"user"`
 	}
 )

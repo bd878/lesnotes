@@ -1,4 +1,4 @@
-openapi: 3.0.0
+openapi: "3.0.0"
 info:
   title: API Specification for messages service
   description: |
@@ -88,14 +88,15 @@ paths:
 
   /messages/v1/read:
     parameters:
+      - $ref: '#/components/parameters/messageId'
       - $ref: '#/components/parameters/threadId'
       - $ref: '#/components/parameters/limit'
       - $ref: '#/components/parameters/offset'
       - $ref: '#/components/parameters/asc'
     get:
-      summary: Get user messages
+      summary: Get user messages or message
       description: |
-        Read messages for a given user, or a specific thread
+        Read messages for a given user, a single message, or a specific thread
       operationId: readMessages
       responses:
         "200":
@@ -103,34 +104,18 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    default: "ok"
-                  description:
-                    type: string
-                    default: ""
-                  messages:
-                    - $ref: '#/components/schemas/messagesList'
+                oneOf:
+                  - $ref: '#/components/schemas/messagesListResponse'
+                  - $ref: '#/components/schemas/messageResponse'
+
         "4XX":
           description: error 
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    default: "fail"
-                  description:
-                    type: string
-                    default: ""
-                  messages:
-                    type: array
-                    items:
-                      type: object
-                    example: []
+                oneOf:
+                  - $ref: '#/components/schemas/messagesListFail'
+                  - $ref: '#/components/schemas/messageFail'
 
   /messages/v1/read:
     parameters:
@@ -223,7 +208,7 @@ components:
     messageId:
       name: id
       in: query
-      required: true
+      required: false
       schema:
         type: integer
         example: 1
@@ -256,15 +241,43 @@ components:
         enum: [1, 0]
         type: integer
     public:
-    	name: public
-    	in: query
-    	required: false
-    	schema:
-    		type: integer
-    		example: 1
+      name: public
+      in: query
+      required: false
+      schema:
+        type: integer
+        example: 1
 
   schemas:
-    messagesList:
+    messagesListFail:
+      type: object
+      properties:
+        status:
+          type: string
+          default: "fail"
+        description:
+          type: string
+          default: ""
+        messages:
+          type: array
+          items:
+            type: object
+          example: []
+
+    messageFail:
+      type: object
+      properties:
+        status:
+          type: string
+          default: "fail"
+        description:
+          type: string
+          default: ""
+        message:
+          type: object
+          default: {}
+
+    messagesListResponse:
       type: object
       properties:
         status:
@@ -281,6 +294,18 @@ components:
             allOf:
               - $ref: '#/components/schemas/message'
 
+    messageResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          default: "ok"
+        description:
+          type: string
+          default: ""
+        message:
+          $ref: '#/components/schemas/message'
+
     updateMessage:
       type: object
       properties:
@@ -292,17 +317,23 @@ components:
           example: ""
 
     sendBody:
-      example:
-        text: test message
-        file_id: ""
-      type: object
-      properties:
-        text:
-          type: string
-          default: ""
-        file_id:
-          type: string
-          default: ""
+      oneOf:
+        - type: object
+          properties:
+            text:
+              type: string
+              default: ""
+            file_id:
+              type: string
+              default: ""
+        - type: object
+          properties:
+            text:
+              type: string
+              default: ""
+            file:
+              type: string
+              format: binary
 
     sendOk:
       type: object

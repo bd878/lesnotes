@@ -68,3 +68,13 @@ type ReadBatchFilesParams struct {
 type ReadBatchFilesResult struct {
 	Files             map[int32](*filesmodel.File)
 }
+
+type SaveFileParams struct {
+	Name              string
+	UserID            int32
+}
+
+type SaveFileResult struct {
+	ID                int32
+	CreateUTCNano     int64
+}

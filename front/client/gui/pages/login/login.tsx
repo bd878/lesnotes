@@ -12,11 +12,11 @@ function Login() {
 		<Suspense fallback={i18n('loading')}>
 			<StoreProvider>
 				<AuthProvider inverted={true}>
-					<Tag css="flex white bg-primary">
-						{i18n("login_form_header")}
-					</Tag>
+					<Tag css="m-8 mt-10 max-w-md min-w-3xs">
+						<Tag css="italic text-2xl mb-8">{i18n("lesnotes")}</Tag>
 
-					<LoginForm />
+						<LoginForm />
+					</Tag>
 				</AuthProvider>
 			</StoreProvider>
 		</Suspense>
