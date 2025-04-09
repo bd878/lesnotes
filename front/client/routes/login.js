@@ -6,21 +6,14 @@ import { resolve } from 'node:path';
 
 async function renderer(ctx) {
 	try {
-		const mainPath = resolve(path.join(Config.get('basedir'), 'templates/main.mustache'));
-		const loginPath = resolve(path.join(Config.get('basedir'), 'templates/login.mustache'));
-		const mainTemplate = await readFile(mainPath, { encoding: 'utf-8' });
-		const loginTemplate = await readFile(loginPath, { encoding: 'utf-8' });
+		const templatePath = resolve(path.join(Config.get('basedir'), 'templates/index.mustache'));
+		const template = await readFile(templatePath, { encoding: 'utf-8' });
 
 		ctx.body = mustache.render(
-			mainTemplate,
+			template,
 			{
 				script: "/public/login.js",
 				styles: ["/public/styles.css"],
-				form: "test",
-				button_text: "Отправить",
-			},
-			{
-				content: loginTemplate,
 			},
 		);
 		ctx.status = 200;

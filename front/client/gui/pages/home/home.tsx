@@ -6,13 +6,13 @@ import AuthProvider from '../../providers/Auth';
 import StoreProvider from '../../providers/Store';
 
 function Home() {
-  return (
-    <StoreProvider>
-      <AuthProvider fallback={i18n("messages_auth_fallback")}>
-        <HomePage />
-      </AuthProvider>
-    </StoreProvider>
-  )
+	return (
+		<StoreProvider>
+			<AuthProvider fallback={i18n("messages_auth_fallback")}>
+				<HomePage />
+			</AuthProvider>
+		</StoreProvider>
+	)
 }
 
 const root = ReactDOM.createRoot(document.getElementById('app'));

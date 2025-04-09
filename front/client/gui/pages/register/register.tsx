@@ -7,13 +7,13 @@ import StoreProvider from '../../providers/Store';
 const RegisterForm = lazy(() => import("../../components/RegisterForm"));
 
 const Register = () => (
-  <Suspense fallback={i18n('loading')}>
-    <Tag>{i18n("register")}</Tag>
+	<Suspense fallback={i18n('loading')}>
+		<Tag>{i18n("register")}</Tag>
 
-    <StoreProvider>
-      <RegisterForm />
-    </StoreProvider>
-  </Suspense>
+		<StoreProvider>
+			<RegisterForm />
+		</StoreProvider>
+	</Suspense>
 )
 
 const root = ReactDOM.createRoot(document.getElementById('app'));
