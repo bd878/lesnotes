@@ -276,17 +276,23 @@ components:
           example: ""
 
     sendBody:
-      example:
-        text: test message
-        file_id: ""
-      type: object
-      properties:
-        text:
-          type: string
-          default: ""
-        file_id:
-          type: string
-          default: ""
+      oneOf:
+        - type: object
+          properties:
+            text:
+              type: string
+              default: ""
+            file_id:
+              type: string
+              default: ""
+        - type: object
+          properties:
+            text:
+              type: string
+              default: ""
+            file:
+              type: string
+              format: binary
 
     sendOk:
       type: object

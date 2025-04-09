@@ -1,0 +1,10 @@
+--BOUNDARY
+Content-Disposition: form-data; name="text"
+
+test text
+--BOUNDARY
+Content-Disposition: form-data; name="file"; filename="example_file.txt"
+Content-Type: text/plain
+
+example file text data
+--BOUNDARY--

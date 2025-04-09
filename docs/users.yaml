@@ -5,6 +5,28 @@ info:
     This API allows authenticating requests.
   version: 1.0.0
 paths:
+  /users/v1/get:
+    parameters:
+      - $ref: '#/components/parameters/userId'
+    get:
+      summary: Get user data
+      description: |
+        Returns given user's metadata info
+      operationId: getMe
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        "4XX":
+          description: error
+          content:
+            application:
+              schema:
+                $ref: '#/components/schemas/getUserErr'
+
   /users/v1/auth:
     parameters:
       - in: header
@@ -136,6 +158,15 @@ paths:
                 default: "working"
 
 components:
+  parameters:
+    userId:
+      name: id
+      in: query
+      required: true
+      schema:
+        type: integer
+        example: 1
+
   schemas:
     loginErr:
       type: object
@@ -206,6 +237,15 @@ components:
           type: string
           default: "no password"
 
+    getUserErr:
+      type: object
+      status:
+        type: string
+        default: "error"
+      description:
+        type: string
+        default: ""
+
     signupOk:
       type: object
       status:
@@ -243,16 +283,26 @@ components:
 
     user:
       type: object
-      properties:
-        id:
-          type: integer
-          example: 1
-        name:
-          type: string
-          example: test
-        token:
-          type: string
-          example: AAAAAA
-        expires_utc_nano:
-          type: integer
-          example: 1234598000000
+      oneOf:
+      - type: object
+        properties:
+          id:
+            type: integer
+            example: 1
+          name:
+            type: string
+            example: test
+          token:
+            type: string
+            example: AAAAAA
+          expires_utc_nano:
+            type: integer
+            example: 1234598000000
+      - type: object
+        properties:
+          id:
+            type: integer
+            example: 1
+          name:
+            type: string
+            example: test

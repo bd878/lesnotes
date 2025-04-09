@@ -19,6 +19,7 @@ var (
 
 func Log(next Handler) Handler {
 	return func(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
+		// TODO: log request
 		next(log, w, req)
 	}
 }
@@ -49,13 +50,18 @@ func (b *AuthBuilder) Auth(next Handler) Handler {
 		default:
 			log.Errorw("bad cookie", "cookie", cookie, "error", err)
 			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(model.ServerResponse{
+				Status: "error",
+				Description: "bad cookie",
+			})
+
 			return
 		}
 
 		if err != nil {
 			log.Errorw("auth middleware failed to restore user, error occured, exit", "error", err)
 			json.NewEncoder(w).Encode(model.ServerResponse{
-				Status: "ok",
+				Status: "error",
 				Description: "token not found",
 			})
 			return

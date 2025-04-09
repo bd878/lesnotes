@@ -6,6 +6,7 @@ import (
 	"io"
 	"fmt"
 	"context"
+	"path/filepath"
 	"encoding/json"
 
 	filesmodel "github.com/bd878/gallery/server/files/pkg/model"
@@ -15,7 +16,7 @@ import (
 	"github.com/bd878/gallery/server/logger"
 )
 
-const selectNoLimit int = 0
+const defaultLimit int = 10
 
 type Controller interface {
 	ReadOneMessage(ctx context.Context, log *logger.Logger, userID, messageID int32) (*model.Message, error)
@@ -29,6 +30,7 @@ type Controller interface {
 type FilesGateway interface {
 	ReadBatchFiles(ctx context.Context, log *logger.Logger, params *model.ReadBatchFilesParams) (*model.ReadBatchFilesResult, error)
 	ReadFile(ctx context.Context, log *logger.Logger, userID, fileID int32) (*filesmodel.File, error)
+	SaveFile(ctx context.Context, log *logger.Logger, stream io.Reader, params *model.SaveFileParams) (*model.SaveFileResult, error)
 }
 
 type Handler struct {
@@ -44,12 +46,17 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 	var (
 		err error
 		fileID, threadID int32
-		private bool
+		private, hasFile bool
 	)
 
 	if err = req.ParseMultipartForm(1); err != nil {
 		log.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			Status: "error",
+			Description: "failed to parse form",
+		})
+
 		return
 	}
 
@@ -57,9 +64,10 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "ok",
+			Status: "error",
 			Description: "user required",
 		})
+
 		return
 	}
 
@@ -70,22 +78,39 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(servermodel.ServerResponse{
-				Status: "ok",
-				Description: "invalid file id",
+				Status: "error",
+				Description: "invalid file_id",
 			})
+
 			return
 		}
+
 		fileID = int32(fileid)
 	}
 
-	log.Infow("received message", "text", text, "name", user.Name, "file_id", fileID)
+	if _, ok := req.MultipartForm.File["file"]; ok {
+		hasFile = true
+	}
 
-	if fileID == 0 && text == "" {
+	log.Infow("received message", "text", text, "name", user.Name, "file_id", fileID, "has_file", hasFile)
+
+	if fileID == 0 && !hasFile && text == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status: "error",
-			Description: "text or file_id are empty",
+			Description: "text or file_id or file required",
 		})
+
+		return
+	}
+
+	if fileID != 0 && hasFile {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			Status: "error",
+			Description: "should be either file_id or file, not both",
+		})
+
 		return
 	}
 
@@ -95,11 +120,13 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(servermodel.ServerResponse{
-				Status: "ok",
+				Status: "error",
 				Description: "invalid thread id",
 			})
+
 			return
 		}
+
 		threadID = int32(threadid)
 	}
 
@@ -108,9 +135,10 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(servermodel.ServerResponse{
-				Status: "ok",
+				Status: "error",
 				Description: "invalid public param",
 			})
+
 			return
 		}
 
@@ -123,6 +151,39 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 		}
 	}
 
+	if hasFile {
+		f, fh, err := req.FormFile("file")
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+				Status: "error",
+				Description: "cannot read file",
+			})
+
+			return
+		}
+
+		fileName := filepath.Base(fh.Filename)
+
+		fileResult, err := h.filesGateway.SaveFile(req.Context(), log, f, &model.SaveFileParams{
+			UserID: user.ID,
+			Name:   fileName,
+		})
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+				Status: "error",
+				Description: "cannot save file",
+			})
+
+			return
+		}
+
+		fileID = fileResult.ID
+	}
+
 	resp, err := h.controller.SaveMessage(req.Context(), log, &model.Message{
 		UserID: user.ID,
 		ThreadID: threadID,
@@ -133,6 +194,11 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 	if err != nil {
 		log.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			Status: "error",
+			Description: "failed to save message",
+		})
+
 		return
 	}
 
@@ -159,9 +225,10 @@ func (h *Handler) DeleteMessage(log *logger.Logger, w http.ResponseWriter, req *
 		log.Error("user not found")
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "ok",
+			Status: "error",
 			Description: "user required",
 		})
+
 		return
 	}
 
@@ -169,9 +236,10 @@ func (h *Handler) DeleteMessage(log *logger.Logger, w http.ResponseWriter, req *
 	if values.Get("id") == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "ok",
+			Status: "error",
 			Description: "empty message id",
 		})
+
 		return
 	}
 
@@ -179,9 +247,10 @@ func (h *Handler) DeleteMessage(log *logger.Logger, w http.ResponseWriter, req *
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "ok",
+			Status: "error",
 			Description: "invalid id",
 		})
+
 		return
 	}
 
@@ -192,6 +261,11 @@ func (h *Handler) DeleteMessage(log *logger.Logger, w http.ResponseWriter, req *
 	if err != nil {
 		log.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			Status: "error",
+			Description: "failed to delete message",
+		})
+
 		return
 	}
 
@@ -212,9 +286,10 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 		log.Error("user not found")
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "ok",
+			Status: "error",
 			Description: "user required",
 		})
+
 		return
 	}
 
@@ -222,9 +297,10 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 	if values.Get("id") == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "ok",
+			Status: "error",
 			Description: "empty message id",
 		})
+
 		return
 	}
 
@@ -232,9 +308,10 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "ok",
+			Status: "error",
 			Description: "invalid id",
 		})
+
 		return
 	}
 
@@ -242,9 +319,10 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 	if text == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "ok",
+			Status: "error",
 			Description: "empty message field",
 		})
+
 		return
 	}
 
@@ -253,9 +331,10 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(servermodel.ServerResponse{
-				Status: "ok",
+				Status: "error",
 				Description: "invalid public param",
 			})
+
 			return
 		}
 
@@ -277,6 +356,11 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 	if err != nil {
 		log.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			Status: "error",
+			Description: "failed to update message",
+		})
+
 		return
 	}
 
@@ -305,9 +389,10 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "ok",
+			Status: "error",
 			Description: "user required",
 		})
+
 		return
 	}
 
@@ -321,6 +406,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 				Status: "error",
 				Description: fmt.Sprintf("wrong \"%s\" query param", "limit"),
 			})
+
 			return
 		}
 
@@ -332,13 +418,14 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 					Status: "error",
 					Description: fmt.Sprintf("wrong \"%s\" query param", "offset"),
 				})
+
 				return
 			}
 		} else {
 			offsetInt = 0
 		}
 	} else {
-		limitInt = selectNoLimit
+		limitInt = defaultLimit
 	}
 
 	if values.Get("id") != "" {
@@ -346,11 +433,13 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(servermodel.ServerResponse{
-				Status: "ok",
+				Status: "error",
 				Description: "invalid message id",
 			})
+
 			return
 		}
+
 		messageID = int32(messageid)
 	}
 
@@ -359,11 +448,13 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(servermodel.ServerResponse{
-				Status: "ok",
+				Status: "error",
 				Description: "invalid thread id",
 			})
+
 			return
 		}
+
 		threadID = int32(threadid)
 	}
 
@@ -375,6 +466,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 				Status: "error",
 				Description: fmt.Sprintf("wrong \"%s\" query param", "asc"),
 			})
+
 			return
 		}
 
@@ -394,8 +486,9 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status: "error",
-			Description: "both message_id and thread_id params given",
+			Description: "both message_id and thread_id params are given",
 		})
+
 		return
 	}
 
@@ -405,6 +498,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 			Status: "error",
 			Description: "both message_id and limit/offset params given",
 		})
+
 		return
 	}
 
@@ -422,6 +516,11 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 		if err != nil {
 			log.Errorw("failed to read thread messages, controller returned error", "user_id", user.ID, "thread_id", threadID, "error", err)
 			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+				Status: "error",
+				Description: "failed to read thread messages",
+			})
+
 			return
 		}
 
@@ -433,6 +532,11 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 		if err != nil {
 			log.Errorw("failed to read one message", "user_id", user.ID, "message_id", messageID, "error", err)
 			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+				Status: "error",
+				Description: "failed to read a message",
+			})
+
 			return
 		}
 
@@ -448,6 +552,11 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 		if err != nil {
 			log.Errorw("failed to read all messages", "error", err)
 			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+				Status: "error",
+				Description: "failed to read all messages",
+			})
+
 			return
 		}
 
@@ -455,7 +564,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 		isLastPage = res.IsLastPage
 	}
 
-	log.Infow("read messages", "thread_id", threadID, "len_messages", len(messages))
+	log.Infow("read messages", "user_id", user.ID, "name", user.Name, "message_id", messageID, "thread_id", threadID, "len_messages", len(messages))
 
 	if message != nil {
 		// one message
@@ -482,6 +591,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 			},
 			Message: message,
 		})
+
 		return
 	}
 
@@ -504,6 +614,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 			Status: "error",
 			Description: "failed to read files",
 		})
+
 		return
 	}
 
@@ -533,6 +644,11 @@ func (h *Handler) GetStatus(log *logger.Logger, w http.ResponseWriter, _ *http.R
 	if _, err := io.WriteString(w, "ok\n"); err != nil {
 		log.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			Status: "error",
+			Description: "failed to get status",
+		})
+
 		return
 	}
 }

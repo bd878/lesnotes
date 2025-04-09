@@ -2,7 +2,7 @@
 
 # Logs in user
 
-stage=${STAGE:-""}
+stage=${STAGE:-"stage."}
 cookie=${COOKIE:-"cookie.txt"}
 name=${NAME:?"Usage: env NAME= PASSWORD= ./login.sh"}
 password=${PASSWORD:?"Usage: env NAME= PASSWORD= ./login.sh"}
