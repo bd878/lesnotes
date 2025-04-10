@@ -31,11 +31,12 @@ function HomePageComponent(props) {
 				css="btn"
 			/>
 
-			<Tag css="flex flex-row grow mt-2">
+			<Tag css="flex flex-row grow mt-2 max-h-full pb-8">
 				<Tag css="flex flex-col items-start w-md w-full">
 					<Button
+						tabIndex="0"
 						content={i18n("load_more")}
-						css="btn w-full text-center mb-5"
+						css="disabled:opacity-30 btn w-full text-center mb-5"
 						onClick={onLoadMoreClick}
 						disabled={isAllLoaded}
 					/>
@@ -43,7 +44,7 @@ function HomePageComponent(props) {
 					<Tag
 						el="div"
 						ref={listRef}
-						css="grow w-full"
+						css="grow w-full h-full overflow-x-hidden overflow-y-scroll"
 						onScroll={onListScroll}
 					>
 						<MessagesList
@@ -55,7 +56,7 @@ function HomePageComponent(props) {
 						/>
 					</Tag>
 
-					<Tag css="w-full">
+					<Tag css="w-full mt-5">
 						<MessageForm
 							send={sendMessage}
 							update={updateMessage}

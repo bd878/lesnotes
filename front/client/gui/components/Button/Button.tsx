@@ -6,6 +6,7 @@ const Button = forwardRef((props, ref) => {
 		<Tag
 			el="button"
 			ref={ref}
+			tabIndex={props.tabIndex}
 			css={props.css}
 			type={props.button}
 			onClick={props.onClick}
