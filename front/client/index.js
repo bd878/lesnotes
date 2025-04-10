@@ -39,7 +39,7 @@ router
 	})
 	.get('/', etag, main)
 	.get('/login', etag, login)
-	.get('/register', etag, register)
+	.get('/signup', etag, register)
 	.get('/home', etag, home)
 	.get('/status', status)
 	.get("/new", etag, message)

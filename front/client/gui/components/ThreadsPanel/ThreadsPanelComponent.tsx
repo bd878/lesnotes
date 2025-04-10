@@ -19,7 +19,7 @@ function ThreadsPanelComponent(props) {
 		<Tag>
 			<Button
 				type="button"
-				text={i18n("close_button_text")}
+				content={i18n("close_button_text")}
 				onClick={close}
 			/>
 			<MainMessage message={threadMessage} />

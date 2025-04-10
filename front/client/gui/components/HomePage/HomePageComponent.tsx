@@ -26,15 +26,16 @@ function HomePageComponent(props) {
 	return (
 		<>
 			<Button
-				text={i18n("logout")}
+				content={"< " + i18n("logout")}
 				onClick={onExitClick}
+				css="btn"
 			/>
 
-			<Tag css="flex row grow y-hidden w-100">
-				<Tag css="flex column grow">
-					<Tag>{i18n("messages_header")}</Tag>
+			<Tag css="flex flex-row grow mt-2">
+				<Tag css="flex flex-col items-start w-md w-full">
 					<Button
-						text={i18n("load_more")}
+						content={i18n("load_more")}
+						css="btn w-full text-center mb-5"
 						onClick={onLoadMoreClick}
 						disabled={isAllLoaded}
 					/>
@@ -42,25 +43,27 @@ function HomePageComponent(props) {
 					<Tag
 						el="div"
 						ref={listRef}
-						css="grow y-scroll"
+						css="grow w-full"
 						onScroll={onListScroll}
 					>
 						<MessagesList
-							css="reset-list-style"
-							liCss="li-10"
+							css="w-full"
+							liCss="mb-2"
 							error={error}
 							messages={messages}
 							loading={loading}
 						/>
 					</Tag>
 
-					<MessageForm
-						send={sendMessage}
-						update={updateMessage}
-						reset={resetEditMessage}
-						resetEdit={resetEditMessage}
-						messageForEdit={messageForEdit}
-					/>
+					<Tag css="w-full">
+						<MessageForm
+							send={sendMessage}
+							update={updateMessage}
+							reset={resetEditMessage}
+							resetEdit={resetEditMessage}
+							messageForEdit={messageForEdit}
+						/>
+					</Tag>
 				</Tag>
 
 				<Tag>

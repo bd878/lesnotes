@@ -11,7 +11,7 @@ const Button = forwardRef((props, ref) => {
 			onClick={props.onClick}
 			disabled={props.disabled}
 		>
-			{props.text}
+			{props.content}
 		</Tag>
 	)
 })

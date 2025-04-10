@@ -25,6 +25,7 @@ function MessagesListComponent(props) {
 			<List el="ul" css={css}>
 				{messages.map(message => (
 					<MessageElement
+						tabIndex="0"
 						key={message.ID}
 						css={liCss}
 						message={message}
@@ -38,7 +39,7 @@ function MessagesListComponent(props) {
 
 	return (
 		<>
-			{loading ? <Tag>{i18n("loading")}</Tag> : null}
+			{loading ? i18n("loading") : null}
 			{content}
 		</>
 	)
