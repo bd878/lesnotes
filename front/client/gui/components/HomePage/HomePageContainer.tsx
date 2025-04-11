@@ -18,6 +18,14 @@ import {
 	selectIsEditMode,
 	resetEditMessageActionCreator,
 } from '../../features/messages';
+import {
+	fetchMessagesActionCreator as fetchThreadMessagesActionCreator,
+	sendMessageActionCreator as sendThreadMessageActionCreator,
+	resetActionCreator as resetThreadActionCreator,
+	selectMessages as selectThreadMessages,
+	selectThreadMessage,
+	selectThreadID,
+} from '../../features/threads';
 import {selectUser, logoutActionCreator} from '../../features/me';
 
 function HomePageContainer(props) {
@@ -34,6 +42,13 @@ function HomePageContainer(props) {
 		updateMessage,
 		resetEditMessage,
 		messageForEdit,
+
+		threadMessage,
+		threadMessages,
+		threadID,
+		resetThread,
+		fetchThreadMessages,
+		sendThreadMessage,
 	} = props
 
 	const listRef = useRef(null);
@@ -47,6 +62,11 @@ function HomePageContainer(props) {
 		fetchMessages(LIMIT_LOAD_BY, 0, LOAD_ORDER)
 	}, [fetchMessages]);
 
+	useEffect(() => {
+		if (threadID !== 0)
+			fetchThreadMessages(LIMIT_LOAD_BY, 0, LOAD_ORDER)
+	}, [threadID])
+
 	const loadMore = useCallback(() => {
 		if (listRef.current != null && !isLoading && !isLastPage)
 			fetchMessages(LIMIT_LOAD_BY, loadOffset, LOAD_ORDER)
@@ -59,6 +79,8 @@ function HomePageContainer(props) {
 	}, [listRef.current, loadMore]);
 
 	const onExitClick = useCallback(() => {logout()}, [logout]);
+
+	const onCloseThreadClick = useCallback(resetThread, [resetThread])
 
 	return (
 		<HomePageComponent
@@ -74,6 +96,12 @@ function HomePageContainer(props) {
 			updateMessage={updateMessage}
 			resetEditMessage={resetEditMessage}
 			messageForEdit={messageForEdit}
+
+			shouldShowThreadsPanel={threadID != 0}
+			threadMessage={threadMessage}
+			threadMessages={threadMessages}
+			closeThread={onCloseThreadClick}
+			sendThreadMessage={sendThreadMessage}
 		/>
 	)
 }
@@ -87,6 +115,10 @@ const mapStateToProps = state => ({
 	user: selectUser(state),
 	messageForEdit: selectMessageForEdit(state),
 	isEditMode: selectIsEditMode(state),
+
+	threadMessage: selectThreadMessage(state),
+	threadMessages: selectThreadMessages(state),
+	threadID: selectThreadID(state),
 })
 
 const mapDispatchToProps = {
@@ -95,6 +127,10 @@ const mapDispatchToProps = {
 	sendMessage: sendMessageActionCreator,
 	updateMessage: updateMessageActionCreator,
 	resetEditMessage: resetEditMessageActionCreator,
+
+	resetThread: resetThreadActionCreator,
+	fetchThreadMessages: fetchThreadMessagesActionCreator,
+	sendThreadMessage: sendThreadMessageActionCreator,
 }
 
 export default connect(

@@ -5,7 +5,7 @@ import Tag from '../Tag';
 
 const MessagesList = lazy(() => import("../MessagesList"));
 const MessageForm = lazy(() => import("../MessageForm"));
-const ThreadsPanel = lazy(() => import("../ThreadsPanel"));
+const MainMessage = lazy(() => import("../MainMessage"));
 
 function HomePageComponent(props) {
 	const {
@@ -21,18 +21,24 @@ function HomePageComponent(props) {
 		updateMessage,
 		resetEditMessage,
 		messageForEdit,
+
+		shouldShowThreadsPanel,
+		threadMessage,
+		threadMessages,
+		closeThread,
+		sendThreadMessage,
 	} = props;
 
 	return (
 		<>
-			<Button
-				content={"< " + i18n("logout")}
-				onClick={onExitClick}
-				css="btn"
-			/>
-
-			<Tag css="flex flex-row grow mt-2 max-h-full pb-8">
+			<Tag css="flex flex-row grow max-h-full pb-8">
 				<Tag css="flex flex-col items-start w-md w-full">
+					<Button
+						content={"< " + i18n("logout")}
+						onClick={onExitClick}
+						css="btn mb-2"
+					/>
+
 					<Button
 						tabIndex="0"
 						content={i18n("load_more")}
@@ -67,9 +73,18 @@ function HomePageComponent(props) {
 					</Tag>
 				</Tag>
 
-				<Tag>
-					<ThreadsPanel />
-				</Tag>
+				{shouldShowThreadsPanel ? (
+					<Tag css="flex flex-col items-start w-md w-full">
+						<Button
+							type="button"
+							content={i18n("close_button_text")}
+							onClick={closeThread}
+						/>
+						<MainMessage message={threadMessage} />
+						<MessagesList messages={threadMessages} 	/>
+						<MessageForm messageForEdit={{}} reset={() => {}} send={sendThreadMessage} update={() => {}} edit={() => {}} />
+					</Tag>
+				) : null}
 			</Tag>
 		</>
 	)
