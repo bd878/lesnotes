@@ -1,9 +1,9 @@
 import React, {lazy} from 'react';
 import Tag from '../Tag';
 import i18n from '../../../i18n';
+import CrayonIcon from '../../icons/CrayonIcon'
+import CopyIcon from '../../icons/CopyIcon'
 import {getFileDownloadUrl} from "../../../api";
-
-const ListItem = lazy(() => import("../../components/ListItem"));
 
 function MessageElementComponent(props) {
 	const {
@@ -23,26 +23,22 @@ function MessageElementComponent(props) {
 			key={`tag_${message.ID}`}
 			onClick={(e) => {e.stopPropagation(); onClick(message)}} 
 		>
-			<Tag css="grow flex flex-row justify-between overflow-hidden max-w-full">
+			<Tag css="grow flex flex-row justify-between items-start overflow-hidden max-w-full">
 				<Tag css="flex flex-col overflow-hidden mr-3">
-					<ListItem css="mb-1 overflow-hidden whitespace-nowrap text-ellipsis" key={`item_${message.ID}`}>{message.text}</ListItem>
+					<Tag css="mb-1" key={`item_${message.ID}`}>
+						<Tag el="details">
+							<Tag el="summary" css="text-sm italic overflow-hidden whitespace-nowrap text-ellipsis">
+								{message.text}
+							</Tag>
 
-					{(message.file && message.file.ID && message.file.name) ? <Tag
-						el="a"
-						href={getFileDownloadUrl(`/files/v1/download?id=${message.file.ID}`, false)}
-						download={message.file.name}
-						target="_blank"
-					>
-						{message.file.name}
-					</Tag> : null}
+							<Tag css="mt-2">{message.text}</Tag>
+						</Tag>
+					</Tag>
 				</Tag>
 
-				{message.createUTCNano ? (
-					<Tag css="flex flex-col justify-around whitespace-nowrap">
-						<Tag el="div" css="text-xs italic">{i18n("created_at") + ": " + message.createUTCNano}</Tag>
-						{message.createUTCNano != message.updateUTCNano ? <Tag el="div" css="text-xs italic">{i18n("updated_at") + ": " + message.updateUTCNano}</Tag> : null}
-					</Tag>
-				) : null}
+				<Tag el="span" css="flex pt-[3px]">
+					<CopyIcon css="flex ml-1" width="18" height="18" />
+				</Tag>
 			</Tag>
 		</Tag>
 	)

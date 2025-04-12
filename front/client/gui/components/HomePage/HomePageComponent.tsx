@@ -25,6 +25,8 @@ function HomePageComponent(props) {
 		shouldShowThreadsPanel,
 		threadMessage,
 		threadMessages,
+		onLoadMoreThreadMessagesClick,
+		isAllThreadMessagesLoaded,
 		closeThread,
 		sendThreadMessage,
 	} = props;
@@ -74,15 +76,36 @@ function HomePageComponent(props) {
 				</Tag>
 
 				{shouldShowThreadsPanel ? (
-					<Tag css="flex flex-col items-start w-md w-full">
+					<Tag css="flex flex-col items-start ml-4 items-start w-md w-full">
 						<Button
 							type="button"
+							tabIndex="0"
 							content={i18n("close_button_text")}
 							onClick={closeThread}
+							css="btn mb-2"
 						/>
-						<MainMessage message={threadMessage} />
-						<MessagesList messages={threadMessages} 	/>
-						<MessageForm messageForEdit={{}} reset={() => {}} send={sendThreadMessage} update={() => {}} edit={() => {}} />
+
+						<Button
+							tabIndex="0"
+							content={i18n("load_more")}
+							css="disabled:opacity-30 btn w-full text-center mb-5"
+							onClick={onLoadMoreThreadMessagesClick}
+							disabled={isAllThreadMessagesLoaded}
+						/>
+
+						<Tag css="grow w-full h-full overflow-x-hidden overflow-y-scroll">
+							<MessagesList messages={threadMessages} />
+						</Tag>
+
+						<Tag css="w-full mt-5">
+							<MessageForm
+								messageForEdit={{}}
+								reset={() => {}}
+								send={sendThreadMessage}
+								update={() => {}}
+								edit={() => {}}
+							/>
+						</Tag>
 					</Tag>
 				) : null}
 			</Tag>

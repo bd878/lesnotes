@@ -98,6 +98,8 @@ function HomePageContainer(props) {
 			messageForEdit={messageForEdit}
 
 			shouldShowThreadsPanel={threadID != 0}
+			onLoadMoreThreadMessagesClick={() => {}}
+			isAllThreadMessagesLoaded={false}
 			threadMessage={threadMessage}
 			threadMessages={threadMessages}
 			closeThread={onCloseThreadClick}
