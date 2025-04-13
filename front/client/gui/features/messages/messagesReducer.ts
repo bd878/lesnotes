@@ -29,6 +29,7 @@ export function messagesReducer(messagesState = initialState, action) {
 				...messagesState,
 				error: action.payload,
 				loading: false,
+				messageForEdit: {},
 			}
 		}
 		case FETCH_MESSAGES: {
@@ -70,14 +71,6 @@ export function messagesReducer(messagesState = initialState, action) {
 				error: "",
 			}
 		}
-		case UPDATE_MESSAGE_SUCCEEDED: {
-			return {
-				...messagesState,
-				list: [ ...action.payload ],
-				loading: false,
-				error: "",
-			}
-		}
 		case SET_MESSAGE_FOR_EDIT: {
 			return {
 				...messagesState,
@@ -112,6 +105,7 @@ export function messagesReducer(messagesState = initialState, action) {
 				list: [ ...action.payload ],
 				loading: false,
 				error: "",
+				messageForEdit: {},
 			}
 		}
 		case SET_MESSAGE_FOR_EDIT: {

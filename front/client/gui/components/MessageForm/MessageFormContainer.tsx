@@ -22,7 +22,7 @@ function MessageFormContainer(props) {
 	useEffect(() => {
 		if (isEditMode)
 			setText(messageForEdit.text)
-	}, [setText, isEditMode]);
+	}, [setText, isEditMode, messageForEdit]);
 
 	const onFileChange = useCallback(e => {
 		setFile(e.target.files[0])

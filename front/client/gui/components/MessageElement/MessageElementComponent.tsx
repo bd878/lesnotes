@@ -6,6 +6,8 @@ import CopyIcon from '../../icons/CopyIcon'
 import * as is from '../../../third_party/is'
 import {getFileDownloadUrl} from "../../../api";
 
+const Button = lazy(() => import("../../components/Button"));
+
 function MessageElementComponent(props) {
 	const {
 		message,
@@ -27,7 +29,7 @@ function MessageElementComponent(props) {
 			<Tag css="grow flex flex-row justify-between items-start overflow-hidden max-w-full">
 				<Tag css="flex flex-col overflow-hidden mr-3 w-full">
 					<Tag css="mb-1" key={`item_${message.ID}`}>
-						<Tag el="details" css="marker:text-xl">
+						<Tag el="details" css="m-1 marker:text-xl">
 							<Tag el="summary" css="text-sm italic overflow-hidden whitespace-nowrap text-ellipsis">
 								<Tag el="span" css="px-2 py-1">{message.text}</Tag>
 							</Tag>
@@ -38,17 +40,30 @@ function MessageElementComponent(props) {
 								{is.trueVal(message.fileID) ? (
 									<Tag>
 										<Tag el="span" css="font-bold text-sm">{i18n("attachments") + ": "}</Tag>
-										<Tag el="a" href={getFileDownloadUrl(`/files/v1/download?id={message.fileID}`, false)} target="_blank" download={message.file.name}>{message.file.name}</Tag>
+										<Tag
+											el="a"
+											css="underline text-blue-600 visited:text-purple-600"
+											href={getFileDownloadUrl(`/files/v1/download?id=${message.fileID}`, false)}
+											target="_blank"
+											download={message.file.name}
+										>
+											{message.file.name}
+										</Tag>
 									</Tag>
 								) : null}
 								<Tag>{message.text}</Tag>
+
+								<Tag css="flex flex-row items-start mt-2">
+									<Button type="button" css="btn" onClick={onDeleteClick} content={i18n("delete_message")} />
+									<Button type="button" css="ml-1 btn" onClick={onEditClick} content={i18n("edit_message")} />
+								</Tag>
 							</Tag>
 						</Tag>
 					</Tag>
 				</Tag>
 
-				<Tag el="button" type="button" onClick={onCopyClick} css="flex pt-[8px]">
-					<CopyIcon css="flex ml-1" width="18" height="18" />
+				<Tag el="button" type="button" onClick={onCopyClick} css="flex mt-[10px] mr-[5px]">
+					<CopyIcon css="flex" width="18" height="18" />
 				</Tag>
 			</Tag>
 		</Tag>

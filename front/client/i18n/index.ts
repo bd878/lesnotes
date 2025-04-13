@@ -30,9 +30,9 @@ const i18n = {
 		token_expired_error: "Token expired",
 		bad_response: "Bad response",
 		cannot_parse_response: "Cannot parse the response",
-		delete_message: "Удалить",
-		edit_message: " Изменить",
-		close_button_text: "Закрыть",
+		delete_message: "Delete",
+		edit_message: "Edit",
+		close_button_text: "Close",
 	},
 	"ru": {
 		logout: "Выйти",
@@ -65,9 +65,9 @@ const i18n = {
 		token_expired_error: "Истекло время жизни токена",
 		bad_response: "Невалидный ответ от сервера",
 		cannot_parse_response: "Не получается разобрать ответ от сервера",
-		delete_message: "Delete",
-		edit_message: "Edit",
-		close_button_text: "Close",
+		delete_message: "Удалить",
+		edit_message: "Изменить",
+		close_button_text: "Закрыть",
 	}
 }
 

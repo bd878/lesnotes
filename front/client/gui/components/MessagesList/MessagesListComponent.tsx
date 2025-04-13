@@ -31,8 +31,8 @@ function MessagesListComponent(props) {
 							message={message}
 							onOpenThreadClick={onOpenThreadClick}
 							onCopyClick={() => onCopyClick(message)}
-							onEditClick={onEditClick}
-							onDeleteClick={onDeleteClick}
+							onEditClick={() => onEditClick(message)}
+							onDeleteClick={() => onDeleteClick(message)}
 						/>
 					))}
 				</List>
