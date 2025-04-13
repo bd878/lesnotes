@@ -3,6 +3,7 @@ import {
 	FETCH_MESSAGES,
 	UPDATE_MESSAGE,
 	SEND_MESSAGE,
+	COPY_MESSAGE,
 	SET_MESSAGE_FOR_EDIT,
 
 	MESSAGES_FAILED,
@@ -52,6 +53,9 @@ export function messagesReducer(messagesState = initialState, action) {
 				loading: true,
 				error: "",
 			}
+		}
+		case COPY_MESSAGE: {
+			return messagesState
 		}
 		case SEND_MESSAGE_SUCCEEDED: {
 			return {

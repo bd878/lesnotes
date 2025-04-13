@@ -2,6 +2,7 @@ import {
 	UPDATE_MESSAGE,
 	DELETE_MESSAGE,
 	SEND_MESSAGE,
+	COPY_MESSAGE,
 	FETCH_MESSAGES,
 	SET_MESSAGE_FOR_EDIT,
 
@@ -77,6 +78,13 @@ export function deleteMessageActionCreator(payload) {
 	return {
 		type: DELETE_MESSAGE,
 		payload,
+	}
+}
+
+export function copyMessageActionCreator(payload) {
+	return {
+		type: COPY_MESSAGE,
+		payload: {text: payload.text},
 	}
 }
 

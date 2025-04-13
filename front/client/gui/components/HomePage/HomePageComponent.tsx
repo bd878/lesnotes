@@ -5,7 +5,7 @@ import Tag from '../Tag';
 
 const MessagesList = lazy(() => import("../MessagesList"));
 const MessageForm = lazy(() => import("../MessageForm"));
-const ThreadsPanel = lazy(() => import("../ThreadsPanel"));
+const MainMessage = lazy(() => import("../MainMessage"));
 
 function HomePageComponent(props) {
 	const {
@@ -21,20 +21,29 @@ function HomePageComponent(props) {
 		updateMessage,
 		resetEditMessage,
 		messageForEdit,
+		shouldShowThreadsPanel,
+		threadMessage,
+		threadMessages,
+		onLoadMoreThreadMessagesClick,
+		isAllThreadMessagesLoaded,
+		closeThread,
+		sendThreadMessage,
 	} = props;
 
 	return (
 		<>
-			<Button
-				text={i18n("logout")}
-				onClick={onExitClick}
-			/>
-
-			<Tag css="flex row grow y-hidden w-100">
-				<Tag css="flex column grow">
-					<Tag>{i18n("messages_header")}</Tag>
+			<Tag css="flex flex-row grow max-h-full pb-8">
+				<Tag css="flex flex-col items-start w-md w-full">
 					<Button
-						text={i18n("load_more")}
+						content={"< " + i18n("logout")}
+						onClick={onExitClick}
+						css="btn mb-2"
+					/>
+
+					<Button
+						tabIndex="0"
+						content={i18n("load_more")}
+						css="disabled:opacity-30 btn w-full text-center mb-5"
 						onClick={onLoadMoreClick}
 						disabled={isAllLoaded}
 					/>
@@ -42,30 +51,62 @@ function HomePageComponent(props) {
 					<Tag
 						el="div"
 						ref={listRef}
-						css="grow y-scroll"
+						css="grow w-full h-full overflow-x-hidden overflow-y-scroll"
 						onScroll={onListScroll}
 					>
 						<MessagesList
-							css="reset-list-style"
-							liCss="li-10"
+							css="w-full"
+							liCss="mb-2"
 							error={error}
 							messages={messages}
 							loading={loading}
 						/>
 					</Tag>
 
-					<MessageForm
-						send={sendMessage}
-						update={updateMessage}
-						reset={resetEditMessage}
-						resetEdit={resetEditMessage}
-						messageForEdit={messageForEdit}
-					/>
+					<Tag css="w-full mt-5">
+						<MessageForm
+							send={sendMessage}
+							update={updateMessage}
+							reset={resetEditMessage}
+							resetEdit={resetEditMessage}
+							messageForEdit={messageForEdit}
+						/>
+					</Tag>
 				</Tag>
 
-				<Tag>
-					<ThreadsPanel />
-				</Tag>
+				{shouldShowThreadsPanel ? (
+					<Tag css="flex flex-col items-start ml-4 items-start w-md w-full">
+						<Button
+							type="button"
+							tabIndex="0"
+							content={i18n("close_button_text")}
+							onClick={closeThread}
+							css="btn mb-2"
+						/>
+
+						<Button
+							tabIndex="0"
+							content={i18n("load_more")}
+							css="disabled:opacity-30 btn w-full text-center mb-5"
+							onClick={onLoadMoreThreadMessagesClick}
+							disabled={isAllThreadMessagesLoaded}
+						/>
+
+						<Tag css="grow w-full h-full overflow-x-hidden overflow-y-scroll">
+							<MessagesList messages={threadMessages} />
+						</Tag>
+
+						<Tag css="w-full mt-5">
+							<MessageForm
+								messageForEdit={{}}
+								reset={() => {}}
+								send={sendThreadMessage}
+								update={() => {}}
+								edit={() => {}}
+							/>
+						</Tag>
+					</Tag>
+				) : null}
 			</Tag>
 		</>
 	)

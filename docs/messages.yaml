@@ -107,7 +107,6 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/messagesListResponse'
                   - $ref: '#/components/schemas/messageResponse'
-
         "4XX":
           description: error 
           content:
@@ -116,47 +115,6 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/messagesListFail'
                   - $ref: '#/components/schemas/messageFail'
-
-  /messages/v1/read:
-    parameters:
-      - $ref: '#/components/parameters/messageId'
-    get:
-      summary: Get single message
-      description: |
-        Read one message
-      operationId: readMessage
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    default: "ok"
-                  description:
-                    type: string
-                    default: ""
-                  message:
-                    - $ref: '#/components/schemas/message'
-        "4XX":
-          description: error 
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    default: "fail"
-                  description:
-                    type: string
-                    default: ""
-                  message:
-                    type: object
-                    default: {}
 
   /messages/v1/status:
     get:

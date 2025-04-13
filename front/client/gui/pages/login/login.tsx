@@ -9,17 +9,19 @@ const LoginForm = lazy(() => import("../../components/LoginForm"));
 
 function Login() {
 	return (
-		<Suspense fallback={i18n('loading')}>
-			<StoreProvider>
-				<AuthProvider inverted={true}>
-					<Tag css="m-8 mt-10 max-w-md min-w-3xs">
-						<Tag css="italic text-2xl mb-8">{i18n("lesnotes")}</Tag>
+		<Tag css="wrap">
+			<Suspense fallback={i18n("loading")}>
+				<StoreProvider>
+					<AuthProvider inverted={true}>
+						<Tag css="max-w-md min-w-3xs w-full">
+							<Tag el="a" css="italic text-2xl mb-8 inline-block cursor-pointer" href="/" target="_self">{i18n("lesnotes")}</Tag>
 
-						<LoginForm />
-					</Tag>
-				</AuthProvider>
-			</StoreProvider>
-		</Suspense>
+							<LoginForm />
+						</Tag>
+					</AuthProvider>
+				</StoreProvider>
+			</Suspense>
+		</Tag>
 	)
 }
 

@@ -8,7 +8,7 @@ function ListItem(props){
 	} = props
 
 	return (
-		<Tag el={el} onClick={onClick}>
+		<Tag css={props.css} el={el} onClick={onClick}>
 			{props.children}
 		</Tag>
 	)

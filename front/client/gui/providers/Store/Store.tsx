@@ -1,10 +1,14 @@
 import React from 'react';
 import {Provider} from '../../../third_party/react-redux'
-import store from '../../store';
+import createStore from '../../store';
 
 function StoreProvider(props) {
 	return (
-		<Provider store={store}>
+		<Provider store={createStore({
+			browser: props.browser,
+			isMobile: props.isMobile,
+			isDesktop: props.isDesktop,
+		})}>
 			{props.children}
 		</Provider>
 	)

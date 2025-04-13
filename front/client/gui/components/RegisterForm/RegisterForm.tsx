@@ -35,12 +35,22 @@ function RegisterForm(props) {
 
 	return (
 		<Tag>
-			<Form autoComplete="off" name="register-form">
-				<FormField required el="input" name="name" type="text" value={name} onChange={onNameChange} />
-				<FormField required el="input" name="password" type="password" value={password} onChange={onPasswordChange} />
+			<Form autoComplete="off" name="register-form" css="flex flex-col">
+				<Tag>
+					<Tag el="label" htmlFor="name">{i18n("username")}</Tag>
+					<FormField required el="input" css="block w-full border-solid border-1" name="name" type="text" value={name} onChange={onNameChange} />
+				</Tag>
+
+				<Tag css="mt-2">
+					<Tag el="label" htmlFor="password">{i18n("password")}</Tag>
+					<FormField required el="input" css="block w-full border-solid border-1" name="password" type="password" value={password} onChange={onPasswordChange} />
+				</Tag>
 			</Form>
-			<Button type="button" text={i18n("register")} onClick={sendRegisterRequest} />
-			<Tag el="a" href="/login" target="_self">{i18n("login")}</Tag>
+
+			<Tag css="flex flex-row justify-between mt-3">
+				<Tag el="a" css="underline italic text-blue-600 text-left cursor-pointer" href="/login" target="_self">{i18n("login")}</Tag>
+				<Button type="button" css="btn" content={i18n("register") + " >"} onClick={sendRegisterRequest} />
+			</Tag>
 		</Tag>
 	);
 }

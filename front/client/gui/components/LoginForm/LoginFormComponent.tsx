@@ -51,7 +51,7 @@ function LoginFormComponent(props) {
 			<Tag css="flex flex-row justify-between mt-3">
 				<Tag
 					el="a"
-					href="/register"
+					href="/signup"
 					target="_self"
 					css="underline italic text-blue-600 text-left cursor-pointer"
 				>
@@ -60,8 +60,8 @@ function LoginFormComponent(props) {
 
 				<Button
 					type="button"
-					text={i18n("login") + " >"}
-					css="border-1 px-4 border-solid text-left cursor-pointer"
+					content={i18n("login") + " >"}
+					css="btn"
 					onClick={sendLoginRequest}
 				/>
 			</Tag>

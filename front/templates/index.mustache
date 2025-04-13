@@ -7,9 +7,12 @@
 		{{#styles}}
 			<link rel="stylesheet" href="{{.}}">
 		{{/styles}}
+		{{#manifest}}
+			<link rel="manifest" href={{.}} />
+		{{/manifest}}
 		<title>Les notes</title>
 	</head>
-	<body>
+	<body data-browser="{{browser}}" data-mobile="{{mobile}}">
 		<div id="app"></div>
 		<script type="module" src="{{{ script }}}"></script>
 	</body>

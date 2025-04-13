@@ -14,7 +14,7 @@ function AuthProvider(props) {
 	useEffect(() => {auth()}, [auth])
 
 	if (isLoading)
-		return (<>{i18n('auth_process')}</>)
+		return i18n("loading")
 
 	if (willRedirect)
 		return (<></>)
@@ -23,14 +23,14 @@ function AuthProvider(props) {
 		return (
 			<>{!isAuth
 				? props.children
-				: (props.fallback || i18n("authed"))
+				: (props.fallback || <Tag css="m-8 mt-10">{i18n("authed")}</Tag>)
 			}</>
 		)
 
 	return (
 		<>{isAuth
 			? props.children
-			: (props.fallback || i18n("not_authed"))
+			: (props.fallback || <Tag css="m-8 mt-10">{i18n("not_authed")}</Tag>)
 		}</>
 	);
 }

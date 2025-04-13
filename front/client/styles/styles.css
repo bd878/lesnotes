@@ -1,1 +1,11 @@
 @import 'tailwindcss';
+
+@layer components {
+	.btn {
+		@apply border-1 px-4 border-solid text-left cursor-pointer
+	}
+
+	.wrap {
+		@apply p-8 pt-10 h-screen flex flex-col items-start
+	}
+}

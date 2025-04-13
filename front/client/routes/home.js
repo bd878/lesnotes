@@ -9,8 +9,23 @@ async function renderer(ctx) {
 		const filePath = resolve(path.join(Config.get('basedir'), 'templates/index.mustache'));
 		const template = await readFile(filePath, { encoding: 'utf-8' });
 
+		let browser = ""
+		if (ctx.userAgent.isFirefox)
+			browser = "firefox"
+		else if (ctx.userAgent.isChrome)
+			browser = "chrome"
+		else if (ctx.userAgent.isSafari)
+			browser = "safari"
+
+		let mobile = false
+		if (ctx.userAgent.isMobile)
+			mobile = true
+
 		ctx.body = mustache.render(template, {
 			script: "/public/home.js",
+			manifest: "/public/manifest.json",
+			browser: browser,
+			mobile: mobile,
 			styles: [
 				"/public/styles.css",
 			],

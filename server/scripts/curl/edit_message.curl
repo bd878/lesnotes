@@ -1,0 +1,3 @@
+url = https://%STAGE%lesnotes.space/messages/v1/update
+-H "Content-Type: multipart/form-data"
+-F "text=update_%UPDATE%"
