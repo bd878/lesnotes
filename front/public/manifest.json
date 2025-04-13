@@ -1,0 +1,16 @@
+{
+	"short_name": "lesnotes",
+	"name": "Les Notes space",
+	"icons": [
+		{
+			"src": "/public/favicon.ico",
+			"sizes": "16x16",
+			"type": "image/x-icon"
+		}
+	],
+	"permissions": [
+		"clipboardRead",
+		"clipboardWrite",
+		"clipboard-write"
+	]
+}
