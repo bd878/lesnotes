@@ -7,6 +7,7 @@ import {
 	updateMessageActionCreator,
 	resetEditMessageActionCreator,
 	deleteMessageActionCreator,
+	copyMessageActionCreator,
 } from './messagesActionCreators'
 import {
 	selectThreadMessage,
@@ -29,6 +30,7 @@ export {
 	sendMessageActionCreator,
 	fetchMessagesActionCreator,
 	updateMessageActionCreator,
+	copyMessageActionCreator,
 	selectMessages,
 	selectError,
 	selectIsLastPage,

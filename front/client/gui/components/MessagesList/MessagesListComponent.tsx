@@ -18,31 +18,25 @@ function MessagesListComponent(props) {
 		onCopyClick,
 	} = props
 
-	let content = <Tag></Tag>;
-	if (error)
-		content = <Tag>{error}</Tag>
-	else
-		content = (
-			<List el="ul" css={css}>
-				{messages.map(message => (
-					<MessageElement
-						tabIndex="0"
-						key={message.ID}
-						css={liCss}
-						message={message}
-						onOpenThreadClick={onOpenThreadClick}
-						onCopyClick={onCopyClick}
-						onEditClick={onEditClick}
-						onDeleteClick={onDeleteClick}
-					/>
-				))}
-			</List>
-		)
-
 	return (
 		<>
 			{loading ? i18n("loading") : null}
-			{content}
+			{error ? null : (
+				<List el="ul" css={css}>
+					{messages.map(message => (
+						<MessageElement
+							tabIndex="0"
+							key={message.ID}
+							css={liCss}
+							message={message}
+							onOpenThreadClick={onOpenThreadClick}
+							onCopyClick={() => onCopyClick(message)}
+							onEditClick={onEditClick}
+							onDeleteClick={onDeleteClick}
+						/>
+					))}
+				</List>
+			)}
 		</>
 	)
 }

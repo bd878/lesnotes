@@ -3,6 +3,7 @@ import MessagesListComponent from './MessagesListComponent';
 import {
 	setEditMessageActionCreator,
 	deleteMessageActionCreator,
+	copyMessageActionCreator,
 } from '../../features/messages';
 import {
 	setThreadMessageActionCreator,
@@ -19,22 +20,13 @@ function MessagesListContainer(props) {
 		setThreadMessage,
 		setEditMessage,
 		deleteMessage,
+		copyMessage,
 	} = props
 
 	const onOpenThreadClick = useCallback(setThreadMessage, [setThreadMessage])
 	const onDeleteClick = useCallback(deleteMessage, [deleteMessage])
 	const onEditClick = useCallback(setEditMessage, [setEditMessage])
-	const onCopyClick = useCallback((e) => {
-		async function copy(e) {
-			try {
-				await navigator.clipboard.writeText("test")
-			} catch (e) {
-				console.error(e)
-			}
-		}
-
-		copy(e)
-	}, [])
+	const onCopyClick = useCallback(copyMessage, [copyMessage])
 
 	return (
 		<MessagesListComponent
@@ -57,6 +49,7 @@ const mapDispatchToProps = {
 	setThreadMessage: setThreadMessageActionCreator,
 	setEditMessage: setEditMessageActionCreator,
 	deleteMessage: deleteMessageActionCreator,
+	copyMessage: copyMessageActionCreator,
 }
 
 export default connect(

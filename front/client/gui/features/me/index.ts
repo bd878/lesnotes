@@ -11,6 +11,9 @@ import {
 	selectIsLoading,
 	selectIsError,
 	selectWillRedirect,
+	selectBrowser,
+	selectIsMobile,
+	selectIsDesktop,
 } from './userSelectors';
 import {userSaga} from './userSagas';
 
@@ -26,4 +29,7 @@ export {
 	selectIsLoading,
 	selectIsError,
 	selectWillRedirect,
+	selectBrowser,
+	selectIsMobile,
+	selectIsDesktop,
 }

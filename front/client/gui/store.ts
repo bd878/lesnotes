@@ -7,16 +7,30 @@ import createSagaMiddleware from 'redux-saga'
 
 const sagaMiddleware = createSagaMiddleware()
 
-export default createStore(combineReducers({
-	messages: messagesReducer,
-	threads: threadsReducer,
-	me: userReducer,
-}), {}, applyMiddleware(sagaMiddleware))
+export default ({
+	browser = "",
+	isMobile = false,
+	isDesktop = true,
+} = {}) => {
+	const store = createStore(combineReducers({
+		messages: messagesReducer,
+		threads: threadsReducer,
+		me: userReducer,
+	}), {
+		me: {
+			browser,
+			isMobile,
+			isDesktop,
+		},
+	}, applyMiddleware(sagaMiddleware))
 
-sagaMiddleware.run(function* rootSaga() {
-	yield all([
-		threadsSaga(),
-		userSaga(),
-		messagesSaga(),
-	])
-})
+	sagaMiddleware.run(function* rootSaga() {
+		yield all([
+			threadsSaga(),
+			userSaga(),
+			messagesSaga(),
+		])
+	})
+
+	return store
+}

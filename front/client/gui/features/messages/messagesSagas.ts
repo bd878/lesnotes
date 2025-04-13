@@ -4,6 +4,7 @@ import {
 	FETCH_MESSAGES,
 	SEND_MESSAGE,
 	DELETE_MESSAGE,
+	COPY_MESSAGE,
 } from './messagesActions'
 import {
 	messagesFailedActionCreator,
@@ -14,6 +15,7 @@ import {
 } from './messagesActionCreators'
 import * as is from '../../../third_party/is'
 import {selectMessages} from './messagesSelectors';
+import {selectBrowser, selectIsMobile, selectIsDesktop} from '../me'
 import api from '../../../api'
 
 interface FetchMessagesPayload {
@@ -105,11 +107,37 @@ function* deleteMessage({payload}) {
 	}
 }
 
+function* copyMessage({payload}) {
+	try {
+		const browser = yield select(selectBrowser)
+		yield call(async function copy(text, browser) {
+			// TODO: compile front with browser dirrectives?
+			switch (browser) {
+			case "chrome":
+				const result = await navigator.permissions.query({ name: "clipboard-write" })
+				if (result.state === "granted" || result.state === "prompt")
+					await navigator.clipboard.writeText(text)
+				else
+					console.error("clipboard write permission is not granted")
+
+				break
+
+			case "firefox":
+				await navigator.clipboard.writeText(text)
+				break
+			}
+		}, payload.text, browser)
+	} catch (e) {
+		console.error(e)
+	}
+}
+
 function* messagesSaga() {
 	yield takeLatest(DELETE_MESSAGE, deleteMessage)
 	yield takeLatest(UPDATE_MESSAGE, updateMessage)
 	yield takeLatest(FETCH_MESSAGES, fetchMessages)
 	yield takeLatest(SEND_MESSAGE, sendMessage)
+	yield takeLatest(COPY_MESSAGE, copyMessage)
 }
 
 export {messagesSaga}

@@ -20,6 +20,9 @@ const initialState = {
 	loading: false,
 	error: "",
 	willRedirect: true,
+	browser: "",
+	isMobile: false,
+	isDesktop: true,
 }
 
 export function userReducer(userState = initialState, action) {
