@@ -12,9 +12,10 @@ function MessagesListComponent(props) {
 		messages,
 		loading,
 		error,
-		onListItemClick,
+		onOpenThreadClick,
 		onEditClick,
 		onDeleteClick,
+		onCopyClick,
 	} = props
 
 	let content = <Tag></Tag>;
@@ -29,7 +30,8 @@ function MessagesListComponent(props) {
 						key={message.ID}
 						css={liCss}
 						message={message}
-						onClick={onListItemClick}
+						onOpenThreadClick={onOpenThreadClick}
+						onCopyClick={onCopyClick}
 						onEditClick={onEditClick}
 						onDeleteClick={onDeleteClick}
 					/>

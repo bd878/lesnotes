@@ -22,6 +22,7 @@ export default function mapMessageFromProto(message) {
 		createUTCNano = createUTCNano.toLocaleString()
 	}
 
+// TODO: createUTCNano -> dateCreatedString
 	let updateUTCNano = 0
 	if (message.update_utc_nano) {
 		updateUTCNano = new Date(Math.floor(message.update_utc_nano / ns_in_ms))

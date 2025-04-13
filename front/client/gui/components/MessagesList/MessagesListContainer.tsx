@@ -21,9 +21,20 @@ function MessagesListContainer(props) {
 		deleteMessage,
 	} = props
 
-	const onListItemClick = useCallback(setThreadMessage, [setThreadMessage])
+	const onOpenThreadClick = useCallback(setThreadMessage, [setThreadMessage])
 	const onDeleteClick = useCallback(deleteMessage, [deleteMessage])
 	const onEditClick = useCallback(setEditMessage, [setEditMessage])
+	const onCopyClick = useCallback((e) => {
+		async function copy(e) {
+			try {
+				await navigator.clipboard.writeText("test")
+			} catch (e) {
+				console.error(e)
+			}
+		}
+
+		copy(e)
+	}, [])
 
 	return (
 		<MessagesListComponent
@@ -32,9 +43,10 @@ function MessagesListContainer(props) {
 			messages={messages}
 			loading={loading}
 			error={error}
-			onListItemClick={onListItemClick}
+			onOpenThreadClick={onOpenThreadClick}
 			onEditClick={onEditClick}
 			onDeleteClick={onDeleteClick}
+			onCopyClick={onCopyClick}
 		/>
 	)
 }
