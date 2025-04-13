@@ -4,6 +4,7 @@ import Tag from '../Tag';
 import AttachIcon from '../../icons/AttachIcon';
 import CheckmarkIcon from '../../icons/CheckmarkIcon';
 import CrossIcon from '../../icons/CrossIcon';
+import * as is from '../../../third_party/is'
 import i18n from '../../../i18n';
 
 const Form = lazy(() => import("../../components/Form"));
@@ -14,9 +15,11 @@ function MessageFormComponent(props) {
 	const {
 		fileRef,
 		text,
+		file,
 		onMessageChange,
 		onFileChange,
 		onSubmit,
+		onFileClick,
 		shouldShowCancelButton,
 		onCancel,
 	} = props
@@ -33,11 +36,18 @@ function MessageFormComponent(props) {
 					value={text}
 					onChange={onMessageChange}
 				/>
-				<Tag css="p-2 flex flex-row justify-between">
-					<Tag css="flex">
-						<Tag tabIndex="0" css="cursor-pointer inline-block" el="label" htmlFor="file">
-							<AttachIcon width="24" height="24" />
-						</Tag>
+
+				<Tag css="py-2 pr-2 pl-1 flex flex-row justify-between">
+					<Tag css="group flex overflow-hidden whitespace-nowrap text-ellipsis mr-2">
+						<Button
+							type="button"
+							tabIndex="0"
+							content={
+								<AttachIcon width="24" height="24" />
+							}
+							css="m-1 cursor-pointer"
+							onClick={onFileClick}
+						/>
 						<FormField
 							ref={fileRef}
 							css="hidden"
@@ -47,9 +57,14 @@ function MessageFormComponent(props) {
 							type="file"
 							onChange={onFileChange}
 						/>
+						{is.notUndef(file) ? (
+							<Tag css="w-full flex items-center text-sm italic overflow-hidden">
+								<Tag css="px-2 overflow-hidden whitespace-nowrap text-ellipsis">{file.name}</Tag>
+							</Tag>
+						) : null}
 					</Tag>
 
-					<Tag css="flex">
+					<Tag css="flex items-center">
 						{shouldShowCancelButton && onCancel ? (
 							<Button
 								type="button"

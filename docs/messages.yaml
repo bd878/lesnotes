@@ -318,9 +318,8 @@ components:
         file_id:
           type: integer
           example: 1234
-        file_name:
-          type: string
-          example: "image.jpg"
+        file:
+          $ref: '#/components/schemas/file'
         text:
           type: string
           example: "message text"
@@ -369,6 +368,16 @@ components:
         description:
           type: string
           default: ""
+
+    file:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "file"
 
     message:
       type: object

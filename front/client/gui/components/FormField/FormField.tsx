@@ -5,6 +5,7 @@ const FormField = forwardRef((props, ref) => {
 	return (
 		<Tag
 			ref={ref}
+			tabIndex={props.tabIndex}
 			id={props.id}
 			css={props.css}
 			el={props.el}

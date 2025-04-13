@@ -202,20 +202,39 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 		return
 	}
 
+	message := &model.Message{
+		ID:            resp.ID,
+		ThreadID:      threadID,
+		FileID:        fileID,
+		Text:          text,
+		UpdateUTCNano: resp.UpdateUTCNano,
+		CreateUTCNano: resp.CreateUTCNano,
+		Private:       resp.Private,
+	}
+
+	if fileID != 0 {
+		fileRes, err := h.filesGateway.ReadFile(req.Context(), log, user.ID, fileID)
+		if err != nil {
+			log.Errorw("failed to read file for a message", "user_id", user.ID, "file_id", fileID, "message_id", resp.ID, "error", err)
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+				Status: "error",
+				Description: "failed to read a file",
+			})
+			return
+		}
+		message.File = &filesmodel.File{
+			Name: fileRes.Name,
+			ID: fileID,
+		}
+	}
+
 	json.NewEncoder(w).Encode(model.NewMessageServerResponse{
 		ServerResponse: servermodel.ServerResponse{
 			Status: "ok",
 			Description: "accepted",
 		},
-		Message: &model.Message{
-			ID:            resp.ID,
-			ThreadID:      threadID,
-			FileID:        fileID,
-			Text:          text,
-			UpdateUTCNano: resp.UpdateUTCNano,
-			CreateUTCNano: resp.CreateUTCNano,
-			Private:       resp.Private,
-		},
+		Message: message,
 	})
 }
 
