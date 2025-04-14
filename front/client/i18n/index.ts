@@ -32,6 +32,8 @@ const i18n = {
 		cannot_parse_response: "Cannot parse the response",
 		delete_message: "Delete",
 		edit_message: "Edit",
+		open_thread: "Open thread",
+		close_thread: "Close",
 		close_button_text: "Close",
 	},
 	"ru": {
@@ -67,6 +69,8 @@ const i18n = {
 		cannot_parse_response: "Не получается разобрать ответ от сервера",
 		delete_message: "Удалить",
 		edit_message: "Изменить",
+		open_thread: "Комментарии",
+		close_thread: "Скрыть",
 		close_button_text: "Закрыть",
 	}
 }

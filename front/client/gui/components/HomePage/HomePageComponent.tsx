@@ -2,8 +2,10 @@ import React, {lazy} from 'react';
 import i18n from '../../../i18n';
 import Button from '../Button';
 import Tag from '../Tag';
+import * as is from '../../../third_party/is';
 
 const MessagesList = lazy(() => import("../MessagesList"));
+const MessageElement = lazy(() => import("../MessageElement"))
 const MessageForm = lazy(() => import("../MessageForm"));
 const MainMessage = lazy(() => import("../MainMessage"));
 
@@ -57,7 +59,6 @@ function HomePageComponent(props) {
 					>
 						<MessagesList
 							css="w-full"
-							liCss="mb-2"
 							error={error}
 							messages={messages}
 							loading={loading}
@@ -80,7 +81,7 @@ function HomePageComponent(props) {
 						<Button
 							type="button"
 							tabIndex="0"
-							content={i18n("close_button_text")}
+							content={i18n("close_button_text") + " X"}
 							onClick={closeThread}
 							css="btn mb-2"
 						/>
@@ -93,7 +94,7 @@ function HomePageComponent(props) {
 							disabled={isAllThreadMessagesLoaded}
 						/>
 
-						<Tag css="grow w-full h-full overflow-x-hidden overflow-y-scroll">
+						<Tag css="grow relative w-full h-full overflow-x-hidden overflow-y-scroll">
 							<MessagesList messages={threadMessages} />
 						</Tag>
 

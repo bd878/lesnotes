@@ -60,9 +60,10 @@ interface SetThreadMessagePayload {
 
 function* setThreadMessage({payload}: {payload: SetThreadMessagePayload}) {
 	const threadID = yield select(selectThreadID)
-	if (threadID !== payload.ID) {
-		yield put(resetActionCreator())
-	}
+	yield put(resetActionCreator())
+	if (threadID === payload.ID)
+		return
+
 	yield put({
 		type: __SET_THREAD_MESSAGE,
 		payload,
