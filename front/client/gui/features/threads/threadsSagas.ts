@@ -10,6 +10,7 @@ import {
 	resetActionCreator,
 } from './threadsActionCreators'
 import api from '../../../api'
+import * as is from '../../../third_party/is'
 
 interface FetchMessagesPayload {
 	limit:  number;
@@ -24,7 +25,7 @@ function* fetchMessages({payload}: {payload: FetchMessagesPayload}) {
 			{limit: payload.limit, offset: payload.offset, order: payload.order, threadID: threadID})
 
 		response.messages.reverse();
-		if (response.error != "")
+		if (is.notEmpty(response.error))
 			yield put(failedActionCreator(response.error))
 		else
 			yield put(fetchMessagesSucceededActionCreator(response))
@@ -44,7 +45,7 @@ function* sendMessage({payload}: {payload: SendMessagePayload}) {
 		const response = yield call(api.sendMessage,
 				{message: payload.message, file: payload.file, threadID: threadID})
 
-		if (response.error != "")
+		if (is.notEmpty(response.error))
 			yield put(failedActionCreator(response.error))
 		else
 			yield put(sendMessageSucceededActionCreator(response.message))

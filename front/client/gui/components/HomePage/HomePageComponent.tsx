@@ -23,14 +23,19 @@ function HomePageComponent(props) {
 		updateMessage,
 		resetEditMessage,
 		messageForEdit,
-
+		checkMessageThreadOpen,
 		shouldShowThreadsPanel,
+		threadID,
 		threadMessage,
 		threadMessages,
 		onLoadMoreThreadMessagesClick,
 		isAllThreadMessagesLoaded,
 		closeThread,
 		sendThreadMessage,
+		onToggleThreadClick,
+		onEditClick,
+		onCopyClick,
+		onDeleteClick,
 	} = props;
 
 	return (
@@ -62,6 +67,12 @@ function HomePageComponent(props) {
 							error={error}
 							messages={messages}
 							loading={loading}
+							isAnyThreadOpen={is.notEmpty(threadID)}
+							checkMyThreadOpen={checkMessageThreadOpen}
+							onDeleteClick={onDeleteClick}
+							onEditClick={onEditClick}
+							onToggleThreadClick={onToggleThreadClick}
+							onCopyClick={onCopyClick}
 						/>
 					</Tag>
 

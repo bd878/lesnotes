@@ -9,10 +9,12 @@ const MessageElement = lazy(() => import("../../components/MessageElement"))
 function MessagesListComponent(props) {
 	const {
 		css,
+		liCss,
 		messages,
 		loading,
 		error,
-		threadID,
+		checkMyThreadOpen,
+		isAnyThreadOpen,
 		onToggleThreadClick,
 		onEditClick,
 		onDeleteClick,
@@ -24,25 +26,36 @@ function MessagesListComponent(props) {
 			{loading ? i18n("loading") : null}
 			{error ? null : (
 				<List el="ul" css={css}>
-					{messages.map(message => (
-						<Tag
-							el="li"
-							tabIndex="0"
-							/* TODO: message.isHovered get computitional property */
-							css={((is.notEmpty(threadID) && threadID !== message.ID) ? "opacity-50 " : "") + "mb-2 px-2 py-1 mx-1 bg-gray-100 hover:bg-gray-200 flex flex-row justify-between"}
-							key={`tag_${message.ID}`}
-						>
-							<MessageElement
-								key={message.ID}
-								message={message}
-								isThreadOpen={is.notEmpty(threadID) && threadID === message.ID}
-								onToggleThreadClick={() => onToggleThreadClick(message)}
-								onCopyClick={() => onCopyClick(message)}
-								onEditClick={() => onEditClick(message)}
-								onDeleteClick={() => onDeleteClick(message)}
-							/>
-						</Tag>
-					))}
+					{messages.map(message => {
+						let isMyThreadOpen = is.func(checkMyThreadOpen) ? checkMyThreadOpen(message.ID) : false
+
+						return (
+							<Tag
+								el="li"
+								tabIndex="0"
+								/* TODO: message.isHovered get computitional property */
+								css={
+									(liCss || "")
+									+ " "
+									+ (isAnyThreadOpen ? isMyThreadOpen ? "" : "opacity-50" : "")
+									+ " "
+									+ "mb-2 px-2 py-1 mx-1 bg-gray-100 hover:bg-gray-200 flex flex-row justify-between"
+								}
+								key={`tag_${message.ID}`}
+							>
+								<MessageElement
+									key={message.ID}
+									message={message}
+									isThreadOpen={isMyThreadOpen}
+									onToggleThreadClick={() => onToggleThreadClick(message)}
+									onCopyClick={() => onCopyClick(message)}
+									onEditClick={() => onEditClick(message)}
+									onDeleteClick={() => onDeleteClick(message)}
+								/>
+							</Tag>
+						)
+					}
+				)}
 				</List>
 			)}
 		</>

@@ -5,6 +5,7 @@ import CrayonIcon from '../../icons/CrayonIcon'
 import CopyIcon from '../../icons/CopyIcon'
 import * as is from '../../../third_party/is'
 import {getFileDownloadUrl} from "../../../api";
+import {equal} from '../../../utils';
 
 const Button = lazy(() => import("../../components/Button"));
 
@@ -25,13 +26,13 @@ function MessageElementComponent(props) {
 			<Tag css="flex flex-col overflow-hidden w-full">
 				<Tag css="mb-1" key={`item_${message.ID}`}>
 					<Tag el="details" css="m-1 marker:text-xl">
-						<Tag el="summary" css="text-sm italic overflow-hidden whitespace-nowrap text-ellipsis">
+						<Tag el="summary" css="cursor-pointer text-sm italic overflow-hidden whitespace-nowrap text-ellipsis">
 							<Tag el="span" css="px-2 py-1">{message.text}</Tag>
 						</Tag>
 
 						<Tag css="mt-2">
 							{is.trueVal(message.createUTCNano) ? <Tag><Tag el="span" css="font-bold text-sm">{i18n("created_at") + ": "}</Tag>{message.createUTCNano}</Tag> : null}
-							{message.updateUTCNano !== message.createUTCNano ? <Tag><Tag el="span" css="font-bold text-sm">{i18n("updated_at") + ": "}</Tag>{message.updateUTCNano}</Tag> : null}
+							{equal(message.updateUTCNano).not(message.createUTCNano) ? <Tag><Tag el="span" css="font-bold text-sm">{i18n("updated_at") + ": "}</Tag>{message.updateUTCNano}</Tag> : null}
 							{is.trueVal(message.fileID) ? (
 								<Tag>
 									<Tag el="span" css="font-bold text-sm">{i18n("attachments") + ": "}</Tag>

@@ -1,6 +1,8 @@
 import React, {useRef, useEffect, useCallback} from 'react';
 import HomePageComponent from './HomePageComponent';
 import {connect} from '../../../third_party/react-redux';
+import * as is from '../../../third_party/is';
+import {equal} from '../../../utils';
 import {
 	LIMIT_LOAD_BY,
 	LOAD_ORDER,
@@ -17,6 +19,9 @@ import {
 	selectMessageForEdit,
 	selectIsEditMode,
 	resetEditMessageActionCreator,
+	setEditMessageActionCreator,
+	deleteMessageActionCreator,
+	copyMessageActionCreator,
 } from '../../features/messages';
 import {
 	fetchMessagesActionCreator as fetchThreadMessagesActionCreator,
@@ -25,6 +30,7 @@ import {
 	selectMessages as selectThreadMessages,
 	selectThreadMessage,
 	selectThreadID,
+	setThreadMessageActionCreator,
 } from '../../features/threads';
 import {selectUser, logoutActionCreator} from '../../features/me';
 
@@ -42,6 +48,10 @@ function HomePageContainer(props) {
 		updateMessage,
 		resetEditMessage,
 		messageForEdit,
+		setThreadMessage,
+		setEditMessage,
+		deleteMessage,
+		copyMessage,
 
 		threadMessage,
 		threadMessages,
@@ -54,7 +64,7 @@ function HomePageContainer(props) {
 	const listRef = useRef(null);
 
 	const scrollToTop = useCallback(() => {
-		if (listRef.current != null)
+		if (is.notEmpty(listRef.current))
 			listRef.current.scrollTo(0, listRef.current.scrollHeight);
 	}, [listRef]);
 
@@ -63,24 +73,29 @@ function HomePageContainer(props) {
 	}, [fetchMessages]);
 
 	useEffect(() => {
-		if (threadID !== 0)
+		if (is.notEmpty(threadID))
 			fetchThreadMessages(LIMIT_LOAD_BY, 0, LOAD_ORDER)
 	}, [threadID])
 
 	const loadMore = useCallback(() => {
-		if (listRef.current != null && !isLoading && !isLastPage)
+		if (is.notEmpty(listRef.current) && !isLoading && !isLastPage)
 			fetchMessages(LIMIT_LOAD_BY, loadOffset, LOAD_ORDER)
 	}, [listRef.current, fetchMessages,
 		loadOffset, isLoading, isLastPage]);
 
 	const onListScroll = useCallback(() => {
-		if (listRef.current != null && listRef.current.scrollTop == 0)
+		if (is.notEmpty(listRef.current) && is.notEmpty(listRef.current.scrollTop))
 			loadMore()
 	}, [listRef.current, loadMore]);
 
-	const onExitClick = useCallback(() => {logout()}, [logout]);
+	const onExitClick = useCallback(logout, [logout]);
 
 	const onCloseThreadClick = useCallback(resetThread, [resetThread])
+
+	const onToggleThreadClick = useCallback(setThreadMessage, [setThreadMessage])
+	const onDeleteClick = useCallback(deleteMessage, [deleteMessage])
+	const onEditClick = useCallback(setEditMessage, [setEditMessage])
+	const onCopyClick = useCallback(copyMessage, [copyMessage])
 
 	return (
 		<HomePageComponent
@@ -96,14 +111,19 @@ function HomePageContainer(props) {
 			updateMessage={updateMessage}
 			resetEditMessage={resetEditMessage}
 			messageForEdit={messageForEdit}
-
 			shouldShowThreadsPanel={threadID != 0}
+			threadID={threadID}
+			checkMessageThreadOpen={equal(threadID)}
 			onLoadMoreThreadMessagesClick={() => {}}
 			isAllThreadMessagesLoaded={false}
 			threadMessage={threadMessage}
 			threadMessages={threadMessages}
 			closeThread={onCloseThreadClick}
 			sendThreadMessage={sendThreadMessage}
+			onToggleThreadClick={onToggleThreadClick}
+			onDeleteClick={onDeleteClick}
+			onEditClick={onEditClick}
+			onCopyClick={onCopyClick}
 		/>
 	)
 }
@@ -129,6 +149,10 @@ const mapDispatchToProps = {
 	sendMessage: sendMessageActionCreator,
 	updateMessage: updateMessageActionCreator,
 	resetEditMessage: resetEditMessageActionCreator,
+	deleteMessage: deleteMessageActionCreator,
+	copyMessage: copyMessageActionCreator,
+	setEditMessage: setEditMessageActionCreator,
+	setThreadMessage: setThreadMessageActionCreator,
 
 	resetThread: resetThreadActionCreator,
 	fetchThreadMessages: fetchThreadMessagesActionCreator,
