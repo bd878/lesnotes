@@ -1,28 +1,29 @@
 import React, {lazy} from 'react';
 import i18n from '../../../i18n';
-import Button from '../Button';
 import Tag from '../Tag';
 import * as is from '../../../third_party/is';
 
-const MessagesList = lazy(() => import("../MessagesList"));
-const MessageElement = lazy(() => import("../MessageElement"))
-const MessageForm = lazy(() => import("../MessageForm"));
-const MainMessage = lazy(() => import("../MainMessage"));
+const Thread = lazy(() => import("../Thread"));
 
 function HomePageComponent(props) {
 	const {
 		listRef,
+		threadListRef,
 		onExitClick,
 		onListScroll,
+		onThreadListScroll,
 		onLoadMoreClick,
 		isAllLoaded,
 		error,
+		threadError,
+		isThreadLoading,
 		messages,
 		loading,
 		sendMessage,
 		updateMessage,
 		resetEditMessage,
 		messageForEdit,
+		threadMessageForEdit,
 		checkMessageThreadOpen,
 		shouldShowThreadsPanel,
 		threadID,
@@ -36,90 +37,35 @@ function HomePageComponent(props) {
 		onEditClick,
 		onCopyClick,
 		onDeleteClick,
+		updateThreadMessage,
+		resetEditThreadMessage,
 	} = props;
 
 	return (
 		<>
 			<Tag css="flex flex-row grow max-h-full pb-8">
-				<Tag css="flex flex-col items-start w-md w-full">
-					<Button
-						content={"< " + i18n("logout")}
-						onClick={onExitClick}
-						css="btn mb-2"
-					/>
-
-					<Button
-						tabIndex="0"
-						content={i18n("load_more")}
-						css="disabled:opacity-30 btn w-full text-center mb-5"
-						onClick={onLoadMoreClick}
-						disabled={isAllLoaded}
-					/>
-
-					<Tag
-						el="div"
-						ref={listRef}
-						css="grow w-full h-full overflow-x-hidden overflow-y-scroll"
-						onScroll={onListScroll}
-					>
-						<MessagesList
-							css="w-full"
-							error={error}
-							messages={messages}
-							loading={loading}
-							isAnyThreadOpen={is.notEmpty(threadID)}
-							checkMyThreadOpen={checkMessageThreadOpen}
-							onDeleteClick={onDeleteClick}
-							onEditClick={onEditClick}
-							onToggleThreadClick={onToggleThreadClick}
-							onCopyClick={onCopyClick}
-						/>
-					</Tag>
-
-					<Tag css="w-full mt-5">
-						<MessageForm
-							send={sendMessage}
-							update={updateMessage}
-							reset={resetEditMessage}
-							resetEdit={resetEditMessage}
-							messageForEdit={messageForEdit}
-						/>
-					</Tag>
-				</Tag>
-
-				{shouldShowThreadsPanel ? (
-					<Tag css="flex flex-col items-start ml-4 items-start w-md w-full">
-						<Button
-							type="button"
-							tabIndex="0"
-							content={i18n("close_button_text") + " X"}
-							onClick={closeThread}
-							css="btn mb-2"
-						/>
-
-						<Button
-							tabIndex="0"
-							content={i18n("load_more")}
-							css="disabled:opacity-30 btn w-full text-center mb-5"
-							onClick={onLoadMoreThreadMessagesClick}
-							disabled={isAllThreadMessagesLoaded}
-						/>
-
-						<Tag css="grow relative w-full h-full overflow-x-hidden overflow-y-scroll">
-							<MessagesList messages={threadMessages} />
-						</Tag>
-
-						<Tag css="w-full mt-5">
-							<MessageForm
-								messageForEdit={{}}
-								reset={() => {}}
-								send={sendThreadMessage}
-								update={() => {}}
-								edit={() => {}}
-							/>
-						</Tag>
-					</Tag>
-				) : null}
+				<Thread
+					ref={listRef}
+					destroyContent={"< " + i18n("logout")}
+					loadMoreContent={i18n("load_more")}
+					onDestroyClick={onExitClick}
+					onLoadMoreClick={onLoadMoreClick}
+					isAllLoaded={isAllLoaded}
+					onScroll={onListScroll}
+					error={error}
+					loading={loading}
+					messages={messages}
+					isAnyOpen={is.notEmpty(threadID)}
+					checkMyThreadOpen={checkMessageThreadOpen}
+					onDeleteClick={onDeleteClick}
+					onEditClick={onEditClick}
+					onToggleThreadClick={onToggleThreadClick}
+					onCopyClick={onCopyClick}
+					send={sendMessage}
+					update={updateMessage}
+					reset={resetEditMessage}
+					messageForEdit={messageForEdit}
+				/>
 			</Tag>
 		</>
 	)

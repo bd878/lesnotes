@@ -28,6 +28,8 @@ import {
 	sendMessageActionCreator as sendThreadMessageActionCreator,
 	resetActionCreator as resetThreadActionCreator,
 	selectMessages as selectThreadMessages,
+	selectIsLoading as selectThreadLoading,
+	selectError as selectThreadError,
 	selectThreadMessage,
 	selectThreadID,
 	setThreadMessageActionCreator,
@@ -39,9 +41,11 @@ function HomePageContainer(props) {
 		messages,
 		user,
 		error,
+		threadError,
 		logout,
 		isLastPage,
 		isLoading,
+		isThreadLoading,
 		loadOffset,
 		fetchMessages,
 		sendMessage,
@@ -62,6 +66,7 @@ function HomePageContainer(props) {
 	} = props
 
 	const listRef = useRef(null);
+	const threadListRef = useRef(null);
 
 	const scrollToTop = useCallback(() => {
 		if (is.notEmpty(listRef.current))
@@ -88,6 +93,12 @@ function HomePageContainer(props) {
 			loadMore()
 	}, [listRef.current, loadMore]);
 
+	const onThreadListScroll = useCallback(() => {}, [])
+
+	const onThreadLoadMore = useCallback(() => {
+
+	}, [])
+
 	const onExitClick = useCallback(logout, [logout]);
 
 	const onCloseThreadClick = useCallback(resetThread, [resetThread])
@@ -100,13 +111,17 @@ function HomePageContainer(props) {
 	return (
 		<HomePageComponent
 			listRef={listRef}
+			threadListRef={threadListRef}
 			onExitClick={onExitClick}
 			onListScroll={onListScroll}
+			onThreadListScroll={onThreadListScroll}
 			onLoadMoreClick={loadMore}
 			isAllLoaded={isLastPage}
 			error={error}
 			messages={messages}
 			loading={isLoading}
+			threadLoading={isThreadLoading}
+			threadError={threadError}
 			sendMessage={sendMessage}
 			updateMessage={updateMessage}
 			resetEditMessage={resetEditMessage}
@@ -132,6 +147,8 @@ const mapStateToProps = state => ({
 	messages: selectMessages(state),
 	isLoading: selectIsLoading(state),
 	isLastPage: selectIsLastPage(state),
+	isThreadLoading: selectThreadLoading(state),
+	threadError: selectThreadError(state),
 	loadOffset: selectLoadOffset(state),
 	error: selectError(state),
 	user: selectUser(state),
