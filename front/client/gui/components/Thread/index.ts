@@ -1,1 +1,1 @@
-export {default} from './ThreadComponent.tsx'
+export {default} from './ThreadContainer'

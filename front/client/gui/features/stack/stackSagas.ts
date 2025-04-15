@@ -5,16 +5,16 @@ import {
 	SEND_MESSAGE,
 	DELETE_MESSAGE,
 	COPY_MESSAGE,
-} from './messagesActions'
+} from './stackActions'
 import {
 	messagesFailedActionCreator,
 	fetchMessagesSucceededActionCreator,
 	sendMessageSucceededActionCreator,
 	updateMessageSucceededActionCreator,
 	deleteMessageSucceededActionCreator,
-} from './messagesActionCreators'
+} from './stackActionCreators'
 import * as is from '../../../third_party/is'
-import {selectMessages} from './messagesSelectors';
+import {selectMessages} from './stackSelectors';
 import {selectBrowser, selectIsMobile, selectIsDesktop} from '../me'
 import api from '../../../api'
 
@@ -24,33 +24,28 @@ interface FetchMessagesPayload {
 	order:  number;
 }
 
-function* fetchMessages({payload}: {payload: FetchMessagesPayload}) {
+function* fetchMessages({index, payload}: {payload: FetchMessagesPayload}) {
 	try {
 		const response = yield call(api.loadMessages,
 			{limit: payload.limit, offset: payload.offset, order: payload.order})
 
 		response.messages.reverse();
 		if (response.error != "")
-			yield put(messagesFailedActionCreator(response.error))
+			yield put(messagesFailedActionCreator(index)(response.error))
 		else
-			yield put(fetchMessagesSucceededActionCreator(response))
+			yield put(fetchMessagesSucceededActionCreator(index)(response))
 	} catch (e) {
-		yield put(messagesFailedActionCreator(e.message))
+		yield put(messagesFailedActionCreator(index)(e.message))
 	}
 }
 
-interface SendMessagePayload {
-	text: any;
-	file?: any;
-}
-
-function* sendMessage({payload}: {payload: SendMessagePayload}) {
+function* sendMessage({index, payload}) {
 	try {
 		let response
 		if (is.notUndef(payload.file)) {
 			response = yield call(api.uploadFile, payload.file)
 			if (response.error != "") {
-				yield put(messagesFailedActionCreator(response.error))
+				yield put(messagesFailedActionCreator(index)(response.error))
 				return
 			}
 
@@ -60,19 +55,19 @@ function* sendMessage({payload}: {payload: SendMessagePayload}) {
 		}
 
 		if (response.error != "")
-			yield put(messagesFailedActionCreator(response.error))
+			yield put(messagesFailedActionCreator(index)(response.error))
 		else
-			yield put(sendMessageSucceededActionCreator(response.message))
+			yield put(sendMessageSucceededActionCreator(index)(response.message))
 	} catch (e) {
-		yield put(messagesFailedActionCreator(e.message))
+		yield put(messagesFailedActionCreator(index)(e.message))
 	}
 }
 
-function* updateMessage({payload}) {
+function* updateMessage({index, payload}) {
 	try {
 		const response = yield call(api.updateMessage, payload.ID, payload.text)
 
-		const messages = yield select(selectMessages)
+		const messages = yield select(selectMessages(index))
 		let idx = messages.findIndex(({ID}) => ID === payload.ID)
 		if (idx !== -1)
 			messages[idx] = {
@@ -83,27 +78,27 @@ function* updateMessage({payload}) {
 			}
 
 		if (response.error !== "")
-			yield put(messagesFailedActionCreator(response.error))
+			yield put(messagesFailedActionCreator(index)(response.error))
 		else
-			yield put(updateMessageSucceededActionCreator(messages))
+			yield put(updateMessageSucceededActionCreator(index)(messages))
 	} catch (e) {
-		yield put(messagesFailedActionCreator(e.message))
+		yield put(messagesFailedActionCreator(index)(e.message))
 	}
 }
 
-function* deleteMessage({payload}) {
+function* deleteMessage({index, payload}) {
 	try {
 		const response = yield call(api.deleteMessage, payload.ID)
 
-		let messages = yield select(selectMessages)
+		let messages = yield select(selectMessages(index))
 		messages = messages.filter(({ID}) => ID !== payload.ID)
 
 		if (response.error !== "")
-			yield put(messagesFailedActionCreator(response.error))
+			yield put(messagesFailedActionCreator(index)(response.error))
 		else
-			yield put(deleteMessageSucceededActionCreator(messages))
+			yield put(deleteMessageSucceededActionCreator(index)(messages))
 	} catch (e) {
-		yield put(messagesFailedActionCreator(e.message))
+		yield put(messagesFailedActionCreator(index)(e.message))
 	}
 }
 
@@ -132,7 +127,7 @@ function* copyMessage({payload}) {
 	}
 }
 
-function* messagesSaga() {
+function* stackSaga() {
 	yield takeLatest(DELETE_MESSAGE, deleteMessage)
 	yield takeLatest(UPDATE_MESSAGE, updateMessage)
 	yield takeLatest(FETCH_MESSAGES, fetchMessages)
@@ -140,4 +135,4 @@ function* messagesSaga() {
 	yield takeLatest(COPY_MESSAGE, copyMessage)
 }
 
-export {messagesSaga}
+export {stackSaga}

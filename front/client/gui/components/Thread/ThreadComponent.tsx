@@ -1,5 +1,4 @@
 import React, {lazy, forwardRef} from 'react';
-import i18n from '../../../i18n';
 import Button from '../Button';
 import Tag from '../Tag';
 import * as is from '../../../third_party/is';
