@@ -1,0 +1,3 @@
+url = https://%STAGE%lesnotes.space/messages/v1/send?thread_id=%THREAD_ID%
+-H "Content-Type: multipart/form-data; boundary=\"BOUNDARY\""
+--data-binary @curl/message_form.txt
