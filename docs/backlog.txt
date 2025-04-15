@@ -1,1 +1,3 @@
 TODOS:
+1. Message List send thread_id and public status
+2. Read public message : both limit/offset params given, but now given ???
