@@ -30,7 +30,7 @@ function* fetchMessages({index, payload}: {payload: FetchMessagesPayload}) {
 			{limit: payload.limit, offset: payload.offset, order: payload.order})
 
 		response.messages.reverse();
-		if (response.error != "")
+		if (is.notEmpty(response.error))
 			yield put(messagesFailedActionCreator(index)(response.error))
 		else
 			yield put(fetchMessagesSucceededActionCreator(index)(response))
@@ -44,7 +44,7 @@ function* sendMessage({index, payload}) {
 		let response
 		if (is.notUndef(payload.file)) {
 			response = yield call(api.uploadFile, payload.file)
-			if (response.error != "") {
+			if (is.notEmpty(response.error)) {
 				yield put(messagesFailedActionCreator(index)(response.error))
 				return
 			}
@@ -54,7 +54,7 @@ function* sendMessage({index, payload}) {
 			response = yield call(api.sendMessage, {text: payload.text})
 		}
 
-		if (response.error != "")
+		if (is.notEmpty(response.error))
 			yield put(messagesFailedActionCreator(index)(response.error))
 		else
 			yield put(sendMessageSucceededActionCreator(index)(response.message))
@@ -77,7 +77,7 @@ function* updateMessage({index, payload}) {
 				updateUTCNano: response.updateUTCNano,
 			}
 
-		if (response.error !== "")
+		if (is.notEmpty(response.error))
 			yield put(messagesFailedActionCreator(index)(response.error))
 		else
 			yield put(updateMessageSucceededActionCreator(index)(messages))
@@ -93,7 +93,7 @@ function* deleteMessage({index, payload}) {
 		let messages = yield select(selectMessages(index))
 		messages = messages.filter(({ID}) => ID !== payload.ID)
 
-		if (response.error !== "")
+		if (is.notEmpty(response.error))
 			yield put(messagesFailedActionCreator(index)(response.error))
 		else
 			yield put(deleteMessageSucceededActionCreator(index)(messages))

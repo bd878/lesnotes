@@ -156,6 +156,9 @@ export function stackReducer(stackState = initialState, action) {
 		} else {
 			console.error("cannot find elem by index", action.index, action.type)
 		}
+		return {
+			...stackState
+		}
 	}
 
 	/*init*/

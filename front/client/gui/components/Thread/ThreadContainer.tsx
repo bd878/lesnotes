@@ -103,14 +103,14 @@ const mapStateToProps = (state, {index}) => ({
 	isEditMode: selectIsEditMode(index)(state),
 })
 
-const mapDispatchToProps = (_, {index}) => ({
-	fetchMessages: fetchMessagesActionCreator(index),
-	sendMessage: sendMessageActionCreator(index),
-	updateMessage: updateMessageActionCreator(index),
-	resetEditMessage: resetEditMessageActionCreator(index),
-	deleteMessage: deleteMessageActionCreator(index),
-	copyMessage: copyMessageActionCreator(index),
-	setEditMessage: setEditMessageActionCreator(index),
+const mapDispatchToProps = (dispatch, {index}) => ({
+	fetchMessages: payload => dispatch(fetchMessagesActionCreator(index)(payload)),
+	sendMessage: payload => dispatch(sendMessageActionCreator(index)(payload)),
+	updateMessage: payload => dispatch(updateMessageActionCreator(index)(payload)),
+	resetEditMessage: payload => dispatch(resetEditMessageActionCreator(index)(payload)),
+	deleteMessage: payload => dispatch(deleteMessageActionCreator(index)(payload)),
+	copyMessage: payload => dispatch(copyMessageActionCreator(index)(payload)),
+	setEditMessage: payload => dispatch(setEditMessageActionCreator(index)(payload)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ThreadContainer)
