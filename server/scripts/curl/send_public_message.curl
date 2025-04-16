@@ -1,3 +1,0 @@
-url = https://%STAGE%lesnotes.space/messages/v1/send?public=1
--H "Content-Type: multipart/form-data; boundary=\"BOUNDARY\""
---data-binary @curl/message_form.txt

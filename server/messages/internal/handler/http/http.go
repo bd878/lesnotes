@@ -128,7 +128,7 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 		threadID = int32(threadid)
 	}
 
-	if values.Get("public") != "" {
+	if values.Has("public") {
 		public, err := strconv.Atoi(values.Get("public"))
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -147,6 +147,8 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 		} else {
 			private = true
 		}
+	} else {
+		private = true
 	}
 
 	if hasFile {

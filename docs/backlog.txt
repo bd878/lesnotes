@@ -1,5 +1,5 @@
 TODOS:
-1. Message List send thread_id and public status
-2. Read public message : both limit/offset params given, but now given ???
+- 1. Message List send thread_id and public status
+- 2. Read public message : both limit/offset params given, but now given ???
 3. Can send a public message with thread_id that do not exists
-4. Upgrade to protoc-gen-go 1.36 and protoc 3.12.4
+- 4. Upgrade to protoc-gen-go 1.36 and protoc 3.12.4
