@@ -43,7 +43,7 @@ func New(dbFilePath string) *Repository {
 	selectStmt := utils.Must(pool.Prepare(`
 SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id, private
 FROM messages
-WHERE id = :id AND user_id IN (:usersList)
+WHERE id = :id AND (user_id IN :usersList OR private = 0)
 ;`,
 	))
 
@@ -466,7 +466,7 @@ func (r *Repository) Read(ctx context.Context, log *logger.Logger, params *model
 		list[i] = strconv.Itoa(int(id))
 	}
 
-	err := r.selectStmt.QueryRowContext(ctx, sql.Named("id", params.ID), sql.Named("usersList", strings.Join(list, ", "))).Scan(
+	err := r.selectStmt.QueryRowContext(ctx, sql.Named("id", params.ID), sql.Named("usersList", "(" + strings.Join(list, ", ") + ")")).Scan(
 		&_id, &userId, &threadIdCol, &createUtcNano, &updateUtcNano, &text, &fileIdCol, &privateCol)
 	if err != nil {
 		log.Errorln("failed to select one message")
