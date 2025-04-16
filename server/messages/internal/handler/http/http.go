@@ -16,8 +16,6 @@ import (
 	"github.com/bd878/gallery/server/logger"
 )
 
-const defaultLimit int = 10
-
 type Controller interface {
 	ReadOneMessage(ctx context.Context, log *logger.Logger, userID, messageID int32) (*model.Message, error)
 	SaveMessage(ctx context.Context, log *logger.Logger, message *model.Message) (*model.SaveMessageResult, error)
@@ -440,11 +438,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 
 				return
 			}
-		} else {
-			offsetInt = 0
 		}
-	} else {
-		limitInt = defaultLimit
 	}
 
 	if values.Get("id") != "" {
