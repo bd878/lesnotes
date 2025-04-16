@@ -462,7 +462,7 @@ FROM messages
 WHERE id = ? AND (user_id IN (?` + strings.Repeat(",?", len(list)-1) + `) OR private = 0)
 	`
 
-	err := r.pool.QueryRowContext(ctx, selectStmt, []interface{}{params.ID, list}...).Scan(
+	err := r.pool.QueryRowContext(ctx, selectStmt, append([]interface{}{params.ID}, list...)...).Scan(
 		&_id, &userId, &threadIdCol, &createUtcNano, &updateUtcNano, &text, &fileIdCol, &privateCol)
 	if err != nil {
 		log.Errorln("failed to select one message")
