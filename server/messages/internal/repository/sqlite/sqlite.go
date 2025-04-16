@@ -466,7 +466,9 @@ func (r *Repository) Read(ctx context.Context, log *logger.Logger, params *model
 		list[i] = strconv.Itoa(int(id))
 	}
 
-	err := r.selectStmt.QueryRowContext(ctx, sql.Named("id", params.ID), sql.Named("usersList", strings.Join(list, ", "))).Scan(
+	usersList := strings.Join(list, ", ")
+	log.Info("users list", usersList)
+	err := r.selectStmt.QueryRowContext(ctx, sql.Named("id", params.ID), sql.Named("usersList", usersList)).Scan(
 		&_id, &userId, &threadIdCol, &createUtcNano, &updateUtcNano, &text, &fileIdCol, &privateCol)
 	if err != nil {
 		log.Errorln("failed to select one message")
