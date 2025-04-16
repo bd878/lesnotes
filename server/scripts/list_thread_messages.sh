@@ -1,12 +1,13 @@
 #!/usr/bin/bash
 
-# List user messages
+# List user thread messages
 
 stage=${STAGE:-"stage."}
 cookie=${COOKIE:-"cookie.txt"}
-limit=${1?"Usage: list_messages.sh limit offset public=-1"}
-offset=${2?"Usage: list_messages.sh limit offset public=-1"}
-public=${3:-"-1"}
+thread_id=${1?"Usage: list_thread_message.sh thread_id limit offset public=-1"}
+limit=${2?"Usage: list_thread_messages.sh thread_id limit offset public=-1"}
+offset=${3?"Usage: list_thread_messages.sh thread_id limit offset public=-1"}
+public=${4:-"-1"}
 
 public_filter=""
 
@@ -19,8 +20,9 @@ fi
 cmd=`cat <<HERE
 sed -e "s/%STAGE%/$stage/g" \
 -e "s/%LIMIT%/$limit/g" \
+-e "s/%THREAD_ID%/$thread_id/g" \
 -e "s/%PUBLIC%/$public_filter/g" \
--e "s/%OFFSET%/$offset/g" ./curl/list_messages.curl |
+-e "s/%OFFSET%/$offset/g" ./curl/list_thread_messages.curl |
 curl -b $cookie -s -K -
 HERE`
 result=`eval "$cmd"`

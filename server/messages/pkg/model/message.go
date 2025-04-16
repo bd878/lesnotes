@@ -14,7 +14,7 @@ type Message struct {
 	FileID              int32               `json:"file_id,omitempty"`
 	File                *filesmodel.File    `json:"file,omitempty"`
 	Text                string              `json:"text,omitempty"`
-	Private             bool                `json:"private,omitempty"`
+	Private             bool                `json:"private"`
 }
 
 type MessagesList struct {

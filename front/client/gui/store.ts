@@ -1,8 +1,7 @@
 import {createStore, combineReducers, applyMiddleware} from '../third_party/redux'
 import {all} from 'redux-saga/effects'
-import {messagesReducer, messagesSaga} from './features/messages'
-import {threadsReducer, threadsSaga} from './features/threads'
 import {userReducer, userSaga} from './features/me'
+import {stackReducer, stackSaga} from './features/stack'
 import createSagaMiddleware from 'redux-saga'
 
 const sagaMiddleware = createSagaMiddleware()
@@ -13,9 +12,8 @@ export default ({
 	isDesktop = true,
 } = {}) => {
 	const store = createStore(combineReducers({
-		messages: messagesReducer,
-		threads: threadsReducer,
 		me: userReducer,
+		stack: stackReducer,
 	}), {
 		me: {
 			browser,
@@ -26,9 +24,8 @@ export default ({
 
 	sagaMiddleware.run(function* rootSaga() {
 		yield all([
-			threadsSaga(),
 			userSaga(),
-			messagesSaga(),
+			stackSaga(),
 		])
 	})
 

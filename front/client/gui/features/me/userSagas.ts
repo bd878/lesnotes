@@ -22,6 +22,7 @@ import {
 	willRedirectActionCreator,
 	resetRedirectActionCreator,
 } from './userActionCreators';
+import * as is from '../../../third_party/is'
 import api from '../../../api'
 
 interface LoginPayload {
@@ -60,7 +61,7 @@ function* register({payload}: {payload: RegisterPayload}) {
 		const response = yield call(api.register,
 			payload.name, payload.password)
 
-		if (response.error !== "")
+		if (is.notEmpty(response.error))
 			yield put(registerFailedActionCreator(response.error))
 		else
 			yield put(registerSucceededActionCreator(response))
@@ -69,14 +70,12 @@ function* register({payload}: {payload: RegisterPayload}) {
 	}
 }
 
-interface AuthPayload {}
-
 function* auth() {
 	try {
 		const response = yield call(api.auth)
 
 		yield put(willRedirectActionCreator())
-		if (response.error !== "")
+		if (is.notEmpty(response.error))
 			yield put(authFailedActionCreator(response.error))
 		else
 			yield put(authSucceededActionCreator(response))

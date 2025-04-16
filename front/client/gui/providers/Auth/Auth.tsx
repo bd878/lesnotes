@@ -1,5 +1,6 @@
 import React, {useEffect} from 'react';
 import i18n from '../../../i18n';
+import Tag from '../../components/Tag'
 import {connect} from '../../../third_party/react-redux';
 import {authActionCreator} from '../../features/me'
 import {
@@ -9,30 +10,24 @@ import {
 } from '../../features/me'
 
 function AuthProvider(props) {
-	const {inverted, auth, isAuth, willRedirect, isLoading} = props
+	const {inverted, auth, isAuth, willRedirect, isLoading, fallback, children} = props
 
 	useEffect(() => {auth()}, [auth])
 
-	if (isLoading)
-		return i18n("loading")
-
-	if (willRedirect)
-		return (<></>)
-
-	if (inverted)
-		return (
-			<>{!isAuth
-				? props.children
-				: (props.fallback || <Tag css="m-8 mt-10">{i18n("authed")}</Tag>)
-			}</>
-		)
+	let shouldAllow = inverted ? !isAuth : isAuth
 
 	return (
-		<>{isAuth
-			? props.children
-			: (props.fallback || <Tag css="m-8 mt-10">{i18n("not_authed")}</Tag>)
-		}</>
-	);
+		<>
+			{isLoading
+				? i18n("loading")
+				: willRedirect
+					? null
+					: shouldAllow
+						? children
+						: fallback || <Tag css="m-8 mt-10">{i18n("not_authed")}</Tag>
+			}
+		</>
+	)
 }
 
 const mapStateToProps = state => ({

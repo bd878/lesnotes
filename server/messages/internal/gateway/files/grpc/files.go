@@ -1,6 +1,7 @@
 package grpc
 
 import (
+	"io"
 	"context"
 
 	"google.golang.org/grpc"

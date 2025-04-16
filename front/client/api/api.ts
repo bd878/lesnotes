@@ -83,11 +83,18 @@ export default function api(url: string, props = {}) {
 				.then(text => {
 					try {
 						const value = JSON.parse(text);
-						return {
-							value,
-							error: "",
-							explain: "",
-						}
+						if (value.status === "error")
+							return {
+								value,
+								error: i18n("bad_status_code"),
+								explain: value.description,
+							}
+						else
+							return {
+								value,
+								error: "",
+								explain: "",
+							}
 					} catch (e) {
 						console.error("[api]: error occured", e)
 						return {

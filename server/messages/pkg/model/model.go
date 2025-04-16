@@ -11,6 +11,11 @@ type SaveMessageResult struct {
 	Private           bool
 }
 
+type ReadOneMessageParams struct {
+	ID int32
+	UserIDs []int32
+}
+
 type UpdateMessageParams struct {
 	ID                int32
 	ThreadID          int32
@@ -41,6 +46,7 @@ type ReadThreadMessagesParams struct {
 	Limit             int32
 	Offset            int32
 	Ascending         bool
+	Private           int32
 }
 
 type ReadThreadMessagesResult struct {
@@ -48,14 +54,15 @@ type ReadThreadMessagesResult struct {
 	IsLastPage        bool
 }
 
-type ReadAllMessagesParams struct {
+type ReadMessagesParams struct {
 	UserID            int32
 	Limit             int32
 	Offset            int32
 	Ascending         bool
+	Private           int32
 }
 
-type ReadAllMessagesResult struct {
+type ReadMessagesResult struct {
 	Messages          []*Message
 	IsLastPage        bool
 }

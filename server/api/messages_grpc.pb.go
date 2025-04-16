@@ -22,7 +22,7 @@ type MessagesClient interface {
 	DeleteMessage(ctx context.Context, in *DeleteMessageRequest, opts ...grpc.CallOption) (*DeleteMessageResponse, error)
 	UpdateMessage(ctx context.Context, in *UpdateMessageRequest, opts ...grpc.CallOption) (*UpdateMessageResponse, error)
 	ReadOneMessage(ctx context.Context, in *ReadOneMessageRequest, opts ...grpc.CallOption) (*Message, error)
-	ReadAllMessages(ctx context.Context, in *ReadAllMessagesRequest, opts ...grpc.CallOption) (*ReadAllMessagesResponse, error)
+	ReadAllMessages(ctx context.Context, in *ReadMessagesRequest, opts ...grpc.CallOption) (*ReadMessagesResponse, error)
 	ReadThreadMessages(ctx context.Context, in *ReadThreadMessagesRequest, opts ...grpc.CallOption) (*ReadThreadMessagesResponse, error)
 }
 
@@ -79,8 +79,8 @@ func (c *messagesClient) ReadOneMessage(ctx context.Context, in *ReadOneMessageR
 	return out, nil
 }
 
-func (c *messagesClient) ReadAllMessages(ctx context.Context, in *ReadAllMessagesRequest, opts ...grpc.CallOption) (*ReadAllMessagesResponse, error) {
-	out := new(ReadAllMessagesResponse)
+func (c *messagesClient) ReadAllMessages(ctx context.Context, in *ReadMessagesRequest, opts ...grpc.CallOption) (*ReadMessagesResponse, error) {
+	out := new(ReadMessagesResponse)
 	err := c.cc.Invoke(ctx, "/messages.v1.Messages/ReadAllMessages", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -106,7 +106,7 @@ type MessagesServer interface {
 	DeleteMessage(context.Context, *DeleteMessageRequest) (*DeleteMessageResponse, error)
 	UpdateMessage(context.Context, *UpdateMessageRequest) (*UpdateMessageResponse, error)
 	ReadOneMessage(context.Context, *ReadOneMessageRequest) (*Message, error)
-	ReadAllMessages(context.Context, *ReadAllMessagesRequest) (*ReadAllMessagesResponse, error)
+	ReadAllMessages(context.Context, *ReadMessagesRequest) (*ReadMessagesResponse, error)
 	ReadThreadMessages(context.Context, *ReadThreadMessagesRequest) (*ReadThreadMessagesResponse, error)
 	mustEmbedUnimplementedMessagesServer()
 }
@@ -130,7 +130,7 @@ func (UnimplementedMessagesServer) UpdateMessage(context.Context, *UpdateMessage
 func (UnimplementedMessagesServer) ReadOneMessage(context.Context, *ReadOneMessageRequest) (*Message, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadOneMessage not implemented")
 }
-func (UnimplementedMessagesServer) ReadAllMessages(context.Context, *ReadAllMessagesRequest) (*ReadAllMessagesResponse, error) {
+func (UnimplementedMessagesServer) ReadAllMessages(context.Context, *ReadMessagesRequest) (*ReadMessagesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadAllMessages not implemented")
 }
 func (UnimplementedMessagesServer) ReadThreadMessages(context.Context, *ReadThreadMessagesRequest) (*ReadThreadMessagesResponse, error) {
@@ -240,7 +240,7 @@ func _Messages_ReadOneMessage_Handler(srv interface{}, ctx context.Context, dec 
 }
 
 func _Messages_ReadAllMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReadAllMessagesRequest)
+	in := new(ReadMessagesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -252,7 +252,7 @@ func _Messages_ReadAllMessages_Handler(srv interface{}, ctx context.Context, dec
 		FullMethod: "/messages.v1.Messages/ReadAllMessages",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MessagesServer).ReadAllMessages(ctx, req.(*ReadAllMessagesRequest))
+		return srv.(MessagesServer).ReadAllMessages(ctx, req.(*ReadMessagesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

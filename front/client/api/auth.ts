@@ -1,6 +1,7 @@
 import i18n from '../i18n';
 import api from './api';
 import models from './models';
+import * as is from '../third_party/is'
 
 async function auth() {
 	let response = {};
@@ -16,7 +17,7 @@ async function auth() {
 			credentials: 'include',
 		});
 
-		if (response.error == "") {
+		if (is.empty(response.error)) {
 			if (response.value.expired)
 				result.expired = true
 			else

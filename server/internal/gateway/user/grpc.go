@@ -5,7 +5,7 @@ import (
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/logger"
-	usersmodel "github.com/bd878/gallery/server/users/pkg/model"
+	usermodel "github.com/bd878/gallery/server/users/pkg/model"
 	"github.com/bd878/gallery/server/internal/grpcutil"
 )
 
@@ -17,7 +17,7 @@ func New(userAddr string) *Gateway {
 	return &Gateway{userAddr}
 }
 
-func (g *Gateway) Auth(ctx context.Context, log *logger.Logger, token string) (*usersmodel.User, error) {
+func (g *Gateway) Auth(ctx context.Context, log *logger.Logger, token string) (*usermodel.User, error) {
 	conn, err := grpcutil.ServiceConnection(ctx, g.userAddr)
 	if err != nil {
 		log.Errorw("failed to establish connection with user service", "error", err)
@@ -30,10 +30,10 @@ func (g *Gateway) Auth(ctx context.Context, log *logger.Logger, token string) (*
 		log.Errorw("failed to authenticate on client", "error", err)
 		return nil, err
 	}
-	return usersmodel.UserFromProto(resp.User), nil
+	return usermodel.UserFromProto(resp.User), nil
 }
 
-func (g *Gateway) GetPublicUser(ctx context.Context, log *logger.Logger, id int32) (*usersmodel.User, error) {
+func (g *Gateway) GetPublicUser(ctx context.Context, log *logger.Logger, id int32) (*usermodel.User, error) {
 	conn, err := grpcutil.ServiceConnection(ctx, g.userAddr)
 	if err != nil {
 		log.Error("gateway failed to establish connection with user service")
@@ -50,5 +50,6 @@ func (g *Gateway) GetPublicUser(ctx context.Context, log *logger.Logger, id int3
 		log.Errorw("gateway failed to get public user", "id", id)
 		return nil, err
 	}
-	return usersmodel.UserFromProto(user), nil
+
+	return usermodel.UserFromProto(user), nil
 }

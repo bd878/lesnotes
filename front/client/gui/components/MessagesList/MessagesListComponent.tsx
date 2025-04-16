@@ -1,6 +1,7 @@
 import React, {lazy} from 'react';
 import Tag from '../Tag';
 import i18n from '../../../i18n';
+import * as is from '../../../third_party/is'
 
 const List = lazy(() => import("../../components/List"));
 const MessageElement = lazy(() => import("../../components/MessageElement"))
@@ -12,7 +13,9 @@ function MessagesListComponent(props) {
 		messages,
 		loading,
 		error,
-		onOpenThreadClick,
+		checkMyThreadOpen,
+		isAnyThreadOpen,
+		onToggleThreadClick,
 		onEditClick,
 		onDeleteClick,
 		onCopyClick,
@@ -23,18 +26,36 @@ function MessagesListComponent(props) {
 			{loading ? i18n("loading") : null}
 			{error ? null : (
 				<List el="ul" css={css}>
-					{messages.map(message => (
-						<MessageElement
-							tabIndex="0"
-							key={message.ID}
-							css={liCss}
-							message={message}
-							onOpenThreadClick={onOpenThreadClick}
-							onCopyClick={() => onCopyClick(message)}
-							onEditClick={onEditClick}
-							onDeleteClick={onDeleteClick}
-						/>
-					))}
+					{messages.map(message => {
+						let isMyThreadOpen = is.func(checkMyThreadOpen) ? checkMyThreadOpen(message.ID) : false
+
+						return (
+							<Tag
+								el="li"
+								tabIndex="0"
+								/* TODO: message.isHovered get computitional property */
+								css={
+									(liCss || "")
+									+ " "
+									+ (isAnyThreadOpen ? isMyThreadOpen ? "" : "opacity-50" : "")
+									+ " "
+									+ "mb-2 px-2 py-1 mx-1 bg-gray-100 hover:bg-gray-200 flex flex-row justify-between"
+								}
+								key={`tag_${message.ID}`}
+							>
+								<MessageElement
+									key={message.ID}
+									message={message}
+									isThreadOpen={isMyThreadOpen}
+									onToggleThreadClick={() => onToggleThreadClick(message)}
+									onCopyClick={() => onCopyClick(message)}
+									onEditClick={() => onEditClick(message)}
+									onDeleteClick={() => onDeleteClick(message)}
+								/>
+							</Tag>
+						)
+					}
+				)}
 				</List>
 			)}
 		</>

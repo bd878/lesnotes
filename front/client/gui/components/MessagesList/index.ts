@@ -1,1 +1,1 @@
-export {default} from "./MessagesListContainer";
+export {default} from "./MessagesListComponent";

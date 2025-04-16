@@ -84,6 +84,7 @@ func (s *Messages) SaveMessage(ctx context.Context, log *logger.Logger, message 
 		ID: res.Id,
 		UpdateUTCNano: res.UpdateUtcNano,
 		CreateUTCNano: res.CreateUtcNano,
+		Private: res.Private,
 	}, nil
 }
 
@@ -146,13 +147,14 @@ func (s *Messages) ReadThreadMessages(ctx context.Context, log *logger.Logger, p
 		}
 	}
 
-	log.Infow("grpc client read thread messages", "user_id", params.UserID, "thread_id", params.ThreadID)
+	log.Infow("grpc client read thread messages", "user_id", params.UserID, "thread_id", params.ThreadID, "private", params.Private)
 	res, err := s.client.ReadThreadMessages(ctx, &api.ReadThreadMessagesRequest{
 		UserId: params.UserID,
 		ThreadId: params.ThreadID,
 		Limit:  params.Limit,
 		Offset: params.Offset,
 		Asc:    params.Ascending,
+		Private: params.Private,
 	})
 	if err != nil {
 		log.Errorw("client failed to read thread messages", "thread_id", params.ThreadID)
@@ -165,8 +167,8 @@ func (s *Messages) ReadThreadMessages(ctx context.Context, log *logger.Logger, p
 	}, err
 }
 
-func (s *Messages) ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadAllMessagesParams) (
-	*model.ReadAllMessagesResult, error,
+func (s *Messages) ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadMessagesParams) (
+	*model.ReadMessagesResult, error,
 ) {
 	if s.isConnFailed() {
 		log.Info("conn failed, setup new connection")
@@ -175,24 +177,25 @@ func (s *Messages) ReadAllMessages(ctx context.Context, log *logger.Logger, para
 		}
 	}
 
-	res, err := s.client.ReadAllMessages(ctx, &api.ReadAllMessagesRequest{
+	res, err := s.client.ReadAllMessages(ctx, &api.ReadMessagesRequest{
 		UserId: int32(params.UserID),
 		Limit:  params.Limit,
 		Offset: params.Offset,
 		Asc:    params.Ascending,
+		Private: params.Private,
 	})
 	if err != nil {
 		log.Errorw("client failed to read user messages", "error", err)
 		return nil, err
 	}
 
-	return &model.ReadAllMessagesResult{
+	return &model.ReadMessagesResult{
 		Messages: model.MapMessagesFromProto(model.MessageFromProto, res.Messages),
 		IsLastPage: res.IsLastPage,
 	}, err
 }
 
-func (s *Messages) ReadOneMessage(ctx context.Context, log *logger.Logger, userID, messageID int32) (
+func (s *Messages) ReadOneMessage(ctx context.Context, log *logger.Logger, params *model.ReadOneMessageParams) (
 	*model.Message, error,
 ) {
 	if s.isConnFailed() {
@@ -203,11 +206,11 @@ func (s *Messages) ReadOneMessage(ctx context.Context, log *logger.Logger, userI
 	}
 
 	res, err := s.client.ReadOneMessage(ctx, &api.ReadOneMessageRequest{
-		UserId: userID,
-		Id: messageID,
+		Id: params.ID,
+		UserIds: params.UserIDs,
 	})
 	if err != nil {
-		log.Errorw("client failed to read user message", "user_id", userID, "message_id", messageID, "error", err)
+		log.Errorw("client failed to read user message", "user_ids", params.UserIDs, "message_id", params.ID, "error", err)
 		return nil, err
 	}
 

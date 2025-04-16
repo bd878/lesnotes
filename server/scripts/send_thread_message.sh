@@ -1,14 +1,14 @@
 #!/usr/bin/bash
 
-# Reads a message
+# Send a thread message
 
 stage=${STAGE:-"stage."}
 cookie=${COOKIE:-"cookie.txt"}
-id=${1:?"Usage: ./read_message.sh message_id"}
+thread_id=${1?"Usage: send_thread_message.sh thread_id"}
 
 cmd=`cat <<HERE
 sed -e "s/%STAGE%/$stage/g" \
--e "s/%ID%/$id/g" ./curl/read_message.curl |
+sed -e "s/%THREAD_ID%/$thread_id/g" ./curl/send_thread_message.curl |
 curl -b $cookie -v -K -
 HERE`
 result=`eval "$cmd"`

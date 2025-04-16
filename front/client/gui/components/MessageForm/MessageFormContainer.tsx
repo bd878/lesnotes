@@ -22,7 +22,7 @@ function MessageFormContainer(props) {
 	useEffect(() => {
 		if (isEditMode)
 			setText(messageForEdit.text)
-	}, [setText, isEditMode]);
+	}, [setText, isEditMode, messageForEdit]);
 
 	const onFileChange = useCallback(e => {
 		setFile(e.target.files[0])
@@ -61,10 +61,18 @@ function MessageFormContainer(props) {
 		setText("")
 	}, [reset, setText])
 
+	const onFileClick = useCallback((e) => {
+		e.preventDefault()
+		if (is.notEmpty(fileRef))
+			fileRef.current.click()
+	}, [fileRef])
+
 	return (
 		<MessageFormComponent
 			fileRef={fileRef}
 			text={text}
+			file={file}
+			onFileClick={onFileClick}
 			onMessageChange={onMessageChange}
 			onFileChange={onFileChange}
 			onSubmit={onSubmit}

@@ -88,6 +88,7 @@ paths:
 
   /messages/v1/read:
     parameters:
+      - $ref: '#/components/parameters/public'
       - $ref: '#/components/parameters/messageId'
       - $ref: '#/components/parameters/threadId'
       - $ref: '#/components/parameters/limit'
@@ -96,7 +97,8 @@ paths:
     get:
       summary: Get user messages or message
       description: |
-        Read messages for a given user, a single message, or a specific thread
+        Read messages for a given user, a single message, or a specific thread,
+        or public messages for a user
       operationId: readMessages
       responses:
         "200":
@@ -107,6 +109,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/messagesListResponse'
                   - $ref: '#/components/schemas/messageResponse'
+
         "4XX":
           description: error 
           content:
@@ -317,9 +320,8 @@ components:
         file_id:
           type: integer
           example: 1234
-        file_name:
-          type: string
-          example: "image.jpg"
+        file:
+          $ref: '#/components/schemas/file'
         text:
           type: string
           example: "message text"
@@ -369,6 +371,16 @@ components:
           type: string
           default: ""
 
+    file:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "file"
+
     message:
       type: object
       properties:
@@ -388,6 +400,10 @@ components:
         update_utc_nano:
           type: integer
           format: integer
+        private:
+          type: integer
+          format: integer
+          example: 1
         file:
           type: object
           properties:
