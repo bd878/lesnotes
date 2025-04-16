@@ -21,7 +21,7 @@ type Controller interface {
 	SaveMessage(ctx context.Context, log *logger.Logger, message *model.Message) (*model.SaveMessageResult, error)
 	UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (*model.UpdateMessageResult, error)
 	DeleteMessage(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) (*model.DeleteMessageResult, error)
-	ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadAllMessagesParams) (*model.ReadAllMessagesResult, error)
+	ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadMessagesParams) (*model.ReadMessagesResult, error)
 	ReadThreadMessages(ctx context.Context, log *logger.Logger, params *model.ReadThreadMessagesParams) (*model.ReadThreadMessagesResult, error)
 }
 
@@ -393,12 +393,12 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 
 func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
 	var (
-		limitInt, offsetInt, orderInt int
+		limitInt, offsetInt, orderInt, publicInt int
 		threadID, messageID int32
 		ascending bool
 		message *model.Message
 		messages []*model.Message
-		isLastPage bool
+		isLastPage, isPrivate bool
 		err error
 	)
 
@@ -438,6 +438,25 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 
 				return
 			}
+		}
+	}
+
+	if values.Has("public") {
+		publicInt, err = strconv.Atoi(values.Get("public"))
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+				Status: "error",
+				Description: fmt.Sprintf("wrong \"%s\" query param", "public"),
+			})
+
+			return
+		}
+
+		if publicInt > 0 {
+			isPrivate = false
+		} else {
+			isPrivate = true
 		}
 	}
 
@@ -495,6 +514,16 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 		ascending = true
 	}
 
+	if values.Has("public") && values.Has("id") {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			Status: "error",
+			Description: "both public and id params are given",
+		})
+
+		return
+	}
+
 	if messageID != 0 && threadID != 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
@@ -515,7 +544,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 		return
 	}
 
-	log.Infow("read messages", "user_id", user.ID, "thread_id", threadID, "message_id", messageID)
+	log.Infow("read messages", "user_id", user.ID, "thread_id", threadID, "message_id", messageID, "public", publicInt)
 
 	if threadID != 0 {
 		// read thread messages
@@ -525,9 +554,10 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 			Limit:     int32(limitInt),
 			Offset:    int32(offsetInt),
 			Ascending: ascending,
+			Private:   isPrivate,
 		})
 		if err != nil {
-			log.Errorw("failed to read thread messages, controller returned error", "user_id", user.ID, "thread_id", threadID, "error", err)
+			log.Errorw("failed to read thread messages, controller returned error", "user_id", user.ID, "thread_id", threadID, "public", publicInt, "error", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(servermodel.ServerResponse{
 				Status: "error",
@@ -556,11 +586,12 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 		message = res
 	} else {
 		// read all messages
-		res, err := h.controller.ReadAllMessages(req.Context(), log, &model.ReadAllMessagesParams{
+		res, err := h.controller.ReadAllMessages(req.Context(), log, &model.ReadMessagesParams{
 			UserID:    user.ID,
 			Limit:     int32(limitInt),
 			Offset:    int32(offsetInt),
 			Ascending: ascending,
+			Private:   isPrivate,
 		})
 		if err != nil {
 			log.Errorw("failed to read all messages", "error", err)
@@ -577,7 +608,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 		isLastPage = res.IsLastPage
 	}
 
-	log.Infow("read messages", "user_id", user.ID, "name", user.Name, "message_id", messageID, "thread_id", threadID, "len_messages", len(messages))
+	log.Infow("read messages", "user_id", user.ID, "name", user.Name, "message_id", messageID, "thread_id", threadID, "len_messages", len(messages), "public", publicInt)
 
 	if message != nil {
 		// one message

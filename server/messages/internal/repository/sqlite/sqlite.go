@@ -20,6 +20,10 @@ type Repository struct {
 	descStmt *sql.Stmt
 	ascThreadStmt *sql.Stmt
 	descThreadStmt *sql.Stmt
+	ascThreadNotPrivateStmt *sql.Stmt
+	descThreadNotPrivateStmt *sql.Stmt
+	ascNotPrivateStmt *sql.Stmt
+	descNotPrivateStmt *sql.Stmt
 	selectStmt *sql.Stmt
 	deleteThreadStmt *sql.Stmt
 }
@@ -108,6 +112,42 @@ LIMIT :limit OFFSET :offset
 ;`,
 	))
 
+	ascNotPrivateStmt := utils.Must(pool.Prepare(`
+SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id, private
+FROM messages
+WHERE user_id = :userId AND (private = 0 OR private ISNULL)
+ORDER BY create_utc_nano ASC
+LIMIT :limit OFFSET :offset
+;`,
+	))
+
+	descNotPrivateStmt := utils.Must(pool.Prepare(`
+SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id, private
+FROM messages
+WHERE user_id = :userId AND (private = 0 OR private ISNULL)
+ORDER BY create_utc_nano DESC
+LIMIT :limit OFFSET :offset
+;`,
+	))
+
+	ascThreadNotPrivateStmt := utils.Must(pool.Prepare(`
+SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id, private
+FROM messages
+WHERE user_id = :userId AND thread_id = :threadId AND (private = 0 OR private ISNULL)
+ORDER BY create_utc_nano ASC
+LIMIT :limit OFFSET :offset
+;`,
+	))
+
+	descThreadNotPrivateStmt := utils.Must(pool.Prepare(`
+SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id, private
+FROM messages
+WHERE user_id = :userId AND thread_id = :threadId AND (private = 0 OR private ISNULL)
+ORDER BY create_utc_nano DESC
+LIMIT :limit OFFSET :offset
+;`,
+	))
+
 	return &Repository{
 		pool: pool,
 		insertStmt: insertStmt,
@@ -119,6 +159,10 @@ LIMIT :limit OFFSET :offset
 		ascThreadStmt: ascThreadStmt,
 		descThreadStmt: descThreadStmt,
 		deleteThreadStmt: deleteThreadStmt,
+		ascNotPrivateStmt: ascNotPrivateStmt,
+		descNotPrivateStmt: descNotPrivateStmt,
+		ascThreadNotPrivateStmt: ascThreadNotPrivateStmt,
+		descThreadNotPrivateStmt: descThreadNotPrivateStmt,
 	}
 }
 
@@ -260,16 +304,22 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, log *logger.Logger,
 		err error
 	)
 
-	if params.Ascending {
-		rows, err = r.ascThreadStmt.QueryContext(ctx,
-			sql.Named("userId", params.UserID), sql.Named("threadId", params.ThreadID),
-			sql.Named("limit", params.Limit), sql.Named("offset", params.Offset))
+	var stmt *sql.Stmt
+	if params.Private {
+		if params.Ascending {
+			stmt = r.ascThreadStmt
+		} else {
+			stmt = r.descThreadStmt
+		}
 	} else {
-		rows, err = r.descThreadStmt.QueryContext(ctx,
-			sql.Named("userId", params.UserID), sql.Named("threadId", params.ThreadID),
-			sql.Named("limit", params.Limit), sql.Named("offset", params.Offset))
+		if params.Ascending {
+			stmt = r.ascThreadNotPrivateStmt
+		} else {
+			stmt = r.descThreadNotPrivateStmt
+		}
 	}
 
+	rows, err = stmt.QueryContext(ctx, sql.Named("userId", params.UserID), sql.Named("threadId", params.ThreadID), sql.Named("limit", params.Limit), sql.Named("offset", params.Offset))
 	if err != nil {
 		log.Errorln("failed to query messages context")
 		return nil, err
@@ -277,7 +327,7 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, log *logger.Logger,
 
 	defer rows.Close()
 
-	log.Infow("repository read thread messages", "user_id", params.UserID, "thread_id", params.ThreadID)
+	log.Infow("repository read thread messages", "user_id", params.UserID, "thread_id", params.ThreadID, "private", params.Private)
 
 	selected, err := r.selectMessages(ctx, log, rows, params.UserID, params.Limit, params.Offset)
 	if err != nil {
@@ -296,24 +346,30 @@ type selectedMessages struct {
 	IsLastPage bool
 }
 
-func (r *Repository) ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadAllMessagesParams) (
-	*model.ReadAllMessagesResult, error,
+func (r *Repository) ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadMessagesParams) (
+	*model.ReadMessagesResult, error,
 ) {
 	var (
 		rows *sql.Rows
 		err error
 	)
 
-	if params.Ascending {
-		rows, err = r.ascStmt.QueryContext(ctx,
-			sql.Named("userId", params.UserID), sql.Named("limit", params.Limit), sql.Named("offset", params.Offset),
-		)
+	var stmt *sql.Stmt
+	if params.Private {
+		if params.Ascending {
+			stmt = r.ascStmt
+		} else {
+			stmt = r.descStmt
+		}
 	} else {
-		rows, err = r.descStmt.QueryContext(ctx,
-			sql.Named("userId", params.UserID), sql.Named("limit", params.Limit), sql.Named("offset", params.Offset),
-		)
+		if params.Ascending {
+			stmt = r.ascNotPrivateStmt
+		} else {
+			stmt = r.descNotPrivateStmt
+		}
 	}
 
+	rows, err = stmt.QueryContext(ctx, sql.Named("userId", params.UserID), sql.Named("limit", params.Limit), sql.Named("offset", params.Offset))
 	if err != nil {
 		log.Error("failed to query messages context")
 		return nil, err
@@ -327,7 +383,7 @@ func (r *Repository) ReadAllMessages(ctx context.Context, log *logger.Logger, pa
 		return nil, err
 	}
 
-	return &model.ReadAllMessagesResult{
+	return &model.ReadMessagesResult{
 		Messages: selected.List,
 		IsLastPage: selected.IsLastPage,
 	}, nil
@@ -434,6 +490,8 @@ func (r *Repository) selectMessages(ctx context.Context, log *logger.Logger, row
 			if privateCol.Int32 == 0 {
 				msg.Private = false
 			}
+		} else {
+			msg.Private = false
 		}
 
 		res = append(res, msg)

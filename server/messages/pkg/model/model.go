@@ -41,6 +41,7 @@ type ReadThreadMessagesParams struct {
 	Limit             int32
 	Offset            int32
 	Ascending         bool
+	Private           bool
 }
 
 type ReadThreadMessagesResult struct {
@@ -48,14 +49,15 @@ type ReadThreadMessagesResult struct {
 	IsLastPage        bool
 }
 
-type ReadAllMessagesParams struct {
+type ReadMessagesParams struct {
 	UserID            int32
 	Limit             int32
 	Offset            int32
 	Ascending         bool
+	Private           bool
 }
 
-type ReadAllMessagesResult struct {
+type ReadMessagesResult struct {
 	Messages          []*Message
 	IsLastPage        bool
 }

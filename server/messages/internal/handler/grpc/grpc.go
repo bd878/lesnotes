@@ -15,7 +15,7 @@ type Controller interface {
 	UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) error
 	DeleteMessage(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error
 	ReadMessage(ctx context.Context, log *logger.Logger, userID, messageID int32) (*model.Message, error)
-	ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadAllMessagesParams) (*model.ReadAllMessagesResult, error)
+	ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadMessagesParams) (*model.ReadMessagesResult, error)
 	ReadThreadMessages(ctx context.Context, log *logger.Logger, params *model.ReadThreadMessagesParams) (*model.ReadThreadMessagesResult, error)
 	GetServers(ctx context.Context, log *logger.Logger) ([]*api.Server, error)
 }
@@ -104,34 +104,36 @@ func (h *Handler) ReadThreadMessages(ctx context.Context, req *api.ReadThreadMes
 		Limit:     req.Limit,
 		Offset:    req.Offset,
 		Ascending: req.Asc,
+		Private:    req.Private,
 	})
 	if err != nil {
 		logger.Errorw("failed to read thread messages", "error", err)
 		return nil, err
 	}
 
-	logger.Debugw("grpc read thread messages ok", "thread_id", req.ThreadId)
+	logger.Debugw("grpc read thread messages ok", "thread_id", req.ThreadId, "private", req.Private)
 	return &api.ReadThreadMessagesResponse{
 		Messages: model.MapMessagesToProto(model.MessageToProto, res.Messages),
 		IsLastPage: res.IsLastPage,
 	}, nil
 }
 
-func (h *Handler) ReadAllMessages(ctx context.Context, req *api.ReadAllMessagesRequest) (
-	*api.ReadAllMessagesResponse, error,
+func (h *Handler) ReadAllMessages(ctx context.Context, req *api.ReadMessagesRequest) (
+	*api.ReadMessagesResponse, error,
 ) {
-	res, err := h.controller.ReadAllMessages(ctx, logger.Default(), &model.ReadAllMessagesParams{
+	res, err := h.controller.ReadAllMessages(ctx, logger.Default(), &model.ReadMessagesParams{
 		UserID:    req.UserId,
 		Limit:     req.Limit,
 		Offset:    req.Offset,
 		Ascending: req.Asc,
+		Private:    req.Private,
 	})
 	if err != nil {
 		logger.Errorw("failed to read user messages", "error", err)
 		return nil, err
 	}
 
-	return &api.ReadAllMessagesResponse{
+	return &api.ReadMessagesResponse{
 		Messages: model.MapMessagesToProto(model.MessageToProto, res.Messages),
 		IsLastPage: res.IsLastPage,
 	}, nil

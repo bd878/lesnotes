@@ -15,7 +15,7 @@ type Repository interface {
 	Update(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) error
 	Delete(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error
 	Read(ctx context.Context, log *logger.Logger, messageID int32) (*model.Message, error)
-	ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadAllMessagesParams) (*model.ReadAllMessagesResult, error)
+	ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadMessagesParams) (*model.ReadMessagesResult, error)
 	ReadThreadMessages(ctx context.Context, log *logger.Logger, params *model.ReadThreadMessagesParams) (*model.ReadThreadMessagesResult, error)
 	Truncate(ctx context.Context, log *logger.Logger) error
 }

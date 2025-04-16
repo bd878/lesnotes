@@ -88,6 +88,7 @@ paths:
 
   /messages/v1/read:
     parameters:
+      - $ref: '#/components/parameters/public'
       - $ref: '#/components/parameters/messageId'
       - $ref: '#/components/parameters/threadId'
       - $ref: '#/components/parameters/limit'
@@ -96,7 +97,8 @@ paths:
     get:
       summary: Get user messages or message
       description: |
-        Read messages for a given user, a single message, or a specific thread
+        Read messages for a given user, a single message, or a specific thread,
+        or public messages for a user
       operationId: readMessages
       responses:
         "200":
@@ -398,6 +400,10 @@ components:
         update_utc_nano:
           type: integer
           format: integer
+        private:
+          type: integer
+          format: integer
+          example: 1
         file:
           type: object
           properties:

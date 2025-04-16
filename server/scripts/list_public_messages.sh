@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-# List user messages
+# List user public messages
 
 stage=${STAGE:-"stage."}
 cookie=${COOKIE:-"cookie.txt"}
@@ -10,7 +10,7 @@ offset=${OFFSET:-"0"}
 cmd=`cat <<HERE
 sed -e "s/%STAGE%/$stage/g" \
 -e "s/%LIMIT%/$limit/g" \
--e "s/%OFFSET%/$offset/g" ./curl/list_messages.curl |
+-e "s/%OFFSET%/$offset/g" ./curl/list_public_messages.curl |
 curl -b $cookie -s -K -
 HERE`
 result=`eval "$cmd"`
