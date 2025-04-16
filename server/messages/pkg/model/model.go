@@ -41,7 +41,7 @@ type ReadThreadMessagesParams struct {
 	Limit             int32
 	Offset            int32
 	Ascending         bool
-	Private           bool
+	Private           int32
 }
 
 type ReadThreadMessagesResult struct {
@@ -54,7 +54,7 @@ type ReadMessagesParams struct {
 	Limit             int32
 	Offset            int32
 	Ascending         bool
-	Private           bool
+	Private           int32
 }
 
 type ReadMessagesResult struct {

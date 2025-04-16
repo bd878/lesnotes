@@ -394,11 +394,11 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
 	var (
 		limitInt, offsetInt, orderInt, publicInt int
-		threadID, messageID int32
+		threadID, messageID, privateInt int32
 		ascending bool
 		message *model.Message
 		messages []*model.Message
-		isLastPage, isPrivate bool
+		isLastPage bool
 		err error
 	)
 
@@ -454,10 +454,12 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 		}
 
 		if publicInt > 0 {
-			isPrivate = false
+			privateInt = 0
 		} else {
-			isPrivate = true
+			privateInt = 1
 		}
+	} else {
+		privateInt = -1
 	}
 
 	if values.Get("id") != "" {
@@ -554,7 +556,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 			Limit:     int32(limitInt),
 			Offset:    int32(offsetInt),
 			Ascending: ascending,
-			Private:   isPrivate,
+			Private:   privateInt,
 		})
 		if err != nil {
 			log.Errorw("failed to read thread messages, controller returned error", "user_id", user.ID, "thread_id", threadID, "public", publicInt, "error", err)
@@ -591,7 +593,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 			Limit:     int32(limitInt),
 			Offset:    int32(offsetInt),
 			Ascending: ascending,
-			Private:   isPrivate,
+			Private:   privateInt,
 		})
 		if err != nil {
 			log.Errorw("failed to read all messages", "error", err)

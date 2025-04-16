@@ -31,7 +31,7 @@ message ReadThreadMessagesRequest {
 	int32    offset = 3;
 	int32    limit = 4;
 	bool     asc = 5;
-	bool     private = 6;
+	int32    private = 6;
 }
 
 message ReadThreadMessagesResponse {
@@ -44,7 +44,7 @@ message ReadMessagesRequest {
 	int32    offset = 2;
 	int32    limit = 3;
 	bool     asc = 4;
-	bool     private = 5;
+	int32     private = 5;
 }
 
 message ReadMessagesResponse {

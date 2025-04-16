@@ -20,10 +20,14 @@ type Repository struct {
 	descStmt *sql.Stmt
 	ascThreadStmt *sql.Stmt
 	descThreadStmt *sql.Stmt
+	ascThreadPrivateStmt *sql.Stmt
+	descThreadPrivateStmt *sql.Stmt
 	ascThreadNotPrivateStmt *sql.Stmt
 	descThreadNotPrivateStmt *sql.Stmt
 	ascNotPrivateStmt *sql.Stmt
 	descNotPrivateStmt *sql.Stmt
+	ascPrivateStmt *sql.Stmt
+	descPrivateStmt *sql.Stmt
 	selectStmt *sql.Stmt
 	deleteThreadStmt *sql.Stmt
 }
@@ -112,6 +116,24 @@ LIMIT :limit OFFSET :offset
 ;`,
 	))
 
+	ascPrivateStmt := utils.Must(pool.Prepare(`
+SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id, private
+FROM messages
+WHERE user_id = :userId AND private = 1
+ORDER BY create_utc_nano ASC
+LIMIT :limit OFFSET :offset
+;`,
+	))
+
+	descPrivateStmt := utils.Must(pool.Prepare(`
+SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id, private
+FROM messages
+WHERE user_id = :userId AND private = 1
+ORDER BY create_utc_nano ASC
+LIMIT :limit OFFSET :offset
+;`,
+	))
+
 	ascNotPrivateStmt := utils.Must(pool.Prepare(`
 SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id, private
 FROM messages
@@ -148,6 +170,24 @@ LIMIT :limit OFFSET :offset
 ;`,
 	))
 
+	ascThreadPrivateStmt := utils.Must(pool.Prepare(`
+SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id, private
+FROM messages
+WHERE user_id = :userId AND thread_id = :threadId AND private = 1
+ORDER BY create_utc_nano ASC
+LIMIT :limit OFFSET :offset
+;`,
+	))
+
+	descThreadPrivateStmt := utils.Must(pool.Prepare(`
+SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id, private
+FROM messages
+WHERE user_id = :userId AND thread_id = :threadId AND private = 1
+ORDER BY create_utc_nano DESC
+LIMIT :limit OFFSET :offset
+;`,
+	))
+
 	return &Repository{
 		pool: pool,
 		insertStmt: insertStmt,
@@ -159,8 +199,12 @@ LIMIT :limit OFFSET :offset
 		ascThreadStmt: ascThreadStmt,
 		descThreadStmt: descThreadStmt,
 		deleteThreadStmt: deleteThreadStmt,
+		ascPrivateStmt: ascPrivateStmt,
+		descPrivateStmt: descPrivateStmt,
 		ascNotPrivateStmt: ascNotPrivateStmt,
 		descNotPrivateStmt: descNotPrivateStmt,
+		ascThreadPrivateStmt: ascThreadPrivateStmt,
+		descThreadPrivateStmt: descThreadPrivateStmt,
 		ascThreadNotPrivateStmt: ascThreadNotPrivateStmt,
 		descThreadNotPrivateStmt: descThreadNotPrivateStmt,
 	}
@@ -305,17 +349,23 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, log *logger.Logger,
 	)
 
 	var stmt *sql.Stmt
-	if params.Private {
+	if params.Private == -1 {
 		if params.Ascending {
 			stmt = r.ascThreadStmt
 		} else {
 			stmt = r.descThreadStmt
 		}
-	} else {
+	} else if params.Private == 0 {
 		if params.Ascending {
 			stmt = r.ascThreadNotPrivateStmt
 		} else {
 			stmt = r.descThreadNotPrivateStmt
+		}
+	} else if params.Private == 1 {
+		if params.Ascending {
+			stmt = r.ascThreadPrivateStmt
+		} else {
+			stmt = r.descThreadPrivateStmt
 		}
 	}
 
@@ -355,13 +405,19 @@ func (r *Repository) ReadAllMessages(ctx context.Context, log *logger.Logger, pa
 	)
 
 	var stmt *sql.Stmt
-	if params.Private {
+	if params.Private == -1 {
 		if params.Ascending {
 			stmt = r.ascStmt
 		} else {
 			stmt = r.descStmt
 		}
-	} else {
+	} else if params.Private == 1 {
+		if params.Ascending {
+			stmt = r.ascPrivateStmt
+		} else {
+			stmt = r.descPrivateStmt
+		}
+	} else if params.Private == 0 {
 		if params.Ascending {
 			stmt = r.ascNotPrivateStmt
 		} else {
