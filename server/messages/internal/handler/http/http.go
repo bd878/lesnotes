@@ -152,6 +152,10 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 		private = true
 	}
 
+	if user.ID == usermodel.PublicUserID {
+		private = false
+	}
+
 	if hasFile {
 		f, fh, err := req.FormFile("file")
 		if err != nil {
@@ -465,6 +469,20 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 		privateInt = -1
 	}
 
+	if user.ID == usermodel.PublicUserID {
+		privateInt = -1
+	}
+
+	if user.ID == usermodel.PublicUserID && !values.Has("id") {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			Status: "error",
+			Description: "can not list public messages",
+		})
+
+		return
+	}
+
 	if values.Get("id") != "" {
 		messageid, err := strconv.Atoi(values.Get("id"))
 		if err != nil {
@@ -551,7 +569,30 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 
 	log.Infow("read messages", "user_id", user.ID, "thread_id", threadID, "message_id", messageID, "public", publicInt)
 
-	if threadID != 0 {
+	if messageID != 0 {
+		// read one message
+		res, err := h.controller.ReadOneMessage(req.Context(), log, &model.ReadOneMessageParams{
+			ID: messageID,
+			UserIDs: []int32{user.ID, usermodel.PublicUserID},
+		})
+		if err != nil {
+			log.Errorw("failed to read one message", "user_id", user.ID, "message_id", messageID, "error", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+				Status: "error",
+				Description: "failed to read a message",
+			})
+
+			return
+		}
+
+		message = res
+
+		if user.ID == usermodel.PublicUserID {
+			message.UserID = 0
+		}
+
+	} else if threadID != 0 {
 		// read thread messages
 		res, err := h.controller.ReadThreadMessages(req.Context(), log, &model.ReadThreadMessagesParams{
 			UserID:    user.ID,
@@ -574,24 +615,6 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 
 		messages = res.Messages
 		isLastPage = res.IsLastPage
-	} else if messageID != 0 {
-		// read one message
-		res, err := h.controller.ReadOneMessage(req.Context(), log, &model.ReadOneMessageParams{
-			ID: messageID,
-			UserIDs: []int32{user.ID, usermodel.PublicUserID},
-		})
-		if err != nil {
-			log.Errorw("failed to read one message", "user_id", user.ID, "message_id", messageID, "error", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(servermodel.ServerResponse{
-				Status: "error",
-				Description: "failed to read a message",
-			})
-
-			return
-		}
-
-		message = res
 	} else {
 		// read all messages
 		res, err := h.controller.ReadAllMessages(req.Context(), log, &model.ReadMessagesParams{
@@ -679,6 +702,10 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 					Name: file.Name,
 				}
 			}
+		}
+
+		if user.ID == usermodel.PublicUserID {
+			message.UserID = 0
 		}
 	}
 
