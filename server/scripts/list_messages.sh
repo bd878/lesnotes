@@ -4,8 +4,8 @@
 
 stage=${STAGE:-"stage."}
 cookie=${COOKIE:-"cookie.txt"}
-limit=${LIMIT:-"20"}
-offset=${OFFSET:-"0"}
+limit=${1?"Usage: list_messages.sh limit offset"}
+offset=${2?"Usage: list_messages.sh limit offset"}
 
 cmd=`cat <<HERE
 sed -e "s/%STAGE%/$stage/g" \
