@@ -90,7 +90,7 @@ func (m *DistributedMessages) DeleteMessage(ctx context.Context, log *logger.Log
 func (m *DistributedMessages) ReadMessage(ctx context.Context, log *logger.Logger, userID, messageID int32) (
 	*model.Message, error,
 ) {
-	return m.repo.Read(ctx, log, messageID)
+	return m.repo.Read(ctx, log, userID, messageID)
 }
 
 func (m *DistributedMessages) ReadThreadMessages(ctx context.Context, log *logger.Logger, params *model.ReadThreadMessagesParams) (
