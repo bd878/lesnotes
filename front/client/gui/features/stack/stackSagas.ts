@@ -27,7 +27,7 @@ interface FetchMessagesPayload {
 function* fetchMessages({index, payload}: {payload: FetchMessagesPayload}) {
 	try {
 		const response = yield call(api.loadMessages,
-			{limit: payload.limit, offset: payload.offset, order: payload.order})
+			{limit: payload.limit, offset: payload.offset, order: payload.order, threadID: payload.threadID})
 
 		response.messages.reverse();
 		if (is.notEmpty(response.error))

@@ -1,5 +1,7 @@
 export const selectStack = state => state.stack.stack || []
 
+export const selectHasNextThread = index => state => state.stack.stack.length > index+1
+export const selectThreadID = index => state => state.stack.stack[index].ID || 0
 export const selectMessages = index => state => state.stack.stack[index].list || []
 export const selectIsLastPage = index => state => state.stack.stack[index].isLastPage || false
 export const selectIsLoading = index => state => state.stack.stack[index].loading || false

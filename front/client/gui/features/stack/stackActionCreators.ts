@@ -1,7 +1,6 @@
 import {
-	PUSH_STACK,
-	POP_STACK,
-	SLICE_STACK,
+	OPEN_THREAD,
+	CLOSE_THREAD,
 
 	UPDATE_MESSAGE,
 	DELETE_MESSAGE,
@@ -18,21 +17,15 @@ import {
 	DELETE_MESSAGE_SUCCEEDED,
 } from './stackActions';
 
-export const pushStackActionCreator = payload => ({
-	type: PUSH_STACK,
+export const openThreadActionCreator = payload => ({
+	type: OPEN_THREAD,
 	payload,
 })
 
-export const popStackActionCreator = payload => ({
-	type: POP_STACK,
+export const closeThreadActionCreator = payload => ({
+	type: CLOSE_THREAD,
 	payload,
 })
-
-export const sliceStackActionCreator = payload => ({
-	type: SLICE_STACK,
-	payload,
-})
-
 
 export const messagesFailedActionCreator = index => payload => ({
 	type: MESSAGES_FAILED,

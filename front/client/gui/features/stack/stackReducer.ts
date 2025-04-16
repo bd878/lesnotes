@@ -1,7 +1,6 @@
 import {
-	PUSH_STACK,
-	POP_STACK,
-	SLICE_STACK,
+	OPEN_THREAD,
+	CLOSE_THREAD,
 
 	UPDATE_MESSAGE,
 	DELETE_MESSAGE,
@@ -19,7 +18,8 @@ import {
 } from './stackActions';
 import * as is from '../../../third_party/is'
 
-const elem = {
+const thread = {
+	ID: 0,
 	list: [],
 	messageForEdit: {},
 	isLastPage: false,
@@ -28,10 +28,10 @@ const elem = {
 }
 
 const initialState = {
-	stack: [structuredClone(elem)],
+	stack: [structuredClone(thread)],
 }
 
-function messageReducer(messagesState = elem, action) {
+function messageReducer(messagesState = thread, action) {
 	switch (action.type) {
 	case MESSAGES_FAILED: {
 		return {
@@ -129,22 +129,23 @@ function messageReducer(messagesState = elem, action) {
 
 export function stackReducer(stackState = initialState, action) {
 	switch (action.type) {
-		case PUSH_STACK: {
+		case OPEN_THREAD: {
+			const nextStack = stackState.stack.slice(0, action.payload.index+1)
+
+			const nextThread = structuredClone(thread)
+			nextThread.ID = action.payload.threadID
+			nextStack.push(nextThread)
+
 			return {
 				...stackState,
-				stack: [...stackState.stack, structuredClone(elem)],
+				stack: nextStack,
 			}
 		}
-		case POP_STACK: {
+		case CLOSE_THREAD: {
+			const index = action.payload.index
 			return {
 				...stackState,
-				stack: stackState.stack.slice(0, -1),
-			}
-		}
-		case SLICE_STACK: {
-			return {
-				...stackState,
-				stack: stackState.stack.slice(0, action.index),
+				stack: stackState.stack.slice(0, index+1),
 			}
 		}
 	}
@@ -154,7 +155,7 @@ export function stackReducer(stackState = initialState, action) {
 		if (is.notUndef(messageState)) {
 			stackState.stack[action.index] = messageReducer(messageState, action)
 		} else {
-			console.error("cannot find elem by index", action.index, action.type)
+			console.error("cannot find Thread by index", action.index, action.type)
 		}
 		return {
 			...stackState

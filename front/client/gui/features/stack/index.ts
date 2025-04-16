@@ -1,5 +1,7 @@
 import {stackReducer} from './stackReducer';
 import {
+	openThreadActionCreator,
+	closeThreadActionCreator,
 	setEditMessageActionCreator,
 	sendMessageActionCreator,
 	fetchMessagesActionCreator,
@@ -9,6 +11,7 @@ import {
 	copyMessageActionCreator,
 } from './stackActionCreators'
 import {
+	selectHasNextThread,
 	selectStack,
 	selectMessages,
 	selectError,
@@ -17,6 +20,7 @@ import {
 	selectLoadOffset,
 	selectMessageForEdit,
 	selectIsEditMode,
+	selectThreadID,
 } from './stackSelectors'
 import {stackSaga} from './stackSagas';
 
@@ -30,7 +34,11 @@ export {
 	selectIsLoading,
 	selectLoadOffset,
 	selectMessageForEdit,
+	selectHasNextThread,
+	selectThreadID,
 	selectIsEditMode,
+	openThreadActionCreator,
+	closeThreadActionCreator,
 	setEditMessageActionCreator,
 	sendMessageActionCreator,
 	fetchMessagesActionCreator,

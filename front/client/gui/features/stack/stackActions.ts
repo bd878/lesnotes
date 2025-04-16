@@ -1,6 +1,5 @@
-export const PUSH_STACK = "@stack/PUSH"
-export const POP_STACK = "@stack/POP"
-export const SLICE_STACK = "@stack/SLICE"
+export const OPEN_THREAD = "@stack/OPEN_THREAD"
+export const CLOSE_THREAD = "@stack/CLOSE_THREAD"
 
 export const SEND_MESSAGE = "@stack/SEND_MESSAGE"
 export const FETCH_MESSAGES = "@stack/FETCH_MESSAGES"

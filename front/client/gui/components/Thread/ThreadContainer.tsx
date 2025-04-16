@@ -14,6 +14,8 @@ import {
 	selectIsLoading,
 	selectError,
 	selectLoadOffset,
+	selectHasNextThread,
+	selectThreadID,
 	sendMessageActionCreator,
 	updateMessageActionCreator,
 	selectMessageForEdit,
@@ -26,11 +28,16 @@ import {
 
 function ThreadContainer(props) {
 	const {
+		index,
+		threadID,
+		openThread,
+		closeThread,
 		messages,
 		error,
 		logout,
 		isLastPage,
 		isLoading,
+		hasNextThread,
 		loadOffset,
 		fetchMessages,
 		sendMessage,
@@ -50,8 +57,8 @@ function ThreadContainer(props) {
 	}, [listRef]);
 
 	useEffect(() => {
-		fetchMessages({limit: LIMIT_LOAD_BY, offset: 0, order: LOAD_ORDER})
-	}, [fetchMessages]);
+		fetchMessages({limit: LIMIT_LOAD_BY, offset: 0, order: LOAD_ORDER, threadID: threadID})
+	}, [fetchMessages, threadID]);
 
 	const loadMore = useCallback(() => {
 		if (is.notEmpty(listRef.current) && !isLoading && !isLastPage)
@@ -62,6 +69,13 @@ function ThreadContainer(props) {
 		if (is.notEmpty(listRef.current) && is.notEmpty(listRef.current.scrollTop))
 			loadMore()
 	}, [listRef.current, loadMore]);
+
+	const onToggleThreadClick = useCallback(message => {
+		if (hasNextThread)
+			closeThread(message)
+		else
+			openThread(message)
+	}, [closeThread, openThread, hasNextThread])
 
 	const onDeleteClick = useCallback(deleteMessage, [deleteMessage])
 	const onEditClick = useCallback(setEditMessage, [setEditMessage])
@@ -83,7 +97,7 @@ function ThreadContainer(props) {
 			checkMyThreadOpen={() => {}}
 			onDeleteClick={onDeleteClick}
 			onEditClick={onEditClick}
-			onToggleThreadClick={() => {}}
+			onToggleThreadClick={onToggleThreadClick}
 			onCopyClick={onCopyClick}
 			send={sendMessage}
 			update={updateMessage}
@@ -95,12 +109,14 @@ function ThreadContainer(props) {
 
 const mapStateToProps = (state, {index}) => ({
 	messages: selectMessages(index)(state),
+	hasNextThread: selectHasNextThread(index)(state),
 	isLoading: selectIsLoading(index)(state),
 	isLastPage: selectIsLastPage(index)(state),
 	loadOffset: selectLoadOffset(index)(state),
 	error: selectError(index)(state),
 	messageForEdit: selectMessageForEdit(index)(state),
 	isEditMode: selectIsEditMode(index)(state),
+	threadID: selectThreadID(index)(state),
 })
 
 const mapDispatchToProps = (dispatch, {index}) => ({
