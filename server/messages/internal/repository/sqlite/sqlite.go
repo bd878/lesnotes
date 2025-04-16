@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"errors"
-	"strconv"
 	"strings"
 	"database/sql"
 
@@ -30,7 +29,6 @@ type Repository struct {
 	descNotPrivateStmt *sql.Stmt
 	ascPrivateStmt *sql.Stmt
 	descPrivateStmt *sql.Stmt
-	selectStmt *sql.Stmt
 	deleteThreadStmt *sql.Stmt
 }
 
@@ -39,13 +37,6 @@ func New(dbFilePath string) *Repository {
 	if err != nil {
 		panic(err)
 	}
-
-	selectStmt := utils.Must(pool.Prepare(`
-SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id, private
-FROM messages
-WHERE id = :id AND (user_id IN (:usersList) OR private = 0)
-;`,
-	))
 
 	insertStmt := utils.Must(pool.Prepare(`
 INSERT INTO messages( 
@@ -197,7 +188,6 @@ LIMIT :limit OFFSET :offset
 		deleteStmt: deleteStmt,
 		ascStmt: ascStmt,
 		descStmt: descStmt,
-		selectStmt: selectStmt,
 		ascThreadStmt: ascThreadStmt,
 		descThreadStmt: descThreadStmt,
 		deleteThreadStmt: deleteThreadStmt,
@@ -461,14 +451,18 @@ func (r *Repository) Read(ctx context.Context, log *logger.Logger, params *model
 		privateCol sql.NullInt32
 	)
 
-	list := make([]string, len(params.UserIDs))
+	list := make([]interface{}, len(params.UserIDs))
 	for i, id := range params.UserIDs {
-		list[i] = strconv.Itoa(int(id))
+		list[i] = id
 	}
 
-	usersList := strings.Join(list, ", ")
-	log.Info("users list", usersList)
-	err := r.selectStmt.QueryRowContext(ctx, sql.Named("id", params.ID), sql.Named("usersList", usersList)).Scan(
+	selectStmt := `
+SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id, private
+FROM messages
+WHERE id = ? AND (user_id IN (?` + strings.Repeat(",?", len(list)-1) + `) OR private = 0)
+	`
+
+	err := r.pool.QueryRowContext(ctx, selectStmt, []interface{}{params.ID, list}...).Scan(
 		&_id, &userId, &threadIdCol, &createUtcNano, &updateUtcNano, &text, &fileIdCol, &privateCol)
 	if err != nil {
 		log.Errorln("failed to select one message")
