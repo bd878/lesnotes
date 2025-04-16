@@ -51,6 +51,7 @@ func (h *Handler) SaveMessage(ctx context.Context, req *api.SaveMessageRequest) 
 		Id: req.Message.Id,
 		CreateUtcNano: req.Message.CreateUtcNano,
 		UpdateUtcNano: req.Message.UpdateUtcNano,
+		Private: req.Message.Private,
 	}, nil
 }
 

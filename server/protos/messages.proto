@@ -72,6 +72,7 @@ message SaveMessageResponse {
 	int32    id = 1;
 	int64    create_utc_nano = 2;
 	int64    update_utc_nano = 3;
+	bool     private = 4;
 }
 
 message DeleteMessageRequest {

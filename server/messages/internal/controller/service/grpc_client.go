@@ -84,6 +84,7 @@ func (s *Messages) SaveMessage(ctx context.Context, log *logger.Logger, message 
 		ID: res.Id,
 		UpdateUTCNano: res.UpdateUtcNano,
 		CreateUTCNano: res.CreateUtcNano,
+		Private: res.Private,
 	}, nil
 }
 
