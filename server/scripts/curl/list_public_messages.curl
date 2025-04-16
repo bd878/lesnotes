@@ -1,1 +1,0 @@
-url = https://%STAGE%lesnotes.space/messages/v1/read?limit=%LIMIT%&offset=%OFFSET%&public=1
