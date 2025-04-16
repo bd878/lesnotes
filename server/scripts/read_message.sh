@@ -2,11 +2,9 @@
 
 # Reads a message
 
-[ -e ".env" ] && source ".env"
-
-stage=${STAGE:-""}
+stage=${STAGE:-"stage."}
 cookie=${COOKIE:-"cookie.txt"}
-id=${ID:?"Usage: env ID=<messageId> ./read_message.sh"}
+id=${1:?"Usage: ./read_message.sh message_id"}
 
 cmd=`cat <<HERE
 sed -e "s/%STAGE%/$stage/g" \

@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 	"errors"
+	"strconv"
+	"strings"
 	"database/sql"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -41,7 +43,7 @@ func New(dbFilePath string) *Repository {
 	selectStmt := utils.Must(pool.Prepare(`
 SELECT id, user_id, thread_id, create_utc_nano, update_utc_nano, text, file_id, private
 FROM messages
-WHERE id = :id AND user_id = :userId AND (thread_id ISNULL OR thread_id = 0)
+WHERE id = :id AND user_id IN (:usersList)
 ;`,
 	))
 
@@ -279,7 +281,7 @@ func (r *Repository) Delete(ctx context.Context, log *logger.Logger, params *mod
 		}
 	}()
 
-	msg, err := r.Read(ctx, log, params.UserID, params.ID)
+	msg, err := r.Read(ctx, log, &model.ReadOneMessageParams{ID: params.ID, UserIDs: []int32{params.UserID}})
 	if err != nil {
 		log.Errorln("cannot delete, no message found")
 		return err
@@ -445,7 +447,7 @@ func (r *Repository) ReadAllMessages(ctx context.Context, log *logger.Logger, pa
 	}, nil
 }
 
-func (r *Repository) Read(ctx context.Context, log *logger.Logger, userID, id int32) (
+func (r *Repository) Read(ctx context.Context, log *logger.Logger, params *model.ReadOneMessageParams) (
 	*model.Message, error,
 ) {
 	var (
@@ -459,7 +461,12 @@ func (r *Repository) Read(ctx context.Context, log *logger.Logger, userID, id in
 		privateCol sql.NullInt32
 	)
 
-	err := r.selectStmt.QueryRowContext(ctx, sql.Named("id", id), sql.Named("userId", userID)).Scan(
+	list := make([]string, len(params.UserIDs))
+	for i, id := range params.UserIDs {
+		list[i] = strconv.Itoa(int(id))
+	}
+
+	err := r.selectStmt.QueryRowContext(ctx, sql.Named("id", params.ID), sql.Named("usersList", strings.Join(list, ", "))).Scan(
 		&_id, &userId, &threadIdCol, &createUtcNano, &updateUtcNano, &text, &fileIdCol, &privateCol)
 	if err != nil {
 		log.Errorln("failed to select one message")
@@ -467,7 +474,7 @@ func (r *Repository) Read(ctx context.Context, log *logger.Logger, userID, id in
 	}
 
 	msg := &model.Message{
-		ID: id,
+		ID: params.ID,
 		UserID: userId,
 		CreateUTCNano: createUtcNano,
 		UpdateUTCNano: updateUtcNano,

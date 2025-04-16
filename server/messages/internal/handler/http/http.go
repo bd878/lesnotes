@@ -11,13 +11,14 @@ import (
 
 	filesmodel "github.com/bd878/gallery/server/files/pkg/model"
 	servermodel "github.com/bd878/gallery/server/pkg/model"
+	usermodel "github.com/bd878/gallery/server/users/pkg/model"
 	"github.com/bd878/gallery/server/messages/pkg/model"
 	"github.com/bd878/gallery/server/utils"
 	"github.com/bd878/gallery/server/logger"
 )
 
 type Controller interface {
-	ReadOneMessage(ctx context.Context, log *logger.Logger, userID, messageID int32) (*model.Message, error)
+	ReadOneMessage(ctx context.Context, log *logger.Logger, params *model.ReadOneMessageParams) (*model.Message, error)
 	SaveMessage(ctx context.Context, log *logger.Logger, message *model.Message) (*model.SaveMessageResult, error)
 	UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (*model.UpdateMessageResult, error)
 	DeleteMessage(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) (*model.DeleteMessageResult, error)
@@ -575,7 +576,10 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 		isLastPage = res.IsLastPage
 	} else if messageID != 0 {
 		// read one message
-		res, err := h.controller.ReadOneMessage(req.Context(), log, user.ID, messageID)
+		res, err := h.controller.ReadOneMessage(req.Context(), log, &model.ReadOneMessageParams{
+			ID: messageID,
+			UserIDs: []int32{user.ID, usermodel.PublicUserID},
+		})
 		if err != nil {
 			log.Errorw("failed to read one message", "user_id", user.ID, "message_id", messageID, "error", err)
 			w.WriteHeader(http.StatusInternalServerError)

@@ -87,10 +87,10 @@ func (m *DistributedMessages) DeleteMessage(ctx context.Context, log *logger.Log
 	return nil
 }
 
-func (m *DistributedMessages) ReadMessage(ctx context.Context, log *logger.Logger, userID, messageID int32) (
+func (m *DistributedMessages) ReadMessage(ctx context.Context, log *logger.Logger, params *model.ReadOneMessageParams) (
 	*model.Message, error,
 ) {
-	return m.repo.Read(ctx, log, userID, messageID)
+	return m.repo.Read(ctx, log, params)
 }
 
 func (m *DistributedMessages) ReadThreadMessages(ctx context.Context, log *logger.Logger, params *model.ReadThreadMessagesParams) (

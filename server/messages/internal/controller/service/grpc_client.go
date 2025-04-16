@@ -195,7 +195,7 @@ func (s *Messages) ReadAllMessages(ctx context.Context, log *logger.Logger, para
 	}, err
 }
 
-func (s *Messages) ReadOneMessage(ctx context.Context, log *logger.Logger, userID, messageID int32) (
+func (s *Messages) ReadOneMessage(ctx context.Context, log *logger.Logger, params *model.ReadOneMessageParams) (
 	*model.Message, error,
 ) {
 	if s.isConnFailed() {
@@ -206,11 +206,11 @@ func (s *Messages) ReadOneMessage(ctx context.Context, log *logger.Logger, userI
 	}
 
 	res, err := s.client.ReadOneMessage(ctx, &api.ReadOneMessageRequest{
-		UserId: userID,
-		Id: messageID,
+		Id: params.ID,
+		UserIds: params.UserIDs,
 	})
 	if err != nil {
-		log.Errorw("client failed to read user message", "user_id", userID, "message_id", messageID, "error", err)
+		log.Errorw("client failed to read user message", "user_ids", params.UserIDs, "message_id", params.ID, "error", err)
 		return nil, err
 	}
 

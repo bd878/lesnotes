@@ -11,6 +11,11 @@ type SaveMessageResult struct {
 	Private           bool
 }
 
+type ReadOneMessageParams struct {
+	ID int32
+	UserIDs []int32
+}
+
 type UpdateMessageParams struct {
 	ID                int32
 	ThreadID          int32

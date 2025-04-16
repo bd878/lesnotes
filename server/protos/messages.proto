@@ -97,5 +97,5 @@ message Server {
 
 message ReadOneMessageRequest {
 	int32  id = 1;
-	int32  user_id = 2;
+	repeated int32  user_ids = 2;
 }
