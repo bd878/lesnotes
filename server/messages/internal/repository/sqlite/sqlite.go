@@ -29,7 +29,7 @@ type Repository struct {
 	descNotPrivateStmt *sql.Stmt
 	ascPrivateStmt *sql.Stmt
 	descPrivateStmt *sql.Stmt
-	deleteThreadStmt *sql.Stmt
+	moveThreadStmt *sql.Stmt
 }
 
 func New(dbFilePath string) *Repository {
@@ -67,8 +67,8 @@ WHERE id = :id AND user_id = :userId
 ;`,
 	))
 
-	deleteThreadStmt := utils.Must(pool.Prepare(`
-DELETE FROM messages
+	moveThreadStmt := utils.Must(pool.Prepare(`
+UPDATE messages SET thread_id = 0
 WHERE thread_id = :threadId
 ;`,
 	))
@@ -190,7 +190,7 @@ LIMIT :limit OFFSET :offset
 		descStmt: descStmt,
 		ascThreadStmt: ascThreadStmt,
 		descThreadStmt: descThreadStmt,
-		deleteThreadStmt: deleteThreadStmt,
+		moveThreadStmt: moveThreadStmt,
 		ascPrivateStmt: ascPrivateStmt,
 		descPrivateStmt: descPrivateStmt,
 		ascNotPrivateStmt: ascNotPrivateStmt,
@@ -242,7 +242,6 @@ func (r *Repository) Create(ctx context.Context, log *logger.Logger, message *mo
 	return nil
 }
 
-// TODO: utilise ctx timeout
 func (r *Repository) Delete(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error {
 	var (
 		tx *sql.Tx
@@ -277,28 +276,15 @@ func (r *Repository) Delete(ctx context.Context, log *logger.Logger, params *mod
 		return err
 	}
 
-	// parent message, no thread id
-	if msg.ThreadID == 0 {
-		err = r.deleteThreadMessages(ctx, log, tx, params.ID)
-		if err != nil {
-			log.Errorln("failed to delete thread messages")
-			return err
-		}
+	_, err = tx.StmtContext(ctx, r.moveThreadStmt).ExecContext(ctx, sql.Named("threadId", msg.ID))
+	if err != nil {
+		log.Errorw("failed to move thread messages to root", "threadId", msg.ID)
+		return err
 	}
 
 	_, err = tx.StmtContext(ctx, r.deleteStmt).ExecContext(ctx, sql.Named("id", params.ID), sql.Named("userId", params.UserID))
 	if err != nil {
 		log.Errorln("failed to delete message")
-		return err
-	}
-
-	return nil
-}
-
-func (r *Repository) deleteThreadMessages(ctx context.Context, log *logger.Logger, tx *sql.Tx, threadID int32) error {
-	_, err := tx.StmtContext(ctx, r.deleteThreadStmt).ExecContext(ctx, sql.Named("threadId", threadID))
-	if err != nil {
-		log.Errorw("failed to delete thread messages", "threadId", threadID)
 		return err
 	}
 

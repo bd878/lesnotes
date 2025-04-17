@@ -65,12 +65,12 @@ paths:
   /messages/v1/delete:
     parameters:
       - $ref: '#/components/parameters/messageId'
-      - $ref: '#/components/parameters/public'
     delete:
       operationId: deleteMessage
       summary: Delete a message
       description: |
-        Delete a message and attached file
+        Deletes a user's message and attached file.
+        Thread messages becomes root thread messages, i.e. thread_id = 0
       responses:
         "200":
           description: OK

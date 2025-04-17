@@ -256,6 +256,16 @@ func (h *Handler) DeleteMessage(log *logger.Logger, w http.ResponseWriter, req *
 		return
 	}
 
+	if user.ID == usermodel.PublicUserID {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			Status: "error",
+			Description: "cannot delete public message",
+		})
+
+		return
+	}
+
 	values := req.URL.Query()
 	if values.Get("id") == "" {
 		w.WriteHeader(http.StatusBadRequest)
@@ -373,6 +383,16 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 		}		
 	} else {
 		private = -1
+	}
+
+	if user.ID == usermodel.PublicUserID && private == 1 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			Status: "error",
+			Description: "cannot make private public message",
+		})
+
+		return
 	}
 
 	resp, err := h.controller.UpdateMessage(req.Context(), log, &model.UpdateMessageParams{

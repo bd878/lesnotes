@@ -7,3 +7,6 @@ TODOS:
 6. Update message make it public
 7. Update file make it public
 8. Delete thread message deletes all its threads
+9. Delete message and attached files
+10. Public messages (with public user id) could not be deleted
+11. Prohibit making private public user messages
