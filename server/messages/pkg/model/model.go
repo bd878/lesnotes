@@ -23,12 +23,13 @@ type UpdateMessageParams struct {
 	FileID            int32
 	Text              string
 	UpdateUTCNano     int64
-	Private           bool
+	Private           int32
 }
 
 type UpdateMessageResult struct {
 	ID                int32
 	UpdateUTCNano     int64
+	Private           bool
 }
 
 type DeleteMessageParams struct {

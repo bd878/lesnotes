@@ -305,22 +305,63 @@ func (r *Repository) deleteThreadMessages(ctx context.Context, log *logger.Logge
 	return nil
 }
 
-func (r *Repository) Update(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) error {
-	var privateCol int32
-	if params.Private {
-		privateCol = 1
+func (r *Repository) Update(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (*model.UpdateMessageResult, error) {
+	var (
+		tx *sql.Tx
+		err error
+		private int32
+	)
+
+	tx, err = r.pool.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return nil, err
 	}
-	_, err := r.updateStmt.ExecContext(ctx,
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback()
+			panic(p)
+		case err != nil:
+			err = tx.Rollback()
+		default:
+			err = tx.Commit()
+		}
+	}()
+
+	err = tx.QueryRowContext(ctx, "SELECT private FROM messages WHERE id = $1 LIMIT 1", params.ID).Scan(&private)
+	if err != nil {
+		return nil, err
+	}
+
+	if params.Private == 0 {
+		private = 0
+	} else if params.Private == 1 {
+		private = 1
+	}
+
+	_, err = tx.StmtContext(ctx, r.updateStmt).ExecContext(ctx, 
 		sql.Named("text", params.Text),
 		sql.Named("updateUtcNano", params.UpdateUTCNano),
 		sql.Named("id", params.ID),
 		sql.Named("userId", params.UserID),
-		sql.Named("private", privateCol))
+		sql.Named("private", private),
+	)
 	if err != nil {
 		log.Errorln("failed to update message")
-		return err
+		return nil, err
 	}
-	return nil
+
+	var privateRes bool
+	if private == 0 {
+		privateRes = false
+	} else {
+		privateRes = true
+	}
+
+	return &model.UpdateMessageResult{
+		Private: privateRes,
+	}, nil
 }
 
 func (r *Repository) Truncate(ctx context.Context, log *logger.Logger) error {

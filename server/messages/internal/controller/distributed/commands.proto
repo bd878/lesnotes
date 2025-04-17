@@ -18,10 +18,12 @@ message UpdateCommand {
 	int32   file_id = 3;
 	string  text = 4;
 	int64   update_utc_nano = 5;
-	bool    private = 6;
+	int32   private = 6;
 }
 
 message UpdateCommandResult {
+	int64   update_utc_nano = 1;
+	bool    private = 2;
 }
 
 message DeleteCommand {

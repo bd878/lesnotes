@@ -38,7 +38,6 @@ paths:
   /messages/v1/update:
     parameters:
       - $ref: '#/components/parameters/messageId'
-      - $ref: '#/components/parameters/public'
     put:
       summary: Update a message
       description: |
@@ -268,14 +267,29 @@ components:
           $ref: '#/components/schemas/message'
 
     updateMessage:
-      type: object
-      properties:
-        message:
-          type: string
-          example: "test message"
-        file_id:
-          type: string
-          example: ""
+      oneOf:
+        - type: object
+          properties:
+            public:
+              type: integer
+              example: 1
+            message:
+              type: string
+              example: "test message"
+            file_id:
+              type: string
+              example: ""
+        - type: object
+          properties:
+            public:
+              type: integer
+              example: 1
+            message:
+              type: string
+              example: "test message"
+            file:
+              type: string
+              format: binary
 
     sendBody:
       oneOf:

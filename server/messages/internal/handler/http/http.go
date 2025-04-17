@@ -303,7 +303,7 @@ func (h *Handler) DeleteMessage(log *logger.Logger, w http.ResponseWriter, req *
 }
 
 func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
-	var private bool
+	var private int32
 
 	user, ok := utils.GetUser(w, req)
 	if !ok {
@@ -350,7 +350,8 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 		return
 	}
 
-	if values.Get("public") != "" {
+	public := req.PostFormValue("public")
+	if public != "" {
 		public, err := strconv.Atoi(values.Get("public"))
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -363,12 +364,14 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 		}
 
 		if public > 0 {
-			private = false
+			private = 0
 		} else if public == 0 {
-			private = true
+			private = 1
 		} else {
-			private = true
-		}
+			private = -1
+		}		
+	} else {
+		private = -1
 	}
 
 	resp, err := h.controller.UpdateMessage(req.Context(), log, &model.UpdateMessageParams{
@@ -395,6 +398,7 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 		},
 		ID: resp.ID,
 		UpdateUTCNano: resp.UpdateUTCNano,
+		Private: resp.Private,
 	})
 }
 

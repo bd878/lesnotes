@@ -12,7 +12,7 @@ import (
 
 type Repository interface {
 	Create(ctx context.Context, log *logger.Logger, message *model.Message) error
-	Update(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) error
+	Update(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (*model.UpdateMessageResult, error)
 	Delete(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error
 	Read(ctx context.Context, log *logger.Logger, params *model.ReadOneMessageParams) (*model.Message, error)
 	ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadMessagesParams) (*model.ReadMessagesResult, error)
@@ -65,7 +65,7 @@ func (f *fsm) applyUpdate(raw []byte) interface{} {
 	var cmd UpdateCommand
 	proto.Unmarshal(raw, &cmd)
 
-	err := f.repo.Update(context.Background(), logger.Default(), &model.UpdateMessageParams{
+	res, err := f.repo.Update(context.Background(), logger.Default(), &model.UpdateMessageParams{
 		ID: cmd.Id,
 		UserID: cmd.UserId,
 		FileID: cmd.FileId,
@@ -77,7 +77,10 @@ func (f *fsm) applyUpdate(raw []byte) interface{} {
 		return err
 	}
 
-	return &UpdateCommandResult{}
+	return &UpdateCommandResult{
+		UpdateUtcNano: cmd.UpdateUtcNano,
+		Private: res.Private,
+	}
 }
 
 func (f *fsm) applyDelete(raw []byte) interface{} {

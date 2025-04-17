@@ -4,3 +4,6 @@ TODOS:
 3. Can send a public message with thread_id that do not exists
 - 4. Upgrade to protoc-gen-go 1.36 and protoc 3.12.4
 5. Message on public user should be always public (private: false)
+6. Update message make it public
+7. Update file make it public
+8. Delete thread message deletes all its threads

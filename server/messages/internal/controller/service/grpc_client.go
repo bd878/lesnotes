@@ -120,7 +120,7 @@ func (s *Messages) UpdateMessage(ctx context.Context, log *logger.Logger, params
 		}
 	}
 
-	res, err := s.client.UpdateMessage(ctx, &api.UpdateMessageRequest{
+	resp, err := s.client.UpdateMessage(ctx, &api.UpdateMessageRequest{
 		Id: params.ID,
 		UserId: params.UserID,
 		FileId: params.FileID,
@@ -133,7 +133,9 @@ func (s *Messages) UpdateMessage(ctx context.Context, log *logger.Logger, params
 	}
 
 	return &model.UpdateMessageResult{
-		UpdateUTCNano: res.UpdateUtcNano,
+		ID: params.ID,
+		UpdateUTCNano: resp.UpdateUtcNano,
+		Private: resp.Private,
 	}, nil
 }
 
