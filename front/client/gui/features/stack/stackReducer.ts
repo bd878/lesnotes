@@ -1,6 +1,7 @@
 import {
 	OPEN_THREAD,
 	CLOSE_THREAD,
+	DESTROY_THREAD,
 
 	UPDATE_MESSAGE,
 	DELETE_MESSAGE,
@@ -146,6 +147,12 @@ export function stackReducer(stackState = initialState, action) {
 			return {
 				...stackState,
 				stack: stackState.stack.slice(0, index+1),
+			}
+		}
+		case DESTROY_THREAD: {
+			return {
+				...stackState,
+				stack: stackState.stack.slice(0, action.payload.index),
 			}
 		}
 	}

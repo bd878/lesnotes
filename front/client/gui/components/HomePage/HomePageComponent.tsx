@@ -10,6 +10,7 @@ function HomePageComponent(props) {
 		stack,
 		openThread,
 		closeThread,
+		destroyThread,
 	} = props;
 
 	return (
@@ -20,6 +21,7 @@ function HomePageComponent(props) {
 					key={elem.ID}
 					thread={elem}
 					index={index}
+					destroyThread={destroyThread(index)}
 					openThread={openThread(index)}
 					closeThread={closeThread(index)}
 					destroyContent={index === 0 ? "< " + i18n("logout") : i18n("close_button_text")}

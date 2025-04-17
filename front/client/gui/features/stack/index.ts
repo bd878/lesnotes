@@ -9,6 +9,7 @@ import {
 	resetEditMessageActionCreator,
 	deleteMessageActionCreator,
 	copyMessageActionCreator,
+	destroyThreadActionCreator,
 } from './stackActionCreators'
 import {
 	selectHasNextThread,
@@ -45,6 +46,7 @@ export {
 	sendMessageActionCreator,
 	fetchMessagesActionCreator,
 	updateMessageActionCreator,
+	destroyThreadActionCreator,
 	resetEditMessageActionCreator,
 	deleteMessageActionCreator,
 	copyMessageActionCreator,

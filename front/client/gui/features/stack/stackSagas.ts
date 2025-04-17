@@ -49,9 +49,9 @@ function* sendMessage({index, payload}) {
 				return
 			}
 
-			response = yield call(api.sendMessage, {text: payload.text, fileID: response.ID})
+			response = yield call(api.sendMessage, {text: payload.text, fileID: response.ID, threadID: payload.threadID})
 		} else {
-			response = yield call(api.sendMessage, {text: payload.text})
+			response = yield call(api.sendMessage, {text: payload.text, threadID: payload.threadID})
 		}
 
 		if (is.notEmpty(response.error))

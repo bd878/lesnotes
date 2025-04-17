@@ -1,6 +1,7 @@
 import {
 	OPEN_THREAD,
 	CLOSE_THREAD,
+	DESTROY_THREAD,
 
 	UPDATE_MESSAGE,
 	DELETE_MESSAGE,
@@ -24,6 +25,11 @@ export const openThreadActionCreator = payload => ({
 
 export const closeThreadActionCreator = payload => ({
 	type: CLOSE_THREAD,
+	payload,
+})
+
+export const destroyThreadActionCreator = payload => ({
+	type: DESTROY_THREAD,
 	payload,
 })
 

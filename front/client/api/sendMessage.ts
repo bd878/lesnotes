@@ -29,7 +29,7 @@ async function sendMessage(params: SendMessageParams) {
 		form.append("file_id", fileID);
 
 	const queryParams = {}
-	if (threadID !== 0 && is.notUndef(threadID))
+	if (is.notEmpty(threadID))
 		queryParams.thread_id = threadID
 
 	try {

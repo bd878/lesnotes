@@ -36,6 +36,7 @@ function ThreadContainer(props) {
 		threadID,
 		openThread,
 		closeThread,
+		destroyThread,
 		messages,
 		error,
 		logout,
@@ -85,13 +86,18 @@ function ThreadContainer(props) {
 	const onEditClick = useCallback(setEditMessage, [setEditMessage])
 	const onCopyClick = useCallback(copyMessage, [copyMessage])
 
+	const onMessageSend = useCallback(payload => {
+		payload.threadID = threadID
+		sendMessage(payload)
+	}, [sendMessage, threadID])
+
 	return (
 		<ThreadComponent
 			ref={listRef}
 			css={css}
 			destroyContent={destroyContent}
 			loadMoreContent={i18n("load_more")}
-			onDestroyClick={() => {}}
+			onDestroyClick={destroyThread}
 			onLoadMoreClick={() => {}}
 			isAllLoaded={isLastPage}
 			onScroll={onListScroll}
@@ -104,7 +110,7 @@ function ThreadContainer(props) {
 			onEditClick={onEditClick}
 			onToggleThreadClick={onToggleThreadClick}
 			onCopyClick={onCopyClick}
-			send={sendMessage}
+			send={onMessageSend}
 			update={updateMessage}
 			reset={resetEditMessage}
 			messageForEdit={messageForEdit}
