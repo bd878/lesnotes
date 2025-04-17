@@ -352,9 +352,9 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 
 	public := req.PostFormValue("public")
 	if public != "" {
-		public, err := strconv.Atoi(values.Get("public"))
+		publicInt, err := strconv.Atoi(public)
 		if err != nil {
-			log.Errorw("wrong public param", "public", values.Get("public"))
+			log.Errorw("wrong public param", "public", public)
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(servermodel.ServerResponse{
 				Status: "error",
@@ -364,9 +364,9 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 			return
 		}
 
-		if public == 1 {
+		if publicInt == 1 {
 			private = 0
-		} else if public == 0 {
+		} else if publicInt == 0 {
 			private = 1
 		} else {
 			private = -1
