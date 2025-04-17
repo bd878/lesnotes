@@ -613,7 +613,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 
 		message = res
 
-		if user.ID == usermodel.PublicUserID {
+		if message.UserID == usermodel.PublicUserID {
 			message.UserID = 0
 		}
 
@@ -729,7 +729,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 			}
 		}
 
-		if user.ID == usermodel.PublicUserID {
+		if message.UserID == usermodel.PublicUserID {
 			message.UserID = 0
 		}
 	}

@@ -270,15 +270,9 @@ func (r *Repository) Delete(ctx context.Context, log *logger.Logger, params *mod
 		}
 	}()
 
-	msg, err := r.Read(ctx, log, &model.ReadOneMessageParams{ID: params.ID, UserIDs: []int32{params.UserID}})
+	_, err = tx.StmtContext(ctx, r.moveThreadStmt).ExecContext(ctx, sql.Named("threadId", params.ID))
 	if err != nil {
-		log.Errorln("cannot delete, no message found")
-		return err
-	}
-
-	_, err = tx.StmtContext(ctx, r.moveThreadStmt).ExecContext(ctx, sql.Named("threadId", msg.ID))
-	if err != nil {
-		log.Errorw("failed to move thread messages to root", "threadId", msg.ID)
+		log.Errorw("failed to move thread messages to root", "threadId", params.ID)
 		return err
 	}
 
