@@ -1,4 +1,3 @@
 url = https://%STAGE%lesnotes.space/messages/v1/update?id=%ID%
--XPOST
 -d "text=%TEXT%"
 -d "public=%PUBLIC%"

@@ -15,9 +15,9 @@ printf "%s %s %s\n" $id $text $public
 
 cmd=`cat <<HERE
 sed -e "s/%STAGE%/$stage/g" \
-sed -e "s/%ID%/$id/g" \
-sed -e "s/%TEXT%/$text/g" \
-sed -e "s/%PUBLIC%/$public/g" ./curl/update_message.curl |
+-e "s/%ID%/$id/g" \
+-e "s/%TEXT%/$text/g" \
+-e "s/%PUBLIC%/$public/g" ./curl/update_message.curl |
 curl  --trace-ascii /dev/stdout -b $cookie -K -
 HERE`
 result=`eval "$cmd"`
