@@ -273,7 +273,7 @@ components:
             public:
               type: integer
               example: 1
-            message:
+            text:
               type: string
               example: "test message"
             file_id:
@@ -284,7 +284,7 @@ components:
             public:
               type: integer
               example: 1
-            message:
+            text:
               type: string
               example: "test message"
             file:
