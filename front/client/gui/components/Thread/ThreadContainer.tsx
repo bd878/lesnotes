@@ -16,6 +16,7 @@ import {
 	selectLoadOffset,
 	selectHasNextThread,
 	selectThreadID,
+	selectIsMessageThreadOpen,
 	sendMessageActionCreator,
 	updateMessageActionCreator,
 	selectMessageForEdit,
@@ -28,7 +29,10 @@ import {
 
 function ThreadContainer(props) {
 	const {
+		css,
 		index,
+		destroyContent,
+		checkMyThreadOpen,
 		threadID,
 		openThread,
 		closeThread,
@@ -84,17 +88,18 @@ function ThreadContainer(props) {
 	return (
 		<ThreadComponent
 			ref={listRef}
-			destroyContent={"< " + i18n("logout")}
+			css={css}
+			destroyContent={destroyContent}
 			loadMoreContent={i18n("load_more")}
 			onDestroyClick={() => {}}
 			onLoadMoreClick={() => {}}
-			isAllLoaded={false}
+			isAllLoaded={isLastPage}
 			onScroll={onListScroll}
 			error={error}
 			loading={isLoading}
 			messages={messages}
-			isAnyOpen={false}
-			checkMyThreadOpen={() => {}}
+			isAnyOpen={hasNextThread}
+			checkMyThreadOpen={checkMyThreadOpen}
 			onDeleteClick={onDeleteClick}
 			onEditClick={onEditClick}
 			onToggleThreadClick={onToggleThreadClick}
@@ -117,6 +122,7 @@ const mapStateToProps = (state, {index}) => ({
 	messageForEdit: selectMessageForEdit(index)(state),
 	isEditMode: selectIsEditMode(index)(state),
 	threadID: selectThreadID(index)(state),
+	checkMyThreadOpen: (messageID) => selectIsMessageThreadOpen(index)(state)(messageID),
 })
 
 const mapDispatchToProps = (dispatch, {index}) => ({

@@ -21,6 +21,7 @@ import {
 	selectMessageForEdit,
 	selectIsEditMode,
 	selectThreadID,
+	selectIsMessageThreadOpen,
 } from './stackSelectors'
 import {stackSaga} from './stackSagas';
 
@@ -37,6 +38,7 @@ export {
 	selectHasNextThread,
 	selectThreadID,
 	selectIsEditMode,
+	selectIsMessageThreadOpen,
 	openThreadActionCreator,
 	closeThreadActionCreator,
 	setEditMessageActionCreator,
