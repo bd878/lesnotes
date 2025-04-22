@@ -7,6 +7,7 @@ import {
 	openThreadActionCreator,
 	closeThreadActionCreator,
 } from '../../features/stack';
+import {logoutActionCreator} from '../../features/me';
 
 function HomePageContainer(props) {
 	const {
@@ -14,11 +15,12 @@ function HomePageContainer(props) {
 		open,
 		close,
 		destroy,
+		logout,
 	} = props
 
 	const openThread = useCallback(index => message => open({index, threadID: message.ID}), [open])
 	const closeThread = useCallback(index => _message => close({index}), [close])
-	const destroyThread = useCallback(index => () => destroy({index}), [destroy])
+	const destroyThread = useCallback(index => () => index === 0 ? logout() : destroy({index}), [destroy, logout])
 
 	return (
 		<HomePageComponent
@@ -35,6 +37,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = {
+	logout: logoutActionCreator,
 	open: openThreadActionCreator,
 	close: closeThreadActionCreator,
 	destroy: destroyThreadActionCreator,

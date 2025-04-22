@@ -66,12 +66,12 @@ function ThreadContainer(props) {
 	}, [fetchMessages, threadID]);
 
 	const loadMore = useCallback(() => {
-		if (is.notEmpty(listRef.current) && !isLoading && !isLastPage)
+		if (!isLoading && !isLastPage)
 			fetchMessages({limit: LIMIT_LOAD_BY, offset: loadOffset, order: LOAD_ORDER})
 	}, [listRef.current, fetchMessages, loadOffset, isLoading, isLastPage]);
 
 	const onListScroll = useCallback(() => {
-		if (is.notEmpty(listRef.current) && is.notEmpty(listRef.current.scrollTop))
+		if (is.notEmpty(listRef.current) && listRef.current.scrollTop == 0)
 			loadMore()
 	}, [listRef.current, loadMore]);
 
@@ -98,7 +98,7 @@ function ThreadContainer(props) {
 			destroyContent={destroyContent}
 			loadMoreContent={i18n("load_more")}
 			onDestroyClick={destroyThread}
-			onLoadMoreClick={() => {}}
+			onLoadMoreClick={loadMore}
 			isAllLoaded={isLastPage}
 			onScroll={onListScroll}
 			error={error}

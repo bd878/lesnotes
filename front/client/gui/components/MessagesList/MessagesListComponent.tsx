@@ -39,7 +39,7 @@ function MessagesListComponent(props) {
 									+ " "
 									+ (isAnyThreadOpen ? isMyThreadOpen ? "" : "opacity-50" : "")
 									+ " "
-									+ "mb-2 px-2 py-1 mx-1 bg-gray-100 hover:bg-gray-200 flex flex-row justify-between"
+									+ "mb-2 px-2 py-1 mx-1 bg-gray-100 flex flex-row justify-between"
 								}
 								key={`tag_${message.ID}`}
 							>
