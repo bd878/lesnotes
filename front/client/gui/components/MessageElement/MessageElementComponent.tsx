@@ -31,8 +31,8 @@ function MessageElementComponent(props) {
 						</Tag>
 
 						<Tag css="mt-2">
-							{is.trueVal(message.createUTCNano) ? <Tag><Tag el="span" css="font-bold text-sm">{i18n("created_at") + ": "}</Tag>{message.createUTCNano}</Tag> : null}
-							{equal(message.updateUTCNano).not(message.createUTCNano) ? <Tag><Tag el="span" css="font-bold text-sm">{i18n("updated_at") + ": "}</Tag>{message.updateUTCNano}</Tag> : null}
+							{is.trueVal(message.createUTCNano) ? <Tag css="text-sm"><Tag el="span" css="font-bold">{i18n("created_at") + ": "}</Tag>{message.createUTCNano}</Tag> : null}
+							{equal(message.updateUTCNano).not(message.createUTCNano) ? <Tag css="text-sm"><Tag el="span" css="font-bold">{i18n("updated_at") + ": "}</Tag>{message.updateUTCNano}</Tag> : null}
 							{is.trueVal(message.fileID) ? (
 								<Tag>
 									<Tag el="span" css="font-bold text-sm">{i18n("attachments") + ": "}</Tag>

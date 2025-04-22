@@ -2,6 +2,7 @@ import {createStore as createReduxStore, combineReducers, applyMiddleware} from 
 import {all} from 'redux-saga/effects'
 import {userReducer, userSaga} from './features/me'
 import {stackReducer, stackSaga} from './features/stack'
+import {notificationReducer, notificationSaga} from './features/notification'
 import createSagaMiddleware from 'redux-saga'
 
 let instance = null
@@ -17,6 +18,7 @@ export default function createStore({
 		instance = createReduxStore(combineReducers({
 			me: userReducer,
 			stack: stackReducer,
+			notification: notificationReducer,
 		}), {
 			me: {
 				browser,
@@ -29,6 +31,7 @@ export default function createStore({
 			yield all([
 				userSaga(),
 				stackSaga(),
+				notificationSaga(),
 			])
 		})
 	}

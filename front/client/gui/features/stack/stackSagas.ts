@@ -106,7 +106,7 @@ function* copyMessage({payload}) {
 	try {
 		const browser = yield select(selectBrowser)
 		yield call(async function copy(text, browser) {
-			// TODO: compile front with browser dirrectives?
+			// TODO: compile front with browser directives?
 			switch (browser) {
 			case "chrome":
 				const result = await navigator.permissions.query({ name: "clipboard-write" })
