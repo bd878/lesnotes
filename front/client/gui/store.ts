@@ -1,33 +1,40 @@
-import {createStore, combineReducers, applyMiddleware} from '../third_party/redux'
+import {createStore as createReduxStore, combineReducers, applyMiddleware} from '../third_party/redux'
 import {all} from 'redux-saga/effects'
 import {userReducer, userSaga} from './features/me'
 import {stackReducer, stackSaga} from './features/stack'
+import {notificationReducer, notificationSaga} from './features/notification'
 import createSagaMiddleware from 'redux-saga'
+
+let instance = null
 
 const sagaMiddleware = createSagaMiddleware()
 
-export default ({
+export default function createStore({
 	browser = "",
 	isMobile = false,
 	isDesktop = true,
-} = {}) => {
-	const store = createStore(combineReducers({
-		me: userReducer,
-		stack: stackReducer,
-	}), {
-		me: {
-			browser,
-			isMobile,
-			isDesktop,
-		},
-	}, applyMiddleware(sagaMiddleware))
+} = {}) {
+	if (instance == null) {
+		instance = createReduxStore(combineReducers({
+			me: userReducer,
+			stack: stackReducer,
+			notification: notificationReducer,
+		}), {
+			me: {
+				browser,
+				isMobile,
+				isDesktop,
+			},
+		}, applyMiddleware(sagaMiddleware))
 
-	sagaMiddleware.run(function* rootSaga() {
-		yield all([
-			userSaga(),
-			stackSaga(),
-		])
-	})
+		sagaMiddleware.run(function* rootSaga() {
+			yield all([
+				userSaga(),
+				stackSaga(),
+				notificationSaga(),
+			])
+		})
+	}
 
-	return store
+	return instance
 }

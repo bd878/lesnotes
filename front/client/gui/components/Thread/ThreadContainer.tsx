@@ -16,6 +16,7 @@ import {
 	selectLoadOffset,
 	selectHasNextThread,
 	selectThreadID,
+	selectIsMessageThreadOpen,
 	sendMessageActionCreator,
 	updateMessageActionCreator,
 	selectMessageForEdit,
@@ -28,10 +29,14 @@ import {
 
 function ThreadContainer(props) {
 	const {
+		css,
 		index,
+		destroyContent,
+		checkMyThreadOpen,
 		threadID,
 		openThread,
 		closeThread,
+		destroyThread,
 		messages,
 		error,
 		logout,
@@ -61,12 +66,12 @@ function ThreadContainer(props) {
 	}, [fetchMessages, threadID]);
 
 	const loadMore = useCallback(() => {
-		if (is.notEmpty(listRef.current) && !isLoading && !isLastPage)
+		if (!isLoading && !isLastPage)
 			fetchMessages({limit: LIMIT_LOAD_BY, offset: loadOffset, order: LOAD_ORDER})
 	}, [listRef.current, fetchMessages, loadOffset, isLoading, isLastPage]);
 
 	const onListScroll = useCallback(() => {
-		if (is.notEmpty(listRef.current) && is.notEmpty(listRef.current.scrollTop))
+		if (is.notEmpty(listRef.current) && listRef.current.scrollTop == 0)
 			loadMore()
 	}, [listRef.current, loadMore]);
 
@@ -81,25 +86,31 @@ function ThreadContainer(props) {
 	const onEditClick = useCallback(setEditMessage, [setEditMessage])
 	const onCopyClick = useCallback(copyMessage, [copyMessage])
 
+	const onMessageSend = useCallback(payload => {
+		payload.threadID = threadID
+		sendMessage(payload)
+	}, [sendMessage, threadID])
+
 	return (
 		<ThreadComponent
 			ref={listRef}
-			destroyContent={"< " + i18n("logout")}
+			css={css}
+			destroyContent={destroyContent}
 			loadMoreContent={i18n("load_more")}
-			onDestroyClick={() => {}}
-			onLoadMoreClick={() => {}}
-			isAllLoaded={false}
+			onDestroyClick={destroyThread}
+			onLoadMoreClick={loadMore}
+			isAllLoaded={isLastPage}
 			onScroll={onListScroll}
 			error={error}
 			loading={isLoading}
 			messages={messages}
-			isAnyOpen={false}
-			checkMyThreadOpen={() => {}}
+			isAnyOpen={hasNextThread}
+			checkMyThreadOpen={checkMyThreadOpen}
 			onDeleteClick={onDeleteClick}
 			onEditClick={onEditClick}
 			onToggleThreadClick={onToggleThreadClick}
 			onCopyClick={onCopyClick}
-			send={sendMessage}
+			send={onMessageSend}
 			update={updateMessage}
 			reset={resetEditMessage}
 			messageForEdit={messageForEdit}
@@ -117,6 +128,7 @@ const mapStateToProps = (state, {index}) => ({
 	messageForEdit: selectMessageForEdit(index)(state),
 	isEditMode: selectIsEditMode(index)(state),
 	threadID: selectThreadID(index)(state),
+	checkMyThreadOpen: (messageID) => selectIsMessageThreadOpen(index)(state)(messageID),
 })
 
 const mapDispatchToProps = (dispatch, {index}) => ({

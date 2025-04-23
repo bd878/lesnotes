@@ -256,6 +256,16 @@ func (h *Handler) DeleteMessage(log *logger.Logger, w http.ResponseWriter, req *
 		return
 	}
 
+	if user.ID == usermodel.PublicUserID {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			Status: "error",
+			Description: "cannot delete public message",
+		})
+
+		return
+	}
+
 	values := req.URL.Query()
 	if values.Get("id") == "" {
 		w.WriteHeader(http.StatusBadRequest)
@@ -303,7 +313,7 @@ func (h *Handler) DeleteMessage(log *logger.Logger, w http.ResponseWriter, req *
 }
 
 func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
-	var private bool
+	var private int32
 
 	user, ok := utils.GetUser(w, req)
 	if !ok {
@@ -344,7 +354,42 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status: "error",
-			Description: "empty message field",
+			Description: "empty text field",
+		})
+
+		return
+	}
+
+	public := req.PostFormValue("public")
+	if public != "" {
+		publicInt, err := strconv.Atoi(public)
+		if err != nil {
+			log.Errorw("wrong public param", "public", public)
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+				Status: "error",
+				Description: "invalid public param",
+			})
+
+			return
+		}
+
+		if publicInt == 1 {
+			private = 0
+		} else if publicInt == 0 {
+			private = 1
+		} else {
+			private = -1
+		}		
+	} else {
+		private = -1
+	}
+
+	if user.ID == usermodel.PublicUserID && private == 1 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			Status: "error",
+			Description: "cannot make private public message",
 		})
 
 		return
@@ -395,6 +440,7 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 		},
 		ID: resp.ID,
 		UpdateUTCNano: resp.UpdateUTCNano,
+		Private: resp.Private,
 	})
 }
 
@@ -588,7 +634,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 
 		message = res
 
-		if user.ID == usermodel.PublicUserID {
+		if message.UserID == usermodel.PublicUserID {
 			message.UserID = 0
 		}
 
@@ -704,7 +750,7 @@ func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWrite
 			}
 		}
 
-		if user.ID == usermodel.PublicUserID {
+		if message.UserID == usermodel.PublicUserID {
 			message.UserID = 0
 		}
 	}

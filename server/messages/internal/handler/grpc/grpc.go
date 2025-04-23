@@ -12,7 +12,7 @@ import (
 
 type Controller interface {
 	SaveMessage(ctx context.Context, log *logger.Logger, message *model.Message) error
-	UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) error
+	UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (*model.UpdateMessageResult, error)
 	DeleteMessage(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error
 	ReadMessage(ctx context.Context, log *logger.Logger, params *model.ReadOneMessageParams) (*model.Message, error)
 	ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadMessagesParams) (*model.ReadMessagesResult, error)
@@ -62,7 +62,7 @@ func (h *Handler) UpdateMessage(ctx context.Context, req *api.UpdateMessageReque
 
 	updateUTCNano := time.Now().UnixNano()
 
-	err := h.controller.UpdateMessage(ctx, logger.Default(), &model.UpdateMessageParams{
+	res, err := h.controller.UpdateMessage(ctx, logger.Default(), &model.UpdateMessageParams{
 		ID: req.Id,
 		UserID: req.UserId,
 		Text: req.Text,
@@ -77,6 +77,7 @@ func (h *Handler) UpdateMessage(ctx context.Context, req *api.UpdateMessageReque
 	logger.Debugw("update message ok", "id", req.Id)
 	return &api.UpdateMessageResponse{
 		UpdateUtcNano: updateUTCNano,
+		Private: res.Private,
 	}, nil
 }
 

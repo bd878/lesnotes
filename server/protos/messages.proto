@@ -57,11 +57,12 @@ message UpdateMessageRequest {
 	int32    user_id = 2;
 	int32    file_id = 3;
 	string   text = 4;
-	bool     private = 5;
+	int32    private = 5;
 }
 
 message UpdateMessageResponse {
 	int64    update_utc_nano = 1;
+	bool     private = 2;
 }
 
 message SaveMessageRequest {

@@ -9,3 +9,4 @@ export const selectError = index => state => state.stack.stack[index].error || "
 export const selectLoadOffset = index => state => selectMessages(index)(state).length
 export const selectMessageForEdit = index => state => state.stack.stack[index].messageForEdit
 export const selectIsEditMode = index => state => selectMessageForEdit(index)(state).ID ? true : false
+export const selectIsMessageThreadOpen = index => state => messageID => selectHasNextThread(index)(state) ? state.stack.stack[index+1].ID === messageID : false

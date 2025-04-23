@@ -3,6 +3,7 @@ package distributed
 import (
 	"time"
 	"context"
+	"errors"
 	"bytes"
 
 	"google.golang.org/protobuf/proto"
@@ -52,7 +53,9 @@ func (m *DistributedMessages) SaveMessage(ctx context.Context, log *logger.Logge
 	return nil
 }
 
-func (m *DistributedMessages) UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) error {
+func (m *DistributedMessages) UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (
+	*model.UpdateMessageResult, error,
+) {
 	cmd, _ := proto.Marshal(&UpdateCommand{
 		Id: params.ID,
 		UserId: params.UserID,
@@ -62,13 +65,23 @@ func (m *DistributedMessages) UpdateMessage(ctx context.Context, log *logger.Log
 		Private: params.Private,
 	})
 
-	_, err := m.apply(ctx, UpdateRequest, cmd)
+	res, err := m.apply(ctx, UpdateRequest, cmd)
 	if err != nil {
 		log.Errorw("raft failed to apply save message", "error", err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	switch val := res.(type) {
+	case *UpdateCommandResult:
+		return &model.UpdateMessageResult{
+			Private: val.Private,
+		}, nil
+	case error:
+		return nil, val
+	default:
+		log.Errorw("update request reseived unknown type", "res", res)
+		return nil, errors.New("unknown message update type")
+	}
 }
 
 func (m *DistributedMessages) DeleteMessage(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error {

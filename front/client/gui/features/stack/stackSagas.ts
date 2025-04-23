@@ -13,7 +13,9 @@ import {
 	updateMessageSucceededActionCreator,
 	deleteMessageSucceededActionCreator,
 } from './stackActionCreators'
+import {showNotificationActionCreator} from '../notification';
 import * as is from '../../../third_party/is'
+import i18n from '../../../i18n';
 import {selectMessages} from './stackSelectors';
 import {selectBrowser, selectIsMobile, selectIsDesktop} from '../me'
 import api from '../../../api'
@@ -49,9 +51,9 @@ function* sendMessage({index, payload}) {
 				return
 			}
 
-			response = yield call(api.sendMessage, {text: payload.text, fileID: response.ID})
+			response = yield call(api.sendMessage, {text: payload.text, fileID: response.ID, threadID: payload.threadID})
 		} else {
-			response = yield call(api.sendMessage, {text: payload.text})
+			response = yield call(api.sendMessage, {text: payload.text, threadID: payload.threadID})
 		}
 
 		if (is.notEmpty(response.error))
@@ -106,14 +108,14 @@ function* copyMessage({payload}) {
 	try {
 		const browser = yield select(selectBrowser)
 		yield call(async function copy(text, browser) {
-			// TODO: compile front with browser dirrectives?
+			// TODO: compile front with browser directives?
 			switch (browser) {
 			case "chrome":
 				const result = await navigator.permissions.query({ name: "clipboard-write" })
 				if (result.state === "granted" || result.state === "prompt")
 					await navigator.clipboard.writeText(text)
 				else
-					console.error("clipboard write permission is not granted")
+					throw new Error("clipboard write permission is not granted")
 
 				break
 
@@ -122,6 +124,8 @@ function* copyMessage({payload}) {
 				break
 			}
 		}, payload.text, browser)
+
+		yield put(showNotificationActionCreator({text: i18n("copied")}))
 	} catch (e) {
 		console.error(e)
 	}

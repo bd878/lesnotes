@@ -5,6 +5,7 @@ import Tag from '../../components/Tag';
 import HomePage from '../../components/HomePage';
 import AuthProvider from '../../providers/Auth';
 import StoreProvider from '../../providers/Store';
+import NotificationProvider from '../../providers/Notification';
 import * as is from '../../../third_party/is';
 
 function Home() {
@@ -14,9 +15,11 @@ function Home() {
 	return (
 		<Tag css="wrap">
 			<StoreProvider browser={browser} isMobile={is.trueVal(isMobile)} isDesktop={true}>
-				<AuthProvider fallback={i18n("messages_auth_fallback")}>
-					<HomePage />
-				</AuthProvider>
+				<NotificationProvider>
+					<AuthProvider fallback={i18n("messages_auth_fallback")}>
+						<HomePage />
+					</AuthProvider>
+				</NotificationProvider>
 			</StoreProvider>
 		</Tag>
 	)

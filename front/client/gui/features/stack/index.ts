@@ -9,6 +9,7 @@ import {
 	resetEditMessageActionCreator,
 	deleteMessageActionCreator,
 	copyMessageActionCreator,
+	destroyThreadActionCreator,
 } from './stackActionCreators'
 import {
 	selectHasNextThread,
@@ -21,6 +22,7 @@ import {
 	selectMessageForEdit,
 	selectIsEditMode,
 	selectThreadID,
+	selectIsMessageThreadOpen,
 } from './stackSelectors'
 import {stackSaga} from './stackSagas';
 
@@ -37,12 +39,14 @@ export {
 	selectHasNextThread,
 	selectThreadID,
 	selectIsEditMode,
+	selectIsMessageThreadOpen,
 	openThreadActionCreator,
 	closeThreadActionCreator,
 	setEditMessageActionCreator,
 	sendMessageActionCreator,
 	fetchMessagesActionCreator,
 	updateMessageActionCreator,
+	destroyThreadActionCreator,
 	resetEditMessageActionCreator,
 	deleteMessageActionCreator,
 	copyMessageActionCreator,

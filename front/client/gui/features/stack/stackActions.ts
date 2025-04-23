@@ -1,5 +1,9 @@
 export const OPEN_THREAD = "@stack/OPEN_THREAD"
 export const CLOSE_THREAD = "@stack/CLOSE_THREAD"
+<<<<<<< HEAD
+=======
+export const DESTROY_THREAD = "@stack/DESTROY_THREAD"
+>>>>>>> stage
 
 export const SEND_MESSAGE = "@stack/SEND_MESSAGE"
 export const FETCH_MESSAGES = "@stack/FETCH_MESSAGES"

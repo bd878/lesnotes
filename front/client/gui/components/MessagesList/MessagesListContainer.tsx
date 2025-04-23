@@ -21,6 +21,7 @@ function MessagesListContainer(props) {
 		setEditMessage,
 		deleteMessage,
 		copyMessage,
+		checkMyThreadOpen,
 	} = props
 
 	const onOpenThreadClick = useCallback(setThreadMessage, [setThreadMessage])
@@ -39,6 +40,7 @@ function MessagesListContainer(props) {
 			onEditClick={onEditClick}
 			onDeleteClick={onDeleteClick}
 			onCopyClick={onCopyClick}
+			checkMyThreadOpen={checkMyThreadOpen}
 		/>
 	)
 }

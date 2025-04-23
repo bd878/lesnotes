@@ -6,6 +6,6 @@
 	}
 
 	.wrap {
-		@apply p-8 pt-10 h-screen flex flex-col items-start
+		@apply p-8 pt-10 h-screen flex flex-col items-start relative
 	}
 }

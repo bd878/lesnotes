@@ -31,7 +31,7 @@ function MessageFormComponent(props) {
 					required
 					css="focus:outline-none w-full resize-none px-2 py-1"
 					el="textarea"
-					name="message"
+					name="text"
 					type="input"
 					value={text}
 					onChange={onMessageChange}

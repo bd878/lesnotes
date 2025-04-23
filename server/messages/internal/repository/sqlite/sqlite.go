@@ -29,7 +29,7 @@ type Repository struct {
 	descNotPrivateStmt *sql.Stmt
 	ascPrivateStmt *sql.Stmt
 	descPrivateStmt *sql.Stmt
-	deleteThreadStmt *sql.Stmt
+	moveThreadStmt *sql.Stmt
 }
 
 func New(dbFilePath string) *Repository {
@@ -67,8 +67,8 @@ WHERE id = :id AND user_id = :userId
 ;`,
 	))
 
-	deleteThreadStmt := utils.Must(pool.Prepare(`
-DELETE FROM messages
+	moveThreadStmt := utils.Must(pool.Prepare(`
+UPDATE messages SET thread_id = 0
 WHERE thread_id = :threadId
 ;`,
 	))
@@ -190,7 +190,7 @@ LIMIT :limit OFFSET :offset
 		descStmt: descStmt,
 		ascThreadStmt: ascThreadStmt,
 		descThreadStmt: descThreadStmt,
-		deleteThreadStmt: deleteThreadStmt,
+		moveThreadStmt: moveThreadStmt,
 		ascPrivateStmt: ascPrivateStmt,
 		descPrivateStmt: descPrivateStmt,
 		ascNotPrivateStmt: ascNotPrivateStmt,
@@ -242,7 +242,6 @@ func (r *Repository) Create(ctx context.Context, log *logger.Logger, message *mo
 	return nil
 }
 
-// TODO: utilise ctx timeout
 func (r *Repository) Delete(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error {
 	var (
 		tx *sql.Tx
@@ -271,19 +270,10 @@ func (r *Repository) Delete(ctx context.Context, log *logger.Logger, params *mod
 		}
 	}()
 
-	msg, err := r.Read(ctx, log, &model.ReadOneMessageParams{ID: params.ID, UserIDs: []int32{params.UserID}})
+	_, err = tx.StmtContext(ctx, r.moveThreadStmt).ExecContext(ctx, sql.Named("threadId", params.ID))
 	if err != nil {
-		log.Errorln("cannot delete, no message found")
+		log.Errorw("failed to move thread messages to root", "threadId", params.ID)
 		return err
-	}
-
-	// parent message, no thread id
-	if msg.ThreadID == 0 {
-		err = r.deleteThreadMessages(ctx, log, tx, params.ID)
-		if err != nil {
-			log.Errorln("failed to delete thread messages")
-			return err
-		}
 	}
 
 	_, err = tx.StmtContext(ctx, r.deleteStmt).ExecContext(ctx, sql.Named("id", params.ID), sql.Named("userId", params.UserID))
@@ -295,32 +285,63 @@ func (r *Repository) Delete(ctx context.Context, log *logger.Logger, params *mod
 	return nil
 }
 
-func (r *Repository) deleteThreadMessages(ctx context.Context, log *logger.Logger, tx *sql.Tx, threadID int32) error {
-	_, err := tx.StmtContext(ctx, r.deleteThreadStmt).ExecContext(ctx, sql.Named("threadId", threadID))
+func (r *Repository) Update(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (*model.UpdateMessageResult, error) {
+	var (
+		tx *sql.Tx
+		err error
+		private int32
+	)
+
+	tx, err = r.pool.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
-		log.Errorw("failed to delete thread messages", "threadId", threadID)
-		return err
+		return nil, err
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback()
+			panic(p)
+		case err != nil:
+			err = tx.Rollback()
+		default:
+			err = tx.Commit()
+		}
+	}()
+
+	err = tx.QueryRowContext(ctx, "SELECT private FROM messages WHERE id = $1 LIMIT 1", params.ID).Scan(&private)
+	if err != nil {
+		return nil, err
 	}
 
-	return nil
-}
-
-func (r *Repository) Update(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) error {
-	var privateCol int32
-	if params.Private {
-		privateCol = 1
+	if params.Private == 0 {
+		private = 0
+	} else if params.Private == 1 {
+		private = 1
 	}
-	_, err := r.updateStmt.ExecContext(ctx,
+
+	_, err = tx.StmtContext(ctx, r.updateStmt).ExecContext(ctx, 
 		sql.Named("text", params.Text),
 		sql.Named("updateUtcNano", params.UpdateUTCNano),
 		sql.Named("id", params.ID),
 		sql.Named("userId", params.UserID),
-		sql.Named("private", privateCol))
+		sql.Named("private", private),
+	)
 	if err != nil {
 		log.Errorln("failed to update message")
-		return err
+		return nil, err
 	}
-	return nil
+
+	var privateRes bool
+	if private == 0 {
+		privateRes = false
+	} else {
+		privateRes = true
+	}
+
+	return &model.UpdateMessageResult{
+		Private: privateRes,
+	}, nil
 }
 
 func (r *Repository) Truncate(ctx context.Context, log *logger.Logger) error {

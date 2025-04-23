@@ -33,7 +33,7 @@ function MessageFormContainer(props) {
 	}, [setText]);
 
 	const updateMessageRequest = useCallback(e => {
-		update(messageForEdit.ID, text)
+		update({ID: messageForEdit.ID, text: text})
 		setText("")
 		setFile(null)
 	}, [update, setText, setFile, messageForEdit, text])
@@ -41,7 +41,7 @@ function MessageFormContainer(props) {
 	const sendMessageRequest = useCallback(e => {
 		if (!text) {console.error(i18n("msg_required_err")); return;}
 
-		send(text, file)
+		send({text: text, file: file})
 
 		fileRef.current.value = null
 		setText("")

@@ -5,7 +5,7 @@ function equal(val1) {
 			? val1 !== val2
 			: val1 === val2
 	}
-	equalFold.not = () => {inverted = true; return equalFold;}
+	equalFold.not = (val2) => {inverted = true; return equalFold(val2);}
 	return equalFold
 }
 
