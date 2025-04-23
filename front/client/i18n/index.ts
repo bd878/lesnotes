@@ -35,6 +35,7 @@ const i18n = {
 		open_thread: "Open thread",
 		close_thread: "Close",
 		close_button_text: "Close",
+		copied: "Copied!",
 	},
 	"ru": {
 		logout: "Выйти",
@@ -72,6 +73,7 @@ const i18n = {
 		open_thread: "Комментарии",
 		close_thread: "Скрыть",
 		close_button_text: "Закрыть",
+		copied: "Скопировано",
 	}
 }
 

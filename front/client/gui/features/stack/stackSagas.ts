@@ -13,7 +13,9 @@ import {
 	updateMessageSucceededActionCreator,
 	deleteMessageSucceededActionCreator,
 } from './stackActionCreators'
+import {showNotificationActionCreator} from '../notification';
 import * as is from '../../../third_party/is'
+import i18n from '../../../i18n';
 import {selectMessages} from './stackSelectors';
 import {selectBrowser, selectIsMobile, selectIsDesktop} from '../me'
 import api from '../../../api'
@@ -113,7 +115,7 @@ function* copyMessage({payload}) {
 				if (result.state === "granted" || result.state === "prompt")
 					await navigator.clipboard.writeText(text)
 				else
-					console.error("clipboard write permission is not granted")
+					throw new Error("clipboard write permission is not granted")
 
 				break
 
@@ -122,6 +124,8 @@ function* copyMessage({payload}) {
 				break
 			}
 		}, payload.text, browser)
+
+		yield put(showNotificationActionCreator({text: i18n("copied")}))
 	} catch (e) {
 		console.error(e)
 	}
