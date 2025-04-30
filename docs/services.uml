@@ -1,3 +1,16 @@
 @startuml
-' diagrame de composants - services
+
+header Staging environment
+
+package Users {
+	[http] -- "192.168.10.3:8184"
+	[grpc] -- "192.168.10.3:8185"
+
+	[grpc] - users_db
+	[http] - [grpc]
+
+	database "SQLite" as users_db {
+	}
+}
+
 @enduml
