@@ -44,6 +44,16 @@ type DeleteMessageServerResponse struct {
 	ID                  int32         `json:"id"`
 }
 
+type DeleteMessageStatus struct {
+	OK                bool            `json:"ok"`
+	Explain           string          `json:"explain"`
+}
+
+type DeleteMessagesServerResponse struct {
+	model.ServerResponse
+	IDs              []*DeleteMessageStatus `json:"ids"`
+}
+
 type MessagesListServerResponse struct {
 	model.ServerResponse
 	ThreadID            int32         `json:"thread_id"`

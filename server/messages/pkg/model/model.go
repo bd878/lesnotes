@@ -38,7 +38,16 @@ type DeleteMessageParams struct {
 	FileID            int32
 }
 
+type DeleteMessagesParams struct {
+	IDs               []int32
+	UserID            int32
+}
+
 type DeleteMessageResult struct {
+}
+
+type DeleteMessagesResult struct {
+	IDs               []*DeleteMessageStatus
 }
 
 type ReadThreadMessagesParams struct {

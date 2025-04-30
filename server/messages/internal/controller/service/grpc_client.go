@@ -110,6 +110,38 @@ func (s *Messages) DeleteMessage(ctx context.Context, log *logger.Logger, params
 	return &model.DeleteMessageResult{}, nil
 }
 
+func (s *Messages) DeleteMessages(ctx context.Context, log *logger.Logger, params *model.DeleteMessagesParams) (
+	*model.DeleteMessagesResult, error,
+) {
+	if s.isConnFailed() {
+		log.Info("conn failed, setup new connection")
+		if err := s.setupConnection(); err != nil {
+			return nil, err
+		}
+	}
+
+	res, err := s.client.DeleteMessages(ctx, &api.DeleteMessagesRequest{
+		Ids: params.IDs,
+		UserId: params.UserID,
+	})
+	if err != nil {
+		log.Errorw("client failed to delete batch messages", "error", err)
+		return nil, err
+	}
+
+	var ids []*model.DeleteMessageStatus
+	for _, status := range res.Ids {
+		ids = append(ids, &model.DeleteMessageStatus{
+			OK: status.Ok,
+			Explain: status.Explain,
+		})
+	}
+
+	return &model.DeleteMessagesResult{
+		IDs: ids,
+	}, nil
+}
+
 func (s *Messages) UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (
 	*model.UpdateMessageResult, error,
 ) {
