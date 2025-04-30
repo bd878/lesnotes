@@ -4,7 +4,8 @@ import {
 	setEditMessageActionCreator,
 	deleteMessageActionCreator,
 	copyMessageActionCreator,
-} from '../../features/messages';
+	selectMessageActionCreator,
+} from '../../features/stack';
 import {
 	setThreadMessageActionCreator,
 } from '../../features/threads';
@@ -21,6 +22,7 @@ function MessagesListContainer(props) {
 		setEditMessage,
 		deleteMessage,
 		copyMessage,
+		selectMessage
 		checkMyThreadOpen,
 	} = props
 
@@ -28,6 +30,7 @@ function MessagesListContainer(props) {
 	const onDeleteClick = useCallback(deleteMessage, [deleteMessage])
 	const onEditClick = useCallback(setEditMessage, [setEditMessage])
 	const onCopyClick = useCallback(copyMessage, [copyMessage])
+	const onSelectClick = useCallback(selectMessage, [selectMessage])
 
 	return (
 		<MessagesListComponent
@@ -52,6 +55,7 @@ const mapDispatchToProps = {
 	setEditMessage: setEditMessageActionCreator,
 	deleteMessage: deleteMessageActionCreator,
 	copyMessage: copyMessageActionCreator,
+	selectMessage: selectMessageActionCreator,
 }
 
 export default connect(

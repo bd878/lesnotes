@@ -10,6 +10,7 @@ import {
 	deleteMessageActionCreator,
 	copyMessageActionCreator,
 	destroyThreadActionCreator,
+	selectMessageActionCreator,
 } from './stackActionCreators'
 import {
 	selectHasNextThread,

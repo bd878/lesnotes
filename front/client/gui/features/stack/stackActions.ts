@@ -3,6 +3,7 @@ export const CLOSE_THREAD = "@stack/CLOSE_THREAD"
 export const DESTROY_THREAD = "@stack/DESTROY_THREAD"
 
 export const SEND_MESSAGE = "@stack/SEND_MESSAGE"
+export const SELECT_MESSAGE = "@stack/SELECT_MESSAGE"
 export const FETCH_MESSAGES = "@stack/FETCH_MESSAGES"
 export const UPDATE_MESSAGE = "@stack/UPDATE_MESSAGE"
 export const DELETE_MESSAGE = "@stack/DELETE_MESSAGE"

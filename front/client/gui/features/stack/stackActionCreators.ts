@@ -8,6 +8,7 @@ import {
 	SEND_MESSAGE,
 	COPY_MESSAGE,
 	FETCH_MESSAGES,
+	SELECT_MESSAGE,
 	SET_MESSAGE_FOR_EDIT,
 
 	MESSAGES_FAILED,
@@ -85,6 +86,12 @@ export const resetEditMessageActionCreator = index => setEditMessageActionCreato
 
 export const deleteMessageActionCreator = index => payload => ({
 	type: DELETE_MESSAGE,
+	index: index,
+	payload,
+})
+
+export const selectMessageActionCreator = index => payload => ({
+	type: SELECT_MESSAGE,
 	index: index,
 	payload,
 })

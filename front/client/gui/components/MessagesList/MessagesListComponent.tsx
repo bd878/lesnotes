@@ -4,7 +4,8 @@ import i18n from '../../../i18n';
 import * as is from '../../../third_party/is'
 
 const List = lazy(() => import("../../components/List"));
-const MessageElement = lazy(() => import("../../components/MessageElement"))
+const MessageElement = lazy(() => import("../../components/MessageElement"));
+const Checkmark = lazy(() => import("../../components/Checkmark"));
 
 function MessagesListComponent(props) {
 	const {
@@ -19,6 +20,7 @@ function MessagesListComponent(props) {
 		onEditClick,
 		onDeleteClick,
 		onCopyClick,
+		onSelectClick,
 	} = props
 
 	return (
@@ -39,10 +41,11 @@ function MessagesListComponent(props) {
 									+ " "
 									+ (isAnyThreadOpen ? isMyThreadOpen ? "" : "opacity-50" : "")
 									+ " "
-									+ "mb-2 px-2 py-1 mx-1 bg-gray-100 flex flex-row justify-between"
+									+ "mb-2 px-2 py-1 bg-gray-100 flex flex-row justify-between"
 								}
 								key={`tag_${message.ID}`}
 							>
+								<Checkmark onClick={() => onSelectClick(message)} />
 								<MessageElement
 									key={message.ID}
 									message={message}
