@@ -2,6 +2,8 @@ export const OPEN_THREAD = "@stack/OPEN_THREAD"
 export const CLOSE_THREAD = "@stack/CLOSE_THREAD"
 export const DESTROY_THREAD = "@stack/DESTROY_THREAD"
 
+export const PUBLISH_MESSAGE = "@stack/PUBLISH_MESSAGE"
+export const PRIVATE_MESSAGE = "@stack/PRIVATE_MESSAGE"
 export const SEND_MESSAGE = "@stack/SEND_MESSAGE"
 export const SELECT_MESSAGE = "@stack/SELECT_MESSAGE"
 export const UNSELECT_MESSAGE = "@stack/UNSELECT_MESSAGE"

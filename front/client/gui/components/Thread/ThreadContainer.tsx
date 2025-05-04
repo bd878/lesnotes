@@ -29,6 +29,8 @@ import {
 	selectMessageActionCreator,
 	unselectMessageActionCreator,
 	clearSelectedActionCreator,
+	publishMessageActionCreator,
+	privateMessageActionCreator,
 } from '../../features/stack';
 
 function ThreadContainer(props) {
@@ -60,6 +62,8 @@ function ThreadContainer(props) {
 		selectMessage,
 		unselectMessage,
 		clearSelectedMessages,
+		publishMessage,
+		privateMessage,
 	} = props
 
 	const listRef = useRef(null);
@@ -96,6 +100,8 @@ function ThreadContainer(props) {
 	const onSelectClick = useCallback(selectMessage, [selectMessage])
 	const onUnselectClick = useCallback(unselectMessage, [unselectMessage])
 	const onClearSelectedClick = useCallback(clearSelectedMessages, [clearSelectedMessages])
+	const onPublishClick = useCallback(publishMessage, [publishMessage])
+	const onPrivateClick = useCallback(privateMessage, [privateMessage])
 
 	const onMessageSend = useCallback(payload => {
 		payload.threadID = threadID
@@ -123,6 +129,8 @@ function ThreadContainer(props) {
 			onClearSelectedClick={onClearSelectedClick}
 			onDeleteClick={onDeleteClick}
 			onEditClick={onEditClick}
+			onPublishClick={onPublishClick}
+			onPrivateClick={onPrivateClick}
 			onToggleThreadClick={onToggleThreadClick}
 			onCopyClick={onCopyClick}
 			send={onMessageSend}
@@ -148,6 +156,8 @@ const mapStateToProps = (state, {index}) => ({
 })
 
 const mapDispatchToProps = (dispatch, {index}) => ({
+	publishMessage: payload => dispatch(publishMessageActionCreator(index)(payload)),
+	privateMessage: payload => dispatch(privateMessageActionCreator(index)(payload)),
 	clearSelectedMessages: payload => dispatch(clearSelectedActionCreator(index)(payload)),
 	unselectMessage: payload => dispatch(unselectMessageActionCreator(index)(payload)),
 	selectMessage: payload => dispatch(selectMessageActionCreator(index)(payload)),

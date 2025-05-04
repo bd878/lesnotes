@@ -6,6 +6,8 @@ import {
 	UPDATE_MESSAGE,
 	DELETE_MESSAGE,
 	SELECT_MESSAGE,
+	PUBLISH_MESSAGE,
+	PRIVATE_MESSAGE,
 	UNSELECT_MESSAGE,
 	CLEAR_SELECTED,
 	SEND_MESSAGE,
@@ -106,7 +108,7 @@ function messageReducer(messagesState = thread, action) {
 	case SET_MESSAGE_FOR_EDIT: {
 		return {
 			...messagesState,
-			messageForEdit: action.payload,
+			messageForEdit: action.payload || {},
 		}
 	}
 	case DELETE_MESSAGE: {
@@ -124,13 +126,6 @@ function messageReducer(messagesState = thread, action) {
 			error: "",
 		}
 	}
-	case UPDATE_MESSAGE: {
-		return {
-			...messagesState,
-			loading: true,
-			error: "",
-		}
-	}
 	case UPDATE_MESSAGE_SUCCEEDED: {
 		return {
 			...messagesState,
@@ -138,12 +133,6 @@ function messageReducer(messagesState = thread, action) {
 			loading: false,
 			error: "",
 			messageForEdit: {},
-		}
-	}
-	case SET_MESSAGE_FOR_EDIT: {
-		return {
-			...messagesState,
-			messageForEdit: action.payload,
 		}
 	}
 	}

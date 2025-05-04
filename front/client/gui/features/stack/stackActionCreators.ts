@@ -2,6 +2,8 @@ import {
 	OPEN_THREAD,
 	CLOSE_THREAD,
 	DESTROY_THREAD,
+	PUBLISH_MESSAGE,
+	PRIVATE_MESSAGE,
 
 	UPDATE_MESSAGE,
 	DELETE_MESSAGE,
@@ -118,6 +120,18 @@ export const copyMessageActionCreator = index => payload => ({
 
 export const deleteMessageSucceededActionCreator = index => payload => ({
 	type: DELETE_MESSAGE_SUCCEEDED,
+	index: index,
+	payload,
+})
+
+export const publishMessageActionCreator = index => payload => ({
+	type: PUBLISH_MESSAGE,
+	index: index,
+	payload,
+})
+
+export const privateMessageActionCreator = index => payload => ({
+	type: PRIVATE_MESSAGE,
 	index: index,
 	payload,
 })

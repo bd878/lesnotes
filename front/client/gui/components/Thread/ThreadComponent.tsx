@@ -17,6 +17,8 @@ function ThreadComponent(props, ref) {
 		onSelectClick,
 		onUnselectClick,
 		onClearSelectedClick,
+		onPublishClick,
+		onPrivateClick,
 		isAllLoaded,
 		onScroll,
 		loadMoreContent,
@@ -61,14 +63,18 @@ function ThreadComponent(props, ref) {
 					css="w-full"
 					error={error}
 					messages={messages}
+					messageForEdit={messageForEdit}
 					selectedMessageIDs={selectedMessageIDs}
 					loading={loading}
 					isAnyThreadOpen={isAnyOpen}
 					checkMyThreadOpen={checkMyThreadOpen}
+					onPublishClick={onPublishClick}
+					onPrivateClick={onPrivateClick}
 					onSelectClick={onSelectClick}
 					onUnselectClick={onUnselectClick}
 					onDeleteClick={onDeleteClick}
 					onEditClick={onEditClick}
+					onResetEditClick={reset}
 					onToggleThreadClick={onToggleThreadClick}
 					onCopyClick={onCopyClick}
 				/>
@@ -76,6 +82,7 @@ function ThreadComponent(props, ref) {
 
 			<Tag css="w-full mt-5">
 				<MessageForm
+					key={is.notEmpty(messageForEdit) ? messageForEdit.ID : null}
 					send={send}
 					update={update}
 					reset={reset}

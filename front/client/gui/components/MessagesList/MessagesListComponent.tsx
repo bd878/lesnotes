@@ -7,7 +7,9 @@ const List = lazy(() => import("../../components/List"));
 const MessageElement = lazy(() => import("../../components/MessageElement"));
 const Checkmark = lazy(() => import("../../components/Checkmark"));
 const Button = lazy(() => import("../../components/Button"));
-const CopyIcon = lazy(() => import('../../icons/CopyIcon'))
+const CopyIcon = lazy(() => import('../../icons/CopyIcon'));
+const CrayonIcon = lazy(() => import('../../icons/CrayonIcon'));
+const CrossIcon = lazy(() => import('../../icons/CrossIcon'));
 
 function MessagesListComponent(props) {
 	const {
@@ -17,14 +19,18 @@ function MessagesListComponent(props) {
 		selectedMessageIDs,
 		loading,
 		error,
+		messageForEdit,
 		checkMyThreadOpen,
 		isAnyThreadOpen,
 		onToggleThreadClick,
 		onEditClick,
 		onDeleteClick,
 		onCopyClick,
+		onPublishClick,
+		onPrivateClick,
 		onSelectClick,
 		onUnselectClick,
+		onResetEditClick,
 	} = props
 
 	return (
@@ -33,9 +39,9 @@ function MessagesListComponent(props) {
 			{error ? null : (
 				<List el="ul" css={css}>
 					{messages.map(message => {
-						let isMyThreadOpen = is.func(checkMyThreadOpen) ? checkMyThreadOpen(message.ID) : false
-
-						const selected = selectedMessageIDs.has(message.ID)
+						const isMyThreadOpen = is.func(checkMyThreadOpen) ? checkMyThreadOpen(message.ID) : false
+						const isSelected = is.notEmpty(selectedMessageIDs) ? selectedMessageIDs.has(message.ID) : false
+						const isEdit = is.notEmpty(messageForEdit) ? messageForEdit.ID === message.ID : false
 
 						return (
 							<Tag
@@ -51,23 +57,52 @@ function MessagesListComponent(props) {
 									+ "mb-2 px-2 py-1 bg-gray-100 grow-1 max-w-full flex flex-row items-start justify-between ml-8"
 								}
 							>
-								<Checkmark
-									css="cursor-pointer mr-5 -ml-8 p-2 w-[20px] h-[20px]"
-									tabIndex="0"
-									onClick={() => selected ? onUnselectClick(message) : onSelectClick(message)}
-									name=""
-									id={message.ID}
-									value={message.ID}
-								/>
+								<Tag css="mr-5 -ml-8 mt-2">
+									<Checkmark
+										css="cursor-pointer"
+										tabIndex="0"
+										onClick={() => isSelected ? onUnselectClick(message) : onSelectClick(message)}
+										name=""
+										id={message.ID}
+										value={message.ID}
+									/>
+								</Tag>
 								<MessageElement
 									key={message.ID}
 									message={message}
 									isThreadOpen={isMyThreadOpen}
+									isPrivate={message.private}
 									onToggleThreadClick={() => onToggleThreadClick(message)}
 									onEditClick={() => onEditClick(message)}
-									onDeleteClick={() => onDeleteClick(message)}
+									onPublishClick={() => onPublishClick(message)}
+									onPrivateClick={() => onPrivateClick(message)}
 								/>
 
+								{isEdit
+									? is.func(onResetEditClick)
+										? (
+											<Button
+												type="button"
+												css="flex my-1 p-2 rounded-sm cursor-pointer hover:bg-gray-300"
+												content={
+													<CrossIcon css="flex" width="20" height="20" />
+												}
+												onClick={() => onResetEditClick()}
+											/>
+										) : null
+
+									: is.func(onEditClick)
+										? (
+											<Button
+												type="button"
+												css="flex my-1 p-2 rounded-sm cursor-pointer hover:bg-gray-300"
+												content={
+													<CrayonIcon css="flex" width="20" height="20" />
+												}
+												onClick={() => onEditClick(message)}
+											/>
+										) : null
+								}
 								{is.func(onCopyClick) ? (
 									<Button
 										type="button"

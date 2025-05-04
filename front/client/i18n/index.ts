@@ -36,6 +36,8 @@ const i18n = {
 		close_thread: "Close",
 		close_button_text: "Close",
 		copied: "Copied!",
+		publish_message: "Publish",
+		private_message: "Make private"
 	},
 	"ru": {
 		logout: "Выйти",
@@ -74,6 +76,8 @@ const i18n = {
 		close_thread: "Скрыть",
 		close_button_text: "Закрыть",
 		copied: "Скопировано",
+		publish_message: "Опубликовать",
+		private_message: "Скрыть"
 	}
 }
 
