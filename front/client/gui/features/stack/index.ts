@@ -11,6 +11,8 @@ import {
 	copyMessageActionCreator,
 	destroyThreadActionCreator,
 	selectMessageActionCreator,
+	unselectMessageActionCreator,
+	clearSelectedActionCreator,
 } from './stackActionCreators'
 import {
 	selectHasNextThread,
@@ -24,6 +26,7 @@ import {
 	selectIsEditMode,
 	selectThreadID,
 	selectIsMessageThreadOpen,
+	selectSelectedMessageIDs,
 } from './stackSelectors'
 import {stackSaga} from './stackSagas';
 
@@ -41,6 +44,10 @@ export {
 	selectThreadID,
 	selectIsEditMode,
 	selectIsMessageThreadOpen,
+	clearSelectedActionCreator,
+	selectSelectedMessageIDs,
+	selectMessageActionCreator,
+	unselectMessageActionCreator,
 	openThreadActionCreator,
 	closeThreadActionCreator,
 	setEditMessageActionCreator,

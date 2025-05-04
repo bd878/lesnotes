@@ -14,12 +14,16 @@ function ThreadComponent(props, ref) {
 		destroyContent,
 		onDestroyClick,
 		onLoadMoreClick,
+		onSelectClick,
+		onUnselectClick,
+		onClearSelectedClick,
 		isAllLoaded,
 		onScroll,
 		loadMoreContent,
 		error,
 		loading,
 		messages,
+		selectedMessageIDs,
 		isAnyOpen,
 		checkMyThreadOpen,
 		onDeleteClick,
@@ -33,7 +37,7 @@ function ThreadComponent(props, ref) {
 	} = props
 
 	return (
-		<Tag css={(css || "") + " " + "flex flex-col items-start w-md w-full"}>
+		<Tag css={(css || "") + " " + "flex flex-col items-start w-lg w-full"}>
 			<Button
 				content={destroyContent}
 				onClick={onDestroyClick}
@@ -57,9 +61,12 @@ function ThreadComponent(props, ref) {
 					css="w-full"
 					error={error}
 					messages={messages}
+					selectedMessageIDs={selectedMessageIDs}
 					loading={loading}
 					isAnyThreadOpen={isAnyOpen}
 					checkMyThreadOpen={checkMyThreadOpen}
+					onSelectClick={onSelectClick}
+					onUnselectClick={onUnselectClick}
 					onDeleteClick={onDeleteClick}
 					onEditClick={onEditClick}
 					onToggleThreadClick={onToggleThreadClick}

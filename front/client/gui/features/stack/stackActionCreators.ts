@@ -9,6 +9,8 @@ import {
 	COPY_MESSAGE,
 	FETCH_MESSAGES,
 	SELECT_MESSAGE,
+	UNSELECT_MESSAGE,
+	CLEAR_SELECTED,
 	SET_MESSAGE_FOR_EDIT,
 
 	MESSAGES_FAILED,
@@ -92,6 +94,18 @@ export const deleteMessageActionCreator = index => payload => ({
 
 export const selectMessageActionCreator = index => payload => ({
 	type: SELECT_MESSAGE,
+	index: index,
+	payload,
+})
+
+export const unselectMessageActionCreator = index => payload => ({
+	type: UNSELECT_MESSAGE,
+	index: index,
+	payload,
+})
+
+export const clearSelectedActionCreator = index => () => ({
+	type: CLEAR_SELECTED,
 	index: index,
 	payload,
 })

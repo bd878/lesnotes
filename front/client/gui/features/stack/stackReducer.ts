@@ -5,6 +5,9 @@ import {
 
 	UPDATE_MESSAGE,
 	DELETE_MESSAGE,
+	SELECT_MESSAGE,
+	UNSELECT_MESSAGE,
+	CLEAR_SELECTED,
 	SEND_MESSAGE,
 	COPY_MESSAGE,
 	FETCH_MESSAGES,
@@ -22,6 +25,7 @@ import * as is from '../../../third_party/is'
 const thread = {
 	ID: 0,
 	list: [],
+	selectedMessageIDs: new Set(),
 	messageForEdit: {},
 	isLastPage: false,
 	loading: false,
@@ -67,6 +71,24 @@ function messageReducer(messagesState = thread, action) {
 	}
 	case COPY_MESSAGE: {
 		return messagesState
+	}
+	case SELECT_MESSAGE: {
+		messagesState.selectedMessageIDs.add(action.payload.ID)
+		return {
+			...messagesState,
+		}
+	}
+	case UNSELECT_MESSAGE: {
+		messagesState.selectedMessageIDs.delete(action.payload.ID)
+		return {
+			...messagesState,
+		}
+	}
+	case CLEAR_SELECTED: {
+		return {
+			...messagesState,
+			selectedMessageIDs: new Set(),
+		}
 	}
 	case SEND_MESSAGE_SUCCEEDED: {
 		return {

@@ -17,6 +17,7 @@ import {
 	selectHasNextThread,
 	selectThreadID,
 	selectIsMessageThreadOpen,
+	selectSelectedMessageIDs,
 	sendMessageActionCreator,
 	updateMessageActionCreator,
 	selectMessageForEdit,
@@ -25,6 +26,9 @@ import {
 	setEditMessageActionCreator,
 	deleteMessageActionCreator,
 	copyMessageActionCreator,
+	selectMessageActionCreator,
+	unselectMessageActionCreator,
+	clearSelectedActionCreator,
 } from '../../features/stack';
 
 function ThreadContainer(props) {
@@ -38,6 +42,7 @@ function ThreadContainer(props) {
 		closeThread,
 		destroyThread,
 		messages,
+		selectedMessageIDs,
 		error,
 		logout,
 		isLastPage,
@@ -52,6 +57,9 @@ function ThreadContainer(props) {
 		setEditMessage,
 		deleteMessage,
 		copyMessage,
+		selectMessage,
+		unselectMessage,
+		clearSelectedMessages,
 	} = props
 
 	const listRef = useRef(null);
@@ -85,6 +93,9 @@ function ThreadContainer(props) {
 	const onDeleteClick = useCallback(deleteMessage, [deleteMessage])
 	const onEditClick = useCallback(setEditMessage, [setEditMessage])
 	const onCopyClick = useCallback(copyMessage, [copyMessage])
+	const onSelectClick = useCallback(selectMessage, [selectMessage])
+	const onUnselectClick = useCallback(unselectMessage, [unselectMessage])
+	const onClearSelectedClick = useCallback(clearSelectedMessages, [clearSelectedMessages])
 
 	const onMessageSend = useCallback(payload => {
 		payload.threadID = threadID
@@ -103,9 +114,13 @@ function ThreadContainer(props) {
 			onScroll={onListScroll}
 			error={error}
 			loading={isLoading}
+			selectedMessageIDs={selectedMessageIDs}
 			messages={messages}
 			isAnyOpen={hasNextThread}
 			checkMyThreadOpen={checkMyThreadOpen}
+			onSelectClick={onSelectClick}
+			onUnselectClick={onUnselectClick}
+			onClearSelectedClick={onClearSelectedClick}
 			onDeleteClick={onDeleteClick}
 			onEditClick={onEditClick}
 			onToggleThreadClick={onToggleThreadClick}
@@ -120,6 +135,7 @@ function ThreadContainer(props) {
 
 const mapStateToProps = (state, {index}) => ({
 	messages: selectMessages(index)(state),
+	selectedMessageIDs: selectSelectedMessageIDs(index)(state),
 	hasNextThread: selectHasNextThread(index)(state),
 	isLoading: selectIsLoading(index)(state),
 	isLastPage: selectIsLastPage(index)(state),
@@ -132,6 +148,9 @@ const mapStateToProps = (state, {index}) => ({
 })
 
 const mapDispatchToProps = (dispatch, {index}) => ({
+	clearSelectedMessages: payload => dispatch(clearSelectedActionCreator(index)(payload)),
+	unselectMessage: payload => dispatch(unselectMessageActionCreator(index)(payload)),
+	selectMessage: payload => dispatch(selectMessageActionCreator(index)(payload)),
 	fetchMessages: payload => dispatch(fetchMessagesActionCreator(index)(payload)),
 	sendMessage: payload => dispatch(sendMessageActionCreator(index)(payload)),
 	updateMessage: payload => dispatch(updateMessageActionCreator(index)(payload)),
