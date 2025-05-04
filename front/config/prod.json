@@ -1,0 +1,8 @@
+{
+	"port": 8081,
+	"addr": "192.168.10.2",
+	"basedir": ".",
+	"https": "1",
+	"backendurl": "lesnotes.space",
+	"env": "prod"
+}
