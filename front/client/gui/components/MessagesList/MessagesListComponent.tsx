@@ -52,7 +52,7 @@ function MessagesListComponent(props) {
 								}
 							>
 								<Checkmark
-									css="cursor-pointer mr-5 -ml-8"
+									css="cursor-pointer mr-5 -ml-8 p-2 w-[20px] h-[20px]"
 									tabIndex="0"
 									onClick={() => selected ? onUnselectClick(message) : onSelectClick(message)}
 									name=""
@@ -75,7 +75,7 @@ function MessagesListComponent(props) {
 										content={
 											<CopyIcon css="flex" width="20" height="20" />
 										}
-										onClick={onCopyClick}
+										onClick={() => onCopyClick(message)}
 									/>
 								) : null}
 							</Tag>
