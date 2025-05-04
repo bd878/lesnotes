@@ -1,0 +1,66 @@
+#!/usr/bin/bash
+
+oval=${1?"Usage: $0 oval nval"}
+nval=${2?"Usage: $0 oval nval"}
+
+# env BUILD_DIR, REPO, LOG, ENV
+
+exec 7<&1
+exec &> $LOG 
+
+cd $REPO
+printf "*** PWD = %s\n" $PWD
+printf "*** ENV = %s\n" $ENV
+printf "*** BUILD_DIR = %s\n" $BUILD_DIR
+echo
+
+export GIT_DIR="$(pwd)/.git"
+
+git diff --quiet "$oval" "$nval" -- "front"
+if (( $? > 0 ))
+then
+    echo "*** building front"
+    echo
+    setsid -f bash --login -c "env BUILD_DIR=$BUILD_DIR ENV=$ENV /srv/misc/scripts/build-front"
+else
+    echo "*** no changes in front"
+    echo
+fi
+
+git diff --quiet "$oval" "$nval" -- "server/messages"
+if (( $? > 0 ))
+then
+    echo "*** building messages"
+    echo
+    setsid -f bash --login -c "env BUILD_DIR=$BUILD_DIR ENV=$ENV /srv/misc/scripts/build-messages"
+else
+    echo "*** no changes in messages"
+    echo
+fi
+
+git diff --quiet "$oval" "$nval" -- "server/users"
+if (( $? > 0 ))
+then
+    echo "*** building users"
+    echo
+    setsid -f bash --login -c "env BUILD_DIR=$BUILD_DIR ENV=$ENV /srv/misc/scripts/build-users"
+else
+    echo "*** no changes in users"
+    echo
+fi
+
+git diff --quiet "$oval" "$nval" -- "server/files"
+if (( $? > 0 ))
+then
+    echo "*** building files"
+    echo
+    setsid -f bash --login -c "env BUILD_DIR=$BUILD_DIR ENV=$ENV /srv/misc/scripts/build-files"
+else
+    echo "*** no changes in files"
+    echo
+fi
+
+exec 1<&7 7<&-
+
+exit 0;
+

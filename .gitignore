@@ -1,6 +1,7 @@
 *
 !*/
 !*.*
+!misc/*
 *.db
 data/*
 files/*

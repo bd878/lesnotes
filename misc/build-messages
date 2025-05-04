@@ -1,0 +1,70 @@
+#!/bin/bash
+#
+# Builds messages service
+#
+
+set -e
+
+# env BUILD_DIR, ENV
+
+BUILD_DIR=`readlink -f $BUILD_DIR`
+# no systemd dependencies
+if [[ "$ENV" == "$ENV" ]]; then
+    :
+elif [[ "$ENV" == "prod" ]]; then
+    PORTS=( 9001 9002 9003 )
+else
+    printf "Unknown env %s\n" $ENV
+    exit 1
+fi
+
+# init
+mkdir -p "/srv/gallery/$ENV/messages" # no error
+touch "$BUILD_DIR/logs/messages.log"
+
+echo "*** logging in $BUILD_DIR/logs/messages.log"
+
+exec 7<&1
+exec &> "$BUILD_DIR/logs/messages.log"
+
+# build 
+echo "*** building messages"
+
+cd $BUILD_DIR/gallery/server/messages
+echo "*** pwd = $(pwd)"
+go version
+[ $? -ne 0 ] && echo "*** go is not installed, exit." && exit 1
+go env -w "CGO_ENABLED=1"
+go build -v -buildvcs=false ./cmd/grpc/
+[ $? -ne 0 ] && echo "*** build failed, exit." && exit 1
+
+go build -v -buildvcs=false ./cmd/http/
+[ $? -ne 0 ] && echo "*** build failed, exit." && exit 1
+
+# stop
+set +e
+echo "*** stopping gallery-messages"
+systemd-run --user --scope -p "Delegate=yes" -- lxc-attach gallery-$ENV -- /srv/misc/scripts/stop_messages.sh
+
+scp grpc gallery-$ENV:/srv/gallery/$ENV/messages/
+scp http gallery-$ENV:/srv/gallery/$ENV/messages/
+
+# start
+echo "*** starting gallery-messages"
+systemd-run --user --scope -p "Delegate=yes" -- lxc-attach gallery-$ENV -- /srv/misc/scripts/start_messages.sh
+
+set -e
+
+echo
+
+# restore
+echo "*** build finish $(date)"
+echo "==="
+
+exec 1<&7 7<&-
+
+echo "done."
+
+exit 0;
+
+
