@@ -14,7 +14,8 @@ import {
 	unselectMessageActionCreator,
 	clearSelectedActionCreator,
 	publishMessageActionCreator,
-	privateMessageActionCreator
+	privateMessageActionCreator,
+	deleteSelectedActionCreator,
 } from './stackActionCreators'
 import {
 	selectHasNextThread,
@@ -61,5 +62,6 @@ export {
 	deleteMessageActionCreator,
 	copyMessageActionCreator,
 	publishMessageActionCreator,
-	privateMessageActionCreator
+	privateMessageActionCreator,
+	deleteSelectedActionCreator,
 }

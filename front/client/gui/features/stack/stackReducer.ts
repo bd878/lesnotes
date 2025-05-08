@@ -5,6 +5,7 @@ import {
 
 	UPDATE_MESSAGE,
 	DELETE_MESSAGE,
+	DELETE_SELECTED,
 	SELECT_MESSAGE,
 	PUBLISH_MESSAGE,
 	PRIVATE_MESSAGE,
@@ -21,6 +22,7 @@ import {
 	FETCH_MESSAGES_SUCCEEDED,
 	UPDATE_MESSAGE_SUCCEEDED,
 	DELETE_MESSAGE_SUCCEEDED,
+	DELETE_SELECTED_SUCCEEDED,
 } from './stackActions';
 import * as is from '../../../third_party/is'
 
@@ -133,6 +135,22 @@ function messageReducer(messagesState = thread, action) {
 			loading: false,
 			error: "",
 			messageForEdit: {},
+		}
+	}
+	case DELETE_SELECTED: {
+		return {
+			...messagesState,
+			loading: true,
+			error: "",
+		}
+	}
+	case DELETE_SELECTED_SUCCEEDED: {
+		return {
+			...messagesState,
+			loading: false,
+			error: "",
+			list: [ ...action.payload ],
+			selectedMessageIDs: new Set(),
 		}
 	}
 	}

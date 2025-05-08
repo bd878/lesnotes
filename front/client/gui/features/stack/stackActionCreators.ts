@@ -7,6 +7,7 @@ import {
 
 	UPDATE_MESSAGE,
 	DELETE_MESSAGE,
+	DELETE_SELECTED,
 	SEND_MESSAGE,
 	COPY_MESSAGE,
 	FETCH_MESSAGES,
@@ -21,6 +22,7 @@ import {
 	FETCH_MESSAGES_SUCCEEDED,
 	UPDATE_MESSAGE_SUCCEEDED,
 	DELETE_MESSAGE_SUCCEEDED,
+	DELETE_SELECTED_SUCCEEDED,
 } from './stackActions';
 
 export const openThreadActionCreator = payload => ({
@@ -94,10 +96,21 @@ export const deleteMessageActionCreator = index => payload => ({
 	payload,
 })
 
+export const deleteSelectedActionCreator = index => () => ({
+	type: DELETE_SELECTED,
+	index: index,
+})
+
 export const selectMessageActionCreator = index => payload => ({
 	type: SELECT_MESSAGE,
 	index: index,
 	payload,
+})
+
+export const deleteSelectedSucceededActionCreator = index => payload => ({
+	type: DELETE_SELECTED_SUCCEEDED,
+	index: index,
+	payload: payload,
 })
 
 export const unselectMessageActionCreator = index => payload => ({

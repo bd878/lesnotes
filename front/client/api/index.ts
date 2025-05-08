@@ -3,6 +3,7 @@ import loadOneMessage from './loadOneMessage';
 import sendMessage from './sendMessage';
 import updateMessage from './updateMessage';
 import deleteMessage from './deleteMessage';
+import deleteMessages from './deleteMessages';
 import uploadFile from './uploadFile';
 import auth from './auth';
 import login from './login';
@@ -21,6 +22,7 @@ export default {
 	sendMessage,
 	updateMessage,
 	deleteMessage,
+	deleteMessages,
 	uploadFile,
 	getFileDownloadUrl,
 }

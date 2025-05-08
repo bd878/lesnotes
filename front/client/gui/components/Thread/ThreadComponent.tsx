@@ -26,9 +26,9 @@ function ThreadComponent(props, ref) {
 		loading,
 		messages,
 		selectedMessageIDs,
+		isAnyMessageSelected,
 		isAnyOpen,
 		checkMyThreadOpen,
-		onDeleteClick,
 		onEditClick,
 		onToggleThreadClick,
 		onCopyClick,
@@ -56,9 +56,14 @@ function ThreadComponent(props, ref) {
 
 			<Tag
 				ref={ref}
-				css="grow w-full h-full overflow-x-hidden overflow-y-scroll"
+				css="grow w-full h-full overflow-x-hidden overflow-y-scroll relative"
 				onScroll={onScroll}
 			>
+				{isAnyMessageSelected ? (
+					<Tag>
+					</Tag>
+				) : null}
+
 				<MessagesList
 					css="w-full"
 					error={error}
@@ -72,7 +77,6 @@ function ThreadComponent(props, ref) {
 					onPrivateClick={onPrivateClick}
 					onSelectClick={onSelectClick}
 					onUnselectClick={onUnselectClick}
-					onDeleteClick={onDeleteClick}
 					onEditClick={onEditClick}
 					onResetEditClick={reset}
 					onToggleThreadClick={onToggleThreadClick}

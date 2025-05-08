@@ -24,7 +24,6 @@ function MessagesListComponent(props) {
 		isAnyThreadOpen,
 		onToggleThreadClick,
 		onEditClick,
-		onDeleteClick,
 		onCopyClick,
 		onPublishClick,
 		onPrivateClick,

@@ -1,4 +1,4 @@
-import React, {useEffect, useCallback, useRef} from 'react';
+import React, {useEffect, useCallback, useMemo, useRef} from 'react';
 import {connect} from '../../../third_party/react-redux';
 import i18n from '../../../i18n';
 import * as is from '../../../third_party/is';
@@ -25,6 +25,7 @@ import {
 	resetEditMessageActionCreator,
 	setEditMessageActionCreator,
 	deleteMessageActionCreator,
+	deleteSelectedActionCreator,
 	copyMessageActionCreator,
 	selectMessageActionCreator,
 	unselectMessageActionCreator,
@@ -58,10 +59,11 @@ function ThreadContainer(props) {
 		messageForEdit,
 		setEditMessage,
 		deleteMessage,
+		deleteSelected,
 		copyMessage,
 		selectMessage,
 		unselectMessage,
-		clearSelectedMessages,
+		clearSelected,
 		publishMessage,
 		privateMessage,
 	} = props
@@ -94,12 +96,13 @@ function ThreadContainer(props) {
 			openThread(message)
 	}, [closeThread, openThread, hasNextThread])
 
+	const onDeleteSelectedClick = useCallback(deleteSelected, [deleteSelected])
 	const onDeleteClick = useCallback(deleteMessage, [deleteMessage])
 	const onEditClick = useCallback(setEditMessage, [setEditMessage])
 	const onCopyClick = useCallback(copyMessage, [copyMessage])
 	const onSelectClick = useCallback(selectMessage, [selectMessage])
 	const onUnselectClick = useCallback(unselectMessage, [unselectMessage])
-	const onClearSelectedClick = useCallback(clearSelectedMessages, [clearSelectedMessages])
+	const onClearSelectedClick = useCallback(clearSelected, [clearSelected])
 	const onPublishClick = useCallback(publishMessage, [publishMessage])
 	const onPrivateClick = useCallback(privateMessage, [privateMessage])
 
@@ -107,6 +110,8 @@ function ThreadContainer(props) {
 		payload.threadID = threadID
 		sendMessage(payload)
 	}, [sendMessage, threadID])
+
+	const isAnyMessageSelected = useMemo(() => selectedMessageIDs.length > 0, [selectedMessageIDs])
 
 	return (
 		<ThreadComponent
@@ -120,6 +125,7 @@ function ThreadContainer(props) {
 			onScroll={onListScroll}
 			error={error}
 			loading={isLoading}
+			isAnyMessageSelected={isAnyMessageSelected}
 			selectedMessageIDs={selectedMessageIDs}
 			messages={messages}
 			isAnyOpen={hasNextThread}
@@ -127,6 +133,7 @@ function ThreadContainer(props) {
 			onSelectClick={onSelectClick}
 			onUnselectClick={onUnselectClick}
 			onClearSelectedClick={onClearSelectedClick}
+			onDeleteSelectedClick={onDeleteSelectedClick}
 			onDeleteClick={onDeleteClick}
 			onEditClick={onEditClick}
 			onPublishClick={onPublishClick}
@@ -158,13 +165,14 @@ const mapStateToProps = (state, {index}) => ({
 const mapDispatchToProps = (dispatch, {index}) => ({
 	publishMessage: payload => dispatch(publishMessageActionCreator(index)(payload)),
 	privateMessage: payload => dispatch(privateMessageActionCreator(index)(payload)),
-	clearSelectedMessages: payload => dispatch(clearSelectedActionCreator(index)(payload)),
+	clearSelected: payload => dispatch(clearSelectedActionCreator(index)(payload)),
 	unselectMessage: payload => dispatch(unselectMessageActionCreator(index)(payload)),
 	selectMessage: payload => dispatch(selectMessageActionCreator(index)(payload)),
 	fetchMessages: payload => dispatch(fetchMessagesActionCreator(index)(payload)),
 	sendMessage: payload => dispatch(sendMessageActionCreator(index)(payload)),
 	updateMessage: payload => dispatch(updateMessageActionCreator(index)(payload)),
 	resetEditMessage: payload => dispatch(resetEditMessageActionCreator(index)(payload)),
+	deleteSelected: payload => dispatch(deleteSelectedActionCreator(index)(payload)),
 	deleteMessage: payload => dispatch(deleteMessageActionCreator(index)(payload)),
 	copyMessage: payload => dispatch(copyMessageActionCreator(index)(payload)),
 	setEditMessage: payload => dispatch(setEditMessageActionCreator(index)(payload)),
