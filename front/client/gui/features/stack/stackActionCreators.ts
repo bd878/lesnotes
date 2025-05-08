@@ -122,7 +122,6 @@ export const unselectMessageActionCreator = index => payload => ({
 export const clearSelectedActionCreator = index => () => ({
 	type: CLEAR_SELECTED,
 	index: index,
-	payload,
 })
 
 export const copyMessageActionCreator = index => payload => ({

@@ -111,7 +111,7 @@ function ThreadContainer(props) {
 		sendMessage(payload)
 	}, [sendMessage, threadID])
 
-	const isAnyMessageSelected = useMemo(() => selectedMessageIDs.length > 0, [selectedMessageIDs])
+	const isAnyMessageSelected = useMemo(() => selectedMessageIDs.size > 0, [selectedMessageIDs])
 
 	return (
 		<ThreadComponent

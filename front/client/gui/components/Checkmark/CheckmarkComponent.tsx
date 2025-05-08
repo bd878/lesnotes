@@ -6,6 +6,8 @@ const CheckmarkComponent = forwardRef((props, ref) => {
 		<Tag
 			css={props.css}
 			tabIndex={props.tabIndex}
+			checked={props.checked}
+			onChange={props.onChange}
 			el="input"
 			type="checkbox"
 			value={props.value}

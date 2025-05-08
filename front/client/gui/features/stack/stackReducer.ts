@@ -80,12 +80,14 @@ function messageReducer(messagesState = thread, action) {
 		messagesState.selectedMessageIDs.add(action.payload.ID)
 		return {
 			...messagesState,
+			selectedMessageIDs: new Set(messagesState.selectedMessageIDs),
 		}
 	}
 	case UNSELECT_MESSAGE: {
 		messagesState.selectedMessageIDs.delete(action.payload.ID)
 		return {
 			...messagesState,
+			selectedMessageIDs: new Set(messagesState.selectedMessageIDs),
 		}
 	}
 	case CLEAR_SELECTED: {

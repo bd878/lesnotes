@@ -1,6 +1,7 @@
 import React, {lazy, forwardRef} from 'react';
 import Button from '../Button';
 import Tag from '../Tag';
+import i18n from '../../../i18n';
 import * as is from '../../../third_party/is';
 
 const MessagesList = lazy(() => import("../MessagesList"));
@@ -13,6 +14,7 @@ function ThreadComponent(props, ref) {
 		css,
 		destroyContent,
 		onDestroyClick,
+		onDeleteSelectedClick,
 		onLoadMoreClick,
 		onSelectClick,
 		onUnselectClick,
@@ -60,7 +62,9 @@ function ThreadComponent(props, ref) {
 				onScroll={onScroll}
 			>
 				{isAnyMessageSelected ? (
-					<Tag>
+					<Tag css="absolute w-full">
+						<Button tabIndex="0" content={i18n("delete_messages")} onClick={onDeleteSelectedClick} />
+						<Button tabIndex="0" content={i18n("cancel_delete")} onClick={onClearSelectedClick} />
 					</Tag>
 				) : null}
 

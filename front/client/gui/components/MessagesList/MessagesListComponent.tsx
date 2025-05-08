@@ -60,10 +60,11 @@ function MessagesListComponent(props) {
 									<Checkmark
 										css="cursor-pointer"
 										tabIndex="0"
-										onClick={() => isSelected ? onUnselectClick(message) : onSelectClick(message)}
+										onChange={() => isSelected ? onUnselectClick(message) : onSelectClick(message)}
 										name=""
 										id={message.ID}
 										value={message.ID}
+										checked={isSelected}
 									/>
 								</Tag>
 								<MessageElement

@@ -8,6 +8,7 @@ import {
 	COPY_MESSAGE,
 } from './stackActions'
 import {
+	resetEditMessageActionCreator,
 	messagesFailedActionCreator,
 	fetchMessagesSucceededActionCreator,
 	sendMessageSucceededActionCreator,
@@ -17,7 +18,7 @@ import {
 import {showNotificationActionCreator} from '../notification';
 import * as is from '../../../third_party/is'
 import i18n from '../../../i18n';
-import {selectMessages, selectSelectedMessageIDs} from './stackSelectors';
+import {selectMessages, selectSelectedMessageIDs, selectMessageForEdit} from './stackSelectors';
 import {selectBrowser, selectIsMobile, selectIsDesktop} from '../me'
 import api from '../../../api'
 
@@ -96,10 +97,15 @@ function* deleteMessage({index, payload}) {
 		let messages = yield select(selectMessages(index))
 		messages = messages.filter(({ID}) => ID !== payload.ID)
 
-		if (is.notEmpty(response.error))
+		const messageForEdit = yield select(selectMessageForEdit(index))
+
+		if (is.notEmpty(response.error)) {
 			yield put(messagesFailedActionCreator(index)(response.error))
-		else
+		} else {
 			yield put(deleteMessageSucceededActionCreator(index)(messages))
+			if (payload.ID === messageForEdit.ID)
+				yield put(resetEditMessageActionCreator(index)({}))
+		}
 	} catch (e) {
 		yield put(messagesFailedActionCreator(index)(e.message))
 	}
@@ -112,10 +118,15 @@ function* deleteSelected({index}) {
 		let messages = yield select(selectMessages(index))
 		messages = messages.filter(({ID}) => ID !== idsSet.has(ID))
 
-		if (is.notEmpty(response.error))
+		const messageForEdit = yield select(selectMessageForEdit(index))
+
+		if (is.notEmpty(response.error)) {
 			yield put(messagesFailedActionCreator(index)(response.error))
-		else
+		} else {
 			yield put(deleteSelectedSucceededActionCreator(index)(messages))
+			if (idsSet.has(messageForEdit.ID))
+				yield put(resetEditMessageActionCreator(index)({}))
+		}
 	} catch (e) {
 		yield put(messagesFailedActionCreator(index)(e.message))
 	}
