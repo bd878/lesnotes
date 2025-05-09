@@ -2,12 +2,18 @@ import {
 	OPEN_THREAD,
 	CLOSE_THREAD,
 	DESTROY_THREAD,
+	PUBLISH_MESSAGE,
+	PRIVATE_MESSAGE,
 
 	UPDATE_MESSAGE,
 	DELETE_MESSAGE,
+	DELETE_SELECTED,
 	SEND_MESSAGE,
 	COPY_MESSAGE,
 	FETCH_MESSAGES,
+	SELECT_MESSAGE,
+	UNSELECT_MESSAGE,
+	CLEAR_SELECTED,
 	SET_MESSAGE_FOR_EDIT,
 
 	MESSAGES_FAILED,
@@ -16,6 +22,7 @@ import {
 	FETCH_MESSAGES_SUCCEEDED,
 	UPDATE_MESSAGE_SUCCEEDED,
 	DELETE_MESSAGE_SUCCEEDED,
+	DELETE_SELECTED_SUCCEEDED,
 } from './stackActions';
 
 export const openThreadActionCreator = payload => ({
@@ -89,6 +96,34 @@ export const deleteMessageActionCreator = index => payload => ({
 	payload,
 })
 
+export const deleteSelectedActionCreator = index => () => ({
+	type: DELETE_SELECTED,
+	index: index,
+})
+
+export const selectMessageActionCreator = index => payload => ({
+	type: SELECT_MESSAGE,
+	index: index,
+	payload,
+})
+
+export const deleteSelectedSucceededActionCreator = index => payload => ({
+	type: DELETE_SELECTED_SUCCEEDED,
+	index: index,
+	payload: payload,
+})
+
+export const unselectMessageActionCreator = index => payload => ({
+	type: UNSELECT_MESSAGE,
+	index: index,
+	payload,
+})
+
+export const clearSelectedActionCreator = index => () => ({
+	type: CLEAR_SELECTED,
+	index: index,
+})
+
 export const copyMessageActionCreator = index => payload => ({
 	type: COPY_MESSAGE,
 	index: index,
@@ -97,6 +132,18 @@ export const copyMessageActionCreator = index => payload => ({
 
 export const deleteMessageSucceededActionCreator = index => payload => ({
 	type: DELETE_MESSAGE_SUCCEEDED,
+	index: index,
+	payload,
+})
+
+export const publishMessageActionCreator = index => payload => ({
+	type: PUBLISH_MESSAGE,
+	index: index,
+	payload,
+})
+
+export const privateMessageActionCreator = index => payload => ({
+	type: PRIVATE_MESSAGE,
 	index: index,
 	payload,
 })

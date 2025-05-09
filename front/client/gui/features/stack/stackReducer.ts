@@ -5,6 +5,12 @@ import {
 
 	UPDATE_MESSAGE,
 	DELETE_MESSAGE,
+	DELETE_SELECTED,
+	SELECT_MESSAGE,
+	PUBLISH_MESSAGE,
+	PRIVATE_MESSAGE,
+	UNSELECT_MESSAGE,
+	CLEAR_SELECTED,
 	SEND_MESSAGE,
 	COPY_MESSAGE,
 	FETCH_MESSAGES,
@@ -16,12 +22,14 @@ import {
 	FETCH_MESSAGES_SUCCEEDED,
 	UPDATE_MESSAGE_SUCCEEDED,
 	DELETE_MESSAGE_SUCCEEDED,
+	DELETE_SELECTED_SUCCEEDED,
 } from './stackActions';
 import * as is from '../../../third_party/is'
 
 const thread = {
 	ID: 0,
 	list: [],
+	selectedMessageIDs: new Set(),
 	messageForEdit: {},
 	isLastPage: false,
 	loading: false,
@@ -68,6 +76,26 @@ function messageReducer(messagesState = thread, action) {
 	case COPY_MESSAGE: {
 		return messagesState
 	}
+	case SELECT_MESSAGE: {
+		messagesState.selectedMessageIDs.add(action.payload.ID)
+		return {
+			...messagesState,
+			selectedMessageIDs: new Set(messagesState.selectedMessageIDs),
+		}
+	}
+	case UNSELECT_MESSAGE: {
+		messagesState.selectedMessageIDs.delete(action.payload.ID)
+		return {
+			...messagesState,
+			selectedMessageIDs: new Set(messagesState.selectedMessageIDs),
+		}
+	}
+	case CLEAR_SELECTED: {
+		return {
+			...messagesState,
+			selectedMessageIDs: new Set(),
+		}
+	}
 	case SEND_MESSAGE_SUCCEEDED: {
 		return {
 			...messagesState,
@@ -84,7 +112,7 @@ function messageReducer(messagesState = thread, action) {
 	case SET_MESSAGE_FOR_EDIT: {
 		return {
 			...messagesState,
-			messageForEdit: action.payload,
+			messageForEdit: action.payload || {},
 		}
 	}
 	case DELETE_MESSAGE: {
@@ -102,13 +130,6 @@ function messageReducer(messagesState = thread, action) {
 			error: "",
 		}
 	}
-	case UPDATE_MESSAGE: {
-		return {
-			...messagesState,
-			loading: true,
-			error: "",
-		}
-	}
 	case UPDATE_MESSAGE_SUCCEEDED: {
 		return {
 			...messagesState,
@@ -118,10 +139,20 @@ function messageReducer(messagesState = thread, action) {
 			messageForEdit: {},
 		}
 	}
-	case SET_MESSAGE_FOR_EDIT: {
+	case DELETE_SELECTED: {
 		return {
 			...messagesState,
-			messageForEdit: action.payload,
+			loading: true,
+			error: "",
+		}
+	}
+	case DELETE_SELECTED_SUCCEEDED: {
+		return {
+			...messagesState,
+			loading: false,
+			error: "",
+			list: [ ...action.payload ],
+			selectedMessageIDs: new Set(),
 		}
 	}
 	}

@@ -38,7 +38,6 @@ paths:
   /messages/v1/update:
     parameters:
       - $ref: '#/components/parameters/messageId'
-      - $ref: '#/components/parameters/public'
     put:
       summary: Update a message
       description: |
@@ -66,10 +65,10 @@ paths:
   /messages/v1/delete:
     parameters:
       - $ref: '#/components/parameters/messageId'
-      - $ref: '#/components/parameters/public'
+      - $ref: '#/components/parameters/batchIds'
     delete:
       operationId: deleteMessage
-      summary: Delete a message
+      summary: Delete a message or messages batch
       description: |
         Deletes a user's message and attached file.
         Thread messages becomes root thread messages, i.e. thread_id = 0
@@ -174,6 +173,14 @@ components:
       schema:
         type: integer
         example: 1
+    batchIds:
+      name: ids
+      in: query
+      required: false
+      schema:
+        type: array
+        items:
+          type: integer
     threadId:
       name: thread_id
       in: query

@@ -1,0 +1,57 @@
+#!/bin/bash
+#
+# Builds gallery front
+#
+
+set -e
+
+# env BUILD_DIR, ENV
+
+# init
+mkdir -p "/srv/gallery/front" # no error
+touch "$BUILD_DIR/logs/front.log"
+
+echo "*** logging in $BUILD_DIR/logs/front.log"
+
+exec 7<&1
+exec &> "$BUILD_DIR/logs/front.log"
+
+# build
+echo "*** building front"
+
+cd "$BUILD_DIR/gallery/front/"
+echo "*** pwd = $(pwd)"
+export NODE_ENV="$ENV"
+export NODE_CONFIG_ENV="$ENV"
+npm install
+node "./scripts/build-gui.js"
+node "./scripts/build-server.js"
+
+# stop
+set +e
+echo "*** stopping gallery-front"
+systemd-run --user --scope -p "Delegate=yes" -- lxc-attach gallery-$ENV -- /srv/misc/scripts/stop_front.sh
+
+scp build/* gallery-$ENV:/srv/gallery/$ENV/front/build/
+scp templates/* gallery-$ENV:/srv/gallery/$ENV/front/templates/
+scp public/* gallery-$ENV:/srv/gallery/$ENV/front/public/
+scp etag gallery-$ENV:/srv/gallery/$ENV/front/
+
+# start
+echo "*** starting gallery-front"
+systemd-run --user --scope -p "Delegate=yes" -- lxc-attach gallery-$ENV -- /srv/misc/scripts/start_front.sh
+
+set -e
+echo
+
+# restore
+echo "*** build finish $(date)"
+echo "==="
+
+exec 1<&7 7<&-
+
+echo "done."
+
+exit 0;
+
+

@@ -1,3 +1,86 @@
 @startuml
-' diagrame de composants - services
+
+skinparam packageStyle rectangle
+
+top to bottom direction
+
+header LesNotes
+title Staging environment
+
+together {
+	package users
+	package files
+	package messages
+}
+
+package Front as front {
+	component http as front_http
+	front_http -- "192.168.10.3:8181"
+}
+
+package Users as users {
+	component http as users_http
+	component grpc as users_grpc
+	database SQLite as users_db
+
+	users_http -- "192.168.10.3:8184"
+	users_grpc -- "192.168.10.3:8185"
+
+	users_grpc - users_db
+	users_http - users_grpc
+
+	note bottom of users_db : ./users.db
+}
+
+package Files as files {
+	component http as files_http
+	component grpc as files_grpc
+	database SQLite as files_db
+
+	files_http -- "192.168.10.3:8182"
+	files_grpc -- "192.168.10.3:8186"
+
+	files_grpc - files_db 
+	files_http - files_grpc
+
+	note bottom of files_db : ./files.db
+}
+
+package Messages as messages {
+	component http as messages_http
+
+	messages_http -- "192.168.10.3:8183"
+
+	package "messages@9101" as 9101 {
+		component grpc as 9101_grpc
+		database SQLite as 9101_db
+
+		9101_grpc -- "192.168.10.3:9101"
+		9101_grpc - 9101_db
+
+		note bottom of 9101_db : ./main.9101.db
+	}
+
+	package "messages@9102" as 9102 {
+		component grpc as 9102_grpc
+		database SQLite as 9102_db
+
+		9102_grpc -- "192.168.10.3:9102"
+		9102_grpc - 9102_db
+
+		note bottom of 9102_db : ./main.9102.db
+	}
+
+	package "messages@9103" as 9103 {
+		component grpc as 9103_grpc
+		database SQLite as 9103_db
+
+		9103_grpc -- "192.168.10.3:9103"
+		9103_grpc - 9103_db
+
+		note bottom of 9103_db : ./main.9103.db
+	}
+}
+
+footer 02.05.25
 @enduml

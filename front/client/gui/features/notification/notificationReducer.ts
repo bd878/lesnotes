@@ -24,7 +24,7 @@ export function notificationReducer(notificationState = initialState, action) {
 	case SET_TIMER_NOTIFICATION:
 		return {
 			...notificationState,
-			timerID: payload.timerID,
+			timerID: action.payload.timerID,
 		}
 	default:
 	}

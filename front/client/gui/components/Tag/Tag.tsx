@@ -16,6 +16,7 @@ const Tag = forwardRef((props, ref) => {
 			className={props.css}
 			name={props.name}
 			type={props.type}
+			checked={props.checked}
 			value={props.value}
 			onClick={props.onClick}
 			onChange={props.onChange}

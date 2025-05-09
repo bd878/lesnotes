@@ -8,6 +8,7 @@ service Messages {
 	rpc GetServers(GetServersRequest) returns (GetServersResponse) {}
 	rpc SaveMessage(SaveMessageRequest) returns (SaveMessageResponse) {}
 	rpc DeleteMessage(DeleteMessageRequest) returns (DeleteMessageResponse) {}
+	rpc DeleteMessages(DeleteMessagesRequest) returns (DeleteMessagesResponse) {}
 	rpc UpdateMessage(UpdateMessageRequest) returns (UpdateMessageResponse) {}
 	rpc ReadOneMessage(ReadOneMessageRequest) returns (Message) {}
 	rpc ReadAllMessages(ReadMessagesRequest) returns (ReadMessagesResponse) {}
@@ -81,7 +82,20 @@ message DeleteMessageRequest {
 	int32    user_id = 2;
 }
 
-message DeleteMessageResponse {
+message DeleteMessagesRequest {
+	repeated int32  ids = 1;
+	int32 user_id = 2;
+}
+
+message DeleteMessageResponse {}
+
+message DeleteMessageStatus {
+	bool ok = 1;
+	string explain = 2;
+}
+
+message DeleteMessagesResponse {
+	repeated DeleteMessageStatus ids = 1;
 }
 
 message GetServersRequest {}

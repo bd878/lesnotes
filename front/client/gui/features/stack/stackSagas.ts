@@ -4,19 +4,21 @@ import {
 	FETCH_MESSAGES,
 	SEND_MESSAGE,
 	DELETE_MESSAGE,
+	DELETE_SELECTED,
 	COPY_MESSAGE,
 } from './stackActions'
 import {
+	resetEditMessageActionCreator,
 	messagesFailedActionCreator,
 	fetchMessagesSucceededActionCreator,
 	sendMessageSucceededActionCreator,
 	updateMessageSucceededActionCreator,
-	deleteMessageSucceededActionCreator,
+	deleteSelectedSucceededActionCreator,
 } from './stackActionCreators'
 import {showNotificationActionCreator} from '../notification';
 import * as is from '../../../third_party/is'
 import i18n from '../../../i18n';
-import {selectMessages} from './stackSelectors';
+import {selectMessages, selectSelectedMessageIDs, selectMessageForEdit} from './stackSelectors';
 import {selectBrowser, selectIsMobile, selectIsDesktop} from '../me'
 import api from '../../../api'
 
@@ -95,10 +97,36 @@ function* deleteMessage({index, payload}) {
 		let messages = yield select(selectMessages(index))
 		messages = messages.filter(({ID}) => ID !== payload.ID)
 
-		if (is.notEmpty(response.error))
+		const messageForEdit = yield select(selectMessageForEdit(index))
+
+		if (is.notEmpty(response.error)) {
 			yield put(messagesFailedActionCreator(index)(response.error))
-		else
+		} else {
 			yield put(deleteMessageSucceededActionCreator(index)(messages))
+			if (payload.ID === messageForEdit.ID)
+				yield put(resetEditMessageActionCreator(index)({}))
+		}
+	} catch (e) {
+		yield put(messagesFailedActionCreator(index)(e.message))
+	}
+}
+
+function* deleteSelected({index}) {
+	try {
+		const idsSet = yield select(selectSelectedMessageIDs(index))
+		const response = yield call(api.deleteMessages, Array.from(idsSet))
+		let messages = yield select(selectMessages(index))
+		messages = messages.filter(({ID}) => ID !== idsSet.has(ID))
+
+		const messageForEdit = yield select(selectMessageForEdit(index))
+
+		if (is.notEmpty(response.error)) {
+			yield put(messagesFailedActionCreator(index)(response.error))
+		} else {
+			yield put(deleteSelectedSucceededActionCreator(index)(messages))
+			if (idsSet.has(messageForEdit.ID))
+				yield put(resetEditMessageActionCreator(index)({}))
+		}
 	} catch (e) {
 		yield put(messagesFailedActionCreator(index)(e.message))
 	}
@@ -133,6 +161,7 @@ function* copyMessage({payload}) {
 
 function* stackSaga() {
 	yield takeLatest(DELETE_MESSAGE, deleteMessage)
+	yield takeLatest(DELETE_SELECTED, deleteSelected)
 	yield takeLatest(UPDATE_MESSAGE, updateMessage)
 	yield takeLatest(FETCH_MESSAGES, fetchMessages)
 	yield takeLatest(SEND_MESSAGE, sendMessage)

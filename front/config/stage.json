@@ -1,0 +1,8 @@
+{
+	"port": 8181,
+	"addr": "192.168.10.3",
+	"basedir": "",
+	"https": "1",
+	"backendurl": "stage.lesnotes.space",
+	"env": "stage"
+}

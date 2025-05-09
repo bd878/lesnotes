@@ -1,0 +1,61 @@
+#!/bin/bash
+#
+# Builds users service
+#
+
+set -e
+
+# env BUILD_DIR, ENV
+
+# init
+mkdir -p "/srv/gallery/$ENV/users" # no error
+touch "$BUILD_DIR/logs/users.log"
+touch "/srv/gallery/$ENV/users/users.log"
+
+echo "*** logging in $BUILD_DIR/logs/users.log"
+
+exec 7<&1
+exec &> "$BUILD_DIR/logs/users.log"
+
+# build 
+echo "*** building users"
+
+cd $BUILD_DIR/gallery/server/users
+echo "*** pwd = $(pwd)"
+go version
+[ $? -ne 0 ] && echo "*** go is not installed, exit." && exit 1
+go env -w "CGO_ENABLED=1"
+
+go build -v -buildvcs=false ./cmd/grpc/
+[ $? -ne 0 ] && echo "*** build failed, exit." && exit 1
+
+go build -v -buildvcs=false ./cmd/http/
+[ $? -ne 0 ] && echo "*** build failed, exit." && exit 1
+
+# stop
+set +e
+echo "*** stopping gallery-users"
+systemd-run --user --scope -p "Delegate=yes" -- lxc-attach gallery-$ENV -- /srv/misc/scripts/stop_users.sh
+
+scp grpc gallery-$ENV:/srv/gallery/$ENV/users/
+scp http gallery-$ENV:/srv/gallery/$ENV/users/
+
+# start
+echo "*** starting gallery-users"
+systemd-run --user --scope -p "Delegate=yes" -- lxc-attach gallery-$ENV -- /srv/misc/scripts/start_users.sh
+
+set -e
+
+echo
+
+# restore
+echo "*** build finish $(date)"
+echo "==="
+
+exec 1<&7 7<&-
+
+echo "done."
+
+exit 0;
+
+

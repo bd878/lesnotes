@@ -1,0 +1,62 @@
+#!/usr/bin/bash
+#
+# This hook build microservices
+# and front
+#
+
+set -e
+
+# -- main()
+#
+
+BUILD_DIR="/tmp/build_$(date +"%H_%M_%S")"
+REPO="$BUILD_DIR/gallery"
+LOGS="$BUILD_DIR/logs"
+LOG="$LOGS/post-receive.log"
+
+rm -rf $BUILD_DIR &>/dev/null
+mkdir -p $LOGS
+mkdir -p $REPO
+
+touch $LOG
+
+echo "*** BUILD_DIR = $BUILD_DIR"
+
+exec 7<&1
+exec &> $LOG 
+
+echo
+
+while read oval nval ref
+do
+	echo "Branch: $ref"
+	echo "Previous commit: $oval"
+	echo "New commit: $nval"
+	echo
+
+	if [[ "$oval" == 00*0 ]]
+	then
+		printf "*** new ref %s is created\n" $ref
+		echo
+	fi
+	if [[ "$nval" == 00*0 ]]
+	then
+		printf "*** old ref %s deleted\n" $ref
+		echo
+	fi
+
+	if [[ "$ref" == 'refs/heads/stage' ]]; then
+		echo "*** Deploy stage"
+		git clone -b stage file:///srv/git/gallery.git "$REPO"
+		setsid -f bash --login -c "env REPO=$REPO BUILD_DIR=$BUILD_DIR LOG=$LOG ENV=stage /srv/misc/scripts/build-services $oval $nval"
+	elif [[ "$ref" == 'refs/heads/master' ]]; then
+		echo "*** Deploy prod"
+		git clone -b master file:///srv/git/gallery.git "$REPO"
+		setsid -f bash --login -c "env REPO=$REPO BUILD_DIR=$BUILD_DIR LOG=$LOG ENV=prod /srv/misc/scripts/build-services $oval $nval"
+	fi
+done
+
+exec 7<&-
+
+exit 0;
+

@@ -22,6 +22,7 @@ type Controller interface {
 	SaveMessage(ctx context.Context, log *logger.Logger, message *model.Message) (*model.SaveMessageResult, error)
 	UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (*model.UpdateMessageResult, error)
 	DeleteMessage(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) (*model.DeleteMessageResult, error)
+	DeleteMessages(ctx context.Context, log *logger.Logger, params *model.DeleteMessagesParams) (*model.DeleteMessagesResult, error)
 	ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadMessagesParams) (*model.ReadMessagesResult, error)
 	ReadThreadMessages(ctx context.Context, log *logger.Logger, params *model.ReadThreadMessagesParams) (*model.ReadThreadMessagesResult, error)
 }
@@ -267,49 +268,86 @@ func (h *Handler) DeleteMessage(log *logger.Logger, w http.ResponseWriter, req *
 	}
 
 	values := req.URL.Query()
-	if values.Get("id") == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "empty message id",
+	if values.Get("id") != "" {
+		id, err := strconv.Atoi(values.Get("id"))
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+				Status: "error",
+				Description: "invalid id",
+			})
+
+			return
+		}
+
+		_, err = h.controller.DeleteMessage(req.Context(), log, &model.DeleteMessageParams{
+			ID: int32(id),
+			UserID: user.ID,
+		})
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+				Status: "error",
+				Description: "failed to delete message",
+			})
+
+			return
+		}
+
+		json.NewEncoder(w).Encode(model.DeleteMessageServerResponse{
+			ServerResponse: servermodel.ServerResponse{
+				Status: "ok",
+				Description: "deleted",
+			},
+			ID: int32(id),
+		})
+
+		return
+	} else if values.Get("ids") != "" {
+		var ids []int32
+		if err := json.Unmarshal([]byte(values.Get("ids")), &ids); err != nil {
+			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+				Status: "error",
+				Description: "wrong \"ids\" query field format",
+			})
+
+			return
+		}
+
+		res, err := h.controller.DeleteMessages(req.Context(), log, &model.DeleteMessagesParams{
+			IDs: ids,
+			UserID: user.ID,
+		})
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+				Status: "error",
+				Description: "failed to delete batch messages",
+			})
+
+			return
+		}
+
+		json.NewEncoder(w).Encode(model.DeleteMessagesServerResponse{
+			ServerResponse: servermodel.ServerResponse{
+				Status: "ok",
+				Description: "deleted",
+			},
+			IDs: res.IDs,
 		})
 
 		return
 	}
 
-	id, err := strconv.Atoi(values.Get("id"))
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "invalid id",
-		})
-
-		return
-	}
-
-	_, err = h.controller.DeleteMessage(req.Context(), log, &model.DeleteMessageParams{
-		ID: int32(id),
-		UserID: user.ID,
+	w.WriteHeader(http.StatusBadRequest)
+	json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		Status: "error",
+		Description: "empty message id or batch ids",
 	})
-	if err != nil {
-		log.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "failed to delete message",
-		})
 
-		return
-	}
-
-	json.NewEncoder(w).Encode(model.DeleteMessageServerResponse{
-		ServerResponse: servermodel.ServerResponse{
-			Status: "ok",
-			Description: "deleted",
-		},
-		ID: int32(id),
-	})
+	return
 }
 
 func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
@@ -393,27 +431,6 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 		})
 
 		return
-	}
-
-	if values.Get("public") != "" {
-		public, err := strconv.Atoi(values.Get("public"))
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(servermodel.ServerResponse{
-				Status: "error",
-				Description: "invalid public param",
-			})
-
-			return
-		}
-
-		if public > 0 {
-			private = false
-		} else if public == 0 {
-			private = true
-		} else {
-			private = true
-		}
 	}
 
 	resp, err := h.controller.UpdateMessage(req.Context(), log, &model.UpdateMessageParams{

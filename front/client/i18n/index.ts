@@ -31,11 +31,15 @@ const i18n = {
 		bad_response: "Bad response",
 		cannot_parse_response: "Cannot parse the response",
 		delete_message: "Delete",
+		delete_messages: "Delete",
 		edit_message: "Edit",
 		open_thread: "Open thread",
 		close_thread: "Close",
 		close_button_text: "Close",
+		cancel_delete: "Cancel",
 		copied: "Copied!",
+		publish_message: "Publish",
+		private_message: "Make private"
 	},
 	"ru": {
 		logout: "Выйти",
@@ -69,11 +73,15 @@ const i18n = {
 		bad_response: "Невалидный ответ от сервера",
 		cannot_parse_response: "Не получается разобрать ответ от сервера",
 		delete_message: "Удалить",
+		delete_messages: "Удалить",
+		cancel_delete: "Отмена",
 		edit_message: "Изменить",
 		open_thread: "Комментарии",
 		close_thread: "Скрыть",
 		close_button_text: "Закрыть",
 		copied: "Скопировано",
+		publish_message: "Опубликовать",
+		private_message: "Скрыть"
 	}
 }
 

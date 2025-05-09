@@ -1,14 +1,17 @@
 export const OPEN_THREAD = "@stack/OPEN_THREAD"
 export const CLOSE_THREAD = "@stack/CLOSE_THREAD"
-<<<<<<< HEAD
-=======
 export const DESTROY_THREAD = "@stack/DESTROY_THREAD"
->>>>>>> stage
 
+export const PUBLISH_MESSAGE = "@stack/PUBLISH_MESSAGE"
+export const PRIVATE_MESSAGE = "@stack/PRIVATE_MESSAGE"
 export const SEND_MESSAGE = "@stack/SEND_MESSAGE"
+export const SELECT_MESSAGE = "@stack/SELECT_MESSAGE"
+export const UNSELECT_MESSAGE = "@stack/UNSELECT_MESSAGE"
+export const CLEAR_SELECTED = "@stack/CLEAR_SELECTED"
 export const FETCH_MESSAGES = "@stack/FETCH_MESSAGES"
 export const UPDATE_MESSAGE = "@stack/UPDATE_MESSAGE"
 export const DELETE_MESSAGE = "@stack/DELETE_MESSAGE"
+export const DELETE_SELECTED = "@stack/DELETE_SELECTED"
 export const COPY_MESSAGE = "@stack/COPY_MESSAGE"
 export const SET_MESSAGE_FOR_EDIT = "@stack/SET_MESSAGE_FOR_EDIT"
 
@@ -18,3 +21,4 @@ export const SEND_MESSAGE_SUCCEEDED = "@stack/SEND_MESSAGE_SUCCEEDED"
 export const FETCH_MESSAGES_SUCCEEDED = "@stack/FETCH_MESSAGES_SUCCEEDED"
 export const UPDATE_MESSAGE_SUCCEEDED = "@stack/UPDATE_MESSAGE_SUCCEEDED"
 export const DELETE_MESSAGE_SUCCEEDED = "@stack/DELETE_MESSAGE_SUCCEEDED"
+export const DELETE_SELECTED_SUCCEEDED = "@stack/DELETE_SELECTED_SUCCEEDED"
