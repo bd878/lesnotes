@@ -51,23 +51,24 @@ function ThreadComponent(props, ref) {
 			<Button
 				tabIndex="0"
 				content={loadMoreContent}
-				css="disabled:opacity-30 btn w-full text-center mb-5"
+				css={(isAnyMessageSelected ? "" : "mb-5 ") + "disabled:opacity-30 btn w-full text-center"}
 				onClick={onLoadMoreClick}
 				disabled={isAllLoaded}
 			/>
 
+			{isAnyMessageSelected ? (
+				<Tag css="w-full bg-white mt-3 mb-5 flex justify-between">
+					<Button css="btn text-center" tabIndex="0" content={i18n("delete_messages")} onClick={onDeleteSelectedClick} />
+					<Button css="btn text-center" tabIndex="0" content={i18n("cancel_delete")} onClick={onClearSelectedClick} />
+				</Tag>
+			) : null}
+
+
 			<Tag
 				ref={ref}
-				css="grow w-full h-full overflow-x-hidden overflow-y-scroll relative"
+				css="grow w-full h-full flex flex-col overflow-x-hidden"
 				onScroll={onScroll}
 			>
-				{isAnyMessageSelected ? (
-					<Tag css="absolute w-full">
-						<Button tabIndex="0" content={i18n("delete_messages")} onClick={onDeleteSelectedClick} />
-						<Button tabIndex="0" content={i18n("cancel_delete")} onClick={onClearSelectedClick} />
-					</Tag>
-				) : null}
-
 				<MessagesList
 					css="w-full"
 					error={error}
