@@ -45,6 +45,7 @@ type DeleteMessageServerResponse struct {
 }
 
 type DeleteMessageStatus struct {
+	ID                int32           `json:"id"`
 	OK                bool            `json:"ok"`
 	Explain           string          `json:"explain"`
 }

@@ -90,13 +90,12 @@ func (f *fsm) applyDelete(raw []byte) interface{} {
 	err := f.repo.Delete(context.Background(), logger.Default(), &model.DeleteMessageParams{
 		ID: cmd.Id,
 		UserID: cmd.UserId,
-		FileID: cmd.FileId,
 	})
 	if err != nil {
 		return err
 	}
 
-	return &DeleteCommandResult{}
+	return &DeleteCommandResult{Ok: true, Explain: "deleted"}
 }
 
 func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {

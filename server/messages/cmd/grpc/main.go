@@ -30,6 +30,7 @@ func main() {
 	logger.SetDefault(logger.New(logger.Config{
 		LogPath:    cfg.LogPath,
 		NodeName:   cfg.NodeName,
+		LogLevel:   cfg.LogLevel,
 		SkipCaller: 0,
 	}))
 

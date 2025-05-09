@@ -5,8 +5,16 @@ import (
 	"github.com/bd878/gallery/server/logger"
 )
 
-type Handler func(log *logger.Logger, w http.ResponseWriter, req *http.Request)
+type Handler interface {
+	Handle(log *logger.Logger, w http.ResponseWriter, req *http.Request) error
+}
 type MiddlewareFunc func(next Handler) Handler
+
+type HandleFunc func(log *logger.Logger, w http.ResponseWriter, req *http.Request) error 
+type handler HandleFunc
+func (h handler) Handle(log *logger.Logger, w http.ResponseWriter, req *http.Request) (err error) {
+	return h(log, w, req)
+}
 
 type builder struct {
 	funcs *list
@@ -18,7 +26,7 @@ func NewBuilder() builder {
 	}
 }
 
-func (b builder) Build(handler Handler) *middleware {
+func (b builder) Build(h HandleFunc) *middleware {
 	funcs := make([]MiddlewareFunc, 0)
 	b.funcs.Traverse(func (n *node) bool {
 		if n.f != nil {
@@ -28,7 +36,7 @@ func (b builder) Build(handler Handler) *middleware {
 	})
 
 	return &middleware{
-		handler: handler,
+		handler: handler(h),
 		funcs: funcs,
 	}
 }

@@ -32,7 +32,7 @@ func (r *Resolver) Build(
 	var err error
 
 	r.clientConn = cc
-	r.resolverConn, err = grpc.Dial(
+	r.resolverConn, err = grpc.NewClient(
 		t.Endpoint(),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
@@ -67,6 +67,7 @@ func (r *Resolver) ResolveNow(resolver.ResolveNowOptions) {
 	ctx := context.Background()
 	res, err := client.GetServers(ctx, &api.GetServersRequest{})
 	if err != nil {
+		logger.Errorw("failed to get servers", "error", err)
 		return
 	}
 

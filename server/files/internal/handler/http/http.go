@@ -2,6 +2,7 @@ package http
 
 import (
 	"io"
+	"errors"
 	"fmt"
 	"strconv"
 	"net/http"
@@ -28,16 +29,15 @@ func New(controller Controller) *Handler {
 	return &Handler{controller}
 }
 
-func (h *Handler) UploadFile(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
+func (h *Handler) UploadFile(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
 	if err := req.ParseMultipartForm(1); err != nil {
-		log.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status: "error",
 			Description: "failed to parse form",
 		})
 
-		return
+		return err
 	}
 
 	user, ok := utils.GetUser(w, req)
@@ -48,7 +48,7 @@ func (h *Handler) UploadFile(log *logger.Logger, w http.ResponseWriter, req *htt
 			Description: "user required",
 		})
 
-		return
+		return errors.New("user required")
 	}
 
 	if _, ok := req.MultipartForm.File["file"]; !ok {
@@ -58,19 +58,18 @@ func (h *Handler) UploadFile(log *logger.Logger, w http.ResponseWriter, req *htt
 			Description: "file required",
 		})
 
-		return
+		return errors.New("file required")
 	}
 
 	f, fh, err := req.FormFile("file")
 	if err != nil {
-		log.Error(err)
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status: "error",
 			Description: "cannot read file",
 		})
 
-		return
+		return errors.New("cannot read file")
 	}
 
 	fileName := filepath.Base(fh.Filename)
@@ -80,14 +79,13 @@ func (h *Handler) UploadFile(log *logger.Logger, w http.ResponseWriter, req *htt
 		Name:   fileName,
 	})
 	if err != nil {
-		log.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status: "error",
 			Description: "cannot save file",
 		})
 
-		return
+		return err
 	}
 
 	json.NewEncoder(w).Encode(model.UploadFileServerResponse{
@@ -98,9 +96,11 @@ func (h *Handler) UploadFile(log *logger.Logger, w http.ResponseWriter, req *htt
 		ID: fileResult.ID,
 		Name: fileName,
 	})
+
+	return nil
 }
 
-func (h *Handler) DownloadFile(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
+func (h *Handler) DownloadFile(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
 	var (
 		fileID int32
 	)
@@ -114,7 +114,7 @@ func (h *Handler) DownloadFile(log *logger.Logger, w http.ResponseWriter, req *h
 				Status: "ok",
 				Description: "id is empty",
 			})
-			return
+			return err
 		}
 		fileID = int32(fileid)
 	}
@@ -126,18 +126,17 @@ func (h *Handler) DownloadFile(log *logger.Logger, w http.ResponseWriter, req *h
 			Status: "ok",
 			Description: "user required",
 		})
-		return
+		return errors.New("user required")
 	}
 
 	file, stream, err := h.controller.ReadFileStream(req.Context(), log, &model.ReadFileStreamParams{FileID: fileID, UserID: user.ID})
 	if err != nil {
-		log.Errorw("failed to read file stream", "id", fileID, "user_id", user.ID, "error", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status:      "error",
 			Description: "failed to read file",
 		})
-		return
+		return err
 	}
 
 	log.Infow("downloading file", "name", file.Name)
@@ -147,16 +146,18 @@ func (h *Handler) DownloadFile(log *logger.Logger, w http.ResponseWriter, req *h
 
 	_, err = io.Copy(w, stream)
 	if err != nil {
-		log.Errorw("failed to write file stream to response", "id", fileID, "user_id", user.ID, "error", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status:      "error",
 			Description: "failed to write file to response",
 		})
-		return
+		return err
 	}
+
+	return nil
 }
 
-func (h *Handler) GetStatus(log *logger.Logger, w http.ResponseWriter, _ *http.Request) {
+func (h *Handler) GetStatus(log *logger.Logger, w http.ResponseWriter, _ *http.Request) error {
 	io.WriteString(w, "ok\n")
+	return nil
 }

@@ -2,6 +2,7 @@ package distributed
 
 import (
 	"time"
+	"fmt"
 	"context"
 	"errors"
 	"bytes"
@@ -46,7 +47,7 @@ func (m *DistributedMessages) SaveMessage(ctx context.Context, log *logger.Logge
 
 	_, err := m.apply(ctx, AppendRequest, cmd)
 	if err != nil {
-		log.Errorw("raft failed to apply save message", "error", err)
+		log.Errorln("raft failed to apply save message")
 		return err
 	}
 
@@ -67,7 +68,7 @@ func (m *DistributedMessages) UpdateMessage(ctx context.Context, log *logger.Log
 
 	res, err := m.apply(ctx, UpdateRequest, cmd)
 	if err != nil {
-		log.Errorw("raft failed to apply save message", "error", err)
+		log.Errorln("raft failed to apply save message")
 		return nil, err
 	}
 
@@ -79,7 +80,7 @@ func (m *DistributedMessages) UpdateMessage(ctx context.Context, log *logger.Log
 	case error:
 		return nil, val
 	default:
-		log.Errorw("update request reseived unknown type", "res", res)
+		log.Errorln("update request reseived unknown type")
 		return nil, errors.New("unknown message update type")
 	}
 }
@@ -88,16 +89,49 @@ func (m *DistributedMessages) DeleteMessage(ctx context.Context, log *logger.Log
 	cmd, _ := proto.Marshal(&DeleteCommand{
 		Id: params.ID,
 		UserId: params.UserID,
-		FileId: params.FileID,
 	})
 
 	_, err := m.apply(ctx, DeleteRequest, cmd)
 	if err != nil {
-		log.Errorw("raft failed to apply delete message", "error", err)
+		log.Errorln("raft failed to apply delete message")
 		return err
 	}
 
 	return nil
+}
+
+func (m *DistributedMessages) DeleteMessages(ctx context.Context, log *logger.Logger, params *model.DeleteMessagesParams) (*model.DeleteMessagesResult, error) {
+	statuses := make([]*model.DeleteMessageStatus, 0, len(params.IDs))
+	for _, id := range params.IDs {
+		cmd, _ := proto.Marshal(&DeleteCommand{
+			Id: id,
+			UserId: params.UserID,
+		})
+
+		res, err := m.apply(ctx, DeleteRequest, cmd)
+		if err != nil {
+			log.Errorw("raft failed to apply delete message", "error", err)
+			statuses = append(statuses, &model.DeleteMessageStatus{
+				ID: id,
+				OK: false,
+				Explain: "error",
+			})
+			continue
+		}
+
+		status, ok := res.(*DeleteCommandResult)
+		if !ok {
+			return nil, fmt.Errorf("cannot cast %T to *DeleteCommandResult\n", status)
+		}
+
+		statuses = append(statuses, &model.DeleteMessageStatus{
+			ID: id,
+			OK: status.Ok,
+			Explain: status.Explain,
+		})
+	}
+
+	return &model.DeleteMessagesResult{IDs: statuses}, nil
 }
 
 func (m *DistributedMessages) ReadMessage(ctx context.Context, log *logger.Logger, params *model.ReadOneMessageParams) (

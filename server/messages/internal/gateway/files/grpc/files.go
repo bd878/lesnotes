@@ -6,12 +6,12 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/messages/pkg/model"
 	filesmodel "github.com/bd878/gallery/server/files/pkg/model"
-	"github.com/bd878/gallery/server/internal/grpcutil"
 )
 
 type Gateway struct {
@@ -27,7 +27,7 @@ func New(filesAddr string) *Gateway {
 }
 
 func (g *Gateway) setupConnection() {
-	conn, err := grpcutil.ServiceConnection(context.Background(), g.filesAddr)
+	conn, err := grpc.NewClient(g.filesAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(err)
 	}
@@ -54,7 +54,7 @@ func (g *Gateway) ReadBatchFiles(ctx context.Context, log *logger.Logger, params
 		Ids:    params.IDs,
 	})
 	if err != nil {
-		log.Errorw("client failed to read batch files", "error", err)
+		log.Errorln("client failed to read batch files")
 		return nil, err
 	}
 
@@ -89,7 +89,7 @@ func (g *Gateway) SaveFile(ctx context.Context, log *logger.Logger, fileStream i
 
 	stream, err := g.client.SaveFileStream(ctx)
 	if err != nil {
-		log.Errorw("client failed to obtain file stream", "error", err)
+		log.Errorln("client failed to obtain file stream")
 		return nil, err
 	}
 
@@ -102,7 +102,7 @@ func (g *Gateway) SaveFile(ctx context.Context, log *logger.Logger, fileStream i
 		},
 	})
 	if err != nil {
-		log.Errorw("failed to save file meta", "error", err)
+		log.Errorln("failed to save file meta")
 		return nil, err
 	}
 
@@ -113,7 +113,7 @@ func (g *Gateway) SaveFile(ctx context.Context, log *logger.Logger, fileStream i
 			break
 		}
 		if err != nil {
-			log.Errorw("failed to read file data in buffer", "error", err)
+			log.Errorln("failed to read file data in buffer")
 			return nil, err
 		}
 
@@ -123,14 +123,14 @@ func (g *Gateway) SaveFile(ctx context.Context, log *logger.Logger, fileStream i
 			},
 		})
 		if err != nil {
-			log.Errorw("failed to send chunk on file server", "error", err)
+			log.Errorln("failed to send chunk on file server")
 			return nil, err
 		}
 	}
 
 	res, err := stream.CloseAndRecv()
 	if err != nil {
-		log.Errorw("failed to close and recv result", "error", err)
+		log.Errorln("failed to close and recv result")
 		return nil, err
 	}
 

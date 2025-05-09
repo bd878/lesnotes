@@ -42,7 +42,7 @@ func New(controller Controller, filesGateway FilesGateway) *Handler {
 	return &Handler{controller, filesGateway}
 }
 
-func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
+func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
 	var (
 		err error
 		fileID, threadID int32
@@ -50,14 +50,13 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 	)
 
 	if err = req.ParseMultipartForm(1); err != nil {
-		log.Error(err)
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status: "error",
 			Description: "failed to parse form",
 		})
 
-		return
+		return err
 	}
 
 	user, ok := utils.GetUser(w, req)
@@ -68,7 +67,7 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 			Description: "user required",
 		})
 
-		return
+		return fmt.Errorf("no user")
 	}
 
 	text := req.PostFormValue("text")
@@ -82,7 +81,7 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 				Description: "invalid file_id",
 			})
 
-			return
+			return err
 		}
 
 		fileID = int32(fileid)
@@ -101,7 +100,7 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 			Description: "text or file_id or file required",
 		})
 
-		return
+		return nil
 	}
 
 	if fileID != 0 && hasFile {
@@ -111,7 +110,7 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 			Description: "should be either file_id or file, not both",
 		})
 
-		return
+		return nil
 	}
 
 	values := req.URL.Query()
@@ -124,7 +123,7 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 				Description: "invalid thread id",
 			})
 
-			return
+			return err
 		}
 
 		threadID = int32(threadid)
@@ -139,7 +138,7 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 				Description: "invalid public param",
 			})
 
-			return
+			return err
 		}
 
 		if public > 0 {
@@ -160,14 +159,13 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 	if hasFile {
 		f, fh, err := req.FormFile("file")
 		if err != nil {
-			log.Error(err)
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(servermodel.ServerResponse{
 				Status: "error",
 				Description: "cannot read file",
 			})
 
-			return
+			return err
 		}
 
 		fileName := filepath.Base(fh.Filename)
@@ -177,14 +175,13 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 			Name:   fileName,
 		})
 		if err != nil {
-			log.Error(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(servermodel.ServerResponse{
 				Status: "error",
 				Description: "cannot save file",
 			})
 
-			return
+			return err
 		}
 
 		fileID = fileResult.ID
@@ -198,14 +195,13 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 		Private: private,
 	})
 	if err != nil {
-		log.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status: "error",
 			Description: "failed to save message",
 		})
 
-		return
+		return err
 	}
 
 	message := &model.Message{
@@ -221,13 +217,13 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 	if fileID != 0 {
 		fileRes, err := h.filesGateway.ReadFile(req.Context(), log, user.ID, fileID)
 		if err != nil {
-			log.Errorw("failed to read file for a message", "user_id", user.ID, "file_id", fileID, "message_id", resp.ID, "error", err)
+			log.Errorw("failed to read file for a message", "user_id", user.ID, "file_id", fileID, "message_id", resp.ID)
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(servermodel.ServerResponse{
 				Status: "error",
 				Description: "failed to read a file",
 			})
-			return
+			return err
 		}
 		message.File = &filesmodel.File{
 			Name: fileRes.Name,
@@ -242,127 +238,22 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 		},
 		Message: message,
 	})
+
+	return nil
 }
 
-func (h *Handler) DeleteMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
-	user, ok := utils.GetUser(w, req)
-	if !ok {
-		log.Error("user not found")
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "user required",
-		})
-
-		return
-	}
-
-	if user.ID == usermodel.PublicUserID {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "cannot delete public message",
-		})
-
-		return
-	}
-
-	values := req.URL.Query()
-	if values.Get("id") != "" {
-		id, err := strconv.Atoi(values.Get("id"))
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(servermodel.ServerResponse{
-				Status: "error",
-				Description: "invalid id",
-			})
-
-			return
-		}
-
-		_, err = h.controller.DeleteMessage(req.Context(), log, &model.DeleteMessageParams{
-			ID: int32(id),
-			UserID: user.ID,
-		})
-		if err != nil {
-			log.Error(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(servermodel.ServerResponse{
-				Status: "error",
-				Description: "failed to delete message",
-			})
-
-			return
-		}
-
-		json.NewEncoder(w).Encode(model.DeleteMessageServerResponse{
-			ServerResponse: servermodel.ServerResponse{
-				Status: "ok",
-				Description: "deleted",
-			},
-			ID: int32(id),
-		})
-
-		return
-	} else if values.Get("ids") != "" {
-		var ids []int32
-		if err := json.Unmarshal([]byte(values.Get("ids")), &ids); err != nil {
-			json.NewEncoder(w).Encode(servermodel.ServerResponse{
-				Status: "error",
-				Description: "wrong \"ids\" query field format",
-			})
-
-			return
-		}
-
-		res, err := h.controller.DeleteMessages(req.Context(), log, &model.DeleteMessagesParams{
-			IDs: ids,
-			UserID: user.ID,
-		})
-		if err != nil {
-			log.Error(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(servermodel.ServerResponse{
-				Status: "error",
-				Description: "failed to delete batch messages",
-			})
-
-			return
-		}
-
-		json.NewEncoder(w).Encode(model.DeleteMessagesServerResponse{
-			ServerResponse: servermodel.ServerResponse{
-				Status: "ok",
-				Description: "deleted",
-			},
-			IDs: res.IDs,
-		})
-
-		return
-	}
-
-	w.WriteHeader(http.StatusBadRequest)
-	json.NewEncoder(w).Encode(servermodel.ServerResponse{
-		Status: "error",
-		Description: "empty message id or batch ids",
-	})
-
-	return
-}
-
-func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
+func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
 	var private int32
 
 	user, ok := utils.GetUser(w, req)
 	if !ok {
-		log.Error("user not found")
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status: "error",
 			Description: "user required",
 		})
 
-		return
+		return fmt.Errorf("user not found")
 	}
 
 	values := req.URL.Query()
@@ -373,7 +264,7 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 			Description: "empty message id",
 		})
 
-		return
+		return nil
 	}
 
 	id, err := strconv.Atoi(values.Get("id"))
@@ -384,7 +275,7 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 			Description: "invalid id",
 		})
 
-		return
+		return err
 	}
 
 	text := req.PostFormValue("text")
@@ -395,7 +286,7 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 			Description: "empty text field",
 		})
 
-		return
+		return nil
 	}
 
 	public := req.PostFormValue("public")
@@ -409,7 +300,7 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 				Description: "invalid public param",
 			})
 
-			return
+			return err
 		}
 
 		if publicInt == 1 {
@@ -430,7 +321,7 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 			Description: "cannot make private public message",
 		})
 
-		return
+		return nil
 	}
 
 	resp, err := h.controller.UpdateMessage(req.Context(), log, &model.UpdateMessageParams{
@@ -440,14 +331,13 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 		Private: private,
 	})
 	if err != nil {
-		log.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status: "error",
 			Description: "failed to update message",
 		})
 
-		return
+		return err
 	}
 
 	json.NewEncoder(w).Encode(model.UpdateMessageServerResponse{
@@ -459,338 +349,20 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 		UpdateUTCNano: resp.UpdateUTCNano,
 		Private: resp.Private,
 	})
+
+	return nil
 }
 
-func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request) {
-	var (
-		limitInt, offsetInt, orderInt, publicInt int
-		threadID, messageID, privateInt int32
-		ascending bool
-		message *model.Message
-		messages []*model.Message
-		isLastPage bool
-		err error
-	)
-
-	user, ok := utils.GetUser(w, req)
-	if !ok {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "user required",
-		})
-
-		return
-	}
-
-	values := req.URL.Query()
-
-	if values.Has("limit") {
-		limitInt, err = strconv.Atoi(values.Get("limit"))
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(servermodel.ServerResponse{
-				Status: "error",
-				Description: fmt.Sprintf("wrong \"%s\" query param", "limit"),
-			})
-
-			return
-		}
-
-		if values.Has("offset") {
-			offsetInt, err = strconv.Atoi(values.Get("offset"))
-			if err != nil {
-				w.WriteHeader(http.StatusBadRequest)
-				json.NewEncoder(w).Encode(servermodel.ServerResponse{
-					Status: "error",
-					Description: fmt.Sprintf("wrong \"%s\" query param", "offset"),
-				})
-
-				return
-			}
-		}
-	}
-
-	if values.Has("public") {
-		publicInt, err = strconv.Atoi(values.Get("public"))
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(servermodel.ServerResponse{
-				Status: "error",
-				Description: fmt.Sprintf("wrong \"%s\" query param", "public"),
-			})
-
-			return
-		}
-
-		if publicInt > 0 {
-			privateInt = 0
-		} else {
-			privateInt = 1
-		}
-	} else {
-		privateInt = -1
-	}
-
-	if user.ID == usermodel.PublicUserID {
-		privateInt = -1
-	}
-
-	if user.ID == usermodel.PublicUserID && !values.Has("id") {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "can not list public messages",
-		})
-
-		return
-	}
-
-	if values.Get("id") != "" {
-		messageid, err := strconv.Atoi(values.Get("id"))
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(servermodel.ServerResponse{
-				Status: "error",
-				Description: "invalid message id",
-			})
-
-			return
-		}
-
-		messageID = int32(messageid)
-	}
-
-	if values.Get("thread_id") != "" {
-		threadid, err := strconv.Atoi(values.Get("thread_id"))
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(servermodel.ServerResponse{
-				Status: "error",
-				Description: "invalid thread id",
-			})
-
-			return
-		}
-
-		threadID = int32(threadid)
-	}
-
-	if values.Has("asc") {
-		orderInt, err = strconv.Atoi(values.Get("asc"))
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(servermodel.ServerResponse{
-				Status: "error",
-				Description: fmt.Sprintf("wrong \"%s\" query param", "asc"),
-			})
-
-			return
-		}
-
-		switch orderInt {
-		case 0:
-			ascending = false
-		case 1:
-			ascending = true
-		default:
-			ascending = true
-		}
-	} else {
-		ascending = true
-	}
-
-	if values.Has("public") && values.Has("id") {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "both public and id params are given",
-		})
-
-		return
-	}
-
-	if messageID != 0 && threadID != 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "both message_id and thread_id params are given",
-		})
-
-		return
-	}
-
-	if messageID != 0 && (limitInt > 0 || offsetInt > 0) {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "both message_id and limit/offset params given",
-		})
-
-		return
-	}
-
-	log.Infow("read messages", "user_id", user.ID, "thread_id", threadID, "message_id", messageID, "public", publicInt)
-
-	if messageID != 0 {
-		// read one message
-		res, err := h.controller.ReadOneMessage(req.Context(), log, &model.ReadOneMessageParams{
-			ID: messageID,
-			UserIDs: []int32{user.ID, usermodel.PublicUserID},
-		})
-		if err != nil {
-			log.Errorw("failed to read one message", "user_id", user.ID, "message_id", messageID, "error", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(servermodel.ServerResponse{
-				Status: "error",
-				Description: "failed to read a message",
-			})
-
-			return
-		}
-
-		message = res
-
-		if message.UserID == usermodel.PublicUserID {
-			message.UserID = 0
-		}
-
-	} else if threadID != 0 {
-		// read thread messages
-		res, err := h.controller.ReadThreadMessages(req.Context(), log, &model.ReadThreadMessagesParams{
-			UserID:    user.ID,
-			ThreadID:  threadID,
-			Limit:     int32(limitInt),
-			Offset:    int32(offsetInt),
-			Ascending: ascending,
-			Private:   privateInt,
-		})
-		if err != nil {
-			log.Errorw("failed to read thread messages, controller returned error", "user_id", user.ID, "thread_id", threadID, "public", publicInt, "error", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(servermodel.ServerResponse{
-				Status: "error",
-				Description: "failed to read thread messages",
-			})
-
-			return
-		}
-
-		messages = res.Messages
-		isLastPage = res.IsLastPage
-	} else {
-		// read all messages
-		res, err := h.controller.ReadAllMessages(req.Context(), log, &model.ReadMessagesParams{
-			UserID:    user.ID,
-			Limit:     int32(limitInt),
-			Offset:    int32(offsetInt),
-			Ascending: ascending,
-			Private:   privateInt,
-		})
-		if err != nil {
-			log.Errorw("failed to read all messages", "error", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(servermodel.ServerResponse{
-				Status: "error",
-				Description: "failed to read all messages",
-			})
-
-			return
-		}
-
-		messages = res.Messages
-		isLastPage = res.IsLastPage
-	}
-
-	log.Infow("read messages", "user_id", user.ID, "name", user.Name, "message_id", messageID, "thread_id", threadID, "len_messages", len(messages), "public", publicInt)
-
-	if message != nil {
-		// one message
-		if message.FileID != 0 {
-			fileRes, err := h.filesGateway.ReadFile(req.Context(), log, user.ID, message.FileID)
-			if err != nil {
-				log.Errorw("failed to read file for a message", "user_id", user.ID, "file_id", message.FileID, "message_id", messageID, "error", err)
-				w.WriteHeader(http.StatusBadRequest)
-				json.NewEncoder(w).Encode(servermodel.ServerResponse{
-					Status: "error",
-					Description: "failed to read a file",
-				})
-				return
-			}
-			message.File = &filesmodel.File{
-				Name: fileRes.Name,
-				ID: message.FileID,
-			}
-		}
-
-		json.NewEncoder(w).Encode(model.ReadMessageServerResponse{
-			ServerResponse: servermodel.ServerResponse{
-				Status: "ok",
-			},
-			Message: message,
-		})
-
-		return
-	}
-
-
-	fileIds := make([]int32, 0)
-	for _, message := range messages {
-		if message.FileID != 0 {
-			fileIds = append(fileIds, message.FileID)
-		}
-	}
-
-	filesRes, err := h.filesGateway.ReadBatchFiles(req.Context(), log, &model.ReadBatchFilesParams{
-		UserID: user.ID,
-		IDs:    fileIds,
-	})
-	if err != nil {
-		log.Errorw("failed to read batch files", "error", err)
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "failed to read files",
-		})
-
-		return
-	}
-
-	for _, message := range messages {
-		if message.FileID != 0 {
-			file := filesRes.Files[message.FileID]
-			if file != nil {
-				message.File = &filesmodel.File{
-					ID: file.ID,
-					Name: file.Name,
-				}
-			}
-		}
-
-		if message.UserID == usermodel.PublicUserID {
-			message.UserID = 0
-		}
-	}
-
-	json.NewEncoder(w).Encode(model.MessagesListServerResponse{
-		ServerResponse: servermodel.ServerResponse{
-			Status: "ok",
-		},
-		ThreadID: threadID,
-		Messages: messages,
-		IsLastPage: isLastPage,
-	})
-}
-
-func (h *Handler) GetStatus(log *logger.Logger, w http.ResponseWriter, _ *http.Request) {
+func (h *Handler) GetStatus(log *logger.Logger, w http.ResponseWriter, _ *http.Request) error {
 	if _, err := io.WriteString(w, "ok\n"); err != nil {
-		log.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status: "error",
 			Description: "failed to get status",
 		})
 
-		return
+		return err
 	}
+
+	return nil
 }

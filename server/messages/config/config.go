@@ -10,6 +10,7 @@ type Config struct {
 	RaftServers       []string    `json:"raft_servers"`
 	SerfJoinAddrs     []string    `json:"serf_join_addrs"`
 	RaftLogLevel      string      `json:"raft_log_level"`
+	LogLevel          string      `json:"log_level"`
 
 	RaftBootstrap     bool        `json:"raft_bootstrap"`
 	LogPath           string      `json:"log_path"`

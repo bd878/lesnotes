@@ -8,6 +8,7 @@ import (
 	usermodel "github.com/bd878/gallery/server/users/pkg/model"
 	httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
 	httphandler "github.com/bd878/gallery/server/messages/internal/handler/http"
+	httplogger "github.com/bd878/gallery/server/messages/internal/logger/http"
 	usergateway "github.com/bd878/gallery/server/internal/gateway/user"
 	filesgateway "github.com/bd878/gallery/server/messages/internal/gateway/files/grpc"
 	controller "github.com/bd878/gallery/server/messages/internal/controller/service"
@@ -29,12 +30,11 @@ type Server struct {
 func New(cfg Config) *Server {
 	mux := http.NewServeMux()
 
-	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log)
+	middleware := httpmiddleware.NewBuilder().WithLog(httplogger.LogBuilder())
 
 	userGateway := usergateway.New(cfg.UsersServiceAddr)
 	filesGateway := filesgateway.New(cfg.FilesServiceAddr)
-	authBuilder := &httpmiddleware.AuthBuilder{Gateway: userGateway, PublicUserID: usermodel.PublicUserID}
-	middleware = middleware.WithAuth(authBuilder.Auth)
+	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(userGateway, usermodel.PublicUserID))
 
 	grpcCtrl := controller.New(controller.Config{
 		RpcAddr: cfg.RpcAddr,
@@ -44,7 +44,7 @@ func New(cfg Config) *Server {
 	mux.Handle("/messages/v1/send", middleware.Build(handler.SendMessage))
 	mux.Handle("/messages/v1/read", middleware.Build(handler.ReadMessagesOrMessage))
 	mux.Handle("/messages/v1/update", middleware.Build(handler.UpdateMessage))
-	mux.Handle("/messages/v1/delete", middleware.Build(handler.DeleteMessage))
+	mux.Handle("/messages/v1/delete", middleware.Build(handler.DeleteMessagesOrMessage))
 	mux.Handle("/messages/v1/status", middleware.NoAuth().Build(handler.GetStatus))
 
 	server := &Server{

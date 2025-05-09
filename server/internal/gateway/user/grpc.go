@@ -3,10 +3,11 @@ package grpc
 import (
 	"context"
 
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/logger"
 	usermodel "github.com/bd878/gallery/server/users/pkg/model"
-	"github.com/bd878/gallery/server/internal/grpcutil"
 )
 
 type Gateway struct {
@@ -18,7 +19,7 @@ func New(userAddr string) *Gateway {
 }
 
 func (g *Gateway) Auth(ctx context.Context, log *logger.Logger, token string) (*usermodel.User, error) {
-	conn, err := grpcutil.ServiceConnection(ctx, g.userAddr)
+	conn, err := grpc.NewClient(g.userAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Errorw("failed to establish connection with user service", "error", err)
 		return nil, err
@@ -34,7 +35,7 @@ func (g *Gateway) Auth(ctx context.Context, log *logger.Logger, token string) (*
 }
 
 func (g *Gateway) GetPublicUser(ctx context.Context, log *logger.Logger, id int32) (*usermodel.User, error) {
-	conn, err := grpcutil.ServiceConnection(ctx, g.userAddr)
+	conn, err := grpc.NewClient(g.userAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Error("gateway failed to establish connection with user service")
 		return nil, err

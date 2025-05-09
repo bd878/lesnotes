@@ -37,7 +37,7 @@ func (s *Messages) Close() {
 }
 
 func (s *Messages) setupConnection() error {
-	conn, err := grpc.Dial(
+	conn, err := grpc.NewClient(
 		fmt.Sprintf(
 			"%s:///%s",
 			loadbalance.Name,
@@ -132,6 +132,7 @@ func (s *Messages) DeleteMessages(ctx context.Context, log *logger.Logger, param
 	var ids []*model.DeleteMessageStatus
 	for _, status := range res.Ids {
 		ids = append(ids, &model.DeleteMessageStatus{
+			ID: status.Id,
 			OK: status.Ok,
 			Explain: status.Explain,
 		})
