@@ -15,6 +15,7 @@ import (
 	hclog "github.com/hashicorp/go-hclog"
 
 	grpcmiddleware "github.com/bd878/gallery/server/internal/middleware/grpc"
+	grpclogger "github.com/bd878/gallery/server/messages/internal/logger/grpc"
 	membership "github.com/bd878/gallery/server/messages/internal/discovery/serf"
 	repository "github.com/bd878/gallery/server/messages/internal/repository/sqlite"
 	controller "github.com/bd878/gallery/server/messages/internal/controller/distributed"
@@ -126,7 +127,7 @@ func (s *Server) setupGRPC(log *logger.Logger) {
 
 	s.Server = grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
-			grpcmiddleware.UnaryServerInterceptor(grpcmiddleware.LogBuilder()),
+			grpcmiddleware.UnaryServerInterceptor(grpclogger.NewBuilder()),
 		),
 	)
 

@@ -15,5 +15,5 @@ func (m *middleware) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	for i := len(m.funcs) - 1; i >= 0; i-- {
 		first = m.funcs[i](first)
 	}
-	first(logger.Default(), w, req)
+	first.Handle(logger.Default(), w, req)
 }

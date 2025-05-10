@@ -3,6 +3,7 @@ package middleware
 import (
 	"time"
 	"context"
+	"google.golang.org/grpc"
 )
 
 type Meta struct {
@@ -18,8 +19,8 @@ type MsgSendParams struct {
 }
 
 type Reporter interface {
-	MsgReceive(req any, params *MsgReceiveParams)
-	MsgSend(resp any, params *MsgSendParams)
+	MsgReceive(req any, info *grpc.UnaryServerInfo, params *MsgReceiveParams)
+	MsgSend(resp any, info *grpc.UnaryServerInfo, params *MsgSendParams)
 }
 
 type ReporterBuilder func(context.Context, *Meta) (Reporter, context.Context)

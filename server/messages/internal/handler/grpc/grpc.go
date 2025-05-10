@@ -14,6 +14,7 @@ type Controller interface {
 	SaveMessage(ctx context.Context, log *logger.Logger, message *model.Message) error
 	UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (*model.UpdateMessageResult, error)
 	DeleteMessage(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error
+	DeleteMessages(ctx context.Context, log *logger.Logger, params *model.DeleteMessagesParams) (*model.DeleteMessagesResult, error)
 	ReadMessage(ctx context.Context, log *logger.Logger, params *model.ReadOneMessageParams) (*model.Message, error)
 	ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadMessagesParams) (*model.ReadMessagesResult, error)
 	ReadThreadMessages(ctx context.Context, log *logger.Logger, params *model.ReadThreadMessagesParams) (*model.ReadThreadMessagesResult, error)
@@ -31,9 +32,7 @@ func New(ctrl Controller) *Handler {
 	return handler
 }
 
-func (h *Handler) SaveMessage(ctx context.Context, req *api.SaveMessageRequest) (
-	*api.SaveMessageResponse, error,
-) {
+func (h *Handler) SaveMessage(ctx context.Context, req *api.SaveMessageRequest) (*api.SaveMessageResponse, error) {
 	logger.Debugw("save message", "text", req.Message)
 
 	req.Message.CreateUtcNano = time.Now().UnixNano()
@@ -55,9 +54,7 @@ func (h *Handler) SaveMessage(ctx context.Context, req *api.SaveMessageRequest) 
 	}, nil
 }
 
-func (h *Handler) UpdateMessage(ctx context.Context, req *api.UpdateMessageRequest) (
-	*api.UpdateMessageResponse, error,
-) {
+func (h *Handler) UpdateMessage(ctx context.Context, req *api.UpdateMessageRequest) (*api.UpdateMessageResponse, error) {
 	logger.Debugw("update message", "id", req.Id)
 
 	updateUTCNano := time.Now().UnixNano()
@@ -81,9 +78,7 @@ func (h *Handler) UpdateMessage(ctx context.Context, req *api.UpdateMessageReque
 	}, nil
 }
 
-func (h *Handler) DeleteMessage(ctx context.Context, req *api.DeleteMessageRequest) (
-	*api.DeleteMessageResponse, error,
-) {
+func (h *Handler) DeleteMessage(ctx context.Context, req *api.DeleteMessageRequest) (*api.DeleteMessageResponse, error) {
 	err := h.controller.DeleteMessage(ctx, logger.Default(), &model.DeleteMessageParams{
 		ID: req.Id,
 		UserID: req.UserId,
@@ -96,9 +91,24 @@ func (h *Handler) DeleteMessage(ctx context.Context, req *api.DeleteMessageReque
 	return &api.DeleteMessageResponse{}, nil
 }
 
-func (h *Handler) ReadThreadMessages(ctx context.Context, req *api.ReadThreadMessagesRequest) (
-	*api.ReadThreadMessagesResponse, error,
-) {
+func (h *Handler) DeleteMessages(ctx context.Context, req *api.DeleteMessagesRequest) (*api.DeleteMessagesResponse, error) {
+	res, err := h.controller.DeleteMessages(ctx, logger.Default(), &model.DeleteMessagesParams{
+		IDs: req.Ids,
+		UserID: req.UserId,
+	})
+	if err != nil {
+		logger.Errorw("failed to delete message", "error", err)
+		return nil, err
+	}
+
+	ids := make([]*api.DeleteMessageStatus, 0, len(res.IDs))
+	for _, status := range res.IDs {
+		ids = append(ids, &api.DeleteMessageStatus{Id: status.ID, Ok: status.OK, Explain: status.Explain})
+	}
+	return &api.DeleteMessagesResponse{Ids: ids}, nil
+}
+
+func (h *Handler) ReadThreadMessages(ctx context.Context, req *api.ReadThreadMessagesRequest) (*api.ReadThreadMessagesResponse, error) {
 	logger.Debugw("grpc read thread messages", "user_id", req.UserId, "thread_id", req.ThreadId)
 	res, err := h.controller.ReadThreadMessages(ctx, logger.Default(), &model.ReadThreadMessagesParams{
 		UserID:    req.UserId,
@@ -120,9 +130,7 @@ func (h *Handler) ReadThreadMessages(ctx context.Context, req *api.ReadThreadMes
 	}, nil
 }
 
-func (h *Handler) ReadAllMessages(ctx context.Context, req *api.ReadMessagesRequest) (
-	*api.ReadMessagesResponse, error,
-) {
+func (h *Handler) ReadAllMessages(ctx context.Context, req *api.ReadMessagesRequest) (*api.ReadMessagesResponse, error) {
 	res, err := h.controller.ReadAllMessages(ctx, logger.Default(), &model.ReadMessagesParams{
 		UserID:    req.UserId,
 		Limit:     req.Limit,
@@ -141,9 +149,7 @@ func (h *Handler) ReadAllMessages(ctx context.Context, req *api.ReadMessagesRequ
 	}, nil
 }
 
-func (h *Handler) GetServers(ctx context.Context, _ *api.GetServersRequest) (
-	*api.GetServersResponse, error,
-) {
+func (h *Handler) GetServers(ctx context.Context, _ *api.GetServersRequest) (*api.GetServersResponse, error) {
 	srvs, err := h.controller.GetServers(ctx, logger.Default())
 	if err != nil {
 		logger.Errorw("failed to get servers", "error", err)
@@ -155,9 +161,7 @@ func (h *Handler) GetServers(ctx context.Context, _ *api.GetServersRequest) (
 	}, nil
 }
 
-func (h *Handler) ReadOneMessage(ctx context.Context, req *api.ReadOneMessageRequest) (
-	*api.Message, error,
-) {
+func (h *Handler) ReadOneMessage(ctx context.Context, req *api.ReadOneMessageRequest) (*api.Message, error) {
 	logger.Debugw("read one message", "user_ids", req.UserIds, "id", req.Id)
 
 	message, err := h.controller.ReadMessage(ctx, logger.Default(), &model.ReadOneMessageParams{

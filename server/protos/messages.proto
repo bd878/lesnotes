@@ -90,8 +90,9 @@ message DeleteMessagesRequest {
 message DeleteMessageResponse {}
 
 message DeleteMessageStatus {
-	bool ok = 1;
-	string explain = 2;
+	int32 id = 1;
+	bool ok = 2;
+	string explain = 3;
 }
 
 message DeleteMessagesResponse {

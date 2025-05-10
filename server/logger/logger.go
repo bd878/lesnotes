@@ -3,12 +3,21 @@ package logger
 import (
 	"sync/atomic"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+)
+
+const (
+	DebugLevel string = "debug"
+	InfoLevel string = "info"
+	WarnLevel  string = "warn"
+	ErrorLevel string = "error"
 )
 
 type Config struct {
 	LogPath    string
 	NodeName   string
 	SkipCaller int
+	LogLevel   string
 }
 
 type Logger struct {
@@ -37,6 +46,17 @@ func New(cfg Config) *Logger {
 	}
 
 	zapConfig := zap.NewDevelopmentConfig()
+	switch cfg.LogLevel {
+	case ErrorLevel:
+		zapConfig.Level.SetLevel(zapcore.ErrorLevel)
+	case DebugLevel:
+		zapConfig.Level.SetLevel(zapcore.DebugLevel)
+	case InfoLevel:
+		zapConfig.Level.SetLevel(zapcore.InfoLevel)
+	case WarnLevel:
+		zapConfig.Level.SetLevel(zapcore.WarnLevel)
+	}
+
 	return &Logger{
 		SugaredLogger: zap.Must(zapConfig.Build(options...)).Sugar(),
 		conf: cfg,

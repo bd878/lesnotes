@@ -30,8 +30,7 @@ func New(cfg Config) *Server {
 	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log)
 
 	userGateway := usergateway.New(cfg.UsersServiceAddr)
-	authBuilder := &httpmiddleware.AuthBuilder{Gateway: userGateway, PublicUserID: usermodel.PublicUserID}
-	middleware = middleware.WithAuth(authBuilder.Auth)
+	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(userGateway, usermodel.PublicUserID))
 
 	grpcCtrl := controller.New(controller.Config{
 		RpcAddr: cfg.RpcAddr,
