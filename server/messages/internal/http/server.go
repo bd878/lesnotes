@@ -42,9 +42,11 @@ func New(cfg Config) *Server {
 	handler := httphandler.New(grpcCtrl, filesGateway)
 
 	mux.Handle("/messages/v1/send", middleware.Build(handler.SendMessage))
-	mux.Handle("/messages/v1/read", middleware.Build(handler.ReadMessagesOrMessage))
+	mux.Handle("/messages/v1/read", middleware.Build(handler.ReadMessageOrMessages))
 	mux.Handle("/messages/v1/update", middleware.Build(handler.UpdateMessage))
-	mux.Handle("/messages/v1/delete", middleware.Build(handler.DeleteMessagesOrMessage))
+	mux.Handle("/messages/v1/publish", middleware.Build(handler.PublishMessageOrMessages))
+	mux.Handle("/messages/v1/private", middleware.Build(handler.PrivateMessageOrMessages))
+	mux.Handle("/messages/v1/delete", middleware.Build(handler.DeleteMessageOrMessages))
 	mux.Handle("/messages/v1/status", middleware.NoAuth().Build(handler.GetStatus))
 
 	server := &Server{

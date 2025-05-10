@@ -7,12 +7,13 @@ import {
 	DELETE_MESSAGE,
 	DELETE_SELECTED,
 	SELECT_MESSAGE,
-	PUBLISH_MESSAGE,
-	PRIVATE_MESSAGE,
+	PUBLISH_MESSAGES,
+	PRIVATE_MESSAGES,
 	UNSELECT_MESSAGE,
 	CLEAR_SELECTED,
 	SEND_MESSAGE,
 	COPY_MESSAGE,
+	COPY_LINK,
 	FETCH_MESSAGES,
 	SET_MESSAGE_FOR_EDIT,
 
@@ -76,6 +77,9 @@ function messageReducer(messagesState = thread, action) {
 	case COPY_MESSAGE: {
 		return messagesState
 	}
+	case COPY_LINK: {
+		return messagesState
+	}
 	case SELECT_MESSAGE: {
 		messagesState.selectedMessageIDs.add(action.payload.ID)
 		return {
@@ -100,6 +104,20 @@ function messageReducer(messagesState = thread, action) {
 		return {
 			...messagesState,
 			list: [ ...messagesState.list, action.payload ],
+		}
+	}
+	case PUBLISH_MESSAGES: {
+		return {
+			...messagesState,
+			loading: true,
+			error: "",
+		}
+	}
+	case PRIVATE_MESSAGES: {
+		return {
+			...messagesState,
+			loading: true,
+			error: "",
 		}
 	}
 	case UPDATE_MESSAGE: {

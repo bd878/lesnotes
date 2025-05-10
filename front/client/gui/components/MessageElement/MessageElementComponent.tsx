@@ -15,7 +15,6 @@ function MessageElementComponent(props) {
 		isThreadOpen,
 		isPrivate,
 		onToggleThreadClick,
-		onDeleteClick,
 		onPublishClick,
 		onPrivateClick,
 	} = props
@@ -43,17 +42,17 @@ function MessageElementComponent(props) {
 						</Tag>
 					</Tag>
 				) : null}
+
 				<Tag>{message.text}</Tag>
 
 				<Tag css="flex flex-row items-start mt-2">
-					{is.func(onDeleteClick) ? <Button type="button" css="btn" onClick={onDeleteClick} content={i18n("delete_message")} /> : null}
 					{isPrivate
-						? is.func(onPublishClick) ? <Button type="button" css="ml-1 btn" onClick={onPublishClick} content={i18n("publish_message")} /> : null
-						: is.func(onPrivateClick) ? <Button type="button" css="ml-1 btn" onClick={onPrivateClick} content={i18n("private_message")} /> : null}
+						? is.func(onPublishClick) ? <Button type="button" css="btn" onClick={onPublishClick} content={i18n("publish_message")} /> : null
+						: is.func(onPrivateClick) ? <Button type="button" css="btn" onClick={onPrivateClick} content={i18n("private_message")} /> : null}
 					{is.func(onToggleThreadClick) ? (
 						<Button
 							type="button"
-							css="ml-1 btn"
+							css="ml-2 btn"
 							onClick={onToggleThreadClick}
 							content={
 								isThreadOpen

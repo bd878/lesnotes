@@ -1,11 +1,14 @@
 import {takeLatest,put,call,select} from 'redux-saga/effects'
 import {
+	PUBLISH_MESSAGES,
+	PRIVATE_MESSAGES,
 	UPDATE_MESSAGE,
 	FETCH_MESSAGES,
 	SEND_MESSAGE,
 	DELETE_MESSAGE,
 	DELETE_SELECTED,
 	COPY_MESSAGE,
+	COPY_LINK,
 } from './stackActions'
 import {
 	resetEditMessageActionCreator,
@@ -20,7 +23,7 @@ import * as is from '../../../third_party/is'
 import i18n from '../../../i18n';
 import {selectMessages, selectSelectedMessageIDs, selectMessageForEdit} from './stackSelectors';
 import {selectBrowser, selectIsMobile, selectIsDesktop} from '../me'
-import api from '../../../api'
+import api, {getMessageLinkUrl} from '../../../api'
 
 interface FetchMessagesPayload {
 	limit:  number;
@@ -69,7 +72,7 @@ function* sendMessage({index, payload}) {
 
 function* updateMessage({index, payload}) {
 	try {
-		const response = yield call(api.updateMessage, payload.ID, payload.text)
+		const response = yield call(api.updateMessage, {id: payload.ID, text: payload.text})
 
 		const messages = yield select(selectMessages(index))
 		let idx = messages.findIndex(({ID}) => ID === payload.ID)
@@ -116,7 +119,7 @@ function* deleteSelected({index}) {
 		const idsSet = yield select(selectSelectedMessageIDs(index))
 		const response = yield call(api.deleteMessages, Array.from(idsSet))
 		let messages = yield select(selectMessages(index))
-		messages = messages.filter(({ID}) => ID !== idsSet.has(ID))
+		messages = messages.filter(({ID}) => !idsSet.has(ID))
 
 		const messageForEdit = yield select(selectMessageForEdit(index))
 
@@ -159,6 +162,78 @@ function* copyMessage({payload}) {
 	}
 }
 
+function* copyLink({payload}) {
+	try {
+		const browser = yield select(selectBrowser)
+		yield call(async function copy(id, browser) {
+			// TODO: compile front with browser directives?
+			const text = getMessageLinkUrl(id)
+			switch (browser) {
+			case "chrome":
+				const result = await navigator.permissions.query({ name: "clipboard-write" })
+				if (result.state === "granted" || result.state === "prompt")
+					await navigator.clipboard.writeText(text)
+				else
+					throw new Error("clipboard write permission is not granted")
+
+				break
+
+			case "firefox":
+				await navigator.clipboard.writeText(text)
+				break
+			}
+		}, payload.ID, browser)
+
+		yield put(showNotificationActionCreator({text: i18n("copied")}))
+	} catch (e) {
+		console.error(e)
+	}
+}
+
+function* publishMessages({index, payload}) {
+	try {
+		const response = yield call(api.publishMessages, payload.ID)
+
+		const messages = yield select(selectMessages(index))
+		let idx = messages.findIndex(({ID}) => ID === payload.ID)
+		if (idx !== -1)
+			messages[idx] = {
+				...messages[idx],
+				private: 0,
+				updateUTCNano: response.updateUTCNano,
+			}
+
+		if (is.notEmpty(response.error))
+			yield put(messagesFailedActionCreator(index)(response.error))
+		else
+			yield put(updateMessageSucceededActionCreator(index)(messages))
+	} catch (e) {
+		yield put(messagesFailedActionCreator(index)(e.message))
+	}
+}
+
+function* privateMessages({index, payload}) {
+	try {
+		const response = yield call(api.privateMessages, payload.ID)
+
+		const messages = yield select(selectMessages(index))
+		let idx = messages.findIndex(({ID}) => ID === payload.ID)
+		if (idx !== -1)
+			messages[idx] = {
+				...messages[idx],
+				private: 1,
+				updateUTCNano: response.updateUTCNano,
+			}
+
+		if (is.notEmpty(response.error))
+			yield put(messagesFailedActionCreator(index)(response.error))
+		else
+			yield put(updateMessageSucceededActionCreator(index)(messages))
+	} catch (e) {
+		yield put(messagesFailedActionCreator(index)(e.message))
+	}
+}
+
 function* stackSaga() {
 	yield takeLatest(DELETE_MESSAGE, deleteMessage)
 	yield takeLatest(DELETE_SELECTED, deleteSelected)
@@ -166,6 +241,9 @@ function* stackSaga() {
 	yield takeLatest(FETCH_MESSAGES, fetchMessages)
 	yield takeLatest(SEND_MESSAGE, sendMessage)
 	yield takeLatest(COPY_MESSAGE, copyMessage)
+	yield takeLatest(COPY_LINK, copyLink)
+	yield takeLatest(PUBLISH_MESSAGES, publishMessages)
+	yield takeLatest(PRIVATE_MESSAGES, privateMessages)
 }
 
 export {stackSaga}

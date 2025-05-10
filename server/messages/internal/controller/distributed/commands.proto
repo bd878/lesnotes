@@ -35,3 +35,19 @@ message DeleteCommandResult {
 	bool    ok = 1;
 	string  explain = 2;
 }
+
+message PublishCommand {
+	repeated int32   ids = 1;
+	int32   user_id = 2;
+	int64   update_utc_nano = 3;
+}
+
+message PrivateCommand {
+	repeated int32 ids = 1;
+	int32   user_id = 2;
+	int64   update_utc_nano = 3;
+}
+
+message PublishCommandResult {}
+
+message PrivateCommandResult {}

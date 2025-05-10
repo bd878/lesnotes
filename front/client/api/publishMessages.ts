@@ -1,32 +1,23 @@
 import i18n from '../i18n';
 import api from './api';
-import * as is from '../third_party/is'
 import models from './models';
 
-async function updateMessage({id, text, public: isPublic}) {
+async function publishMessages(id = "") {
 	let response = {};
-	let result: UpdateMessageResult = {
+	let result: PublishMessagesResult = {
 		error: "",
 		explain: "",
-		ID: "",
+		IDs: [],
 		updateUTCNano: 0,
 	}
 
-	const form = new FormData()
-	if (is.notEmpty(text))
-		form.append("text", text);
-
-	if (is.notUndef(isPublic))
-		form.append("public", isPublic)
-
 	try {
-		response = await api("/messages/v1/update", {
+		response = await api("/messages/v1/publish", {
 			queryParams: {
 				id: id,
 			},
-			method: "POST",
+			method: "PUT",
 			credentials: "include",
-			body: form,
 		});
 
 		if (response.error != "") {
@@ -35,7 +26,7 @@ async function updateMessage({id, text, public: isPublic}) {
 		} else {
 			if (response.value) {
 				const model = models.message({update_utc_nano: response.value.update_utc_nano})
-				result.ID = id
+				result.IDs = response.value.IDs
 				result.updateUTCNano = model.updateUTCNano
 			}
 		}
@@ -47,4 +38,4 @@ async function updateMessage({id, text, public: isPublic}) {
 	return result
 }
 
-export default updateMessage
+export default publishMessages

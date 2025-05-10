@@ -17,6 +17,8 @@ type Repository struct {
 	insertStmt   *sql.Stmt
 	updateStmt   *sql.Stmt
 	deleteStmt   *sql.Stmt
+	publishStmt  *sql.Stmt
+	privateStmt  *sql.Stmt
 	ascStmt *sql.Stmt
 	descStmt *sql.Stmt
 	ascThreadStmt *sql.Stmt
@@ -57,6 +59,22 @@ UPDATE messages SET
 	text = :text,
 	update_utc_nano = :updateUtcNano,
 	private = :private
+WHERE id = :id AND user_id = :userId
+;`,
+	))
+
+	publishStmt := utils.Must(pool.Prepare(`
+UPDATE messages SET
+	private = 0,
+	update_utc_nano = :updateUtcNano
+WHERE id = :id AND user_id = :userId
+;`,
+	))
+
+	privateStmt := utils.Must(pool.Prepare(`
+UPDATE messages SET
+	private = 1,
+	update_utc_nano = :updateUtcNano
 WHERE id = :id AND user_id = :userId
 ;`,
 	))
@@ -188,6 +206,8 @@ LIMIT :limit OFFSET :offset
 		deleteStmt: deleteStmt,
 		ascStmt: ascStmt,
 		descStmt: descStmt,
+		publishStmt: publishStmt,
+		privateStmt: privateStmt,
 		ascThreadStmt: ascThreadStmt,
 		descThreadStmt: descThreadStmt,
 		moveThreadStmt: moveThreadStmt,
@@ -240,6 +260,74 @@ func (r *Repository) Create(ctx context.Context, log *logger.Logger, message *mo
 		return errors.New("failed to put message")
 	}
 	return nil
+}
+
+func (r *Repository) Publish(ctx context.Context, log *logger.Logger, params *model.PublishMessagesParams) (err error) {
+	var tx *sql.Tx
+
+	tx, err = r.pool.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback()
+			panic(p)
+		case err != nil:
+			err = tx.Rollback()
+		default:
+			err = tx.Commit()
+		}
+	}()
+
+	for _, id := range params.IDs {
+		_, err := tx.StmtContext(ctx, r.publishStmt).ExecContext(ctx,
+			sql.Named("updateUtcNano", params.UpdateUTCNano),
+			sql.Named("id", id),
+			sql.Named("userId", params.UserID),
+		)
+		if err != nil {
+			log.Errorw("failed to make message publish", "id", id, "user_id", params.UserID, "error", err)
+		}
+	}
+
+	return
+}
+
+func (r *Repository) Private(ctx context.Context, log *logger.Logger, params *model.PrivateMessagesParams) (err error) {
+	var tx *sql.Tx
+
+	tx, err = r.pool.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback()
+			panic(p)
+		case err != nil:
+			err = tx.Rollback()
+		default:
+			err = tx.Commit()
+		}
+	}()
+
+	for _, id := range params.IDs {
+		_, err := tx.StmtContext(ctx, r.privateStmt).ExecContext(ctx,
+			sql.Named("updateUtcNano", params.UpdateUTCNano),
+			sql.Named("id", id),
+			sql.Named("userId", params.UserID),
+		)
+		if err != nil {
+			log.Errorw("failed to make message private", "id", id, "user_id", params.UserID, "error", err)
+		}
+	}
+
+	return
 }
 
 func (r *Repository) Delete(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error {

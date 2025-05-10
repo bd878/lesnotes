@@ -2,14 +2,15 @@ import {
 	OPEN_THREAD,
 	CLOSE_THREAD,
 	DESTROY_THREAD,
-	PUBLISH_MESSAGE,
-	PRIVATE_MESSAGE,
+	PUBLISH_MESSAGES,
+	PRIVATE_MESSAGES,
 
 	UPDATE_MESSAGE,
 	DELETE_MESSAGE,
 	DELETE_SELECTED,
 	SEND_MESSAGE,
 	COPY_MESSAGE,
+	COPY_LINK,
 	FETCH_MESSAGES,
 	SELECT_MESSAGE,
 	UNSELECT_MESSAGE,
@@ -113,6 +114,12 @@ export const deleteSelectedSucceededActionCreator = index => payload => ({
 	payload: payload,
 })
 
+export const copyLinkActionCreator = index => payload => ({
+	type: COPY_LINK,
+	index: index,
+	payload: payload,
+})
+
 export const unselectMessageActionCreator = index => payload => ({
 	type: UNSELECT_MESSAGE,
 	index: index,
@@ -136,14 +143,14 @@ export const deleteMessageSucceededActionCreator = index => payload => ({
 	payload,
 })
 
-export const publishMessageActionCreator = index => payload => ({
-	type: PUBLISH_MESSAGE,
+export const publishMessagesActionCreator = index => payload => ({
+	type: PUBLISH_MESSAGES,
 	index: index,
 	payload,
 })
 
-export const privateMessageActionCreator = index => payload => ({
-	type: PRIVATE_MESSAGE,
+export const privateMessagesActionCreator = index => payload => ({
+	type: PRIVATE_MESSAGES,
 	index: index,
 	payload,
 })

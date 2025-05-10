@@ -1,0 +1,2 @@
+url = https://%STAGE%lesnotes.space/messages/v1/publish?id=%ID%
+-XPUT

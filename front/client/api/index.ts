@@ -4,14 +4,16 @@ import sendMessage from './sendMessage';
 import updateMessage from './updateMessage';
 import deleteMessage from './deleteMessage';
 import deleteMessages from './deleteMessages';
+import publishMessages from './publishMessages'
+import privateMessages from './privateMessages';
 import uploadFile from './uploadFile';
 import auth from './auth';
 import login from './login';
 import logout from './logout';
 import register from './register';
-import {getFileDownloadUrl} from './api';
+import {getFileDownloadUrl, getMessageLinkUrl} from './api';
 
-export {getFileDownloadUrl}
+export {getFileDownloadUrl, getMessageLinkUrl}
 export default {
 	register,
 	login,
@@ -23,6 +25,9 @@ export default {
 	updateMessage,
 	deleteMessage,
 	deleteMessages,
+	publishMessages,
+	privateMessages,
 	uploadFile,
 	getFileDownloadUrl,
+	getMessageLinkUrl,
 }

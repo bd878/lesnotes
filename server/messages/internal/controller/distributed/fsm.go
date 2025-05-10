@@ -14,6 +14,8 @@ type Repository interface {
 	Create(ctx context.Context, log *logger.Logger, message *model.Message) error
 	Update(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (*model.UpdateMessageResult, error)
 	Delete(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error
+	Publish(ctx context.Context, log *logger.Logger, params *model.PublishMessagesParams) error
+	Private(ctx context.Context, log *logger.Logger, params *model.PrivateMessagesParams) error
 	Read(ctx context.Context, log *logger.Logger, params *model.ReadOneMessageParams) (*model.Message, error)
 	ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadMessagesParams) (*model.ReadMessagesResult, error)
 	ReadThreadMessages(ctx context.Context, log *logger.Logger, params *model.ReadThreadMessagesParams) (*model.ReadThreadMessagesResult, error)
@@ -43,6 +45,10 @@ func (f *fsm) Apply(record *raft.Log) interface{} {
 		return f.applyUpdate(buf[1:])
 	case DeleteRequest:
 		return f.applyDelete(buf[1:])
+	case PublishRequest:
+		return f.applyPublish(buf[1:])
+	case PrivateRequest:
+		return f.applyPrivate(buf[1:])
 	default:
 		logger.Errorw("unknown request type", "type", reqType)
 	}
@@ -96,6 +102,38 @@ func (f *fsm) applyDelete(raw []byte) interface{} {
 	}
 
 	return &DeleteCommandResult{Ok: true, Explain: "deleted"}
+}
+
+func (f *fsm) applyPublish(raw []byte) interface{} {
+	var cmd PublishCommand
+	proto.Unmarshal(raw, &cmd)
+
+	err := f.repo.Publish(context.Background(), logger.Default(), &model.PublishMessagesParams{
+		IDs: cmd.Ids,
+		UserID: cmd.UserId,
+		UpdateUTCNano: cmd.UpdateUtcNano,
+	})
+	if err != nil {
+		return err
+	}
+
+	return &PublishCommandResult{}
+}
+
+func (f *fsm) applyPrivate(raw []byte) interface{} {
+	var cmd PrivateCommand
+	proto.Unmarshal(raw, &cmd)
+
+	err := f.repo.Private(context.Background(), logger.Default(), &model.PrivateMessagesParams{
+		IDs: cmd.Ids,
+		UserID: cmd.UserId,
+		UpdateUTCNano: cmd.UpdateUtcNano,
+	})
+	if err != nil {
+		return err
+	}
+
+	return &PrivateCommandResult{}
 }
 
 func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {
