@@ -15,6 +15,8 @@ type Controller interface {
 	UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (*model.UpdateMessageResult, error)
 	DeleteMessage(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error
 	DeleteMessages(ctx context.Context, log *logger.Logger, params *model.DeleteMessagesParams) (*model.DeleteMessagesResult, error)
+	PublishMessages(ctx context.Context, log *logger.Logger, params *model.PublishMessagesParams) (*model.PublishMessagesResult, error)
+	PrivateMessages(ctx context.Context, log *logger.Logger, params *model.PrivateMessagesParams) (*model.PrivateMessagesResult, error)
 	ReadMessage(ctx context.Context, log *logger.Logger, params *model.ReadOneMessageParams) (*model.Message, error)
 	ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadMessagesParams) (*model.ReadMessagesResult, error)
 	ReadThreadMessages(ctx context.Context, log *logger.Logger, params *model.ReadThreadMessagesParams) (*model.ReadThreadMessagesResult, error)
@@ -33,19 +35,15 @@ func New(ctrl Controller) *Handler {
 }
 
 func (h *Handler) SaveMessage(ctx context.Context, req *api.SaveMessageRequest) (*api.SaveMessageResponse, error) {
-	logger.Debugw("save message", "text", req.Message)
-
 	req.Message.CreateUtcNano = time.Now().UnixNano()
 	req.Message.UpdateUtcNano = time.Now().UnixNano()
 	req.Message.Id = utils.RandomID()
 
 	err := h.controller.SaveMessage(ctx, logger.Default(), model.MessageFromProto(req.Message)) 
 	if err != nil {
-		logger.Errorw("failed to save message", "error", err)
 		return nil, err
 	}
 
-	logger.Debugw("save message ok", "id", req.Message.Id)
 	return &api.SaveMessageResponse{
 		Id: req.Message.Id,
 		CreateUtcNano: req.Message.CreateUtcNano,
@@ -55,8 +53,6 @@ func (h *Handler) SaveMessage(ctx context.Context, req *api.SaveMessageRequest) 
 }
 
 func (h *Handler) UpdateMessage(ctx context.Context, req *api.UpdateMessageRequest) (*api.UpdateMessageResponse, error) {
-	logger.Debugw("update message", "id", req.Id)
-
 	updateUTCNano := time.Now().UnixNano()
 
 	res, err := h.controller.UpdateMessage(ctx, logger.Default(), &model.UpdateMessageParams{
@@ -67,11 +63,9 @@ func (h *Handler) UpdateMessage(ctx context.Context, req *api.UpdateMessageReque
 		Private: req.Private,
 	})
 	if err != nil {
-		logger.Errorw("failed to update message", "error", err)
 		return nil, err
 	}
 
-	logger.Debugw("update message ok", "id", req.Id)
 	return &api.UpdateMessageResponse{
 		UpdateUtcNano: updateUTCNano,
 		Private: res.Private,
@@ -84,7 +78,6 @@ func (h *Handler) DeleteMessage(ctx context.Context, req *api.DeleteMessageReque
 		UserID: req.UserId,
 	})
 	if err != nil {
-		logger.Errorw("failed to delete message", "error", err)
 		return nil, err
 	}
 
@@ -97,7 +90,6 @@ func (h *Handler) DeleteMessages(ctx context.Context, req *api.DeleteMessagesReq
 		UserID: req.UserId,
 	})
 	if err != nil {
-		logger.Errorw("failed to delete message", "error", err)
 		return nil, err
 	}
 
@@ -108,8 +100,29 @@ func (h *Handler) DeleteMessages(ctx context.Context, req *api.DeleteMessagesReq
 	return &api.DeleteMessagesResponse{Ids: ids}, nil
 }
 
+func (h *Handler) PublishMessages(ctx context.Context, req *api.PublishMessagesRequest) (*api.PublishMessagesResponse, error) {
+	updateUTCNano := time.Now().UnixNano()
+	_, err := h.controller.PublishMessages(ctx, logger.Default(), &model.PublishMessagesParams{
+		IDs: req.Ids,
+		UserID: req.UserId,
+		UpdateUTCNano: updateUTCNano,
+	})
+
+	return &api.PublishMessagesResponse{UpdateUtcNano: updateUTCNano}, err
+}
+
+func (h *Handler) PrivateMessages(ctx context.Context, req *api.PrivateMessagesRequest) (*api.PrivateMessagesResponse, error) {
+	updateUTCNano := time.Now().UnixNano()
+	_, err := h.controller.PrivateMessages(ctx, logger.Default(), &model.PrivateMessagesParams{
+		IDs: req.Ids,
+		UserID: req.UserId,
+		UpdateUTCNano: updateUTCNano,
+	})
+
+	return &api.PrivateMessagesResponse{UpdateUtcNano: updateUTCNano}, err
+}
+
 func (h *Handler) ReadThreadMessages(ctx context.Context, req *api.ReadThreadMessagesRequest) (*api.ReadThreadMessagesResponse, error) {
-	logger.Debugw("grpc read thread messages", "user_id", req.UserId, "thread_id", req.ThreadId)
 	res, err := h.controller.ReadThreadMessages(ctx, logger.Default(), &model.ReadThreadMessagesParams{
 		UserID:    req.UserId,
 		ThreadID:  req.ThreadId,
@@ -119,11 +132,9 @@ func (h *Handler) ReadThreadMessages(ctx context.Context, req *api.ReadThreadMes
 		Private:    req.Private,
 	})
 	if err != nil {
-		logger.Errorw("failed to read thread messages", "error", err)
 		return nil, err
 	}
 
-	logger.Debugw("grpc read thread messages ok", "thread_id", req.ThreadId, "private", req.Private)
 	return &api.ReadThreadMessagesResponse{
 		Messages: model.MapMessagesToProto(model.MessageToProto, res.Messages),
 		IsLastPage: res.IsLastPage,
@@ -139,7 +150,6 @@ func (h *Handler) ReadAllMessages(ctx context.Context, req *api.ReadMessagesRequ
 		Private:    req.Private,
 	})
 	if err != nil {
-		logger.Errorw("failed to read user messages", "error", err)
 		return nil, err
 	}
 
@@ -152,7 +162,6 @@ func (h *Handler) ReadAllMessages(ctx context.Context, req *api.ReadMessagesRequ
 func (h *Handler) GetServers(ctx context.Context, _ *api.GetServersRequest) (*api.GetServersResponse, error) {
 	srvs, err := h.controller.GetServers(ctx, logger.Default())
 	if err != nil {
-		logger.Errorw("failed to get servers", "error", err)
 		return nil, err
 	}
 
@@ -162,17 +171,13 @@ func (h *Handler) GetServers(ctx context.Context, _ *api.GetServersRequest) (*ap
 }
 
 func (h *Handler) ReadOneMessage(ctx context.Context, req *api.ReadOneMessageRequest) (*api.Message, error) {
-	logger.Debugw("read one message", "user_ids", req.UserIds, "id", req.Id)
-
 	message, err := h.controller.ReadMessage(ctx, logger.Default(), &model.ReadOneMessageParams{
 		ID: req.Id,
 		UserIDs: req.UserIds,
 	})
 	if err != nil {
-		logger.Errorw("failed to read one message", "user_ids", req.UserIds, "message_id", req.Id)
 		return nil, err
 	}
 
-	logger.Debugw("read one message ok", "user_ids", req.UserIds, "id", req.Id)
 	return model.MessageToProto(message), nil
 }

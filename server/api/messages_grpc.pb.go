@@ -21,6 +21,8 @@ type MessagesClient interface {
 	SaveMessage(ctx context.Context, in *SaveMessageRequest, opts ...grpc.CallOption) (*SaveMessageResponse, error)
 	DeleteMessage(ctx context.Context, in *DeleteMessageRequest, opts ...grpc.CallOption) (*DeleteMessageResponse, error)
 	DeleteMessages(ctx context.Context, in *DeleteMessagesRequest, opts ...grpc.CallOption) (*DeleteMessagesResponse, error)
+	PublishMessages(ctx context.Context, in *PublishMessagesRequest, opts ...grpc.CallOption) (*PublishMessagesResponse, error)
+	PrivateMessages(ctx context.Context, in *PrivateMessagesRequest, opts ...grpc.CallOption) (*PrivateMessagesResponse, error)
 	UpdateMessage(ctx context.Context, in *UpdateMessageRequest, opts ...grpc.CallOption) (*UpdateMessageResponse, error)
 	ReadOneMessage(ctx context.Context, in *ReadOneMessageRequest, opts ...grpc.CallOption) (*Message, error)
 	ReadAllMessages(ctx context.Context, in *ReadMessagesRequest, opts ...grpc.CallOption) (*ReadMessagesResponse, error)
@@ -71,6 +73,24 @@ func (c *messagesClient) DeleteMessages(ctx context.Context, in *DeleteMessagesR
 	return out, nil
 }
 
+func (c *messagesClient) PublishMessages(ctx context.Context, in *PublishMessagesRequest, opts ...grpc.CallOption) (*PublishMessagesResponse, error) {
+	out := new(PublishMessagesResponse)
+	err := c.cc.Invoke(ctx, "/messages.v1.Messages/PublishMessages", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *messagesClient) PrivateMessages(ctx context.Context, in *PrivateMessagesRequest, opts ...grpc.CallOption) (*PrivateMessagesResponse, error) {
+	out := new(PrivateMessagesResponse)
+	err := c.cc.Invoke(ctx, "/messages.v1.Messages/PrivateMessages", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *messagesClient) UpdateMessage(ctx context.Context, in *UpdateMessageRequest, opts ...grpc.CallOption) (*UpdateMessageResponse, error) {
 	out := new(UpdateMessageResponse)
 	err := c.cc.Invoke(ctx, "/messages.v1.Messages/UpdateMessage", in, out, opts...)
@@ -115,6 +135,8 @@ type MessagesServer interface {
 	SaveMessage(context.Context, *SaveMessageRequest) (*SaveMessageResponse, error)
 	DeleteMessage(context.Context, *DeleteMessageRequest) (*DeleteMessageResponse, error)
 	DeleteMessages(context.Context, *DeleteMessagesRequest) (*DeleteMessagesResponse, error)
+	PublishMessages(context.Context, *PublishMessagesRequest) (*PublishMessagesResponse, error)
+	PrivateMessages(context.Context, *PrivateMessagesRequest) (*PrivateMessagesResponse, error)
 	UpdateMessage(context.Context, *UpdateMessageRequest) (*UpdateMessageResponse, error)
 	ReadOneMessage(context.Context, *ReadOneMessageRequest) (*Message, error)
 	ReadAllMessages(context.Context, *ReadMessagesRequest) (*ReadMessagesResponse, error)
@@ -137,6 +159,12 @@ func (UnimplementedMessagesServer) DeleteMessage(context.Context, *DeleteMessage
 }
 func (UnimplementedMessagesServer) DeleteMessages(context.Context, *DeleteMessagesRequest) (*DeleteMessagesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteMessages not implemented")
+}
+func (UnimplementedMessagesServer) PublishMessages(context.Context, *PublishMessagesRequest) (*PublishMessagesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PublishMessages not implemented")
+}
+func (UnimplementedMessagesServer) PrivateMessages(context.Context, *PrivateMessagesRequest) (*PrivateMessagesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PrivateMessages not implemented")
 }
 func (UnimplementedMessagesServer) UpdateMessage(context.Context, *UpdateMessageRequest) (*UpdateMessageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateMessage not implemented")
@@ -235,6 +263,42 @@ func _Messages_DeleteMessages_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Messages_PublishMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PublishMessagesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MessagesServer).PublishMessages(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/messages.v1.Messages/PublishMessages",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MessagesServer).PublishMessages(ctx, req.(*PublishMessagesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Messages_PrivateMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PrivateMessagesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MessagesServer).PrivateMessages(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/messages.v1.Messages/PrivateMessages",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MessagesServer).PrivateMessages(ctx, req.(*PrivateMessagesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Messages_UpdateMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateMessageRequest)
 	if err := dec(in); err != nil {
@@ -326,6 +390,14 @@ var _Messages_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteMessages",
 			Handler:    _Messages_DeleteMessages_Handler,
+		},
+		{
+			MethodName: "PublishMessages",
+			Handler:    _Messages_PublishMessages_Handler,
+		},
+		{
+			MethodName: "PrivateMessages",
+			Handler:    _Messages_PrivateMessages_Handler,
 		},
 		{
 			MethodName: "UpdateMessage",

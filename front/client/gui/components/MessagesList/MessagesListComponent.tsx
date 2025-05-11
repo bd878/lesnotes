@@ -10,6 +10,7 @@ const Button = lazy(() => import("../../components/Button"));
 const CopyIcon = lazy(() => import('../../icons/CopyIcon'));
 const CrayonIcon = lazy(() => import('../../icons/CrayonIcon'));
 const CrossIcon = lazy(() => import('../../icons/CrossIcon'));
+const LinkIcon = lazy(() => import('../../icons/LinkIcon'));
 
 function MessagesListComponent(props) {
 	const {
@@ -25,8 +26,9 @@ function MessagesListComponent(props) {
 		onToggleThreadClick,
 		onEditClick,
 		onCopyClick,
-		onPublishClick,
 		onPrivateClick,
+		onPublishClick,
+		onCopyLinkClick,
 		onSelectClick,
 		onUnselectClick,
 		onResetEditClick,
@@ -41,6 +43,7 @@ function MessagesListComponent(props) {
 						const isMyThreadOpen = is.func(checkMyThreadOpen) ? checkMyThreadOpen(message.ID) : false
 						const isSelected = is.notEmpty(selectedMessageIDs) ? selectedMessageIDs.has(message.ID) : false
 						const isEdit = is.notEmpty(messageForEdit) ? messageForEdit.ID === message.ID : false
+						const isPublic = is.notUndef(message.private) ? message.private === 0 : false
 
 						return (
 							<Tag
@@ -67,17 +70,31 @@ function MessagesListComponent(props) {
 										checked={isSelected}
 									/>
 								</Tag>
+
 								<MessageElement
 									key={message.ID}
 									message={message}
-									isThreadOpen={isMyThreadOpen}
 									isPrivate={message.private}
-									onToggleThreadClick={() => onToggleThreadClick(message)}
-									onEditClick={() => onEditClick(message)}
 									onPublishClick={() => onPublishClick(message)}
 									onPrivateClick={() => onPrivateClick(message)}
+									isThreadOpen={isMyThreadOpen}
+									onToggleThreadClick={() => onToggleThreadClick(message)}
 								/>
 
+								{isPublic
+									? is.func(onCopyLinkClick)
+										? (
+											<Button
+												type="button"
+												css="flex my-1 p-2 rounded-sm cursor-pointer hover:bg-gray-300"
+												content={
+													<LinkIcon css="flex" width="20" height="20" />
+												}
+												onClick={() => onCopyLinkClick(message)}
+											/>
+										) : null
+									: null
+								}
 								{isEdit
 									? is.func(onResetEditClick)
 										? (

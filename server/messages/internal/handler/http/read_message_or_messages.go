@@ -14,7 +14,7 @@ import (
 	"github.com/bd878/gallery/server/logger"
 )
 
-func (h *Handler) ReadMessagesOrMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) ReadMessageOrMessages(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
 	var (
 		limitInt, offsetInt, orderInt, publicInt int
 		threadID, messageID, privateInt int32

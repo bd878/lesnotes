@@ -21,6 +21,7 @@ function ThreadComponent(props, ref) {
 		onClearSelectedClick,
 		onPublishClick,
 		onPrivateClick,
+		onCopyLinkClick,
 		isAllLoaded,
 		onScroll,
 		loadMoreContent,
@@ -63,7 +64,6 @@ function ThreadComponent(props, ref) {
 				</Tag>
 			) : null}
 
-
 			<Tag
 				ref={ref}
 				css="grow w-full h-full flex flex-col overflow-x-hidden"
@@ -80,6 +80,7 @@ function ThreadComponent(props, ref) {
 					checkMyThreadOpen={checkMyThreadOpen}
 					onPublishClick={onPublishClick}
 					onPrivateClick={onPrivateClick}
+					onCopyLinkClick={onCopyLinkClick}
 					onSelectClick={onSelectClick}
 					onUnselectClick={onUnselectClick}
 					onEditClick={onEditClick}

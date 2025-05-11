@@ -1,8 +1,8 @@
 package http
 
 import (
-	"net/http"
 	"fmt"
+	"net/http"
 	"strconv"
 	"encoding/json"
 
@@ -13,7 +13,7 @@ import (
 	"github.com/bd878/gallery/server/logger"
 )
 
-func (h *Handler) DeleteMessagesOrMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) PublishMessageOrMessages(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
 	user, ok := utils.GetUser(w, req)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
@@ -29,17 +29,17 @@ func (h *Handler) DeleteMessagesOrMessage(log *logger.Logger, w http.ResponseWri
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status: "error",
-			Description: "cannot delete public message",
+			Description: "can publish messages of a user only",
 		})
 
-		return fmt.Errorf("cannot delete public message")
+		return fmt.Errorf("can publish messages of a user only")
 	}
 
 	values := req.URL.Query()
 	if values.Get("id") != "" {
-		return h.deleteMessage(log, w, req, user, values.Get("id"))
+		return h.publishMessage(log, w, req, user, values.Get("id"))
 	} else if values.Get("ids") != "" {
-		return h.deleteMessages(log, w, req, user, values.Get("ids"))
+		return h.publishMessages(log, w, req, user, values.Get("ids"))
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
@@ -51,7 +51,7 @@ func (h *Handler) DeleteMessagesOrMessage(log *logger.Logger, w http.ResponseWri
 	}
 }
 
-func (h *Handler) deleteMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request, user *usermodel.User, idValue string) error {
+func (h *Handler) publishMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request, user *usermodel.User, idValue string) error {
 	id, err := strconv.Atoi(idValue)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -63,34 +63,34 @@ func (h *Handler) deleteMessage(log *logger.Logger, w http.ResponseWriter, req *
 		return err
 	}
 
-	_, err = h.controller.DeleteMessage(req.Context(), log, &model.DeleteMessageParams{
-		ID: int32(id),
+	res, err := h.controller.PublishMessages(req.Context(), log, &model.PublishMessagesParams{
+		IDs: []int32{int32(id)},
 		UserID: user.ID,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status: "error",
-			Description: "failed to delete message",
+			Description: "failed to publish a message",
 		})
 
 		return err
 	}
 
-	json.NewEncoder(w).Encode(model.DeleteMessageServerResponse{
+	json.NewEncoder(w).Encode(model.PublishMessagesServerResponse{
 		ServerResponse: servermodel.ServerResponse{
 			Status: "ok",
-			Description: "deleted",
+			Description: "published",
 		},
-		ID: int32(id),
+		UpdateUTCNano: res.UpdateUTCNano,
+		IDs: []int32{int32(id)},
 	})
 
 	return nil
 }
 
-func (h *Handler) deleteMessages(log *logger.Logger, w http.ResponseWriter, req *http.Request, user *usermodel.User, idsValue string) error {
+func (h *Handler) publishMessages(log *logger.Logger, w http.ResponseWriter, req *http.Request, user *usermodel.User, idsValue string) error {
 	var ids []int32
-	log.Debugf("ids value: %s\n", idsValue)
 	if err := json.Unmarshal([]byte(idsValue), &ids); err != nil {
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status: "error",
@@ -100,7 +100,7 @@ func (h *Handler) deleteMessages(log *logger.Logger, w http.ResponseWriter, req 
 		return err
 	}
 
-	res, err := h.controller.DeleteMessages(req.Context(), log, &model.DeleteMessagesParams{
+	res, err := h.controller.PublishMessages(req.Context(), log, &model.PublishMessagesParams{
 		IDs: ids,
 		UserID: user.ID,
 	})
@@ -108,18 +108,19 @@ func (h *Handler) deleteMessages(log *logger.Logger, w http.ResponseWriter, req 
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status: "error",
-			Description: "failed to delete batch messages",
+			Description: "failed to publish batch messages",
 		})
 
 		return err
 	}
 
-	json.NewEncoder(w).Encode(model.DeleteMessagesServerResponse{
+	json.NewEncoder(w).Encode(model.PublishMessagesServerResponse{
 		ServerResponse: servermodel.ServerResponse{
 			Status: "ok",
-			Description: "deleted",
+			Description: "published",
 		},
-		IDs: res.IDs,
+		UpdateUTCNano: res.UpdateUTCNano,
+		IDs: ids,
 	})
 
 	return nil

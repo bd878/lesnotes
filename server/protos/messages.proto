@@ -9,6 +9,8 @@ service Messages {
 	rpc SaveMessage(SaveMessageRequest) returns (SaveMessageResponse) {}
 	rpc DeleteMessage(DeleteMessageRequest) returns (DeleteMessageResponse) {}
 	rpc DeleteMessages(DeleteMessagesRequest) returns (DeleteMessagesResponse) {}
+	rpc PublishMessages(PublishMessagesRequest) returns (PublishMessagesResponse) {}
+	rpc PrivateMessages(PrivateMessagesRequest) returns (PrivateMessagesResponse) {}
 	rpc UpdateMessage(UpdateMessageRequest) returns (UpdateMessageResponse) {}
 	rpc ReadOneMessage(ReadOneMessageRequest) returns (Message) {}
 	rpc ReadAllMessages(ReadMessagesRequest) returns (ReadMessagesResponse) {}
@@ -85,6 +87,24 @@ message DeleteMessageRequest {
 message DeleteMessagesRequest {
 	repeated int32  ids = 1;
 	int32 user_id = 2;
+}
+
+message PublishMessagesRequest {
+	repeated int32 ids = 1;
+	int32 user_id = 2;
+}
+
+message PublishMessagesResponse {
+	int64    update_utc_nano = 1;
+}
+
+message PrivateMessagesRequest {
+	repeated int32 ids = 1;
+	int32 user_id = 2;
+}
+
+message PrivateMessagesResponse {
+	int64    update_utc_nano = 1;
 }
 
 message DeleteMessageResponse {}

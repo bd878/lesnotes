@@ -46,7 +46,6 @@ func (s *Messages) setupConnection() error {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		logger.Error("messages cannot setup grpc client connection, exit")
 		return err
 	}
 
@@ -66,7 +65,6 @@ func (s *Messages) SaveMessage(ctx context.Context, log *logger.Logger, message 
 	*model.SaveMessageResult, error,
 ) {
 	if s.isConnFailed() {
-		log.Info("conn failed, setup new connection")
 		if err := s.setupConnection(); err != nil {
 			return nil, err
 		}
@@ -76,7 +74,6 @@ func (s *Messages) SaveMessage(ctx context.Context, log *logger.Logger, message 
 		Message: model.MessageToProto(message),
 	})
 	if err != nil {
-		log.Errorw("client failed to save message", "error", err)
 		return nil, err 
 	}
 
@@ -92,7 +89,6 @@ func (s *Messages) DeleteMessage(ctx context.Context, log *logger.Logger, params
 	*model.DeleteMessageResult, error,
 ) {
 	if s.isConnFailed() {
-		log.Info("conn failed, setup new connection")
 		if err := s.setupConnection(); err != nil {
 			return nil, err
 		}
@@ -103,7 +99,6 @@ func (s *Messages) DeleteMessage(ctx context.Context, log *logger.Logger, params
 		UserId: params.UserID,
 	})
 	if err != nil {
-		log.Errorw("client failed to delete message", "error", err)
 		return nil, err
 	}
 
@@ -114,7 +109,6 @@ func (s *Messages) DeleteMessages(ctx context.Context, log *logger.Logger, param
 	*model.DeleteMessagesResult, error,
 ) {
 	if s.isConnFailed() {
-		log.Info("conn failed, setup new connection")
 		if err := s.setupConnection(); err != nil {
 			return nil, err
 		}
@@ -125,7 +119,6 @@ func (s *Messages) DeleteMessages(ctx context.Context, log *logger.Logger, param
 		UserId: params.UserID,
 	})
 	if err != nil {
-		log.Errorw("client failed to delete batch messages", "error", err)
 		return nil, err
 	}
 
@@ -143,11 +136,54 @@ func (s *Messages) DeleteMessages(ctx context.Context, log *logger.Logger, param
 	}, nil
 }
 
+func (s *Messages) PublishMessages(ctx context.Context, log *logger.Logger, params *model.PublishMessagesParams) (
+	*model.PublishMessagesResult, error,
+) {
+	if s.isConnFailed() {
+		if err := s.setupConnection(); err != nil {
+			return nil, err
+		}
+	}
+
+	resp, err := s.client.PublishMessages(ctx, &api.PublishMessagesRequest{
+		Ids: params.IDs,
+		UserId: params.UserID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.PublishMessagesResult{
+		UpdateUTCNano: resp.UpdateUtcNano,
+	}, nil
+}
+
+func (s *Messages) PrivateMessages(ctx context.Context, log *logger.Logger, params *model.PrivateMessagesParams) (
+	*model.PrivateMessagesResult, error,
+) {
+	if s.isConnFailed() {
+		if err := s.setupConnection(); err != nil {
+			return nil, err
+		}
+	}
+
+	resp, err := s.client.PrivateMessages(ctx, &api.PrivateMessagesRequest{
+		Ids: params.IDs,
+		UserId: params.UserID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.PrivateMessagesResult{
+		UpdateUTCNano: resp.UpdateUtcNano,
+	}, nil
+}
+
 func (s *Messages) UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (
 	*model.UpdateMessageResult, error,
 ) {
 	if s.isConnFailed() {
-		log.Info("conn failed, setup new connection")
 		if err := s.setupConnection(); err != nil {
 			return nil, err
 		}
@@ -161,7 +197,6 @@ func (s *Messages) UpdateMessage(ctx context.Context, log *logger.Logger, params
 		Private: params.Private,
 	})
 	if err != nil {
-		log.Errorw("client failed to save message", "error", err)
 		return nil, err 
 	}
 
@@ -176,13 +211,11 @@ func (s *Messages) ReadThreadMessages(ctx context.Context, log *logger.Logger, p
 	*model.ReadThreadMessagesResult, error,
 ) {
 	if s.isConnFailed() {
-		log.Info("conn failed, setup new connection")
 		if err := s.setupConnection(); err != nil {
 			return nil, err
 		}
 	}
 
-	log.Infow("grpc client read thread messages", "user_id", params.UserID, "thread_id", params.ThreadID, "private", params.Private)
 	res, err := s.client.ReadThreadMessages(ctx, &api.ReadThreadMessagesRequest{
 		UserId: params.UserID,
 		ThreadId: params.ThreadID,
@@ -192,7 +225,6 @@ func (s *Messages) ReadThreadMessages(ctx context.Context, log *logger.Logger, p
 		Private: params.Private,
 	})
 	if err != nil {
-		log.Errorw("client failed to read thread messages", "thread_id", params.ThreadID)
 		return nil, err
 	}
 
@@ -206,7 +238,6 @@ func (s *Messages) ReadAllMessages(ctx context.Context, log *logger.Logger, para
 	*model.ReadMessagesResult, error,
 ) {
 	if s.isConnFailed() {
-		log.Info("conn failed, setup new connection")
 		if err := s.setupConnection(); err != nil {
 			return nil, err
 		}
@@ -220,7 +251,6 @@ func (s *Messages) ReadAllMessages(ctx context.Context, log *logger.Logger, para
 		Private: params.Private,
 	})
 	if err != nil {
-		log.Errorw("client failed to read user messages", "error", err)
 		return nil, err
 	}
 
@@ -234,7 +264,6 @@ func (s *Messages) ReadOneMessage(ctx context.Context, log *logger.Logger, param
 	*model.Message, error,
 ) {
 	if s.isConnFailed() {
-		log.Info("conn failed, setup new connection")
 		if err := s.setupConnection(); err != nil {
 			return nil, err
 		}
@@ -245,7 +274,6 @@ func (s *Messages) ReadOneMessage(ctx context.Context, log *logger.Logger, param
 		UserIds: params.UserIDs,
 	})
 	if err != nil {
-		log.Errorw("client failed to read user message", "user_ids", params.UserIDs, "message_id", params.ID, "error", err)
 		return nil, err
 	}
 

@@ -12,7 +12,7 @@ async function deleteMessages(ids = []) {
 	try {
 		response = await api("/messages/v1/delete", {
 			queryParams: {
-				ids: ids,
+				ids: JSON.stringify(ids),
 			},
 			method: "DELETE",
 			credentials: "include",

@@ -44,6 +44,18 @@ type DeleteMessageServerResponse struct {
 	ID                  int32         `json:"id"`
 }
 
+type PublishMessagesServerResponse struct {
+	model.ServerResponse
+	IDs                  []int32       `json:"ids"`
+	UpdateUTCNano        int64         `json:"update_utc_nano"`
+}
+
+type PrivateMessagesServerResponse struct {
+	model.ServerResponse
+	IDs                  []int32       `json:"ids"`
+	UpdateUTCNano        int64         `json:"update_utc_nano"`
+}
+
 type DeleteMessageStatus struct {
 	ID                int32           `json:"id"`
 	OK                bool            `json:"ok"`

@@ -35,6 +35,62 @@ paths:
               schema:
                 $ref: '#/components/schemas/sendErr'
 
+  /messages/v1/publish:
+    parameters:
+      - $ref: '#/components/parameters/messageId'
+    put:
+      summary: Make message public
+      description: |
+        Update private field of a message to make it public
+      operationId: publicMessage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              nullable: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/publishOk'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/statusErr'
+
+  /messages/v1/private:
+    parameters:
+      - $ref: '#/components/parameters/messageId'
+    put:
+      summary: Make message private
+      description: |
+        Update private field of a message to make it private
+      operationId: privateMessage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              nullable: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/publishOk'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/statusErr'
+
   /messages/v1/update:
     parameters:
       - $ref: '#/components/parameters/messageId'
@@ -357,6 +413,23 @@ components:
         description:
           type: string
           default: ""
+
+    publishOk:
+      type: object
+      properties:
+        status:
+          type: string 
+          default: "ok"
+        description:
+          type: string 
+          default: ""
+        ids:
+          type: array
+          items:
+            type: integer
+        update_utc_nano:
+          type: integer
+          example: 1234566700000000
 
     updateOk:
       type: object

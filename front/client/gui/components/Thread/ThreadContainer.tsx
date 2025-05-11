@@ -30,8 +30,9 @@ import {
 	selectMessageActionCreator,
 	unselectMessageActionCreator,
 	clearSelectedActionCreator,
-	publishMessageActionCreator,
-	privateMessageActionCreator,
+	publishMessagesActionCreator,
+	privateMessagesActionCreator,
+	copyLinkActionCreator,
 } from '../../features/stack';
 
 function ThreadContainer(props) {
@@ -43,6 +44,7 @@ function ThreadContainer(props) {
 		threadID,
 		openThread,
 		closeThread,
+		copyLink,
 		destroyThread,
 		messages,
 		selectedMessageIDs,
@@ -64,8 +66,8 @@ function ThreadContainer(props) {
 		selectMessage,
 		unselectMessage,
 		clearSelected,
-		publishMessage,
-		privateMessage,
+		publishMessages,
+		privateMessages,
 	} = props
 
 	const listRef = useRef(null);
@@ -103,8 +105,9 @@ function ThreadContainer(props) {
 	const onSelectClick = useCallback(selectMessage, [selectMessage])
 	const onUnselectClick = useCallback(unselectMessage, [unselectMessage])
 	const onClearSelectedClick = useCallback(clearSelected, [clearSelected])
-	const onPublishClick = useCallback(publishMessage, [publishMessage])
-	const onPrivateClick = useCallback(privateMessage, [privateMessage])
+	const onPublishClick = useCallback(publishMessages, [publishMessages])
+	const onPrivateClick = useCallback(privateMessages, [privateMessages])
+	const onCopyLinkClick = useCallback(copyLink, [copyLink])
 
 	const onMessageSend = useCallback(payload => {
 		payload.threadID = threadID
@@ -135,6 +138,7 @@ function ThreadContainer(props) {
 			onClearSelectedClick={onClearSelectedClick}
 			onDeleteSelectedClick={onDeleteSelectedClick}
 			onDeleteClick={onDeleteClick}
+			onCopyLinkClick={onCopyLinkClick}
 			onEditClick={onEditClick}
 			onPublishClick={onPublishClick}
 			onPrivateClick={onPrivateClick}
@@ -163,8 +167,8 @@ const mapStateToProps = (state, {index}) => ({
 })
 
 const mapDispatchToProps = (dispatch, {index}) => ({
-	publishMessage: payload => dispatch(publishMessageActionCreator(index)(payload)),
-	privateMessage: payload => dispatch(privateMessageActionCreator(index)(payload)),
+	publishMessages: payload => dispatch(publishMessagesActionCreator(index)(payload)),
+	privateMessages: payload => dispatch(privateMessagesActionCreator(index)(payload)),
 	clearSelected: payload => dispatch(clearSelectedActionCreator(index)(payload)),
 	unselectMessage: payload => dispatch(unselectMessageActionCreator(index)(payload)),
 	selectMessage: payload => dispatch(selectMessageActionCreator(index)(payload)),
@@ -175,6 +179,7 @@ const mapDispatchToProps = (dispatch, {index}) => ({
 	deleteSelected: payload => dispatch(deleteSelectedActionCreator(index)(payload)),
 	deleteMessage: payload => dispatch(deleteMessageActionCreator(index)(payload)),
 	copyMessage: payload => dispatch(copyMessageActionCreator(index)(payload)),
+	copyLink: payload => dispatch(copyLinkActionCreator(index)(payload)),
 	setEditMessage: payload => dispatch(setEditMessageActionCreator(index)(payload)),
 })
 

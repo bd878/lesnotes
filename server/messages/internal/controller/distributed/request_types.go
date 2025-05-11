@@ -6,4 +6,6 @@ const (
 	AppendRequest RequestType = iota
 	UpdateRequest
 	DeleteRequest
+	PublishRequest
+	PrivateRequest
 )

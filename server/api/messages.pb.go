@@ -761,6 +761,210 @@ func (x *DeleteMessagesRequest) GetUserId() int32 {
 	return 0
 }
 
+type PublishMessagesRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Ids    []int32 `protobuf:"varint,1,rep,packed,name=ids,proto3" json:"ids,omitempty"`
+	UserId int32   `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+}
+
+func (x *PublishMessagesRequest) Reset() {
+	*x = PublishMessagesRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_protos_messages_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PublishMessagesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PublishMessagesRequest) ProtoMessage() {}
+
+func (x *PublishMessagesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_protos_messages_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PublishMessagesRequest.ProtoReflect.Descriptor instead.
+func (*PublishMessagesRequest) Descriptor() ([]byte, []int) {
+	return file_protos_messages_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *PublishMessagesRequest) GetIds() []int32 {
+	if x != nil {
+		return x.Ids
+	}
+	return nil
+}
+
+func (x *PublishMessagesRequest) GetUserId() int32 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+type PublishMessagesResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	UpdateUtcNano int64 `protobuf:"varint,1,opt,name=update_utc_nano,json=updateUtcNano,proto3" json:"update_utc_nano,omitempty"`
+}
+
+func (x *PublishMessagesResponse) Reset() {
+	*x = PublishMessagesResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_protos_messages_proto_msgTypes[12]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PublishMessagesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PublishMessagesResponse) ProtoMessage() {}
+
+func (x *PublishMessagesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_protos_messages_proto_msgTypes[12]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PublishMessagesResponse.ProtoReflect.Descriptor instead.
+func (*PublishMessagesResponse) Descriptor() ([]byte, []int) {
+	return file_protos_messages_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *PublishMessagesResponse) GetUpdateUtcNano() int64 {
+	if x != nil {
+		return x.UpdateUtcNano
+	}
+	return 0
+}
+
+type PrivateMessagesRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Ids    []int32 `protobuf:"varint,1,rep,packed,name=ids,proto3" json:"ids,omitempty"`
+	UserId int32   `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+}
+
+func (x *PrivateMessagesRequest) Reset() {
+	*x = PrivateMessagesRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_protos_messages_proto_msgTypes[13]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PrivateMessagesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PrivateMessagesRequest) ProtoMessage() {}
+
+func (x *PrivateMessagesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_protos_messages_proto_msgTypes[13]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PrivateMessagesRequest.ProtoReflect.Descriptor instead.
+func (*PrivateMessagesRequest) Descriptor() ([]byte, []int) {
+	return file_protos_messages_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *PrivateMessagesRequest) GetIds() []int32 {
+	if x != nil {
+		return x.Ids
+	}
+	return nil
+}
+
+func (x *PrivateMessagesRequest) GetUserId() int32 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+type PrivateMessagesResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	UpdateUtcNano int64 `protobuf:"varint,1,opt,name=update_utc_nano,json=updateUtcNano,proto3" json:"update_utc_nano,omitempty"`
+}
+
+func (x *PrivateMessagesResponse) Reset() {
+	*x = PrivateMessagesResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_protos_messages_proto_msgTypes[14]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PrivateMessagesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PrivateMessagesResponse) ProtoMessage() {}
+
+func (x *PrivateMessagesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_protos_messages_proto_msgTypes[14]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PrivateMessagesResponse.ProtoReflect.Descriptor instead.
+func (*PrivateMessagesResponse) Descriptor() ([]byte, []int) {
+	return file_protos_messages_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *PrivateMessagesResponse) GetUpdateUtcNano() int64 {
+	if x != nil {
+		return x.UpdateUtcNano
+	}
+	return 0
+}
+
 type DeleteMessageResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -770,7 +974,7 @@ type DeleteMessageResponse struct {
 func (x *DeleteMessageResponse) Reset() {
 	*x = DeleteMessageResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_protos_messages_proto_msgTypes[11]
+		mi := &file_protos_messages_proto_msgTypes[15]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -783,7 +987,7 @@ func (x *DeleteMessageResponse) String() string {
 func (*DeleteMessageResponse) ProtoMessage() {}
 
 func (x *DeleteMessageResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_proto_msgTypes[11]
+	mi := &file_protos_messages_proto_msgTypes[15]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -796,7 +1000,7 @@ func (x *DeleteMessageResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteMessageResponse.ProtoReflect.Descriptor instead.
 func (*DeleteMessageResponse) Descriptor() ([]byte, []int) {
-	return file_protos_messages_proto_rawDescGZIP(), []int{11}
+	return file_protos_messages_proto_rawDescGZIP(), []int{15}
 }
 
 type DeleteMessageStatus struct {
@@ -812,7 +1016,7 @@ type DeleteMessageStatus struct {
 func (x *DeleteMessageStatus) Reset() {
 	*x = DeleteMessageStatus{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_protos_messages_proto_msgTypes[12]
+		mi := &file_protos_messages_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -825,7 +1029,7 @@ func (x *DeleteMessageStatus) String() string {
 func (*DeleteMessageStatus) ProtoMessage() {}
 
 func (x *DeleteMessageStatus) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_proto_msgTypes[12]
+	mi := &file_protos_messages_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -838,7 +1042,7 @@ func (x *DeleteMessageStatus) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteMessageStatus.ProtoReflect.Descriptor instead.
 func (*DeleteMessageStatus) Descriptor() ([]byte, []int) {
-	return file_protos_messages_proto_rawDescGZIP(), []int{12}
+	return file_protos_messages_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *DeleteMessageStatus) GetId() int32 {
@@ -873,7 +1077,7 @@ type DeleteMessagesResponse struct {
 func (x *DeleteMessagesResponse) Reset() {
 	*x = DeleteMessagesResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_protos_messages_proto_msgTypes[13]
+		mi := &file_protos_messages_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -886,7 +1090,7 @@ func (x *DeleteMessagesResponse) String() string {
 func (*DeleteMessagesResponse) ProtoMessage() {}
 
 func (x *DeleteMessagesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_proto_msgTypes[13]
+	mi := &file_protos_messages_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -899,7 +1103,7 @@ func (x *DeleteMessagesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteMessagesResponse.ProtoReflect.Descriptor instead.
 func (*DeleteMessagesResponse) Descriptor() ([]byte, []int) {
-	return file_protos_messages_proto_rawDescGZIP(), []int{13}
+	return file_protos_messages_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *DeleteMessagesResponse) GetIds() []*DeleteMessageStatus {
@@ -918,7 +1122,7 @@ type GetServersRequest struct {
 func (x *GetServersRequest) Reset() {
 	*x = GetServersRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_protos_messages_proto_msgTypes[14]
+		mi := &file_protos_messages_proto_msgTypes[18]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -931,7 +1135,7 @@ func (x *GetServersRequest) String() string {
 func (*GetServersRequest) ProtoMessage() {}
 
 func (x *GetServersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_proto_msgTypes[14]
+	mi := &file_protos_messages_proto_msgTypes[18]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -944,7 +1148,7 @@ func (x *GetServersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetServersRequest.ProtoReflect.Descriptor instead.
 func (*GetServersRequest) Descriptor() ([]byte, []int) {
-	return file_protos_messages_proto_rawDescGZIP(), []int{14}
+	return file_protos_messages_proto_rawDescGZIP(), []int{18}
 }
 
 type GetServersResponse struct {
@@ -958,7 +1162,7 @@ type GetServersResponse struct {
 func (x *GetServersResponse) Reset() {
 	*x = GetServersResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_protos_messages_proto_msgTypes[15]
+		mi := &file_protos_messages_proto_msgTypes[19]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -971,7 +1175,7 @@ func (x *GetServersResponse) String() string {
 func (*GetServersResponse) ProtoMessage() {}
 
 func (x *GetServersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_proto_msgTypes[15]
+	mi := &file_protos_messages_proto_msgTypes[19]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -984,7 +1188,7 @@ func (x *GetServersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetServersResponse.ProtoReflect.Descriptor instead.
 func (*GetServersResponse) Descriptor() ([]byte, []int) {
-	return file_protos_messages_proto_rawDescGZIP(), []int{15}
+	return file_protos_messages_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *GetServersResponse) GetServers() []*Server {
@@ -1007,7 +1211,7 @@ type Server struct {
 func (x *Server) Reset() {
 	*x = Server{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_protos_messages_proto_msgTypes[16]
+		mi := &file_protos_messages_proto_msgTypes[20]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1020,7 +1224,7 @@ func (x *Server) String() string {
 func (*Server) ProtoMessage() {}
 
 func (x *Server) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_proto_msgTypes[16]
+	mi := &file_protos_messages_proto_msgTypes[20]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1033,7 +1237,7 @@ func (x *Server) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Server.ProtoReflect.Descriptor instead.
 func (*Server) Descriptor() ([]byte, []int) {
-	return file_protos_messages_proto_rawDescGZIP(), []int{16}
+	return file_protos_messages_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *Server) GetId() string {
@@ -1069,7 +1273,7 @@ type ReadOneMessageRequest struct {
 func (x *ReadOneMessageRequest) Reset() {
 	*x = ReadOneMessageRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_protos_messages_proto_msgTypes[17]
+		mi := &file_protos_messages_proto_msgTypes[21]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1082,7 +1286,7 @@ func (x *ReadOneMessageRequest) String() string {
 func (*ReadOneMessageRequest) ProtoMessage() {}
 
 func (x *ReadOneMessageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_proto_msgTypes[17]
+	mi := &file_protos_messages_proto_msgTypes[21]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1095,7 +1299,7 @@ func (x *ReadOneMessageRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReadOneMessageRequest.ProtoReflect.Descriptor instead.
 func (*ReadOneMessageRequest) Descriptor() ([]byte, []int) {
-	return file_protos_messages_proto_rawDescGZIP(), []int{17}
+	return file_protos_messages_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *ReadOneMessageRequest) GetId() int32 {
@@ -1201,7 +1405,24 @@ var file_protos_messages_proto_rawDesc = []byte{
 	0x67, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x10, 0x0a, 0x03, 0x69, 0x64,
 	0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x05, 0x52, 0x03, 0x69, 0x64, 0x73, 0x12, 0x17, 0x0a, 0x07,
 	0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x75,
-	0x73, 0x65, 0x72, 0x49, 0x64, 0x22, 0x17, 0x0a, 0x15, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x4d,
+	0x73, 0x65, 0x72, 0x49, 0x64, 0x22, 0x43, 0x0a, 0x16, 0x50, 0x75, 0x62, 0x6c, 0x69, 0x73, 0x68,
+	0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
+	0x10, 0x0a, 0x03, 0x69, 0x64, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x05, 0x52, 0x03, 0x69, 0x64,
+	0x73, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x05, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x22, 0x41, 0x0a, 0x17, 0x50, 0x75,
+	0x62, 0x6c, 0x69, 0x73, 0x68, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x26, 0x0a, 0x0f, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x5f,
+	0x75, 0x74, 0x63, 0x5f, 0x6e, 0x61, 0x6e, 0x6f, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0d,
+	0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x55, 0x74, 0x63, 0x4e, 0x61, 0x6e, 0x6f, 0x22, 0x43, 0x0a,
+	0x16, 0x50, 0x72, 0x69, 0x76, 0x61, 0x74, 0x65, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x10, 0x0a, 0x03, 0x69, 0x64, 0x73, 0x18, 0x01,
+	0x20, 0x03, 0x28, 0x05, 0x52, 0x03, 0x69, 0x64, 0x73, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65,
+	0x72, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72,
+	0x49, 0x64, 0x22, 0x41, 0x0a, 0x17, 0x50, 0x72, 0x69, 0x76, 0x61, 0x74, 0x65, 0x4d, 0x65, 0x73,
+	0x73, 0x61, 0x67, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x26, 0x0a,
+	0x0f, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x5f, 0x75, 0x74, 0x63, 0x5f, 0x6e, 0x61, 0x6e, 0x6f,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0d, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x55, 0x74,
+	0x63, 0x4e, 0x61, 0x6e, 0x6f, 0x22, 0x17, 0x0a, 0x15, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x4d,
 	0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x4f,
 	0x0a, 0x13, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x53,
 	0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
@@ -1228,7 +1449,7 @@ var file_protos_messages_proto_rawDesc = []byte{
 	0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05,
 	0x52, 0x02, 0x69, 0x64, 0x12, 0x19, 0x0a, 0x08, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x73,
 	0x18, 0x02, 0x20, 0x03, 0x28, 0x05, 0x52, 0x07, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x73, 0x32,
-	0xd1, 0x05, 0x0a, 0x08, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x12, 0x4f, 0x0a, 0x0a,
+	0x91, 0x07, 0x0a, 0x08, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x12, 0x4f, 0x0a, 0x0a,
 	0x47, 0x65, 0x74, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x73, 0x12, 0x1e, 0x2e, 0x6d, 0x65, 0x73,
 	0x73, 0x61, 0x67, 0x65, 0x73, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x53, 0x65, 0x72, 0x76,
 	0x65, 0x72, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1f, 0x2e, 0x6d, 0x65, 0x73,
@@ -1250,6 +1471,18 @@ var file_protos_messages_proto_rawDesc = []byte{
 	0x74, 0x65, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
 	0x74, 0x1a, 0x23, 0x2e, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x2e, 0x76, 0x31, 0x2e,
 	0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x52, 0x65,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x5e, 0x0a, 0x0f, 0x50, 0x75, 0x62, 0x6c,
+	0x69, 0x73, 0x68, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x12, 0x23, 0x2e, 0x6d, 0x65,
+	0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x2e, 0x76, 0x31, 0x2e, 0x50, 0x75, 0x62, 0x6c, 0x69, 0x73,
+	0x68, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x1a, 0x24, 0x2e, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x2e, 0x76, 0x31, 0x2e, 0x50,
+	0x75, 0x62, 0x6c, 0x69, 0x73, 0x68, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x52, 0x65,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x5e, 0x0a, 0x0f, 0x50, 0x72, 0x69, 0x76,
+	0x61, 0x74, 0x65, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x12, 0x23, 0x2e, 0x6d, 0x65,
+	0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x2e, 0x76, 0x31, 0x2e, 0x50, 0x72, 0x69, 0x76, 0x61, 0x74,
+	0x65, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x1a, 0x24, 0x2e, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x2e, 0x76, 0x31, 0x2e, 0x50,
+	0x72, 0x69, 0x76, 0x61, 0x74, 0x65, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x52, 0x65,
 	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x58, 0x0a, 0x0d, 0x55, 0x70, 0x64, 0x61,
 	0x74, 0x65, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x21, 0x2e, 0x6d, 0x65, 0x73, 0x73,
 	0x61, 0x67, 0x65, 0x73, 0x2e, 0x76, 0x31, 0x2e, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x4d, 0x65,
@@ -1291,7 +1524,7 @@ func file_protos_messages_proto_rawDescGZIP() []byte {
 	return file_protos_messages_proto_rawDescData
 }
 
-var file_protos_messages_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
+var file_protos_messages_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
 var file_protos_messages_proto_goTypes = []interface{}{
 	(*Message)(nil),                    // 0: messages.v1.Message
 	(*ReadThreadMessagesRequest)(nil),  // 1: messages.v1.ReadThreadMessagesRequest
@@ -1304,38 +1537,46 @@ var file_protos_messages_proto_goTypes = []interface{}{
 	(*SaveMessageResponse)(nil),        // 8: messages.v1.SaveMessageResponse
 	(*DeleteMessageRequest)(nil),       // 9: messages.v1.DeleteMessageRequest
 	(*DeleteMessagesRequest)(nil),      // 10: messages.v1.DeleteMessagesRequest
-	(*DeleteMessageResponse)(nil),      // 11: messages.v1.DeleteMessageResponse
-	(*DeleteMessageStatus)(nil),        // 12: messages.v1.DeleteMessageStatus
-	(*DeleteMessagesResponse)(nil),     // 13: messages.v1.DeleteMessagesResponse
-	(*GetServersRequest)(nil),          // 14: messages.v1.GetServersRequest
-	(*GetServersResponse)(nil),         // 15: messages.v1.GetServersResponse
-	(*Server)(nil),                     // 16: messages.v1.Server
-	(*ReadOneMessageRequest)(nil),      // 17: messages.v1.ReadOneMessageRequest
+	(*PublishMessagesRequest)(nil),     // 11: messages.v1.PublishMessagesRequest
+	(*PublishMessagesResponse)(nil),    // 12: messages.v1.PublishMessagesResponse
+	(*PrivateMessagesRequest)(nil),     // 13: messages.v1.PrivateMessagesRequest
+	(*PrivateMessagesResponse)(nil),    // 14: messages.v1.PrivateMessagesResponse
+	(*DeleteMessageResponse)(nil),      // 15: messages.v1.DeleteMessageResponse
+	(*DeleteMessageStatus)(nil),        // 16: messages.v1.DeleteMessageStatus
+	(*DeleteMessagesResponse)(nil),     // 17: messages.v1.DeleteMessagesResponse
+	(*GetServersRequest)(nil),          // 18: messages.v1.GetServersRequest
+	(*GetServersResponse)(nil),         // 19: messages.v1.GetServersResponse
+	(*Server)(nil),                     // 20: messages.v1.Server
+	(*ReadOneMessageRequest)(nil),      // 21: messages.v1.ReadOneMessageRequest
 }
 var file_protos_messages_proto_depIdxs = []int32{
 	0,  // 0: messages.v1.ReadThreadMessagesResponse.messages:type_name -> messages.v1.Message
 	0,  // 1: messages.v1.ReadMessagesResponse.messages:type_name -> messages.v1.Message
 	0,  // 2: messages.v1.SaveMessageRequest.message:type_name -> messages.v1.Message
-	12, // 3: messages.v1.DeleteMessagesResponse.ids:type_name -> messages.v1.DeleteMessageStatus
-	16, // 4: messages.v1.GetServersResponse.servers:type_name -> messages.v1.Server
-	14, // 5: messages.v1.Messages.GetServers:input_type -> messages.v1.GetServersRequest
+	16, // 3: messages.v1.DeleteMessagesResponse.ids:type_name -> messages.v1.DeleteMessageStatus
+	20, // 4: messages.v1.GetServersResponse.servers:type_name -> messages.v1.Server
+	18, // 5: messages.v1.Messages.GetServers:input_type -> messages.v1.GetServersRequest
 	7,  // 6: messages.v1.Messages.SaveMessage:input_type -> messages.v1.SaveMessageRequest
 	9,  // 7: messages.v1.Messages.DeleteMessage:input_type -> messages.v1.DeleteMessageRequest
 	10, // 8: messages.v1.Messages.DeleteMessages:input_type -> messages.v1.DeleteMessagesRequest
-	5,  // 9: messages.v1.Messages.UpdateMessage:input_type -> messages.v1.UpdateMessageRequest
-	17, // 10: messages.v1.Messages.ReadOneMessage:input_type -> messages.v1.ReadOneMessageRequest
-	3,  // 11: messages.v1.Messages.ReadAllMessages:input_type -> messages.v1.ReadMessagesRequest
-	1,  // 12: messages.v1.Messages.ReadThreadMessages:input_type -> messages.v1.ReadThreadMessagesRequest
-	15, // 13: messages.v1.Messages.GetServers:output_type -> messages.v1.GetServersResponse
-	8,  // 14: messages.v1.Messages.SaveMessage:output_type -> messages.v1.SaveMessageResponse
-	11, // 15: messages.v1.Messages.DeleteMessage:output_type -> messages.v1.DeleteMessageResponse
-	13, // 16: messages.v1.Messages.DeleteMessages:output_type -> messages.v1.DeleteMessagesResponse
-	6,  // 17: messages.v1.Messages.UpdateMessage:output_type -> messages.v1.UpdateMessageResponse
-	0,  // 18: messages.v1.Messages.ReadOneMessage:output_type -> messages.v1.Message
-	4,  // 19: messages.v1.Messages.ReadAllMessages:output_type -> messages.v1.ReadMessagesResponse
-	2,  // 20: messages.v1.Messages.ReadThreadMessages:output_type -> messages.v1.ReadThreadMessagesResponse
-	13, // [13:21] is the sub-list for method output_type
-	5,  // [5:13] is the sub-list for method input_type
+	11, // 9: messages.v1.Messages.PublishMessages:input_type -> messages.v1.PublishMessagesRequest
+	13, // 10: messages.v1.Messages.PrivateMessages:input_type -> messages.v1.PrivateMessagesRequest
+	5,  // 11: messages.v1.Messages.UpdateMessage:input_type -> messages.v1.UpdateMessageRequest
+	21, // 12: messages.v1.Messages.ReadOneMessage:input_type -> messages.v1.ReadOneMessageRequest
+	3,  // 13: messages.v1.Messages.ReadAllMessages:input_type -> messages.v1.ReadMessagesRequest
+	1,  // 14: messages.v1.Messages.ReadThreadMessages:input_type -> messages.v1.ReadThreadMessagesRequest
+	19, // 15: messages.v1.Messages.GetServers:output_type -> messages.v1.GetServersResponse
+	8,  // 16: messages.v1.Messages.SaveMessage:output_type -> messages.v1.SaveMessageResponse
+	15, // 17: messages.v1.Messages.DeleteMessage:output_type -> messages.v1.DeleteMessageResponse
+	17, // 18: messages.v1.Messages.DeleteMessages:output_type -> messages.v1.DeleteMessagesResponse
+	12, // 19: messages.v1.Messages.PublishMessages:output_type -> messages.v1.PublishMessagesResponse
+	14, // 20: messages.v1.Messages.PrivateMessages:output_type -> messages.v1.PrivateMessagesResponse
+	6,  // 21: messages.v1.Messages.UpdateMessage:output_type -> messages.v1.UpdateMessageResponse
+	0,  // 22: messages.v1.Messages.ReadOneMessage:output_type -> messages.v1.Message
+	4,  // 23: messages.v1.Messages.ReadAllMessages:output_type -> messages.v1.ReadMessagesResponse
+	2,  // 24: messages.v1.Messages.ReadThreadMessages:output_type -> messages.v1.ReadThreadMessagesResponse
+	15, // [15:25] is the sub-list for method output_type
+	5,  // [5:15] is the sub-list for method input_type
 	5,  // [5:5] is the sub-list for extension type_name
 	5,  // [5:5] is the sub-list for extension extendee
 	0,  // [0:5] is the sub-list for field type_name
@@ -1480,7 +1721,7 @@ func file_protos_messages_proto_init() {
 			}
 		}
 		file_protos_messages_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*DeleteMessageResponse); i {
+			switch v := v.(*PublishMessagesRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1492,7 +1733,7 @@ func file_protos_messages_proto_init() {
 			}
 		}
 		file_protos_messages_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*DeleteMessageStatus); i {
+			switch v := v.(*PublishMessagesResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1504,7 +1745,7 @@ func file_protos_messages_proto_init() {
 			}
 		}
 		file_protos_messages_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*DeleteMessagesResponse); i {
+			switch v := v.(*PrivateMessagesRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1516,7 +1757,7 @@ func file_protos_messages_proto_init() {
 			}
 		}
 		file_protos_messages_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetServersRequest); i {
+			switch v := v.(*PrivateMessagesResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1528,7 +1769,7 @@ func file_protos_messages_proto_init() {
 			}
 		}
 		file_protos_messages_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetServersResponse); i {
+			switch v := v.(*DeleteMessageResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1540,7 +1781,7 @@ func file_protos_messages_proto_init() {
 			}
 		}
 		file_protos_messages_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Server); i {
+			switch v := v.(*DeleteMessageStatus); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1552,6 +1793,54 @@ func file_protos_messages_proto_init() {
 			}
 		}
 		file_protos_messages_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*DeleteMessagesResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_protos_messages_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetServersRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_protos_messages_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetServersResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_protos_messages_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Server); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_protos_messages_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ReadOneMessageRequest); i {
 			case 0:
 				return &v.state
@@ -1570,7 +1859,7 @@ func file_protos_messages_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_protos_messages_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   18,
+			NumMessages:   22,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

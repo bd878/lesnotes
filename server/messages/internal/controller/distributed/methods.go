@@ -134,6 +134,40 @@ func (m *DistributedMessages) DeleteMessages(ctx context.Context, log *logger.Lo
 	return &model.DeleteMessagesResult{IDs: statuses}, nil
 }
 
+func (m *DistributedMessages) PublishMessages(ctx context.Context, log *logger.Logger, params *model.PublishMessagesParams) (*model.PublishMessagesResult, error) {
+	cmd, _ := proto.Marshal(&PublishCommand{
+		Ids: params.IDs,
+		UserId: params.UserID,
+		UpdateUtcNano: params.UpdateUTCNano,
+	})
+
+	_, err := m.apply(ctx, PublishRequest, cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.PublishMessagesResult{
+		UpdateUTCNano: params.UpdateUTCNano,
+	}, nil
+}
+
+func (m *DistributedMessages) PrivateMessages(ctx context.Context, log *logger.Logger, params *model.PrivateMessagesParams) (*model.PrivateMessagesResult, error) {
+	cmd, _ := proto.Marshal(&PrivateCommand{
+		Ids: params.IDs,
+		UserId: params.UserID,
+		UpdateUtcNano: params.UpdateUTCNano,
+	})
+
+	_, err := m.apply(ctx, PrivateRequest, cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.PrivateMessagesResult{
+		UpdateUTCNano: params.UpdateUTCNano,
+	}, nil
+}
+
 func (m *DistributedMessages) ReadMessage(ctx context.Context, log *logger.Logger, params *model.ReadOneMessageParams) (
 	*model.Message, error,
 ) {
