@@ -20,7 +20,33 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/sendBody'
+              $ref: '#/components/schemas/sendMessage'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sendOk'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sendErr'
+
+  /messages/v2/send:
+    post:
+      summary: Send a message public API
+      description: |
+        Send a message and replicate throughout the cluster,
+        message
+      operationId: sendMessage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/sendMessageJson'
       responses:
         "200":
           description: OK
@@ -356,7 +382,7 @@ components:
               type: string
               format: binary
 
-    sendBody:
+    sendMessage:
       oneOf:
         - type: object
           properties:
@@ -374,6 +400,25 @@ components:
             file:
               type: string
               format: binary
+
+    sendMessageJson:
+      type: object
+      properties:
+        text:
+          type: string
+          default: ""
+          required: true
+        file_id:
+          type: string
+          default: ""
+          required: false
+        private:
+          type: boolean
+          required: false
+          example: 0
+        thread_id:
+          type: integer
+          required: false
 
     sendOk:
       type: object
