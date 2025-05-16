@@ -2,7 +2,7 @@ import i18n from '../i18n';
 import api from './api';
 import models from './models';
 
-async function publishMessages(id = "") {
+async function publishMessages(ids = []) {
 	let response = {};
 	let result: PublishMessagesResult = {
 		error: "",
@@ -14,7 +14,7 @@ async function publishMessages(id = "") {
 	try {
 		response = await api("/messages/v1/publish", {
 			queryParams: {
-				id: id,
+				ids: JSON.stringify(ids),
 			},
 			method: "PUT",
 			credentials: "include",
@@ -26,7 +26,7 @@ async function publishMessages(id = "") {
 		} else {
 			if (response.value) {
 				const model = models.message({update_utc_nano: response.value.update_utc_nano})
-				result.IDs = response.value.IDs
+				result.IDs = response.value.ids
 				result.updateUTCNano = model.updateUTCNano
 			}
 		}

@@ -2,19 +2,18 @@ import i18n from '../i18n';
 import api from './api';
 import models from './models';
 
-async function privateMessages(id = "") {
+async function privateMessages(ids = []) {
 	let response = {};
 	let result: PrivateMessagesResult = {
 		error: "",
 		explain: "",
 		IDs: [],
-		updateUTCNano: 0,
 	}
 
 	try {
 		response = await api("/messages/v1/private", {
 			queryParams: {
-				id: id,
+				ids: JSON.stringify(ids),
 			},
 			method: "PUT",
 			credentials: "include",
@@ -26,7 +25,7 @@ async function privateMessages(id = "") {
 		} else {
 			if (response.value) {
 				const model = models.message({update_utc_nano: response.value.update_utc_nano})
-				result.IDs = response.value.IDs
+				result.IDs = response.value.ids
 				result.updateUTCNano = model.updateUTCNano
 			}
 		}

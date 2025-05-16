@@ -10,7 +10,7 @@ const empty = {
 	text: "",
 	fileID: 0,
 	file: file(),
-	private: 1,
+	private: true,
 }
 
 export default function mapMessageFromProto(message) {

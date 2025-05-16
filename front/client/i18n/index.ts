@@ -81,7 +81,7 @@ const i18n = {
 		close_button_text: "Закрыть",
 		copied: "Скопировано",
 		publish_message: "Опубликовать",
-		private_message: "Скрыть"
+		private_message: "Скрыть доступ"
 	}
 }
 

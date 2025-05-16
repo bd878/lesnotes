@@ -13,8 +13,8 @@ import {
 	selectMessageActionCreator,
 	unselectMessageActionCreator,
 	clearSelectedActionCreator,
-	publishMessagesActionCreator,
-	privateMessagesActionCreator,
+	publishSelectedActionCreator,
+	privateSelectedActionCreator,
 	deleteSelectedActionCreator,
 	copyLinkActionCreator,
 } from './stackActionCreators'
@@ -62,8 +62,8 @@ export {
 	resetEditMessageActionCreator,
 	deleteMessageActionCreator,
 	copyMessageActionCreator,
-	publishMessagesActionCreator,
-	privateMessagesActionCreator,
+	publishSelectedActionCreator,
+	privateSelectedActionCreator,
 	deleteSelectedActionCreator,
 	copyLinkActionCreator,
 }

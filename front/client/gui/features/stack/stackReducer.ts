@@ -7,8 +7,8 @@ import {
 	DELETE_MESSAGE,
 	DELETE_SELECTED,
 	SELECT_MESSAGE,
-	PUBLISH_MESSAGES,
-	PRIVATE_MESSAGES,
+	PUBLISH_SELECTED,
+	PRIVATE_SELECTED,
 	UNSELECT_MESSAGE,
 	CLEAR_SELECTED,
 	SEND_MESSAGE,
@@ -106,14 +106,14 @@ function messageReducer(messagesState = thread, action) {
 			list: [ ...messagesState.list, action.payload ],
 		}
 	}
-	case PUBLISH_MESSAGES: {
+	case PUBLISH_SELECTED: {
 		return {
 			...messagesState,
 			loading: true,
 			error: "",
 		}
 	}
-	case PRIVATE_MESSAGES: {
+	case PRIVATE_SELECTED: {
 		return {
 			...messagesState,
 			loading: true,

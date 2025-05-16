@@ -30,8 +30,8 @@ import {
 	selectMessageActionCreator,
 	unselectMessageActionCreator,
 	clearSelectedActionCreator,
-	publishMessagesActionCreator,
-	privateMessagesActionCreator,
+	publishSelectedActionCreator,
+	privateSelectedActionCreator,
 	copyLinkActionCreator,
 } from '../../features/stack';
 
@@ -66,8 +66,8 @@ function ThreadContainer(props) {
 		selectMessage,
 		unselectMessage,
 		clearSelected,
-		publishMessages,
-		privateMessages,
+		publishSelected,
+		privateSelected,
 	} = props
 
 	const listRef = useRef(null);
@@ -105,8 +105,8 @@ function ThreadContainer(props) {
 	const onSelectClick = useCallback(selectMessage, [selectMessage])
 	const onUnselectClick = useCallback(unselectMessage, [unselectMessage])
 	const onClearSelectedClick = useCallback(clearSelected, [clearSelected])
-	const onPublishClick = useCallback(publishMessages, [publishMessages])
-	const onPrivateClick = useCallback(privateMessages, [privateMessages])
+	const onPublishClick = useCallback(publishSelected, [publishSelected])
+	const onPrivateClick = useCallback(privateSelected, [privateSelected])
 	const onCopyLinkClick = useCallback(copyLink, [copyLink])
 
 	const onMessageSend = useCallback(payload => {
@@ -167,8 +167,8 @@ const mapStateToProps = (state, {index}) => ({
 })
 
 const mapDispatchToProps = (dispatch, {index}) => ({
-	publishMessages: payload => dispatch(publishMessagesActionCreator(index)(payload)),
-	privateMessages: payload => dispatch(privateMessagesActionCreator(index)(payload)),
+	publishSelected: payload => dispatch(publishSelectedActionCreator(index)(payload)),
+	privateSelected: payload => dispatch(privateSelectedActionCreator(index)(payload)),
 	clearSelected: payload => dispatch(clearSelectedActionCreator(index)(payload)),
 	unselectMessage: payload => dispatch(unselectMessageActionCreator(index)(payload)),
 	selectMessage: payload => dispatch(selectMessageActionCreator(index)(payload)),

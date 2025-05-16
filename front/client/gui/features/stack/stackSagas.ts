@@ -1,7 +1,7 @@
 import {takeLatest,put,call,select} from 'redux-saga/effects'
 import {
-	PUBLISH_MESSAGES,
-	PRIVATE_MESSAGES,
+	PUBLISH_SELECTED,
+	PRIVATE_SELECTED,
 	UPDATE_MESSAGE,
 	FETCH_MESSAGES,
 	SEND_MESSAGE,
@@ -190,18 +190,16 @@ function* copyLink({payload}) {
 	}
 }
 
-function* publishMessages({index, payload}) {
+function* publishSelected({index, payload}) {
 	try {
-		const response = yield call(api.publishMessages, payload.ID)
+		const idsSet = yield select(selectSelectedMessageIDs(index))
+		const response = yield call(api.publishMessages, Array.from(idsSet))
 
 		const messages = yield select(selectMessages(index))
-		let idx = messages.findIndex(({ID}) => ID === payload.ID)
-		if (idx !== -1)
-			messages[idx] = {
-				...messages[idx],
-				private: 0,
-				updateUTCNano: response.updateUTCNano,
-			}
+		messages.filter(({ID}) => idsSet.has(ID)).forEach(msg => {
+			msg.private = false
+			msg.updateUTCNano = response.updateUTCNano
+		})
 
 		if (is.notEmpty(response.error))
 			yield put(messagesFailedActionCreator(index)(response.error))
@@ -212,18 +210,16 @@ function* publishMessages({index, payload}) {
 	}
 }
 
-function* privateMessages({index, payload}) {
+function* privateSelected({index, payload}) {
 	try {
-		const response = yield call(api.privateMessages, payload.ID)
+		const idsSet = yield select(selectSelectedMessageIDs(index))
+		const response = yield call(api.privateMessages, Array.from(idsSet))
 
 		const messages = yield select(selectMessages(index))
-		let idx = messages.findIndex(({ID}) => ID === payload.ID)
-		if (idx !== -1)
-			messages[idx] = {
-				...messages[idx],
-				private: 1,
-				updateUTCNano: response.updateUTCNano,
-			}
+		messages.filter(({ID}) => idsSet.has(ID)).forEach(msg => {
+			msg.private = true
+			msg.updateUTCNano = response.updateUTCNano
+		})
 
 		if (is.notEmpty(response.error))
 			yield put(messagesFailedActionCreator(index)(response.error))
@@ -242,8 +238,8 @@ function* stackSaga() {
 	yield takeLatest(SEND_MESSAGE, sendMessage)
 	yield takeLatest(COPY_MESSAGE, copyMessage)
 	yield takeLatest(COPY_LINK, copyLink)
-	yield takeLatest(PUBLISH_MESSAGES, publishMessages)
-	yield takeLatest(PRIVATE_MESSAGES, privateMessages)
+	yield takeLatest(PUBLISH_SELECTED, publishSelected)
+	yield takeLatest(PRIVATE_SELECTED, privateSelected)
 }
 
 export {stackSaga}

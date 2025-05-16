@@ -2,8 +2,8 @@ import {
 	OPEN_THREAD,
 	CLOSE_THREAD,
 	DESTROY_THREAD,
-	PUBLISH_MESSAGES,
-	PRIVATE_MESSAGES,
+	PUBLISH_SELECTED,
+	PRIVATE_SELECTED,
 
 	UPDATE_MESSAGE,
 	DELETE_MESSAGE,
@@ -143,14 +143,12 @@ export const deleteMessageSucceededActionCreator = index => payload => ({
 	payload,
 })
 
-export const publishMessagesActionCreator = index => payload => ({
-	type: PUBLISH_MESSAGES,
+export const publishSelectedActionCreator = index => () => ({
+	type: PUBLISH_SELECTED,
 	index: index,
-	payload,
 })
 
-export const privateMessagesActionCreator = index => payload => ({
-	type: PRIVATE_MESSAGES,
+export const privateSelectedActionCreator = index => () => ({
+	type: PRIVATE_SELECTED,
 	index: index,
-	payload,
 })

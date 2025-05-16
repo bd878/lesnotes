@@ -15,8 +15,6 @@ function MessageElementComponent(props) {
 		isThreadOpen,
 		isPrivate,
 		onToggleThreadClick,
-		onPublishClick,
-		onPrivateClick,
 	} = props
 
 	return (
@@ -43,12 +41,9 @@ function MessageElementComponent(props) {
 					</Tag>
 				) : null}
 
-				<Tag>{message.text}</Tag>
+				<Tag css="whitespace-pre-wrap">{message.text}</Tag>
 
 				<Tag css="flex flex-row items-start mt-2">
-					{isPrivate
-						? is.func(onPublishClick) ? <Button type="button" css="btn" onClick={onPublishClick} content={i18n("publish_message")} /> : null
-						: is.func(onPrivateClick) ? <Button type="button" css="btn" onClick={onPrivateClick} content={i18n("private_message")} /> : null}
 					{is.func(onToggleThreadClick) ? (
 						<Button
 							type="button"
