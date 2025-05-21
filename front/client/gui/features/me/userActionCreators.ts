@@ -55,26 +55,23 @@ export function loginFailedActionCreator(payload) {
 	}
 }
 
-export function authActionCreator(payload = {}) {
-	return {
-		type: AUTH,
-		payload: payload,
-	}
-}
+export const authActionCreator = (shouldSuccessRedirect, shouldFailRedirect) => ({
+	type: AUTH,
+	shouldSuccessRedirect,
+	shouldFailRedirect,
+})
 
-export function authFailedActionCreator(payload) {
-	return {
-		type: AUTH_FAILED,
-		payload,
-	}
-}
+export const authFailedActionCreator = (payload, shouldRedirect) => ({
+	type: AUTH_FAILED,
+	payload,
+	shouldRedirect,
+})
 
-export function authSucceededActionCreator(payload) {
-	return {
-		type: AUTH_SUCCEEDED,
-		payload,
-	}
-}
+export const authSucceededActionCreator = (payload, shouldRedirect) => ({
+	type: AUTH_SUCCEEDED,
+	payload,
+	shouldRedirect,
+})
 
 export function logoutActionCreator(payload = {}) {
 	return {

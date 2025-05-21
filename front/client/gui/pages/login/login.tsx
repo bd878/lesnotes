@@ -1,6 +1,7 @@
 import React, {Suspense, lazy} from 'react';
 import ReactDOM from 'react-dom/client';
 import Tag from '../../components/Tag';
+import Footer from '../../components/Footer';
 import StoreProvider from '../../providers/Store';
 import AuthProvider from '../../providers/Auth';
 import i18n from '../../../i18n';
@@ -13,7 +14,7 @@ function Login() {
 			<Suspense fallback={i18n("loading")}>
 				<StoreProvider>
 					<AuthProvider inverted={true}>
-						<Tag css="max-w-md min-w-3xs w-full">
+						<Tag css="max-w-md min-w-3xs w-full grow">
 							<Tag el="a" css="italic text-2xl mb-8 inline-block cursor-pointer" href="/" target="_self">{i18n("lesnotes")}</Tag>
 
 							<LoginForm />
@@ -21,6 +22,8 @@ function Login() {
 					</AuthProvider>
 				</StoreProvider>
 			</Suspense>
+
+			<Footer />
 		</Tag>
 	)
 }

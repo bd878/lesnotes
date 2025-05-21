@@ -10,21 +10,21 @@ import {
 } from '../../features/me'
 
 function AuthProvider(props) {
-	const {inverted, auth, isAuth, willRedirect, isLoading, fallback, children} = props
+	const {inverted, auth, isAuth, willRedirect, shouldSuccessRedirect, shouldFailRedirect, isLoading, fallback, children} = props
 
-	useEffect(() => {auth()}, [auth])
+	useEffect(() => {auth(shouldSuccessRedirect, shouldFailRedirect)}, [auth, shouldSuccessRedirect, shouldFailRedirect])
 
 	let shouldAllow = inverted ? !isAuth : isAuth
 
 	return (
 		<>
 			{isLoading
-				? i18n("loading")
+				? <Tag css="grow w-full">{i18n("loading")}</Tag>
 				: willRedirect
 					? null
 					: shouldAllow
 						? children
-						: fallback || <Tag css="m-8 mt-10">{i18n("not_authed")}</Tag>
+						: fallback || <Tag css="m-8 mt-10 grow w-full">{i18n("not_authed")}</Tag>
 			}
 		</>
 	)

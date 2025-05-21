@@ -9,7 +9,6 @@ import {
 	AUTH_SUCCEEDED,
 	LOGIN_SUCCEEDED,
 	REGISTER_SUCCEEDED,
-	WILL_REDIRECT,
 } from './userActions'
 import {
 	logoutActionCreator,
@@ -44,8 +43,8 @@ function* login({payload}: {payload: LoginPayload}) {
 	}
 }
 
-function* redirectHome() {
-	if (location && !location.pathname.includes("/home"))
+function* redirectHome({shouldRedirect = true}) {
+	if (location && !location.pathname.includes("/home") && shouldRedirect)
 		setTimeout(() => {location.href = "/home"})
 	else
 		yield put(resetRedirectActionCreator())
@@ -70,22 +69,22 @@ function* register({payload}: {payload: RegisterPayload}) {
 	}
 }
 
-function* auth() {
+function* auth({shouldSuccessRedirect = true, shouldFailRedirect = true}) {
 	try {
 		const response = yield call(api.auth)
 
 		yield put(willRedirectActionCreator())
 		if (is.notEmpty(response.error))
-			yield put(authFailedActionCreator(response.error))
+			yield put(authFailedActionCreator(response.error, shouldFailRedirect))
 		else
-			yield put(authSucceededActionCreator(response))
+			yield put(authSucceededActionCreator(response, shouldSuccessRedirect))
 	} catch (e) {
-		yield put(authFailedActionCreator(e.message))
+		yield put(authFailedActionCreator(e.message, shouldFailRedirect))
 	}
 }
 
-function* redirectLogin() {
-	if (location && !location.pathname.includes("/login"))
+function* redirectLogin({shouldRedirect = true}) {
+	if (location && !location.pathname.includes("/login") && shouldRedirect)
 		setTimeout(() => {location.href = "/login"})
 	else
 		yield put(resetRedirectActionCreator())

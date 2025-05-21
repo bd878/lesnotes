@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import i18n from '../../../i18n';
 import Tag from '../../components/Tag';
 import HomePage from '../../components/HomePage';
+import Footer from '../../components/Footer';
 import AuthProvider from '../../providers/Auth';
 import StoreProvider from '../../providers/Store';
 import NotificationProvider from '../../providers/Notification';
@@ -21,6 +22,8 @@ function Home() {
 					</AuthProvider>
 				</NotificationProvider>
 			</StoreProvider>
+
+			<Footer />
 		</Tag>
 	)
 }

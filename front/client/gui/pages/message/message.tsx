@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import Tag from '../../components/Tag';
 import i18n from '../../../i18n';
 import MessagePage from '../../components/MessagePage';
+import Footer from '../../components/Footer';
 import StoreProvider from '../../providers/Store';
 
 function Message() {
@@ -11,8 +12,12 @@ function Message() {
 	return (
 		<Tag css="wrap">
 			<StoreProvider>
-				<MessagePage id={id} />
+				<Tag css="grow w-full">
+					<MessagePage id={id} />
+				</Tag>
 			</StoreProvider>
+
+			<Footer />
 		</Tag>
 	)
 }
