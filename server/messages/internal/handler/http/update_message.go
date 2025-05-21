@@ -50,15 +50,6 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 	}
 
 	text := req.PostFormValue("text")
-	if text == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "empty text field",
-		})
-
-		return nil
-	}
 
 	if req.PostFormValue("thread_id") != "" {
 		threadid, err := strconv.Atoi(req.PostFormValue("thread_id"))
@@ -120,6 +111,34 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 		})
 
 		return nil
+	}
+
+	msg, err := h.controller.ReadOneMessage(req.Context(), log, &model.ReadOneMessageParams{
+		ID: int32(id),
+		UserIDs: []int32{user.ID},
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			Status: "error",
+			Description: "failed to read message",
+		})
+
+		return err		
+	}
+
+	if text == "" && threadID == -1 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			Status: "error",
+			Description: "text or thread_id or both must be provided",
+		})
+
+		return nil
+	}
+
+	if text == "" {
+		text = msg.Text
 	}
 
 	resp, err := h.controller.UpdateMessage(req.Context(), log, &model.UpdateMessageParams{

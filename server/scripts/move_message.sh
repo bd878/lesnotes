@@ -16,7 +16,7 @@ cmd=`cat <<HERE
 sed -e "s/%STAGE%/$stage/g" \
 -e "s/%ID%/$id/g" \
 -e "s/%THREAD_ID%/$thread_id/g" ./curl/move_message.curl |
-curl  --trace-ascii /dev/stdout -b $cookie -K -
+curl  -b $cookie -K -
 HERE`
 result=`eval "$cmd"`
 echo $result
