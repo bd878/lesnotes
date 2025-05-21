@@ -1,4 +1,3 @@
 url = https://%STAGE%lesnotes.space/messages/v2/send
--XPOST
 -H "Content-Type: application/json"
--d %JSON%
+--data-binary %JSON%

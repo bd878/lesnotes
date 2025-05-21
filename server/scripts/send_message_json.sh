@@ -5,7 +5,7 @@
 stage=${STAGE:-"stage."}
 cookie=${COOKIE:-"cookie.txt"}
 
-json='{"text":"abc"}'
+json='{\"text\":\"abc\"}'
 
 cmd=`cat <<HERE
 sed -e "s/%STAGE%/$stage/g" \
