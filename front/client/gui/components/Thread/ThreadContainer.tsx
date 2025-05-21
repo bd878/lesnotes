@@ -33,6 +33,7 @@ import {
 	publishSelectedActionCreator,
 	privateSelectedActionCreator,
 	copyLinkActionCreator,
+	moveMessageActionCreator,
 } from '../../features/stack';
 
 function ThreadContainer(props) {
@@ -57,6 +58,7 @@ function ThreadContainer(props) {
 		fetchMessages,
 		sendMessage,
 		updateMessage,
+		moveMessage,
 		resetEditMessage,
 		messageForEdit,
 		setEditMessage,
@@ -98,6 +100,20 @@ function ThreadContainer(props) {
 			openThread(message)
 	}, [closeThread, openThread, hasNextThread])
 
+	const onDrop = useCallback((event) => {
+		event.stopPropagation()
+		const [prevIndex, message] = JSON.parse(event.dataTransfer.getData('text/plain'))
+
+		moveMessage(prevIndex, message)
+
+		return false
+	}, [moveMessage])
+
+	const onDragOver = useCallback(event => {
+		event.preventDefault()
+		return false
+	}, [])
+
 	const onDeleteSelectedClick = useCallback(deleteSelected, [deleteSelected])
 	const onDeleteClick = useCallback(deleteMessage, [deleteMessage])
 	const onEditClick = useCallback(setEditMessage, [setEditMessage])
@@ -120,12 +136,15 @@ function ThreadContainer(props) {
 		<ThreadComponent
 			ref={listRef}
 			css={css}
+			index={index}
 			destroyContent={destroyContent}
 			loadMoreContent={i18n("load_more")}
 			onDestroyClick={destroyThread}
 			onLoadMoreClick={loadMore}
 			isAllLoaded={isLastPage}
 			onScroll={onListScroll}
+			onDrop={onDrop}
+			onDragOver={onDragOver}
 			error={error}
 			loading={isLoading}
 			isAnyMessageSelected={isAnyMessageSelected}
@@ -167,6 +186,7 @@ const mapStateToProps = (state, {index}) => ({
 })
 
 const mapDispatchToProps = (dispatch, {index}) => ({
+	moveMessage: (prevIndex, payload) => dispatch(moveMessageActionCreator(index)(prevIndex, payload)),
 	publishSelected: payload => dispatch(publishSelectedActionCreator(index)(payload)),
 	privateSelected: payload => dispatch(privateSelectedActionCreator(index)(payload)),
 	clearSelected: payload => dispatch(clearSelectedActionCreator(index)(payload)),

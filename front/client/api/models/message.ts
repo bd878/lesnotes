@@ -10,6 +10,7 @@ const empty = {
 	text: "",
 	fileID: 0,
 	file: file(),
+	threadID: 0,
 	private: true,
 }
 
@@ -37,6 +38,7 @@ export default function mapMessageFromProto(message) {
 		userID: message.user_id,
 		text: message.text,
 		private: message.private,
+		threadID: message.thread_id,
 	}
 	if (message.file && message.file_id) {
 		res.fileID = message.file_id

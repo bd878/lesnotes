@@ -21,6 +21,15 @@ const Tag = forwardRef((props, ref) => {
 			onClick={props.onClick}
 			onChange={props.onChange}
 			onScroll={props.onScroll}
+			onMouseDown={props.onMouseDown}
+			onMouseUp={props.onMouseUp}
+			draggable={props.draggable}
+			onDragStart={props.onDragStart}
+			onDragEnd={props.onDragEnd}
+			onDragOver={props.onDragOver}
+			onDragEnter={props.onDragEnter}
+			onDragLeave={props.onDragLeave}
+			onDrop={props.onDrop}
 			encType={props.encType}
 			action={props.action}
 			autoComplete={props.autoComplete}

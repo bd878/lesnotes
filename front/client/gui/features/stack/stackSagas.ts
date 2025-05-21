@@ -5,6 +5,7 @@ import {
 	UPDATE_MESSAGE,
 	FETCH_MESSAGES,
 	SEND_MESSAGE,
+	MOVE_MESSAGE,
 	DELETE_MESSAGE,
 	DELETE_SELECTED,
 	COPY_MESSAGE,
@@ -17,11 +18,14 @@ import {
 	sendMessageSucceededActionCreator,
 	updateMessageSucceededActionCreator,
 	deleteSelectedSucceededActionCreator,
+	moveMessageSucceededActionCreator,
+	unselectMessageActionCreator,
+	setMessagesActionCreator,
 } from './stackActionCreators'
 import {showNotificationActionCreator} from '../notification';
 import * as is from '../../../third_party/is'
 import i18n from '../../../i18n';
-import {selectMessages, selectSelectedMessageIDs, selectMessageForEdit} from './stackSelectors';
+import {selectMessages, selectSelectedMessageIDs, selectMessageForEdit, selectThreadID} from './stackSelectors';
 import {selectBrowser, selectIsMobile, selectIsDesktop} from '../me'
 import api, {getMessageLinkUrl} from '../../../api'
 
@@ -230,6 +234,40 @@ function* privateSelected({index, payload}) {
 	}
 }
 
+function* moveMessage({index, prevIndex, payload}) {
+	try {
+		const idsSet = yield select(selectSelectedMessageIDs(prevIndex))
+		const threadID = yield select(selectThreadID(index))
+
+		const response = yield call(api.moveMessage, payload.ID, threadID)
+		payload.threadID = response.threadID
+
+		const messageForEdit = yield select(selectMessageForEdit(prevIndex))
+		let prevMessages = yield select(selectMessages(prevIndex))
+		let messages = yield select(selectMessages(index))
+
+		prevMessages = prevMessages.filter(({ID}) => ID !== payload.ID)
+		messages = [ ...messages, payload ]
+
+		if (is.notEmpty(response.error)) {
+			yield put(messagesFailedActionCreator(prevIndex)(response.error))
+		} else {
+			if (idsSet.has(payload.ID))
+				yield put(unselectMessageActionCreator(prevIndex)({ID: payload.ID}))
+
+			if (is.notEmpty(messageForEdit) && messageForEdit.ID == payload.ID)
+				yield put(resetEditMessageActionCreator(prevIndex)())
+
+			yield put(setMessagesActionCreator(prevIndex)(prevMessages))
+			yield put(setMessagesActionCreator(index)(messages))
+			yield put(moveMessageSucceededActionCreator(index)())
+		}
+	} catch (e) {
+		console.error(e)
+		yield put(messagesFailedActionCreator(prevIndex)(e.message))
+	}
+}
+
 function* stackSaga() {
 	yield takeLatest(DELETE_MESSAGE, deleteMessage)
 	yield takeLatest(DELETE_SELECTED, deleteSelected)
@@ -240,6 +278,7 @@ function* stackSaga() {
 	yield takeLatest(COPY_LINK, copyLink)
 	yield takeLatest(PUBLISH_SELECTED, publishSelected)
 	yield takeLatest(PRIVATE_SELECTED, privateSelected)
+	yield takeLatest(MOVE_MESSAGE, moveMessage)
 }
 
 export {stackSaga}

@@ -16,6 +16,7 @@ const MainMessage = lazy(() => import("../MainMessage"));
 function ThreadComponent(props, ref) {
 	const {
 		css,
+		index,
 		destroyContent,
 		onDestroyClick,
 		onDeleteSelectedClick,
@@ -28,6 +29,8 @@ function ThreadComponent(props, ref) {
 		onCopyLinkClick,
 		isAllLoaded,
 		onScroll,
+		onDrop,
+		onDragOver,
 		loadMoreContent,
 		error,
 		loading,
@@ -113,10 +116,13 @@ function ThreadComponent(props, ref) {
 				ref={ref}
 				css={"grow w-full flex flex-col overflow-x-hidden"}
 				onScroll={onScroll}
+				onDrop={onDrop}
+				onDragOver={onDragOver}
 			>
 				<MessagesList
 					css="w-full mt-[60px] mb-5"
 					error={error}
+					index={index}
 					messages={messages}
 					messageForEdit={messageForEdit}
 					selectedMessageIDs={selectedMessageIDs}

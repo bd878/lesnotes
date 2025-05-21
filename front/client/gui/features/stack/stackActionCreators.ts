@@ -6,12 +6,14 @@ import {
 	PRIVATE_SELECTED,
 
 	UPDATE_MESSAGE,
+	MOVE_MESSAGE,
 	DELETE_MESSAGE,
 	DELETE_SELECTED,
 	SEND_MESSAGE,
 	COPY_MESSAGE,
 	COPY_LINK,
 	FETCH_MESSAGES,
+	SET_MESSAGES,
 	SELECT_MESSAGE,
 	UNSELECT_MESSAGE,
 	CLEAR_SELECTED,
@@ -20,6 +22,7 @@ import {
 	MESSAGES_FAILED,
 
 	SEND_MESSAGE_SUCCEEDED,
+	MOVE_MESSAGE_SUCCEEDED,
 	FETCH_MESSAGES_SUCCEEDED,
 	UPDATE_MESSAGE_SUCCEEDED,
 	DELETE_MESSAGE_SUCCEEDED,
@@ -151,4 +154,23 @@ export const publishSelectedActionCreator = index => () => ({
 export const privateSelectedActionCreator = index => () => ({
 	type: PRIVATE_SELECTED,
 	index: index,
+})
+
+export const moveMessageActionCreator = index => (prevIndex, payload) => ({
+	type: MOVE_MESSAGE,
+	payload: payload,
+	index: index,
+	prevIndex: prevIndex,
+})
+
+export const moveMessageSucceededActionCreator = index => payload => ({
+	type: MOVE_MESSAGE_SUCCEEDED,
+	index: index,
+	payload: payload,
+})
+
+export const setMessagesActionCreator = index => payload => ({
+	type: SET_MESSAGES,
+	index: index,
+	payload: payload,
 })

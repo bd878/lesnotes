@@ -4,6 +4,7 @@ import {
 	DESTROY_THREAD,
 
 	UPDATE_MESSAGE,
+	MOVE_MESSAGE,
 	DELETE_MESSAGE,
 	DELETE_SELECTED,
 	SELECT_MESSAGE,
@@ -14,12 +15,14 @@ import {
 	SEND_MESSAGE,
 	COPY_MESSAGE,
 	COPY_LINK,
+	SET_MESSAGES,
 	FETCH_MESSAGES,
 	SET_MESSAGE_FOR_EDIT,
 
 	MESSAGES_FAILED,
 
 	SEND_MESSAGE_SUCCEEDED,
+	MOVE_MESSAGE_SUCCEEDED,
 	FETCH_MESSAGES_SUCCEEDED,
 	UPDATE_MESSAGE_SUCCEEDED,
 	DELETE_MESSAGE_SUCCEEDED,
@@ -49,6 +52,12 @@ function messageReducer(messagesState = thread, action) {
 			error: action.payload,
 			loading: false,
 			messageForEdit: {},
+		}
+	}
+	case SET_MESSAGES: {
+		return {
+			...messagesState,
+			list: [ ...action.payload ],
 		}
 	}
 	case FETCH_MESSAGES: {
@@ -161,6 +170,20 @@ function messageReducer(messagesState = thread, action) {
 		return {
 			...messagesState,
 			loading: true,
+			error: "",
+		}
+	}
+	case MOVE_MESSAGE: {
+		return {
+			...messagesState,
+			loading: true,
+			error: "",
+		}
+	}
+	case MOVE_MESSAGE_SUCCEEDED: {
+		return {
+			...messagesState,
+			loading: false,
 			error: "",
 		}
 	}

@@ -17,6 +17,7 @@ import {
 	privateSelectedActionCreator,
 	deleteSelectedActionCreator,
 	copyLinkActionCreator,
+	moveMessageActionCreator,
 } from './stackActionCreators'
 import {
 	selectHasNextThread,
@@ -58,6 +59,7 @@ export {
 	sendMessageActionCreator,
 	fetchMessagesActionCreator,
 	updateMessageActionCreator,
+	moveMessageActionCreator,
 	destroyThreadActionCreator,
 	resetEditMessageActionCreator,
 	deleteMessageActionCreator,
