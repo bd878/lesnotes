@@ -58,6 +58,7 @@ INSERT INTO messages(
 UPDATE messages SET 
 	text = :text,
 	update_utc_nano = :updateUtcNano,
+	thread_id = :threadId,
 	private = :private
 WHERE id = :id AND user_id = :userId
 ;`,
@@ -378,6 +379,8 @@ func (r *Repository) Update(ctx context.Context, log *logger.Logger, params *mod
 		tx *sql.Tx
 		err error
 		private int32
+		threadIdCol sql.NullInt32
+		threadID int32
 	)
 
 	tx, err = r.pool.BeginTx(ctx, &sql.TxOptions{})
@@ -397,7 +400,7 @@ func (r *Repository) Update(ctx context.Context, log *logger.Logger, params *mod
 		}
 	}()
 
-	err = tx.QueryRowContext(ctx, "SELECT private FROM messages WHERE id = $1 LIMIT 1", params.ID).Scan(&private)
+	err = tx.QueryRowContext(ctx, "SELECT private, thread_id FROM messages WHERE id = $1 LIMIT 1", params.ID).Scan(&private, &threadIdCol)
 	if err != nil {
 		return nil, err
 	}
@@ -408,11 +411,20 @@ func (r *Repository) Update(ctx context.Context, log *logger.Logger, params *mod
 		private = 1
 	}
 
+	if threadIdCol.Valid {
+		threadID = threadIdCol.Int32
+	}
+
+	if params.ThreadID != -1 {
+		threadID = params.ThreadID
+	}
+
 	_, err = tx.StmtContext(ctx, r.updateStmt).ExecContext(ctx, 
 		sql.Named("text", params.Text),
 		sql.Named("updateUtcNano", params.UpdateUTCNano),
 		sql.Named("id", params.ID),
 		sql.Named("userId", params.UserID),
+		sql.Named("threadId", threadID),
 		sql.Named("private", private),
 	)
 	if err != nil {

@@ -75,6 +75,7 @@ func (f *fsm) applyUpdate(raw []byte) interface{} {
 		ID: cmd.Id,
 		UserID: cmd.UserId,
 		FileID: cmd.FileId,
+		ThreadID: cmd.ThreadId,
 		Text: cmd.Text,
 		UpdateUTCNano: cmd.UpdateUtcNano,
 		Private: cmd.Private,

@@ -168,6 +168,7 @@ type FileData struct {
 	unknownFields protoimpl.UnknownFields
 
 	// Types that are assignable to Data:
+	//
 	//	*FileData_File
 	//	*FileData_Chunk
 	Data isFileData_Data `protobuf_oneof:"data"`

@@ -370,6 +370,10 @@ components:
             file_id:
               type: string
               example: ""
+            thread_id:
+              type: integer
+              required: false
+
         - type: object
           properties:
             public:
@@ -381,6 +385,9 @@ components:
             file:
               type: string
               format: binary
+            thread_id:
+              type: integer
+              required: false
 
     sendMessage:
       oneOf:

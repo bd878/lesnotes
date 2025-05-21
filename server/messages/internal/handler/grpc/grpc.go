@@ -58,6 +58,7 @@ func (h *Handler) UpdateMessage(ctx context.Context, req *api.UpdateMessageReque
 	res, err := h.controller.UpdateMessage(ctx, logger.Default(), &model.UpdateMessageParams{
 		ID: req.Id,
 		UserID: req.UserId,
+		ThreadID: req.ThreadId,
 		Text: req.Text,
 		UpdateUTCNano: updateUTCNano,
 		Private: req.Private,

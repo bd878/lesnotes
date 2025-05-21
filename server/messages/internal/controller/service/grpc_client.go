@@ -195,6 +195,7 @@ func (s *Messages) UpdateMessage(ctx context.Context, log *logger.Logger, params
 		FileId: params.FileID,
 		Text: params.Text,
 		Private: params.Private,
+		ThreadId: params.ThreadID,
 	})
 	if err != nil {
 		return nil, err 

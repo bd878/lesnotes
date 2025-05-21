@@ -61,6 +61,7 @@ func (m *DistributedMessages) UpdateMessage(ctx context.Context, log *logger.Log
 		Id: params.ID,
 		UserId: params.UserID,
 		FileId: params.FileID,
+		ThreadId: params.ThreadID,
 		Text:   params.Text,
 		UpdateUtcNano: params.UpdateUTCNano,
 		Private: params.Private,

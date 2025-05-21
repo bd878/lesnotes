@@ -16,9 +16,10 @@ message UpdateCommand {
 	int32   id = 1;
 	int32   user_id = 2;
 	int32   file_id = 3;
-	string  text = 4;
-	int64   update_utc_nano = 5;
-	int32   private = 6;
+	int32   thread_id = 4;
+	string  text = 5;
+	int64   update_utc_nano = 6;
+	int32   private = 7;
 }
 
 message UpdateCommandResult {

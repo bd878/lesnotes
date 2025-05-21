@@ -191,6 +191,7 @@ type GetUserRequest struct {
 	unknownFields protoimpl.UnknownFields
 
 	// Types that are assignable to SearchKey:
+	//
 	//	*GetUserRequest_Id
 	//	*GetUserRequest_Token
 	SearchKey isGetUserRequest_SearchKey `protobuf_oneof:"search_key"`
