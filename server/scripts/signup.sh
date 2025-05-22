@@ -2,6 +2,7 @@
 
 # Signs user up
 
+stage=${STAGE:-"stage."}
 name=${NAME:?"Usage: env NAME= PASSWORD= ./signup.sh"}
 password=${PASSWORD:?"Usage: env NAME= PASSWORD= ./signup.sh"}
 
