@@ -14,7 +14,7 @@ async function moveMessage(id, threadID) {
 	}
 
 	const form = new FormData()
-	if (is.notEmpty(threadID))
+	if (is.notUndef(threadID))
 		form.append("thread_id", threadID);
 
 	try {

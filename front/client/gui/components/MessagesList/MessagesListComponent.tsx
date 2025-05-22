@@ -13,7 +13,6 @@ function MessagesListComponent(props) {
 		index,
 		messages,
 		selectedMessageIDs,
-		loading,
 		error,
 		messageForEdit,
 		checkMyThreadOpen,
@@ -29,7 +28,6 @@ function MessagesListComponent(props) {
 
 	return (
 		<Tag css={css}>
-			{loading ? i18n("loading") : null}
 			{error ? null : (
 				<List el="ul" css="w-full">
 					{messages.map(message => {

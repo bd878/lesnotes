@@ -110,9 +110,18 @@ function ThreadContainer(props) {
 	}, [moveMessage])
 
 	const onDragOver = useCallback(event => {
+		const [prevIndex, message] = JSON.parse(event.dataTransfer.getData('text/plain'))
+
+		if (prevIndex == index)
+			return false
+
+		if (threadID === message.ID)
+			return false
+
 		event.preventDefault()
+
 		return false
-	}, [])
+	}, [index, threadID])
 
 	const onDeleteSelectedClick = useCallback(deleteSelected, [deleteSelected])
 	const onDeleteClick = useCallback(deleteMessage, [deleteMessage])

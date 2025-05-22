@@ -37,7 +37,7 @@ export default function mapMessageFromProto(message) {
 		updateUTCNano: updateUTCNano,
 		userID: message.user_id,
 		text: message.text,
-		private: message.private,
+		private: Boolean(message.private),
 		threadID: message.thread_id,
 	}
 	if (message.file && message.file_id) {

@@ -114,11 +114,12 @@ function ThreadComponent(props, ref) {
 
 			<Tag
 				ref={ref}
-				css={"grow w-full flex flex-col overflow-x-hidden"}
+				css={"grow w-full flex flex-col overflow-x-hidden relative"}
 				onScroll={onScroll}
 				onDrop={onDrop}
 				onDragOver={onDragOver}
 			>
+				{loading ? (<Tag css="absolute mb-2 top-[20px]">{i18n("loading")}</Tag>) : null}
 				<MessagesList
 					css="w-full mt-[60px] mb-5"
 					error={error}
@@ -126,7 +127,6 @@ function ThreadComponent(props, ref) {
 					messages={messages}
 					messageForEdit={messageForEdit}
 					selectedMessageIDs={selectedMessageIDs}
-					loading={loading}
 					isAnyThreadOpen={isAnyOpen}
 					checkMyThreadOpen={checkMyThreadOpen}
 					onCopyLinkClick={onCopyLinkClick}
@@ -139,7 +139,7 @@ function ThreadComponent(props, ref) {
 				/>
 			</Tag>
 
-			<Tag css="w-full shadow-[0_-10px_10px_-10px_rgba(0,0,0,0.4)]">
+			<Tag css="w-full z-1 shadow-[0_-10px_10px_-10px_rgba(0,0,0,0.4)]">
 				<MessageForm
 					key={is.notEmpty(messageForEdit) ? messageForEdit.ID : null}
 					send={send}

@@ -29,7 +29,7 @@ function MessageFormComponent(props) {
 			<Tag css="w-full border rounded-sm focus-within:outline focus-within:outline-offset-2">
 				<FormField
 					required
-					css="focus:outline-none whitespace-pre w-full resize-none px-2 py-1"
+					css="focus:outline-none w-full resize-none px-2 py-1"
 					el="textarea"
 					name="text"
 					type="input"
