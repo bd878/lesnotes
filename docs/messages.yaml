@@ -41,7 +41,7 @@ paths:
       description: |
         Send a message and replicate throughout the cluster,
         message
-      operationId: sendMessage
+      operationId: sendMessageJson
       requestBody:
         content:
           application/json:

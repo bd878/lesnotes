@@ -79,6 +79,31 @@ paths:
               schema:
                 $ref: '#/components/schemas/signupErr'
 
+  /users/v2/signup:
+    post:
+      summary: Registers user
+      description: |
+        Records user & password in database
+      operationId: signupUserJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/signupUserJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/signupOk'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/signupErr'
+
   /users/v1/login:
     post:
       summary: Logs in user
@@ -90,6 +115,31 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/loginUser'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/loginOk'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/loginErr'
+
+  /users/v2/login:
+    post:
+      summary: Logs in user via json api
+      description: |
+        Verifies that user is valid with given user & password
+      operationId: loginUserJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/loginUserJson'
       responses:
         "200":
           description: OK
@@ -195,11 +245,29 @@ components:
         type: string
         default: "authenticated"
 
+    loginUserJson:
+      type: object
+      name:
+        type: string
+        example: test
+      password:
+        type: string
+        example: "12345"
+
     loginUser:
       type: object
       name:
         type: string
         example: test
+      password:
+        type: string
+        example: "12345"
+
+    signupUserJson:
+      type: object
+      name:
+        type: string
+        example: text
       password:
         type: string
         example: "12345"
