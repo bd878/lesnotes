@@ -26,9 +26,10 @@ func New(repo Repository) *Controller {
 	return &Controller{repo}
 }
 
-func (c *Controller) AddUser(ctx context.Context, log *logger.Logger, params *model.AddUserParams) error {
+func (c *Controller) AddUser(ctx context.Context, log *logger.Logger, params *model.AddUserParams) (int32, error) {
 	params.User.ID = utils.RandomID()
-	return c.repo.AddUser(ctx, log, params.User)
+	err := c.repo.AddUser(ctx, log, params.User)
+	return params.User.ID, err
 }
 
 func (c *Controller) HasUser(ctx context.Context, log *logger.Logger, params *model.HasUserParams) (bool, error) {

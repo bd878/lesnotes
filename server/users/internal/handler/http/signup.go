@@ -51,7 +51,7 @@ func (h *Handler) Signup(log *logger.Logger, w http.ResponseWriter, req *http.Re
 
 	token, expiresUtcNano := createToken(w, h.config.CookieDomain)
 
-	err = h.controller.AddUser(req.Context(), log, &model.AddUserParams{
+	_, err = h.controller.AddUser(req.Context(), log, &model.AddUserParams{
 		User: &model.User{
 			Name:                  userName,
 			Password:              password,

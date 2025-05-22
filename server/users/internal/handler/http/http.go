@@ -14,7 +14,7 @@ import (
 )
 
 type Controller interface {
-	AddUser(ctx context.Context, log *logger.Logger, params *model.AddUserParams) error
+	AddUser(ctx context.Context, log *logger.Logger, params *model.AddUserParams) (int32, error)
 	HasUser(ctx context.Context, log *logger.Logger, params *model.HasUserParams) (bool, error)
 	RefreshToken(ctx context.Context, log *logger.Logger, params *model.RefreshTokenParams) error
 	DeleteToken(ctx context.Context, log *logger.Logger, params *model.DeleteTokenParams) error

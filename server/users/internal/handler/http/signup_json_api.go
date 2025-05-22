@@ -84,7 +84,7 @@ func (h *Handler) SignupJsonAPI(log *logger.Logger, w http.ResponseWriter, req *
 	user.Token = token
 	user.ExpiresUTCNano = expiresUtcNano
 
-	err = h.controller.AddUser(req.Context(), log, &model.AddUserParams{
+	id, err := h.controller.AddUser(req.Context(), log, &model.AddUserParams{
 		User: &user,
 	})
 	if err != nil {
@@ -97,9 +97,14 @@ func (h *Handler) SignupJsonAPI(log *logger.Logger, w http.ResponseWriter, req *
 		return err
 	}
 
-	json.NewEncoder(w).Encode(servermodel.ServerResponse{
-		Status: "ok",
-		Description: "created",
+	json.NewEncoder(w).Encode(&model.SignupJsonUserServerResponse{
+		ServerResponse: servermodel.ServerResponse{
+			Status: "ok",
+			Description: "created",
+		},
+		Token: token,
+		ExpiresUTCNano: expiresUtcNano,
+		ID: id,
 	})
 
 	return nil

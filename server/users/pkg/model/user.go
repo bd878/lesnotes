@@ -25,4 +25,11 @@ type (
 		model.ServerResponse
 		User             User             `json:"user"`
 	}
+
+	SignupJsonUserServerResponse struct {
+		model.ServerResponse
+		ID               int32            `json:"id"`
+		Token            string           `json:"token,omitempty"`
+		ExpiresUTCNano   int64            `json:"expires_utc_nano,omitempty"`
+	}
 )

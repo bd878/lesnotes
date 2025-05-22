@@ -96,7 +96,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/signupOk'
+                $ref: '#/components/schemas/signupOkJson'
         "4XX":
           description: error
           content:
@@ -313,6 +313,21 @@ components:
       description:
         type: string
         default: ""
+
+    signupOkJson:
+      type: object
+      status:
+        type: string
+        default: "ok"
+      description:
+        type: string
+        default: "created"
+      token:
+        type: string
+        example: "AAA"
+      id:
+        type: integer
+        example: 1
 
     signupOk:
       type: object
