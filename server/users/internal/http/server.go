@@ -8,12 +8,14 @@ import (
 	httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
 	repository "github.com/bd878/gallery/server/users/internal/repository/sqlite"
 	httphandler "github.com/bd878/gallery/server/users/internal/handler/http"
+	messagesgateway "github.com/bd878/gallery/server/users/internal/gateway/messages/grpc"
 	controller "github.com/bd878/gallery/server/users/internal/controller/users"
 )
 
 type Config struct {
 	Addr             string
 	RpcAddr          string
+	MessagesServiceAddr string
 	DataPath         string
 	CookieDomain     string
 	DBPath           string
@@ -29,11 +31,13 @@ func New(cfg Config) *Server {
 
 	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log)
 
+	messagesGateway := messagesgateway.New(cfg.MessagesServiceAddr)
+
 	repo := repository.New(cfg.DBPath)
 	grpcCtrl := controller.New(repo)
 	handler := httphandler.New(grpcCtrl, httphandler.Config{
 		CookieDomain:    cfg.CookieDomain,
-	})
+	}, messagesGateway)
 
 	mux.Handle("/users/v1/get", middleware.Build(handler.GetUser))
 	mux.Handle("/users/v1/signup", middleware.Build(handler.Signup))
@@ -42,6 +46,7 @@ func New(cfg Config) *Server {
 	mux.Handle("/users/v2/login",  middleware.Build(handler.LoginJsonAPI))
 	mux.Handle("/users/v1/logout", middleware.Build(handler.Logout))
 	mux.Handle("/users/v1/auth",   middleware.Build(handler.Auth))
+	mux.Handle("/users/v2/delete", middleware.Build(handler.DeleteJsonAPI))
 	mux.Handle("/users/v1/status", middleware.Build(handler.Status))
 
 	server := &Server{

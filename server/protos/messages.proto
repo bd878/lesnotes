@@ -9,6 +9,7 @@ service Messages {
 	rpc SaveMessage(SaveMessageRequest) returns (SaveMessageResponse) {}
 	rpc DeleteMessage(DeleteMessageRequest) returns (DeleteMessageResponse) {}
 	rpc DeleteMessages(DeleteMessagesRequest) returns (DeleteMessagesResponse) {}
+	rpc DeleteAllUserMessages(DeleteAllUserMessagesRequest) returns (DeleteAllUserMessagesResponse) {}
 	rpc PublishMessages(PublishMessagesRequest) returns (PublishMessagesResponse) {}
 	rpc PrivateMessages(PrivateMessagesRequest) returns (PrivateMessagesResponse) {}
 	rpc UpdateMessage(UpdateMessageRequest) returns (UpdateMessageResponse) {}
@@ -79,6 +80,12 @@ message SaveMessageResponse {
 	int64    update_utc_nano = 3;
 	bool     private = 4;
 }
+
+message DeleteAllUserMessagesRequest {
+	int32    user_id = 1;
+}
+
+message DeleteAllUserMessagesResponse {}
 
 message DeleteMessageRequest {
 	int32    id = 1;

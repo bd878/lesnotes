@@ -39,6 +39,7 @@ func main() {
 		DataPath:         cfg.DataPath,
 		DBPath:           cfg.DBPath,
 		CookieDomain:     cfg.CookieDomain,
+		MessagesServiceAddr: cfg.MessagesServiceAddr,
 	})
 
 	var wg sync.WaitGroup

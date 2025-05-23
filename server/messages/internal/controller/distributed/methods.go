@@ -86,6 +86,20 @@ func (m *DistributedMessages) UpdateMessage(ctx context.Context, log *logger.Log
 	}
 }
 
+func (m *DistributedMessages) DeleteAllUserMessages(ctx context.Context, log *logger.Logger, params *model.DeleteAllUserMessagesParams) error {
+	cmd, _ := proto.Marshal(&DeleteAllUserMessagesCommand{
+		UserId: params.UserID,
+	})
+
+	_, err := m.apply(ctx, DeleteAllUserMessagesRequest, cmd)
+	if err != nil {
+		log.Errorln("raft failed to apply delete all messages")
+		return err
+	}
+
+	return nil
+}
+
 func (m *DistributedMessages) DeleteMessage(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error {
 	cmd, _ := proto.Marshal(&DeleteCommand{
 		Id: params.ID,

@@ -17,6 +17,7 @@ type Repository struct {
 	insertStmt   *sql.Stmt
 	updateStmt   *sql.Stmt
 	deleteStmt   *sql.Stmt
+	deleteAllUserMessagesStmt *sql.Stmt
 	publishStmt  *sql.Stmt
 	privateStmt  *sql.Stmt
 	ascStmt *sql.Stmt
@@ -77,6 +78,12 @@ UPDATE messages SET
 	private = 1,
 	update_utc_nano = :updateUtcNano
 WHERE id = :id AND user_id = :userId
+;`,
+	))
+
+	deleteAllUserMessagesStmt := utils.Must(pool.Prepare(`
+DELETE FROM messages
+WHERE user_id = :user_id
 ;`,
 	))
 
@@ -220,6 +227,7 @@ LIMIT :limit OFFSET :offset
 		descThreadPrivateStmt: descThreadPrivateStmt,
 		ascThreadNotPrivateStmt: ascThreadNotPrivateStmt,
 		descThreadNotPrivateStmt: descThreadNotPrivateStmt,
+		deleteAllUserMessagesStmt: deleteAllUserMessagesStmt,
 	}
 }
 
@@ -329,6 +337,43 @@ func (r *Repository) Private(ctx context.Context, log *logger.Logger, params *mo
 	}
 
 	return
+}
+
+func (r *Repository) DeleteAllUserMessages(ctx context.Context, log *logger.Logger, params *model.DeleteAllUserMessagesParams) error {
+	var (
+		tx *sql.Tx
+		err error
+	)
+
+	tx, err = r.pool.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		log.Errorln("failed to start transaction")
+		return err
+	}
+
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback()
+			panic(p)
+		case err != nil:
+			rErr := tx.Rollback()
+			if rErr != nil {
+				log.Errorw("failed to rollback delete all messages stmt", "error", rErr)
+			}
+		default:
+			err = tx.Commit()
+		}
+	}()
+
+	_, err = tx.StmtContext(ctx, r.deleteAllUserMessagesStmt).ExecContext(ctx, sql.Named("userId", params.UserID))
+	if err != nil {
+		log.Errorln("failed to delete all user messages")
+		return err
+	}
+
+	return nil
 }
 
 func (r *Repository) Delete(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error {

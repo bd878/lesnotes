@@ -19,16 +19,17 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Messages_GetServers_FullMethodName         = "/messages.v1.Messages/GetServers"
-	Messages_SaveMessage_FullMethodName        = "/messages.v1.Messages/SaveMessage"
-	Messages_DeleteMessage_FullMethodName      = "/messages.v1.Messages/DeleteMessage"
-	Messages_DeleteMessages_FullMethodName     = "/messages.v1.Messages/DeleteMessages"
-	Messages_PublishMessages_FullMethodName    = "/messages.v1.Messages/PublishMessages"
-	Messages_PrivateMessages_FullMethodName    = "/messages.v1.Messages/PrivateMessages"
-	Messages_UpdateMessage_FullMethodName      = "/messages.v1.Messages/UpdateMessage"
-	Messages_ReadOneMessage_FullMethodName     = "/messages.v1.Messages/ReadOneMessage"
-	Messages_ReadAllMessages_FullMethodName    = "/messages.v1.Messages/ReadAllMessages"
-	Messages_ReadThreadMessages_FullMethodName = "/messages.v1.Messages/ReadThreadMessages"
+	Messages_GetServers_FullMethodName            = "/messages.v1.Messages/GetServers"
+	Messages_SaveMessage_FullMethodName           = "/messages.v1.Messages/SaveMessage"
+	Messages_DeleteMessage_FullMethodName         = "/messages.v1.Messages/DeleteMessage"
+	Messages_DeleteMessages_FullMethodName        = "/messages.v1.Messages/DeleteMessages"
+	Messages_DeleteAllUserMessages_FullMethodName = "/messages.v1.Messages/DeleteAllUserMessages"
+	Messages_PublishMessages_FullMethodName       = "/messages.v1.Messages/PublishMessages"
+	Messages_PrivateMessages_FullMethodName       = "/messages.v1.Messages/PrivateMessages"
+	Messages_UpdateMessage_FullMethodName         = "/messages.v1.Messages/UpdateMessage"
+	Messages_ReadOneMessage_FullMethodName        = "/messages.v1.Messages/ReadOneMessage"
+	Messages_ReadAllMessages_FullMethodName       = "/messages.v1.Messages/ReadAllMessages"
+	Messages_ReadThreadMessages_FullMethodName    = "/messages.v1.Messages/ReadThreadMessages"
 )
 
 // MessagesClient is the client API for Messages service.
@@ -39,6 +40,7 @@ type MessagesClient interface {
 	SaveMessage(ctx context.Context, in *SaveMessageRequest, opts ...grpc.CallOption) (*SaveMessageResponse, error)
 	DeleteMessage(ctx context.Context, in *DeleteMessageRequest, opts ...grpc.CallOption) (*DeleteMessageResponse, error)
 	DeleteMessages(ctx context.Context, in *DeleteMessagesRequest, opts ...grpc.CallOption) (*DeleteMessagesResponse, error)
+	DeleteAllUserMessages(ctx context.Context, in *DeleteAllUserMessagesRequest, opts ...grpc.CallOption) (*DeleteAllUserMessagesResponse, error)
 	PublishMessages(ctx context.Context, in *PublishMessagesRequest, opts ...grpc.CallOption) (*PublishMessagesResponse, error)
 	PrivateMessages(ctx context.Context, in *PrivateMessagesRequest, opts ...grpc.CallOption) (*PrivateMessagesResponse, error)
 	UpdateMessage(ctx context.Context, in *UpdateMessageRequest, opts ...grpc.CallOption) (*UpdateMessageResponse, error)
@@ -89,6 +91,16 @@ func (c *messagesClient) DeleteMessages(ctx context.Context, in *DeleteMessagesR
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(DeleteMessagesResponse)
 	err := c.cc.Invoke(ctx, Messages_DeleteMessages_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *messagesClient) DeleteAllUserMessages(ctx context.Context, in *DeleteAllUserMessagesRequest, opts ...grpc.CallOption) (*DeleteAllUserMessagesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteAllUserMessagesResponse)
+	err := c.cc.Invoke(ctx, Messages_DeleteAllUserMessages_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -163,6 +175,7 @@ type MessagesServer interface {
 	SaveMessage(context.Context, *SaveMessageRequest) (*SaveMessageResponse, error)
 	DeleteMessage(context.Context, *DeleteMessageRequest) (*DeleteMessageResponse, error)
 	DeleteMessages(context.Context, *DeleteMessagesRequest) (*DeleteMessagesResponse, error)
+	DeleteAllUserMessages(context.Context, *DeleteAllUserMessagesRequest) (*DeleteAllUserMessagesResponse, error)
 	PublishMessages(context.Context, *PublishMessagesRequest) (*PublishMessagesResponse, error)
 	PrivateMessages(context.Context, *PrivateMessagesRequest) (*PrivateMessagesResponse, error)
 	UpdateMessage(context.Context, *UpdateMessageRequest) (*UpdateMessageResponse, error)
@@ -190,6 +203,9 @@ func (UnimplementedMessagesServer) DeleteMessage(context.Context, *DeleteMessage
 }
 func (UnimplementedMessagesServer) DeleteMessages(context.Context, *DeleteMessagesRequest) (*DeleteMessagesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteMessages not implemented")
+}
+func (UnimplementedMessagesServer) DeleteAllUserMessages(context.Context, *DeleteAllUserMessagesRequest) (*DeleteAllUserMessagesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteAllUserMessages not implemented")
 }
 func (UnimplementedMessagesServer) PublishMessages(context.Context, *PublishMessagesRequest) (*PublishMessagesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PublishMessages not implemented")
@@ -298,6 +314,24 @@ func _Messages_DeleteMessages_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MessagesServer).DeleteMessages(ctx, req.(*DeleteMessagesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Messages_DeleteAllUserMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteAllUserMessagesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MessagesServer).DeleteAllUserMessages(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Messages_DeleteAllUserMessages_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MessagesServer).DeleteAllUserMessages(ctx, req.(*DeleteAllUserMessagesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -432,6 +466,10 @@ var Messages_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteMessages",
 			Handler:    _Messages_DeleteMessages_Handler,
+		},
+		{
+			MethodName: "DeleteAllUserMessages",
+			Handler:    _Messages_DeleteAllUserMessages_Handler,
 		},
 		{
 			MethodName: "PublishMessages",

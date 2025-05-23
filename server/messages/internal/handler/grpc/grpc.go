@@ -14,6 +14,7 @@ type Controller interface {
 	SaveMessage(ctx context.Context, log *logger.Logger, message *model.Message) error
 	UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (*model.UpdateMessageResult, error)
 	DeleteMessage(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error
+	DeleteAllUserMessages(ctx context.Context, log *logger.Logger, params *model.DeleteAllUserMessagesParams) error
 	DeleteMessages(ctx context.Context, log *logger.Logger, params *model.DeleteMessagesParams) (*model.DeleteMessagesResult, error)
 	PublishMessages(ctx context.Context, log *logger.Logger, params *model.PublishMessagesParams) (*model.PublishMessagesResult, error)
 	PrivateMessages(ctx context.Context, log *logger.Logger, params *model.PrivateMessagesParams) (*model.PrivateMessagesResult, error)
@@ -50,6 +51,17 @@ func (h *Handler) SaveMessage(ctx context.Context, req *api.SaveMessageRequest) 
 		UpdateUtcNano: req.Message.UpdateUtcNano,
 		Private: req.Message.Private,
 	}, nil
+}
+
+func (h *Handler) DeleteAllUserMessages(ctx context.Context, req *api.DeleteAllUserMessagesRequest) (*api.DeleteAllUserMessagesResponse, error) {
+	err := h.controller.DeleteAllUserMessages(ctx, logger.Default(), &model.DeleteAllUserMessagesParams{
+		UserID: req.UserId,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &api.DeleteAllUserMessagesResponse{}, nil
 }
 
 func (h *Handler) UpdateMessage(ctx context.Context, req *api.UpdateMessageRequest) (*api.UpdateMessageResponse, error) {

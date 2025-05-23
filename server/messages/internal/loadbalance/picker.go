@@ -51,6 +51,7 @@ func (p *Picker) Pick(info balancer.PickInfo) (
 	if strings.Contains(info.FullMethodName, "SaveMessage") ||
 		 strings.Contains(info.FullMethodName, "DeleteMessage") ||
 		 strings.Contains(info.FullMethodName, "DeleteMessages") ||
+		 strings.Contains(info.FullMethodName, "DeleteAllUserMessages") ||
 		 strings.Contains(info.FullMethodName, "PublishMessages") ||
 		 strings.Contains(info.FullMethodName, "PrivateMessages") ||
 		 strings.Contains(info.FullMethodName, "UpdateMessage") ||

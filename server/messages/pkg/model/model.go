@@ -49,6 +49,10 @@ type PublishMessagesParams struct {
 	UpdateUTCNano     int64
 }
 
+type DeleteAllUserMessagesParams struct {
+	UserID            int32
+}
+
 type PrivateMessagesParams struct {
 	IDs               []int32
 	UserID            int32

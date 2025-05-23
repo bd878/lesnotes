@@ -15,6 +15,17 @@ type (
 		ExpiresUTCNano   int64            `json:"expires_utc_nano,omitempty"`
 	}
 
+	DeleteUserJsonRequest struct {
+		Token            string           `json:"token"`
+		Name             string           `json:"name"`
+		Password         string           `json:"password"`
+	}
+
+	DeleteUserJsonServerResponse struct {
+		model.ServerResponse
+		Expired          bool             `json:"expired,omitempty"`
+	}
+
 	ServerAuthorizeResponse struct {
 		model.ServerResponse
 		Expired          bool             `json:"expired"`
@@ -29,7 +40,7 @@ type (
 	SignupJsonUserServerResponse struct {
 		model.ServerResponse
 		ID               int32            `json:"id"`
-		Token            string           `json:"token,omitempty"`
-		ExpiresUTCNano   int64            `json:"expires_utc_nano,omitempty"`
+		Token            string           `json:"token"`
+		ExpiresUTCNano   int64            `json:"expires_utc_nano"`
 	}
 )

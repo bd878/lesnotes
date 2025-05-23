@@ -32,10 +32,16 @@ message DeleteCommand {
 	int32   user_id = 2;
 }
 
+message DeleteAllUserMessagesCommand {
+	int32   user_id = 1;
+}
+
 message DeleteCommandResult {
 	bool    ok = 1;
 	string  explain = 2;
 }
+
+message DeleteAllUserMessagesCommandResult {}
 
 message PublishCommand {
 	repeated int32   ids = 1;

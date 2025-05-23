@@ -185,10 +185,48 @@ paths:
               type: object
               status:
                 type: string
-                default: "fail"
+                default: "error"
               description:
                 type: string
                 default: "failed to logout"
+
+  /users/v2/delete:
+    post:
+      summary: Deletes user via json api
+      description: |
+        Deletes user and all releated notes, public and private
+      operationId: deleteUserJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/deleteUserJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              type: object
+              status:
+                type: string
+                default: "ok"
+              description:
+                type: string
+                default: ""
+        "4XX":
+          description: error
+          content:
+            application/json:
+              type: object
+              status:
+                type: string
+                default: "error"
+              description:
+                type: string
+                default: "failed to delete"
+              expired:
+                type: boolean
+                default: true
 
   /users/v1/status:
     get:
@@ -244,6 +282,18 @@ components:
       description:
         type: string
         default: "authenticated"
+
+    deleteUserJson:
+      type: object
+      token:
+        type: string
+        example: "AAAAAA"
+      name:
+        type: string
+        example: "abc"
+      password:
+        type: string
+        example: "pass"
 
     loginUserJson:
       type: object

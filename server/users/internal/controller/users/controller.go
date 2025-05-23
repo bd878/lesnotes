@@ -13,6 +13,7 @@ import (
 type Repository interface {
 	AddUser(ctx context.Context, log *logger.Logger, user *model.User) error
 	HasUser(ctx context.Context, log *logger.Logger, user *model.User) (bool, error)
+	DeleteUser(ctx context.Context, log *logger.Logger, params *model.DeleteUserParams) error
 	RefreshToken(ctx context.Context, log *logger.Logger, user *model.User) error
 	DeleteToken(ctx context.Context,  log *logger.Logger, params *model.DeleteTokenParams) error
 	GetUser(ctx context.Context, log *logger.Logger, params *model.GetUserParams) (*model.User, error)
@@ -42,6 +43,10 @@ func (c *Controller) RefreshToken(ctx context.Context, log *logger.Logger, param
 
 func (c *Controller) DeleteToken(ctx context.Context, log *logger.Logger, params *model.DeleteTokenParams) error {
 	return c.repo.DeleteToken(ctx, log, params)
+}
+
+func (c *Controller) DeleteUser(ctx context.Context, log *logger.Logger, params *model.DeleteUserParams) error {
+	return c.repo.DeleteUser(ctx, log, params)
 }
 
 func (c *Controller) GetUser(ctx context.Context, log *logger.Logger, params *model.GetUserParams) (*model.User, error) {

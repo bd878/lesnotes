@@ -8,4 +8,5 @@ const (
 	DeleteRequest
 	PublishRequest
 	PrivateRequest
+	DeleteAllUserMessagesRequest
 )

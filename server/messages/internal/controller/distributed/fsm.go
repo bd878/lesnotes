@@ -17,6 +17,7 @@ type Repository interface {
 	Publish(ctx context.Context, log *logger.Logger, params *model.PublishMessagesParams) error
 	Private(ctx context.Context, log *logger.Logger, params *model.PrivateMessagesParams) error
 	Read(ctx context.Context, log *logger.Logger, params *model.ReadOneMessageParams) (*model.Message, error)
+	DeleteAllUserMessages(ctx context.Context, log *logger.Logger, params *model.DeleteAllUserMessagesParams) error
 	ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadMessagesParams) (*model.ReadMessagesResult, error)
 	ReadThreadMessages(ctx context.Context, log *logger.Logger, params *model.ReadThreadMessagesParams) (*model.ReadThreadMessagesResult, error)
 	Truncate(ctx context.Context, log *logger.Logger) error
@@ -43,6 +44,8 @@ func (f *fsm) Apply(record *raft.Log) interface{} {
 		return f.applyAppend(buf[1:])
 	case UpdateRequest:
 		return f.applyUpdate(buf[1:])
+	case DeleteAllUserMessagesRequest:
+		return f.applyDeleteAllUserMessages(buf[1:])
 	case DeleteRequest:
 		return f.applyDelete(buf[1:])
 	case PublishRequest:
@@ -88,6 +91,20 @@ func (f *fsm) applyUpdate(raw []byte) interface{} {
 		UpdateUtcNano: cmd.UpdateUtcNano,
 		Private: res.Private,
 	}
+}
+
+func (f *fsm) applyDeleteAllUserMessages(raw []byte) interface{} {
+	var cmd DeleteAllUserMessagesCommand
+	proto.Unmarshal(raw, &cmd)
+
+	err := f.repo.DeleteAllUserMessages(context.Background(), logger.Default(), &model.DeleteAllUserMessagesParams{
+		UserID: cmd.UserId,
+	})
+	if err != nil {
+		return err
+	}
+
+	return &DeleteCommandResult{}
 }
 
 func (f *fsm) applyDelete(raw []byte) interface{} {

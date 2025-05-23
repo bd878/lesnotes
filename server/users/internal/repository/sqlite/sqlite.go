@@ -15,6 +15,7 @@ type Repository struct {
 	db          *sql.DB
 	resetTokenStmt *sql.Stmt
 	selectByIDStmt *sql.Stmt
+	deleteUserStmt *sql.Stmt
 }
 
 func New(dbPath string) *Repository {
@@ -38,10 +39,17 @@ WHERE id = :id
 ;`,
 	))
 
+	deleteUserStmt := utils.Must(db.Prepare(`
+DELETE FROM users
+WHERE id = :id AND token = :token AND name = :name
+;`,
+	))
+
 	return &Repository{
 		db: db,
 		resetTokenStmt: resetTokenStmt,
 		selectByIDStmt: selectByIDStmt,
+		deleteUserStmt: deleteUserStmt,
 	}
 }
 
@@ -85,6 +93,43 @@ func (r *Repository) DeleteToken(ctx context.Context, log *logger.Logger, params
 		log.Error("cannot delete token")
 	}
 	return err
+}
+
+func (r *Repository) DeleteUser(ctx context.Context, log *logger.Logger, params *model.DeleteUserParams) error {
+	var (
+		tx *sql.Tx
+		err error
+	)
+
+	tx, err = r.db.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		log.Errorln("failed to start transaction")
+		return err
+	}
+
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback()
+			panic(p)
+		case err != nil:
+			rErr := tx.Rollback()
+			if rErr != nil {
+				log.Errorw("failed to rollback delete stmt", "error", rErr)
+			}
+		default:
+			err = tx.Commit()
+		}
+	}()
+
+	_, err = tx.StmtContext(ctx, r.deleteUserStmt).ExecContext(ctx, sql.Named("id", params.ID), sql.Named("token", params.Token), sql.Named("name", params.Name))
+	if err != nil {
+		log.Errorln("failed to delete user")
+		return err
+	}
+
+	return nil
 }
 
 func (r *Repository) getByID(ctx context.Context, log *logger.Logger, id int32) (*model.User, error) {

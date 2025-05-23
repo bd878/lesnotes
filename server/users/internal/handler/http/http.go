@@ -10,6 +10,7 @@ import (
 	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/users/pkg/model"
 	servermodel "github.com/bd878/gallery/server/pkg/model"
+	messagesmodel "github.com/bd878/gallery/server/messages/pkg/model"
 	"github.com/bd878/gallery/server/utils"
 )
 
@@ -19,6 +20,11 @@ type Controller interface {
 	RefreshToken(ctx context.Context, log *logger.Logger, params *model.RefreshTokenParams) error
 	DeleteToken(ctx context.Context, log *logger.Logger, params *model.DeleteTokenParams) error
 	GetUser(ctx context.Context, log *logger.Logger, params *model.GetUserParams) (*model.User, error)
+	DeleteUser(ctx context.Context, log *logger.Logger, params *model.DeleteUserParams) error
+}
+
+type MessagesGateway interface {
+	DeleteAllUserMessages(ctx context.Context, log *logger.Logger, params *messagesmodel.DeleteAllUserMessagesParams) error
 }
 
 type Config struct {
@@ -28,10 +34,11 @@ type Config struct {
 type Handler struct {
 	controller      Controller
 	config          Config
+	messagesGateway MessagesGateway
 }
 
-func New(controller Controller, config Config) *Handler {
-	return &Handler{controller, config}
+func New(controller Controller, config Config, messagesGateway MessagesGateway) *Handler {
+	return &Handler{controller, config, messagesGateway}
 }
 
 func (h *Handler) Status(log *logger.Logger, w http.ResponseWriter, _ *http.Request) error {
