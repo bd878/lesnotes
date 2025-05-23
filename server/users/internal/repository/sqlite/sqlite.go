@@ -49,7 +49,7 @@ func (r *Repository) AddUser(ctx context.Context, log *logger.Logger, user *mode
 	_, err := r.db.ExecContext(ctx, "INSERT INTO users(id,name,password,token,expires_utc_nano)" +
 		"VALUES(?,?,?,?,?)", user.ID, user.Name, user.Password, user.Token, user.ExpiresUTCNano)
 	if err != nil {
-		log.Error("query error: %v\n", err)
+		log.Errorf("query error: %v\n", err)
 	}
 	return err
 }
@@ -141,11 +141,11 @@ func (r *Repository) getByUserName(ctx context.Context, log *logger.Logger, name
 
 	switch {
 	case err == sql.ErrNoRows:
-		log.Error("no rows for name %v\n", name)
+		log.Errorf("no rows for name %v\n", name)
 		return nil, errors.New("no user")
 
 	case err != nil:
-		log.Error("query error: %v\n", err)
+		log.Errorf("query error: %v\n", err)
 		return nil, err
 
 	default:
@@ -162,11 +162,11 @@ func (r *Repository) getByToken(ctx context.Context, log *logger.Logger, token s
 		"token = ?", token).Scan(&id, &name, &password, &token, &expiresUtcNano)
 	switch {
 	case err == sql.ErrNoRows:
-		log.Error("no rows for token %v\n", token)
+		log.Errorf("no rows for token %v\n", token)
 		return nil, errors.New("no user")
 
 	case err != nil:
-		log.Error("query error: %v\n", err)
+		log.Errorf("query error: %v\n", err)
 		return nil, err
 
 	default:
@@ -186,11 +186,11 @@ func (r *Repository) hasUserAndPassword(ctx context.Context, log *logger.Logger,
 		"name = ? AND password = ?", user.Name, user.Password).Scan(&count)
 	switch {
 	case err != nil:
-		log.Error("query error: %v\n", err)
+		log.Errorf("query error: %v\n", err)
 		return false, err
 	default:
 		if count == 0 {
-			log.Error("no user with given user/password pair, user: %v\n", user.Name)
+			log.Errorf("no user with given user/password pair, user: %v\n", user.Name)
 			return false, nil
 		}
 		return true, nil
@@ -203,11 +203,11 @@ func (r *Repository) hasUser(ctx context.Context, log *logger.Logger, name strin
 		"name = ?", name).Scan(&count)
 	switch {
 	case err != nil:
-		log.Error("query error: %v\n", err)
+		log.Errorf("query error: %v\n", err)
 		return false, err
 	default:
 		if count == 0 {
-			log.Error("no user with name %v\n", name)
+			log.Errorf("no user with name %v\n", name)
 			return false, nil
 		}
 		return true, nil
