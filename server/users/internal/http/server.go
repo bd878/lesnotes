@@ -41,13 +41,14 @@ func New(cfg Config) *Server {
 
 	mux.Handle("/users/v1/get", middleware.Build(handler.GetUser))
 	mux.Handle("/users/v1/signup", middleware.Build(handler.Signup))
-	mux.Handle("/users/v2/signup", middleware.Build(handler.SignupJsonAPI))
 	mux.Handle("/users/v1/login",  middleware.Build(handler.Login))
-	mux.Handle("/users/v2/login",  middleware.Build(handler.LoginJsonAPI))
 	mux.Handle("/users/v1/logout", middleware.Build(handler.Logout))
 	mux.Handle("/users/v1/auth",   middleware.Build(handler.Auth))
-	mux.Handle("/users/v2/delete", middleware.Build(handler.DeleteJsonAPI))
 	mux.Handle("/users/v1/status", middleware.Build(handler.Status))
+	mux.Handle("/users/v2/auth",   middleware.Build(handler.AuthJsonAPI))
+	mux.Handle("/users/v2/login",  middleware.Build(handler.LoginJsonAPI))
+	mux.Handle("/users/v2/signup", middleware.Build(handler.SignupJsonAPI))
+	mux.Handle("/users/v2/delete", middleware.Build(handler.DeleteJsonAPI))
 
 	server := &Server{
 		Server: &http.Server{

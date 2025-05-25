@@ -54,6 +54,32 @@ paths:
               schema:
                 $ref: '#/components/schemas/authErr'
 
+  /users/v2/auth:
+    post:
+      summary: Check if token is still valid
+      description: |
+        Finds user with given token,
+        is token valid, returns associated user
+      operationId: authUserJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/authUserJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/authOk'
+        "401":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/authErr'
+
   /users/v1/signup:
     post:
       summary: Registers user
@@ -303,6 +329,17 @@ components:
       password:
         type: string
         example: "12345"
+
+    authUserJson:
+      type: object
+      properties:
+        token:
+          type: string
+          default: ""
+          required: true
+        req:
+          type: object
+          required: false
 
     loginUser:
       type: object
