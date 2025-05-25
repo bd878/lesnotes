@@ -172,7 +172,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/loginOk'
+                $ref: '#/components/schemas/loginOkJson'
         "4XX":
           description: error
           content:
@@ -300,11 +300,27 @@ components:
           type: string
           default: "no password"
 
+    loginOkJson:
+      type: object
+      properties:
+        status:
+          type: string
+          default: "ok"
+        description:
+          type: string
+          default: "authenticated"
+        token:
+          type: string
+          required: true
+        expires_utc_nano:
+          type: integer
+          example: 1
+
     loginOk:
       type: object
       status:
         type: string
-        default: ok
+        default: "ok"
       description:
         type: string
         default: "authenticated"
@@ -403,18 +419,22 @@ components:
 
     signupOkJson:
       type: object
-      status:
-        type: string
-        default: "ok"
-      description:
-        type: string
-        default: "created"
-      token:
-        type: string
-        example: "AAA"
-      id:
-        type: integer
-        example: 1
+      properties:
+        status:
+          type: string
+          default: "ok"
+        description:
+          type: string
+          default: "created"
+        token:
+          type: string
+          example: "AAA"
+        id:
+          type: integer
+          example: 1
+        expires_utc_nano:
+          type: integer
+          example: 1
 
     signupOk:
       type: object

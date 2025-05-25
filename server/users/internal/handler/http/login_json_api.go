@@ -110,9 +110,6 @@ func (h *Handler) LoginJsonAPI(log *logger.Logger, w http.ResponseWriter, req *h
 
 		return err
 
-	case nil:
-		attachTokenToResponse(w, user.Token, h.config.CookieDomain, user.ExpiresUTCNano)
-
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
@@ -123,9 +120,14 @@ func (h *Handler) LoginJsonAPI(log *logger.Logger, w http.ResponseWriter, req *h
 		return err
 	}
 
-	json.NewEncoder(w).Encode(servermodel.ServerResponse{
-		Status: "ok",
-		Description: "authenticated",
+	json.NewEncoder(w).Encode(&model.LoginJsonUserServerResponse{
+		ServerResponse: servermodel.ServerResponse{
+			Status: "ok",
+			Description: "authenticated",
+		},
+		Token: user.Token,
+		ID: resp.ID,
+		ExpiresUTCNano: resp.ExpiresUTCNano,
 	})
 
 	return nil
