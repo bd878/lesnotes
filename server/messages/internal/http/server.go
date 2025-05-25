@@ -47,7 +47,9 @@ func New(cfg Config) *Server {
 	mux.Handle("/messages/v1/publish", middleware.Build(handler.PublishMessageOrMessages))
 	mux.Handle("/messages/v1/private", middleware.Build(handler.PrivateMessageOrMessages))
 	mux.Handle("/messages/v1/delete", middleware.Build(handler.DeleteMessageOrMessages))
-	mux.Handle("/messages/v1/status", middleware.NoAuth().Build(handler.GetStatus))
+
+	middleware.NoAuth()
+	mux.Handle("/messages/v1/status", middleware.Build(handler.GetStatus))
 
 	middleware.WithAuth(httpmiddleware.TokenAuthBuilder(userGateway, usermodel.PublicUserID))
 	mux.Handle("/messages/v2/send", middleware.Build(handler.SendMessageJsonAPI))

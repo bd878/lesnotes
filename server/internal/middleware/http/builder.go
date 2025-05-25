@@ -46,7 +46,6 @@ func (b builder) NoAuth() builder {
 	b.funcs.Traverse(func(n *node) bool {
 		if n.name == "auth" {
 			n.f = nil
-			return true
 		}
 		return false
 	})
@@ -58,7 +57,6 @@ func (b builder) NoLog() builder {
 	b.funcs.Traverse(func(n *node) bool {
 		if n.name == "log" {
 			n.f = nil
-			return true
 		}
 		return false
 	})
@@ -67,39 +65,19 @@ func (b builder) NoLog() builder {
 }
 
 func (b builder) WithLog(f MiddlewareFunc) builder {
-	found := b.funcs.Traverse(func(n *node) bool {
-		if n.name == "log" {
-			n.f = nil
-			return true
-		}
-		return false
+	b.funcs.Append(&node{
+		name: "log",
+		f: f,
 	})
-
-	if !found {
-		b.funcs.Append(&node{
-			name: "log",
-			f: f,
-		})
-	}
 
 	return b
 }
 
 func (b builder) WithAuth(f MiddlewareFunc) builder {
-	found := b.funcs.Traverse(func(n *node) bool {
-		if n.name == "auth" {
-			n.f = nil
-			return true
-		}
-		return false
+	b.funcs.Append(&node{
+		name: "auth",
+		f: f,
 	})
-
-	if !found {
-		b.funcs.Append(&node{
-			name: "auth",
-			f: f,
-		})
-	}
 
 	return b
 }
