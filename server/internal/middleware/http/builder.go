@@ -41,6 +41,7 @@ func (b builder) Build(h HandleFunc) *middleware {
 	}
 }
 
+// Removes auth from all subsequent builds
 func (b builder) NoAuth() builder {
 	b.funcs.Traverse(func(n *node) bool {
 		if n.name == "auth" {

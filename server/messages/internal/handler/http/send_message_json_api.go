@@ -2,7 +2,6 @@ package http
 
 import (
 	"net/http"
-	"io"
 	"fmt"
 	"encoding/json"
 
@@ -14,22 +13,6 @@ import (
 )
 
 func (h *Handler) SendMessageJsonAPI(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
-	var err error
-
-	data, err := io.ReadAll(req.Body)
-	if err != nil {
-		req.Body.Close()
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "failed to parse request",
-		})
-
-		return err
-	}
-
-	defer req.Body.Close()
-
 	user, ok := utils.GetUser(w, req)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
@@ -39,6 +22,17 @@ func (h *Handler) SendMessageJsonAPI(log *logger.Logger, w http.ResponseWriter, 
 		})
 
 		return fmt.Errorf("no user")
+	}
+
+	data, ok := utils.GetJsonRequestBody(w, req)
+	if !ok {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			Status: "error",
+			Description: "body data required",
+		})
+
+		return fmt.Errorf("no req data")
 	}
 
 	var message model.Message

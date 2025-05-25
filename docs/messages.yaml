@@ -411,21 +411,28 @@ components:
     sendMessageJson:
       type: object
       properties:
-        text:
+        token:
           type: string
           default: ""
           required: true
-        file_id:
-          type: string
-          default: ""
-          required: false
-        private:
-          type: boolean
-          required: false
-          example: 0
-        thread_id:
-          type: integer
-          required: false
+        req:
+          type: object
+          properties:
+            text:
+              type: string
+              default: ""
+              required: true
+            file_id:
+              type: string
+              default: ""
+              required: false
+            private:
+              type: boolean
+              required: false
+              example: 0
+            thread_id:
+              type: integer
+              required: false
 
     sendOk:
       type: object
