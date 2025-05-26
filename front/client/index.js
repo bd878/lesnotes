@@ -19,6 +19,7 @@ import home from './routes/home.js';
 import status from './routes/status.js';
 import xxx from './routes/xxx.js';
 import message from './routes/message.js';
+import miniapp from './routes/miniapp.js';
 import newThread from './routes/newThread.js';
 
 const app = new Koa();
@@ -44,6 +45,7 @@ router
 	.get('/status', status)
 	.get("/new", etag, message)
 	.get("/m/:id", etag, message)
+	.get("/miniapp", etag, miniapp)
 	.get('/:any*', xxx)
 
 app.use(router.routes());

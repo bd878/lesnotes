@@ -6,11 +6,11 @@ import { resolve } from 'node:path';
 
 async function renderer(ctx) {
 	try {
-		const filePath = resolve(path.join(Config.get('basedir'), 'templates/index.mustache'));
+		const filePath = resolve(path.join(Config.get('basedir'), 'templates/miniapp.mustache'));
 		const template = await readFile(filePath, { encoding: 'utf-8' });
 
 		ctx.body = mustache.render(template, {
-			script: "/public/xxx.js",
+			script: "/public/miniapp.js",
 			styles: [
 				"/public/styles.css",
 			],
