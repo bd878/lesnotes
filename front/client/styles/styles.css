@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer components {
 	.btn {
 		@apply border-1 px-4 border-solid text-left cursor-pointer
