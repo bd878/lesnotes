@@ -9,9 +9,11 @@ function Home() {
 	const isMobile = document.body.dataset.mobile
 
 	return (
-		<Tag css="wrap">
+		<Tag css="wrap dark">
 			{is.notUndef(window.Telegram) ? <Tag>{window.Telegram.WebApp.initData}</Tag> : <Tag>{"window telegram is undef"}</Tag>}
-			<Footer />
+			<Tag css="bg-white dark:bg-black">
+				<Footer />
+			</Tag>
 		</Tag>
 	)
 }

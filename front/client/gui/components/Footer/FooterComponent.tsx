@@ -4,7 +4,7 @@ import Tag from '../Tag';
 function FooterComponent(props) {
 	return (
 		<Tag css="w-full flex justify-center">
-			<Tag css="text-sm">Les notes © 2025</Tag>
+			<Tag css="text-sm text-gray-950 dark:text-white">Les notes © 2025</Tag>
 		</Tag>
 	)
 }
