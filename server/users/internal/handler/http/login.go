@@ -63,7 +63,7 @@ func (h *Handler) Login(log *logger.Logger, w http.ResponseWriter, req *http.Req
 	switch err {
 	case controller.ErrTokenExpired:
 		log.Infoln("token expired")
-		err := refreshToken(h, w, req, userName)
+		_, err := refreshToken(h, w, req, userName)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(servermodel.ServerResponse{

@@ -64,16 +64,19 @@ func getTextField(w http.ResponseWriter, req *http.Request, field string) (value
 	return
 }
 
-func refreshToken(h *Handler, w http.ResponseWriter, req *http.Request, userName string) error {
+func refreshToken(h *Handler, w http.ResponseWriter, req *http.Request, userName string) (*model.User, error) {
 	token, expiresUtcNano := createToken(w, h.config.CookieDomain)
 
-	return h.controller.RefreshToken(req.Context(), logger.Default(), &model.RefreshTokenParams{
-		User: &model.User{
-			Name:               userName,
-			Token:              token,
-			ExpiresUTCNano:     expiresUtcNano,
-		},
+	user := &model.User{
+		Name:               userName,
+		Token:              token,
+		ExpiresUTCNano:     expiresUtcNano,
+	}
+
+	err := h.controller.RefreshToken(req.Context(), logger.Default(), &model.RefreshTokenParams{
+		User: user,
 	})
+	return user, err
 }
 
 func createToken(w http.ResponseWriter, cookieDomain string) (token string, expires int64) {

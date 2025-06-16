@@ -82,15 +82,10 @@ func (h *Handler) LoginJsonAPI(log *logger.Logger, w http.ResponseWriter, req *h
 	}
 
 	resp, err := h.controller.GetUser(req.Context(), log, &model.GetUserParams{Name: user.Name})
-
-	user.ExpiresUTCNano = resp.ExpiresUTCNano
-	user.Token = resp.Token
-	user.ID = resp.ID
-
 	switch err {
 	case controller.ErrTokenExpired:
 		log.Infoln("token expired")
-		err := refreshToken(h, w, req, user.Name)
+		token, err := refreshToken(h, w, req, user.Name)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(servermodel.ServerResponse{
@@ -101,6 +96,17 @@ func (h *Handler) LoginJsonAPI(log *logger.Logger, w http.ResponseWriter, req *h
 			return err
 		}
 
+		json.NewEncoder(w).Encode(&model.LoginJsonUserServerResponse{
+			ServerResponse: servermodel.ServerResponse{
+				Status: "ok",
+				Description: "authenticated",
+			},
+			Token: token.Token,
+			ID: user.ID,
+			ExpiresUTCNano: token.ExpiresUTCNano,
+		})
+		return nil
+
 	case controller.ErrNotFound:
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
@@ -109,6 +115,17 @@ func (h *Handler) LoginJsonAPI(log *logger.Logger, w http.ResponseWriter, req *h
 		})
 
 		return err
+	case nil:
+		json.NewEncoder(w).Encode(&model.LoginJsonUserServerResponse{
+			ServerResponse: servermodel.ServerResponse{
+				Status: "ok",
+				Description: "authenticated",
+			},
+			Token: resp.Token,
+			ID: resp.ID,
+			ExpiresUTCNano: resp.ExpiresUTCNano,
+		})
+		return nil
 
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
@@ -119,16 +136,6 @@ func (h *Handler) LoginJsonAPI(log *logger.Logger, w http.ResponseWriter, req *h
 
 		return err
 	}
-
-	json.NewEncoder(w).Encode(&model.LoginJsonUserServerResponse{
-		ServerResponse: servermodel.ServerResponse{
-			Status: "ok",
-			Description: "authenticated",
-		},
-		Token: user.Token,
-		ID: resp.ID,
-		ExpiresUTCNano: resp.ExpiresUTCNano,
-	})
 
 	return nil
 }
