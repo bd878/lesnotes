@@ -9,6 +9,7 @@ import privateMessages from './privateMessages';
 import moveMessage from './moveMessage';
 import uploadFile from './uploadFile';
 import validateMiniappData from './validateMiniappData';
+import sendLog from './sendLog';
 import auth from './auth';
 import login from './login';
 import logout from './logout';
@@ -34,4 +35,5 @@ export default {
 	getFileDownloadUrl,
 	getMessageLinkUrl,
 	validateMiniappData,
+	sendLog,
 }

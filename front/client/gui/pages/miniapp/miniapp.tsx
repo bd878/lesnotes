@@ -8,7 +8,6 @@ import * as is from '../../../third_party/is';
 
 function Miniapp() {
 	const [valid, setValid] = useState(null)
-	const [error, setError] = useState("")
 	const [loading, setLoading] = useState(true)
 
 	useEffect(() => {
@@ -19,19 +18,18 @@ function Miniapp() {
 				setValid(true);
 			} else {
 				setValid(false);
-				setError(result.error + ": " + result.explain)
+				api.sendLog(JSON.stringify(result))
 			}
 			setLoading(false)
 		}
 
 		validateData(window.Telegram.WebApp.initData)
-	}, [setValid, setLoading, setError])
+	}, [setValid, setLoading])
 
 	return (
 		<Tag css="wrap dark">
 			<Tag css="bg-white">{"Miniapp"}</Tag>
 			<Tag css="bg-white">{valid ? "data ok" : "data not ok"}</Tag>
-			<Tag css="bg-white">{error}</Tag>
 			<Tag css="bg-white dark:bg-black">
 				<Footer />
 			</Tag>

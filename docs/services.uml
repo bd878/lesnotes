@@ -11,11 +11,17 @@ together {
 	package users
 	package files
 	package messages
+	package telemetry
 }
 
 package Front as front {
 	component http as front_http
 	front_http -- "192.168.10.3:8181"
+}
+
+package Telemetry as telemetry {
+	component http as telemetry_http
+	front_http -- "192.168.10.3:8179"
 }
 
 package Users as users {
@@ -82,5 +88,5 @@ package Messages as messages {
 	}
 }
 
-footer 02.05.25
+footer 20.06.25
 @enduml
