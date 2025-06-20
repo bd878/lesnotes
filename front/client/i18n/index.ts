@@ -39,7 +39,8 @@ const i18n = {
 		cancel_delete: "Cancel",
 		copied: "Copied!",
 		publish_message: "Publish",
-		private_message: "Make private"
+		private_message: "Make private",
+		miniapp_only: "This page should be opened in Telegram only"
 	},
 	"ru": {
 		logout: "Выйти",
@@ -81,7 +82,8 @@ const i18n = {
 		close_button_text: "Закрыть",
 		copied: "Скопировано",
 		publish_message: "Опубликовать",
-		private_message: "Скрыть доступ"
+		private_message: "Скрыть доступ",
+		miniapp_only: "Эта страница работает только из приложения Telegram"
 	}
 }
 

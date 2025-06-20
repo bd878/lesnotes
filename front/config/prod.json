@@ -3,6 +3,7 @@
 	"addr": "192.168.10.2",
 	"basedir": ".",
 	"https": "1",
-	"backendurl": "lesnotes.space",
+	"backend_url": "lesnotes.space",
+	"bot_validate_url": "https://bot.lesnotes.space/validate",
 	"env": "prod"
 }

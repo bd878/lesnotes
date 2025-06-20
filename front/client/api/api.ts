@@ -42,7 +42,7 @@ function prepareBody(body, method) {
 	if (body instanceof URLSearchParams || body instanceof FormData)
 		return body;
 
-	return JSON.stringify({ ...body });
+	return JSON.stringify(body);
 }
 
 function getOptions(props) {

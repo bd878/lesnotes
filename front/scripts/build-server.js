@@ -6,7 +6,8 @@ let ctx = await esbuild.context({
 	entryNames: '[name]',
 	define: {
 		ENV: '"' + Config.get("env") + '"',
-		BACKEND_URL: '"' + Config.get("backendurl") + '"',
+		BACKEND_URL: '"' + Config.get("backend_url") + '"',
+		BOT_VALIDATE_URL: '"' + Config.get("bot_validate_url") + '"',
 		HTTPS: '"' + Config.get("https") + '"',
 	},
 	bundle: true,
