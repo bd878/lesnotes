@@ -109,8 +109,5 @@ export default function api(url: string, props = {}) {
 					}
 				})
 		})
-		.catch(e => Promise.reject({
-			error: e,
-			message: 'Cannot parse the response',
-		}));
+		.catch(e => Promise.reject(e));
 }

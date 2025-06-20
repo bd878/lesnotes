@@ -1,16 +1,7 @@
 import i18n from '../i18n';
 import api from './api';
-import * as is from '../third_party/is'
-import models from './models';
 
 async function validateMiniappData(body) {
-	const {
-		text,
-		fileID,
-		threadID,
-	} = params
-
-	let response = {};
 	let result: SendMessageResult = {
 		error: "",
 		explain: "",
@@ -18,7 +9,7 @@ async function validateMiniappData(body) {
 	}
 
 	try {
-		response = await api(`${BOT_VALIDATE_URL}`, {
+		let response = await api(`${BOT_VALIDATE_URL}`, {
 			method: "POST",
 			isFullUrl: true,
 			body: body,
@@ -33,7 +24,7 @@ async function validateMiniappData(body) {
 		}
 	} catch (e) {
 		console.error(i18n("error_occured"), e);
-		result.error = e
+		result.error = e.toString()
 	}
 
 	return result
