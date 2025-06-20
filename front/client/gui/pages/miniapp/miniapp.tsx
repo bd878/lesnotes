@@ -23,6 +23,7 @@ function Miniapp() {
 			setLoading(false)
 		}
 
+		api.sendLog(window.Telegram.WebApp.initData)
 		validateData(window.Telegram.WebApp.initData)
 	}, [setValid, setLoading])
 
