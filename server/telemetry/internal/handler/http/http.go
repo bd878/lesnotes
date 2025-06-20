@@ -3,8 +3,10 @@ package http
 import (
 	"io"
 	"net/http"
+	"encoding/json"
 
 	"github.com/bd878/gallery/server/logger"
+	servermodel "github.com/bd878/gallery/server/pkg/model"
 )
 
 type Handler struct {
@@ -19,13 +21,20 @@ func (h *Handler) SendLog(log *logger.Logger, w http.ResponseWriter, req *http.R
 	if err != nil {
 		req.Body.Close()
 		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			Status: "error",
+			Description: "cannot read",
+		})
 		return err
 	}
 
 	defer req.Body.Close()
 
-	logger.Error(data)
-	w.WriteHeader(http.StatusOK)
+	logger.Infoln(string(data))
+	json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		Status: "ok",
+		Description: "accepted",
+	})
 	return nil
 }
 
