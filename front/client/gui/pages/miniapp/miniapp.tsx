@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import ReactDOM from 'react-dom/client';
+import {init, backButton} from '@telegram-apps/sdk';
 import Tag from '../../components/Tag';
 import Footer from '../../components/Footer';
 import i18n from '../../../i18n';
@@ -26,6 +27,13 @@ function Miniapp() {
 		api.sendLog(window.Telegram.WebApp.initData)
 		validateData(window.Telegram.WebApp.initData)
 	}, [setValid, setLoading])
+
+	useEffect(() => {
+		if (valid) {
+			init();
+			backButton.show.ifAvailable();
+		}
+	}, [valid])
 
 	return (
 		<Tag css="wrap dark">
