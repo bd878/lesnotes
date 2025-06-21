@@ -70,13 +70,15 @@ function BackButton() {
 	const isVisible = useSignal(backButton.isVisible)
 
 	useEffect(() => {
-		console.log("back button is ", isVisible ? "visible" : "invisible");
+		console.log("back button is", isVisible ? "visible" : "invisible");
 	}, [isVisible])
 
 	useEffect(() => {
 		backButton.show()
 		return () => backButton.hide()
 	}, [])
+
+	return null
 }
 
 function Miniapp() {
