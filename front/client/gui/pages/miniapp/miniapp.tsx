@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import ReactDOM from 'react-dom/client';
-import {init, mockTelegramEnv, emitEvent, backButton, retrieveLaunchParams, isTMA} from '@telegram-apps/sdk';
+import {init, mockTelegramEnv, emitEvent, backButton, retrieveLaunchParams, isTMA, useSignal} from '@telegram-apps/sdk-react';
 import Tag from '../../components/Tag';
 import Footer from '../../components/Footer';
 import i18n from '../../../i18n';
@@ -66,6 +66,19 @@ mockTelegramEnv({
 	},
 })
 
+function BackButton() {
+	const isVisible = useSignal(backButton.isVisible)
+
+	useEffect(() => {
+		console.log("back button is ", isVisible ? "visible" : "invisible");
+	}, [isVisible])
+
+	useEffect(() => {
+		backButton.show()
+		return () => backButton.hide()
+	}, [])
+}
+
 function Miniapp() {
 	// const [valid, setValid] = useState(null)
 	// const [loading, setLoading] = useState(true)
@@ -88,29 +101,13 @@ function Miniapp() {
 	// }, [setValid, setLoading])
 
 	useEffect(() => {
-		if (backButton.isSupported())
-			console.log("back button supported");
-		else
-			console.log("back button not supported");
-
-		if (backButton.mount.isAvailable())
-			backButton.mount();
-		else
-			console.log("back button unable to mount");
-
-		if (backButton.show.isAvailable())
-			backButton.show()
-		else
-			console.log("back button not available")
-	}, [])
-
-	useEffect(() => {
 		const lp = retrieveLaunchParams()
 		console.log(lp)
 	}, [])
 
 	return (
 		<Tag css="wrap dark">
+			<BackButton />
 			<Tag css="bg-white">{"Miniapp"}</Tag>
 			<Tag css="bg-white dark:bg-black">
 				<Footer />
@@ -119,9 +116,10 @@ function Miniapp() {
 	)
 }
 
-function Main() {
-	useEffect(init, [])
+init();
+backButton.mount()
 
+function Main() {
 	if (!isTMA())
 		return (
 			<Tag css="wrap">
