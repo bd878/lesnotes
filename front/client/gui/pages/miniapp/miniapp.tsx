@@ -87,15 +87,22 @@ function Miniapp() {
 	// 	validateData(window.Telegram.WebApp.initData)
 	// }, [setValid, setLoading])
 
-	if (backButton.mount.isAvailable())
-		backButton.mount();
-	else
-		console.log("back button unable to mount");
+	useEffect(() => {
+		if (backButton.isSupported())
+			console.log("back button supported");
+		else
+			console.log("back button not supported");
 
-	if (backButton.show.isAvailable())
-		backButton.show()
-	else
-		console.log("back button not available")
+		if (backButton.mount.isAvailable())
+			backButton.mount();
+		else
+			console.log("back button unable to mount");
+
+		if (backButton.show.isAvailable())
+			backButton.show()
+		else
+			console.log("back button not available")
+	}, [])
 
 	useEffect(() => {
 		const lp = retrieveLaunchParams()
