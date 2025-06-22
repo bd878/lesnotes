@@ -1,11 +1,12 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom/client';
-import {init, mockTelegramEnv, emitEvent, backButton, retrieveLaunchParams, isTMA, useSignal} from '@telegram-apps/sdk-react';
+import {mockTelegramEnv, emitEvent, isTMA, mockTelegramEnv, emitEvent, init, backButton} from '@telegram-apps/sdk-react';
 import Tag from '../../components/Tag';
 import Footer from '../../components/Footer';
+import MiniappMainPage from '../../components/MiniappMainPage';
+import StoreProvider from '../../providers/Store';
 import i18n from '../../../i18n';
-import api from '../../../api';
-import * as is from '../../../third_party/is';
+import _ from './mock';
 
 const noInsets = {
 	left: 0,
@@ -66,60 +67,8 @@ mockTelegramEnv({
 	},
 })
 
-function BackButton() {
-	const isVisible = useSignal(backButton.isVisible)
-
-	useEffect(() => {
-		console.log("back button is", isVisible ? "visible" : "invisible");
-	}, [isVisible])
-
-	useEffect(() => {
-		backButton.show()
-		return () => backButton.hide()
-	}, [])
-
-	return null
-}
-
-function Miniapp() {
-	// const [valid, setValid] = useState(null)
-	// const [loading, setLoading] = useState(true)
-
-	// useEffect(() => {
-	// 	async function validateData(dataStr) {
-	// 		setLoading(true)
-	// 		let result = await api.validateMiniappData(dataStr)
-	// 		if (result.ok) {
-	// 			setValid(true);
-	// 		} else {
-	// 			setValid(false);
-	// 			api.sendLog(JSON.stringify(result))
-	// 		}
-	// 		setLoading(false)
-	// 	}
-
-	// 	api.sendLog(window.Telegram.WebApp.initData)
-	// 	validateData(window.Telegram.WebApp.initData)
-	// }, [setValid, setLoading])
-
-	useEffect(() => {
-		const lp = retrieveLaunchParams()
-		console.log(lp)
-	}, [])
-
-	return (
-		<Tag css="wrap dark">
-			<BackButton />
-			<Tag css="bg-white">{"Miniapp"}</Tag>
-			<Tag css="bg-white dark:bg-black">
-				<Footer />
-			</Tag>
-		</Tag>
-	)
-}
-
 init();
-backButton.mount()
+backButton.mount();
 
 function Main() {
 	if (!isTMA())
@@ -133,7 +82,13 @@ function Main() {
 		);
 
 	return (
-		<Miniapp />
+		<Tag css="wrap">
+			<StoreProvider>
+				<MiniappMainPage />
+			</StoreProvider>
+
+			<Footer />
+		</Tag>
 	);
 }
 

@@ -1,0 +1,4 @@
+export const VALIDATE_INIT_DATA = "@miniapp/VALIDATE_INIT_DATA"
+export const VALIDATE_INIT_DATA_SUCCEEDED = "@miniapp/VALIDATE_INIT_DATA_SUCCEEDED"
+
+export const MINIAPP_FAILED = "@miniapp/FAILED"

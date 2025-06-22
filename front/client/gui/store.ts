@@ -3,6 +3,7 @@ import {all} from 'redux-saga/effects'
 import {userReducer, userSaga} from './features/me'
 import {stackReducer, stackSaga} from './features/stack'
 import {notificationReducer, notificationSaga} from './features/notification'
+import {miniappReducer, miniappSaga} from './features/miniapp'
 import createSagaMiddleware from 'redux-saga'
 
 let instance = null
@@ -19,6 +20,7 @@ export default function createStore({
 			me: userReducer,
 			stack: stackReducer,
 			notification: notificationReducer,
+			miniapp: miniappReducer,
 		}), {
 			me: {
 				browser,
@@ -32,6 +34,7 @@ export default function createStore({
 				userSaga(),
 				stackSaga(),
 				notificationSaga(),
+				miniappSaga(),
 			])
 		})
 	}
