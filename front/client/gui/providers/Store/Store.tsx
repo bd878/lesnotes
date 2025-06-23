@@ -8,6 +8,7 @@ function StoreProvider(props) {
 			browser: props.browser,
 			isMobile: props.isMobile,
 			isDesktop: props.isDesktop,
+			isMiniapp: props.isMiniapp,
 		})}>
 			{props.children}
 		</Provider>

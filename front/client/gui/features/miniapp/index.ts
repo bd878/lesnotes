@@ -1,6 +1,6 @@
 import {miniappReducer} from './miniappReducer';
 import {miniappSaga} from './miniappSagas';
-import {selectIsLoading, selectIsValid, selectError} from './miniappSelectors';
+import {selectIsLoading, selectIsValid, selectError, selectToken} from './miniappSelectors';
 import {
 	validateInitDataActionCreator,
 } from './miniappActionCreators';
@@ -12,4 +12,5 @@ export {
 	selectIsLoading,
 	selectIsValid,
 	selectError,
+	selectToken,
 }

@@ -13,6 +13,7 @@ import {
 	selectWillRedirect,
 	selectBrowser,
 	selectIsMobile,
+	selectIsMiniapp,
 	selectIsDesktop,
 } from './userSelectors';
 import {userSaga} from './userSagas';
@@ -32,4 +33,5 @@ export {
 	selectBrowser,
 	selectIsMobile,
 	selectIsDesktop,
+	selectIsMiniapp,
 }

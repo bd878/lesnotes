@@ -1,4 +1,5 @@
 import loadMessages from './loadMessages';
+import loadMessagesJson from './loadMessagesJson';
 import loadOneMessage from './loadOneMessage';
 import sendMessage from './sendMessage';
 import updateMessage from './updateMessage';
@@ -23,6 +24,7 @@ export default {
 	logout,
 	auth,
 	loadMessages,
+	loadMessagesJson,
 	loadOneMessage,
 	sendMessage,
 	updateMessage,

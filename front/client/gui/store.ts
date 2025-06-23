@@ -14,6 +14,7 @@ export default function createStore({
 	browser = "",
 	isMobile = false,
 	isDesktop = true,
+	isMiniapp = false,
 } = {}) {
 	if (instance == null) {
 		instance = createReduxStore(combineReducers({
@@ -26,6 +27,7 @@ export default function createStore({
 				browser,
 				isMobile,
 				isDesktop,
+				isMiniapp,
 			},
 		}, applyMiddleware(sagaMiddleware))
 

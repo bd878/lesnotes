@@ -23,6 +23,8 @@ import {
 	setMessagesActionCreator,
 } from './stackActionCreators'
 import {showNotificationActionCreator} from '../notification';
+import {selectToken} from '../miniapp';
+import {selectIsMiniapp} from '../me';
 import * as is from '../../../third_party/is'
 import i18n from '../../../i18n';
 import {selectMessages, selectSelectedMessageIDs, selectMessageForEdit, selectThreadID} from './stackSelectors';
@@ -35,9 +37,19 @@ interface FetchMessagesPayload {
 	order:  number;
 }
 
+function* loadMessages(bodyOrQueryParams) {
+	const isMiniapp = yield select(selectIsMiniapp)
+	if (isMiniapp) {
+		const token = yield select(selectToken)
+		return yield call(api.loadMessagesJson, token, bodyOrQueryParams)
+	} else {
+		return yield call(api.loadMessages, bodyOrQueryParams)
+	}
+}
+
 function* fetchMessages({index, payload}: {payload: FetchMessagesPayload}) {
 	try {
-		const response = yield call(api.loadMessages,
+		const response = yield call(loadMessages,
 			{limit: payload.limit, offset: payload.offset, order: payload.order, threadID: payload.threadID})
 
 		response.messages.reverse();

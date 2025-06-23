@@ -12,7 +12,7 @@ function* validateInitData({payload}) {
 		let result = yield call(api.validateMiniappData, payload)
 
 		if (result.ok) {
-			yield put(validateInitDataSucceededActionCreator())
+			yield put(validateInitDataSucceededActionCreator(result.token))
 		} else {
 			yield put(miniappFailedActionCreator(result.error + ": " + result.explain))
 			console.log(JSON.stringify(result))

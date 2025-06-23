@@ -83,7 +83,7 @@ function Main() {
 
 	return (
 		<Tag css="wrap">
-			<StoreProvider>
+			<StoreProvider isMiniapp={true}>
 				<MiniappMainPage />
 			</StoreProvider>
 

@@ -23,6 +23,7 @@ const initialState = {
 	browser: "",
 	isMobile: false,
 	isDesktop: true,
+	isMiniapp: false,
 }
 
 export function userReducer(userState = initialState, action) {

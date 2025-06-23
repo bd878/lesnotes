@@ -202,7 +202,7 @@ paths:
                   - $ref: '#/components/schemas/messageFail'
 
   /messages/v2/read:
-    get:
+    post:
       summary: Get user messages or message
       description: |
         Read messages for a given user, a single message, or a specific thread,

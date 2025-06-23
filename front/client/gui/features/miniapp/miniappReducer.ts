@@ -3,6 +3,7 @@ import {VALIDATE_INIT_DATA, VALIDATE_INIT_DATA_SUCCEEDED, MINIAPP_FAILED} from '
 const initialState = {
 	loading: false,
 	valid: false,
+	token: "",
 	error: "",
 }
 
@@ -27,6 +28,7 @@ export function miniappReducer(miniappState = initialState, action) {
 			...miniappState,
 			loading: false,
 			valid: true,
+			token: action.payload,
 			error: "",
 		}
 	}
