@@ -201,6 +201,37 @@ paths:
                   - $ref: '#/components/schemas/messagesListFail'
                   - $ref: '#/components/schemas/messageFail'
 
+  /messages/v2/read:
+    get:
+      summary: Get user messages or message
+      description: |
+        Read messages for a given user, a single message, or a specific thread,
+        or public messages for a user
+      operationId: sendMessageJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/readMessageOrMessagesJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/messagesListResponse'
+                  - $ref: '#/components/schemas/messageResponse'
+
+        "4XX":
+          description: error 
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/messagesListFail'
+                  - $ref: '#/components/schemas/messageFail'
+
   /messages/v1/status:
     get:
       operationId: reportStatus
@@ -388,6 +419,37 @@ components:
             thread_id:
               type: integer
               required: false
+
+    readMessageOrMessagesJson:
+      type: object
+      properties:
+        token:
+          type: string
+          default: ""
+          required: true
+        req:
+          type: object
+          properties:
+            public:
+              type: integer
+              required: false
+              default: 0
+            id:
+              type: integer
+              required: false
+            thread_id:
+              type: integer
+              required: false
+            limit:
+              type: integer
+              required: false
+            offset:
+              type: integer
+              required: False
+            asc:
+              type: integer
+              required: false
+              example: 0
 
     sendMessage:
       oneOf:
