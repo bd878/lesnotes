@@ -1,0 +1,3 @@
+url = https://%STAGE%lesnotes.space/messages/v2/read
+-H "Content-Type: application/json"
+--data-binary %JSON%
