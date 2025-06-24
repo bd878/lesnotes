@@ -54,6 +54,7 @@ func New(cfg Config) *Server {
 	middleware.WithAuth(httpmiddleware.TokenAuthBuilder(userGateway, usermodel.PublicUserID))
 	mux.Handle("/messages/v2/send", middleware.Build(handler.SendMessageJsonAPI))
 	mux.Handle("/messages/v2/read", middleware.Build(handler.ReadMessageOrMessagesJsonAPI))
+	mux.Handle("/messages/v2/publish", middleware.Build(handler.PublishMessageOrMessagesJsonAPI))
 
 	server := &Server{
 		Server: &http.Server{

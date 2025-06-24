@@ -64,11 +64,12 @@ paths:
   /messages/v1/publish:
     parameters:
       - $ref: '#/components/parameters/messageId'
+      - $ref: '#/components/parameters/batchIds'
     put:
-      summary: Make message public
+      summary: Make message or messages public
       description: |
-        Update private field of a message to make it public
-      operationId: publicMessage
+        Update private field of a message or messages to make it public
+      operationId: publicMessageOrMessages
       requestBody:
         content:
           application/json:
@@ -89,14 +90,40 @@ paths:
               schema:
                 $ref: '#/components/schemas/statusErr'
 
+  /messages/v2/publish:
+    put:
+      summary: Make message public public API
+      description: |
+        Update private field of a message to make it public
+      operationId: publicMessageJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/publishMessageOrMessagesJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/publishOk'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/statusErr'
+
   /messages/v1/private:
     parameters:
       - $ref: '#/components/parameters/messageId'
+      - $ref: '#/components/parameters/batchIds'
     put:
-      summary: Make message private
+      summary: Make message or messages private
       description: |
-        Update private field of a message to make it private
-      operationId: privateMessage
+        Update private field of a message or messages to make it private
+      operationId: privateMessageOrMessages
       requestBody:
         content:
           application/json:
@@ -149,7 +176,7 @@ paths:
       - $ref: '#/components/parameters/messageId'
       - $ref: '#/components/parameters/batchIds'
     delete:
-      operationId: deleteMessage
+      operationId: deleteMessageOrMessages
       summary: Delete a message or messages batch
       description: |
         Deletes a user's message and attached file.
@@ -450,6 +477,25 @@ components:
               type: integer
               required: false
               example: 0
+
+    publishMessageOrMessagesJson:
+      type: object
+      properties:
+        token:
+          type: string
+          default: ""
+          required: true
+        req:
+          type: object
+          properties:
+            id:
+              type: integer
+              required: false
+            ids:
+              type: array
+              required: false
+              items:
+                type: integer
 
     sendMessage:
       oneOf:

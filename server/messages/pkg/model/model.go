@@ -120,11 +120,18 @@ type SaveFileResult struct {
 	CreateUTCNano     int64
 }
 
-type ReadMessageOrMessagesJsonRequest struct {
-	Public     *int      `json:"public,omitempty"`
-	MessageID  int32       `json:"id"`
-	ThreadID   int32       `json:"thread_id"`
-	Limit      int       `json:"limit"`
-	Offset     int       `json:"offset"`
-	Asc        int       `json:"asc"`
-}
+type (
+	ReadMessageOrMessagesJsonRequest struct {
+		Public     *int      `json:"public,omitempty"`
+		MessageID  int32       `json:"id"`
+		ThreadID   int32       `json:"thread_id"`
+		Limit      int       `json:"limit"`
+		Offset     int       `json:"offset"`
+		Asc        int       `json:"asc"`
+	}
+
+	PublishMessageOrMessagesJsonRequest struct {
+		MessageID *int32     `json:"id,omitempty"`
+		IDs       *[]int32   `json:"ids,omitempty"`
+	}
+)
