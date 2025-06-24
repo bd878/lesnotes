@@ -18,6 +18,8 @@ async function loadMessagesJson(token, req): LoadMessagesResult {
 		isLastPage: false,
 	}
 
+	api.sendLog(token + " : " + JSON.stringify(req))
+
 	try {
 		response = await api('/messages/v2/read', {
 			method: "POST",

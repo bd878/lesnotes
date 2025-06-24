@@ -16,10 +16,12 @@ function* validateInitData({payload}) {
 		} else {
 			yield put(miniappFailedActionCreator(result.error + ": " + result.explain))
 			console.log(JSON.stringify(result))
+			api.sendLog(JSON.stringify(result))
 		}
 	} catch (e) {
 		yield put(miniappFailedActionCreator(e.message))
 		console.error(e)
+		api.sendLog(e.message)
 	}
 }
 
