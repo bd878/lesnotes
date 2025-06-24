@@ -37,9 +37,30 @@ func (h *Handler) DeleteMessageOrMessages(log *logger.Logger, w http.ResponseWri
 
 	values := req.URL.Query()
 	if values.Get("id") != "" {
-		return h.deleteMessage(log, w, req, user, values.Get("id"))
+		id, err := strconv.Atoi(values.Get("id"))
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+				Status: "error",
+				Description: "invalid id",
+			})
+
+			return err
+		}
+
+		return h.deleteMessage(log, w, req, user, int32(id))
 	} else if values.Get("ids") != "" {
-		return h.deleteMessages(log, w, req, user, values.Get("ids"))
+		var ids []int32
+		if err := json.Unmarshal([]byte(values.Get("ids")), &ids); err != nil {
+			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+				Status: "error",
+				Description: "wrong \"ids\" query field format",
+			})
+
+			return err
+		}
+
+		return h.deleteMessages(log, w, req, user, ids)
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
@@ -51,20 +72,9 @@ func (h *Handler) DeleteMessageOrMessages(log *logger.Logger, w http.ResponseWri
 	}
 }
 
-func (h *Handler) deleteMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request, user *usermodel.User, idValue string) error {
-	id, err := strconv.Atoi(idValue)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "invalid id",
-		})
-
-		return err
-	}
-
-	_, err = h.controller.DeleteMessage(req.Context(), log, &model.DeleteMessageParams{
-		ID: int32(id),
+func (h *Handler) deleteMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request, user *usermodel.User, id int32) error {
+	_, err := h.controller.DeleteMessage(req.Context(), log, &model.DeleteMessageParams{
+		ID: id,
 		UserID: user.ID,
 	})
 	if err != nil {
@@ -82,23 +92,13 @@ func (h *Handler) deleteMessage(log *logger.Logger, w http.ResponseWriter, req *
 			Status: "ok",
 			Description: "deleted",
 		},
-		ID: int32(id),
+		ID: id,
 	})
 
 	return nil
 }
 
-func (h *Handler) deleteMessages(log *logger.Logger, w http.ResponseWriter, req *http.Request, user *usermodel.User, idsValue string) error {
-	var ids []int32
-	if err := json.Unmarshal([]byte(idsValue), &ids); err != nil {
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "wrong \"ids\" query field format",
-		})
-
-		return err
-	}
-
+func (h *Handler) deleteMessages(log *logger.Logger, w http.ResponseWriter, req *http.Request, user *usermodel.User, ids []int32) error {
 	res, err := h.controller.DeleteMessages(req.Context(), log, &model.DeleteMessagesParams{
 		IDs: ids,
 		UserID: user.ID,

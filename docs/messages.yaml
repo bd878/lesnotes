@@ -220,6 +220,33 @@ paths:
               schema:
                 $ref: '#/components/schemas/statusErr'
 
+  /messages/v2/delete:
+    delete:
+      operationId: deleteMessageOrMessagesJson
+      summary: Delete a message or messages batch public API
+      description: |
+        Deletes a user's message and attached file.
+        Thread messages becomes root thread messages, i.e. thread_id = 0
+      operationId: deleteMessageOrMessagesJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/deleteMessageOrMessagesJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/statusOk'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/statusErr'
+
   /messages/v1/read:
     parameters:
       - $ref: '#/components/parameters/public'
@@ -504,6 +531,25 @@ components:
               example: 0
 
     publishMessageOrMessagesJson:
+      type: object
+      properties:
+        token:
+          type: string
+          default: ""
+          required: true
+        req:
+          type: object
+          properties:
+            id:
+              type: integer
+              required: false
+            ids:
+              type: array
+              required: false
+              items:
+                type: integer
+
+    deleteMessageOrMessagesJson:
       type: object
       properties:
         token:

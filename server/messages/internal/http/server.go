@@ -56,6 +56,7 @@ func New(cfg Config) *Server {
 	mux.Handle("/messages/v2/read", middleware.Build(handler.ReadMessageOrMessagesJsonAPI))
 	mux.Handle("/messages/v2/publish", middleware.Build(handler.PublishMessageOrMessagesJsonAPI))
 	mux.Handle("/messages/v2/private", middleware.Build(handler.PrivateMessageOrMessagesJsonAPI))
+	mux.Handle("/messages/v2/delete", middleware.Build(handler.DeleteMessageOrMessagesJsonAPI))
 
 	server := &Server{
 		Server: &http.Server{
