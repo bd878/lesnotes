@@ -207,7 +207,7 @@ paths:
       description: |
         Read messages for a given user, a single message, or a specific thread,
         or public messages for a user
-      operationId: sendMessageJson
+      operationId: readMessageJson
       requestBody:
         content:
           application/json:

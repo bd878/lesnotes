@@ -80,6 +80,8 @@ func (h *Handler) SendMessageJsonAPI(log *logger.Logger, w http.ResponseWriter, 
 		message.Private = false
 	}
 
+	message.UserID = user.ID
+
 	// TODO: check file by file_id exists
 	// TODO: check thread by thread_id exists
 
