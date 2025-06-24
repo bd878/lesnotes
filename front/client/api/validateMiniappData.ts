@@ -6,6 +6,7 @@ async function validateMiniappData(body) {
 		error: "",
 		explain: "",
 		ok: false,
+		token: "",
 	}
 
 	try {
@@ -21,6 +22,7 @@ async function validateMiniappData(body) {
 			result.ok = false
 		} else {
 			result.ok = true
+			result.token = response.value.token
 		}
 	} catch (e) {
 		console.error(i18n("error_occured"), e);
