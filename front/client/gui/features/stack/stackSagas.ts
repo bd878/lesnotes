@@ -40,9 +40,11 @@ interface FetchMessagesPayload {
 function* loadMessages(bodyOrQueryParams) {
 	const isMiniapp = yield select(selectIsMiniapp)
 	if (isMiniapp) {
+		api.sendLog("miniapp")
 		const token = yield select(selectToken)
 		return yield call(api.loadMessagesJson, token, bodyOrQueryParams)
 	} else {
+		api.sendLog("not miniapp")
 		return yield call(api.loadMessages, bodyOrQueryParams)
 	}
 }
