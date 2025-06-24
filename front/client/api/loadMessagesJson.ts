@@ -1,5 +1,6 @@
 import i18n from '../i18n';
 import api from './api';
+import sendLog from './sendLog';
 import models from './models';
 
 interface LoadMessagesResult {
@@ -18,9 +19,9 @@ async function loadMessagesJson(token, req): LoadMessagesResult {
 		isLastPage: false,
 	}
 
-	await api.sendLog(token + " : " + JSON.stringify(req))
-
 	try {
+		await sendLog(token + " : " + JSON.stringify(req))
+
 		response = await api('/messages/v2/read', {
 			method: "POST",
 			body: {

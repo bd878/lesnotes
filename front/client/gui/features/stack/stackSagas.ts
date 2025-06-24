@@ -42,10 +42,13 @@ function* loadMessages(bodyOrQueryParams) {
 	if (isMiniapp) {
 		api.sendLog("miniapp")
 		const token = yield select(selectToken)
-		return yield call(api.loadMessagesJson, token, bodyOrQueryParams)
+		api.sendLog("token: " + token)
+		const response = yield call(api.loadMessagesJson, token, bodyOrQueryParams)
+		return response
 	} else {
 		api.sendLog("not miniapp")
-		return yield call(api.loadMessages, bodyOrQueryParams)
+		const response = yield call(api.loadMessages, bodyOrQueryParams)
+		return response
 	}
 }
 
