@@ -196,6 +196,31 @@ paths:
               schema:
                 $ref: '#/components/schemas/statusErr'
 
+  /messages/v2/update:
+    put:
+      summary: Update a message public API
+      description: |
+        Update a message text or file. Message text cannot be empty
+      operationId: updateMessageJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updateMessageJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/updateOk'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/statusErr'
+
   /messages/v1/delete:
     parameters:
       - $ref: '#/components/parameters/messageId'
@@ -498,6 +523,53 @@ components:
             thread_id:
               type: integer
               required: false
+
+    updateMessageJson:
+      type: object
+      properties:
+        token:
+          type: string
+          default: ""
+          required: true
+        req:
+          oneOf:
+            - type: object
+              properties:
+                id:
+                  type: integer
+                  example: 1
+                  required: true
+                public:
+                  type: integer
+                  example: 1
+                text:
+                  type: string
+                  example: "test message"
+                file_id:
+                  type: string
+                  example: ""
+                thread_id:
+                  type: integer
+                  required: false
+
+            - type: object
+              properties:
+                id:
+                  type: integer
+                  example: 1
+                  required: true
+                public:
+                  type: integer
+                  example: 1
+                text:
+                  type: string
+                  example: "test message"
+                file:
+                  type: string
+                  format: binary
+                thread_id:
+                  type: integer
+                  required: false
 
     readMessageOrMessagesJson:
       type: object

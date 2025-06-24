@@ -2,6 +2,7 @@ package http
 
 import (
 	"net/http"
+	"context"
 	"strconv"
 	"fmt"
 	"encoding/json"
@@ -14,7 +15,7 @@ import (
 )
 
 func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
-	var private, threadID int32
+	var public, threadID int
 
 	user, ok := utils.GetUser(w, req)
 	if !ok {
@@ -52,7 +53,7 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 	text := req.PostFormValue("text")
 
 	if req.PostFormValue("thread_id") != "" {
-		threadid, err := strconv.Atoi(req.PostFormValue("thread_id"))
+		threadID, err = strconv.Atoi(req.PostFormValue("thread_id"))
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(servermodel.ServerResponse{
@@ -62,10 +63,40 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 
 			return err
 		}
-
-		threadID = int32(threadid)
 	} else {
 		threadID = -1
+	}
+
+	if req.PostFormValue("public") != "" {
+		public, err = strconv.Atoi(req.PostFormValue("public"))
+		if err != nil {
+			log.Errorw("wrong public param", "public", public)
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+				Status: "error",
+				Description: "invalid public param",
+			})
+
+			return err
+		}
+	} else {
+		public = -1
+	}
+
+	return h.updateMessage(req.Context(), log, w, int32(id), user, text, int32(threadID), public)
+}
+
+func (h *Handler) updateMessage(ctx context.Context, log *logger.Logger, w http.ResponseWriter, messageID int32, user *usermodel.User,
+	text string, threadID int32, public int,
+) error {
+	var private int32
+
+	if public == 1 {
+		private = 0
+	} else if public == 0 {
+		private = 1
+	} else {
+		private = -1
 	}
 
 	if user.ID == usermodel.PublicUserID && threadID != -1 {
@@ -78,31 +109,6 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 		return nil
 	}
 
-	public := req.PostFormValue("public")
-	if public != "" {
-		publicInt, err := strconv.Atoi(public)
-		if err != nil {
-			log.Errorw("wrong public param", "public", public)
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(servermodel.ServerResponse{
-				Status: "error",
-				Description: "invalid public param",
-			})
-
-			return err
-		}
-
-		if publicInt == 1 {
-			private = 0
-		} else if publicInt == 0 {
-			private = 1
-		} else {
-			private = -1
-		}		
-	} else {
-		private = -1
-	}
-
 	if user.ID == usermodel.PublicUserID && private == 1 {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
@@ -113,8 +119,8 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 		return nil
 	}
 
-	msg, err := h.controller.ReadOneMessage(req.Context(), log, &model.ReadOneMessageParams{
-		ID: int32(id),
+	msg, err := h.controller.ReadOneMessage(ctx, log, &model.ReadOneMessageParams{
+		ID: messageID,
 		UserIDs: []int32{user.ID},
 	})
 	if err != nil {
@@ -141,8 +147,8 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 		text = msg.Text
 	}
 
-	resp, err := h.controller.UpdateMessage(req.Context(), log, &model.UpdateMessageParams{
-		ID:     int32(id),
+	resp, err := h.controller.UpdateMessage(ctx, log, &model.UpdateMessageParams{
+		ID:     messageID,
 		UserID: user.ID,
 		Text:   text,
 		Private: private,

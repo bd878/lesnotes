@@ -139,4 +139,12 @@ type (
 		MessageID *int32     `json:"id,omitempty"`
 		IDs       *[]int32   `json:"ids,omitempty"`
 	}
+
+	UpdateMessageJsonRequest struct {
+		MessageID         *int32 `json:"id,omitempty"`
+		ThreadID          *int32 `json:"thread_id,omitempty"`
+		FileID            *int32 `json:"file_id,omitempty"`
+		Text              *string `json:"text,omitempty"`
+		Public           *int `json:"public,omitempty"`
+	}
 )
