@@ -134,4 +134,9 @@ type (
 		MessageID *int32     `json:"id,omitempty"`
 		IDs       *[]int32   `json:"ids,omitempty"`
 	}
+
+	PrivateMessageOrMessagesJsonRequest struct {
+		MessageID *int32     `json:"id,omitempty"`
+		IDs       *[]int32   `json:"ids,omitempty"`
+	}
 )

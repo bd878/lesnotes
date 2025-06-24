@@ -37,9 +37,30 @@ func (h *Handler) PrivateMessageOrMessages(log *logger.Logger, w http.ResponseWr
 
 	values := req.URL.Query()
 	if values.Get("id") != "" {
-		return h.privateMessage(log, w, req, user, values.Get("id"))
+		id, err := strconv.Atoi(values.Get("id"))
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+				Status: "error",
+				Description: "invalid id",
+			})
+
+			return err
+		}
+
+		return h.privateMessage(log, w, req, user, int32(id))
 	} else if values.Get("ids") != "" {
-		return h.privateMessages(log, w, req, user, values.Get("ids"))
+		var ids []int32
+		if err := json.Unmarshal([]byte(values.Get("ids")), &ids); err != nil {
+			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+				Status: "error",
+				Description: "wrong \"ids\" query field format",
+			})
+
+			return err
+		}
+
+		return h.privateMessages(log, w, req, user, ids)
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
@@ -51,20 +72,9 @@ func (h *Handler) PrivateMessageOrMessages(log *logger.Logger, w http.ResponseWr
 	}
 }
 
-func (h *Handler) privateMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request, user *usermodel.User, idValue string) error {
-	id, err := strconv.Atoi(idValue)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "invalid id",
-		})
-
-		return err
-	}
-
+func (h *Handler) privateMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request, user *usermodel.User, id int32) error {
 	res, err := h.controller.PrivateMessages(req.Context(), log, &model.PrivateMessagesParams{
-		IDs: []int32{int32(id)},
+		IDs: []int32{id},
 		UserID: user.ID,
 	})
 	if err != nil {
@@ -83,23 +93,13 @@ func (h *Handler) privateMessage(log *logger.Logger, w http.ResponseWriter, req 
 			Description: "private",
 		},
 		UpdateUTCNano: res.UpdateUTCNano,
-		IDs: []int32{int32(id)},
+		IDs: []int32{id},
 	})
 
 	return nil
 }
 
-func (h *Handler) privateMessages(log *logger.Logger, w http.ResponseWriter, req *http.Request, user *usermodel.User, idsValue string) error {
-	var ids []int32
-	if err := json.Unmarshal([]byte(idsValue), &ids); err != nil {
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "wrong \"ids\" query field format",
-		})
-
-		return err
-	}
-
+func (h *Handler) privateMessages(log *logger.Logger, w http.ResponseWriter, req *http.Request, user *usermodel.User, ids []int32) error {
 	res, err := h.controller.PrivateMessages(req.Context(), log, &model.PrivateMessagesParams{
 		IDs: ids,
 		UserID: user.ID,
