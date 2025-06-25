@@ -123,8 +123,8 @@ type SaveFileResult struct {
 type (
 	ReadMessageOrMessagesJsonRequest struct {
 		Public     *int      `json:"public,omitempty"`
-		MessageID  int32       `json:"id"`
-		ThreadID   int32       `json:"thread_id"`
+		MessageID  int32     `json:"id"`
+		ThreadID   int32     `json:"thread_id"`
 		Limit      int       `json:"limit"`
 		Offset     int       `json:"offset"`
 		Asc        int       `json:"asc"`
@@ -141,10 +141,10 @@ type (
 	}
 
 	UpdateMessageJsonRequest struct {
-		MessageID         *int32 `json:"id,omitempty"`
-		ThreadID          *int32 `json:"thread_id,omitempty"`
-		FileID            *int32 `json:"file_id,omitempty"`
-		Text              *string `json:"text,omitempty"`
-		Public           *int `json:"public,omitempty"`
+		MessageID  *int32    `json:"id,omitempty"`
+		ThreadID   *int32    `json:"thread_id,omitempty"`
+		FileID     *int32    `json:"file_id,omitempty"`
+		Text       *string   `json:"text,omitempty"`
+		Public     *int      `json:"public,omitempty"`
 	}
 )
