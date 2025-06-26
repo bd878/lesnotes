@@ -29,7 +29,7 @@ const themeParams = {
 	subtitle_text_color: '#708499',
 	text_color: '#f5f5f5',
 } as const;
-
+// Amazon OTP : 97530386
 mockTelegramEnv({
 	launchParams: {
 		tgWebAppThemeParams: themeParams,
@@ -82,7 +82,7 @@ function Main() {
 		);
 
 	return (
-		<Tag css="wrap">
+		<Tag css="wrap" style="background-color: var(--tg-theme-bg-color)">
 			<StoreProvider isMiniapp={true}>
 				<MiniappMainPage />
 			</StoreProvider>
