@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import {mockTelegramEnv, emitEvent, isTMA, mockTelegramEnv, emitEvent, init, backButton} from '@telegram-apps/sdk-react';
+import {mockTelegramEnv, emitEvent, isTMA, mockTelegramEnv, emitEvent, init, backButton, setDebug, bindThemeParamsCssVars, isThemeParamsCssVarsBound} from '@telegram-apps/sdk-react';
 import Tag from '../../components/Tag';
 import Footer from '../../components/Footer';
 import MiniappMainPage from '../../components/MiniappMainPage';
@@ -67,8 +67,15 @@ mockTelegramEnv({
 	},
 })
 
+setDebug(true);
 init();
 backButton.mount();
+
+if (bindThemeParamsCssVars.isAvailable()) {
+	bindThemeParamsCssVars()
+} else {
+	console.log("theme params not available")
+}
 
 function Main() {
 	if (!isTMA())
@@ -82,7 +89,7 @@ function Main() {
 		);
 
 	return (
-		<Tag css="wrap" style={{backgroundColor: "var(--tg-theme-bg-color)"}}>
+		<Tag css="wrap bg-(--tg-theme-bg-color)">
 			<StoreProvider isMiniapp={true}>
 				<MiniappMainPage />
 			</StoreProvider>

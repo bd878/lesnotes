@@ -1,7 +1,7 @@
 import React, {useEffect, lazy} from 'react';
 import ReactDOM from 'react-dom/client';
 import {connect} from '../../../third_party/react-redux';
-import {useRawInitData} from '@telegram-apps/sdk-react';
+import {useRawInitData, useLaunchParams} from '@telegram-apps/sdk-react';
 import Tag from '../../components/Tag';
 import i18n from '../../../i18n';
 import {
@@ -22,10 +22,13 @@ function MiniappMainPageComponent(props) {
 	} = props
 
 	const initData = useRawInitData()
+	const launchParams = useLaunchParams()
 
 	useEffect(() => {
 		validate(initData)
 	}, [initData])
+
+	console.log(launchParams)
 
 	return (
 		<Tag css="wrap dark">
