@@ -82,7 +82,7 @@ function Main() {
 		);
 
 	return (
-		<Tag css="wrap" style="background-color: var(--tg-theme-bg-color)">
+		<Tag css="wrap" style={{backgroundColor: "var(--tg-theme-bg-color)"}}>
 			<StoreProvider isMiniapp={true}>
 				<MiniappMainPage />
 			</StoreProvider>
