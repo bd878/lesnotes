@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import {mockTelegramEnv, emitEvent, isTMA, mockTelegramEnv, emitEvent, init, backButton, setDebug, bindThemeParamsCssVars, isThemeParamsCssVarsBound} from '@telegram-apps/sdk-react';
+import {mockTelegramEnv, emitEvent, isTMA, mockTelegramEnv, emitEvent, init, backButton, setDebug, bindThemeParamsCssVars, isThemeParamsCssVarsBound, themeParams} from '@telegram-apps/sdk-react';
 import Tag from '../../components/Tag';
 import Footer from '../../components/Footer';
 import MiniappMainPage from '../../components/MiniappMainPage';
@@ -14,7 +14,7 @@ const noInsets = {
 	bottom: 0,
 	right: 0,
 } as const;
-const themeParams = {
+const mockThemeParams = {
 	accent_text_color: '#6ab2f2',
 	bg_color: '#17212b',
 	button_color: '#5288c1',
@@ -32,7 +32,7 @@ const themeParams = {
 // Amazon OTP : 97530386
 mockTelegramEnv({
 	launchParams: {
-		tgWebAppThemeParams: themeParams,
+		tgWebAppThemeParams: mockThemeParams,
 		tgWebAppData: new URLSearchParams([
 			['user', JSON.stringify({
 				id: 1,
@@ -48,7 +48,7 @@ mockTelegramEnv({
 	},
 	onEvent(e) {
 		if (e[0] === 'web_app_request_theme') {
-			return emitEvent('theme_changed', { theme_params: themeParams });
+			return emitEvent('theme_changed', { theme_params: mockThemeParams });
 		}
 		if (e[0] === 'web_app_request_viewport') {
 			return emitEvent('viewport_changed', {
@@ -69,13 +69,13 @@ mockTelegramEnv({
 
 setDebug(true);
 init();
-backButton.mount();
-
-if (bindThemeParamsCssVars.isAvailable()) {
+if (themeParams.mountSync.isAvailable()) {
+	themeParams.mountSync()
+	console.log("theme params mounted?:", themeParams.isMounted())
 	bindThemeParamsCssVars()
-} else {
-	console.log("theme params not available")
+	console.log("is theme params css bound?:", isThemeParamsCssVarsBound())
 }
+backButton.mount();
 
 function Main() {
 	if (!isTMA())
