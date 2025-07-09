@@ -1,4 +1,4 @@
-import React, {useEffect, lazy} from 'react';
+import React, {useEffect} from 'react';
 import ReactDOM from 'react-dom/client';
 import {connect} from '../../../third_party/react-redux';
 import {useRawInitData, useLaunchParams, themeParams} from '@telegram-apps/sdk-react';
@@ -10,8 +10,7 @@ import {
 	validateInitDataActionCreator,
 } from '../../features/miniapp';
 import {selectStack} from '../../features/stack';
-
-const MiniappThread = lazy(() => import("../MiniappThread"));
+import MiniappThread from '../MiniappThread'
 
 function MiniappMainPageComponent(props) {
 	const {
