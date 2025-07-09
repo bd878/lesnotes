@@ -1,5 +1,6 @@
 import React, {useEffect} from 'react';
 import ReactDOM from 'react-dom/client';
+import {connect} from '../../../third_party/react-redux';
 import {
 	LIMIT_LOAD_BY,
 	LOAD_ORDER,
