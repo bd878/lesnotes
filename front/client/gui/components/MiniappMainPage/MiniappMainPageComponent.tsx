@@ -40,7 +40,6 @@ function MiniappMainPageComponent(props) {
 			{valid ? stack.map((elem, index) => (
 				<MiniappThread
 					key={elem.ID}
-					thread={elem}
 					index={index}
 				/>
 			)) : "invalid"}
