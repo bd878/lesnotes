@@ -4,6 +4,7 @@ import {connect} from '../../../third_party/react-redux';
 import {useRawInitData, useLaunchParams, themeParams} from '@telegram-apps/sdk-react';
 import Tag from '../../components/Tag';
 import i18n from '../../../i18n';
+import api from '../../../api';
 import {
 	selectIsLoading,
 	selectIsValid,
@@ -26,6 +27,11 @@ function MiniappMainPageComponent(props) {
 	useEffect(() => {
 		validate(initData)
 	}, [initData])
+
+	useEffect(() => {
+		api.sendLog("send launch params")
+		api.sendLog(JSON.stringify(launchParams.tgWebAppThemeParams))
+	}, [launchParams])
 
 	useEffect(() => {
 		console.log("theme params state:", themeParams.state())
