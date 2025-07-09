@@ -11,7 +11,7 @@ import {
 } from '../../features/miniapp';
 import {selectStack} from '../../features/stack';
 
-const Thread = lazy(() => import("../Thread"));
+const MiniappThread = lazy(() => import("../MiniappThread"));
 
 function MiniappMainPageComponent(props) {
 	const {
@@ -33,20 +33,15 @@ function MiniappMainPageComponent(props) {
 	}, [])
 
 	return (
-		<Tag css="wrap dark">
+		<Tag css="wrap">
 			<Tag>{loading ? "loading..." : "loaded"}</Tag>
 			<Tag css="bg-white">{"Miniapp"}</Tag>
 
 			{valid ? stack.map((elem, index) => (
-				<Thread
-					css={index > 0 ? "ml-4" : ""}
+				<MiniappThread
 					key={elem.ID}
 					thread={elem}
 					index={index}
-					destroyThread={() => () => {}}
-					openThread={() => () => {}}
-					closeThread={() => () => {}}
-					destroyContent={index === 0 ? "< " + i18n("logout") : ("X " + i18n("close_button_text"))}
 				/>
 			)) : "invalid"}
 		</Tag>

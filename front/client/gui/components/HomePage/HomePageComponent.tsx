@@ -19,7 +19,6 @@ function HomePageComponent(props) {
 				<Thread
 					css={index > 0 ? "ml-4" : ""}
 					key={elem.ID}
-					thread={elem}
 					index={index}
 					destroyThread={destroyThread(index)}
 					openThread={openThread(index)}
