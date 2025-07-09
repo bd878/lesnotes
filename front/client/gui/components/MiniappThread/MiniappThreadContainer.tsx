@@ -24,8 +24,8 @@ function MiniappThreadContainer(props) {
 
 	return (
 		<Tag>
-			{messages.map((message, index) => (
-				<Tag key={index} css="px-2 py-1">{message.text}</Tag>
+			{messages.map((message) => (
+				<Tag key={message.ID} css="px-2 py-1">{message.text}</Tag>
 			))}
 		</Tag>
 	)
