@@ -54,6 +54,7 @@ function* loadMessages(bodyOrQueryParams) {
 
 function* fetchMessages({index, payload}: {payload: FetchMessagesPayload}) {
 	try {
+		api.sendLog("fetch message")
 		const response = yield call(loadMessages,
 			{limit: payload.limit, offset: payload.offset, order: payload.order, threadID: payload.threadID})
 

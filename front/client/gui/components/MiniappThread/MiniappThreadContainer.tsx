@@ -8,6 +8,7 @@ import {
 	fetchMessagesActionCreator,
 	selectMessages,
 	selectThreadID,
+	selectError,
 } from '../../features/stack';
 import Tag from '../../components/Tag';
 
@@ -15,6 +16,7 @@ function MiniappThreadContainer(props) {
 	const {
 		threadID,
 		messages,
+		error,
 		fetchMessages,
 	} = props
 
@@ -24,7 +26,7 @@ function MiniappThreadContainer(props) {
 
 	return (
 		<Tag>
-			{messages.map((message) => (
+			{error ? null : messages.map((message) => (
 				<Tag key={message.ID} css="px-2 py-1">{message.text}</Tag>
 			))}
 		</Tag>
@@ -34,6 +36,7 @@ function MiniappThreadContainer(props) {
 const mapStateToProps = (state, {index}) => ({
 	messages: selectMessages(index)(state),
 	threadID: selectThreadID(index)(state),
+	error: selectError(index)(state),
 })
 
 const mapDispatchToProps = (dispatch, {index}) => ({
