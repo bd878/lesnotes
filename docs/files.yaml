@@ -13,6 +13,54 @@ paths:
       summary: Uploads a file
       description: |
         Uploads a file on server
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/uploadFile'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/uploadOk'
+        "4XX":
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/statusErr'
+
+  /files/v2/upload:
+    parameters:
+      token:
+        in: path
+        type: string
+        required: true
+    post:
+      operationId: uploadFileV2
+      summary: Upload a file
+      description: |
+        Upload a file on server with a token given in path
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/uploadFile'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/uploadOk'
+        "4XX":
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/statusErr'              
 
   /files/v1/download:
     security:
@@ -52,6 +100,29 @@ paths:
 
 components:
   schemas:
+    uploadFile:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+
+    uploadOk:
+      type: object
+      properties:
+        status:
+          type: string
+          default: "ok"
+        description:
+          type: string
+          default: "saved"
+        id:
+          type: integer
+          required: true
+        name:
+          type: string
+          required: true
+
     statusOk:
       type: object
       properties:

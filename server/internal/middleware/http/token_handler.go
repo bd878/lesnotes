@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"io"
+	"errors"
 	"context"
 	"net/http"
 	"encoding/json"
@@ -26,6 +27,37 @@ func TokenAuthBuilder(gateway userGateway, publicUserID int32) MiddlewareFunc {
 }
 
 func (b *tokenAuthBuilder) Handle(log *logger.Logger, w http.ResponseWriter, req *http.Request) (err error) {
+	if req.Header.Get("content-type") == "multipart/form-data" {
+		return b.handleMultipartFormData(log, w, req)
+	} else {
+		return b.handleJson(log, w, req)
+	}
+}
+
+func (b *tokenAuthBuilder) handleMultipartFormData(log *logger.Logger, w http.ResponseWriter, req *http.Request) (err error) {
+	var user *usermodel.User
+
+	if req.URL.Query().Has("token") {
+		user, err = b.restoreAuthorizedUser(log, w, req, req.URL.Query().Get("token"))
+	} else {
+		err = errors.New("multipart/form-data has no token param")
+	}
+
+	if err != nil {
+		log.Errorw("auth middleware failed to restore user, error occured, exit", "error", err)
+		json.NewEncoder(w).Encode(model.ServerResponse{
+			Status: "error",
+			Description: "token not found",
+		})
+		return
+	}
+
+	req = req.WithContext(context.WithValue(req.Context(), UserContextKey{}, user))
+
+	return b.next.Handle(log, w, req)
+}
+
+func (b *tokenAuthBuilder) handleJson(log *logger.Logger, w http.ResponseWriter, req *http.Request) (err error) {
 	var user *usermodel.User
 
 	data, err := io.ReadAll(req.Body)
@@ -68,8 +100,8 @@ func (b *tokenAuthBuilder) Handle(log *logger.Logger, w http.ResponseWriter, req
 		return
 	}
 
-	req = req.WithContext(context.WithValue(req.Context(), UserContextKey{}, user))
 	req = req.WithContext(context.WithValue(req.Context(), RequestContextKey{}, jsonApiRequest.Req))
+	req = req.WithContext(context.WithValue(req.Context(), UserContextKey{}, user))
 
 	return b.next.Handle(log, w, req)
 }
