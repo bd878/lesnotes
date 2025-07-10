@@ -22,7 +22,7 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 		private, hasFile bool
 	)
 
-	if err = req.ParseMultipartForm(1); err != nil {
+	if err = req.ParseMultipartForm(21 << 10) /* 21 MB */; err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status: "error",

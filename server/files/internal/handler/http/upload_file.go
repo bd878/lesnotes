@@ -28,7 +28,7 @@ func (h *Handler) uploadFile(log *logger.Logger, w http.ResponseWriter, req *htt
 		return errors.New("user required")
 	}
 
-	if err := req.ParseMultipartForm(1); err != nil {
+	if err := req.ParseMultipartForm(21 << 10) /* 21 MB */; err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status: "error",
