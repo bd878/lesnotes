@@ -3,6 +3,7 @@ package middleware
 import (
 	"io"
 	"errors"
+	"bytes"
 	"context"
 	"net/http"
 	"encoding/json"
@@ -27,7 +28,7 @@ func TokenAuthBuilder(gateway userGateway, publicUserID int32) MiddlewareFunc {
 }
 
 func (b *tokenAuthBuilder) Handle(log *logger.Logger, w http.ResponseWriter, req *http.Request) (err error) {
-	if req.Header.Get("content-type") == "multipart/form-data" {
+	if bytes.Contains([]byte(req.Header.Get("content-type")), []byte("multipart/form-data")) {
 		return b.handleMultipartFormData(log, w, req)
 	} else {
 		return b.handleJson(log, w, req)
