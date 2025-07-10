@@ -66,16 +66,6 @@ func (h *Handler) SendMessageJsonAPI(log *logger.Logger, w http.ResponseWriter, 
 		return nil
 	}
 
-	if message.FileID != 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "cannot save with file_id yet",
-		})
-
-		return nil
-	}
-
 	if user.ID == usermodel.PublicUserID {
 		message.Private = false
 	}
