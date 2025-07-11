@@ -49,10 +49,10 @@ WHERE id = :id AND (user_id = :userId OR private = 0)
 
 func (r *Repository) SaveFile(ctx context.Context, log *logger.Logger, file *model.File) error {
 	var privateCol sql.NullInt32
-	if *file.Private == true {
+	if file.Private {
 		privateCol.Int32 = 1
 		privateCol.Valid = true
-	} else if *file.Private == false {
+	} else {
 		privateCol.Int32 = 0
 		privateCol.Valid = true
 	}
@@ -89,18 +89,13 @@ func (r *Repository) ReadFile(ctx context.Context, log *logger.Logger, params *m
 		UserID:            userId,
 		Name:              name,
 		CreateUTCNano:     createUTCNano,
+		Private:           true,
 	}
 
-	var private bool
 	if privateCol.Valid {
 		if privateCol.Int32 == 0 {
-			private = false
-		} else if privateCol.Int32 == 1 {
-			private = true
+			msg.Private = false
 		}
-		msg.Private = &private
-	} else {
-		msg.Private = nil
 	}
 
 	switch {

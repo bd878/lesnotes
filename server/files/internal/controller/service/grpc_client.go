@@ -142,6 +142,7 @@ func (f *Files) SaveFileStream(ctx context.Context, log *logger.Logger, fileStre
 			File: &api.File{
 				Name:    params.Name,
 				UserId:  params.UserID,
+				Private: params.Private,
 			},
 		},
 	})

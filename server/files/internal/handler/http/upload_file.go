@@ -64,6 +64,7 @@ func (h *Handler) uploadFile(log *logger.Logger, w http.ResponseWriter, req *htt
 	fileResult, err := h.controller.SaveFileStream(req.Context(), log, f, &model.SaveFileParams{
 		UserID: user.ID,
 		Name:   fileName,
+		Private: false,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

@@ -52,6 +52,7 @@ func (h *Handler) ReadBatchFiles(ctx context.Context, req *api.ReadBatchFilesReq
 		}
 
 		files[id] = file
+		files[id].Private = file.Private
 	}
 
 	return &api.ReadBatchFilesResponse{
@@ -98,6 +99,7 @@ func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.F
 				UserId:         file.UserID,
 				Name:           file.Name,
 				CreateUtcNano:  file.CreateUTCNano,
+				Private:        file.Private,
 				Size:           size,
 			},
 		},
@@ -153,6 +155,7 @@ func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) error {
 		UserID:          file.File.UserId,
 		Name:            file.File.Name,
 		CreateUTCNano:   timeCreated,
+		Private:         file.File.Private,
 	})
 	if err != nil {
 		logger.Errorw("failed to save file meta", "user_id", file.File.UserId, "name", file.File.Name, "error", err)
