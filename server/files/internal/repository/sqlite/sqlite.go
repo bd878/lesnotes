@@ -36,7 +36,7 @@ INSERT INTO files(
 	selectStmt := utils.Must(pool.Prepare(`
 SELECT id, user_id, name, create_utc_nano, private
 FROM files
-WHERE id = :id AND user_id = :userId
+WHERE id = :id AND (user_id = :userId OR private = 0)
 ;`,
 	))
 
@@ -49,8 +49,11 @@ WHERE id = :id AND user_id = :userId
 
 func (r *Repository) SaveFile(ctx context.Context, log *logger.Logger, file *model.File) error {
 	var privateCol sql.NullInt32
-	if file.Private {
+	if *file.Private == true {
 		privateCol.Int32 = 1
+		privateCol.Valid = true
+	} else if *file.Private == false {
+		privateCol.Int32 = 0
 		privateCol.Valid = true
 	}
 
@@ -86,13 +89,18 @@ func (r *Repository) ReadFile(ctx context.Context, log *logger.Logger, params *m
 		UserID:            userId,
 		Name:              name,
 		CreateUTCNano:     createUTCNano,
-		Private:           true,
 	}
 
+	var private bool
 	if privateCol.Valid {
 		if privateCol.Int32 == 0 {
-			msg.Private = false
+			private = false
+		} else if privateCol.Int32 == 1 {
+			private = true
 		}
+		msg.Private = &private
+	} else {
+		msg.Private = nil
 	}
 
 	switch {

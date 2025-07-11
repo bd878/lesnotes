@@ -11,7 +11,7 @@ func FileToProto(file *File) *api.File {
 		CreateUtcNano: file.CreateUTCNano,
 		Size:          file.Size,
 		Error:         file.Error,
-		Private:       file.Private,
+		Private:       *file.Private,
 	}
 }
 
@@ -22,7 +22,7 @@ func FileFromProto(proto *api.File) *File {
 		CreateUTCNano:     proto.CreateUtcNano,
 		Error:             proto.Error,
 		Size:              proto.Size,
-		Private:           proto.Private,
+		Private:           &proto.Private,
 	}
 }
 
