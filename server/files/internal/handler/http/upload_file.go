@@ -10,13 +10,24 @@ import (
 	"github.com/bd878/gallery/server/utils"
 	"github.com/bd878/gallery/server/files/pkg/model"
 	servermodel "github.com/bd878/gallery/server/pkg/model"
+	usermodel "github.com/bd878/gallery/server/users/pkg/model"
 )
 
 func (h *Handler) UploadFile(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
-	return h.uploadFile(log, w, req)
+	return h.uploadFile(log, w, req, 0)
 }
 
-func (h *Handler) uploadFile(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) uploadFile(log *logger.Logger, w http.ResponseWriter, req *http.Request, public int) error {
+	var private bool
+
+	if public > 0 {
+		private = false
+	} else if public == 0 {
+		private = true
+	} else {
+		private = true
+	}
+
 	user, ok := utils.GetUser(w, req)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
@@ -26,6 +37,10 @@ func (h *Handler) uploadFile(log *logger.Logger, w http.ResponseWriter, req *htt
 		})
 
 		return errors.New("user required")
+	}
+
+	if user.ID == usermodel.PublicUserID {
+		private = false
 	}
 
 	if err := req.ParseMultipartForm(21 << 10) /* 21 MB */; err != nil {
@@ -64,7 +79,7 @@ func (h *Handler) uploadFile(log *logger.Logger, w http.ResponseWriter, req *htt
 	fileResult, err := h.controller.SaveFileStream(req.Context(), log, f, &model.SaveFileParams{
 		UserID: user.ID,
 		Name:   fileName,
-		Private: false,
+		Private: private,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

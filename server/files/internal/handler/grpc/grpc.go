@@ -149,7 +149,7 @@ func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) error {
 
 	id := utils.RandomID()
 	timeCreated := time.Now().UnixNano()
-	
+
 	err = h.repo.SaveFile(context.Background(), logger.Default(), &model.File{
 		ID:              id,
 		UserID:          file.File.UserId,
