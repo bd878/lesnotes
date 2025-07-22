@@ -1,10 +1,20 @@
 import React from 'react';
 import Tag from '../Tag';
+import cn from 'classnames';
+import * as is from '../../../third_party/is'
 
 function FooterComponent(props) {
+	const {
+		textColor,
+	} = props
+
+	const css = cn(textColor, "text-sm", {
+		"text-gray-950 dark:text-white": !textColor,
+	})
+
 	return (
 		<Tag css="w-full flex justify-center">
-			<Tag css="text-sm text-gray-950 dark:text-white text-(--tg-theme-text-color)">Les notes © 2025</Tag>
+			<Tag css={css}>Les notes © 2025</Tag>
 		</Tag>
 	)
 }

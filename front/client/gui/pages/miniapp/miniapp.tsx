@@ -94,7 +94,7 @@ function Main() {
 				<MiniappMainPage />
 			</StoreProvider>
 
-			<Footer />
+			<Footer textColor="text-(--tg-theme-text-color)" />
 		</Tag>
 	);
 }
