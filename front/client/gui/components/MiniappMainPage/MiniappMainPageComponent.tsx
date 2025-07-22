@@ -39,9 +39,6 @@ function MiniappMainPageComponent(props) {
 
 	return (
 		<Tag css="wrap">
-			<Tag>{loading ? "loading..." : "loaded"}</Tag>
-			<Tag css="bg-white">{"Miniapp"}</Tag>
-
 			{valid ? stack.map((elem, index) => (
 				<MiniappThread
 					key={elem.ID}

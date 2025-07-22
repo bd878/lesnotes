@@ -6,7 +6,6 @@ import Footer from '../../components/Footer';
 import MiniappMainPage from '../../components/MiniappMainPage';
 import StoreProvider from '../../providers/Store';
 import i18n from '../../../i18n';
-import _ from './mock';
 
 const noInsets = {
 	left: 0,
@@ -29,7 +28,7 @@ const mockThemeParams = {
 	subtitle_text_color: '#708499',
 	text_color: '#f5f5f5',
 } as const;
-// Amazon OTP : 97530386
+
 mockTelegramEnv({
 	launchParams: {
 		tgWebAppThemeParams: mockThemeParams,
@@ -69,6 +68,7 @@ mockTelegramEnv({
 
 setDebug(true);
 init();
+
 if (themeParams.mountSync.isAvailable()) {
 	themeParams.mountSync()
 	console.log("theme params mounted?:", themeParams.isMounted())
