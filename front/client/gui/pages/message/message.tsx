@@ -11,7 +11,7 @@ function Message() {
 	return (
 		<Tag css="wrap">
 			<StoreProvider>
-				<Tag css="grow w-full">
+				<Tag css="grow w-full whitespace-pre-wrap">
 					<MessagePage id={id} />
 				</Tag>
 			</StoreProvider>
