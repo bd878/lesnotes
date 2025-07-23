@@ -2,6 +2,7 @@ package messages
 
 import (
 	"context"
+	"fmt"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
@@ -10,6 +11,7 @@ import (
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/logger"
 	messagesmodel "github.com/bd878/gallery/server/messages/pkg/model"
+	"github.com/bd878/gallery/server/messages/pkg/loadbalance"
 )
 
 type Gateway struct {
@@ -25,7 +27,14 @@ func New(messagesAddr string) *Gateway {
 }
 
 func (g *Gateway) setupConnection() {
-	conn, err := grpc.NewClient(g.messagesAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(
+		fmt.Sprintf(
+			"%s:///%s",
+			loadbalance.Name,
+			g.messagesAddr,
+		),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 	if err != nil {
 		panic(err)
 	}

@@ -10,7 +10,7 @@ import (
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/logger"
-	"github.com/bd878/gallery/server/messages/internal/loadbalance"
+	"github.com/bd878/gallery/server/messages/pkg/loadbalance"
 	"github.com/bd878/gallery/server/messages/pkg/model"
 )
 

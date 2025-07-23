@@ -1,5 +1,7 @@
 package loadbalance
 
 import (
-	_ "github.com/bd878/gallery/server/messages/internal/loadbalance"
+	"github.com/bd878/gallery/server/messages/internal/loadbalance"
 )
+
+const Name = loadbalance.Name
