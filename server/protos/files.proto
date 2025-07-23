@@ -39,6 +39,8 @@ message SaveFileStreamResponse {
 message ReadFileStreamRequest {
 	int32    id = 1;
 	int32    user_id = 2;
+	string   name = 3;
+	bool     public = 4;
 }
 
 message ReadBatchFilesRequest {

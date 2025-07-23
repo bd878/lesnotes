@@ -72,10 +72,15 @@ func (h *Handler) ReadFile(ctx context.Context, req *api.ReadFileRequest) (
 }
 
 func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.Files_ReadFileStreamServer) error {
-	file, err := h.repo.ReadFile(context.Background(), logger.Default(), &model.ReadFileParams{ID: params.Id, UserID: params.UserId})
+	file, err := h.repo.ReadFile(context.Background(), logger.Default(), &model.ReadFileParams{ID: params.Id, Name: params.Name, UserID: params.UserId})
 	if err != nil {
-		logger.Errorw("failed to read file", "user_id", params.UserId, "id", params.Id, "error", err)
+		logger.Errorw("failed to read file", "user_id", params.UserId, "id", params.Id, "name", params.Name, "public", params.Public, "error", err)
 		return err
+	}
+
+	if file.Private && params.Public {
+		logger.Errorw("failed to read private file", "user_id", params.UserId, "id", params.Id, "name", params.Name, "public", params.Public)
+		return errors.New("cannot read private file, when public requested")
 	}
 
 	ff, err := os.Open(filepath.Join(h.dataPath, fmt.Sprintf("%d/%d", file.UserID, file.ID)))

@@ -42,8 +42,9 @@ func New(cfg Config) *Server {
 
 	middleware.NoAuth()
 	mux.Handle("/files/v1/status", middleware.Build(handler.GetStatus))
+	mux.Handle("/files/v2/{user_id}/{name}", middleware.Build(handler.DownloadFileV2))
 
-	middleware.WithAuth(httpmiddleware.TokenAuthBuilder(userGateway, usermodel.PublicUserID))
+	middleware.NoAuth().WithAuth(httpmiddleware.TokenAuthBuilder(userGateway, usermodel.PublicUserID))
 	mux.Handle("/files/v2/upload", middleware.Build(handler.UploadFileV2))
 
 	server := &Server{

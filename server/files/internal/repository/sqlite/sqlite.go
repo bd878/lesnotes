@@ -36,7 +36,7 @@ INSERT INTO files(
 	selectStmt := utils.Must(pool.Prepare(`
 SELECT id, user_id, name, create_utc_nano, private
 FROM files
-WHERE id = :id AND (user_id = :userId OR private = 0)
+WHERE (id = :id OR name = :name) AND (user_id = :userId OR private = 0)
 ;`,
 	))
 
@@ -81,7 +81,7 @@ func (r *Repository) ReadFile(ctx context.Context, log *logger.Logger, params *m
 		privateCol sql.NullInt32
 	)
 
-	err := r.selectStmt.QueryRowContext(ctx, sql.Named("id", params.ID),
+	err := r.selectStmt.QueryRowContext(ctx, sql.Named("id", params.ID), sql.Named("name", params.Name),
 		sql.Named("userId", params.UserID)).Scan(&id, &userId, &name, &createUTCNano, &privateCol)
 
 	msg := &model.File{
@@ -100,11 +100,11 @@ func (r *Repository) ReadFile(ctx context.Context, log *logger.Logger, params *m
 
 	switch {
 	case err == sql.ErrNoRows:
-		log.Errorw("failed to read file, no rows found", "id", params.ID, "user_id", params.UserID)
+		log.Errorw("failed to read file, no rows found", "id", params.ID, "name", params.Name, "user_id", params.UserID)
 		return nil, err
 
 	case err != nil:
-		log.Errorw("failed to read file, unknown error", "id", params.ID, "user_id", params.UserID)
+		log.Errorw("failed to read file, unknown error", "id", params.ID, "name", params.Name, "user_id", params.UserID)
 		return nil, err
 
 	default:

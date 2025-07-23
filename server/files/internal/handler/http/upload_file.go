@@ -43,7 +43,7 @@ func (h *Handler) uploadFile(log *logger.Logger, w http.ResponseWriter, req *htt
 		private = false
 	}
 
-	if err := req.ParseMultipartForm(21 << 10) /* 21 MB */; err != nil {
+	if err := req.ParseMultipartForm(50 << 10) /* 50 MB */; err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status: "error",

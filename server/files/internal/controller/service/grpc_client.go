@@ -99,6 +99,8 @@ func (f *Files) ReadFileStream(ctx context.Context, log *logger.Logger, params *
 	stream, err := f.client.ReadFileStream(ctx, &api.ReadFileStreamRequest{
 		Id:      params.FileID,
 		UserId:  params.UserID,
+		Name:    params.FileName,
+		Public:  params.Public,
 	})
 	if err != nil {
 		log.Errorln("failed to open read stream")

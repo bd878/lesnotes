@@ -13,13 +13,16 @@ type File struct {
 }
 
 type ReadFileParams struct {
-	ID             int32         `json:"id"`
+	ID             int32         `json:"id,omitempty"`
+	Name           string        `json:"name,omitempty"`
 	UserID         int32         `json:"user_id"`
 }
 
 type ReadFileStreamParams struct {
-	FileID         int32         `json:"file_id"`
+	FileName       string        `json:"name,omitempty"`
+	FileID         int32         `json:"file_id,omitempty"`
 	UserID         int32         `json:"user_id"`
+	Public         bool          `json:"public,omitempty"`
 }
 
 type SaveFileParams struct {

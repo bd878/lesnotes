@@ -87,6 +87,23 @@ paths:
         Download a file for a provided user
       operationId: downloadFile
 
+  /files/v2/{user_id}/{name}:
+    parameters:
+      user_id:
+        in: path
+        type: integer
+        required: true
+      name:
+        in: path
+        type: string
+        required: true
+        example: file_1.jpeg
+    get:
+      summary: Download public file
+      description: |
+        Download public file of a given user
+      operationId: downloadPublicFile
+
   /files/v1/status:
     get:
       operationId: getStatus
