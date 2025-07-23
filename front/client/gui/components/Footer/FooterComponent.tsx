@@ -14,7 +14,7 @@ function FooterComponent(props) {
 
 	return (
 		<Tag css="w-full flex justify-center">
-			<Tag css={css}>Les notes © 2025</Tag>
+			<Tag css={css}>Les Notes © 2025</Tag>
 		</Tag>
 	)
 }

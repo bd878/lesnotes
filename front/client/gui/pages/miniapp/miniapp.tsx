@@ -80,7 +80,7 @@ backButton.mount();
 function Main() {
 	if (!isTMA())
 		return (
-			<Tag css="wrap">
+			<Tag css="h-screen flex flex-col items-start relative">
 				{i18n("miniapp_only")}
 				<Tag css="bg-white">
 					<Footer />
@@ -89,12 +89,12 @@ function Main() {
 		);
 
 	return (
-		<Tag css="wrap bg-(--tg-theme-bg-color)">
+		<Tag css="h-screen flex flex-col items-start relative p-2 pb-4 bg-body">
 			<StoreProvider isMiniapp={true}>
 				<MiniappMainPage />
 			</StoreProvider>
 
-			<Footer textColor="text-(--tg-theme-text-color)" />
+			<Footer textColor="text-subtitle" />
 		</Tag>
 	);
 }

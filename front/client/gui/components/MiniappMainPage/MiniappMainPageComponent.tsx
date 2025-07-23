@@ -38,7 +38,7 @@ function MiniappMainPageComponent(props) {
 	}, [])
 
 	return (
-		<Tag css="wrap">
+		<Tag css="w-full h-full">
 			{valid ? stack.map((elem, index) => (
 				<MiniappThread
 					key={elem.ID}

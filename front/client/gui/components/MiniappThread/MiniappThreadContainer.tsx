@@ -11,7 +11,9 @@ import {
 	selectThreadID,
 	selectError,
 } from '../../features/stack';
-import Tag from '../../components/Tag';
+import Tag from '../Tag';
+import List from '../List';
+import MiniappListElement from '../MiniappListElement'
 
 function MiniappThreadContainer(props) {
 	const {
@@ -27,9 +29,19 @@ function MiniappThreadContainer(props) {
 
 	return (
 		<Tag>
-			{error ? null : messages.map((message) => (
-				<Tag key={message.ID} css="px-2 py-1">{message.text}</Tag>
-			))}
+			{error ? null : (
+				<List el="ul" css="w-full flex flex-col space-y-px -mb-2">
+					{messages.map((message) => (
+						<MiniappListElement
+							key={message.ID}
+							message={message}
+							margin="mb-2"
+							radius="rounded-sm"
+							textColor="text-main"
+						/>
+					))}
+				</List>
+			)}
 		</Tag>
 	)
 }
