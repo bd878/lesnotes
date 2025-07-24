@@ -13,7 +13,7 @@ async function authTelegram(ctx) {
 		const template = await readFile(filePath, { encoding: 'utf-8' });
 
 		if (resp.ok) {
-			const expireDate = new Date().getTime()
+			var expireDate = new Date().getTime()
 			const age = 1 * 24 * 60 * 60 * 1000 /* 1 day */
 			expireDate += age
 
