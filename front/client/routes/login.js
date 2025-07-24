@@ -9,6 +9,8 @@ async function renderer(ctx) {
 		const templatePath = resolve(path.join(Config.get('basedir'), 'templates/login.mustache'));
 		const template = await readFile(templatePath, { encoding: 'utf-8' });
 
+		ctx.set({ "Content-Security-Policy": "frame-ancestors 'self' https://telegram.org" })
+
 		ctx.body = mustache.render(
 			template,
 			{
