@@ -12,8 +12,6 @@ async function renderer(ctx) {
 		ctx.body = mustache.render(
 			template,
 			{
-				backend_url: Config.get("backend_url"),
-				bot_username: Config.get("bot_username"),
 				script: "/public/login.js",
 				styles: ["/public/styles.css"],
 			},
