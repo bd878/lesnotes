@@ -13,12 +13,20 @@ async function authTelegram(ctx) {
 		const template = await readFile(filePath, { encoding: 'utf-8' });
 
 		if (resp.ok) {
-			ctx.body = mustache.render(template, {
-				token: resp.token,
-				styles: [
-					"/public/styles.css",
-				],
-			});
+			const expireDate = new Date().getTime()
+			const age = 1 * 24 * 60 * 60 * 1000 /* 1 day */
+			expireDate += age
+
+			ctx.cookies.set("token", resp.token, {
+				maxAge: age,
+				expires: new Date(expireDate),
+				domain: Config.get("backend_url"),
+				secure: true,
+				overwrite: true,
+			})
+
+			ctx.redirect('/')
+			ctx.status = 301
 		} else {
 			ctx.body = mustache.render(template, {
 				error: resp.error,
