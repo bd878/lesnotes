@@ -1,7 +1,22 @@
-<div>
-	<form method="POST" action="/users/v1/login" name="login-form" autocomplete="off">
-		<input name="name" type="text" required />
-		<input name="password" type="password" required />
-		<button type="submit">{{button_text}}</button>
-	</form>
-</div>
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8" />
+		<link rel="icon" href="/public/favicon.ico">
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+
+		<script async src="https://telegram.org/js/telegram-widget.js?22" data-telegram-login="les_notes_bot" data-size="small" data-auth-url="https://{{backend_url}}/tg_auth" data-request-access="write"></script>
+
+		{{#styles}}
+			<link rel="stylesheet" href="{{.}}">
+		{{/styles}}
+		{{#manifest}}
+			<link rel="manifest" href={{.}} />
+		{{/manifest}}
+		<title>Les notes</title>
+	</head>
+	<body data-browser="{{browser}}" data-mobile="{{mobile}}">
+		<div id="app"></div>
+		<script type="module" src="{{{ script }}}"></script>
+	</body>
+</html>

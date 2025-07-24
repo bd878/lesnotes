@@ -4,6 +4,7 @@
 	"basedir": "",
 	"https": "1",
 	"backend_url": "stage.lesnotes.space",
-	"bot_validate_url": "https://bot.lesnotes.space/validate",
+	"bot_validate_url": "https://stage.bot.lesnotes.space/validate",
+	"bot_validate_auth_url": "https://stage.bot.lesnotes.space/validate_auth",
 	"env": "stage"
 }

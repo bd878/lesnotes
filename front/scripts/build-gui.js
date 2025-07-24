@@ -26,6 +26,7 @@ let ctx = await esbuild.context({
 	define: {
 		BACKEND_URL: '"' + Config.get("backend_url") + '"',
 		BOT_VALIDATE_URL: '"' + Config.get("bot_validate_url") + '"',
+		BOT_VALIDATE_AUTH_URL: '"' + Config.get("bot_validate_auth_url") + '"',
 		ENV: '"' + Config.get("env") + '"',
 		HTTPS: '"' + Config.get("https") + '"',
 	},

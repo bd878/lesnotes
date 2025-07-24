@@ -6,11 +6,12 @@ import { resolve } from 'node:path';
 
 async function renderer(ctx) {
 	try {
-		const templatePath = resolve(path.join(Config.get('basedir'), 'templates/index.mustache'));
+		const templatePath = resolve(path.join(Config.get('basedir'), 'templates/login.mustache'));
 		const template = await readFile(templatePath, { encoding: 'utf-8' });
 
 		ctx.body = mustache.render(
 			template,
+			backend_url: Config.get("backend_url"),
 			{
 				script: "/public/login.js",
 				styles: ["/public/styles.css"],
@@ -20,7 +21,7 @@ async function renderer(ctx) {
 	} catch (err) {
 		ctx.body = "<html>Pas de template</html>";
 		ctx.status = 500;
-		console.log("failed to return index template");
+		console.log("failed to return login template");
 		throw Error(err);
 	}
 }

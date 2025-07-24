@@ -20,7 +20,7 @@ import status from './routes/status.js';
 import xxx from './routes/xxx.js';
 import message from './routes/message.js';
 import miniapp from './routes/miniapp.js';
-import newThread from './routes/newThread.js';
+import authTelegram from './routes/authTelegram.js';
 
 const app = new Koa();
 const router = new Router();
@@ -44,6 +44,7 @@ router
 	.get('/home', etag, home)
 	.get('/status', status)
 	.get("/new", etag, message)
+	.get("/tg_auth", authTelegram)
 	.get("/m/:id", etag, message)
 	.get("/miniapp", etag, miniapp)
 	.get('/:any*', xxx)

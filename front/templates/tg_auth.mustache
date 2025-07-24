@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{lang}}">
+<html lang="en">
 	<head>
 		<meta charset="UTF-8" />
 		<link rel="icon" href="/public/favicon.ico">
@@ -7,9 +7,15 @@
 		{{#styles}}
 			<link rel="stylesheet" href="{{.}}">
 		{{/styles}}
-		<title>Les notes</title>
+		<title>Les notes TG Auth</title>
 	</head>
 	<body>
-		{{> content}}
+		{{#token}}
+			<div>{{token}}</div>
+		{{/token}}
+		{{#error}}
+			<div>{{error}}</div>
+			<div>{{explain}}</div>
+		{{/error}}
 	</body>
 </html>
