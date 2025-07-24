@@ -21,7 +21,7 @@ async function authTelegram(ctx) {
 				maxAge: age,
 				expires: new Date(expireDate),
 				domain: Config.get("backend_url"),
-				secure: true,
+				secure: false,
 				overwrite: true,
 			})
 
