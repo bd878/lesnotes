@@ -12,6 +12,8 @@ together {
 	package files
 	package messages
 	package telemetry
+	package sessions
+	package front
 }
 
 package Front as front {
@@ -88,5 +90,16 @@ package Messages as messages {
 	}
 }
 
-footer 20.06.25
+package Sessions as sessions {
+	component grpc as sessions_grpc
+	database SQLite as sessions_db
+
+	sessions_grpc -- "192.168.10.3:8178"
+
+	sessions_grpc - sessions_db
+
+	note bottom of sessions_db : ./sessions.db
+}
+
+footer 24.07.25
 @enduml
