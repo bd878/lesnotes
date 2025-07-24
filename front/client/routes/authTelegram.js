@@ -25,7 +25,7 @@ async function authTelegram(ctx) {
 				overwrite: true,
 			})
 
-			ctx.redirect('/')
+			ctx.redirect('/home')
 			ctx.status = 301
 		} else {
 			ctx.body = mustache.render(template, {
@@ -35,9 +35,8 @@ async function authTelegram(ctx) {
 					"/public/styles.css",
 				],
 			});
+			ctx.status = 200;
 		}
-
-		ctx.status = 200;
 	} catch (err) {
 		ctx.body = "<html>Pas de template</html>";
 		ctx.status = 500;
