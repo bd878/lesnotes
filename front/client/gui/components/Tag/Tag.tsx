@@ -6,6 +6,7 @@ const Tag = forwardRef((props, ref) => {
 	return (
 		<TagName
 			ref={ref}
+			src={props.src}
 			id={props.id}
 			style={props.style}
 			tabIndex={props.tabIndex}
