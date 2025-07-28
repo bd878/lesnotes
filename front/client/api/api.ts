@@ -20,8 +20,8 @@ function getFileDownloadUrl(url: string) {
 	return getFullUrl(url, false);
 }
 
-function getMessageLinkUrl(id: string) {
-	return getFullUrl(`/m/${id}`, false)
+function getMessageLinkUrl(userId: string, id: string) {
+	return getFullUrl(`/m/${userId}/${id}`, false)
 }
 
 function appendQueryParams(url: string, queryParams): string {
