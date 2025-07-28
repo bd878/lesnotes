@@ -4,7 +4,7 @@
 
 [ -e ".env" ] && source ".env"
 
-stage=${STAGE:-""}
+stage=${STAGE:-"stage."}
 cookie=${COOKIE:-"cookie.txt"}
 id=${ID:?"Usage: env ID=<userId> ./get_user.sh"}
 

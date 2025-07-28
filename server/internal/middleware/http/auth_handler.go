@@ -97,7 +97,7 @@ func (b *authBuilder) restoreAuthorizedUser(req *http.Request, cookie *http.Cook
 
 	session, err := b.sessions.GetSession(req.Context(), cookie.Value)
 	if err != nil {
-		return nil, ErrNoSession
+		return nil, err
 	}
 
 	user, err = b.users.GetUser(req.Context(), session.UserID)
