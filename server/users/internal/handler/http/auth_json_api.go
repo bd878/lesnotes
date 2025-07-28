@@ -44,6 +44,7 @@ func (h *Handler) AuthJsonAPI(w http.ResponseWriter, req *http.Request) error {
 		json.NewEncoder(w).Encode(model.ServerAuthorizeResponse{
 			ServerResponse: servermodel.ServerResponse{
 				Status:      "error",
+				Code:        "expired",
 				Description: "token expired",
 			},
 			Expired: true,
@@ -55,6 +56,7 @@ func (h *Handler) AuthJsonAPI(w http.ResponseWriter, req *http.Request) error {
 	if err != nil {
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status:      "error",
+			Code:        "no_token",
 			Description: "user not found",
 		})
 

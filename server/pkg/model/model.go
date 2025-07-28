@@ -4,7 +4,8 @@ import "encoding/json"
 
 type ServerResponse struct {
 	Status              string        `json:"status"`
-	Description         string        `json:"description"`
+	Code                string        `json:"code,omitempty"`
+	Description         string        `json:"description,omitempty"`
 }
 
 type JSONServerRequest struct {
