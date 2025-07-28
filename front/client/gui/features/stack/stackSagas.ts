@@ -23,6 +23,7 @@ import {
 	setMessagesActionCreator,
 } from './stackActionCreators'
 import {showNotificationActionCreator} from '../notification';
+import {selectUser} from '../me';
 import {selectToken} from '../miniapp';
 import {selectIsMiniapp} from '../me';
 import * as is from '../../../third_party/is'
@@ -187,9 +188,10 @@ function* copyMessage({payload}) {
 function* copyLink({payload}) {
 	try {
 		const browser = yield select(selectBrowser)
+		const user = yield select(selectUser)
 		yield call(async function copy(id, browser) {
 			// TODO: compile front with browser directives?
-			const text = getMessageLinkUrl(id)
+			const text = getMessageLinkUrl(user.ID, id)
 			switch (browser) {
 			case "chrome":
 				const result = await navigator.permissions.query({ name: "clipboard-write" })

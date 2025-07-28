@@ -23,6 +23,7 @@ async function renderMessage(ctx) {
 
 				ctx.body = mustache.render(template, {
 					id: ctx.params.id,
+					userId: ctx.params.userId,
 					react: false,
 					message: resp.message,
 					styles: [
@@ -32,6 +33,7 @@ async function renderMessage(ctx) {
 			} else {
 				ctx.body = mustache.render(template, {
 					id: "",
+					userId: ctx.params.userId || "",
 					react: true,
 					script: "/public/message.js",
 					styles: [
@@ -42,6 +44,7 @@ async function renderMessage(ctx) {
 		} else if (!is.empty(token)) {
 			ctx.body = mustache.render(template, {
 				id: ctx.params.id || "",
+				userId: ctx.params.userId || "",
 				react: true,
 				script: "/public/message.js",
 				styles: [
