@@ -1,5 +1,6 @@
 import React from 'react';
 import {connect} from '../../../third_party/react-redux';
+import * as is from '../../../third_party/is'
 import MainMessageComponent from './MainMessageComponent'
 import {
 	selectUser,
@@ -12,7 +13,7 @@ function MainMessageContainer(props) {
 	} = props
 
 	return (
-		<MainMessageComponent message={message} userID={user.ID} />
+		<MainMessageComponent message={message} user={user} />
 	)
 }
 

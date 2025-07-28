@@ -6,7 +6,7 @@ import {getFileDownloadUrl} from "../../../api";
 function MainMessageComponent(props) {
 	const {
 		message,
-		userID,
+		user,
 	} = props
 
 	if (is.empty(message) || (is.notEmpty(message) && is.empty(message.text)))
@@ -18,9 +18,9 @@ function MainMessageComponent(props) {
 				{message.text}
 			</Tag>
 
-			{(message.file && message.file.name && userID) ? <Tag
+			{(message.file && message.file.name && user && user.ID) ? <Tag
 				el="img"
-				src={getFileDownloadUrl(`/files/v2/${userID}/${message.file.name}`)}
+				src={getFileDownloadUrl(`/files/v2/${user.ID}/${message.file.name}`)}
 			/> : null}
 		</Tag>
 	)
