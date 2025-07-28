@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package sessions.v1;
+
+option go_package = "github.com/bd878/gallery/server/api";
+
+service Sessions {
+	rpc List(ListUserSessionsRequest) returns (ListUserSessionsResponse);
+	rpc Get(GetSessionRequest) returns (Session);
+	rpc Create(CreateSessionRequest) returns (Session);
+	rpc Remove(RemoveSessionRequest) returns (RemoveSessionResponse);
+	rpc RemoveAll(RemoveAllSessionsRequest) returns (RemoveAllSessionsResponse);
+}
+
+message Session {
+	int32     user_id = 1;
+	string    token = 2;
+	int64     expires_utc_nano = 4;
+}
+
+message CreateSessionRequest {
+	int32     user_id = 1;
+}
+
+message ListUserSessionsRequest {
+	int32     user_id = 1;
+}
+
+message ListUserSessionsResponse {
+	repeated Session sessions = 1;
+}
+
+message GetSessionRequest {
+	string    token = 1;
+}
+
+message RemoveSessionRequest {
+	string    token = 1;
+}
+
+message RemoveAllSessionsRequest {
+	int32     user_id = 1;
+}
+
+message RemoveAllSessionsResponse {}
+
+message AddSessionResponse {}
+
+message RemoveSessionResponse {}

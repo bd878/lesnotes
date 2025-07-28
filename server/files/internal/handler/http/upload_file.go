@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 
 	"github.com/bd878/gallery/server/logger"
-	"github.com/bd878/gallery/server/utils"
 	"github.com/bd878/gallery/server/files/pkg/model"
 	servermodel "github.com/bd878/gallery/server/pkg/model"
 	usermodel "github.com/bd878/gallery/server/users/pkg/model"

@@ -60,6 +60,17 @@ else
 	echo
 fi
 
+git diff --quiet "$oval" "$nval" -- "server/sessions"
+if (( $? > 0 ))
+then
+	echo "*** building sessions"
+	echo
+	setsid -f bash --login -c "env BUILD_DIR=$BUILD_DIR ENV=$ENV /srv/misc/scripts/build-sessions"
+else
+	echo "*** no changes in sessions"
+	echo
+fi
+
 exec 1<&7 7<&-
 
 exit 0;

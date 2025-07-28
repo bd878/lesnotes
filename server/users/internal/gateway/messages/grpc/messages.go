@@ -9,8 +9,6 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/logger"
-	messagesmodel "github.com/bd878/gallery/server/messages/pkg/model"
 	"github.com/bd878/gallery/server/messages/pkg/loadbalance"
 )
 
@@ -48,19 +46,13 @@ func (g *Gateway) isConnFailed() bool {
 	return state == connectivity.Shutdown || state == connectivity.TransientFailure
 }
 
-func (g *Gateway) DeleteAllUserMessages(ctx context.Context, log *logger.Logger, params *messagesmodel.DeleteAllUserMessagesParams) error {
+func (g *Gateway) DeleteAllUserMessages(ctx context.Context, userID int32) (err error) {
 	if g.isConnFailed() {
-		log.Info("conn failed, setup new connection")
 		g.setupConnection()
 	}
 
-	_, err := g.client.DeleteAllUserMessages(ctx, &api.DeleteAllUserMessagesRequest{
-		UserId: params.UserID,
+	_, err = g.client.DeleteAllUserMessages(ctx, &api.DeleteAllUserMessagesRequest{
+		UserId: userID,
 	})
-	if err != nil {
-		log.Errorln("client failed to delete all user messages")
-		return err
-	}
-
-	return nil
+	return
 }

@@ -34,10 +34,13 @@ func main() {
 	}))
 
 	server := grpc.New(grpc.Config{
-		Addr:             cfg.RpcAddr,
-		DBPath:           cfg.DBPath,
-		NodeName:         cfg.NodeName,
-		DataPath:         cfg.DataPath,
+		Addr:                 cfg.RpcAddr,
+		DBPath:               cfg.DBPath,
+		NodeName:             cfg.NodeName,
+		DataPath:             cfg.DataPath,
+		TableName:            cfg.TableName,
+		SessionsServiceAddr:  cfg.SessionsServiceAddr,
+		MessagesServiceAddr:  cfg.MessagesServiceAddr,
 	})
 
 	var wg sync.WaitGroup

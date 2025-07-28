@@ -34,12 +34,13 @@ func main() {
 	}))
 
 	server := http.New(http.Config{
-		Addr:             cfg.HttpAddr,
-		RpcAddr:          cfg.RpcAddr,
-		DataPath:         cfg.DataPath,
-		DBPath:           cfg.DBPath,
-		CookieDomain:     cfg.CookieDomain,
+		Addr:                cfg.HttpAddr,
+		RpcAddr:             cfg.RpcAddr,
+		DataPath:            cfg.DataPath,
+		DBPath:              cfg.DBPath,
+		CookieDomain:        cfg.CookieDomain,
 		MessagesServiceAddr: cfg.MessagesServiceAddr,
+		SessionsServiceAddr: cfg.SessionsServiceAddr,
 	})
 
 	var wg sync.WaitGroup

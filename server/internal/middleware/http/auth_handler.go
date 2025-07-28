@@ -8,48 +8,55 @@ import (
 
 	"github.com/bd878/gallery/server/pkg/model"
 	"github.com/bd878/gallery/server/logger"
-	usermodel "github.com/bd878/gallery/server/users/pkg/model"
+	usersmodel "github.com/bd878/gallery/server/users/pkg/model"
+	sessionsmodel "github.com/bd878/gallery/server/sessions/pkg/model"
 )
 
 var (
-	ErrEmptyToken = errors.New("empty token")
-	ErrNoUser = errors.New("no user")
-	ErrNoPublicID = errors.New("no public user id")
+	ErrEmptyToken  = errors.New("empty token")
+	ErrNoUser      = errors.New("no user")
+	ErrNoSession   = errors.New("no session")
+	ErrNoPublicID  = errors.New("no public user id")
 )
 
 type UserContextKey struct {}
 
-type userGateway interface {
-	Auth(ctx context.Context, log *logger.Logger, token string) (*usermodel.User, error)
-	GetPublicUser(ctx context.Context, log *logger.Logger, id int32) (*usermodel.User, error)
+type UsersGateway interface {
+	GetUser(ctx context.Context, userID int32) (*usersmodel.User, error)
+}
+
+type SessionsGateway interface {
+	GetSession(ctx context.Context, token string) (*sessionsmodel.Session, error)
 }
 
 type authBuilder struct {
-	gateway userGateway
-	publicUserID int32
-	next Handler
+	log           *logger.Logger
+	users         UsersGateway
+	sessions      SessionsGateway
+	publicUserID  int32
+	next          Handler
 }
 
-func AuthBuilder(gateway userGateway, publicUserID int32) MiddlewareFunc {
+func AuthBuilder(log *logger.Logger, users UsersGateway, sessions SessionsGateway, publicUserID int32) MiddlewareFunc {
 	return func(next Handler) Handler {
-		return &authBuilder{gateway: gateway, publicUserID: publicUserID, next: next}
+		return &authBuilder{log: log, users: users, sessions: sessions, publicUserID: publicUserID, next: next}
 	}
 }
 
-func (b *authBuilder) Handle(log *logger.Logger, w http.ResponseWriter, req *http.Request) (err error) {
+func (b *authBuilder) Handle(w http.ResponseWriter, req *http.Request) (err error) {
 	var (
-		user *usermodel.User
+		user   *usersmodel.User
 		cookie *http.Cookie
 	)
 
 	cookie, err = req.Cookie("token")
 	switch err {
 	case http.ErrNoCookie:
-		user, err = b.restorePublicUser(log, w, req)
+		user, err = b.restorePublicUser(req)
 	case nil:
-		user, err = b.restoreAuthorizedUser(log, w, req, cookie)
+		user, err = b.restoreAuthorizedUser(req, cookie)
 	default:
-		log.Errorw("bad cookie", "cookie", cookie, "error", err)
+		b.log.Errorw("bad cookie", "cookie", cookie, "error", err)
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(model.ServerResponse{
 			Status: "error",
@@ -60,7 +67,7 @@ func (b *authBuilder) Handle(log *logger.Logger, w http.ResponseWriter, req *htt
 	}
 
 	if err != nil {
-		log.Errorw("auth middleware failed to restore user, error occured, exit", "error", err)
+		b.log.Errorw("auth middleware failed to restore user, error occured, exit", "error", err)
 		json.NewEncoder(w).Encode(model.ServerResponse{
 			Status: "error",
 			Description: "token not found",
@@ -70,33 +77,30 @@ func (b *authBuilder) Handle(log *logger.Logger, w http.ResponseWriter, req *htt
 
 	req = req.WithContext(context.WithValue(context.Background(), UserContextKey{}, user))
 
-	return b.next.Handle(log, w, req)
+	return b.next.Handle(w, req)
 }
 
-func (b *authBuilder) restorePublicUser(log *logger.Logger, w http.ResponseWriter, req *http.Request) (*usermodel.User, error) {
+func (b *authBuilder) restorePublicUser(req *http.Request) (user *usersmodel.User, err error) {
 	if b.publicUserID == 0 {
 		return nil, ErrNoPublicID
 	}
 
-	user, err := b.gateway.GetPublicUser(req.Context(), log, b.publicUserID)
-	if err != nil {
-		log.Errorw("middleware failed to restore public user, gateway error", "id", b.publicUserID)
-		return nil, err
-	}
+	user, err = b.users.GetUser(req.Context(), b.publicUserID)
 
 	return user, nil
 }
 
-func (b *authBuilder) restoreAuthorizedUser(log *logger.Logger, w http.ResponseWriter, req *http.Request, cookie *http.Cookie) (*usermodel.User, error) {
+func (b *authBuilder) restoreAuthorizedUser(req *http.Request, cookie *http.Cookie) (user *usersmodel.User, err error) {
 	if cookie == nil {
 		return nil, ErrEmptyToken
 	}
 
-	user, err := b.gateway.Auth(req.Context(), log, cookie.Value)
+	session, err := b.sessions.GetSession(req.Context(), cookie.Value)
 	if err != nil {
-		log.Errorw("middleware failed to authorize user, gateway error", "cookie", cookie.Value)
-		return nil, ErrNoUser
+		return nil, ErrNoSession
 	}
 
-	return user, nil
+	user, err = b.users.GetUser(req.Context(), session.UserID)
+
+	return
 }

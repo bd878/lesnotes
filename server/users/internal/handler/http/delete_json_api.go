@@ -6,14 +6,12 @@ import (
 	"errors"
 	"encoding/json"
 
-	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/utils"
 	"github.com/bd878/gallery/server/users/pkg/model"
-	"github.com/bd878/gallery/server/users/internal/controller"
-	messagesmodel "github.com/bd878/gallery/server/messages/pkg/model"
 	servermodel "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) DeleteJsonAPI(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) DeleteJsonAPI(w http.ResponseWriter, req *http.Request) error {
 	var err error
 
 	data, err := io.ReadAll(req.Body)
@@ -68,43 +66,23 @@ func (h *Handler) DeleteJsonAPI(log *logger.Logger, w http.ResponseWriter, req *
 		return errors.New("cannot get password from request")
 	}
 
-	user, err := h.controller.GetUser(req.Context(), log, &model.GetUserParams{Token: jsonRequest.Token})
-	if err == controller.ErrTokenExpired {
-		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(model.DeleteUserJsonServerResponse{
-			ServerResponse: servermodel.ServerResponse{
-				Status: "error",
-				Description: "token expired",
-			},
-			Expired: true,
+	user, ok := utils.GetUser(w, req)
+	if !ok {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			Status: "error",
+			Description: "user required",
 		})
 
-		return err
+		return errors.New("user required")
 	}
 
-	err = h.controller.DeleteUser(req.Context(), log, &model.DeleteUserParams{
-		ID: user.ID,
-		Token: jsonRequest.Token,
-		Name: user.Name,
-	})
+	err = h.controller.DeleteUser(req.Context(), user.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status: "error",
 			Description: "cannot delete user",
-		})
-
-		return err
-	}
-
-	err = h.messagesGateway.DeleteAllUserMessages(req.Context(), log, &messagesmodel.DeleteAllUserMessagesParams{
-		UserID: user.ID,
-	})
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "cannot delete all user messages",
 		})
 
 		return err

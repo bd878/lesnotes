@@ -6,12 +6,11 @@ import (
 	"errors"
 	"encoding/json"
 
-	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/users/pkg/model"
 	servermodel "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) SignupJsonAPI(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) error {
 	var err error
 
 	data, err := io.ReadAll(req.Body)
@@ -28,8 +27,8 @@ func (h *Handler) SignupJsonAPI(log *logger.Logger, w http.ResponseWriter, req *
 
 	defer req.Body.Close()
 
-	var user model.User
-	if err := json.Unmarshal(data, &user); err != nil {
+	var body model.User
+	if err := json.Unmarshal(data, &body); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status: "error",
@@ -39,7 +38,7 @@ func (h *Handler) SignupJsonAPI(log *logger.Logger, w http.ResponseWriter, req *
 		return err
 	}
 
-	if user.Name == "" {
+	if body.Name == "" {
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status: "error",
 			Description: "no name",
@@ -48,7 +47,7 @@ func (h *Handler) SignupJsonAPI(log *logger.Logger, w http.ResponseWriter, req *
 		return errors.New("cannot get user name from request")
 	}
 
-	if user.Password == "" {
+	if body.Password == "" {
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status: "error",
 			Description: "no password",
@@ -57,9 +56,7 @@ func (h *Handler) SignupJsonAPI(log *logger.Logger, w http.ResponseWriter, req *
 		return errors.New("cannot get password from request")
 	}
 
-	exists, err := h.controller.HasUser(req.Context(), log, &model.HasUserParams{
-		User: &model.User{Name: user.Name},
-	})
+	user, err := h.controller.CreateUser(req.Context(), body.Name, body.Password)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
@@ -70,41 +67,14 @@ func (h *Handler) SignupJsonAPI(log *logger.Logger, w http.ResponseWriter, req *
 		return err
 	}
 
-	if exists {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "name exists",
-		})
-
-		return errors.New("name exists")
-	}
-
-	token, expiresUtcNano := createToken(w, h.config.CookieDomain)
-	user.Token = token
-	user.ExpiresUTCNano = expiresUtcNano
-
-	id, err := h.controller.AddUser(req.Context(), log, &model.AddUserParams{
-		User: &user,
-	})
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "cannot add user",
-		})
-
-		return err
-	}
-
 	json.NewEncoder(w).Encode(&model.SignupJsonUserServerResponse{
 		ServerResponse: servermodel.ServerResponse{
-			Status: "ok",
+			Status:      "ok",
 			Description: "created",
 		},
-		Token: token,
-		ExpiresUTCNano: expiresUtcNano,
-		ID: id,
+		Token:          user.Token,
+		ExpiresUTCNano: user.ExpiresUTCNano,
+		ID:             user.ID,
 	})
 
 	return nil

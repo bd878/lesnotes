@@ -89,108 +89,16 @@ func (x *User) GetExpiresUtcNano() int64 {
 	return 0
 }
 
-type AuthUserRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AuthUserRequest) Reset() {
-	*x = AuthUserRequest{}
-	mi := &file_protos_users_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AuthUserRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AuthUserRequest) ProtoMessage() {}
-
-func (x *AuthUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_users_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AuthUserRequest.ProtoReflect.Descriptor instead.
-func (*AuthUserRequest) Descriptor() ([]byte, []int) {
-	return file_protos_users_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *AuthUserRequest) GetToken() string {
-	if x != nil {
-		return x.Token
-	}
-	return ""
-}
-
-type AuthUserResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	User          *User                  `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AuthUserResponse) Reset() {
-	*x = AuthUserResponse{}
-	mi := &file_protos_users_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AuthUserResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AuthUserResponse) ProtoMessage() {}
-
-func (x *AuthUserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_users_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AuthUserResponse.ProtoReflect.Descriptor instead.
-func (*AuthUserResponse) Descriptor() ([]byte, []int) {
-	return file_protos_users_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *AuthUserResponse) GetUser() *User {
-	if x != nil {
-		return x.User
-	}
-	return nil
-}
-
 type GetUserRequest struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Types that are valid to be assigned to SearchKey:
-	//
-	//	*GetUserRequest_Id
-	//	*GetUserRequest_Token
-	SearchKey     isGetUserRequest_SearchKey `protobuf_oneof:"search_key"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetUserRequest) Reset() {
 	*x = GetUserRequest{}
-	mi := &file_protos_users_proto_msgTypes[3]
+	mi := &file_protos_users_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -202,7 +110,7 @@ func (x *GetUserRequest) String() string {
 func (*GetUserRequest) ProtoMessage() {}
 
 func (x *GetUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_users_proto_msgTypes[3]
+	mi := &file_protos_users_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -215,49 +123,97 @@ func (x *GetUserRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserRequest.ProtoReflect.Descriptor instead.
 func (*GetUserRequest) Descriptor() ([]byte, []int) {
-	return file_protos_users_proto_rawDescGZIP(), []int{3}
+	return file_protos_users_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *GetUserRequest) GetSearchKey() isGetUserRequest_SearchKey {
+func (x *GetUserRequest) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type FindUserRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to SearchKey:
+	//
+	//	*FindUserRequest_Name
+	//	*FindUserRequest_Token
+	SearchKey     isFindUserRequest_SearchKey `protobuf_oneof:"search_key"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FindUserRequest) Reset() {
+	*x = FindUserRequest{}
+	mi := &file_protos_users_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FindUserRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FindUserRequest) ProtoMessage() {}
+
+func (x *FindUserRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_protos_users_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FindUserRequest.ProtoReflect.Descriptor instead.
+func (*FindUserRequest) Descriptor() ([]byte, []int) {
+	return file_protos_users_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *FindUserRequest) GetSearchKey() isFindUserRequest_SearchKey {
 	if x != nil {
 		return x.SearchKey
 	}
 	return nil
 }
 
-func (x *GetUserRequest) GetId() int32 {
+func (x *FindUserRequest) GetName() string {
 	if x != nil {
-		if x, ok := x.SearchKey.(*GetUserRequest_Id); ok {
-			return x.Id
+		if x, ok := x.SearchKey.(*FindUserRequest_Name); ok {
+			return x.Name
 		}
 	}
-	return 0
+	return ""
 }
 
-func (x *GetUserRequest) GetToken() string {
+func (x *FindUserRequest) GetToken() string {
 	if x != nil {
-		if x, ok := x.SearchKey.(*GetUserRequest_Token); ok {
+		if x, ok := x.SearchKey.(*FindUserRequest_Token); ok {
 			return x.Token
 		}
 	}
 	return ""
 }
 
-type isGetUserRequest_SearchKey interface {
-	isGetUserRequest_SearchKey()
+type isFindUserRequest_SearchKey interface {
+	isFindUserRequest_SearchKey()
 }
 
-type GetUserRequest_Id struct {
-	Id int32 `protobuf:"varint,1,opt,name=id,proto3,oneof"`
+type FindUserRequest_Name struct {
+	Name string `protobuf:"bytes,1,opt,name=name,proto3,oneof"`
 }
 
-type GetUserRequest_Token struct {
+type FindUserRequest_Token struct {
 	Token string `protobuf:"bytes,2,opt,name=token,proto3,oneof"`
 }
 
-func (*GetUserRequest_Id) isGetUserRequest_SearchKey() {}
+func (*FindUserRequest_Name) isFindUserRequest_SearchKey() {}
 
-func (*GetUserRequest_Token) isGetUserRequest_SearchKey() {}
+func (*FindUserRequest_Token) isFindUserRequest_SearchKey() {}
 
 var File_protos_users_proto protoreflect.FileDescriptor
 
@@ -270,29 +226,24 @@ var file_protos_users_proto_rawDesc = string([]byte{
 	0x6b, 0x65, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e,
 	0x12, 0x28, 0x0a, 0x10, 0x65, 0x78, 0x70, 0x69, 0x72, 0x65, 0x73, 0x5f, 0x75, 0x74, 0x63, 0x5f,
 	0x6e, 0x61, 0x6e, 0x6f, 0x18, 0x04, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0e, 0x65, 0x78, 0x70, 0x69,
-	0x72, 0x65, 0x73, 0x55, 0x74, 0x63, 0x4e, 0x61, 0x6e, 0x6f, 0x22, 0x27, 0x0a, 0x0f, 0x41, 0x75,
-	0x74, 0x68, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x14, 0x0a,
-	0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x74, 0x6f,
-	0x6b, 0x65, 0x6e, 0x22, 0x36, 0x0a, 0x10, 0x41, 0x75, 0x74, 0x68, 0x55, 0x73, 0x65, 0x72, 0x52,
-	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x22, 0x0a, 0x04, 0x75, 0x73, 0x65, 0x72, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0e, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x73, 0x2e, 0x76, 0x31,
-	0x2e, 0x55, 0x73, 0x65, 0x72, 0x52, 0x04, 0x75, 0x73, 0x65, 0x72, 0x22, 0x48, 0x0a, 0x0e, 0x47,
-	0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x10, 0x0a,
-	0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x48, 0x00, 0x52, 0x02, 0x69, 0x64, 0x12,
-	0x16, 0x0a, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x48, 0x00,
-	0x52, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x42, 0x0c, 0x0a, 0x0a, 0x73, 0x65, 0x61, 0x72, 0x63,
-	0x68, 0x5f, 0x6b, 0x65, 0x79, 0x32, 0x7b, 0x0a, 0x05, 0x55, 0x73, 0x65, 0x72, 0x73, 0x12, 0x3d,
-	0x0a, 0x04, 0x41, 0x75, 0x74, 0x68, 0x12, 0x19, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x73, 0x2e, 0x76,
-	0x31, 0x2e, 0x41, 0x75, 0x74, 0x68, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x1a, 0x1a, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x73, 0x2e, 0x76, 0x31, 0x2e, 0x41, 0x75, 0x74,
-	0x68, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x33, 0x0a,
-	0x07, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x12, 0x18, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x73,
-	0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65,
-	0x73, 0x74, 0x1a, 0x0e, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x73, 0x2e, 0x76, 0x31, 0x2e, 0x55, 0x73,
-	0x65, 0x72, 0x42, 0x25, 0x5a, 0x23, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d,
-	0x2f, 0x62, 0x64, 0x38, 0x37, 0x38, 0x2f, 0x67, 0x61, 0x6c, 0x6c, 0x65, 0x72, 0x79, 0x2f, 0x73,
-	0x65, 0x72, 0x76, 0x65, 0x72, 0x2f, 0x61, 0x70, 0x69, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x33,
+	0x72, 0x65, 0x73, 0x55, 0x74, 0x63, 0x4e, 0x61, 0x6e, 0x6f, 0x22, 0x20, 0x0a, 0x0e, 0x47, 0x65,
+	0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02,
+	0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x02, 0x69, 0x64, 0x22, 0x4d, 0x0a, 0x0f,
+	0x46, 0x69, 0x6e, 0x64, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
+	0x14, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x48, 0x00, 0x52,
+	0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x16, 0x0a, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x09, 0x48, 0x00, 0x52, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x42, 0x0c, 0x0a,
+	0x0a, 0x73, 0x65, 0x61, 0x72, 0x63, 0x68, 0x5f, 0x6b, 0x65, 0x79, 0x32, 0x73, 0x0a, 0x05, 0x55,
+	0x73, 0x65, 0x72, 0x73, 0x12, 0x33, 0x0a, 0x07, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x12,
+	0x18, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x73, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73,
+	0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0e, 0x2e, 0x75, 0x73, 0x65, 0x72,
+	0x73, 0x2e, 0x76, 0x31, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x12, 0x35, 0x0a, 0x08, 0x46, 0x69, 0x6e,
+	0x64, 0x55, 0x73, 0x65, 0x72, 0x12, 0x19, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x73, 0x2e, 0x76, 0x31,
+	0x2e, 0x46, 0x69, 0x6e, 0x64, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x1a, 0x0e, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x73, 0x2e, 0x76, 0x31, 0x2e, 0x55, 0x73, 0x65, 0x72,
+	0x42, 0x25, 0x5a, 0x23, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x62,
+	0x64, 0x38, 0x37, 0x38, 0x2f, 0x67, 0x61, 0x6c, 0x6c, 0x65, 0x72, 0x79, 0x2f, 0x73, 0x65, 0x72,
+	0x76, 0x65, 0x72, 0x2f, 0x61, 0x70, 0x69, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 })
 
 var (
@@ -307,24 +258,22 @@ func file_protos_users_proto_rawDescGZIP() []byte {
 	return file_protos_users_proto_rawDescData
 }
 
-var file_protos_users_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_protos_users_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_protos_users_proto_goTypes = []any{
-	(*User)(nil),             // 0: users.v1.User
-	(*AuthUserRequest)(nil),  // 1: users.v1.AuthUserRequest
-	(*AuthUserResponse)(nil), // 2: users.v1.AuthUserResponse
-	(*GetUserRequest)(nil),   // 3: users.v1.GetUserRequest
+	(*User)(nil),            // 0: users.v1.User
+	(*GetUserRequest)(nil),  // 1: users.v1.GetUserRequest
+	(*FindUserRequest)(nil), // 2: users.v1.FindUserRequest
 }
 var file_protos_users_proto_depIdxs = []int32{
-	0, // 0: users.v1.AuthUserResponse.user:type_name -> users.v1.User
-	1, // 1: users.v1.Users.Auth:input_type -> users.v1.AuthUserRequest
-	3, // 2: users.v1.Users.GetUser:input_type -> users.v1.GetUserRequest
-	2, // 3: users.v1.Users.Auth:output_type -> users.v1.AuthUserResponse
-	0, // 4: users.v1.Users.GetUser:output_type -> users.v1.User
-	3, // [3:5] is the sub-list for method output_type
-	1, // [1:3] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	1, // 0: users.v1.Users.GetUser:input_type -> users.v1.GetUserRequest
+	2, // 1: users.v1.Users.FindUser:input_type -> users.v1.FindUserRequest
+	0, // 2: users.v1.Users.GetUser:output_type -> users.v1.User
+	0, // 3: users.v1.Users.FindUser:output_type -> users.v1.User
+	2, // [2:4] is the sub-list for method output_type
+	0, // [0:2] is the sub-list for method input_type
+	0, // [0:0] is the sub-list for extension type_name
+	0, // [0:0] is the sub-list for extension extendee
+	0, // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_protos_users_proto_init() }
@@ -332,9 +281,9 @@ func file_protos_users_proto_init() {
 	if File_protos_users_proto != nil {
 		return
 	}
-	file_protos_users_proto_msgTypes[3].OneofWrappers = []any{
-		(*GetUserRequest_Id)(nil),
-		(*GetUserRequest_Token)(nil),
+	file_protos_users_proto_msgTypes[2].OneofWrappers = []any{
+		(*FindUserRequest_Name)(nil),
+		(*FindUserRequest_Token)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -342,7 +291,7 @@ func file_protos_users_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_protos_users_proto_rawDesc), len(file_protos_users_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -2,18 +2,17 @@ package middleware
 
 import (
 	"net/http"
-	"github.com/bd878/gallery/server/logger"
 )
 
 type Handler interface {
-	Handle(log *logger.Logger, w http.ResponseWriter, req *http.Request) error
+	Handle(w http.ResponseWriter, req *http.Request) error
 }
 type MiddlewareFunc func(next Handler) Handler
 
-type HandleFunc func(log *logger.Logger, w http.ResponseWriter, req *http.Request) error 
+type HandleFunc func(w http.ResponseWriter, req *http.Request) error 
 type handler HandleFunc
-func (h handler) Handle(log *logger.Logger, w http.ResponseWriter, req *http.Request) (err error) {
-	return h(log, w, req)
+func (h handler) Handle(w http.ResponseWriter, req *http.Request) (err error) {
+	return h(w, req)
 }
 
 type builder struct {

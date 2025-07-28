@@ -6,17 +6,16 @@ import (
 	"errors"
 	"encoding/json"
 
-	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/users/pkg/model"
 	servermodel "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) GetUser(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) GetUser(w http.ResponseWriter, req *http.Request) error {
 	values := req.URL.Query()
 	if values.Get("id") == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
+			Status:      "error",
 			Description: "empty user id",
 		})
 
@@ -27,18 +26,18 @@ func (h *Handler) GetUser(log *logger.Logger, w http.ResponseWriter, req *http.R
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
+			Status:      "error",
 			Description: "invalid id",
 		})
 
 		return err
 	}
 
-	user, err := h.controller.GetUser(req.Context(), log, &model.GetUserParams{ID: int32(id)})
+	user, err := h.controller.GetUser(req.Context(), int32(id))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
+			Status:      "error",
 			Description: "cannot find user",
 		})
 
@@ -47,7 +46,7 @@ func (h *Handler) GetUser(log *logger.Logger, w http.ResponseWriter, req *http.R
 
 	json.NewEncoder(w).Encode(model.ServerUserResponse{
 		ServerResponse: servermodel.ServerResponse{
-			Status: "ok",
+			Status:      "ok",
 			Description: "exists",
 		},
 		User: model.User{

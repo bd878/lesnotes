@@ -11,16 +11,21 @@ import (
 	"github.com/bd878/gallery/server/logger"
 
 	grpcmiddleware "github.com/bd878/gallery/server/internal/middleware/grpc"
+	sessionsgateway "github.com/bd878/gallery/server/users/internal/gateway/sessions/grpc"
+	messagesgateway "github.com/bd878/gallery/server/users/internal/gateway/messages/grpc"
 	controller "github.com/bd878/gallery/server/users/internal/controller/users"
 	repository "github.com/bd878/gallery/server/users/internal/repository/sqlite"
 	grpchandler "github.com/bd878/gallery/server/users/internal/handler/grpc"
 )
 
 type Config struct {
-	Addr            string
-	DBPath          string
-	NodeName        string
-	DataPath        string
+	Addr                   string
+	TableName              string
+	DBPath                 string
+	NodeName               string
+	DataPath               string
+	SessionsServiceAddr    string
+	MessagesServiceAddr    string
 }
 
 type Server struct {
@@ -51,8 +56,12 @@ func New(cfg Config) *Server {
 }
 
 func (s *Server) setupGRPC(log *logger.Logger) {
-	repo := repository.New(s.config.DBPath)
-	control := controller.New(repo)
+	repo := repository.New(s.config.TableName, s.config.DBPath)
+
+	sessionsGateway := sessionsgateway.New(s.config.SessionsServiceAddr)
+	messagesGateway := messagesgateway.New(s.config.MessagesServiceAddr)
+
+	control := controller.New(repo, messagesGateway, sessionsGateway)
 	handler := grpchandler.New(control)
 
 	s.Server = grpc.NewServer(

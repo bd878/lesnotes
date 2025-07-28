@@ -7,12 +7,12 @@ import (
 )
 
 func Log(next Handler) Handler {
-	return handler(func(log *logger.Logger, w http.ResponseWriter, req *http.Request) (err error) {
-		log.Infof("--> %s\n", req.URL.String())
-		err = next.Handle(log, w, req)
-		log.Infof("<-- %s\n", req.URL.String())
+	return handler(func(w http.ResponseWriter, req *http.Request) (err error) {
+		logger.Default().Infof("--> %s\n", req.URL.String())
+		err = next.Handle(w, req)
+		logger.Default().Infof("<-- %s\n", req.URL.String())
 		if err != nil {
-			log.Errorln(err.Error())
+			logger.Default().Errorln(err.Error())
 		}
 		return
 	})

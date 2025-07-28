@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"net/http"
-	"github.com/bd878/gallery/server/logger"
 )
 
 type middleware struct {
@@ -15,5 +14,5 @@ func (m *middleware) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	for i := len(m.funcs) - 1; i >= 0; i-- {
 		first = m.funcs[i](first)
 	}
-	first.Handle(logger.Default(), w, req)
+	first.Handle(w, req)
 }

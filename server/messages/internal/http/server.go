@@ -5,11 +5,13 @@ import (
 	"sync"
 	"net/http"
 
+	"github.com/bd878/gallery/server/logger"
 	usermodel "github.com/bd878/gallery/server/users/pkg/model"
 	httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
 	httphandler "github.com/bd878/gallery/server/messages/internal/handler/http"
 	httplogger "github.com/bd878/gallery/server/messages/internal/logger/http"
-	usergateway "github.com/bd878/gallery/server/internal/gateway/user"
+	usersgateway "github.com/bd878/gallery/server/internal/gateway/users"
+	sessionsgateway "github.com/bd878/gallery/server/internal/gateway/sessions"
 	filesgateway "github.com/bd878/gallery/server/messages/internal/gateway/files/grpc"
 	controller "github.com/bd878/gallery/server/messages/internal/controller/service"
 )
@@ -32,9 +34,10 @@ func New(cfg Config) *Server {
 
 	middleware := httpmiddleware.NewBuilder().WithLog(httplogger.LogBuilder())
 
-	userGateway := usergateway.New(cfg.UsersServiceAddr)
+	usersGateway := usersgateway.New(cfg.UsersServiceAddr)
 	filesGateway := filesgateway.New(cfg.FilesServiceAddr)
-	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(userGateway, usermodel.PublicUserID))
+	sessionsGateway := sessionsgateway.New(cfg.SessionsServiceAddr)
+	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
 
 	grpcCtrl := controller.New(controller.Config{
 		RpcAddr: cfg.RpcAddr,
@@ -51,7 +54,7 @@ func New(cfg Config) *Server {
 	middleware.NoAuth()
 	mux.Handle("/messages/v1/status", middleware.Build(handler.GetStatus))
 
-	middleware.WithAuth(httpmiddleware.TokenAuthBuilder(userGateway, usermodel.PublicUserID))
+	middleware.WithAuth(httpmiddleware.TokenAuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
 	mux.Handle("/messages/v2/send", middleware.Build(handler.SendMessageJsonAPI))
 	mux.Handle("/messages/v2/read", middleware.Build(handler.ReadMessageOrMessagesJsonAPI))
 	mux.Handle("/messages/v2/publish", middleware.Build(handler.PublishMessageOrMessagesJsonAPI))

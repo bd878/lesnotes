@@ -46,7 +46,6 @@ type (
 
 	LoginJsonUserServerResponse struct {
 		model.ServerResponse
-		ID               int32            `json:"id"`
 		Token            string           `json:"token"`
 		ExpiresUTCNano   int64            `json:"expires_utc_nano"`
 	}

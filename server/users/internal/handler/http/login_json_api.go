@@ -6,13 +6,12 @@ import (
 	"errors"
 	"encoding/json"
 
-	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/users/pkg/model"
 	"github.com/bd878/gallery/server/users/internal/controller"
 	servermodel "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) LoginJsonAPI(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) LoginJsonAPI(w http.ResponseWriter, req *http.Request) error {
 	var err error
 
 	data, err := io.ReadAll(req.Body)
@@ -20,7 +19,7 @@ func (h *Handler) LoginJsonAPI(log *logger.Logger, w http.ResponseWriter, req *h
 		req.Body.Close()
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
+			Status:      "error",
 			Description: "failed to parse request",
 		})
 
@@ -33,7 +32,7 @@ func (h *Handler) LoginJsonAPI(log *logger.Logger, w http.ResponseWriter, req *h
 	if err := json.Unmarshal(data, &user); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
+			Status:      "error",
 			Description: "failed to parse user",
 		})
 
@@ -42,7 +41,7 @@ func (h *Handler) LoginJsonAPI(log *logger.Logger, w http.ResponseWriter, req *h
 
 	if user.Name == "" {
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
+			Status:      "error",
 			Description: "no name",
 		})
 
@@ -51,7 +50,7 @@ func (h *Handler) LoginJsonAPI(log *logger.Logger, w http.ResponseWriter, req *h
 
 	if user.Password == "" {
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
+			Status:      "error",
 			Description: "no password",
 		})
 
@@ -59,78 +58,41 @@ func (h *Handler) LoginJsonAPI(log *logger.Logger, w http.ResponseWriter, req *h
 	}
 
 
-	exists, err := h.controller.HasUser(req.Context(), log, &model.HasUserParams{
-		User: &user,
-	})
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "cannot find user",
-		})
-
-		return err
-	}
-
-	if !exists {
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "no user,password pair",
-		})
-
-		return errors.New("no user,password pair")
-	}
-
-	resp, err := h.controller.GetUser(req.Context(), log, &model.GetUserParams{Name: user.Name})
+	session, err := h.controller.LoginUser(req.Context(), user.Name, user.Password)
 	switch err {
-	case controller.ErrTokenExpired:
-		log.Infoln("token expired")
-		token, err := refreshToken(h, w, req, user.Name)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(servermodel.ServerResponse{
-				Status: "error",
-				Description: "cannot refresh token",
-			})
-
-			return err
-		}
-
-		json.NewEncoder(w).Encode(&model.LoginJsonUserServerResponse{
-			ServerResponse: servermodel.ServerResponse{
-				Status: "ok",
-				Description: "authenticated",
-			},
-			Token: token.Token,
-			ID: user.ID,
-			ExpiresUTCNano: token.ExpiresUTCNano,
-		})
-		return nil
-
-	case controller.ErrNotFound:
+	case controller.ErrUserNotFound:
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
+			Status:      "error",
 			Description: "no user,password pair",
 		})
 
 		return err
+
+	case controller.ErrWrongPassword:
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			Status:      "error",
+			Description: "wrong password",
+		})
+
+		return err
+
 	case nil:
 		json.NewEncoder(w).Encode(&model.LoginJsonUserServerResponse{
 			ServerResponse: servermodel.ServerResponse{
 				Status: "ok",
 				Description: "authenticated",
 			},
-			Token: resp.Token,
-			ID: resp.ID,
-			ExpiresUTCNano: resp.ExpiresUTCNano,
+			Token:          session.Token,
+			ExpiresUTCNano: session.ExpiresUTCNano,
 		})
 		return nil
 
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
+			Status:      "error",
 			Description: "cannot get user",
 		})
 

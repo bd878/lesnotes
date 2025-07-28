@@ -5,8 +5,10 @@ import (
 	"sync"
 	"net/http"
 
+	"github.com/bd878/gallery/server/logger"
 	usermodel "github.com/bd878/gallery/server/users/pkg/model"
-	usergateway "github.com/bd878/gallery/server/internal/gateway/user"
+	usersgateway "github.com/bd878/gallery/server/internal/gateway/users"
+	sessionsgateway "github.com/bd878/gallery/server/internal/gateway/sessions"
 	httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
 	httphandler "github.com/bd878/gallery/server/files/internal/handler/http"
 	controller "github.com/bd878/gallery/server/files/internal/controller/service"
@@ -29,8 +31,9 @@ func New(cfg Config) *Server {
 
 	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log)
 
-	userGateway := usergateway.New(cfg.UsersServiceAddr)
-	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(userGateway, usermodel.PublicUserID))
+	usersGateway := usersgateway.New(cfg.UsersServiceAddr)
+	sessionsGateway := sessionsgateway.New(cfg.SessionsServiceAddr)
+	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
 
 	grpcCtrl := controller.New(controller.Config{
 		RpcAddr: cfg.RpcAddr,
@@ -44,7 +47,7 @@ func New(cfg Config) *Server {
 	mux.Handle("/files/v1/status", middleware.Build(handler.GetStatus))
 	mux.Handle("/files/v2/{user_id}/{name}", middleware.Build(handler.DownloadFileV2))
 
-	middleware.NoAuth().WithAuth(httpmiddleware.TokenAuthBuilder(userGateway, usermodel.PublicUserID))
+	middleware.NoAuth().WithAuth(httpmiddleware.TokenAuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
 	mux.Handle("/files/v2/upload", middleware.Build(handler.UploadFileV2))
 
 	server := &Server{

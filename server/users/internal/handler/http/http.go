@@ -7,24 +7,20 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/users/pkg/model"
 	servermodel "github.com/bd878/gallery/server/pkg/model"
-	messagesmodel "github.com/bd878/gallery/server/messages/pkg/model"
+	sessionsmodel "github.com/bd878/gallery/server/sessions/pkg/model"
 	"github.com/bd878/gallery/server/utils"
 )
 
 type Controller interface {
-	AddUser(ctx context.Context, log *logger.Logger, params *model.AddUserParams) (int32, error)
-	HasUser(ctx context.Context, log *logger.Logger, params *model.HasUserParams) (bool, error)
-	RefreshToken(ctx context.Context, log *logger.Logger, params *model.RefreshTokenParams) error
-	DeleteToken(ctx context.Context, log *logger.Logger, params *model.DeleteTokenParams) error
-	GetUser(ctx context.Context, log *logger.Logger, params *model.GetUserParams) (*model.User, error)
-	DeleteUser(ctx context.Context, log *logger.Logger, params *model.DeleteUserParams) error
-}
-
-type MessagesGateway interface {
-	DeleteAllUserMessages(ctx context.Context, log *logger.Logger, params *messagesmodel.DeleteAllUserMessagesParams) error
+	CreateUser(ctx context.Context, name, password string) (user *model.User, err error)
+	FindUser(ctx context.Context, params *model.FindUserParams) (user *model.User, err error)
+	AuthUser(ctx context.Context, token string) (user *model.User, err error)
+	GetUser(ctx context.Context, userID int32) (user *model.User, err error)
+	LoginUser(ctx context.Context, name, password string) (session *sessionsmodel.Session, err error)
+	DeleteUser(ctx context.Context, userID int32) (err error)
+	LogoutUser(ctx context.Context, token string) (err error)
 }
 
 type Config struct {
@@ -32,16 +28,15 @@ type Config struct {
 }
 
 type Handler struct {
-	controller      Controller
-	config          Config
-	messagesGateway MessagesGateway
+	controller         Controller
+	config             Config
 }
 
-func New(controller Controller, config Config, messagesGateway MessagesGateway) *Handler {
-	return &Handler{controller, config, messagesGateway}
+func New(controller Controller, config Config) *Handler {
+	return &Handler{controller, config}
 }
 
-func (h *Handler) Status(log *logger.Logger, w http.ResponseWriter, _ *http.Request) error {
+func (h *Handler) Status(w http.ResponseWriter, _ *http.Request) error {
 	if _, err := io.WriteString(w, "ok\n"); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return err
@@ -64,21 +59,6 @@ func getTextField(w http.ResponseWriter, req *http.Request, field string) (value
 	return
 }
 
-func refreshToken(h *Handler, w http.ResponseWriter, req *http.Request, userName string) (*model.User, error) {
-	token, expiresUtcNano := createToken(w, h.config.CookieDomain)
-
-	user := &model.User{
-		Name:               userName,
-		Token:              token,
-		ExpiresUTCNano:     expiresUtcNano,
-	}
-
-	err := h.controller.RefreshToken(req.Context(), logger.Default(), &model.RefreshTokenParams{
-		User: user,
-	})
-	return user, err
-}
-
 func createToken(w http.ResponseWriter, cookieDomain string) (token string, expires int64) {
 	token = utils.RandomString(10)
 	expiresAt := time.Now().Add(time.Hour * 24 * 5)
@@ -93,26 +73,4 @@ func createToken(w http.ResponseWriter, cookieDomain string) (token string, expi
 	})
 
 	return token, expiresAt.UnixNano()
-}
-
-func attachTokenToResponse(w http.ResponseWriter, token, cookieDomain string, expiresUtcNano int64) {
-	http.SetCookie(w, &http.Cookie{
-		Name:          "token",
-		Value:          token,
-		Domain:         cookieDomain,
-		Expires:        time.Unix(0, expiresUtcNano),
-		Path:          "/",
-		HttpOnly:       true,
-	})
-}
-
-func deleteToken(w http.ResponseWriter, cookieDomain string) {
-	http.SetCookie(w, &http.Cookie{
-		Name:           "token",
-		Value:          "",
-		Domain:         cookieDomain,
-		Expires:        time.Unix(0, 0),
-		Path: "/",
-		HttpOnly: true,
-	})
 }

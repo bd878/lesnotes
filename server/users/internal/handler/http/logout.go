@@ -1,21 +1,19 @@
 package http
 
 import (
+	"time"
 	"net/http"
 	"encoding/json"
 
-	"github.com/bd878/gallery/server/logger"
-	"github.com/bd878/gallery/server/users/pkg/model"
 	servermodel "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) Logout(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) Logout(w http.ResponseWriter, req *http.Request) error {
 	cookie, err := req.Cookie("token")
 	if err != nil {
-		log.Error("bad cookie")
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
+			Status:      "error",
 			Description: "bad cookie",
 		})
 
@@ -24,25 +22,30 @@ func (h *Handler) Logout(log *logger.Logger, w http.ResponseWriter, req *http.Re
 
 	token := cookie.Value
 
-	deleteToken(w, h.config.CookieDomain)
-
-	err = h.controller.DeleteToken(req.Context(), log, &model.DeleteTokenParams{
-		Token: token,
-	})
+	err = h.controller.LogoutUser(req.Context(), token)
 	if err != nil {
-		log.Errorw("failed to delete token, continue", "error", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
+			Status:      "error",
 			Description: "failed to delete token",
 		})
 
 		return err
 	}
 
+	http.SetCookie(w, &http.Cookie{
+		Name:           "token",
+		Value:          "",
+		Domain:         h.config.CookieDomain,
+		Expires:        time.Unix(0, 0),
+		Path:           "/",
+		HttpOnly:       true,
+	})
+
 	json.NewEncoder(w).Encode(servermodel.ServerResponse{
-		Status: "ok",
+		Status:      "ok",
 		Description: "logged out",
 	})
+
 	return nil
 }
