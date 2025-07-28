@@ -16,8 +16,8 @@ import (
 )
 
 type Repository interface {
-	SaveFile(ctx context.Context, log *logger.Logger, file *model.File) error
-	ReadFile(ctx context.Context, log *logger.Logger, params *model.ReadFileParams) (*model.File, error)
+	SaveFile(ctx context.Context, file *model.File) error
+	ReadFile(ctx context.Context, params *model.ReadFileParams) (*model.File, error)
 }
 
 type Handler struct {
@@ -44,7 +44,7 @@ func (h *Handler) ReadBatchFiles(ctx context.Context, req *api.ReadBatchFilesReq
 			UserID: req.UserId,
 		}
 
-		file, err := h.repo.ReadFile(ctx, logger.Default(), &model.ReadFileParams{ID: id, UserID: req.UserId})
+		file, err := h.repo.ReadFile(ctx, &model.ReadFileParams{ID: id, UserID: req.UserId})
 		if err != nil {
 			files[id].Error = "can not found file"
 			logger.Errorw("failed to read file", "user_id", req.UserId, "id", id, "error", err)
@@ -63,7 +63,7 @@ func (h *Handler) ReadBatchFiles(ctx context.Context, req *api.ReadBatchFilesReq
 func (h *Handler) ReadFile(ctx context.Context, req *api.ReadFileRequest) (
 	*api.File, error,
 ) {
-	file, err := h.repo.ReadFile(ctx, logger.Default(), &model.ReadFileParams{ID: req.Id, UserID: req.UserId})
+	file, err := h.repo.ReadFile(ctx, &model.ReadFileParams{ID: req.Id, UserID: req.UserId})
 	if err != nil {
 		logger.Errorw("failed to read one file", "user_id", req.UserId, "file_id", req.Id, "error", err)
 		return nil, err
@@ -72,7 +72,7 @@ func (h *Handler) ReadFile(ctx context.Context, req *api.ReadFileRequest) (
 }
 
 func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.Files_ReadFileStreamServer) error {
-	file, err := h.repo.ReadFile(context.Background(), logger.Default(), &model.ReadFileParams{ID: params.Id, Name: params.Name, UserID: params.UserId})
+	file, err := h.repo.ReadFile(context.Background(), &model.ReadFileParams{ID: params.Id, Name: params.Name, UserID: params.UserId})
 	if err != nil {
 		logger.Errorw("failed to read file", "user_id", params.UserId, "id", params.Id, "name", params.Name, "public", params.Public, "error", err)
 		return err
@@ -155,7 +155,7 @@ func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) error {
 	id := utils.RandomID()
 	timeCreated := time.Now().UnixNano()
 
-	err = h.repo.SaveFile(context.Background(), logger.Default(), &model.File{
+	err = h.repo.SaveFile(context.Background(), &model.File{
 		ID:              id,
 		UserID:          file.File.UserId,
 		Name:            file.File.Name,

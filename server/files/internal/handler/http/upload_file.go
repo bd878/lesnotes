@@ -6,17 +6,17 @@ import (
 	"encoding/json"
 	"path/filepath"
 
-	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/utils"
 	"github.com/bd878/gallery/server/files/pkg/model"
 	servermodel "github.com/bd878/gallery/server/pkg/model"
 	usermodel "github.com/bd878/gallery/server/users/pkg/model"
 )
 
-func (h *Handler) UploadFile(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
-	return h.uploadFile(log, w, req, 0)
+func (h *Handler) UploadFile(w http.ResponseWriter, req *http.Request) error {
+	return h.uploadFile(w, req, 0)
 }
 
-func (h *Handler) uploadFile(log *logger.Logger, w http.ResponseWriter, req *http.Request, public int) error {
+func (h *Handler) uploadFile(w http.ResponseWriter, req *http.Request, public int) error {
 	var private bool
 
 	if public > 0 {
@@ -75,7 +75,7 @@ func (h *Handler) uploadFile(log *logger.Logger, w http.ResponseWriter, req *htt
 
 	fileName := filepath.Base(fh.Filename)
 
-	fileResult, err := h.controller.SaveFileStream(req.Context(), log, f, &model.SaveFileParams{
+	fileResult, err := h.controller.SaveFileStream(req.Context(), f, &model.SaveFileParams{
 		UserID: user.ID,
 		Name:   fileName,
 		Private: private,

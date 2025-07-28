@@ -47,7 +47,7 @@ WHERE (id = :id OR name = :name) AND (user_id = :userId OR private = 0)
 	}
 }
 
-func (r *Repository) SaveFile(ctx context.Context, log *logger.Logger, file *model.File) error {
+func (r *Repository) SaveFile(ctx context.Context, file *model.File) error {
 	var privateCol sql.NullInt32
 	if file.Private {
 		privateCol.Int32 = 1
@@ -65,13 +65,13 @@ func (r *Repository) SaveFile(ctx context.Context, log *logger.Logger, file *mod
 		sql.Named("private", privateCol),
 	)
 	if err != nil {
-		log.Errorw("failed to save file", "id", file.ID, "user_id", file.UserID)
+		logger.Errorw("failed to save file", "id", file.ID, "user_id", file.UserID)
 		return err
 	}
 	return nil
 }
 
-func (r *Repository) ReadFile(ctx context.Context, log *logger.Logger, params *model.ReadFileParams) (
+func (r *Repository) ReadFile(ctx context.Context, params *model.ReadFileParams) (
 	*model.File, error,
 ) {
 	var (
@@ -100,11 +100,11 @@ func (r *Repository) ReadFile(ctx context.Context, log *logger.Logger, params *m
 
 	switch {
 	case err == sql.ErrNoRows:
-		log.Errorw("failed to read file, no rows found", "id", params.ID, "name", params.Name, "user_id", params.UserID)
+		logger.Errorw("failed to read file, no rows found", "id", params.ID, "name", params.Name, "user_id", params.UserID)
 		return nil, err
 
 	case err != nil:
-		log.Errorw("failed to read file, unknown error", "id", params.ID, "name", params.Name, "user_id", params.UserID)
+		logger.Errorw("failed to read file, unknown error", "id", params.ID, "name", params.Name, "user_id", params.UserID)
 		return nil, err
 
 	default:

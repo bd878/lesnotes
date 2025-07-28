@@ -13,7 +13,7 @@ import (
 	servermodel "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) DownloadFileV2(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) DownloadFileV2(w http.ResponseWriter, req *http.Request) error {
 	userIDStr, fileName := req.PathValue("user_id"), req.PathValue("name")
 	if userIDStr == "" {
 		w.WriteHeader(http.StatusBadRequest)
@@ -43,7 +43,7 @@ func (h *Handler) DownloadFileV2(log *logger.Logger, w http.ResponseWriter, req 
 		return errors.New("no name in path given")
 	}
 
-	file, stream, err := h.controller.ReadFileStream(req.Context(), log, &model.ReadFileStreamParams{FileName: fileName, UserID: int32(userID), Public: true})
+	file, stream, err := h.controller.ReadFileStream(req.Context(), &model.ReadFileStreamParams{FileName: fileName, UserID: int32(userID), Public: true})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
@@ -53,7 +53,7 @@ func (h *Handler) DownloadFileV2(log *logger.Logger, w http.ResponseWriter, req 
 		return err
 	}
 
-	log.Infow("downloading file", "name", file.Name)
+	logger.Infow("downloading file", "name", file.Name)
 
 	w.Header().Set("Content-Disposition", "attachment; " + "filename*=UTF-8''" + file.Name)
 	w.Header().Set("Content-Length", fmt.Sprintf("%d", file.Size))

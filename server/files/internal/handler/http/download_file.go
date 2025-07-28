@@ -14,7 +14,7 @@ import (
 	servermodel "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) DownloadFile(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) DownloadFile(w http.ResponseWriter, req *http.Request) error {
 	var (
 		fileID int32
 	)
@@ -43,7 +43,7 @@ func (h *Handler) DownloadFile(log *logger.Logger, w http.ResponseWriter, req *h
 		return errors.New("user required")
 	}
 
-	file, stream, err := h.controller.ReadFileStream(req.Context(), log, &model.ReadFileStreamParams{FileID: fileID, UserID: user.ID})
+	file, stream, err := h.controller.ReadFileStream(req.Context(), &model.ReadFileStreamParams{FileID: fileID, UserID: user.ID})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
@@ -53,7 +53,7 @@ func (h *Handler) DownloadFile(log *logger.Logger, w http.ResponseWriter, req *h
 		return err
 	}
 
-	log.Infow("downloading file", "name", file.Name)
+	logger.Infow("downloading file", "name", file.Name)
 
 	w.Header().Set("Content-Disposition", "attachment; " + "filename*=UTF-8''" + file.Name)
 	w.Header().Set("Content-Length", fmt.Sprintf("%d", file.Size))

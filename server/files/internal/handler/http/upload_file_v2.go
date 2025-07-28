@@ -6,11 +6,10 @@ import (
 	"fmt"
 	"encoding/json"
 
-	"github.com/bd878/gallery/server/logger"
 	servermodel "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) UploadFileV2(log *logger.Logger, w http.ResponseWriter, req *http.Request) (err error) {
+func (h *Handler) UploadFileV2(w http.ResponseWriter, req *http.Request) (err error) {
 	var public int
 	values := req.URL.Query()
 	if values.Has("public") {
@@ -28,5 +27,5 @@ func (h *Handler) UploadFileV2(log *logger.Logger, w http.ResponseWriter, req *h
 		public = -1
 	}
 
-	return h.uploadFile(log, w, req, public)
+	return h.uploadFile(w, req, public)
 }

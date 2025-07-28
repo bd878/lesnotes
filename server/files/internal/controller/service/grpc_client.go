@@ -90,9 +90,9 @@ func (s *streamReader) Read(p []byte) (int, error) {
 	return n, nil
 }
 
-func (f *Files) ReadFileStream(ctx context.Context, log *logger.Logger, params *model.ReadFileStreamParams) (*model.File, io.Reader, error) {
+func (f *Files) ReadFileStream(ctx context.Context, params *model.ReadFileStreamParams) (*model.File, io.Reader, error) {
 	if f.isConnFailed() {
-		log.Info("conn failed, setup new connection")
+		logger.Info("conn failed, setup new connection")
 		f.setupConnection()
 	}
 
@@ -103,7 +103,7 @@ func (f *Files) ReadFileStream(ctx context.Context, log *logger.Logger, params *
 		Public:  params.Public,
 	})
 	if err != nil {
-		log.Errorln("failed to open read stream")
+		logger.Errorln("failed to open read stream")
 		return nil, nil, err
 	}
 
@@ -114,7 +114,7 @@ func (f *Files) ReadFileStream(ctx context.Context, log *logger.Logger, params *
 
 	meta, ok := data.Data.(*api.FileData_File)
 	if !ok {
-		log.Errorln("FileData_File expected")
+		logger.Errorln("FileData_File expected")
 		return nil, nil, errors.New("wrong format: FileData_File expected")
 	}
 
@@ -125,17 +125,17 @@ func (f *Files) ReadFileStream(ctx context.Context, log *logger.Logger, params *
 	return model.FileFromProto(meta.File), reader, nil
 }
 
-func (f *Files) SaveFileStream(ctx context.Context, log *logger.Logger, fileStream io.Reader, params *model.SaveFileParams) (
+func (f *Files) SaveFileStream(ctx context.Context, fileStream io.Reader, params *model.SaveFileParams) (
 	*model.SaveFileResult, error,
 ) {
 	if f.isConnFailed() {
-		log.Info("conn failed, setup new connection")
+		logger.Info("conn failed, setup new connection")
 		f.setupConnection()
 	}
 
 	stream, err := f.client.SaveFileStream(ctx)
 	if err != nil {
-		log.Errorw("client failed to obtain file stream", "error", err)
+		logger.Errorw("client failed to obtain file stream", "error", err)
 		return nil, err
 	}
 
@@ -149,7 +149,7 @@ func (f *Files) SaveFileStream(ctx context.Context, log *logger.Logger, fileStre
 		},
 	})
 	if err != nil {
-		log.Errorw("failed to save file meta", "error", err)
+		logger.Errorw("failed to save file meta", "error", err)
 		return nil, err
 	}
 
@@ -160,7 +160,7 @@ func (f *Files) SaveFileStream(ctx context.Context, log *logger.Logger, fileStre
 			break
 		}
 		if err != nil {
-			log.Errorw("failed to read file data in buffer", "error", err)
+			logger.Errorw("failed to read file data in buffer", "error", err)
 			return nil, err
 		}
 
@@ -170,14 +170,14 @@ func (f *Files) SaveFileStream(ctx context.Context, log *logger.Logger, fileStre
 			},
 		})
 		if err != nil {
-			log.Errorw("failed to send chunk on file server", "error", err)
+			logger.Errorw("failed to send chunk on file server", "error", err)
 			return nil, err
 		}
 	}
 
 	res, err := stream.CloseAndRecv()
 	if err != nil {
-		log.Errorw("failed to close and recv result", "error", err)
+		logger.Errorw("failed to close and recv result", "error", err)
 		return nil, err
 	}
 
