@@ -15,10 +15,11 @@ import (
 )
 
 type Config struct {
-	Addr            string
-	DBPath          string
-	NodeName        string
-	DataPath        string
+	Addr                  string
+	DBPath                string
+	NodeName              string
+	DataPath              string
+	SessionsServiceAddr   string
 }
 
 type Server struct {
