@@ -38,6 +38,7 @@ func main() {
 		RpcAddr:             cfg.RpcAddr,
 		DataPath:            cfg.DataPath,
 		DBPath:              cfg.DBPath,
+		TableName:           cfg.TableName,
 		CookieDomain:        cfg.CookieDomain,
 		MessagesServiceAddr: cfg.MessagesServiceAddr,
 		SessionsServiceAddr: cfg.SessionsServiceAddr,
