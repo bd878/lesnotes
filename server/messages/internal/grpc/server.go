@@ -23,15 +23,16 @@ import (
 )
 
 type Config struct {
-	Addr            string
-	DBPath          string
-	NodeName        string
-	RaftLogLevel    string
-	RaftBootstrap   bool
-	DataPath        string
-	RaftServers     []string
-	SerfAddr        string
-	SerfJoinAddrs   []string
+	Addr                string
+	DBPath              string
+	NodeName            string
+	RaftLogLevel        string
+	RaftBootstrap       bool
+	DataPath            string
+	RaftServers         []string
+	SerfAddr            string
+	SerfJoinAddrs       []string
+	SessionsServiceAddr string
 }
 
 type Server struct {

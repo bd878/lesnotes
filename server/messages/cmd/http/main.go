@@ -35,11 +35,12 @@ func main() {
 	}))
 
 	server := http.New(http.Config{
-		Addr:              cfg.HttpAddr,
-		RpcAddr:           cfg.RpcAddr,
-		DataPath:          cfg.DataPath,
-		UsersServiceAddr:  cfg.UsersServiceAddr,
-		FilesServiceAddr:  cfg.FilesServiceAddr,
+		Addr:                  cfg.HttpAddr,
+		RpcAddr:               cfg.RpcAddr,
+		DataPath:              cfg.DataPath,
+		UsersServiceAddr:      cfg.UsersServiceAddr,
+		FilesServiceAddr:      cfg.FilesServiceAddr,
+		SessionsServiceAddr:   cfg.SessionsServiceAddr,
 	})
 
 	var wg sync.WaitGroup

@@ -35,15 +35,16 @@ func main() {
 	}))
 
 	server := grpc.New(grpc.Config{
-		Addr:             cfg.RpcAddr,
-		DBPath:           cfg.DBPath,
-		NodeName:         cfg.NodeName,
-		RaftLogLevel:     cfg.RaftLogLevel,
-		RaftBootstrap:    cfg.RaftBootstrap,
-		DataPath:         cfg.DataPath,
-		RaftServers:      cfg.RaftServers,
-		SerfAddr:         cfg.SerfAddr,
-		SerfJoinAddrs:    cfg.SerfJoinAddrs,
+		Addr:                  cfg.RpcAddr,
+		DBPath:                cfg.DBPath,
+		NodeName:              cfg.NodeName,
+		RaftLogLevel:          cfg.RaftLogLevel,
+		RaftBootstrap:         cfg.RaftBootstrap,
+		DataPath:              cfg.DataPath,
+		RaftServers:           cfg.RaftServers,
+		SerfAddr:              cfg.SerfAddr,
+		SerfJoinAddrs:         cfg.SerfJoinAddrs,
+		SessionsServiceAddr:   cfg.SessionsServiceAddr,
 	})
 
 	var wg sync.WaitGroup
