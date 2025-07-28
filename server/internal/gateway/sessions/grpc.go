@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/logger"
 	sessionsmodel "github.com/bd878/gallery/server/sessions/pkg/model"
 )
 
@@ -19,7 +19,7 @@ type Gateway struct {
 func New(addr string) *Gateway {
 	g := &Gateway{addr: addr}
 	g.setupConnection()
-	return &Gateway{conn}
+	return g
 }
 
 func (g *Gateway) setupConnection() {
@@ -37,7 +37,7 @@ func (g *Gateway) isConnFailed() bool {
 	return state == connectivity.Shutdown || state == connectivity.TransientFailure
 }
 
-func (g *Gateway) RestoreSession(ctx context.Context, token string) (*sessionsmodel.Session, error) {
+func (g *Gateway) GetSession(ctx context.Context, token string) (*sessionsmodel.Session, error) {
 	if g.isConnFailed() {
 		g.setupConnection()
 	}

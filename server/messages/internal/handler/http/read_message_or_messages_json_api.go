@@ -8,10 +8,9 @@ import (
 	servermodel "github.com/bd878/gallery/server/pkg/model"
 	"github.com/bd878/gallery/server/messages/pkg/model"
 	"github.com/bd878/gallery/server/utils"
-	"github.com/bd878/gallery/server/logger"
 )
 
-func (h *Handler) ReadMessageOrMessagesJsonAPI(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) ReadMessageOrMessagesJsonAPI(w http.ResponseWriter, req *http.Request) error {
 	var public int
 
 	user, ok := utils.GetUser(w, req)
@@ -53,6 +52,6 @@ func (h *Handler) ReadMessageOrMessagesJsonAPI(log *logger.Logger, w http.Respon
 		public = *jsonRequest.Public
 	}
 
-	return h.readMessageOrMessages(req.Context(), log, w, user,
+	return h.readMessageOrMessages(req.Context(), w, user,
 		jsonRequest.Limit, jsonRequest.Offset, public, jsonRequest.MessageID, jsonRequest.ThreadID, jsonRequest.Asc)
 }

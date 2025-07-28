@@ -15,7 +15,7 @@ import (
 	"github.com/bd878/gallery/server/logger"
 )
 
-func (h *Handler) ReadMessageOrMessages(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) ReadMessageOrMessages(w http.ResponseWriter, req *http.Request) error {
 	var (
 		limit, offset, order, public int
 		threadID, messageID int32
@@ -119,10 +119,10 @@ func (h *Handler) ReadMessageOrMessages(log *logger.Logger, w http.ResponseWrite
 		}
 	}
 
-	return h.readMessageOrMessages(req.Context(), log, w, user, limit, offset, public, messageID, threadID, order)
+	return h.readMessageOrMessages(req.Context(), w, user, limit, offset, public, messageID, threadID, order)
 }
 
-func (h *Handler) readMessageOrMessages(ctx context.Context, log *logger.Logger, w http.ResponseWriter, user *usermodel.User,
+func (h *Handler) readMessageOrMessages(ctx context.Context, w http.ResponseWriter, user *usermodel.User,
 	limit int, offset int, public int, messageID int32, threadID int32, order int,
 ) error {
 	var (
@@ -193,23 +193,23 @@ func (h *Handler) readMessageOrMessages(ctx context.Context, log *logger.Logger,
 
 	if messageID != 0 {
 		// read one message
-		return h.readMessage(ctx, log, w, user, messageID)
+		return h.readMessage(ctx, w, user, messageID)
 	} else if threadID != 0 {
 		// read thread messages
-		return h.readThreadMessages(ctx, log, w, user, threadID, int32(limit), int32(offset), ascending, int32(private))
+		return h.readThreadMessages(ctx, w, user, threadID, int32(limit), int32(offset), ascending, int32(private))
 	} else {
 		// read all messages
-		return h.readMessages(ctx, log, w, user, int32(limit), int32(offset), ascending, int32(private))
+		return h.readMessages(ctx, w, user, int32(limit), int32(offset), ascending, int32(private))
 	}
 }
 
-func (h *Handler) readMessage(ctx context.Context, log *logger.Logger, w http.ResponseWriter, user *usermodel.User, messageID int32) error {
-	message, err := h.controller.ReadOneMessage(ctx, log, &model.ReadOneMessageParams{
+func (h *Handler) readMessage(ctx context.Context, w http.ResponseWriter, user *usermodel.User, messageID int32) error {
+	message, err := h.controller.ReadOneMessage(ctx, &model.ReadOneMessageParams{
 		ID: messageID,
 		UserIDs: []int32{user.ID, usermodel.PublicUserID},
 	})
 	if err != nil {
-		log.Errorw("failed to read one message", "user_id", user.ID, "message_id", messageID)
+		logger.Errorw("failed to read one message", "user_id", user.ID, "message_id", messageID)
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status: "error",
@@ -224,9 +224,9 @@ func (h *Handler) readMessage(ctx context.Context, log *logger.Logger, w http.Re
 	}
 
 	if message.FileID != 0 {
-		fileRes, err := h.filesGateway.ReadFile(ctx, log, user.ID, message.FileID)
+		fileRes, err := h.filesGateway.ReadFile(ctx, user.ID, message.FileID)
 		if err != nil {
-			log.Errorw("failed to read file for a message", "user_id", user.ID, "file_id", message.FileID, "message_id", messageID, "error", err)
+			logger.Errorw("failed to read file for a message", "user_id", user.ID, "file_id", message.FileID, "message_id", messageID, "error", err)
 		} else {
 			message.File = &filesmodel.File{
 				Name: fileRes.Name,
@@ -245,8 +245,8 @@ func (h *Handler) readMessage(ctx context.Context, log *logger.Logger, w http.Re
 	return nil
 }
 
-func (h *Handler) readThreadMessages(ctx context.Context, log *logger.Logger, w http.ResponseWriter, user *usermodel.User, threadID, limit, offset int32, ascending bool, private int32) error {
-	res, err := h.controller.ReadThreadMessages(ctx, log, &model.ReadThreadMessagesParams{
+func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter, user *usermodel.User, threadID, limit, offset int32, ascending bool, private int32) error {
+	res, err := h.controller.ReadThreadMessages(ctx, &model.ReadThreadMessagesParams{
 		UserID:    user.ID,
 		ThreadID:  threadID,
 		Limit:     limit,
@@ -274,12 +274,12 @@ func (h *Handler) readThreadMessages(ctx context.Context, log *logger.Logger, w 
 		}
 	}
 
-	filesRes, err := h.filesGateway.ReadBatchFiles(ctx, log, &model.ReadBatchFilesParams{
+	filesRes, err := h.filesGateway.ReadBatchFiles(ctx, &model.ReadBatchFilesParams{
 		UserID: user.ID,
 		IDs:    fileIds,
 	})
 	if err != nil {
-		log.Errorw("failed to read batch files", "user_id", user.ID, "error", err)
+		logger.Errorw("failed to read batch files", "user_id", user.ID, "error", err)
 	} else {
 		for _, message := range messages {
 			if message.FileID != 0 {
@@ -310,8 +310,8 @@ func (h *Handler) readThreadMessages(ctx context.Context, log *logger.Logger, w 
 	return nil
 }
 
-func (h *Handler) readMessages(ctx context.Context, log *logger.Logger, w http.ResponseWriter, user *usermodel.User, limit, offset int32, ascending bool, private int32) error {
-	res, err := h.controller.ReadAllMessages(ctx, log, &model.ReadMessagesParams{
+func (h *Handler) readMessages(ctx context.Context, w http.ResponseWriter, user *usermodel.User, limit, offset int32, ascending bool, private int32) error {
+	res, err := h.controller.ReadAllMessages(ctx, &model.ReadMessagesParams{
 		UserID:    user.ID,
 		Limit:     limit,
 		Offset:    offset,
@@ -338,12 +338,12 @@ func (h *Handler) readMessages(ctx context.Context, log *logger.Logger, w http.R
 		}
 	}
 
-	filesRes, err := h.filesGateway.ReadBatchFiles(ctx, log, &model.ReadBatchFilesParams{
+	filesRes, err := h.filesGateway.ReadBatchFiles(ctx, &model.ReadBatchFilesParams{
 		UserID: user.ID,
 		IDs:    fileIds,
 	})
 	if err != nil {
-		log.Errorw("failed to read batch files", "user_id", user.ID, "error", err)
+		logger.Errorw("failed to read batch files", "user_id", user.ID, "error", err)
 	} else {
 		for _, message := range messages {
 			if message.FileID != 0 {

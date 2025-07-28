@@ -8,10 +8,9 @@ import (
 	servermodel "github.com/bd878/gallery/server/pkg/model"
 	"github.com/bd878/gallery/server/messages/pkg/model"
 	"github.com/bd878/gallery/server/utils"
-	"github.com/bd878/gallery/server/logger"
 )
 
-func (h *Handler) DeleteMessageOrMessagesJsonAPI(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) DeleteMessageOrMessagesJsonAPI(w http.ResponseWriter, req *http.Request) error {
 	user, ok := utils.GetUser(w, req)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
@@ -46,9 +45,9 @@ func (h *Handler) DeleteMessageOrMessagesJsonAPI(log *logger.Logger, w http.Resp
 	}
 
 	if jsonRequest.MessageID != nil {
-		return h.deleteMessage(log, w, req, user, *jsonRequest.MessageID)
+		return h.deleteMessage(w, req, user, *jsonRequest.MessageID)
 	} else if jsonRequest.IDs != nil {
-		return h.deleteMessages(log, w, req, user, *jsonRequest.IDs)
+		return h.deleteMessages(w, req, user, *jsonRequest.IDs)
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{

@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/logger"
 	usersmodel "github.com/bd878/gallery/server/users/pkg/model"
 )
 
@@ -19,7 +19,7 @@ type Gateway struct {
 func New(addr string) *Gateway {
 	g := &Gateway{addr: addr}
 	g.setupConnection()
-	return &Gateway{conn}
+	return g
 }
 
 func (g *Gateway) setupConnection() {
@@ -30,6 +30,11 @@ func (g *Gateway) setupConnection() {
 
 	g.conn = conn
 	g.client = api.NewUsersClient(conn)
+}
+
+func (g *Gateway) isConnFailed() bool {
+	state := g.conn.GetState()
+	return state == connectivity.Shutdown || state == connectivity.TransientFailure
 }
 
 func (g *Gateway) GetUser(ctx context.Context, userID int32) (*usersmodel.User, error) {
@@ -44,5 +49,5 @@ func (g *Gateway) GetUser(ctx context.Context, userID int32) (*usersmodel.User, 
 		return nil, err
 	}
 
-	return usersmodel.UserFromProto(resp.User), nil
+	return usersmodel.UserFromProto(resp), nil
 }

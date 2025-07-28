@@ -10,10 +10,9 @@ import (
 	usermodel "github.com/bd878/gallery/server/users/pkg/model"
 	"github.com/bd878/gallery/server/messages/pkg/model"
 	"github.com/bd878/gallery/server/utils"
-	"github.com/bd878/gallery/server/logger"
 )
 
-func (h *Handler) DeleteMessageOrMessages(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) DeleteMessageOrMessages(w http.ResponseWriter, req *http.Request) error {
 	user, ok := utils.GetUser(w, req)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
@@ -48,7 +47,7 @@ func (h *Handler) DeleteMessageOrMessages(log *logger.Logger, w http.ResponseWri
 			return err
 		}
 
-		return h.deleteMessage(log, w, req, user, int32(id))
+		return h.deleteMessage(w, req, user, int32(id))
 	} else if values.Get("ids") != "" {
 		var ids []int32
 		if err := json.Unmarshal([]byte(values.Get("ids")), &ids); err != nil {
@@ -60,7 +59,7 @@ func (h *Handler) DeleteMessageOrMessages(log *logger.Logger, w http.ResponseWri
 			return err
 		}
 
-		return h.deleteMessages(log, w, req, user, ids)
+		return h.deleteMessages(w, req, user, ids)
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
@@ -72,8 +71,8 @@ func (h *Handler) DeleteMessageOrMessages(log *logger.Logger, w http.ResponseWri
 	}
 }
 
-func (h *Handler) deleteMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request, user *usermodel.User, id int32) error {
-	_, err := h.controller.DeleteMessage(req.Context(), log, &model.DeleteMessageParams{
+func (h *Handler) deleteMessage(w http.ResponseWriter, req *http.Request, user *usermodel.User, id int32) error {
+	_, err := h.controller.DeleteMessage(req.Context(), &model.DeleteMessageParams{
 		ID: id,
 		UserID: user.ID,
 	})
@@ -98,8 +97,8 @@ func (h *Handler) deleteMessage(log *logger.Logger, w http.ResponseWriter, req *
 	return nil
 }
 
-func (h *Handler) deleteMessages(log *logger.Logger, w http.ResponseWriter, req *http.Request, user *usermodel.User, ids []int32) error {
-	res, err := h.controller.DeleteMessages(req.Context(), log, &model.DeleteMessagesParams{
+func (h *Handler) deleteMessages(w http.ResponseWriter, req *http.Request, user *usermodel.User, ids []int32) error {
+	res, err := h.controller.DeleteMessages(req.Context(), &model.DeleteMessagesParams{
 		IDs: ids,
 		UserID: user.ID,
 	})

@@ -14,7 +14,7 @@ import (
 	"github.com/bd878/gallery/server/logger"
 )
 
-func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) error {
 	var public, threadID int
 
 	user, ok := utils.GetUser(w, req)
@@ -70,7 +70,7 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 	if req.PostFormValue("public") != "" {
 		public, err = strconv.Atoi(req.PostFormValue("public"))
 		if err != nil {
-			log.Errorw("wrong public param", "public", public)
+			logger.Errorw("wrong public param", "public", public)
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(servermodel.ServerResponse{
 				Status: "error",
@@ -83,10 +83,10 @@ func (h *Handler) UpdateMessage(log *logger.Logger, w http.ResponseWriter, req *
 		public = -1
 	}
 
-	return h.updateMessage(req.Context(), log, w, int32(id), user, text, int32(threadID), public)
+	return h.updateMessage(req.Context(), w, int32(id), user, text, int32(threadID), public)
 }
 
-func (h *Handler) updateMessage(ctx context.Context, log *logger.Logger, w http.ResponseWriter, messageID int32, user *usermodel.User,
+func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, messageID int32, user *usermodel.User,
 	text string, threadID int32, public int,
 ) error {
 	var private int32
@@ -119,7 +119,7 @@ func (h *Handler) updateMessage(ctx context.Context, log *logger.Logger, w http.
 		return nil
 	}
 
-	msg, err := h.controller.ReadOneMessage(ctx, log, &model.ReadOneMessageParams{
+	msg, err := h.controller.ReadOneMessage(ctx, &model.ReadOneMessageParams{
 		ID: messageID,
 		UserIDs: []int32{user.ID},
 	})
@@ -147,7 +147,7 @@ func (h *Handler) updateMessage(ctx context.Context, log *logger.Logger, w http.
 		text = msg.Text
 	}
 
-	resp, err := h.controller.UpdateMessage(ctx, log, &model.UpdateMessageParams{
+	resp, err := h.controller.UpdateMessage(ctx, &model.UpdateMessageParams{
 		ID:     messageID,
 		UserID: user.ID,
 		Text:   text,

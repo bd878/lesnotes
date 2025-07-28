@@ -7,11 +7,10 @@ import (
 
 	servermodel "github.com/bd878/gallery/server/pkg/model"
 	"github.com/bd878/gallery/server/utils"
-	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/messages/pkg/model"
 )
 
-func (h *Handler) UpdateMessageJsonAPI(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) UpdateMessageJsonAPI(w http.ResponseWriter, req *http.Request) error {
 	var threadID int32
 	var public int
 	var text string
@@ -75,5 +74,5 @@ func (h *Handler) UpdateMessageJsonAPI(log *logger.Logger, w http.ResponseWriter
 		text = *jsonRequest.Text
 	}
 
-	return h.updateMessage(req.Context(), log, w, *jsonRequest.MessageID, user, text, threadID, public)
+	return h.updateMessage(req.Context(), w, *jsonRequest.MessageID, user, text, threadID, public)
 }

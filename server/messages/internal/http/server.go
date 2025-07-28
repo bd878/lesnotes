@@ -17,11 +17,12 @@ import (
 )
 
 type Config struct {
-	Addr             string
-	RpcAddr          string
-	UsersServiceAddr string
-	FilesServiceAddr string
-	DataPath         string
+	Addr                string
+	RpcAddr             string
+	UsersServiceAddr    string
+	FilesServiceAddr    string
+	SessionsServiceAddr string
+	DataPath            string
 }
 
 type Server struct {

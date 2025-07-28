@@ -10,10 +10,9 @@ import (
 	usermodel "github.com/bd878/gallery/server/users/pkg/model"
 	"github.com/bd878/gallery/server/messages/pkg/model"
 	"github.com/bd878/gallery/server/utils"
-	"github.com/bd878/gallery/server/logger"
 )
 
-func (h *Handler) PrivateMessageOrMessages(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) PrivateMessageOrMessages(w http.ResponseWriter, req *http.Request) error {
 	user, ok := utils.GetUser(w, req)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
@@ -48,7 +47,7 @@ func (h *Handler) PrivateMessageOrMessages(log *logger.Logger, w http.ResponseWr
 			return err
 		}
 
-		return h.privateMessage(log, w, req, user, int32(id))
+		return h.privateMessage(w, req, user, int32(id))
 	} else if values.Get("ids") != "" {
 		var ids []int32
 		if err := json.Unmarshal([]byte(values.Get("ids")), &ids); err != nil {
@@ -60,7 +59,7 @@ func (h *Handler) PrivateMessageOrMessages(log *logger.Logger, w http.ResponseWr
 			return err
 		}
 
-		return h.privateMessages(log, w, req, user, ids)
+		return h.privateMessages(w, req, user, ids)
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
@@ -72,8 +71,8 @@ func (h *Handler) PrivateMessageOrMessages(log *logger.Logger, w http.ResponseWr
 	}
 }
 
-func (h *Handler) privateMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request, user *usermodel.User, id int32) error {
-	res, err := h.controller.PrivateMessages(req.Context(), log, &model.PrivateMessagesParams{
+func (h *Handler) privateMessage(w http.ResponseWriter, req *http.Request, user *usermodel.User, id int32) error {
+	res, err := h.controller.PrivateMessages(req.Context(), &model.PrivateMessagesParams{
 		IDs: []int32{id},
 		UserID: user.ID,
 	})
@@ -99,8 +98,8 @@ func (h *Handler) privateMessage(log *logger.Logger, w http.ResponseWriter, req 
 	return nil
 }
 
-func (h *Handler) privateMessages(log *logger.Logger, w http.ResponseWriter, req *http.Request, user *usermodel.User, ids []int32) error {
-	res, err := h.controller.PrivateMessages(req.Context(), log, &model.PrivateMessagesParams{
+func (h *Handler) privateMessages(w http.ResponseWriter, req *http.Request, user *usermodel.User, ids []int32) error {
+	res, err := h.controller.PrivateMessages(req.Context(), &model.PrivateMessagesParams{
 		IDs: ids,
 		UserID: user.ID,
 	})

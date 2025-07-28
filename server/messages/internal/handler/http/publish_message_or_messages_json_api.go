@@ -8,10 +8,9 @@ import (
 	servermodel "github.com/bd878/gallery/server/pkg/model"
 	"github.com/bd878/gallery/server/messages/pkg/model"
 	"github.com/bd878/gallery/server/utils"
-	"github.com/bd878/gallery/server/logger"
 )
 
-func (h *Handler) PublishMessageOrMessagesJsonAPI(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) PublishMessageOrMessagesJsonAPI(w http.ResponseWriter, req *http.Request) error {
 	user, ok := utils.GetUser(w, req)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
@@ -46,9 +45,9 @@ func (h *Handler) PublishMessageOrMessagesJsonAPI(log *logger.Logger, w http.Res
 	}
 
 	if jsonRequest.MessageID != nil {
-		return h.publishMessage(log, w, req, user, *jsonRequest.MessageID)
+		return h.publishMessage(w, req, user, *jsonRequest.MessageID)
 	} else if jsonRequest.IDs != nil {
-		return h.publishMessages(log, w, req, user, *jsonRequest.IDs)
+		return h.publishMessages(w, req, user, *jsonRequest.IDs)
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{

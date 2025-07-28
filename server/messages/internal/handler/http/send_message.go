@@ -15,7 +15,7 @@ import (
 	"github.com/bd878/gallery/server/logger"
 )
 
-func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) error {
 	var (
 		err error
 		fileID, threadID int32
@@ -107,7 +107,7 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 		hasFile = true
 	}
 
-	log.Infow("received message", "text", text, "name", user.Name, "file_id", fileID, "has_file", hasFile)
+	logger.Infow("received message", "text", text, "name", user.Name, "file_id", fileID, "has_file", hasFile)
 
 	if fileID == 0 && !hasFile && text == "" {
 		w.WriteHeader(http.StatusBadRequest)
@@ -143,7 +143,7 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 
 		fileName := filepath.Base(fh.Filename)
 
-		fileResult, err := h.filesGateway.SaveFile(req.Context(), log, f, &model.SaveFileParams{
+		fileResult, err := h.filesGateway.SaveFile(req.Context(), f, &model.SaveFileParams{
 			UserID: user.ID,
 			Name:   fileName,
 		})
@@ -168,11 +168,11 @@ func (h *Handler) SendMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 		Private: private,
 	}
 
-	return h.saveMessage(log, w, req, message)
+	return h.saveMessage(w, req, message)
 }
 
-func (h *Handler) saveMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request, message *model.Message) error {
-	resp, err := h.controller.SaveMessage(req.Context(), log, message)
+func (h *Handler) saveMessage(w http.ResponseWriter, req *http.Request, message *model.Message) error {
+	resp, err := h.controller.SaveMessage(req.Context(), message)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
@@ -189,9 +189,9 @@ func (h *Handler) saveMessage(log *logger.Logger, w http.ResponseWriter, req *ht
 	message.CreateUTCNano = resp.CreateUTCNano
 
 	if message.FileID != 0 {
-		fileRes, err := h.filesGateway.ReadFile(req.Context(), log, message.UserID, message.FileID)
+		fileRes, err := h.filesGateway.ReadFile(req.Context(), message.UserID, message.FileID)
 		if err != nil {
-			log.Errorw("failed to read file for a message", "user_id", message.UserID, "file_id", message.FileID, "message_id", resp.ID)
+			logger.Errorw("failed to read file for a message", "user_id", message.UserID, "file_id", message.FileID, "message_id", resp.ID)
 		} else {
 			message.File = &filesmodel.File{
 				Name: fileRes.Name,

@@ -9,7 +9,6 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/messages/pkg/loadbalance"
 	"github.com/bd878/gallery/server/messages/pkg/model"
 )
@@ -61,7 +60,7 @@ func (s *Messages) isConnFailed() bool {
 	return state == connectivity.Shutdown || state == connectivity.TransientFailure
 }
 
-func (s *Messages) SaveMessage(ctx context.Context, log *logger.Logger, message *model.Message) (
+func (s *Messages) SaveMessage(ctx context.Context, message *model.Message) (
 	*model.SaveMessageResult, error,
 ) {
 	if s.isConnFailed() {
@@ -85,7 +84,7 @@ func (s *Messages) SaveMessage(ctx context.Context, log *logger.Logger, message 
 	}, nil
 }
 
-func (s *Messages) DeleteMessage(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) (
+func (s *Messages) DeleteMessage(ctx context.Context, params *model.DeleteMessageParams) (
 	*model.DeleteMessageResult, error,
 ) {
 	if s.isConnFailed() {
@@ -105,7 +104,7 @@ func (s *Messages) DeleteMessage(ctx context.Context, log *logger.Logger, params
 	return &model.DeleteMessageResult{}, nil
 }
 
-func (s *Messages) DeleteMessages(ctx context.Context, log *logger.Logger, params *model.DeleteMessagesParams) (
+func (s *Messages) DeleteMessages(ctx context.Context, params *model.DeleteMessagesParams) (
 	*model.DeleteMessagesResult, error,
 ) {
 	if s.isConnFailed() {
@@ -136,7 +135,7 @@ func (s *Messages) DeleteMessages(ctx context.Context, log *logger.Logger, param
 	}, nil
 }
 
-func (s *Messages) PublishMessages(ctx context.Context, log *logger.Logger, params *model.PublishMessagesParams) (
+func (s *Messages) PublishMessages(ctx context.Context, params *model.PublishMessagesParams) (
 	*model.PublishMessagesResult, error,
 ) {
 	if s.isConnFailed() {
@@ -158,7 +157,7 @@ func (s *Messages) PublishMessages(ctx context.Context, log *logger.Logger, para
 	}, nil
 }
 
-func (s *Messages) PrivateMessages(ctx context.Context, log *logger.Logger, params *model.PrivateMessagesParams) (
+func (s *Messages) PrivateMessages(ctx context.Context, params *model.PrivateMessagesParams) (
 	*model.PrivateMessagesResult, error,
 ) {
 	if s.isConnFailed() {
@@ -180,7 +179,7 @@ func (s *Messages) PrivateMessages(ctx context.Context, log *logger.Logger, para
 	}, nil
 }
 
-func (s *Messages) UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (
+func (s *Messages) UpdateMessage(ctx context.Context, params *model.UpdateMessageParams) (
 	*model.UpdateMessageResult, error,
 ) {
 	if s.isConnFailed() {
@@ -208,7 +207,7 @@ func (s *Messages) UpdateMessage(ctx context.Context, log *logger.Logger, params
 	}, nil
 }
 
-func (s *Messages) ReadThreadMessages(ctx context.Context, log *logger.Logger, params *model.ReadThreadMessagesParams) (
+func (s *Messages) ReadThreadMessages(ctx context.Context, params *model.ReadThreadMessagesParams) (
 	*model.ReadThreadMessagesResult, error,
 ) {
 	if s.isConnFailed() {
@@ -235,7 +234,7 @@ func (s *Messages) ReadThreadMessages(ctx context.Context, log *logger.Logger, p
 	}, err
 }
 
-func (s *Messages) ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadMessagesParams) (
+func (s *Messages) ReadAllMessages(ctx context.Context, params *model.ReadMessagesParams) (
 	*model.ReadMessagesResult, error,
 ) {
 	if s.isConnFailed() {
@@ -261,7 +260,7 @@ func (s *Messages) ReadAllMessages(ctx context.Context, log *logger.Logger, para
 	}, err
 }
 
-func (s *Messages) ReadOneMessage(ctx context.Context, log *logger.Logger, params *model.ReadOneMessageParams) (
+func (s *Messages) ReadOneMessage(ctx context.Context, params *model.ReadOneMessageParams) (
 	*model.Message, error,
 ) {
 	if s.isConnFailed() {

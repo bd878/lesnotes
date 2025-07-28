@@ -236,7 +236,7 @@ LIMIT :limit OFFSET :offset
  * Does not put message with same id
  * twice
  */
-func (r *Repository) Create(ctx context.Context, log *logger.Logger, message *model.Message) error {
+func (r *Repository) Create(ctx context.Context, message *model.Message) error {
 	var threadIdCol sql.NullInt32
 	if message.ThreadID != 0 {
 		threadIdCol.Int32 = int32(message.ThreadID)
@@ -265,13 +265,13 @@ func (r *Repository) Create(ctx context.Context, log *logger.Logger, message *mo
 		sql.Named("private", privateCol),
 	)
 	if err != nil {
-		log.Errorw("failed to insert new message ", "error", err)
+		logger.Errorw("failed to insert new message ", "error", err)
 		return errors.New("failed to put message")
 	}
 	return nil
 }
 
-func (r *Repository) Publish(ctx context.Context, log *logger.Logger, params *model.PublishMessagesParams) (err error) {
+func (r *Repository) Publish(ctx context.Context, params *model.PublishMessagesParams) (err error) {
 	var tx *sql.Tx
 
 	tx, err = r.pool.BeginTx(ctx, &sql.TxOptions{})
@@ -298,14 +298,14 @@ func (r *Repository) Publish(ctx context.Context, log *logger.Logger, params *mo
 			sql.Named("userId", params.UserID),
 		)
 		if err != nil {
-			log.Errorw("failed to make message publish", "id", id, "user_id", params.UserID, "error", err)
+			logger.Errorw("failed to make message publish", "id", id, "user_id", params.UserID, "error", err)
 		}
 	}
 
 	return
 }
 
-func (r *Repository) Private(ctx context.Context, log *logger.Logger, params *model.PrivateMessagesParams) (err error) {
+func (r *Repository) Private(ctx context.Context, params *model.PrivateMessagesParams) (err error) {
 	var tx *sql.Tx
 
 	tx, err = r.pool.BeginTx(ctx, &sql.TxOptions{})
@@ -332,14 +332,14 @@ func (r *Repository) Private(ctx context.Context, log *logger.Logger, params *mo
 			sql.Named("userId", params.UserID),
 		)
 		if err != nil {
-			log.Errorw("failed to make message private", "id", id, "user_id", params.UserID, "error", err)
+			logger.Errorw("failed to make message private", "id", id, "user_id", params.UserID, "error", err)
 		}
 	}
 
 	return
 }
 
-func (r *Repository) DeleteAllUserMessages(ctx context.Context, log *logger.Logger, params *model.DeleteAllUserMessagesParams) error {
+func (r *Repository) DeleteAllUserMessages(ctx context.Context, params *model.DeleteAllUserMessagesParams) error {
 	var (
 		tx *sql.Tx
 		err error
@@ -347,7 +347,7 @@ func (r *Repository) DeleteAllUserMessages(ctx context.Context, log *logger.Logg
 
 	tx, err = r.pool.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
-		log.Errorln("failed to start transaction")
+		logger.Errorln("failed to start transaction")
 		return err
 	}
 
@@ -360,7 +360,7 @@ func (r *Repository) DeleteAllUserMessages(ctx context.Context, log *logger.Logg
 		case err != nil:
 			rErr := tx.Rollback()
 			if rErr != nil {
-				log.Errorw("failed to rollback delete all messages stmt", "error", rErr)
+				logger.Errorw("failed to rollback delete all messages stmt", "error", rErr)
 			}
 		default:
 			err = tx.Commit()
@@ -369,14 +369,14 @@ func (r *Repository) DeleteAllUserMessages(ctx context.Context, log *logger.Logg
 
 	_, err = tx.StmtContext(ctx, r.deleteAllUserMessagesStmt).ExecContext(ctx, sql.Named("userId", params.UserID))
 	if err != nil {
-		log.Errorln("failed to delete all user messages")
+		logger.Errorln("failed to delete all user messages")
 		return err
 	}
 
 	return nil
 }
 
-func (r *Repository) Delete(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error {
+func (r *Repository) Delete(ctx context.Context, params *model.DeleteMessageParams) error {
 	var (
 		tx *sql.Tx
 		err error
@@ -384,7 +384,7 @@ func (r *Repository) Delete(ctx context.Context, log *logger.Logger, params *mod
 
 	tx, err = r.pool.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
-		log.Errorln("failed to start transaction")
+		logger.Errorln("failed to start transaction")
 		return err
 	}
 
@@ -397,7 +397,7 @@ func (r *Repository) Delete(ctx context.Context, log *logger.Logger, params *mod
 		case err != nil:
 			rErr := tx.Rollback()
 			if rErr != nil {
-				log.Errorw("failed to rollback delete stmt", "error", rErr)
+				logger.Errorw("failed to rollback delete stmt", "error", rErr)
 			}
 		default:
 			err = tx.Commit()
@@ -406,20 +406,20 @@ func (r *Repository) Delete(ctx context.Context, log *logger.Logger, params *mod
 
 	_, err = tx.StmtContext(ctx, r.moveThreadStmt).ExecContext(ctx, sql.Named("threadId", params.ID))
 	if err != nil {
-		log.Errorw("failed to move thread messages to root", "threadId", params.ID)
+		logger.Errorw("failed to move thread messages to root", "threadId", params.ID)
 		return err
 	}
 
 	_, err = tx.StmtContext(ctx, r.deleteStmt).ExecContext(ctx, sql.Named("id", params.ID), sql.Named("userId", params.UserID))
 	if err != nil {
-		log.Errorln("failed to delete message")
+		logger.Errorln("failed to delete message")
 		return err
 	}
 
 	return nil
 }
 
-func (r *Repository) Update(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (*model.UpdateMessageResult, error) {
+func (r *Repository) Update(ctx context.Context, params *model.UpdateMessageParams) (*model.UpdateMessageResult, error) {
 	var (
 		tx *sql.Tx
 		err error
@@ -473,7 +473,7 @@ func (r *Repository) Update(ctx context.Context, log *logger.Logger, params *mod
 		sql.Named("private", private),
 	)
 	if err != nil {
-		log.Errorln("failed to update message")
+		logger.Errorln("failed to update message")
 		return nil, err
 	}
 
@@ -489,16 +489,16 @@ func (r *Repository) Update(ctx context.Context, log *logger.Logger, params *mod
 	}, nil
 }
 
-func (r *Repository) Truncate(ctx context.Context, log *logger.Logger) error {
+func (r *Repository) Truncate(ctx context.Context) error {
 	_, err := r.pool.ExecContext(ctx, "DELETE FROM messages")
 	if err != nil {
-		log.Error("failed to delete messages")
+		logger.Error("failed to delete messages")
 		return err
 	}
 	return nil
 }
 
-func (r *Repository) ReadThreadMessages(ctx context.Context, log *logger.Logger, params *model.ReadThreadMessagesParams) (
+func (r *Repository) ReadThreadMessages(ctx context.Context, params *model.ReadThreadMessagesParams) (
 	*model.ReadThreadMessagesResult, error,
 ) {
 	var (
@@ -529,17 +529,17 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, log *logger.Logger,
 
 	rows, err = stmt.QueryContext(ctx, sql.Named("userId", params.UserID), sql.Named("threadId", params.ThreadID), sql.Named("limit", params.Limit), sql.Named("offset", params.Offset))
 	if err != nil {
-		log.Errorln("failed to query messages context")
+		logger.Errorln("failed to query messages context")
 		return nil, err
 	}
 
 	defer rows.Close()
 
-	log.Infow("repository read thread messages", "user_id", params.UserID, "thread_id", params.ThreadID, "private", params.Private)
+	logger.Infow("repository read thread messages", "user_id", params.UserID, "thread_id", params.ThreadID, "private", params.Private)
 
-	selected, err := r.selectMessages(ctx, log, rows, params.UserID, params.Limit, params.Offset)
+	selected, err := r.selectMessages(ctx, rows, params.UserID, params.Limit, params.Offset)
 	if err != nil {
-		log.Errorln("cannot select messages")
+		logger.Errorln("cannot select messages")
 		return nil, err
 	}
 
@@ -554,7 +554,7 @@ type selectedMessages struct {
 	IsLastPage bool
 }
 
-func (r *Repository) ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadMessagesParams) (
+func (r *Repository) ReadAllMessages(ctx context.Context, params *model.ReadMessagesParams) (
 	*model.ReadMessagesResult, error,
 ) {
 	var (
@@ -585,15 +585,15 @@ func (r *Repository) ReadAllMessages(ctx context.Context, log *logger.Logger, pa
 
 	rows, err = stmt.QueryContext(ctx, sql.Named("userId", params.UserID), sql.Named("limit", params.Limit), sql.Named("offset", params.Offset))
 	if err != nil {
-		log.Error("failed to query messages context")
+		logger.Error("failed to query messages context")
 		return nil, err
 	}
 
 	defer rows.Close()
 
-	selected, err := r.selectMessages(ctx, log, rows, params.UserID, params.Limit, params.Offset)
+	selected, err := r.selectMessages(ctx, rows, params.UserID, params.Limit, params.Offset)
 	if err != nil {
-		log.Errorln("cannot select messages")
+		logger.Errorln("cannot select messages")
 		return nil, err
 	}
 
@@ -603,7 +603,7 @@ func (r *Repository) ReadAllMessages(ctx context.Context, log *logger.Logger, pa
 	}, nil
 }
 
-func (r *Repository) Read(ctx context.Context, log *logger.Logger, params *model.ReadOneMessageParams) (
+func (r *Repository) Read(ctx context.Context, params *model.ReadOneMessageParams) (
 	*model.Message, error,
 ) {
 	var (
@@ -631,7 +631,7 @@ WHERE id = ? AND (user_id IN (?` + strings.Repeat(",?", len(list)-1) + `) OR pri
 	err := r.pool.QueryRowContext(ctx, selectStmt, append([]interface{}{params.ID}, list...)...).Scan(
 		&_id, &userId, &threadIdCol, &createUtcNano, &updateUtcNano, &text, &fileIdCol, &privateCol)
 	if err != nil {
-		log.Errorln("failed to select one message")
+		logger.Errorln("failed to select one message")
 		return nil, err
 	}
 
@@ -662,7 +662,7 @@ WHERE id = ? AND (user_id IN (?` + strings.Repeat(",?", len(list)-1) + `) OR pri
 	return msg, nil
 }
 
-func (r *Repository) selectMessages(ctx context.Context, log *logger.Logger, rows *sql.Rows, userID, limit, offset int32) (
+func (r *Repository) selectMessages(ctx context.Context, rows *sql.Rows, userID, limit, offset int32) (
 	*selectedMessages, error,
 ) {
 	var isLastPage bool
@@ -690,7 +690,7 @@ func (r *Repository) selectMessages(ctx context.Context, log *logger.Logger, row
 			&fileIdCol,
 			&privateCol,
 		); err != nil {
-			log.Error("failed to scan row")
+			logger.Error("failed to scan row")
 			return nil, err
 		}
 

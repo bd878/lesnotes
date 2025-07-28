@@ -10,10 +10,9 @@ import (
 	usermodel "github.com/bd878/gallery/server/users/pkg/model"
 	"github.com/bd878/gallery/server/messages/pkg/model"
 	"github.com/bd878/gallery/server/utils"
-	"github.com/bd878/gallery/server/logger"
 )
 
-func (h *Handler) PublishMessageOrMessages(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) PublishMessageOrMessages(w http.ResponseWriter, req *http.Request) error {
 	user, ok := utils.GetUser(w, req)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
@@ -48,7 +47,7 @@ func (h *Handler) PublishMessageOrMessages(log *logger.Logger, w http.ResponseWr
 			return err
 		}
 
-		return h.publishMessage(log, w, req, user, int32(id))
+		return h.publishMessage(w, req, user, int32(id))
 	} else if values.Get("ids") != "" {
 		var ids []int32
 		if err := json.Unmarshal([]byte(values.Get("ids")), &ids); err != nil {
@@ -60,7 +59,7 @@ func (h *Handler) PublishMessageOrMessages(log *logger.Logger, w http.ResponseWr
 			return err
 		}
 
-		return h.publishMessages(log, w, req, user, ids)
+		return h.publishMessages(w, req, user, ids)
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
@@ -72,8 +71,8 @@ func (h *Handler) PublishMessageOrMessages(log *logger.Logger, w http.ResponseWr
 	}
 }
 
-func (h *Handler) publishMessage(log *logger.Logger, w http.ResponseWriter, req *http.Request, user *usermodel.User, id int32) error {
-	res, err := h.controller.PublishMessages(req.Context(), log, &model.PublishMessagesParams{
+func (h *Handler) publishMessage(w http.ResponseWriter, req *http.Request, user *usermodel.User, id int32) error {
+	res, err := h.controller.PublishMessages(req.Context(), &model.PublishMessagesParams{
 		IDs: []int32{id},
 		UserID: user.ID,
 	})
@@ -99,8 +98,8 @@ func (h *Handler) publishMessage(log *logger.Logger, w http.ResponseWriter, req 
 	return nil
 }
 
-func (h *Handler) publishMessages(log *logger.Logger, w http.ResponseWriter, req *http.Request, user *usermodel.User, ids []int32) error {
-	res, err := h.controller.PublishMessages(req.Context(), log, &model.PublishMessagesParams{
+func (h *Handler) publishMessages(w http.ResponseWriter, req *http.Request, user *usermodel.User, ids []int32) error {
+	res, err := h.controller.PublishMessages(req.Context(), &model.PublishMessagesParams{
 		IDs: ids,
 		UserID: user.ID,
 	})

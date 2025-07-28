@@ -41,11 +41,11 @@ func (g *Gateway) isConnFailed() bool {
 	return state == connectivity.Shutdown || state == connectivity.TransientFailure
 }
 
-func (g *Gateway) ReadBatchFiles(ctx context.Context, log *logger.Logger, params *model.ReadBatchFilesParams) (
+func (g *Gateway) ReadBatchFiles(ctx context.Context, params *model.ReadBatchFilesParams) (
 	*model.ReadBatchFilesResult, error,
 ) {
 	if g.isConnFailed() {
-		log.Info("conn failed, setup new connection")
+		logger.Info("conn failed, setup new connection")
 		g.setupConnection()
 	}
 
@@ -54,7 +54,7 @@ func (g *Gateway) ReadBatchFiles(ctx context.Context, log *logger.Logger, params
 		Ids:    params.IDs,
 	})
 	if err != nil {
-		log.Errorln("client failed to read batch files")
+		logger.Errorln("client failed to read batch files")
 		return nil, err
 	}
 
@@ -63,7 +63,7 @@ func (g *Gateway) ReadBatchFiles(ctx context.Context, log *logger.Logger, params
 	}, nil
 }
 
-func (g *Gateway) ReadFile(ctx context.Context, log *logger.Logger, userID, fileID int32) (
+func (g *Gateway) ReadFile(ctx context.Context, userID, fileID int32) (
 	*filesmodel.File, error,
 ) {
 	file, err := g.client.ReadFile(ctx, &api.ReadFileRequest{
@@ -71,7 +71,7 @@ func (g *Gateway) ReadFile(ctx context.Context, log *logger.Logger, userID, file
 		Id: fileID,
 	})
 	if err != nil {
-		log.Errorw("client failed to read one file", "user_id", userID, "file_id", fileID)
+		logger.Errorw("client failed to read one file", "user_id", userID, "file_id", fileID)
 		return nil, err
 	}
 
@@ -79,17 +79,17 @@ func (g *Gateway) ReadFile(ctx context.Context, log *logger.Logger, userID, file
 }
 
 // copied from files/internal/controller/service
-func (g *Gateway) SaveFile(ctx context.Context, log *logger.Logger, fileStream io.Reader, params *model.SaveFileParams) (
+func (g *Gateway) SaveFile(ctx context.Context, fileStream io.Reader, params *model.SaveFileParams) (
 	*model.SaveFileResult, error,
 ) {
 	if g.isConnFailed() {
-		log.Info("conn failed, setup new connection")
+		logger.Info("conn failed, setup new connection")
 		g.setupConnection()
 	}
 
 	stream, err := g.client.SaveFileStream(ctx)
 	if err != nil {
-		log.Errorln("client failed to obtain file stream")
+		logger.Errorln("client failed to obtain file stream")
 		return nil, err
 	}
 
@@ -102,7 +102,7 @@ func (g *Gateway) SaveFile(ctx context.Context, log *logger.Logger, fileStream i
 		},
 	})
 	if err != nil {
-		log.Errorln("failed to save file meta")
+		logger.Errorln("failed to save file meta")
 		return nil, err
 	}
 
@@ -113,7 +113,7 @@ func (g *Gateway) SaveFile(ctx context.Context, log *logger.Logger, fileStream i
 			break
 		}
 		if err != nil {
-			log.Errorln("failed to read file data in buffer")
+			logger.Errorln("failed to read file data in buffer")
 			return nil, err
 		}
 
@@ -123,14 +123,14 @@ func (g *Gateway) SaveFile(ctx context.Context, log *logger.Logger, fileStream i
 			},
 		})
 		if err != nil {
-			log.Errorln("failed to send chunk on file server")
+			logger.Errorln("failed to send chunk on file server")
 			return nil, err
 		}
 	}
 
 	res, err := stream.CloseAndRecv()
 	if err != nil {
-		log.Errorln("failed to close and recv result")
+		logger.Errorln("failed to close and recv result")
 		return nil, err
 	}
 

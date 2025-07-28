@@ -40,21 +40,21 @@ func (m *DistributedMessages) apply(ctx context.Context, reqType RequestType, cm
 	return res, nil
 }
 
-func (m *DistributedMessages) SaveMessage(ctx context.Context, log *logger.Logger, message *model.Message) error {
+func (m *DistributedMessages) SaveMessage(ctx context.Context, message *model.Message) error {
 	cmd, _ := proto.Marshal(&AppendCommand{
 		Message: model.MessageToProto(message),
 	})
 
 	_, err := m.apply(ctx, AppendRequest, cmd)
 	if err != nil {
-		log.Errorln("raft failed to apply save message")
+		logger.Errorln("raft failed to apply save message")
 		return err
 	}
 
 	return nil
 }
 
-func (m *DistributedMessages) UpdateMessage(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (
+func (m *DistributedMessages) UpdateMessage(ctx context.Context, params *model.UpdateMessageParams) (
 	*model.UpdateMessageResult, error,
 ) {
 	cmd, _ := proto.Marshal(&UpdateCommand{
@@ -69,7 +69,7 @@ func (m *DistributedMessages) UpdateMessage(ctx context.Context, log *logger.Log
 
 	res, err := m.apply(ctx, UpdateRequest, cmd)
 	if err != nil {
-		log.Errorln("raft failed to apply save message")
+		logger.Errorln("raft failed to apply save message")
 		return nil, err
 	}
 
@@ -81,26 +81,26 @@ func (m *DistributedMessages) UpdateMessage(ctx context.Context, log *logger.Log
 	case error:
 		return nil, val
 	default:
-		log.Errorln("update request reseived unknown type")
+		logger.Errorln("update request reseived unknown type")
 		return nil, errors.New("unknown message update type")
 	}
 }
 
-func (m *DistributedMessages) DeleteAllUserMessages(ctx context.Context, log *logger.Logger, params *model.DeleteAllUserMessagesParams) error {
+func (m *DistributedMessages) DeleteAllUserMessages(ctx context.Context, params *model.DeleteAllUserMessagesParams) error {
 	cmd, _ := proto.Marshal(&DeleteAllUserMessagesCommand{
 		UserId: params.UserID,
 	})
 
 	_, err := m.apply(ctx, DeleteAllUserMessagesRequest, cmd)
 	if err != nil {
-		log.Errorln("raft failed to apply delete all messages")
+		logger.Errorln("raft failed to apply delete all messages")
 		return err
 	}
 
 	return nil
 }
 
-func (m *DistributedMessages) DeleteMessage(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error {
+func (m *DistributedMessages) DeleteMessage(ctx context.Context, params *model.DeleteMessageParams) error {
 	cmd, _ := proto.Marshal(&DeleteCommand{
 		Id: params.ID,
 		UserId: params.UserID,
@@ -108,14 +108,14 @@ func (m *DistributedMessages) DeleteMessage(ctx context.Context, log *logger.Log
 
 	_, err := m.apply(ctx, DeleteRequest, cmd)
 	if err != nil {
-		log.Errorln("raft failed to apply delete message")
+		logger.Errorln("raft failed to apply delete message")
 		return err
 	}
 
 	return nil
 }
 
-func (m *DistributedMessages) DeleteMessages(ctx context.Context, log *logger.Logger, params *model.DeleteMessagesParams) (*model.DeleteMessagesResult, error) {
+func (m *DistributedMessages) DeleteMessages(ctx context.Context, params *model.DeleteMessagesParams) (*model.DeleteMessagesResult, error) {
 	statuses := make([]*model.DeleteMessageStatus, 0, len(params.IDs))
 	for _, id := range params.IDs {
 		cmd, _ := proto.Marshal(&DeleteCommand{
@@ -125,7 +125,7 @@ func (m *DistributedMessages) DeleteMessages(ctx context.Context, log *logger.Lo
 
 		res, err := m.apply(ctx, DeleteRequest, cmd)
 		if err != nil {
-			log.Errorw("raft failed to apply delete message", "error", err)
+			logger.Errorw("raft failed to apply delete message", "error", err)
 			statuses = append(statuses, &model.DeleteMessageStatus{
 				ID: id,
 				OK: false,
@@ -149,7 +149,7 @@ func (m *DistributedMessages) DeleteMessages(ctx context.Context, log *logger.Lo
 	return &model.DeleteMessagesResult{IDs: statuses}, nil
 }
 
-func (m *DistributedMessages) PublishMessages(ctx context.Context, log *logger.Logger, params *model.PublishMessagesParams) (*model.PublishMessagesResult, error) {
+func (m *DistributedMessages) PublishMessages(ctx context.Context, params *model.PublishMessagesParams) (*model.PublishMessagesResult, error) {
 	cmd, _ := proto.Marshal(&PublishCommand{
 		Ids: params.IDs,
 		UserId: params.UserID,
@@ -166,7 +166,7 @@ func (m *DistributedMessages) PublishMessages(ctx context.Context, log *logger.L
 	}, nil
 }
 
-func (m *DistributedMessages) PrivateMessages(ctx context.Context, log *logger.Logger, params *model.PrivateMessagesParams) (*model.PrivateMessagesResult, error) {
+func (m *DistributedMessages) PrivateMessages(ctx context.Context, params *model.PrivateMessagesParams) (*model.PrivateMessagesResult, error) {
 	cmd, _ := proto.Marshal(&PrivateCommand{
 		Ids: params.IDs,
 		UserId: params.UserID,
@@ -183,19 +183,17 @@ func (m *DistributedMessages) PrivateMessages(ctx context.Context, log *logger.L
 	}, nil
 }
 
-func (m *DistributedMessages) ReadMessage(ctx context.Context, log *logger.Logger, params *model.ReadOneMessageParams) (
+func (m *DistributedMessages) ReadMessage(ctx context.Context, params *model.ReadOneMessageParams) (
 	*model.Message, error,
 ) {
-	return m.repo.Read(ctx, log, params)
+	return m.repo.Read(ctx, params)
 }
 
-func (m *DistributedMessages) ReadThreadMessages(ctx context.Context, log *logger.Logger, params *model.ReadThreadMessagesParams) (
+func (m *DistributedMessages) ReadThreadMessages(ctx context.Context, params *model.ReadThreadMessagesParams) (
 	*model.ReadThreadMessagesResult, error,
 ) {
-	log.Infow("distributed methods. read thread messages", "user_id", params.UserID, "thread_id", params.ThreadID)
-	return m.repo.ReadThreadMessages(
-		ctx,
-		log,
+	logger.Infow("distributed methods. read thread messages", "user_id", params.UserID, "thread_id", params.ThreadID)
+	return m.repo.ReadThreadMessages(ctx,
 		&model.ReadThreadMessagesParams{
 			UserID:    params.UserID,
 			ThreadID:  params.ThreadID,
@@ -207,12 +205,10 @@ func (m *DistributedMessages) ReadThreadMessages(ctx context.Context, log *logge
 	)
 }
 
-func (m *DistributedMessages) ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadMessagesParams) (
+func (m *DistributedMessages) ReadAllMessages(ctx context.Context, params *model.ReadMessagesParams) (
 	*model.ReadMessagesResult, error,
 ) {
-	return m.repo.ReadAllMessages(
-		ctx,
-		log,
+	return m.repo.ReadAllMessages(ctx,
 		&model.ReadMessagesParams{
 			UserID:    params.UserID,
 			Limit:     params.Limit,

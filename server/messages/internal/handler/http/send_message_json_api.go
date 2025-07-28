@@ -8,11 +8,10 @@ import (
 	servermodel "github.com/bd878/gallery/server/pkg/model"
 	usermodel "github.com/bd878/gallery/server/users/pkg/model"
 	"github.com/bd878/gallery/server/utils"
-	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/messages/pkg/model"
 )
 
-func (h *Handler) SendMessageJsonAPI(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) SendMessageJsonAPI(w http.ResponseWriter, req *http.Request) error {
 	user, ok := utils.GetUser(w, req)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
@@ -75,5 +74,5 @@ func (h *Handler) SendMessageJsonAPI(log *logger.Logger, w http.ResponseWriter, 
 	// TODO: check file by file_id exists
 	// TODO: check thread by thread_id exists
 
-	return h.saveMessage(log, w, req, &message)
+	return h.saveMessage(w, req, &message)
 }

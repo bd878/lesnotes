@@ -11,16 +11,16 @@ import (
 )
 
 type Repository interface {
-	Create(ctx context.Context, log *logger.Logger, message *model.Message) error
-	Update(ctx context.Context, log *logger.Logger, params *model.UpdateMessageParams) (*model.UpdateMessageResult, error)
-	Delete(ctx context.Context, log *logger.Logger, params *model.DeleteMessageParams) error
-	Publish(ctx context.Context, log *logger.Logger, params *model.PublishMessagesParams) error
-	Private(ctx context.Context, log *logger.Logger, params *model.PrivateMessagesParams) error
-	Read(ctx context.Context, log *logger.Logger, params *model.ReadOneMessageParams) (*model.Message, error)
-	DeleteAllUserMessages(ctx context.Context, log *logger.Logger, params *model.DeleteAllUserMessagesParams) error
-	ReadAllMessages(ctx context.Context, log *logger.Logger, params *model.ReadMessagesParams) (*model.ReadMessagesResult, error)
-	ReadThreadMessages(ctx context.Context, log *logger.Logger, params *model.ReadThreadMessagesParams) (*model.ReadThreadMessagesResult, error)
-	Truncate(ctx context.Context, log *logger.Logger) error
+	Create(ctx context.Context, message *model.Message) error
+	Update(ctx context.Context, params *model.UpdateMessageParams) (*model.UpdateMessageResult, error)
+	Delete(ctx context.Context, params *model.DeleteMessageParams) error
+	Publish(ctx context.Context, params *model.PublishMessagesParams) error
+	Private(ctx context.Context, params *model.PrivateMessagesParams) error
+	Read(ctx context.Context, params *model.ReadOneMessageParams) (*model.Message, error)
+	DeleteAllUserMessages(ctx context.Context, params *model.DeleteAllUserMessagesParams) error
+	ReadAllMessages(ctx context.Context, params *model.ReadMessagesParams) (*model.ReadMessagesResult, error)
+	ReadThreadMessages(ctx context.Context, params *model.ReadThreadMessagesParams) (*model.ReadThreadMessagesResult, error)
+	Truncate(ctx context.Context) error
 }
 
 var _ raft.FSM = (*fsm)(nil)
@@ -63,7 +63,7 @@ func (f *fsm) applyAppend(raw []byte) interface{} {
 	proto.Unmarshal(raw, &cmd)
 
 	// Put does not put message with same id twice
-	err := f.repo.Create(context.Background(), logger.Default(), model.MessageFromProto(cmd.Message))
+	err := f.repo.Create(context.Background(), model.MessageFromProto(cmd.Message))
 	if err != nil {
 		return err
 	}
@@ -74,7 +74,7 @@ func (f *fsm) applyUpdate(raw []byte) interface{} {
 	var cmd UpdateCommand
 	proto.Unmarshal(raw, &cmd)
 
-	res, err := f.repo.Update(context.Background(), logger.Default(), &model.UpdateMessageParams{
+	res, err := f.repo.Update(context.Background(), &model.UpdateMessageParams{
 		ID: cmd.Id,
 		UserID: cmd.UserId,
 		FileID: cmd.FileId,
@@ -97,7 +97,7 @@ func (f *fsm) applyDeleteAllUserMessages(raw []byte) interface{} {
 	var cmd DeleteAllUserMessagesCommand
 	proto.Unmarshal(raw, &cmd)
 
-	err := f.repo.DeleteAllUserMessages(context.Background(), logger.Default(), &model.DeleteAllUserMessagesParams{
+	err := f.repo.DeleteAllUserMessages(context.Background(), &model.DeleteAllUserMessagesParams{
 		UserID: cmd.UserId,
 	})
 	if err != nil {
@@ -111,7 +111,7 @@ func (f *fsm) applyDelete(raw []byte) interface{} {
 	var cmd DeleteCommand
 	proto.Unmarshal(raw, &cmd)
 
-	err := f.repo.Delete(context.Background(), logger.Default(), &model.DeleteMessageParams{
+	err := f.repo.Delete(context.Background(), &model.DeleteMessageParams{
 		ID: cmd.Id,
 		UserID: cmd.UserId,
 	})
@@ -126,7 +126,7 @@ func (f *fsm) applyPublish(raw []byte) interface{} {
 	var cmd PublishCommand
 	proto.Unmarshal(raw, &cmd)
 
-	err := f.repo.Publish(context.Background(), logger.Default(), &model.PublishMessagesParams{
+	err := f.repo.Publish(context.Background(), &model.PublishMessagesParams{
 		IDs: cmd.Ids,
 		UserID: cmd.UserId,
 		UpdateUTCNano: cmd.UpdateUtcNano,
@@ -142,7 +142,7 @@ func (f *fsm) applyPrivate(raw []byte) interface{} {
 	var cmd PrivateCommand
 	proto.Unmarshal(raw, &cmd)
 
-	err := f.repo.Private(context.Background(), logger.Default(), &model.PrivateMessagesParams{
+	err := f.repo.Private(context.Background(), &model.PrivateMessagesParams{
 		IDs: cmd.Ids,
 		UserID: cmd.UserId,
 		UpdateUTCNano: cmd.UpdateUtcNano,
