@@ -134,10 +134,10 @@ func (m *DistributedMessages) WaitForLeader(timeout time.Duration) error {
 	}
 }
 
-func (m *DistributedMessages) GetServers(_ context.Context, log *logger.Logger) ([](*api.Server), error) {
+func (m *DistributedMessages) GetServers(_ context.Context) ([](*api.Server), error) {
 	future := m.raft.GetConfiguration()
 	if err := future.Error(); err != nil {
-		log.Error("message", "failed to get servers configuration")
+		logger.Error("message", "failed to get servers configuration")
 		return nil, err
 	}
 	var servers []*api.Server
