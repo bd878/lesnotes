@@ -5,7 +5,8 @@ import {getFileDownloadUrl} from "../../../api";
 
 function MainMessageComponent(props) {
 	const {
-		message
+		message,
+		userID,
 	} = props
 
 	if (is.empty(message) || (is.notEmpty(message) && is.empty(message.text)))
@@ -17,14 +18,10 @@ function MainMessageComponent(props) {
 				{message.text}
 			</Tag>
 
-			{(message.file && message.file.ID && message.file.name) ? <Tag
-				el="a"
-				href={getFileDownloadUrl(`/files/v1/download?id=${message.file.ID}`, false)}
-				download={message.file.name}
-				target="_blank"
-			>
-				{message.file.name}
-			</Tag> : null}
+			{(message.file && message.file.name && userID) ? <Tag
+				el="img"
+				src={getFileDownloadUrl(`/files/v2/${userID}/${message.file.name}`)}
+			/> : null}
 		</Tag>
 	)
 }
