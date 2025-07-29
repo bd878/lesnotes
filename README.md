@@ -1,15 +1,5 @@
-Simple service that will keep
-fiels and messages on remote server.
-Plays with microservices
+LesNotes is a web service, that allows you to keep and share your notes.
+It supports Telegram integration to synchronize messages between these two platforms.
 
-*** changelog
-Set in /etc/hosts: 127.0.0.2:80 galleryexample.com
-to save cookies on login.
-Proxy front and server both through nginx
-
-*** changelog
-Launch process from directory,
-where config/ is
-i.e.
-cd server/users
-go run ./cmd/users/main.go
+LesNotes employs distributed technologies like Serf and Raft and empowers you to keep your files save.
+By the way, it is a file server also.
