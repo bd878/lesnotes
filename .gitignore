@@ -19,3 +19,4 @@ cookie.txt
 *.patch
 *.token
 .env
+node_modules/*
