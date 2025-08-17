@@ -11,15 +11,15 @@ import (
 )
 
 type Repository interface {
-	Create(ctx context.Context, message *model.Message) error
-	Update(ctx context.Context, params *model.UpdateMessageParams) (*model.UpdateMessageResult, error)
-	Delete(ctx context.Context, params *model.DeleteMessageParams) error
-	Publish(ctx context.Context, params *model.PublishMessagesParams) error
-	Private(ctx context.Context, params *model.PrivateMessagesParams) error
-	Read(ctx context.Context, params *model.ReadOneMessageParams) (*model.Message, error)
-	DeleteAllUserMessages(ctx context.Context, params *model.DeleteAllUserMessagesParams) error
-	ReadAllMessages(ctx context.Context, params *model.ReadMessagesParams) (*model.ReadMessagesResult, error)
-	ReadThreadMessages(ctx context.Context, params *model.ReadThreadMessagesParams) (*model.ReadThreadMessagesResult, error)
+	Create(ctx context.Context, message *model.Message) (err error)
+	Update(ctx context.Context, userID, id int32, newText string, newThreadID int32, newFileIDs []int32, newPrivate int) (result *model.UpdateMessageResult, err error)
+	DeleteMessage(ctx context.Context, userID, id int32) (err error)
+	Publish(ctx context.Context, userID int32, ids []int32) (err error)
+	Private(ctx context.Context, userID int32, ids []int32) (err error)
+	Read(ctx context.Context, userIDs []int32, id int32) (message *model.Message, err error)
+	DeleteAllUserMessages(ctx context.Context, userID int32) (err error)
+	ReadThreadMessages(ctx context.Context, userID, threadID, limit, offset int32, private int32) (messages []*model.Message, isLastPage bool, err error)
+	ReadAllMessages(ctx context.Context, userID, limit, offset int32, private int32) (messages []*model.Message, isLastPage bool, err error)
 	Truncate(ctx context.Context) error
 }
 
@@ -74,15 +74,7 @@ func (f *fsm) applyUpdate(raw []byte) interface{} {
 	var cmd UpdateCommand
 	proto.Unmarshal(raw, &cmd)
 
-	res, err := f.repo.Update(context.Background(), &model.UpdateMessageParams{
-		ID: cmd.Id,
-		UserID: cmd.UserId,
-		FileID: cmd.FileId,
-		ThreadID: cmd.ThreadId,
-		Text: cmd.Text,
-		UpdateUTCNano: cmd.UpdateUtcNano,
-		Private: cmd.Private,
-	})
+	res, err := f.repo.Update(context.Background(), cmd.UserId, cmd.Id, cmd.Text, cmd.ThreadId, []int32{cmd.FileId}, int(cmd.Private))
 	if err != nil {
 		return err
 	}
@@ -97,9 +89,7 @@ func (f *fsm) applyDeleteAllUserMessages(raw []byte) interface{} {
 	var cmd DeleteAllUserMessagesCommand
 	proto.Unmarshal(raw, &cmd)
 
-	err := f.repo.DeleteAllUserMessages(context.Background(), &model.DeleteAllUserMessagesParams{
-		UserID: cmd.UserId,
-	})
+	err := f.repo.DeleteAllUserMessages(context.Background(), cmd.UserId)
 	if err != nil {
 		return err
 	}
@@ -111,10 +101,7 @@ func (f *fsm) applyDelete(raw []byte) interface{} {
 	var cmd DeleteCommand
 	proto.Unmarshal(raw, &cmd)
 
-	err := f.repo.Delete(context.Background(), &model.DeleteMessageParams{
-		ID: cmd.Id,
-		UserID: cmd.UserId,
-	})
+	err := f.repo.DeleteMessage(context.Background(), cmd.UserId, cmd.Id)
 	if err != nil {
 		return err
 	}
@@ -126,11 +113,7 @@ func (f *fsm) applyPublish(raw []byte) interface{} {
 	var cmd PublishCommand
 	proto.Unmarshal(raw, &cmd)
 
-	err := f.repo.Publish(context.Background(), &model.PublishMessagesParams{
-		IDs: cmd.Ids,
-		UserID: cmd.UserId,
-		UpdateUTCNano: cmd.UpdateUtcNano,
-	})
+	err := f.repo.Publish(context.Background(), cmd.UserId, cmd.Ids)
 	if err != nil {
 		return err
 	}
@@ -142,11 +125,7 @@ func (f *fsm) applyPrivate(raw []byte) interface{} {
 	var cmd PrivateCommand
 	proto.Unmarshal(raw, &cmd)
 
-	err := f.repo.Private(context.Background(), &model.PrivateMessagesParams{
-		IDs: cmd.Ids,
-		UserID: cmd.UserId,
-		UpdateUTCNano: cmd.UpdateUtcNano,
-	})
+	err := f.repo.Private(context.Background(), cmd.UserId, cmd.Ids)
 	if err != nil {
 		return err
 	}

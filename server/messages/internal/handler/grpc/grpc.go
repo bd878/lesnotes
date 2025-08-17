@@ -18,8 +18,8 @@ type Controller interface {
 	PublishMessages(ctx context.Context, params *model.PublishMessagesParams) (*model.PublishMessagesResult, error)
 	PrivateMessages(ctx context.Context, params *model.PrivateMessagesParams) (*model.PrivateMessagesResult, error)
 	ReadMessage(ctx context.Context, params *model.ReadOneMessageParams) (*model.Message, error)
-	ReadAllMessages(ctx context.Context, params *model.ReadMessagesParams) (*model.ReadMessagesResult, error)
-	ReadThreadMessages(ctx context.Context, params *model.ReadThreadMessagesParams) (*model.ReadThreadMessagesResult, error)
+	ReadAllMessages(ctx context.Context, params *model.ReadMessagesParams) (messages []*model.Message, isLastPage bool, err error,)
+	ReadThreadMessages(ctx context.Context, params *model.ReadThreadMessagesParams) (messages []*model.Message, isLastPage bool, err error,)
 	GetServers(ctx context.Context) ([]*api.Server, error)
 }
 
@@ -135,7 +135,7 @@ func (h *Handler) PrivateMessages(ctx context.Context, req *api.PrivateMessagesR
 }
 
 func (h *Handler) ReadThreadMessages(ctx context.Context, req *api.ReadThreadMessagesRequest) (*api.ReadThreadMessagesResponse, error) {
-	res, err := h.controller.ReadThreadMessages(ctx, &model.ReadThreadMessagesParams{
+	messages, isLastPage, err := h.controller.ReadThreadMessages(ctx, &model.ReadThreadMessagesParams{
 		UserID:    req.UserId,
 		ThreadID:  req.ThreadId,
 		Limit:     req.Limit,
@@ -148,13 +148,13 @@ func (h *Handler) ReadThreadMessages(ctx context.Context, req *api.ReadThreadMes
 	}
 
 	return &api.ReadThreadMessagesResponse{
-		Messages: model.MapMessagesToProto(model.MessageToProto, res.Messages),
-		IsLastPage: res.IsLastPage,
+		Messages: model.MapMessagesToProto(model.MessageToProto, messages),
+		IsLastPage: isLastPage,
 	}, nil
 }
 
 func (h *Handler) ReadAllMessages(ctx context.Context, req *api.ReadMessagesRequest) (*api.ReadMessagesResponse, error) {
-	res, err := h.controller.ReadAllMessages(ctx, &model.ReadMessagesParams{
+	messages, isLastPage, err := h.controller.ReadAllMessages(ctx, &model.ReadMessagesParams{
 		UserID:    req.UserId,
 		Limit:     req.Limit,
 		Offset:    req.Offset,
@@ -166,8 +166,8 @@ func (h *Handler) ReadAllMessages(ctx context.Context, req *api.ReadMessagesRequ
 	}
 
 	return &api.ReadMessagesResponse{
-		Messages: model.MapMessagesToProto(model.MessageToProto, res.Messages),
-		IsLastPage: res.IsLastPage,
+		Messages: model.MapMessagesToProto(model.MessageToProto, messages),
+		IsLastPage: isLastPage,
 	}, nil
 }
 

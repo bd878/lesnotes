@@ -15,12 +15,14 @@ import (
 	"golang.org/x/sync/errgroup"
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/logger"
+	"github.com/jackc/pgx/v5/pgxpool"
 	hclog "github.com/hashicorp/go-hclog"
 
+	"github.com/bd878/gallery/server/waiter"
 	grpcmiddleware "github.com/bd878/gallery/server/internal/middleware/grpc"
 	grpclogger "github.com/bd878/gallery/server/messages/internal/logger/grpc"
 	membership "github.com/bd878/gallery/server/messages/internal/discovery/serf"
-	repository "github.com/bd878/gallery/server/messages/internal/repository/sqlite"
+	repository "github.com/bd878/gallery/server/messages/internal/repository/postgres"
 	controller "github.com/bd878/gallery/server/messages/internal/controller/distributed"
 	grpchandler "github.com/bd878/gallery/server/messages/internal/handler/grpc"
 )
@@ -43,6 +45,7 @@ type Server struct {
 	*grpc.Server
 	conf             Config
 	mux              cmux.CMux
+	pool             *pgxpool.Pool
 	listener         net.Listener
 	grpcListener     net.Listener
 	controller      *controller.DistributedMessages
@@ -63,14 +66,23 @@ func New(cfg Config) *Server {
 		listener:      listener,
 	}
 
+	server.setupDB()
 	server.setupRaft(logger.Default())
 	server.setupGRPC(logger.Default())
 
 	return server
 }
 
+func (s *Server) setupDB() {
+	var err error
+	s.pool, err = pgxpool.New(context.Background(), s.conf.PGConn)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func (s *Server) setupRaft(log *logger.Logger) {
-	repo := repository.New(s.conf.DBPath)
+	repo := repository.New(s.pool)
 
 	raftLogLevel := hclog.Error.String()
 	switch s.conf.RaftLogLevel {
@@ -142,6 +154,14 @@ func (s *Server) setupGRPC(log *logger.Logger) {
 }
 
 func (s *Server) Run(ctx context.Context) (err error) {
+	waiter := waiter.New(waiter.CatchSignals())
+
+	waiter.Add(s.WaitForRPC, s.WaitForPool)
+
+	return waiter.Wait()
+}
+
+func (s *Server) WaitForPool(ctx context.Context) (err error) {
 	group, gCtx := errgroup.WithContext(ctx)
 
 	group.Go(func() error {
@@ -172,6 +192,19 @@ func (s *Server) Run(ctx context.Context) (err error) {
 	group.Go(func() error {
 		s.mux.Serve()
 		defer s.mux.Close()
+		return nil
+	})
+
+	return group.Wait()
+}
+
+func (s *Server) WaitForRPC(ctx context.Context) (err error) {
+	group, gCtx := errgroup.WithContext(ctx)
+
+	group.Go(func() error {
+		<-gCtx.Done()
+		fmt.Fprintln(os.Stdout, "closing pgpool connections")
+		s.pool.Close()
 		return nil
 	})
 

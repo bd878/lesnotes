@@ -6,13 +6,9 @@ import (
 	"os"
 	"context"
 
-	"golang.org/x/sync/errgroup"
-	"github.com/jackc/pgx/v5/pgxpool"
-
 	"github.com/bd878/gallery/server/messages/internal/grpc"
 	"github.com/bd878/gallery/server/messages/config"
 	"github.com/bd878/gallery/server/logger"
-	"github.com/bd878/gallery/server/waiter"
 )
 
 func init() {
@@ -37,14 +33,10 @@ func main() {
 		SkipCaller: 0,
 	}))
 
-	pool, err := pgxpool.New(context.Background(), cfg.PGConn)
-	if err != nil {
-		panic(err)
-	}
-
 	server := grpc.New(grpc.Config{
 		Addr:                  cfg.RpcAddr,
 		DBPath:                cfg.DBPath,
+		PGConn:                cfg.PGConn,
 		NodeName:              cfg.NodeName,
 		RaftLogLevel:          cfg.RaftLogLevel,
 		RaftBootstrap:         cfg.RaftBootstrap,
@@ -55,25 +47,7 @@ func main() {
 		SessionsServiceAddr:   cfg.SessionsServiceAddr,
 	})
 
-	waiter := waiter.New(waiter.CatchSignals())
-
-	waitForPool := func(ctx context.Context) error {
-		group, gCtx := errgroup.WithContext(ctx)
-
-		group.Go(func() error {
-			<-gCtx.Done()
-			fmt.Fprintln(os.Stdout, "closing pgpool connections")
-			pool.Close()
-			return nil
-		})
-
-		return group.Wait()
+	if err := server.Run(context.Background()); err != nil {
+		fmt.Fprintf(os.Stderr, "server exited %v", err)
 	}
-
-	waiter.Add(
-		waitForPool,
-		server.Run,
-	)
-
-	waiter.Wait()
 }
