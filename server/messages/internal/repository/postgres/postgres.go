@@ -18,9 +18,9 @@ type Repository struct {
 	pool      *pgxpool.Pool
 }
 
-func New(tableName string, pool *pgxpool.Pool) *Repository {
+func New(pool *pgxpool.Pool) *Repository {
 	return &Repository{
-		tableName: tableName,
+		tableName: "messages.messages",
 		pool:      pool,
 	}
 }
@@ -64,17 +64,17 @@ func (r *Repository) Create(ctx context.Context, message *model.Message) (err er
  * newText == "" : left as is
  * newThreadID == -1 : left as is
  * newPrivate == -1 : left as is
- * @param  {[type]} r *Repository)  Update(ctx context.Context, id int32, userID int32, text string, threadID int32, fileIDs []int32, private int) (*model.UpdateMessageResult, error [description]
+ * @param  {[type]} r *Repository)  Update(ctx context.Context, userID, id int32, text string, threadID int32, fileIDs []int32, private int) (*model.UpdateMessageResult, error [description]
  * @return {error}   error
  */
-func (r *Repository) Update(ctx context.Context, id int32, userID int32, newText string, newThreadID int32, newFileIDs []int32, newPrivate int) (err error) {
-	const query = "UPDATE %s SET text = $3, thread_id = $4, file_ids = $5, private = $6 WHERE id = $1 AND user_id = $2"
-	const selectQuery = "SELECT text, thread_id, file_ids, private FROM %s WHERE id = $1 AND user_id = $2"
+func (r *Repository) Update(ctx context.Context, userID, id int32, newText string, newThreadID int32, newFileIDs []int32, newPrivate int) (result *model.UpdateMessageResult, err error) {
+	const query = "UPDATE %s SET text = $3, thread_id = $4, file_ids = $5, private = $6 WHERE user_id = $1 AND id = $2"
+	const selectQuery = "SELECT text, thread_id, file_ids, private FROM %s WHERE user_id = $1 AND id = $2"
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer func() {
 		p := recover()
@@ -97,7 +97,7 @@ func (r *Repository) Update(ctx context.Context, id int32, userID int32, newText
 		private  bool
 	)
 
-	err = tx.QueryRow(ctx, r.table(selectQuery), id, userID).Scan(&text, &threadID, &fileIDs, &private)
+	err = tx.QueryRow(ctx, r.table(selectQuery), userID, id).Scan(&text, &threadID, &fileIDs, &private)
 	if err != nil {
 		return
 	}
@@ -125,12 +125,23 @@ func (r *Repository) Update(ctx context.Context, id int32, userID int32, newText
 		}
 	}
 
-	_, err = tx.Exec(ctx, r.table(query), id, userID, text, threadID, fileIDs, private)
+	_, err = tx.Exec(ctx, r.table(query), userID, id, text, threadID, fileIDs, private)
 	if err != nil {
 		return
 	}
 
-	return nil
+	var updatedAt time.Time
+	err = tx.QueryRow(ctx, r.table("SELECT updated_at FROM %s WHERE user_id = $1 AND id = $2"), userID, id).Scan(&updatedAt)
+	if err != nil {
+		return
+	}
+
+	result = &model.UpdateMessageResult{
+		UpdateUTCNano: updatedAt.UnixNano(),
+		Private:       private,
+	}
+
+	return
 }
 
 /**
@@ -177,13 +188,63 @@ func (r *Repository) DeleteMessage(ctx context.Context, userID, id int32) (err e
 	return nil
 }
 
-func (r *Repository) Publish(ctx context.Context, userID, id int32) (err error) {
-	_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = false WHERE id = $1 AND user_id = $2"), id, userID)
+func (r *Repository) Publish(ctx context.Context, userID int32, ids []int32) (err error) {
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			fmt.Fprintf(os.Stderr, "rollback with error: %v", err)
+			err = tx.Rollback(ctx)
+		default:
+			err = tx.Commit(ctx)
+		}
+	}()
+
+	for _, id := range ids {
+		_, err = tx.Exec(ctx, r.table("UPDATE %s SET private = false WHERE user_id = $1 AND id = $2"), userID, id)
+		if err != nil {
+			return
+		}
+	}
+
 	return
 }
 
-func (r *Repository) Private(ctx context.Context, userID, id int32) (err error) {
-	_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = true WHERE id = $1 AND user_id = $2"), id, userID)
+func (r *Repository) Private(ctx context.Context, userID int32, ids []int32) (err error) {
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			fmt.Fprintf(os.Stderr, "rollback with error: %v", err)
+			err = tx.Rollback(ctx)
+		default:
+			err = tx.Commit(ctx)
+		}
+	}()
+
+	for _, id := range ids {
+		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = true WHERE user_id = $1 AND id = $2"), userID, id)
+		if err != nil {
+			return
+		}
+	}
+
 	return
 }
 
@@ -249,7 +310,7 @@ func (r *Repository) DeleteAllUserMessages(ctx context.Context, userID int32) (e
 	return
 }
 
-func (r *Repository) ReadMessages(ctx context.Context, userID, threadID, limit, offset int32, private int32) (messages []*model.Message, isLastPage bool, err error) {
+func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID, limit, offset int32, private int32) (messages []*model.Message, isLastPage bool, err error) {
 	var rows pgx.Rows
 
 	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at FROM %s WHERE user_id = $1 AND thread_id = $2 AND private = $5 ORDER BY created_at DESC LIMIT $3 OFFSET $4"
@@ -293,6 +354,62 @@ func (r *Repository) ReadMessages(ctx context.Context, userID, threadID, limit, 
 	} else {
 		var count int32
 		err = r.pool.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE user_id = $1 AND thread_id = $2"), userID, threadID).Scan(&count)
+		if err != nil {
+			return
+		}
+
+		if count <= offset + limit {
+			isLastPage = true
+		}
+	}
+
+	return
+}
+
+func (r *Repository) ReadAllMessages(ctx context.Context, userID, limit, offset int32, private int32) (messages []*model.Message, isLastPage bool, err error) {
+	var rows pgx.Rows
+
+	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at FROM %s WHERE user_id = $1 AND private = $4 ORDER BY created_at DESC LIMIT $2 OFFSET $3"
+
+	rows, err = r.pool.Query(ctx, r.table(query), userID, limit, offset, private)
+	defer rows.Close()
+
+	messages = make([]*model.Message, 0)
+	for rows.Next() {
+		message := &model.Message{}
+
+		var (
+			fileIDs []byte
+			createdAt, updatedAt time.Time
+		)
+
+		err = rows.Scan(&message.ID, &message.UserID, &message.ThreadID, &fileIDs, &message.Name, &message.Text, &message.Private, &createdAt, &updatedAt)
+		if err != nil {
+			return
+		}
+
+		if fileIDs != nil {
+			err = json.Unmarshal(fileIDs, &message.FileIDs)
+			if err != nil {
+				return
+			}
+		}
+
+		message.CreateUTCNano = createdAt.UnixNano()
+		message.UpdateUTCNano = updatedAt.UnixNano()
+
+		messages = append(messages, message)
+	}
+
+	if err = rows.Err(); err != nil {
+		return
+	}
+
+	if int32(len(messages)) < limit {
+		isLastPage = true
+	} else {
+		var count int32
+		err = r.pool.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE user_id = $1"), userID).Scan(&count)
 		if err != nil {
 			return
 		}

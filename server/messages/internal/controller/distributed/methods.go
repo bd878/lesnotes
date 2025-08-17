@@ -186,35 +186,17 @@ func (m *DistributedMessages) PrivateMessages(ctx context.Context, params *model
 func (m *DistributedMessages) ReadMessage(ctx context.Context, params *model.ReadOneMessageParams) (
 	*model.Message, error,
 ) {
-	return m.repo.Read(ctx, params)
+	return m.repo.Read(ctx, params.UserIDs, params.ID)
 }
 
 func (m *DistributedMessages) ReadThreadMessages(ctx context.Context, params *model.ReadThreadMessagesParams) (
-	*model.ReadThreadMessagesResult, error,
+	messages []*model.Message, isLastPage bool, err error,
 ) {
-	logger.Infow("distributed methods. read thread messages", "user_id", params.UserID, "thread_id", params.ThreadID)
-	return m.repo.ReadThreadMessages(ctx,
-		&model.ReadThreadMessagesParams{
-			UserID:    params.UserID,
-			ThreadID:  params.ThreadID,
-			Limit:     params.Limit,
-			Offset:    params.Offset,
-			Ascending: params.Ascending,
-			Private:   params.Private,
-		},
-	)
+	return m.repo.ReadThreadMessages(ctx, params.UserID, params.ThreadID, params.Limit, params.Offset, params.Private)
 }
 
 func (m *DistributedMessages) ReadAllMessages(ctx context.Context, params *model.ReadMessagesParams) (
-	*model.ReadMessagesResult, error,
+	messages []*model.Message, isLastPage bool, err error,
 ) {
-	return m.repo.ReadAllMessages(ctx,
-		&model.ReadMessagesParams{
-			UserID:    params.UserID,
-			Limit:     params.Limit,
-			Offset:    params.Offset,
-			Ascending: params.Ascending,
-			Private:   params.Private,
-		},
-	)
+	return m.repo.ReadAllMessages(ctx, params.UserID, params.Limit, params.Offset, params.Private)
 }
