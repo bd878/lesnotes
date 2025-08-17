@@ -15,6 +15,8 @@ type Config struct {
 
 	RaftBootstrap        bool        `json:"raft_bootstrap"`
 	LogPath              string      `json:"log_path"`
-	DBPath               string      `json:"db_path"`
+	PGConn               string      `json:"pg_conn"`
+	// TODO ShutdownTimeout string     `json:"shutdown_timeout"`
+	DBPath               string      `json:"db_path"` // deprecated for pg_conn
 	DataPath             string      `json:"data_path"`
 }

@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"os"
 	"context"
-	"sync"
+
+	"golang.org/x/sync/errgroup"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/bd878/gallery/server/messages/internal/grpc"
 	"github.com/bd878/gallery/server/messages/config"
 	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/waiter"
 )
 
 func init() {
@@ -34,6 +37,11 @@ func main() {
 		SkipCaller: 0,
 	}))
 
+	pool, err := pgxpool.New(context.Background(), cfg.PGConn)
+	if err != nil {
+		panic(err)
+	}
+
 	server := grpc.New(grpc.Config{
 		Addr:                  cfg.RpcAddr,
 		DBPath:                cfg.DBPath,
@@ -47,8 +55,25 @@ func main() {
 		SessionsServiceAddr:   cfg.SessionsServiceAddr,
 	})
 
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go server.Run(context.Background(), &wg)
-	wg.Wait()
+	waiter := waiter.New(waiter.CatchSignals())
+
+	waitForPool := func(ctx context.Context) error {
+		group, gCtx := errgroup.WithContext(ctx)
+
+		group.Go(func() error {
+			<-gCtx.Done()
+			fmt.Fprintln(os.Stdout, "closing pgpool connections")
+			pool.Close()
+			return nil
+		})
+
+		return group.Wait()
+	}
+
+	waiter.Add(
+		waitForPool,
+		server.Run,
+	)
+
+	waiter.Wait()
 }
