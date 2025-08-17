@@ -22,7 +22,6 @@ type Config struct {
 	Bootstrap    bool
 	DataDir      string
 	Servers      []string
-	DBPath       string
 }
 
 type DistributedMessages struct {

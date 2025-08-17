@@ -1,7 +1,5 @@
 SET client_min_messages TO WARNING;
 
-\ir 'env.sql'
-
 BEGIN;
 
 \echo `# Configure database privileges`

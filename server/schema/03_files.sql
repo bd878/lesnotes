@@ -1,4 +1,4 @@
-\с lesnotes
+\c lesnotes
 CREATE SCHEMA IF NOT EXISTS files;
 
 CREATE TABLE IF NOT EXISTS files.files

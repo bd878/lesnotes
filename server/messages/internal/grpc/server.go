@@ -1,15 +1,18 @@
 package grpc
 
 import (
+	"os"
 	"net"
 	"io"
-	"sync"
+	"fmt"
+	"time"
 	"context"
 	"bytes"
 	"google.golang.org/grpc"
 	"github.com/hashicorp/raft"
 	"github.com/soheilhy/cmux"
 
+	"golang.org/x/sync/errgroup"
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/logger"
 	hclog "github.com/hashicorp/go-hclog"
@@ -24,6 +27,7 @@ import (
 
 type Config struct {
 	Addr                string
+	PGConn              string
 	DBPath              string
 	NodeName            string
 	RaftLogLevel        string
@@ -96,7 +100,6 @@ func (s *Server) setupRaft(log *logger.Logger) {
 		StreamLayer: controller.NewStreamLayer(raftListener),
 		Bootstrap:   s.conf.RaftBootstrap,
 		DataDir:     s.conf.DataPath,
-		DBPath:      s.conf.DBPath,
 		Servers:     s.conf.RaftServers,
 	})
 	if err != nil {
@@ -138,17 +141,43 @@ func (s *Server) setupGRPC(log *logger.Logger) {
 	s.grpcListener = grpcListener
 }
 
-func (s *Server) Run(ctx context.Context, wg *sync.WaitGroup) {
-	go s.Serve(s.grpcListener)
-	defer s.mux.Close()
-	s.mux.Serve()
-	wg.Done()
+func (s *Server) Run(ctx context.Context) (err error) {
+	group, gCtx := errgroup.WithContext(ctx)
+
+	group.Go(func() error {
+		fmt.Fprintf(os.Stdout, "rpc server started %s\n", s.Addr())
+		defer fmt.Fprintf(os.Stdout, "rpc server shutdown")
+		if err := s.Serve(s.grpcListener); err != nil {
+			return err
+		}
+		return nil
+	})
+	group.Go(func() error {
+		<-gCtx.Done()
+		fmt.Fprintln(os.Stdout, "rpc server to be shutdown")
+		stopped := make(chan struct{})
+		go func() {
+			s.GracefulStop()
+			close(stopped)
+		}()
+		timeout := time.NewTimer(5*time.Second)
+		select {
+		case <-timeout.C:
+			s.Stop()
+			return fmt.Errorf("rpc server failed to stop gracefully")
+		case <-stopped:
+			return nil
+		}
+	})
+	group.Go(func() error {
+		s.mux.Serve()
+		defer s.mux.Close()
+		return nil
+	})
+
+	return group.Wait()
 }
 
 func (s *Server) Addr() string {
 	return s.listener.Addr().String()
-}
-
-func (s *Server) Shutdown() {
-/* TODO: implement, Leave server from cluster */
 }

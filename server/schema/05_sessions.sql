@@ -6,8 +6,7 @@ CREATE TABLE IF NOT EXISTS sessions.sessions
 	user_id     bigint       NOT NULL,
 	value       VARCHAR(256) NOT NULL,
 	expires_at  timestamptz  NOT NULL,
-	created_at  timestamptz  NOT NULL DEFAULT NOW(),
-	PRIMARY KEY(id)
+	created_at  timestamptz  NOT NULL DEFAULT NOW()
 );
 
 CREATE TRIGGER created_at_sessions_trgr BEFORE UPDATE ON sessions.sessions FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
