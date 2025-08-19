@@ -310,12 +310,24 @@ func (r *Repository) DeleteAllUserMessages(ctx context.Context, userID int32) (e
 	return
 }
 
+/**
+ * private == -1 : do not consider private in select
+ * @param  {[type]} r *Repository)  ReadThreadMessages(ctx context.Context, userID, threadID, limit, offset int32, private int32) (messages []*model.Message, isLastPage bool, err error [description]
+ * @return {[type]}   [description]
+ */
 func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID, limit, offset int32, private int32) (messages []*model.Message, isLastPage bool, err error) {
 	var rows pgx.Rows
 
-	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at FROM %s WHERE user_id = $1 AND thread_id = $2 AND private = $5 ORDER BY created_at DESC LIMIT $3 OFFSET $4"
+	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at FROM %s WHERE user_id = $1 AND thread_id = $2 "
 
-	rows, err = r.pool.Query(ctx, r.table(query), userID, threadID, limit, offset, private)
+	if private == 0 || private == 1 {
+		query += "AND private = $5 ORDER BY created_at DESC LIMIT $3 OFFSET $4"
+		rows, err = r.pool.Query(ctx, r.table(query), userID, threadID, limit, offset, private)
+	} else {
+		query += "ORDER BY created_at DESC LIMIT $3 OFFSET $4"
+		rows, err = r.pool.Query(ctx, r.table(query), userID, threadID, limit, offset)
+	}
+
 	defer rows.Close()
 
 	messages = make([]*model.Message, 0)
@@ -366,12 +378,25 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID, l
 	return
 }
 
+/**
+ * Read all user messages from all threads
+ * private == -1 : do not consider private in select
+ * @param  {[type]} r *Repository)  ReadAllMessages(ctx context.Context, userID, limit, offset int32, private int32) (messages []*model.Message, isLastPage bool, err error [description]
+ * @return {[type]}   [description]
+ */
 func (r *Repository) ReadAllMessages(ctx context.Context, userID, limit, offset int32, private int32) (messages []*model.Message, isLastPage bool, err error) {
 	var rows pgx.Rows
 
-	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at FROM %s WHERE user_id = $1 AND private = $4 ORDER BY created_at DESC LIMIT $2 OFFSET $3"
+	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at FROM %s WHERE user_id = $1 "
 
-	rows, err = r.pool.Query(ctx, r.table(query), userID, limit, offset, private)
+	if private == 0 || private == 1 {
+		query += "AND private = $4 ORDER BY created_at DESC LIMIT $2 OFFSET $3"
+		rows, err = r.pool.Query(ctx, r.table(query), userID, limit, offset, private)
+	} else {
+		query += "ORDER BY created_at DESC LIMIT $2 OFFSET $3"
+		rows, err = r.pool.Query(ctx, r.table(query), userID, limit, offset)
+	}
+
 	defer rows.Close()
 
 	messages = make([]*model.Message, 0)
