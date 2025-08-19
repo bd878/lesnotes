@@ -35,7 +35,6 @@ func main() {
 
 	server := grpc.New(grpc.Config{
 		Addr:                  cfg.RpcAddr,
-		DBPath:                cfg.DBPath,
 		PGConn:                cfg.PGConn,
 		NodeName:              cfg.NodeName,
 		RaftLogLevel:          cfg.RaftLogLevel,

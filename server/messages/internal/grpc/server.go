@@ -30,7 +30,6 @@ import (
 type Config struct {
 	Addr                string
 	PGConn              string
-	DBPath              string
 	NodeName            string
 	RaftLogLevel        string
 	RaftBootstrap       bool
