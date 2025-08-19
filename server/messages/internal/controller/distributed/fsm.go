@@ -74,7 +74,12 @@ func (f *fsm) applyUpdate(raw []byte) interface{} {
 	var cmd UpdateCommand
 	proto.Unmarshal(raw, &cmd)
 
-	res, err := f.repo.Update(context.Background(), cmd.UserId, cmd.Id, cmd.Text, cmd.ThreadId, []int32{cmd.FileId}, int(cmd.Private))
+	var fileIDs []int32
+	if cmd.FileId != 0 {
+		fileIDs = []int32{cmd.FileId}
+	}
+
+	res, err := f.repo.Update(context.Background(), cmd.UserId, cmd.Id, cmd.Text, cmd.ThreadId, fileIDs, int(cmd.Private))
 	if err != nil {
 		return err
 	}
