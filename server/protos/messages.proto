@@ -27,6 +27,7 @@ message Message {
 	int32    file_id = 7;
 	int32    thread_id = 8;
 	bool     private = 9;
+	string   name = 10;
 }
 
 message ReadThreadMessagesRequest {
@@ -79,6 +80,7 @@ message SaveMessageResponse {
 	int64    create_utc_nano = 2;
 	int64    update_utc_nano = 3;
 	bool     private = 4;
+	string   name = 5;
 }
 
 message DeleteAllUserMessagesRequest {

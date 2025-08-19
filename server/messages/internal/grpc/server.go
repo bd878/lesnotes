@@ -189,8 +189,14 @@ func (s *Server) WaitForPool(ctx context.Context) (err error) {
 		}
 	})
 	group.Go(func() error {
+		fmt.Fprintln(os.Stdout, "mux serve")
 		s.mux.Serve()
-		defer s.mux.Close()
+		return nil
+	})
+	group.Go(func() error {
+		<-gCtx.Done()
+		fmt.Fprintln(os.Stdout, "mux close")
+		s.mux.Close()
 		return nil
 	})
 
