@@ -267,7 +267,7 @@ func (r *Repository) Read(ctx context.Context, userIDs []int32, id int32) (messa
 	}
 
 	err = r.pool.QueryRow(ctx, r.table(`
-SELECT user_id, thread_id, file_ids, created_at, updated_at, text, private, name FROM %s WHERE id = $1 AND (user_id IN (` + ids + `) OR private = 0)
+SELECT user_id, thread_id, file_ids, created_at, updated_at, text, private, name FROM %s WHERE id = $1 AND (user_id IN (` + ids + `) OR private = false)
 `), append([]interface{}{id}, list...)...).Scan(&message.UserID, &message.ThreadID, &fileIDs, &createdAt, &updatedAt, &message.Text, &message.Private, &message.Name)
 	if err != nil {
 		return
@@ -320,9 +320,12 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID, l
 
 	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at FROM %s WHERE user_id = $1 AND thread_id = $2 "
 
-	if private == 0 || private == 1 {
-		query += "AND private = $5 ORDER BY created_at DESC LIMIT $3 OFFSET $4"
-		rows, err = r.pool.Query(ctx, r.table(query), userID, threadID, limit, offset, private)
+	if private == 0 {
+		query += "AND private = false ORDER BY created_at DESC LIMIT $3 OFFSET $4"
+		rows, err = r.pool.Query(ctx, r.table(query), userID, threadID, limit, offset)
+	} else if private == 1 {
+		query += "AND private = true ORDER BY created_at DESC LIMIT $3 OFFSET $4"
+		rows, err = r.pool.Query(ctx, r.table(query), userID, threadID, limit, offset)
 	} else {
 		query += "ORDER BY created_at DESC LIMIT $3 OFFSET $4"
 		rows, err = r.pool.Query(ctx, r.table(query), userID, threadID, limit, offset)
@@ -389,9 +392,12 @@ func (r *Repository) ReadAllMessages(ctx context.Context, userID, limit, offset 
 
 	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at FROM %s WHERE user_id = $1 "
 
-	if private == 0 || private == 1 {
-		query += "AND private = $4 ORDER BY created_at DESC LIMIT $2 OFFSET $3"
-		rows, err = r.pool.Query(ctx, r.table(query), userID, limit, offset, private)
+	if private == 0 {
+		query += "AND private = false ORDER BY created_at DESC LIMIT $2 OFFSET $3"
+		rows, err = r.pool.Query(ctx, r.table(query), userID, limit, offset)
+	} else if private == 1 {
+		query += "AND private = true ORDER BY created_at DESC LIMIT $2 OFFSET $3"
+		rows, err = r.pool.Query(ctx, r.table(query), userID, limit, offset)
 	} else {
 		query += "ORDER BY created_at DESC LIMIT $2 OFFSET $3"
 		rows, err = r.pool.Query(ctx, r.table(query), userID, limit, offset)
