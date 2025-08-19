@@ -4,6 +4,7 @@ import (
 	"time"
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/utils"
 	"github.com/bd878/gallery/server/messages/pkg/model"
@@ -38,6 +39,7 @@ func (h *Handler) SaveMessage(ctx context.Context, req *api.SaveMessageRequest) 
 	req.Message.CreateUtcNano = time.Now().UnixNano()
 	req.Message.UpdateUtcNano = time.Now().UnixNano()
 	req.Message.Id = utils.RandomID()
+	req.Message.Name = uuid.New().String()
 
 	err := h.controller.SaveMessage(ctx, model.MessageFromProto(req.Message)) 
 	if err != nil {
@@ -49,6 +51,7 @@ func (h *Handler) SaveMessage(ctx context.Context, req *api.SaveMessageRequest) 
 		CreateUtcNano: req.Message.CreateUtcNano,
 		UpdateUtcNano: req.Message.UpdateUtcNano,
 		Private: req.Message.Private,
+		Name: req.Message.Name,
 	}, nil
 }
 

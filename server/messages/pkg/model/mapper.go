@@ -14,6 +14,7 @@ func MessageFromProto(proto *api.Message) *Message {
 		Text:           proto.Text,
 		FileID:         proto.FileId,
 		Private:        proto.Private,
+		Name:           proto.Name,
 	}
 }
 
@@ -27,6 +28,7 @@ func MessageToProto(msg *Message) *api.Message {
 		Text:           msg.Text,
 		FileId:         msg.FileID,
 		Private:        msg.Private,
+		Name:           msg.Name,
 	}
 }
 
