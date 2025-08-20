@@ -9,7 +9,7 @@ import (
 )
 
 type Repository interface {
-	Add(ctx context.Context, userID int32, token string, expiresUTCNano int64) (err error)
+	Save(ctx context.Context, userID int32, token string, expiresUTCNano int64) (err error)
 	Get(ctx context.Context, token string) (session *model.Session, err error)
 	List(ctx context.Context, userID int32) (sessions []*model.Session, err error)
 	Delete(ctx context.Context, token string) (err error)
@@ -28,7 +28,7 @@ func (c *Controller) CreateSession(ctx context.Context, userID int32) (session *
 	token := utils.RandomString(10)
 	expiresUTCNano := time.Now().Add(time.Hour * 24 * 5).UnixNano()
 
-	err = c.repo.Add(ctx, userID, token, expiresUTCNano)
+	err = c.repo.Save(ctx, userID, token, expiresUTCNano)
 	if err != nil {
 		return
 	}

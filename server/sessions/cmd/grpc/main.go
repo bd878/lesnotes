@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"context"
-	"sync"
 
 	"github.com/bd878/gallery/server/sessions/internal/grpc"
 	"github.com/bd878/gallery/server/sessions/config"
@@ -35,13 +34,11 @@ func main() {
 
 	server := grpc.New(grpc.Config{
 		Addr:             cfg.RpcAddr,
-		DBPath:           cfg.DBPath,
+		PGConn:           cfg.PGConn,
 		NodeName:         cfg.NodeName,
 	})
 
-	var wg sync.WaitGroup
-	wg.Add(1)
-	logger.Infoln("server is listening on:", server.Addr())
-	go server.Run(context.Background(), &wg)
-	wg.Wait()
+	if err := server.Run(context.Background()); err != nil {
+		fmt.Fprintf(os.Stderr, "server exited %v\n", err)
+	}
 }
