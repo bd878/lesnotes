@@ -9,6 +9,7 @@ import (
 	"github.com/bd878/gallery/server/sessions/pkg/model"
 )
 
+// TODO: delete
 type Repository struct {
 	pool          *sql.DB
 	insertStmt    *sql.Stmt

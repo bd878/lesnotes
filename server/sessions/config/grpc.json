@@ -1,6 +1,5 @@
 {
 	"rpc_addr":       "0.0.0.0:8078",
 	"node_name":      "sessions.8078",
-	"log_path":       "../../logs/",
-	"db_path":        "../../sessions.db"
+	"log_path":       "../../logs/"
 }
