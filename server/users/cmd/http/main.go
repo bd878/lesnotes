@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"sync"
 	"context"
 	"os"
 
@@ -37,16 +36,13 @@ func main() {
 		Addr:                cfg.HttpAddr,
 		RpcAddr:             cfg.RpcAddr,
 		DataPath:            cfg.DataPath,
-		DBPath:              cfg.DBPath,
-		TableName:           cfg.TableName,
+		PGConn:              cfg.PGConn,
 		CookieDomain:        cfg.CookieDomain,
 		MessagesServiceAddr: cfg.MessagesServiceAddr,
 		SessionsServiceAddr: cfg.SessionsServiceAddr,
 	})
 
-	var wg sync.WaitGroup
-	wg.Add(1)
-	logger.Infoln("server is listening on:", server.Addr)
-	go server.ListenAndServe(context.Background(), &wg)
-	wg.Wait()
+	if err := server.Run(context.Background()); err != nil {
+		fmt.Fprintf(os.Stderr, "server exited %v", err)
+	}
 }
