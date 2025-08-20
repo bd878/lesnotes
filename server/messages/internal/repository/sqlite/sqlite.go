@@ -12,6 +12,7 @@ import (
 	"github.com/bd878/gallery/server/messages/pkg/model"
 )
 
+// TODO: legacy, remove
 type Repository struct {
 	pool         *sql.DB
 	insertStmt   *sql.Stmt

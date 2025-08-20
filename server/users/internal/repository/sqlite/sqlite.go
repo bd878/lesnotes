@@ -12,6 +12,7 @@ import (
 	"github.com/bd878/gallery/server/users/internal/repository"
 )
 
+// TODO: remove, stale
 type Repository struct {
 	tableName   string
 	pool        *sql.DB

@@ -8,7 +8,7 @@ type Config struct {
 	NodeName               string          `json:"node_name"`
 	LogPath                string          `json:"log_path"`
 	DataPath               string          `json:"data_path"`
-	TableName              string          `json:"table_name"`
 	DBPath                 string          `json:"db_path"`
+	PGConn                 string          `json:"pg_conn"`
 	CookieDomain           string          `json:"cookie_domain"`
 }
