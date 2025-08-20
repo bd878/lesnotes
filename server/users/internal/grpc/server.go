@@ -97,7 +97,7 @@ func (s *Server) Run(ctx context.Context) (err error) {
 	return waiter.Wait()
 }
 
-func (s *Server) WaitForPool(ctx context.Context) (err error) {
+func (s *Server) WaitForRPC(ctx context.Context) (err error) {
 	group, gCtx := errgroup.WithContext(ctx)
 
 	group.Go(func() error {
@@ -140,7 +140,7 @@ func (s *Server) WaitForPool(ctx context.Context) (err error) {
 	return group.Wait()
 }
 
-func (s *Server) WaitForRPC(ctx context.Context) (err error) {
+func (s *Server) WaitForPool(ctx context.Context) (err error) {
 	group, gCtx := errgroup.WithContext(ctx)
 
 	group.Go(func() error {
