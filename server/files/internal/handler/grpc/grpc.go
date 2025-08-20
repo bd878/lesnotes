@@ -2,12 +2,11 @@ package grpc
 
 import (
 	"io"
-	"os"
 	"time"
-	"fmt"
 	"context"
+	"bytes"
+	"sync"
 	"errors"
-	"path/filepath"
 
 	"github.com/bd878/gallery/server/utils"
 	"github.com/bd878/gallery/server/api"
@@ -16,22 +15,19 @@ import (
 )
 
 type Repository interface {
-	SaveFile(ctx context.Context, file *model.File) error
-	ReadFile(ctx context.Context, params *model.ReadFileParams) (*model.File, error)
+	SaveFile(ctx context.Context, reader io.Reader, file *model.File) (err error)
+	GetMeta(ctx context.Context, ownerID, id int32) (file *model.File, err error)
+	DeleteFile(ctx context.Context, ownerID, id int32) (err error)
+	ReadFile(ctx context.Context, oid int32, writer io.Writer) (err error)
 }
 
 type Handler struct {
 	api.UnimplementedFilesServer
 	repo       Repository
-	dataPath   string
 }
 
-func New(repo Repository, dataPath string) *Handler {
-	if err := os.MkdirAll(dataPath, 0755); err != nil {
-		panic(err)
-	}
-
-	return &Handler{repo: repo, dataPath: dataPath}
+func New(repo Repository) *Handler {
+	return &Handler{repo: repo}
 }
 
 func (h *Handler) ReadBatchFiles(ctx context.Context, req *api.ReadBatchFilesRequest) (
@@ -44,7 +40,7 @@ func (h *Handler) ReadBatchFiles(ctx context.Context, req *api.ReadBatchFilesReq
 			UserID: req.UserId,
 		}
 
-		file, err := h.repo.ReadFile(ctx, &model.ReadFileParams{ID: id, UserID: req.UserId})
+		file, err := h.repo.GetMeta(ctx, req.UserId, id)
 		if err != nil {
 			files[id].Error = "can not found file"
 			logger.Errorw("failed to read file", "user_id", req.UserId, "id", id, "error", err)
@@ -63,7 +59,7 @@ func (h *Handler) ReadBatchFiles(ctx context.Context, req *api.ReadBatchFilesReq
 func (h *Handler) ReadFile(ctx context.Context, req *api.ReadFileRequest) (
 	*api.File, error,
 ) {
-	file, err := h.repo.ReadFile(ctx, &model.ReadFileParams{ID: req.Id, UserID: req.UserId})
+	file, err := h.repo.GetMeta(ctx, req.UserId, req.Id)
 	if err != nil {
 		logger.Errorw("failed to read one file", "user_id", req.UserId, "file_id", req.Id, "error", err)
 		return nil, err
@@ -71,8 +67,23 @@ func (h *Handler) ReadFile(ctx context.Context, req *api.ReadFileRequest) (
 	return model.FileToProto(file), nil
 }
 
-func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.Files_ReadFileStreamServer) error {
-	file, err := h.repo.ReadFile(context.Background(), &model.ReadFileParams{ID: params.Id, Name: params.Name, UserID: params.UserId})
+type streamWriter struct {
+	api.Files_ReadFileStreamServer
+}
+
+var _ io.Writer = (*streamWriter)(nil)
+
+func (w *streamWriter) Write(p []byte) (n int, err error) {
+	err = w.Send(&api.FileData{
+		Data: &api.FileData_Chunk{
+			Chunk: p,
+		},
+	})
+	return len(p), err
+}
+
+func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.Files_ReadFileStreamServer) (err error) {
+	file, err := h.repo.GetMeta(context.Background(), params.UserId, params.Id)
 	if err != nil {
 		logger.Errorw("failed to read file", "user_id", params.UserId, "id", params.Id, "name", params.Name, "public", params.Public, "error", err)
 		return err
@@ -83,20 +94,6 @@ func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.F
 		return errors.New("cannot read private file, when public requested")
 	}
 
-	ff, err := os.Open(filepath.Join(h.dataPath, fmt.Sprintf("%d/%d", file.UserID, file.ID)))
-	if err != nil {
-		logger.Errorw("failed to open file", "user_id", file.UserID, "id", file.ID, "name", file.Name, "error", err)
-		return err
-	}
-
-	var size int64
-	stat, err := ff.Stat()
-	if err != nil {
-		logger.Errorw("cannot stat file", "error", err, "name", file.Name, "id", file.ID)
-	} else {
-		size = stat.Size()
-	}
-
 	err = stream.Send(&api.FileData{
 		Data: &api.FileData_File{
 			File: &api.File{
@@ -105,38 +102,63 @@ func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.F
 				Name:           file.Name,
 				CreateUtcNano:  file.CreateUTCNano,
 				Private:        file.Private,
-				Size:           size,
+				Size:           file.Size,
 			},
 		},
 	})
 	if err != nil {
 		logger.Errorw("stream failed to send filedata", "user_id", file.UserID, "id", file.ID, "error", err)
-		return err
+		return
 	}
 
-	buffer := make([]byte, 1024*1024*50 /* 50 MB */)
-	for {
-		n, err := ff.Read(buffer)
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			logger.Errorw("failed to read file data in buffer", "error", err)
-			return err
-		}
+	err = h.repo.ReadFile(context.Background(), file.OID, &streamWriter{stream})
 
-		err = stream.Send(&api.FileData{
-			Data: &api.FileData_Chunk{
-				Chunk: buffer[:n],
-			},
-		})
-		if err != nil {
-			logger.Errorw("failed to send chunk fil file server", "error", err)
-			return err
+	return
+}
+
+type streamReader struct {
+	api.Files_SaveFileStreamServer
+	mu  sync.Mutex
+	eof bool
+	buf bytes.Buffer
+}
+
+var _ io.Reader = (*streamReader)(nil)
+
+func (r *streamReader) Read(p []byte) (n int, err error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if r.eof {
+		return 0, io.EOF
+	}
+
+	if r.buf.Len() > 0 {
+		return r.buf.Read(p)
+	}
+
+	fileData, err := r.Recv()
+	if err != nil {
+		// return 0, EOF, not n>0, EOF
+		if err == io.EOF && !r.eof {
+			r.eof = true
+			err = nil
+		} else {
+			return 0, err
 		}
 	}
 
-	return nil
+	chunk, ok := fileData.Data.(*api.FileData_Chunk)
+	if !ok {
+		return 0, errors.New("file data chunk expected, wrong format")
+	}
+
+	_, err = r.buf.Write(chunk.Chunk)
+	if err != nil {
+		return 0, err
+	}
+
+	return r.buf.Read(p)
 }
 
 func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) error {
@@ -155,7 +177,7 @@ func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) error {
 	id := utils.RandomID()
 	timeCreated := time.Now().UnixNano()
 
-	err = h.repo.SaveFile(context.Background(), &model.File{
+	err = h.repo.SaveFile(context.Background(), &streamReader{Files_SaveFileStreamServer: stream}, &model.File{
 		ID:              id,
 		UserID:          file.File.UserId,
 		Name:            file.File.Name,
@@ -165,42 +187,6 @@ func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) error {
 	if err != nil {
 		logger.Errorw("failed to save file meta", "user_id", file.File.UserId, "name", file.File.Name, "error", err)
 		return err
-	}
-
-	userDir := filepath.Join(h.dataPath, fmt.Sprintf("%d", file.File.UserId))
-	err = os.MkdirAll(userDir, 0755)
-	if err != nil {
-		logger.Errorw("cannot create user files dir", "user_id", file.File.UserId, "error", err)
-		return err
-	}
-
-	ff, err := os.Create(filepath.Join(h.dataPath, fmt.Sprintf("%d/%d", file.File.UserId, id)))
-	if err != nil {
-		logger.Errorw("failed to create file", "user_id", file.File.UserId, "id", id, "error", err)
-		return err
-	}
-
-	for {
-		fileData, err := stream.Recv()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			logger.Errorw("failed to receive next file chunk", "error", err)
-			return err
-		}
-
-		chunk, ok := fileData.Data.(*api.FileData_Chunk)
-		if !ok {
-			logger.Errorw("file data chunk expected", "error", "wrong format")
-			return nil
-		}
-
-		_, err = ff.Write(chunk.Chunk)
-		if err != nil {
-			logger.Errorw("failed to write next file chunk in buffer", "error", err)
-			return err
-		}
 	}
 
 	return stream.SendAndClose(&api.SaveFileStreamResponse{

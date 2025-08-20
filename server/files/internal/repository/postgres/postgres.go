@@ -27,7 +27,7 @@ func New(pool *pgxpool.Pool) *Repository {
 	}
 }
 
-func (r *Repository) SaveFile(ctx context.Context, ownerID int32, reader io.Reader, file *model.File) (err error) {
+func (r *Repository) SaveFile(ctx context.Context, reader io.Reader, file *model.File) (err error) {
 	const query = "INSERT INTO %s(id, owner_id, name, private, oid, mime, size) VALUES ($1, $2, $3, $4, $5, $6, $7)"
 	const createdAtQuery = "SELECT created_at FROM %s WHERE id = $1"
 

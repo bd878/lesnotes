@@ -40,7 +40,7 @@ func (r *Repository) Create(ctx context.Context, message *model.Message) (err er
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v", err)
+			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)
@@ -83,7 +83,7 @@ func (r *Repository) Update(ctx context.Context, userID, id int32, newText strin
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v", err)
+			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)
@@ -162,7 +162,7 @@ func (r *Repository) DeleteMessage(ctx context.Context, userID, id int32) (err e
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v", err)
+			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)
@@ -201,7 +201,7 @@ func (r *Repository) Publish(ctx context.Context, userID int32, ids []int32) (er
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v", err)
+			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)
@@ -231,7 +231,7 @@ func (r *Repository) Private(ctx context.Context, userID int32, ids []int32) (er
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v", err)
+			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)
@@ -299,7 +299,7 @@ func (r *Repository) DeleteAllUserMessages(ctx context.Context, userID int32) (e
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v", err)
+			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)

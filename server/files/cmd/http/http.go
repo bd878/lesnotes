@@ -3,13 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	"sync"
 	"context"
 	"os"
 
+	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/files/config"
 	"github.com/bd878/gallery/server/files/internal/http"
-	"github.com/bd878/gallery/server/logger"
 )
 
 func init() {
@@ -40,9 +39,7 @@ func main() {
 		SessionsServiceAddr:  cfg.SessionsServiceAddr,
 	})
 
-	var wg sync.WaitGroup
-	wg.Add(1)
-	logger.Infoln("server is listening on:", server.Addr)
-	go server.ListenAndServe(context.Background(), &wg)
-	wg.Wait()
+	if err := server.Run(context.Background()); err != nil {
+		fmt.Fprintf(os.Stderr, "server exited %v\n", err)
+	}
 }

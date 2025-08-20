@@ -42,6 +42,6 @@ func main() {
 	})
 
 	if err := server.Run(context.Background()); err != nil {
-		fmt.Fprintf(os.Stderr, "server exited %v", err)
+		fmt.Fprintf(os.Stderr, "server exited %v\n", err)
 	}
 }

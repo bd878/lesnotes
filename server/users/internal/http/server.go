@@ -115,7 +115,7 @@ func (s *Server) WaitForServer(ctx context.Context) (err error) {
 
 	group.Go(func() error {
 		fmt.Fprintf(os.Stdout, "http server started %s\n", s.Addr)
-		defer fmt.Fprintf(os.Stdout, "http server shutdown")
+		defer fmt.Fprintln(os.Stdout, "http server shutdown")
 		if err := s.ListenAndServe(); err != nil {
 			return err
 		}
