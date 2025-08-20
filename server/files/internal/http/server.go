@@ -1,10 +1,14 @@
 package http
 
 import (
+	"os"
+	"fmt"
+	"time"
 	"context"
-	"sync"
 	"net/http"
+	"golang.org/x/sync/errgroup"
 
+	"github.com/bd878/gallery/server/waiter"
 	"github.com/bd878/gallery/server/logger"
 	usermodel "github.com/bd878/gallery/server/users/pkg/model"
 	usersgateway "github.com/bd878/gallery/server/internal/gateway/users"
@@ -62,10 +66,36 @@ func New(cfg Config) *Server {
 	return server
 }
 
-func (s *Server) ListenAndServe(_ context.Context, wg *sync.WaitGroup) {
-	err := s.Server.ListenAndServe()
-	if err != nil {
-		panic(err)
-	}
-	wg.Done()
+func (s *Server) Run(ctx context.Context) (err error) {
+	waiter := waiter.New(waiter.CatchSignals())
+
+	waiter.Add(s.WaitForServer)
+
+	return waiter.Wait()
+}
+
+func (s *Server) WaitForServer(ctx context.Context) (err error) {
+	group, gCtx := errgroup.WithContext(ctx)
+
+	group.Go(func() error {
+		fmt.Fprintf(os.Stdout, "http server started %s\n", s.Addr)
+		defer fmt.Fprintln(os.Stdout, "http server shutdown")
+		if err := s.ListenAndServe(); err != nil {
+			return err
+		}
+		return nil
+	})
+	group.Go(func() error {
+		<-gCtx.Done()
+		fmt.Fprintln(os.Stdout, "http server to be shutdown")
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		defer cancel()
+		if err := s.Shutdown(ctx); err != nil {
+			fmt.Fprintln(os.Stderr, "http server failed to stop gracefully")
+			return err
+		}
+		return nil
+	})
+
+	return group.Wait()
 }

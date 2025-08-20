@@ -2,7 +2,5 @@
 	"node_name": "files.8086",
 	"rpc_addr":  "0.0.0.0:8086",
 
-	"log_path":  "../../logs",
-	"db_path":   "../../files.db",
-	"data_path": "../../files"
+	"log_path":  "../../logs"
 }

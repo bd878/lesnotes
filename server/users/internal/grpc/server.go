@@ -102,7 +102,7 @@ func (s *Server) WaitForRPC(ctx context.Context) (err error) {
 
 	group.Go(func() error {
 		fmt.Fprintf(os.Stdout, "rpc server started %s\n", s.Addr())
-		defer fmt.Fprintf(os.Stdout, "rpc server shutdown")
+		defer fmt.Fprintln(os.Stdout, "rpc server shutdown")
 		if err := s.Serve(s.grpcListener); err != nil {
 			return err
 		}

@@ -8,6 +8,5 @@ type Config struct {
 	SessionsServiceAddr  string      `json:"sessions_service_addr"`
 
 	LogPath              string      `json:"log_path"`
-	DBPath               string      `json:"db_path"`
-	DataPath             string      `json:"data_path"`
+	PGConn               string      `json:"pg_conn"`
 }

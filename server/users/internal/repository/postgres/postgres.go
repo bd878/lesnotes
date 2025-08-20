@@ -46,7 +46,7 @@ func (r *Repository) Delete(ctx context.Context, id int32) (err error) {
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v", err)
+			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)

@@ -4,6 +4,5 @@
 	"http_addr":             "0.0.0.0:8082",
 	"users_service_addr":    "0.0.0.0:8085",
 
-	"log_path":              "../../logs",
-	"data_path":             "../../files"
+	"log_path":              "../../logs"
 }

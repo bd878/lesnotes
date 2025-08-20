@@ -4,9 +4,12 @@ CREATE SCHEMA IF NOT EXISTS files;
 CREATE TABLE IF NOT EXISTS files.files
 (
 	id            bigint        UNIQUE NOT NULL,
-	user_id       bigint        NOT NULL,
+	owner_id      bigint        NOT NULL,
 	name          VARCHAR(256)  UNIQUE NOT NULL,
 	private       bool          NOT NULL DEFAULT true,
+	oid           int           UNIQUE DEFAULT NULL, -- large object id
+	mime          VARCHAR(256)  NOT NULL,
+	size          int           NOT NULL,
 	created_at    timestamptz   NOT NULL DEFAULT NOW(),
 	updated_at    timestamptz   NOT NULL DEFAULT NOW(),
 	PRIMARY KEY(id)
