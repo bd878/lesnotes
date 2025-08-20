@@ -2,16 +2,12 @@ package repository
 
 import (
 	"fmt"
-	"os"
-	"io"
 	"time"
-	"errors"
 	"context"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/sessions/pkg/model"
 )
 
@@ -38,7 +34,7 @@ func (r *Repository) Save(ctx context.Context, userID int32, token string, expir
 }
 
 func (r *Repository) Get(ctx context.Context, token string) (session *model.Session, err error) {
-	const query := "SELECT user_id, expires_at FROM %s WHERE value = $1"
+	const query = "SELECT user_id, expires_at FROM %s WHERE value = $1"
 
 	var (
 		expiresAt time.Time
@@ -60,7 +56,7 @@ func (r *Repository) Get(ctx context.Context, token string) (session *model.Sess
 }
 
 func (r *Repository) List(ctx context.Context, userID int32) (sessions []*model.Session, err error) {
-	const query := "SELECT value, expires_at FROM %s WHERE user_id = $1"
+	const query = "SELECT value, expires_at FROM %s WHERE user_id = $1"
 
 	var rows pgx.Rows
 	rows, err = r.pool.Query(ctx, r.table(query), userID)
@@ -97,7 +93,7 @@ func (r *Repository) List(ctx context.Context, userID int32) (sessions []*model.
 }
 
 func (r *Repository) Delete(ctx context.Context, token string) (err error) {
-	const query := "DELETE FROM %s WHERE value = $1"
+	const query = "DELETE FROM %s WHERE value = $1"
 
 	_, err = r.pool.Exec(ctx, r.table(query), token)
 
@@ -105,7 +101,7 @@ func (r *Repository) Delete(ctx context.Context, token string) (err error) {
 }
 
 func (r *Repository) DeleteAll(ctx context.Context, userID int32) (err error) {
-	const query := "DELETE FROM %s WHERE user_id = $1"
+	const query = "DELETE FROM %s WHERE user_id = $1"
 
 	_, err = r.pool.Exec(ctx, r.table(query), userID)
 

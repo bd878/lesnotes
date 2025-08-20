@@ -5,7 +5,6 @@ import (
 	"time"
 	"os"
 	"fmt"
-	"sync"
 	"context"
 	"google.golang.org/grpc"
 	"github.com/soheilhy/cmux"
