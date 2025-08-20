@@ -16,7 +16,7 @@ func New() *Handler {
 	return &Handler{}
 }
 
-func (h *Handler) SendLog(log *logger.Logger, w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) SendLog(w http.ResponseWriter, req *http.Request) error {
 	data, err := io.ReadAll(req.Body)
 	if err != nil {
 		req.Body.Close()
@@ -38,7 +38,7 @@ func (h *Handler) SendLog(log *logger.Logger, w http.ResponseWriter, req *http.R
 	return nil
 }
 
-func (h *Handler) GetStatus(log *logger.Logger, w http.ResponseWriter, _ *http.Request) error {
+func (h *Handler) GetStatus(w http.ResponseWriter, _ *http.Request) error {
 	io.WriteString(w, "ok\n")
 	return nil
 }
