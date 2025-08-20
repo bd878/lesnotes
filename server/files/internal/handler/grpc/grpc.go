@@ -119,7 +119,6 @@ func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.F
 type streamReader struct {
 	api.Files_SaveFileStreamServer
 	mu  sync.Mutex
-	eof bool
 	buf bytes.Buffer
 }
 
@@ -129,23 +128,13 @@ func (r *streamReader) Read(p []byte) (n int, err error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if r.eof {
-		return 0, io.EOF
-	}
-
 	if r.buf.Len() > 0 {
 		return r.buf.Read(p)
 	}
 
 	fileData, err := r.Recv()
 	if err != nil {
-		// return 0, EOF, not n>0, EOF
-		if err == io.EOF && !r.eof {
-			r.eof = true
-			err = nil
-		} else {
-			return 0, err
-		}
+		return 0, err
 	}
 
 	chunk, ok := fileData.Data.(*api.FileData_Chunk)
