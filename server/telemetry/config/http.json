@@ -1,5 +1,5 @@
 {
 	"node_name":             "telemetry.http",
 	"http_addr":             "0.0.0.0:8079",
-	"log_path":              "../../logs",
+	"log_path":              "../../logs"
 }
