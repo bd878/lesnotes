@@ -28,8 +28,8 @@ func (h *Handler) LoginJsonAPI(w http.ResponseWriter, req *http.Request) error {
 
 	defer req.Body.Close()
 
-	var user model.User
-	if err := json.Unmarshal(data, &user); err != nil {
+	var body model.LoginUserJsonRequest
+	if err := json.Unmarshal(data, &body); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status:      "error",
@@ -39,7 +39,7 @@ func (h *Handler) LoginJsonAPI(w http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
-	if user.Name == "" {
+	if body.Login == "" {
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status:      "error",
 			Description: "no name",
@@ -48,7 +48,7 @@ func (h *Handler) LoginJsonAPI(w http.ResponseWriter, req *http.Request) error {
 		return errors.New("cannot get user name from request")
 	}
 
-	if user.Password == "" {
+	if body.Password == "" {
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status:      "error",
 			Description: "no password",
@@ -58,7 +58,7 @@ func (h *Handler) LoginJsonAPI(w http.ResponseWriter, req *http.Request) error {
 	}
 
 
-	session, err := h.controller.LoginUser(req.Context(), user.Name, user.Password)
+	session, err := h.controller.LoginUser(req.Context(), body.Login, body.Password)
 	switch err {
 	case controller.ErrUserNotFound:
 		w.WriteHeader(http.StatusBadRequest)

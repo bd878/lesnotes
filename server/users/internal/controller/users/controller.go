@@ -61,7 +61,7 @@ func (c *Controller) CreateUser(ctx context.Context, id int64, login, password s
 	user = &model.User{
 		ID:                id,
 		Name:              login,
-		Password:          string(hashed),
+		HashedPassword:    string(hashed),
 		Token:             session.Token,
 		ExpiresUTCNano:    session.ExpiresUTCNano,
 	}
@@ -117,7 +117,7 @@ func (c *Controller) FindUser(ctx context.Context, id int64, login, token string
 	return
 }
 
-func (c *Controller) LoginUser(ctx context.Context, name, password string) (session *sessionsmodel.Session, err error) {
+func (c *Controller) LoginUser(ctx context.Context, name, hashedPassword string) (session *sessionsmodel.Session, err error) {
 	user, err := c.repo.Find(ctx, 0, name)
 	if err != nil {
 		if errors.Is(err, repository.ErrNoRows) {
@@ -126,7 +126,7 @@ func (c *Controller) LoginUser(ctx context.Context, name, password string) (sess
 		return nil, err
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	err = bcrypt.CompareHashAndPassword([]byte(user.HashedPassword), []byte(hashedPassword))
 	if err != nil {
 		return nil, err
 	}
