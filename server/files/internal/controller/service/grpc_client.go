@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"errors"
 	"io"
+	"sync"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
@@ -57,37 +58,34 @@ func (f *Files) Close() {
 
 type streamReader struct {
 	api.Files_ReadFileStreamClient
+	mu  sync.Mutex
 	buf bytes.Buffer
 }
 
 func (s *streamReader) Read(p []byte) (int, error) {
-	if s.buf.Available() > 0 {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s.buf.Len() > 0 {
 		return s.buf.Read(p)
 	}
 
 	data, err := s.Recv()
 	if err != nil {
-		logger.Errorln("failed to receive next data")
 		return 0, err
 	}
 
 	chunk, ok := data.Data.(*api.FileData_Chunk)
 	if !ok {
-		logger.Errorln("FileData_Chunk expected")
 		return 0, errors.New("wrong format: FileData_Chunk expected")
 	}
 
-	n := copy(p, chunk.Chunk)
-	if n < len(chunk.Chunk) {
-		s.buf.Grow(len(chunk.Chunk))
-		_, err := s.buf.Write(chunk.Chunk[n:])
-		if err != nil {
-			logger.Errorf("failed to write file chunks to buffer", "error", err)
-			return 0, err
-		}
+	_, err = s.buf.Write(chunk.Chunk)
+	if err != nil {
+		return 0, err
 	}
 
-	return n, nil
+	return s.buf.Read(p)
 }
 
 func (f *Files) ReadFileStream(ctx context.Context, params *model.ReadFileStreamParams) (*model.File, io.Reader, error) {
@@ -103,7 +101,6 @@ func (f *Files) ReadFileStream(ctx context.Context, params *model.ReadFileStream
 		Public:  params.Public,
 	})
 	if err != nil {
-		logger.Errorln("failed to open read stream")
 		return nil, nil, err
 	}
 

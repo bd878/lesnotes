@@ -9,6 +9,5 @@
   "raft_log_level": "debug",
   "log_path": "../../logs",
   "log_level": "debug",
-  "db_path": "../../messages@2.db",
   "data_path": "../../data@2"
 }

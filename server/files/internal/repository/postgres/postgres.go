@@ -59,10 +59,10 @@ func (r *Repository) SaveFile(ctx context.Context, reader io.Reader, file *model
 	}
 
 	object, err := lb.Open(ctx, oid, pgx.LargeObjectModeWrite)
+	defer object.Close()
 	if err != nil {
 		return err
 	}
-	defer object.Close()
 
 	var size int64
 	size, err = io.Copy(object, reader)
@@ -122,6 +122,7 @@ func (r *Repository) ReadFile(ctx context.Context, oid int32, writer io.Writer) 
 
 	lb := tx.LargeObjects()
 	object, err := lb.Open(ctx, uint32(oid), pgx.LargeObjectModeRead)
+	defer object.Close()
 	if err != nil {
 		return err
 	}
@@ -130,8 +131,6 @@ func (r *Repository) ReadFile(ctx context.Context, oid int32, writer io.Writer) 
 	if err != nil {
 		return err
 	}
-
-	object.Close()
 
 	return
 }

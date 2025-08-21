@@ -18,9 +18,9 @@ type Repository struct {
 	pool      *pgxpool.Pool
 }
 
-func New(pool *pgxpool.Pool) *Repository {
+func New(tableName string, pool *pgxpool.Pool) *Repository {
 	return &Repository{
-		tableName: "messages.messages",
+		tableName: tableName,
 		pool:      pool,
 	}
 }
@@ -47,9 +47,17 @@ func (r *Repository) Create(ctx context.Context, message *model.Message) (err er
 		}
 	}()
 
-	fileIDs, err := json.Marshal(message.FileIDs)
-	if err != nil {
-		return err
+	var fileIDs []byte
+	if message.FileIDs != nil {
+		fileIDs, err = json.Marshal(message.FileIDs)
+		if err != nil {
+			return err
+		}
+	} else if message.FileID != 0 {
+		fileIDs, err = json.Marshal([]int64{message.FileID})
+		if err != nil {
+			return err
+		}
 	}
 
 	_, err = tx.Exec(ctx, r.table(query), message.ID, message.Text, fileIDs, message.Private, message.Name, message.UserID, message.ThreadID)
@@ -283,6 +291,11 @@ SELECT user_id, thread_id, file_ids, created_at, updated_at, text, private, name
 	message.CreateUTCNano = createdAt.UnixNano()
 	message.UpdateUTCNano = updatedAt.UnixNano()
 
+	// TODO: rewrite on fileIDs completely, drop fileID
+	if message.FileIDs != nil && len(message.FileIDs) == 1 {
+		message.FileID = message.FileIDs[0]
+	}
+
 	return
 }
 
@@ -357,6 +370,10 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID in
 		message.CreateUTCNano = createdAt.UnixNano()
 		message.UpdateUTCNano = updatedAt.UnixNano()
 
+		if message.FileIDs != nil && len(message.FileIDs) == 1 {
+			message.FileID = message.FileIDs[0]
+		}
+
 		messages = append(messages, message)
 	}
 
@@ -428,6 +445,10 @@ func (r *Repository) ReadAllMessages(ctx context.Context, userID int64, limit, o
 
 		message.CreateUTCNano = createdAt.UnixNano()
 		message.UpdateUTCNano = updatedAt.UnixNano()
+
+		if message.FileIDs != nil && len(message.FileIDs) == 1 {
+			message.FileID = message.FileIDs[0]
+		}
 
 		messages = append(messages, message)
 	}
