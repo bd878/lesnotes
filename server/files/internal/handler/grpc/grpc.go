@@ -79,6 +79,9 @@ func (w *streamWriter) Write(p []byte) (n int, err error) {
 			Chunk: p,
 		},
 	})
+	if err != nil {
+		logger.Errorw("failed to send chunk", "error", err)
+	}
 	return len(p), err
 }
 

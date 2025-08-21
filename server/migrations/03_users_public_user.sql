@@ -1,1 +1,0 @@
-INSERT INTO users(id,expires_utc_nano) VALUES(9999999,2531505706000000000/*in 25 years*/);
