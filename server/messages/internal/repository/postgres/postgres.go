@@ -47,9 +47,17 @@ func (r *Repository) Create(ctx context.Context, message *model.Message) (err er
 		}
 	}()
 
-	fileIDs, err := json.Marshal(message.FileIDs)
-	if err != nil {
-		return err
+	var fileIDs []byte
+	if message.FileIDs != nil {
+		fileIDs, err = json.Marshal(message.FileIDs)
+		if err != nil {
+			return err
+		}
+	} else if message.FileID != 0 {
+		fileIDs, err = json.Marshal([]int64{message.FileID})
+		if err != nil {
+			return err
+		}
 	}
 
 	_, err = tx.Exec(ctx, r.table(query), message.ID, message.Text, fileIDs, message.Private, message.Name, message.UserID, message.ThreadID)
@@ -282,6 +290,11 @@ SELECT user_id, thread_id, file_ids, created_at, updated_at, text, private, name
 
 	message.CreateUTCNano = createdAt.UnixNano()
 	message.UpdateUTCNano = updatedAt.UnixNano()
+
+	// TODO: rewrite on fileIDs completely, drop fileID
+	if message.FileIDs != nil && len(message.FileIDs) == 1 {
+		message.FileID = message.FileIDs[0]
+	}
 
 	return
 }

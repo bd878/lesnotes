@@ -72,13 +72,11 @@ func (s *streamReader) Read(p []byte) (int, error) {
 
 	data, err := s.Recv()
 	if err != nil {
-		logger.Errorln("failed to receive next data")
 		return 0, err
 	}
 
 	chunk, ok := data.Data.(*api.FileData_Chunk)
 	if !ok {
-		logger.Errorln("FileData_Chunk expected")
 		return 0, errors.New("wrong format: FileData_Chunk expected")
 	}
 
@@ -103,7 +101,6 @@ func (f *Files) ReadFileStream(ctx context.Context, params *model.ReadFileStream
 		Public:  params.Public,
 	})
 	if err != nil {
-		logger.Errorln("failed to open read stream")
 		return nil, nil, err
 	}
 
