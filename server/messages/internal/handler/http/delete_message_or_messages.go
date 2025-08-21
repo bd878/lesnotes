@@ -47,9 +47,9 @@ func (h *Handler) DeleteMessageOrMessages(w http.ResponseWriter, req *http.Reque
 			return err
 		}
 
-		return h.deleteMessage(w, req, user, int32(id))
+		return h.deleteMessage(w, req, user, int64(id))
 	} else if values.Get("ids") != "" {
-		var ids []int32
+		var ids []int64
 		if err := json.Unmarshal([]byte(values.Get("ids")), &ids); err != nil {
 			json.NewEncoder(w).Encode(servermodel.ServerResponse{
 				Status: "error",
@@ -71,7 +71,7 @@ func (h *Handler) DeleteMessageOrMessages(w http.ResponseWriter, req *http.Reque
 	}
 }
 
-func (h *Handler) deleteMessage(w http.ResponseWriter, req *http.Request, user *usermodel.User, id int32) error {
+func (h *Handler) deleteMessage(w http.ResponseWriter, req *http.Request, user *usermodel.User, id int64) error {
 	_, err := h.controller.DeleteMessage(req.Context(), &model.DeleteMessageParams{
 		ID: id,
 		UserID: user.ID,
@@ -97,7 +97,7 @@ func (h *Handler) deleteMessage(w http.ResponseWriter, req *http.Request, user *
 	return nil
 }
 
-func (h *Handler) deleteMessages(w http.ResponseWriter, req *http.Request, user *usermodel.User, ids []int32) error {
+func (h *Handler) deleteMessages(w http.ResponseWriter, req *http.Request, user *usermodel.User, ids []int64) error {
 	res, err := h.controller.DeleteMessages(req.Context(), &model.DeleteMessagesParams{
 		IDs: ids,
 		UserID: user.ID,

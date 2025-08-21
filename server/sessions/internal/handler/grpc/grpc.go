@@ -9,10 +9,10 @@ import (
 
 type Controller interface {
 	GetSession(ctx context.Context, token string) (*model.Session, error)
-	ListUserSessions(ctx context.Context, userID int32) ([]*model.Session, error)
-	CreateSession(ctx context.Context, userID int32) (*model.Session, error)
+	ListUserSessions(ctx context.Context, userID int64) ([]*model.Session, error)
+	CreateSession(ctx context.Context, userID int64) (*model.Session, error)
 	RemoveSession(ctx context.Context, token string) error
-	RemoveUserSessions(ctx context.Context, userID int32) error
+	RemoveUserSessions(ctx context.Context, userID int64) error
 }
 
 type Handler struct {

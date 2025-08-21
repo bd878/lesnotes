@@ -25,7 +25,7 @@ type Controller interface {
 
 type FilesGateway interface {
 	ReadBatchFiles(ctx context.Context, params *model.ReadBatchFilesParams) (*model.ReadBatchFilesResult, error)
-	ReadFile(ctx context.Context, userID, fileID int32) (*filesmodel.File, error)
+	ReadFile(ctx context.Context, userID, fileID int64) (*filesmodel.File, error)
 	SaveFile(ctx context.Context, stream io.Reader, params *model.SaveFileParams) (*model.SaveFileResult, error)
 }
 

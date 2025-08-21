@@ -8,7 +8,7 @@ const (
 
 type (
 	User struct {
-		ID               int32            `json:"id"`
+		ID               int64            `json:"id"`
 		Name             string           `json:"name,omitempty"` // TODO: login
 		Password         string           `json:"password,omitempty"` // TODO: HashedPassword
 		Token            string           `json:"token,omitempty"`
@@ -39,7 +39,7 @@ type (
 
 	SignupJsonUserServerResponse struct {
 		model.ServerResponse
-		ID               int32            `json:"id"`
+		ID               int64            `json:"id"`
 		Token            string           `json:"token"`
 		ExpiresUTCNano   int64            `json:"expires_utc_nano"`
 	}

@@ -9,14 +9,14 @@ message AppendCommand {
 }
 
 message AppendCommandResult {
-	int32   id = 1;
+	int64   id = 1;
 }
 
 message UpdateCommand {
-	int32   id = 1;
-	int32   user_id = 2;
-	int32   file_id = 3;
-	int32   thread_id = 4;
+	int64   id = 1;
+	int64   user_id = 2;
+	int64   file_id = 3;
+	int64   thread_id = 4;
 	string  text = 5;
 	int64   update_utc_nano = 6;
 	int32   private = 7;
@@ -28,12 +28,12 @@ message UpdateCommandResult {
 }
 
 message DeleteCommand {
-	int32   id = 1;
-	int32   user_id = 2;
+	int64   id = 1;
+	int64   user_id = 2;
 }
 
 message DeleteAllUserMessagesCommand {
-	int32   user_id = 1;
+	int64   user_id = 1;
 }
 
 message DeleteCommandResult {
@@ -44,14 +44,14 @@ message DeleteCommandResult {
 message DeleteAllUserMessagesCommandResult {}
 
 message PublishCommand {
-	repeated int32   ids = 1;
-	int32   user_id = 2;
+	repeated int64   ids = 1;
+	int64   user_id = 2;
 	int64   update_utc_nano = 3;
 }
 
 message PrivateCommand {
-	repeated int32 ids = 1;
-	int32   user_id = 2;
+	repeated int64 ids = 1;
+	int64   user_id = 2;
 	int64   update_utc_nano = 3;
 }
 

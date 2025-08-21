@@ -10,14 +10,14 @@ service Users {
 }
 
 message User {
-	int32     id = 1;
+	int64     id = 1;
 	string    name = 2;
 	string    token = 3;
 	int64     expires_utc_nano = 4;
 }
 
 message GetUserRequest {
-	int32 id = 1;
+	int64 id = 1;
 }
 
 message FindUserRequest {

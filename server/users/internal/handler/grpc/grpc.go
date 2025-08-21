@@ -22,7 +22,7 @@ func New(controller Controller) *Handler {
 }
 
 func (h *Handler) GetUser(ctx context.Context, req *api.GetUserRequest) (*api.User, error) {
-	user, err := h.controller.GetUser(ctx, int64(req.Id))
+	user, err := h.controller.GetUser(ctx, req.Id)
 	if err != nil {
 		return nil, err
 	}

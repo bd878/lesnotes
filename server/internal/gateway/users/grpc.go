@@ -37,7 +37,7 @@ func (g *Gateway) isConnFailed() bool {
 	return state == connectivity.Shutdown || state == connectivity.TransientFailure
 }
 
-func (g *Gateway) GetUser(ctx context.Context, userID int32) (*usersmodel.User, error) {
+func (g *Gateway) GetUser(ctx context.Context, userID int64) (*usersmodel.User, error) {
 	if g.isConnFailed() {
 		g.setupConnection()
 	}

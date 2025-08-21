@@ -16,8 +16,8 @@ import (
 
 type Repository interface {
 	SaveFile(ctx context.Context, reader io.Reader, file *model.File) (err error)
-	GetMeta(ctx context.Context, ownerID, id int32) (file *model.File, err error)
-	DeleteFile(ctx context.Context, ownerID, id int32) (err error)
+	GetMeta(ctx context.Context, ownerID, id int64) (file *model.File, err error)
+	DeleteFile(ctx context.Context, ownerID, id int64) (err error)
 	ReadFile(ctx context.Context, oid int32, writer io.Writer) (err error)
 }
 
@@ -33,7 +33,7 @@ func New(repo Repository) *Handler {
 func (h *Handler) ReadBatchFiles(ctx context.Context, req *api.ReadBatchFilesRequest) (
 	*api.ReadBatchFilesResponse, error,
 ) {
-	files := make(map[int32]*model.File, len(req.Ids))
+	files := make(map[int64]*model.File, len(req.Ids))
 	for _, id := range req.Ids {
 		files[id] = &model.File{
 			ID:     id,
@@ -167,7 +167,7 @@ func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) error {
 	timeCreated := time.Now().UnixNano()
 
 	err = h.repo.SaveFile(context.Background(), &streamReader{Files_SaveFileStreamServer: stream}, &model.File{
-		ID:              id,
+		ID:              int64(id),
 		UserID:          file.File.UserId,
 		Name:            file.File.Name,
 		CreateUTCNano:   timeCreated,
@@ -180,7 +180,7 @@ func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) error {
 
 	return stream.SendAndClose(&api.SaveFileStreamResponse{
 		File: &api.File{
-			Id:               id,
+			Id:               int64(id),
 			Name:             file.File.Name,
 			CreateUtcNano:    timeCreated,
 		},

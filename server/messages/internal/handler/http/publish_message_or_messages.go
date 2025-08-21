@@ -47,9 +47,9 @@ func (h *Handler) PublishMessageOrMessages(w http.ResponseWriter, req *http.Requ
 			return err
 		}
 
-		return h.publishMessage(w, req, user, int32(id))
+		return h.publishMessage(w, req, user, int64(id))
 	} else if values.Get("ids") != "" {
-		var ids []int32
+		var ids []int64
 		if err := json.Unmarshal([]byte(values.Get("ids")), &ids); err != nil {
 			json.NewEncoder(w).Encode(servermodel.ServerResponse{
 				Status: "error",
@@ -71,9 +71,9 @@ func (h *Handler) PublishMessageOrMessages(w http.ResponseWriter, req *http.Requ
 	}
 }
 
-func (h *Handler) publishMessage(w http.ResponseWriter, req *http.Request, user *usermodel.User, id int32) error {
+func (h *Handler) publishMessage(w http.ResponseWriter, req *http.Request, user *usermodel.User, id int64) error {
 	res, err := h.controller.PublishMessages(req.Context(), &model.PublishMessagesParams{
-		IDs: []int32{id},
+		IDs: []int64{id},
 		UserID: user.ID,
 	})
 	if err != nil {
@@ -92,13 +92,13 @@ func (h *Handler) publishMessage(w http.ResponseWriter, req *http.Request, user 
 			Description: "published",
 		},
 		UpdateUTCNano: res.UpdateUTCNano,
-		IDs: []int32{id},
+		IDs: []int64{id},
 	})
 
 	return nil
 }
 
-func (h *Handler) publishMessages(w http.ResponseWriter, req *http.Request, user *usermodel.User, ids []int32) error {
+func (h *Handler) publishMessages(w http.ResponseWriter, req *http.Request, user *usermodel.User, ids []int64) error {
 	res, err := h.controller.PublishMessages(req.Context(), &model.PublishMessagesParams{
 		IDs: ids,
 		UserID: user.ID,

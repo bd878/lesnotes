@@ -5,57 +5,57 @@ import (
 )
 
 type SaveMessageResult struct {
-	ID                int32
+	ID                int64
 	CreateUTCNano     int64
 	UpdateUTCNano     int64
 	Private           bool
 }
 
 type ReadOneMessageParams struct {
-	ID int32
-	UserIDs []int32
+	ID int64
+	UserIDs []int64
 }
 
 type UpdateMessageParams struct {
-	ID                int32
-	ThreadID          int32
-	UserID            int32
-	FileID            int32
+	ID                int64
+	ThreadID          int64
+	UserID            int64
+	FileID            int64
 	Text              string
 	UpdateUTCNano     int64
 	Private           int32
 }
 
 type UpdateMessageResult struct {
-	ID                int32
+	ID                int64
 	UpdateUTCNano     int64
 	Private           bool
 }
 
 type DeleteMessageParams struct {
-	ID                int32
-	UserID            int32
-	FileID            int32
+	ID                int64
+	UserID            int64
+	FileID            int64
 }
 
 type DeleteMessagesParams struct {
-	IDs               []int32
-	UserID            int32
+	IDs               []int64
+	UserID            int64
 }
 
 type PublishMessagesParams struct {
-	IDs               []int32
-	UserID            int32
+	IDs               []int64
+	UserID            int64
 	UpdateUTCNano     int64
 }
 
 type DeleteAllUserMessagesParams struct {
-	UserID            int32
+	UserID            int64
 }
 
 type PrivateMessagesParams struct {
-	IDs               []int32
-	UserID            int32
+	IDs               []int64
+	UserID            int64
 	UpdateUTCNano     int64
 }
 
@@ -75,8 +75,8 @@ type DeleteMessagesResult struct {
 }
 
 type ReadThreadMessagesParams struct {
-	UserID            int32
-	ThreadID          int32
+	UserID            int64
+	ThreadID          int64
 	Limit             int32
 	Offset            int32
 	Ascending         bool
@@ -89,7 +89,7 @@ type ReadThreadMessagesResult struct {
 }
 
 type ReadMessagesParams struct {
-	UserID            int32
+	UserID            int64
 	Limit             int32
 	Offset            int32
 	Ascending         bool
@@ -102,48 +102,48 @@ type ReadMessagesResult struct {
 }
 
 type ReadBatchFilesParams struct {
-	UserID            int32
-	IDs               []int32
+	UserID            int64
+	IDs               []int64
 }
 
 type ReadBatchFilesResult struct {
-	Files             map[int32](*filesmodel.File)
+	Files             map[int64](*filesmodel.File)
 }
 
 type SaveFileParams struct {
 	Name              string
-	UserID            int32
+	UserID            int64
 }
 
 type SaveFileResult struct {
-	ID                int32
+	ID                int64
 	CreateUTCNano     int64
 }
 
 type (
 	ReadMessageOrMessagesJsonRequest struct {
 		Public     *int      `json:"public,omitempty"`
-		MessageID  int32     `json:"id"`
-		ThreadID   int32     `json:"thread_id"`
+		MessageID  int64     `json:"id"`
+		ThreadID   int64     `json:"thread_id"`
 		Limit      int       `json:"limit"`
 		Offset     int       `json:"offset"`
 		Asc        int       `json:"asc"`
 	}
 
 	PublishMessageOrMessagesJsonRequest struct {
-		MessageID *int32     `json:"id,omitempty"`
-		IDs       *[]int32   `json:"ids,omitempty"`
+		MessageID *int64     `json:"id,omitempty"`
+		IDs       *[]int64   `json:"ids,omitempty"`
 	}
 
 	PrivateMessageOrMessagesJsonRequest struct {
-		MessageID *int32     `json:"id,omitempty"`
-		IDs       *[]int32   `json:"ids,omitempty"`
+		MessageID *int64     `json:"id,omitempty"`
+		IDs       *[]int64   `json:"ids,omitempty"`
 	}
 
 	UpdateMessageJsonRequest struct {
-		MessageID  *int32    `json:"id,omitempty"`
-		ThreadID   *int32    `json:"thread_id,omitempty"`
-		FileID     *int32    `json:"file_id,omitempty"`
+		MessageID  *int64    `json:"id,omitempty"`
+		ThreadID   *int64    `json:"thread_id,omitempty"`
+		FileID     *int64    `json:"file_id,omitempty"`
 		Text       *string   `json:"text,omitempty"`
 		Public     *int      `json:"public,omitempty"`
 	}

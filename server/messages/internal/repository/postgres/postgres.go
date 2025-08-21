@@ -64,10 +64,10 @@ func (r *Repository) Create(ctx context.Context, message *model.Message) (err er
  * newText == "" : left as is
  * newThreadID == -1 : left as is
  * newPrivate == -1 : left as is
- * @param  {[type]} r *Repository)  Update(ctx context.Context, userID, id int32, text string, threadID int32, fileIDs []int32, private int) (*model.UpdateMessageResult, error [description]
+ * @param  {[type]} r *Repository)  Update(ctx context.Context, userID, id int64, text string, threadID int64, fileIDs []int64, private int) (*model.UpdateMessageResult, error [description]
  * @return {error}   error
  */
-func (r *Repository) Update(ctx context.Context, userID, id int32, newText string, newThreadID int32, newFileIDs []int32, newPrivate int) (result *model.UpdateMessageResult, err error) {
+func (r *Repository) Update(ctx context.Context, userID, id int64, newText string, newThreadID int64, newFileIDs []int64, newPrivate int) (result *model.UpdateMessageResult, err error) {
 	const query = "UPDATE %s SET text = $3, thread_id = $4, file_ids = $5, private = $6 WHERE user_id = $1 AND id = $2"
 	const selectQuery = "SELECT text, thread_id, file_ids, private FROM %s WHERE user_id = $1 AND id = $2"
 
@@ -92,7 +92,7 @@ func (r *Repository) Update(ctx context.Context, userID, id int32, newText strin
 
 	var (
 		text     string
-		threadID int32
+		threadID int64
 		fileIDs  []byte
 		private  bool
 	)
@@ -146,10 +146,10 @@ func (r *Repository) Update(ctx context.Context, userID, id int32, newText strin
 
 /**
  * Delete message and move ancestor messages on current thread
- * @param  {[type]} r *Repository)  DeleteMessage(ctx context.Context, userID, id, parentThreadID int32) (err error [description]
+ * @param  {[type]} r *Repository)  DeleteMessage(ctx context.Context, userID, id, parentThreadID int64) (err error [description]
  * @return {error}   error
  */
-func (r *Repository) DeleteMessage(ctx context.Context, userID, id int32) (err error) {
+func (r *Repository) DeleteMessage(ctx context.Context, userID, id int64) (err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -169,7 +169,7 @@ func (r *Repository) DeleteMessage(ctx context.Context, userID, id int32) (err e
 		}
 	}()
 
-	var threadID int32
+	var threadID int64
 	err = tx.QueryRow(ctx, r.table("SELECT thread_id FROM %s WHERE id = $1 AND user_id = $2"), id, userID).Scan(&threadID)
 	if err != nil {
 		return
@@ -188,7 +188,7 @@ func (r *Repository) DeleteMessage(ctx context.Context, userID, id int32) (err e
 	return nil
 }
 
-func (r *Repository) Publish(ctx context.Context, userID int32, ids []int32) (err error) {
+func (r *Repository) Publish(ctx context.Context, userID int64, ids []int64) (err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -218,7 +218,7 @@ func (r *Repository) Publish(ctx context.Context, userID int32, ids []int32) (er
 	return
 }
 
-func (r *Repository) Private(ctx context.Context, userID int32, ids []int32) (err error) {
+func (r *Repository) Private(ctx context.Context, userID int64, ids []int64) (err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -248,7 +248,7 @@ func (r *Repository) Private(ctx context.Context, userID int32, ids []int32) (er
 	return
 }
 
-func (r *Repository) Read(ctx context.Context, userIDs []int32, id int32) (message *model.Message, err error) {
+func (r *Repository) Read(ctx context.Context, userIDs []int64, id int64) (message *model.Message, err error) {
 	message = &model.Message{ID: id}
 
 	var (
@@ -286,7 +286,7 @@ SELECT user_id, thread_id, file_ids, created_at, updated_at, text, private, name
 	return
 }
 
-func (r *Repository) DeleteAllUserMessages(ctx context.Context, userID int32) (err error) {
+func (r *Repository) DeleteAllUserMessages(ctx context.Context, userID int64) (err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -312,10 +312,10 @@ func (r *Repository) DeleteAllUserMessages(ctx context.Context, userID int32) (e
 
 /**
  * private == -1 : do not consider private in select
- * @param  {[type]} r *Repository)  ReadThreadMessages(ctx context.Context, userID, threadID, limit, offset int32, private int32) (messages []*model.Message, isLastPage bool, err error [description]
+ * @param  {[type]} r *Repository)  ReadThreadMessages(ctx context.Context, userID, threadID int64, limit, offset int32, private int32) (messages []*model.Message, isLastPage bool, err error [description]
  * @return {[type]}   [description]
  */
-func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID, limit, offset int32, private int32) (messages []*model.Message, isLastPage bool, err error) {
+func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID int64, limit, offset, private int32) (messages []*model.Message, isLastPage bool, err error) {
 	var rows pgx.Rows
 
 	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at FROM %s WHERE user_id = $1 AND thread_id = $2 "
@@ -384,10 +384,10 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID, l
 /**
  * Read all user messages from all threads
  * private == -1 : do not consider private in select
- * @param  {[type]} r *Repository)  ReadAllMessages(ctx context.Context, userID, limit, offset int32, private int32) (messages []*model.Message, isLastPage bool, err error [description]
+ * @param  {[type]} r *Repository)  ReadAllMessages(ctx context.Context, userID int64, limit, offset, private int32) (messages []*model.Message, isLastPage bool, err error [description]
  * @return {[type]}   [description]
  */
-func (r *Repository) ReadAllMessages(ctx context.Context, userID, limit, offset int32, private int32) (messages []*model.Message, isLastPage bool, err error) {
+func (r *Repository) ReadAllMessages(ctx context.Context, userID int64, limit, offset, private int32) (messages []*model.Message, isLastPage bool, err error) {
 	var rows pgx.Rows
 
 	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at FROM %s WHERE user_id = $1 "

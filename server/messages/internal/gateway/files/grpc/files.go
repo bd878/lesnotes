@@ -63,7 +63,7 @@ func (g *Gateway) ReadBatchFiles(ctx context.Context, params *model.ReadBatchFil
 	}, nil
 }
 
-func (g *Gateway) ReadFile(ctx context.Context, userID, fileID int32) (
+func (g *Gateway) ReadFile(ctx context.Context, userID, fileID int64) (
 	*filesmodel.File, error,
 ) {
 	file, err := g.client.ReadFile(ctx, &api.ReadFileRequest{

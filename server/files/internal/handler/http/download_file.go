@@ -16,7 +16,7 @@ import (
 
 func (h *Handler) DownloadFile(w http.ResponseWriter, req *http.Request) error {
 	var (
-		fileID int32
+		fileID int64
 	)
 
 	values := req.URL.Query()
@@ -30,7 +30,7 @@ func (h *Handler) DownloadFile(w http.ResponseWriter, req *http.Request) error {
 			})
 			return err
 		}
-		fileID = int32(fileid)
+		fileID = int64(fileid)
 	}
 
 	user, ok := utils.GetUser(w, req)
