@@ -72,13 +72,13 @@ func (g *Gateway) ListUserSessions(ctx context.Context, userID int32) (sessions 
 	return
 }
 
-func (g *Gateway) CreateSession(ctx context.Context, userID int32) (session *sessionsmodel.Session, err error) {
+func (g *Gateway) CreateSession(ctx context.Context, userID int64) (session *sessionsmodel.Session, err error) {
 	if g.isConnFailed() {
 		g.setupConnection()
 	}
 
 	resp, err := g.client.Create(ctx, &api.CreateSessionRequest{
-		UserId:         userID,
+		UserId:         int32(userID),
 	})
 
 	session = sessionsmodel.SessionFromProto(resp)

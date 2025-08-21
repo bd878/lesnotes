@@ -10,9 +10,9 @@ type (
 	User struct {
 		ID               int32            `json:"id"`
 		Name             string           `json:"name,omitempty"`
-		Password         string           `json:"password,omitempty"`
+		Password         string           `json:"password,omitempty"` // TODO: HashedPassword
 		Token            string           `json:"token,omitempty"`
-		ExpiresUTCNano   int64            `json:"expires_utc_nano,omitempty"`
+		ExpiresUTCNano   int64            `json:"expires_utc_nano,omitempty"` // TODO: ExpiresAt
 	}
 
 	DeleteUserJsonRequest struct {

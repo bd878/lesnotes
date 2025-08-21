@@ -6,6 +6,7 @@ import (
 	"errors"
 	"encoding/json"
 
+	"github.com/bd878/gallery/server/utils"
 	"github.com/bd878/gallery/server/users/pkg/model"
 	servermodel "github.com/bd878/gallery/server/pkg/model"
 )
@@ -56,7 +57,9 @@ func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) error 
 		return errors.New("cannot get password from request")
 	}
 
-	user, err := h.controller.CreateUser(req.Context(), body.Name, body.Password)
+	id := utils.RandomID()
+
+	user, err := h.controller.CreateUser(req.Context(), int64(id), body.Name, body.Password)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
