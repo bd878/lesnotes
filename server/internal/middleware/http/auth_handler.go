@@ -22,7 +22,7 @@ var (
 type UserContextKey struct {}
 
 type UsersGateway interface {
-	GetUser(ctx context.Context, userID int32) (*usersmodel.User, error)
+	GetUser(ctx context.Context, userID int64) (*usersmodel.User, error)
 }
 
 type SessionsGateway interface {
@@ -33,11 +33,11 @@ type authBuilder struct {
 	log           *logger.Logger
 	users         UsersGateway
 	sessions      SessionsGateway
-	publicUserID  int32
+	publicUserID  int64
 	next          Handler
 }
 
-func AuthBuilder(log *logger.Logger, users UsersGateway, sessions SessionsGateway, publicUserID int32) MiddlewareFunc {
+func AuthBuilder(log *logger.Logger, users UsersGateway, sessions SessionsGateway, publicUserID int64) MiddlewareFunc {
 	return func(next Handler) Handler {
 		return &authBuilder{log: log, users: users, sessions: sessions, publicUserID: publicUserID, next: next}
 	}
@@ -100,7 +100,7 @@ func (b *authBuilder) restoreAuthorizedUser(req *http.Request, cookie *http.Cook
 		return nil, err
 	}
 
-	user, err = b.users.GetUser(req.Context(), session.UserID)
+	user, err = b.users.GetUser(req.Context(), int64(session.UserID))
 
 	return
 }

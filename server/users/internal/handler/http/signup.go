@@ -11,7 +11,7 @@ import (
 )
 
 func (h *Handler) Signup( w http.ResponseWriter, req *http.Request) error {
-	name, ok := getTextField(w, req, "name")
+	login, ok := getTextField(w, req, "name")
 	if !ok {
 		return errors.New("no user name")
 	}
@@ -23,7 +23,7 @@ func (h *Handler) Signup( w http.ResponseWriter, req *http.Request) error {
 
 	id := utils.RandomID()
 
-	user, err := h.controller.CreateUser(req.Context(), int64(id), name, password)
+	user, err := h.controller.CreateUser(req.Context(), int64(id), login, password)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{

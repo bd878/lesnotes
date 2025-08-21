@@ -11,7 +11,7 @@ import (
 )
 
 func (h *Handler) Login(w http.ResponseWriter, req *http.Request) error {
-	name, ok := getTextField(w, req, "name")
+	login, ok := getTextField(w, req, "name")
 	if !ok {
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status:      "error",
@@ -31,7 +31,7 @@ func (h *Handler) Login(w http.ResponseWriter, req *http.Request) error {
 		return errors.New("no password field")
 	}
 
-	session, err := h.controller.LoginUser(req.Context(), name, password)
+	session, err := h.controller.LoginUser(req.Context(), login, password)
 	switch err {
 	case controller.ErrUserNotFound:
 		w.WriteHeader(http.StatusBadRequest)

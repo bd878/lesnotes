@@ -19,11 +19,11 @@ type tokenAuthBuilder struct {
 	log             *logger.Logger
 	users           UsersGateway
 	sessions        SessionsGateway
-	publicUserID    int32
+	publicUserID    int64
 	next            Handler
 }
 
-func TokenAuthBuilder(log *logger.Logger, users UsersGateway, sessions SessionsGateway, publicUserID int32) MiddlewareFunc {
+func TokenAuthBuilder(log *logger.Logger, users UsersGateway, sessions SessionsGateway, publicUserID int64) MiddlewareFunc {
 	return func(next Handler) Handler {
 		return &tokenAuthBuilder{log: log, users: users, sessions: sessions, publicUserID: publicUserID, next: next}
 	}
@@ -129,7 +129,7 @@ func (b *tokenAuthBuilder) restoreAuthorizedUser(w http.ResponseWriter, req *htt
 		return nil, ErrNoSession
 	}
 
-	user, err = b.users.GetUser(req.Context(), session.UserID)
+	user, err = b.users.GetUser(req.Context(), int64(session.UserID))
 
 	return
 }

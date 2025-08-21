@@ -13,21 +13,21 @@ import (
 )
 
 type Repository interface {
-	Save(ctx context.Context, id int64, name, password string) error
-	Delete(ctx context.Context, id int32) error
-	Find(ctx context.Context, id int32, name string) (*model.User, error)
+	Save(ctx context.Context, id int64, login, password string) error
+	Delete(ctx context.Context, id int64) error
+	Find(ctx context.Context, id int64, login string) (*model.User, error)
 }
 
 type SessionsGateway interface {
 	GetSession(ctx context.Context, token string) (session *sessionsmodel.Session, err error)
-	ListUserSessions(ctx context.Context, userID int32) (sessions []*sessionsmodel.Session, err error)
-	RemoveAllUserSessions(ctx context.Context, userID int32) (err error)
+	ListUserSessions(ctx context.Context, userID int64) (sessions []*sessionsmodel.Session, err error)
+	RemoveAllUserSessions(ctx context.Context, userID int64) (err error)
 	CreateSession(ctx context.Context, userID int64) (session *sessionsmodel.Session, err error)
 	RemoveSession(ctx context.Context, token string) (err error)
 }
 
 type MessagesGateway interface {
-	DeleteAllUserMessages(ctx context.Context, userID int32) error
+	DeleteAllUserMessages(ctx context.Context, userID int64) error
 }
 
 type Controller struct {
@@ -40,7 +40,7 @@ func New(repo Repository, messages MessagesGateway, sessions SessionsGateway) *C
 	return &Controller{repo: repo, messages: messages, sessions: sessions}
 }
 
-func (c *Controller) CreateUser(ctx context.Context, id int64, name, password string) (user *model.User, err error) {
+func (c *Controller) CreateUser(ctx context.Context, id int64, login, password string) (user *model.User, err error) {
 	// TODO: verify password
 
 	hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -53,14 +53,14 @@ func (c *Controller) CreateUser(ctx context.Context, id int64, name, password st
 		return nil, err
 	}
 
-	err = c.repo.Save(ctx, id, name, string(hashed))
+	err = c.repo.Save(ctx, id, login, string(hashed))
 	if err != nil {
 		return
 	}
 
 	user = &model.User{
 		ID:                int32(id),
-		Name:              name,
+		Name:              login,
 		Password:          string(hashed),
 		Token:             session.Token,
 		ExpiresUTCNano:    session.ExpiresUTCNano,
@@ -69,7 +69,7 @@ func (c *Controller) CreateUser(ctx context.Context, id int64, name, password st
 	return
 }
 
-func (c *Controller) DeleteUser(ctx context.Context, userID int32) (err error) {
+func (c *Controller) DeleteUser(ctx context.Context, userID int64) (err error) {
 	err = c.sessions.RemoveAllUserSessions(ctx, userID)
 	if err != nil {
 		return
@@ -94,16 +94,16 @@ func (c *Controller) LogoutUser(ctx context.Context, token string) (err error) {
 	return
 }
 
-func (c *Controller) FindUser(ctx context.Context, params *model.FindUserParams) (user *model.User, err error) {
-	if params.Token != "" {
-		session, err := c.sessions.GetSession(ctx, params.Token)
+func (c *Controller) FindUser(ctx context.Context, id int64, login, token string) (user *model.User, err error) {
+	if token != "" {
+		session, err := c.sessions.GetSession(ctx, token)
 		if err != nil {
 			return nil, err
 		}
 
-		user, err = c.repo.Find(ctx, session.UserID, "")
+		user, err = c.repo.Find(ctx, int64(session.UserID), "")
 	} else {
-		user, err = c.repo.Find(ctx, 0, params.Name)
+		user, err = c.repo.Find(ctx, 0, login)
 	}
 
 	if err != nil {
@@ -145,7 +145,7 @@ func (c *Controller) AuthUser(ctx context.Context, token string) (user *model.Us
 		return nil, controller.ErrTokenExpired
 	}
 
-	user, err = c.repo.Find(ctx, session.UserID, "")
+	user, err = c.repo.Find(ctx, int64(session.UserID), "")
 	if err != nil {
 		if errors.Is(err, repository.ErrNoRows) {
 			return nil, controller.ErrUserNotFound
@@ -160,7 +160,7 @@ func (c *Controller) AuthUser(ctx context.Context, token string) (user *model.Us
 	return
 }
 
-func (c *Controller) GetUser(ctx context.Context, id int32) (user *model.User, err error) {
+func (c *Controller) GetUser(ctx context.Context, id int64) (user *model.User, err error) {
 	user, err = c.repo.Find(ctx, id, "")
 	if errors.Is(err, repository.ErrNoRows) {
 		return nil, controller.ErrUserNotFound

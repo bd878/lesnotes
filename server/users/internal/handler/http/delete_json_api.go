@@ -77,7 +77,7 @@ func (h *Handler) DeleteJsonAPI(w http.ResponseWriter, req *http.Request) error 
 		return errors.New("user required")
 	}
 
-	err = h.controller.DeleteUser(req.Context(), user.ID)
+	err = h.controller.DeleteUser(req.Context(), int64(user.ID))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
