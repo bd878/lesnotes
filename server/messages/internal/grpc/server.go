@@ -30,6 +30,7 @@ import (
 type Config struct {
 	Addr                string
 	PGConn              string
+	TableName           string
 	NodeName            string
 	RaftLogLevel        string
 	RaftBootstrap       bool
@@ -81,7 +82,7 @@ func (s *Server) setupDB() {
 }
 
 func (s *Server) setupRaft(log *logger.Logger) {
-	repo := repository.New(s.pool)
+	repo := repository.New(s.conf.TableName, s.pool)
 
 	raftLogLevel := hclog.Error.String()
 	switch s.conf.RaftLogLevel {

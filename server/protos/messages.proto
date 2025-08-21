@@ -28,6 +28,7 @@ message Message {
 	int64    thread_id = 8;
 	bool     private = 9;
 	string   name = 10;
+	repeated int64 file_ids = 11;
 }
 
 message ReadThreadMessagesRequest {
@@ -64,6 +65,7 @@ message UpdateMessageRequest {
 	int64    thread_id = 4;
 	string   text = 5;
 	int32    private = 6;
+	repeated int64 file_ids = 7;
 }
 
 message UpdateMessageResponse {

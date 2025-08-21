@@ -18,9 +18,9 @@ type Repository struct {
 	pool      *pgxpool.Pool
 }
 
-func New(pool *pgxpool.Pool) *Repository {
+func New(tableName string, pool *pgxpool.Pool) *Repository {
 	return &Repository{
-		tableName: "messages.messages",
+		tableName: tableName,
 		pool:      pool,
 	}
 }
@@ -369,6 +369,9 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID in
 
 		message.CreateUTCNano = createdAt.UnixNano()
 		message.UpdateUTCNano = updatedAt.UnixNano()
+		if fileIDs != nil && len(fileIDs) == 1 {
+			message.FileID = message.FileIDs[0]
+		}
 
 		messages = append(messages, message)
 	}
@@ -441,6 +444,9 @@ func (r *Repository) ReadAllMessages(ctx context.Context, userID int64, limit, o
 
 		message.CreateUTCNano = createdAt.UnixNano()
 		message.UpdateUTCNano = updatedAt.UnixNano()
+		if fileIDs != nil && len(fileIDs) == 1 {
+			message.FileID = message.FileIDs[0]
+		}
 
 		messages = append(messages, message)
 	}
