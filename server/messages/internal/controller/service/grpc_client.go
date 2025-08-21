@@ -244,7 +244,7 @@ func (s *Messages) ReadAllMessages(ctx context.Context, params *model.ReadMessag
 	}
 
 	res, err := s.client.ReadAllMessages(ctx, &api.ReadMessagesRequest{
-		UserId: int32(params.UserID),
+		UserId: params.UserID,
 		Limit:  params.Limit,
 		Offset: params.Offset,
 		Asc:    params.Ascending,

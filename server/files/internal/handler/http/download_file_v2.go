@@ -43,7 +43,7 @@ func (h *Handler) DownloadFileV2(w http.ResponseWriter, req *http.Request) error
 		return errors.New("no name in path given")
 	}
 
-	file, stream, err := h.controller.ReadFileStream(req.Context(), &model.ReadFileStreamParams{FileName: fileName, UserID: int32(userID), Public: true})
+	file, stream, err := h.controller.ReadFileStream(req.Context(), &model.ReadFileStreamParams{FileName: fileName, UserID: int64(userID), Public: true})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{

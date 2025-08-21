@@ -38,7 +38,7 @@ func New(ctrl Controller) *Handler {
 func (h *Handler) SaveMessage(ctx context.Context, req *api.SaveMessageRequest) (*api.SaveMessageResponse, error) {
 	req.Message.CreateUtcNano = time.Now().UnixNano()
 	req.Message.UpdateUtcNano = time.Now().UnixNano()
-	req.Message.Id = utils.RandomID()
+	req.Message.Id = int64(utils.RandomID())
 	req.Message.Name = uuid.New().String()
 
 	err := h.controller.SaveMessage(ctx, model.MessageFromProto(req.Message)) 

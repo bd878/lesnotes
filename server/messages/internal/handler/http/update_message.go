@@ -83,11 +83,11 @@ func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) error 
 		public = -1
 	}
 
-	return h.updateMessage(req.Context(), w, int32(id), user, text, int32(threadID), public)
+	return h.updateMessage(req.Context(), w, int64(id), user, text, int64(threadID), public)
 }
 
-func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, messageID int32, user *usermodel.User,
-	text string, threadID int32, public int,
+func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, messageID int64, user *usermodel.User,
+	text string, threadID int64, public int,
 ) error {
 	var private int32
 
@@ -121,7 +121,7 @@ func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, mess
 
 	msg, err := h.controller.ReadOneMessage(ctx, &model.ReadOneMessageParams{
 		ID: messageID,
-		UserIDs: []int32{user.ID},
+		UserIDs: []int64{user.ID},
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

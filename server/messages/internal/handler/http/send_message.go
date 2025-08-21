@@ -18,7 +18,7 @@ import (
 func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) error {
 	var (
 		err error
-		fileID, threadID int32
+		fileID, threadID int64
 		private, hasFile bool
 	)
 
@@ -57,7 +57,7 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) error {
 			return err
 		}
 
-		fileID = int32(fileid)
+		fileID = int64(fileid)
 	}
 
 	values := req.URL.Query()
@@ -73,7 +73,7 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) error {
 			return err
 		}
 
-		threadID = int32(threadid)
+		threadID = int64(threadid)
 	}
 
 	if values.Has("public") {

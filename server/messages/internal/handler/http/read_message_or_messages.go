@@ -18,7 +18,7 @@ import (
 func (h *Handler) ReadMessageOrMessages(w http.ResponseWriter, req *http.Request) error {
 	var (
 		limit, offset, order, public int
-		threadID, messageID int32
+		threadID, messageID int64
 		err error
 	)
 
@@ -88,7 +88,7 @@ func (h *Handler) ReadMessageOrMessages(w http.ResponseWriter, req *http.Request
 			return err
 		}
 
-		messageID = int32(messageIDInt)
+		messageID = int64(messageIDInt)
 	}
 
 	if values.Get("thread_id") != "" {
@@ -103,7 +103,7 @@ func (h *Handler) ReadMessageOrMessages(w http.ResponseWriter, req *http.Request
 			return err
 		}
 
-		threadID = int32(threadid)
+		threadID = int64(threadid)
 	}
 
 	if values.Has("asc") {
@@ -123,7 +123,7 @@ func (h *Handler) ReadMessageOrMessages(w http.ResponseWriter, req *http.Request
 }
 
 func (h *Handler) readMessageOrMessages(ctx context.Context, w http.ResponseWriter, user *usermodel.User,
-	limit int, offset int, public int, messageID int32, threadID int32, order int,
+	limit int, offset int, public int, messageID int64, threadID int64, order int,
 ) error {
 	var (
 		private int
@@ -203,10 +203,10 @@ func (h *Handler) readMessageOrMessages(ctx context.Context, w http.ResponseWrit
 	}
 }
 
-func (h *Handler) readMessage(ctx context.Context, w http.ResponseWriter, user *usermodel.User, messageID int32) error {
+func (h *Handler) readMessage(ctx context.Context, w http.ResponseWriter, user *usermodel.User, messageID int64) error {
 	message, err := h.controller.ReadOneMessage(ctx, &model.ReadOneMessageParams{
 		ID: messageID,
-		UserIDs: []int32{user.ID, usermodel.PublicUserID},
+		UserIDs: []int64{user.ID, usermodel.PublicUserID},
 	})
 	if err != nil {
 		logger.Errorw("failed to read one message", "user_id", user.ID, "message_id", messageID)
@@ -245,7 +245,7 @@ func (h *Handler) readMessage(ctx context.Context, w http.ResponseWriter, user *
 	return nil
 }
 
-func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter, user *usermodel.User, threadID, limit, offset int32, ascending bool, private int32) error {
+func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter, user *usermodel.User, threadID int64, limit, offset int32, ascending bool, private int32) error {
 	res, err := h.controller.ReadThreadMessages(ctx, &model.ReadThreadMessagesParams{
 		UserID:    user.ID,
 		ThreadID:  threadID,
@@ -267,7 +267,7 @@ func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter,
 	messages := res.Messages
 	isLastPage := res.IsLastPage
 
-	fileIds := make([]int32, 0)
+	fileIds := make([]int64, 0)
 	for _, message := range messages {
 		if message.FileID != 0 {
 			fileIds = append(fileIds, message.FileID)
@@ -331,7 +331,7 @@ func (h *Handler) readMessages(ctx context.Context, w http.ResponseWriter, user 
 	messages := res.Messages
 	isLastPage := res.IsLastPage
 
-	fileIds := make([]int32, 0)
+	fileIds := make([]int64, 0)
 	for _, message := range messages {
 		if message.FileID != 0 {
 			fileIds = append(fileIds, message.FileID)

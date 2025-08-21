@@ -47,9 +47,9 @@ func (h *Handler) PrivateMessageOrMessages(w http.ResponseWriter, req *http.Requ
 			return err
 		}
 
-		return h.privateMessage(w, req, user, int32(id))
+		return h.privateMessage(w, req, user, int64(id))
 	} else if values.Get("ids") != "" {
-		var ids []int32
+		var ids []int64
 		if err := json.Unmarshal([]byte(values.Get("ids")), &ids); err != nil {
 			json.NewEncoder(w).Encode(servermodel.ServerResponse{
 				Status: "error",
@@ -71,9 +71,9 @@ func (h *Handler) PrivateMessageOrMessages(w http.ResponseWriter, req *http.Requ
 	}
 }
 
-func (h *Handler) privateMessage(w http.ResponseWriter, req *http.Request, user *usermodel.User, id int32) error {
+func (h *Handler) privateMessage(w http.ResponseWriter, req *http.Request, user *usermodel.User, id int64) error {
 	res, err := h.controller.PrivateMessages(req.Context(), &model.PrivateMessagesParams{
-		IDs: []int32{id},
+		IDs: []int64{id},
 		UserID: user.ID,
 	})
 	if err != nil {
@@ -92,13 +92,13 @@ func (h *Handler) privateMessage(w http.ResponseWriter, req *http.Request, user 
 			Description: "private",
 		},
 		UpdateUTCNano: res.UpdateUTCNano,
-		IDs: []int32{id},
+		IDs: []int64{id},
 	})
 
 	return nil
 }
 
-func (h *Handler) privateMessages(w http.ResponseWriter, req *http.Request, user *usermodel.User, ids []int32) error {
+func (h *Handler) privateMessages(w http.ResponseWriter, req *http.Request, user *usermodel.User, ids []int64) error {
 	res, err := h.controller.PrivateMessages(req.Context(), &model.PrivateMessagesParams{
 		IDs: ids,
 		UserID: user.ID,

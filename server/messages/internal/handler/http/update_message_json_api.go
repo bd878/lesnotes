@@ -11,7 +11,7 @@ import (
 )
 
 func (h *Handler) UpdateMessageJsonAPI(w http.ResponseWriter, req *http.Request) error {
-	var threadID int32
+	var threadID int64
 	var public int
 	var text string
 

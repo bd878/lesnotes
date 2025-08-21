@@ -23,7 +23,7 @@ func New(pool *pgxpool.Pool) *Repository {
 	}
 }
 
-func (r *Repository) Save(ctx context.Context, userID int32, token string, expiresUTCNano int64) (err error) {
+func (r *Repository) Save(ctx context.Context, userID int64, token string, expiresUTCNano int64) (err error) {
 	const query = "INSERT INTO %s(user_id, value, expires_at) VALUES ($1, $2, $3)"
 
 	expiresAt := time.Unix(0, expiresUTCNano)
@@ -38,7 +38,7 @@ func (r *Repository) Get(ctx context.Context, token string) (session *model.Sess
 
 	var (
 		expiresAt time.Time
-		userID int32
+		userID int64
 	)
 
 	err = r.pool.QueryRow(ctx, r.table(query), token).Scan(&userID, &expiresAt)
@@ -55,7 +55,7 @@ func (r *Repository) Get(ctx context.Context, token string) (session *model.Sess
 	return
 }
 
-func (r *Repository) List(ctx context.Context, userID int32) (sessions []*model.Session, err error) {
+func (r *Repository) List(ctx context.Context, userID int64) (sessions []*model.Session, err error) {
 	const query = "SELECT value, expires_at FROM %s WHERE user_id = $1"
 
 	var rows pgx.Rows
@@ -100,7 +100,7 @@ func (r *Repository) Delete(ctx context.Context, token string) (err error) {
 	return
 }
 
-func (r *Repository) DeleteAll(ctx context.Context, userID int32) (err error) {
+func (r *Repository) DeleteAll(ctx context.Context, userID int64) (err error) {
 	const query = "DELETE FROM %s WHERE user_id = $1"
 
 	_, err = r.pool.Exec(ctx, r.table(query), userID)

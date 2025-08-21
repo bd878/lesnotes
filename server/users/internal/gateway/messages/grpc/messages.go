@@ -52,7 +52,7 @@ func (g *Gateway) DeleteAllUserMessages(ctx context.Context, userID int64) (err 
 	}
 
 	_, err = g.client.DeleteAllUserMessages(ctx, &api.DeleteAllUserMessagesRequest{
-		UserId: int32(userID),
+		UserId: userID,
 	})
 	return
 }

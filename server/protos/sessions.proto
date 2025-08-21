@@ -13,17 +13,17 @@ service Sessions {
 }
 
 message Session {
-	int32     user_id = 1;
+	int64     user_id = 1;
 	string    token = 2;
 	int64     expires_utc_nano = 4;
 }
 
 message CreateSessionRequest {
-	int32     user_id = 1;
+	int64     user_id = 1;
 }
 
 message ListUserSessionsRequest {
-	int32     user_id = 1;
+	int64     user_id = 1;
 }
 
 message ListUserSessionsResponse {
@@ -39,7 +39,7 @@ message RemoveSessionRequest {
 }
 
 message RemoveAllSessionsRequest {
-	int32     user_id = 1;
+	int64     user_id = 1;
 }
 
 message RemoveAllSessionsResponse {}

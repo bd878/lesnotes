@@ -61,7 +61,7 @@ func (g *Gateway) ListUserSessions(ctx context.Context, userID int64) (sessions 
 	}
 
 	resp, err := g.client.List(ctx, &api.ListUserSessionsRequest{
-		UserId: int32(userID),
+		UserId: userID,
 	})
 	if err != nil {
 		return nil, err
@@ -78,7 +78,7 @@ func (g *Gateway) CreateSession(ctx context.Context, userID int64) (session *ses
 	}
 
 	resp, err := g.client.Create(ctx, &api.CreateSessionRequest{
-		UserId:         int32(userID),
+		UserId:         userID,
 	})
 
 	session = sessionsmodel.SessionFromProto(resp)
@@ -104,7 +104,7 @@ func (g *Gateway) RemoveAllUserSessions(ctx context.Context, userID int64) (err 
 	}
 
 	_, err = g.client.RemoveAll(ctx, &api.RemoveAllSessionsRequest{
-		UserId: int32(userID),
+		UserId: userID,
 	})
 
 	return

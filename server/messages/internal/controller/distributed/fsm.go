@@ -12,14 +12,14 @@ import (
 
 type Repository interface {
 	Create(ctx context.Context, message *model.Message) (err error)
-	Update(ctx context.Context, userID, id int32, newText string, newThreadID int32, newFileIDs []int32, newPrivate int) (result *model.UpdateMessageResult, err error)
-	DeleteMessage(ctx context.Context, userID, id int32) (err error)
-	Publish(ctx context.Context, userID int32, ids []int32) (err error)
-	Private(ctx context.Context, userID int32, ids []int32) (err error)
-	Read(ctx context.Context, userIDs []int32, id int32) (message *model.Message, err error)
-	DeleteAllUserMessages(ctx context.Context, userID int32) (err error)
-	ReadThreadMessages(ctx context.Context, userID, threadID, limit, offset int32, private int32) (messages []*model.Message, isLastPage bool, err error)
-	ReadAllMessages(ctx context.Context, userID, limit, offset int32, private int32) (messages []*model.Message, isLastPage bool, err error)
+	Update(ctx context.Context, userID, id int64, newText string, newThreadID int64, newFileIDs []int64, newPrivate int) (result *model.UpdateMessageResult, err error)
+	DeleteMessage(ctx context.Context, userID, id int64) (err error)
+	Publish(ctx context.Context, userID int64, ids []int64) (err error)
+	Private(ctx context.Context, userID int64, ids []int64) (err error)
+	Read(ctx context.Context, userIDs []int64, id int64) (message *model.Message, err error)
+	DeleteAllUserMessages(ctx context.Context, userID int64) (err error)
+	ReadThreadMessages(ctx context.Context, userID, threadID int64, limit, offset, private int32) (messages []*model.Message, isLastPage bool, err error)
+	ReadAllMessages(ctx context.Context, userID int64, limit, offset, private int32) (messages []*model.Message, isLastPage bool, err error)
 	Truncate(ctx context.Context) error
 }
 
@@ -74,9 +74,9 @@ func (f *fsm) applyUpdate(raw []byte) interface{} {
 	var cmd UpdateCommand
 	proto.Unmarshal(raw, &cmd)
 
-	var fileIDs []int32
+	var fileIDs []int64
 	if cmd.FileId != 0 {
-		fileIDs = []int32{cmd.FileId}
+		fileIDs = []int64{cmd.FileId}
 	}
 
 	res, err := f.repo.Update(context.Background(), cmd.UserId, cmd.Id, cmd.Text, cmd.ThreadId, fileIDs, int(cmd.Private))

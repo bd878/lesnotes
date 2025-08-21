@@ -59,7 +59,7 @@ func (c *Controller) CreateUser(ctx context.Context, id int64, login, password s
 	}
 
 	user = &model.User{
-		ID:                int32(id),
+		ID:                id,
 		Name:              login,
 		Password:          string(hashed),
 		Token:             session.Token,

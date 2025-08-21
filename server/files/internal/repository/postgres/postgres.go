@@ -78,7 +78,7 @@ func (r *Repository) SaveFile(ctx context.Context, reader io.Reader, file *model
 	return
 }
 
-func (r *Repository) GetMeta(ctx context.Context, ownerID int32, id int32) (file *model.File, err error) {
+func (r *Repository) GetMeta(ctx context.Context, ownerID int64, id int64) (file *model.File, err error) {
 	const query = "SELECT name, private, oid, mime, size, created_at FROM %s WHERE owner_id = $1 AND id = $2"
 
 	logger.Infow("get meta", "owner_id", ownerID, "id", id)
@@ -136,7 +136,7 @@ func (r *Repository) ReadFile(ctx context.Context, oid int32, writer io.Writer) 
 	return
 }
 
-func (r *Repository) DeleteFile(ctx context.Context, ownerID, id int32) (err error) {
+func (r *Repository) DeleteFile(ctx context.Context, ownerID, id int64) (err error) {
 	const query = "SELECT oid FROM %s WHERE owner_id = $1 AND id = $2"
 	const deleteQuery = "DELETE FROM %s WHERE owner_id = $1 AND id = $2"
 
