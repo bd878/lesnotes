@@ -126,8 +126,9 @@ func (c *Controller) LoginUser(ctx context.Context, name, password string) (sess
 		return nil, err
 	}
 
-	if user.Password != password {
-		return nil, controller.ErrWrongPassword
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
+		return nil, err
 	}
 
 	session, err = c.sessions.CreateSession(ctx, int64(user.ID))
