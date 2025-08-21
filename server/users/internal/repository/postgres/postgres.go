@@ -72,10 +72,10 @@ func (r *Repository) Find(ctx context.Context, id int64, login string) (user *mo
 
 	if id == 0 {
 		query += " login = $1"
-		err = r.pool.QueryRow(ctx, r.table(query), login).Scan(&user.ID, &user.Name, &user.Password)
+		err = r.pool.QueryRow(ctx, r.table(query), login).Scan(&user.ID, &user.Name, &user.HashedPassword)
 	} else {
 		query += " id = $1"
-		err = r.pool.QueryRow(ctx, r.table(query), id).Scan(&user.ID, &user.Name, &user.Password)
+		err = r.pool.QueryRow(ctx, r.table(query), id).Scan(&user.ID, &user.Name, &user.HashedPassword)
 	}
 
 	return

@@ -28,7 +28,7 @@ func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) error 
 
 	defer req.Body.Close()
 
-	var body model.User
+	var body model.SignupUserJsonRequest
 	if err := json.Unmarshal(data, &body); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
@@ -39,7 +39,7 @@ func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) error 
 		return err
 	}
 
-	if body.Name == "" {
+	if body.Login == "" {
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status: "error",
 			Description: "no name",
@@ -59,7 +59,7 @@ func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) error 
 
 	id := utils.RandomID()
 
-	user, err := h.controller.CreateUser(req.Context(), int64(id), body.Name, body.Password)
+	user, err := h.controller.CreateUser(req.Context(), int64(id), body.Login, body.Password)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
