@@ -369,7 +369,7 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID in
 
 		message.CreateUTCNano = createdAt.UnixNano()
 		message.UpdateUTCNano = updatedAt.UnixNano()
-		if fileIDs != nil && len(fileIDs) == 1 {
+		if message.FileIDs != nil && len(message.FileIDs) == 1 {
 			message.FileID = message.FileIDs[0]
 		}
 
@@ -444,7 +444,7 @@ func (r *Repository) ReadAllMessages(ctx context.Context, userID int64, limit, o
 
 		message.CreateUTCNano = createdAt.UnixNano()
 		message.UpdateUTCNano = updatedAt.UnixNano()
-		if fileIDs != nil && len(fileIDs) == 1 {
+		if message.FileIDs != nil && len(message.FileIDs) == 1 {
 			message.FileID = message.FileIDs[0]
 		}
 
