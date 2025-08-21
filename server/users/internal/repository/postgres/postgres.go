@@ -23,7 +23,7 @@ func New(pool *pgxpool.Pool) *Repository {
 	}
 }
 
-func (r *Repository) Save(ctx context.Context, id int32, name, password string) (err error) {
+func (r *Repository) Save(ctx context.Context, id int64, name, password string) (err error) {
 	const query = "INSERT INTO %s(id, login, salt) VALUES ($1, $2, $3)"
 
 	_, err = r.pool.Exec(ctx, r.table(query), id, name, password)

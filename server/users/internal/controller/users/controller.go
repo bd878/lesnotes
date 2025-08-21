@@ -4,8 +4,8 @@ import (
 	"time"
 	"errors"
 	"context"
+	"golang.org/x/crypto/bcrypt"
 
-	"github.com/bd878/gallery/server/utils"
 	"github.com/bd878/gallery/server/users/pkg/model"
 	"github.com/bd878/gallery/server/users/internal/controller"
 	"github.com/bd878/gallery/server/users/internal/repository"
@@ -13,7 +13,7 @@ import (
 )
 
 type Repository interface {
-	Save(ctx context.Context, id int32, name, password string) error
+	Save(ctx context.Context, id int64, name, password string) error
 	Delete(ctx context.Context, id int32) error
 	Find(ctx context.Context, id int32, name string) (*model.User, error)
 }
@@ -22,7 +22,7 @@ type SessionsGateway interface {
 	GetSession(ctx context.Context, token string) (session *sessionsmodel.Session, err error)
 	ListUserSessions(ctx context.Context, userID int32) (sessions []*sessionsmodel.Session, err error)
 	RemoveAllUserSessions(ctx context.Context, userID int32) (err error)
-	CreateSession(ctx context.Context, userID int32) (session *sessionsmodel.Session, err error)
+	CreateSession(ctx context.Context, userID int64) (session *sessionsmodel.Session, err error)
 	RemoveSession(ctx context.Context, token string) (err error)
 }
 
@@ -40,24 +40,28 @@ func New(repo Repository, messages MessagesGateway, sessions SessionsGateway) *C
 	return &Controller{repo: repo, messages: messages, sessions: sessions}
 }
 
-func (c *Controller) CreateUser(ctx context.Context, name, password string) (user *model.User, err error) {
-	id := utils.RandomID()
+func (c *Controller) CreateUser(ctx context.Context, id int64, name, password string) (user *model.User, err error) {
+	// TODO: verify password
 
-	var session *sessionsmodel.Session
-	session, err = c.sessions.CreateSession(ctx, id)
+	hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	err = c.repo.Save(ctx, id, name, password)
+	session, err := c.sessions.CreateSession(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.repo.Save(ctx, id, name, string(hashed))
 	if err != nil {
 		return
 	}
 
 	user = &model.User{
-		ID:                id,
+		ID:                int32(id),
 		Name:              name,
-		Password:          password,
+		Password:          string(hashed),
 		Token:             session.Token,
 		ExpiresUTCNano:    session.ExpiresUTCNano,
 	}
@@ -126,7 +130,7 @@ func (c *Controller) LoginUser(ctx context.Context, name, password string) (sess
 		return nil, controller.ErrWrongPassword
 	}
 
-	session, err = c.sessions.CreateSession(ctx, user.ID)
+	session, err = c.sessions.CreateSession(ctx, int64(user.ID))
 
 	return
 }

@@ -14,7 +14,7 @@ import (
 )
 
 type Controller interface {
-	CreateUser(ctx context.Context, name, password string) (user *model.User, err error)
+	CreateUser(ctx context.Context, id int64, name, password string) (user *model.User, err error)
 	FindUser(ctx context.Context, params *model.FindUserParams) (user *model.User, err error)
 	AuthUser(ctx context.Context, token string) (user *model.User, err error)
 	GetUser(ctx context.Context, userID int32) (user *model.User, err error)
