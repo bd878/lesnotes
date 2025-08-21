@@ -11,6 +11,7 @@
 		"@telegram-apps/sdk-react": "^3.3.2",
 		"@types/react": "^19.0.2",
 		"@types/react-dom": "^19.0.2",
+		"classnames": "^2.5.1",
 		"config": "^3.3.9",
 		"koa": "^2.14.2",
 		"koa-bodyparser": "^4.4.1",
