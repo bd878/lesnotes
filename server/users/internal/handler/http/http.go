@@ -14,12 +14,12 @@ import (
 )
 
 type Controller interface {
-	CreateUser(ctx context.Context, id int64, name, password string) (user *model.User, err error)
-	FindUser(ctx context.Context, params *model.FindUserParams) (user *model.User, err error)
+	CreateUser(ctx context.Context, id int64, login, password string) (user *model.User, err error)
+	FindUser(ctx context.Context, id int64, login, token string) (user *model.User, err error)
 	AuthUser(ctx context.Context, token string) (user *model.User, err error)
-	GetUser(ctx context.Context, userID int32) (user *model.User, err error)
+	GetUser(ctx context.Context, userID int64) (user *model.User, err error)
 	LoginUser(ctx context.Context, name, password string) (session *sessionsmodel.Session, err error)
-	DeleteUser(ctx context.Context, userID int32) (err error)
+	DeleteUser(ctx context.Context, userID int64) (err error)
 	LogoutUser(ctx context.Context, token string) (err error)
 }
 

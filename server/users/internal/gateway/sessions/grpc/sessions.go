@@ -55,13 +55,13 @@ func (g *Gateway) GetSession(ctx context.Context, token string) (session *sessio
 	return
 }
 
-func (g *Gateway) ListUserSessions(ctx context.Context, userID int32) (sessions []*sessionsmodel.Session, err error) {
+func (g *Gateway) ListUserSessions(ctx context.Context, userID int64) (sessions []*sessionsmodel.Session, err error) {
 	if g.isConnFailed() {
 		g.setupConnection()
 	}
 
 	resp, err := g.client.List(ctx, &api.ListUserSessionsRequest{
-		UserId: userID,
+		UserId: int32(userID),
 	})
 	if err != nil {
 		return nil, err
@@ -98,13 +98,13 @@ func (g *Gateway) RemoveSession(ctx context.Context, token string) (err error) {
 	return
 }
 
-func (g *Gateway) RemoveAllUserSessions(ctx context.Context, userID int32) (err error) {
+func (g *Gateway) RemoveAllUserSessions(ctx context.Context, userID int64) (err error) {
 	if g.isConnFailed() {
 		g.setupConnection()
 	}
 
 	_, err = g.client.RemoveAll(ctx, &api.RemoveAllSessionsRequest{
-		UserId: userID,
+		UserId: int32(userID),
 	})
 
 	return

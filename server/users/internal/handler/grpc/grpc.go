@@ -8,8 +8,8 @@ import (
 )
 
 type Controller interface {
-	GetUser(ctx context.Context, id int32) (*model.User, error)
-	FindUser(ctx context.Context, params *model.FindUserParams) (*model.User, error)
+	GetUser(ctx context.Context, id int64) (*model.User, error)
+	FindUser(ctx context.Context, id int64, login, token string) (*model.User, error)
 }
 
 type Handler struct {
@@ -22,7 +22,7 @@ func New(controller Controller) *Handler {
 }
 
 func (h *Handler) GetUser(ctx context.Context, req *api.GetUserRequest) (*api.User, error) {
-	user, err := h.controller.GetUser(ctx, req.Id)
+	user, err := h.controller.GetUser(ctx, int64(req.Id))
 	if err != nil {
 		return nil, err
 	}
@@ -31,16 +31,16 @@ func (h *Handler) GetUser(ctx context.Context, req *api.GetUserRequest) (*api.Us
 }
 
 func (h *Handler) FindUser(ctx context.Context, req *api.FindUserRequest) (*api.User, error) {
-	params := &model.FindUserParams{}
+	var login, token string
 
 	switch key := req.SearchKey.(type) {
 	case *api.FindUserRequest_Name:
-		params.Name = key.Name
+		login = key.Name
 	case *api.FindUserRequest_Token:
-		params.Token = key.Token
+		token = key.Token
 	}
 
-	user, err := h.controller.FindUser(ctx, params)
+	user, err := h.controller.FindUser(ctx, 0, login, token)
 	if err != nil {
 		return nil, err
 	}

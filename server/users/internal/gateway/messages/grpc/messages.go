@@ -46,13 +46,13 @@ func (g *Gateway) isConnFailed() bool {
 	return state == connectivity.Shutdown || state == connectivity.TransientFailure
 }
 
-func (g *Gateway) DeleteAllUserMessages(ctx context.Context, userID int32) (err error) {
+func (g *Gateway) DeleteAllUserMessages(ctx context.Context, userID int64) (err error) {
 	if g.isConnFailed() {
 		g.setupConnection()
 	}
 
 	_, err = g.client.DeleteAllUserMessages(ctx, &api.DeleteAllUserMessagesRequest{
-		UserId: userID,
+		UserId: int32(userID),
 	})
 	return
 }

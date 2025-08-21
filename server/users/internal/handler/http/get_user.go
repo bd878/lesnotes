@@ -33,7 +33,7 @@ func (h *Handler) GetUser(w http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
-	user, err := h.controller.GetUser(req.Context(), int32(id))
+	user, err := h.controller.GetUser(req.Context(), int64(id))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{

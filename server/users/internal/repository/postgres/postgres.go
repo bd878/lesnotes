@@ -31,7 +31,7 @@ func (r *Repository) Save(ctx context.Context, id int64, name, password string) 
 	return err
 }
 
-func (r *Repository) Delete(ctx context.Context, id int32) (err error) {
+func (r *Repository) Delete(ctx context.Context, id int64) (err error) {
 	const query = "DELETE FROM %s WHERE id = $1"
 
 	var tx pgx.Tx
@@ -62,10 +62,10 @@ func (r *Repository) Delete(ctx context.Context, id int32) (err error) {
  * Find by id or login
  * If id == 0 : find by login
  * If login == "" : return error
- * @param  {[type]} r *Repository)  Find(ctx context.Context, id int32, login string) (user *model.User, err error [description]
+ * @param  {[type]} r *Repository)  Find(ctx context.Context, id int64, login string) (user *model.User, err error [description]
  * @return {[type]}   [description]
  */
-func (r *Repository) Find(ctx context.Context, id int32, login string) (user *model.User, err error) {
+func (r *Repository) Find(ctx context.Context, id int64, login string) (user *model.User, err error) {
 	query := "SELECT id, login, salt FROM %s WHERE"
 
 	user = &model.User{}

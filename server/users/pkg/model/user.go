@@ -3,13 +3,13 @@ package model
 import "github.com/bd878/gallery/server/pkg/model"
 
 const (
-	PublicUserID int32 = 9_999_999
+	PublicUserID int64 = 9_999_999
 )
 
 type (
 	User struct {
 		ID               int32            `json:"id"`
-		Name             string           `json:"name,omitempty"`
+		Name             string           `json:"name,omitempty"` // TODO: login
 		Password         string           `json:"password,omitempty"` // TODO: HashedPassword
 		Token            string           `json:"token,omitempty"`
 		ExpiresUTCNano   int64            `json:"expires_utc_nano,omitempty"` // TODO: ExpiresAt
