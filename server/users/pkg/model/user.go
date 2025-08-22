@@ -9,25 +9,25 @@ const (
 type (
 	User struct {
 		ID               int64            `json:"id"`
-		Name             string           `json:"name,omitempty"` // TODO: login
+		Login            string           `json:"login,omitempty"`
 		HashedPassword   string           `json:"salt,omitempty"`
 		Token            string           `json:"token,omitempty"`
 		ExpiresUTCNano   int64            `json:"expires_utc_nano,omitempty"` // TODO: ExpiresAt
 	}
 
 	LoginUserJsonRequest struct {
-		Login            string           `json:"name"`
+		Login            string           `json:"login"`
 		Password         string           `json:"password"`
 	}
 
 	SignupUserJsonRequest struct {
-		Login            string           `json:"name"`
+		Login            string           `json:"login"`
 		Password         string           `json:"password"`
 	}
 
 	DeleteUserJsonRequest struct {
 		Token            string           `json:"token"`
-		Name             string           `json:"name"`
+		Login            string           `json:"login"`
 		Password         string           `json:"password"`
 	}
 

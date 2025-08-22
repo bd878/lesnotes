@@ -7,7 +7,8 @@ import (
 func UserToProto(u *User) *api.User {
 	return &api.User{
 		Id:               u.ID,
-		Name:             u.Name,
+		Login:            u.Login,
+		HashedPassword:   u.HashedPassword,
 		Token:            u.Token,
 		ExpiresUtcNano:   u.ExpiresUTCNano,
 	}
@@ -16,8 +17,9 @@ func UserToProto(u *User) *api.User {
 func UserFromProto(u *api.User) *User {
 	return &User{
 		ID:               u.Id,
-		Name:             u.Name,
+		Login:            u.Login,
 		Token:            u.Token,
+		HashedPassword:   u.HashedPassword,
 		ExpiresUTCNano:   u.ExpiresUtcNano,
 	}
 }

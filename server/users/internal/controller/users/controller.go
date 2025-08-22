@@ -60,7 +60,7 @@ func (c *Controller) CreateUser(ctx context.Context, id int64, login, password s
 
 	user = &model.User{
 		ID:                id,
-		Name:              login,
+		Login:             login,
 		HashedPassword:    string(hashed),
 		Token:             session.Token,
 		ExpiresUTCNano:    session.ExpiresUTCNano,
@@ -117,8 +117,8 @@ func (c *Controller) FindUser(ctx context.Context, id int64, login, token string
 	return
 }
 
-func (c *Controller) LoginUser(ctx context.Context, name, hashedPassword string) (session *sessionsmodel.Session, err error) {
-	user, err := c.repo.Find(ctx, 0, name)
+func (c *Controller) LoginUser(ctx context.Context, login, hashedPassword string) (session *sessionsmodel.Session, err error) {
+	user, err := c.repo.Find(ctx, 0, login)
 	if err != nil {
 		if errors.Is(err, repository.ErrNoRows) {
 			return nil, controller.ErrUserNotFound

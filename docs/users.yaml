@@ -330,7 +330,7 @@ components:
       token:
         type: string
         example: "AAAAAA"
-      name:
+      login:
         type: string
         example: "abc"
       password:
@@ -339,7 +339,7 @@ components:
 
     loginUserJson:
       type: object
-      name:
+      login:
         type: string
         example: test
       password:
@@ -359,7 +359,7 @@ components:
 
     loginUser:
       type: object
-      name:
+      login:
         type: string
         example: test
       password:
@@ -368,7 +368,7 @@ components:
 
     signupUserJson:
       type: object
-      name:
+      login:
         type: string
         example: text
       password:
@@ -377,7 +377,7 @@ components:
 
     signupUser:
       type: object
-      name:
+      login:
         type: string
         example: test
       password:
@@ -392,14 +392,14 @@ components:
           default: "ok"
         description:
           type: string
-          default: "name exists"
+          default: "login exists"
       - type: object
         status:
           type: string
           default: "ok"
         description:
           type: string
-          default: "no name"
+          default: "no login"
       - type: object
         status:
           type: string
@@ -479,7 +479,7 @@ components:
           id:
             type: integer
             example: 1
-          name:
+          login:
             type: string
             example: test
           token:
@@ -493,6 +493,6 @@ components:
           id:
             type: integer
             example: 1
-          name:
+          login:
             type: string
             example: test

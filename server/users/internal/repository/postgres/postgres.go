@@ -23,10 +23,10 @@ func New(pool *pgxpool.Pool) *Repository {
 	}
 }
 
-func (r *Repository) Save(ctx context.Context, id int64, name, password string) (err error) {
+func (r *Repository) Save(ctx context.Context, id int64, login, password string) (err error) {
 	const query = "INSERT INTO %s(id, login, salt) VALUES ($1, $2, $3)"
 
-	_, err = r.pool.Exec(ctx, r.table(query), id, name, password)
+	_, err = r.pool.Exec(ctx, r.table(query), id, login, password)
 
 	return err
 }
@@ -72,10 +72,10 @@ func (r *Repository) Find(ctx context.Context, id int64, login string) (user *mo
 
 	if id == 0 {
 		query += " login = $1"
-		err = r.pool.QueryRow(ctx, r.table(query), login).Scan(&user.ID, &user.Name, &user.HashedPassword)
+		err = r.pool.QueryRow(ctx, r.table(query), login).Scan(&user.ID, &user.Login, &user.HashedPassword)
 	} else {
 		query += " id = $1"
-		err = r.pool.QueryRow(ctx, r.table(query), id).Scan(&user.ID, &user.Name, &user.HashedPassword)
+		err = r.pool.QueryRow(ctx, r.table(query), id).Scan(&user.ID, &user.Login, &user.HashedPassword)
 	}
 
 	return

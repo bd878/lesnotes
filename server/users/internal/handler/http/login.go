@@ -11,14 +11,14 @@ import (
 )
 
 func (h *Handler) Login(w http.ResponseWriter, req *http.Request) error {
-	login, ok := getTextField(w, req, "name")
+	login, ok := getTextField(w, req, "login")
 	if !ok {
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status:      "error",
-			Description: "no name",
+			Description: "no login",
 		})
 
-		return errors.New("no name field")
+		return errors.New("no login field")
 	}
 
 	password, ok := getTextField(w, req, "password")

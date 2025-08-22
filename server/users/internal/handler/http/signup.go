@@ -11,9 +11,9 @@ import (
 )
 
 func (h *Handler) Signup( w http.ResponseWriter, req *http.Request) error {
-	login, ok := getTextField(w, req, "name")
+	login, ok := getTextField(w, req, "login")
 	if !ok {
-		return errors.New("no user name")
+		return errors.New("no user login")
 	}
 
 	password, ok := getTextField(w, req, "password")

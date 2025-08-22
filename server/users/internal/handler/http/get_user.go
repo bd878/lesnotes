@@ -50,8 +50,8 @@ func (h *Handler) GetUser(w http.ResponseWriter, req *http.Request) error {
 			Description: "exists",
 		},
 		User: model.User{
-			ID: user.ID,
-			Name: user.Name,
+			ID:    user.ID,
+			Login: user.Login,
 		},
 	})
 

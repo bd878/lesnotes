@@ -71,7 +71,7 @@ func (h *Handler) AuthJsonAPI(w http.ResponseWriter, req *http.Request) error {
 		Expired: false,
 		User: model.User{
 			ID:               user.ID,
-			Name:             user.Name,
+			Login:            user.Login,
 			Token:            user.Token,
 			ExpiresUTCNano:   user.ExpiresUTCNano,
 		},

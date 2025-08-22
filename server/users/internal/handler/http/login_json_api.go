@@ -42,10 +42,10 @@ func (h *Handler) LoginJsonAPI(w http.ResponseWriter, req *http.Request) error {
 	if body.Login == "" {
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status:      "error",
-			Description: "no name",
+			Description: "no login",
 		})
 
-		return errors.New("cannot get user name from request")
+		return errors.New("cannot get user login from request")
 	}
 
 	if body.Password == "" {

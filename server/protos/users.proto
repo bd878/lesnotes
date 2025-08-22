@@ -11,9 +11,10 @@ service Users {
 
 message User {
 	int64     id = 1;
-	string    name = 2;
+	string    login = 2;
 	string    token = 3;
 	int64     expires_utc_nano = 4;
+	string    hashed_password = 5;
 }
 
 message GetUserRequest {
@@ -22,7 +23,7 @@ message GetUserRequest {
 
 message FindUserRequest {
 	oneof search_key {
-		string name = 1;
+		string login = 1;
 		string token = 2;
 	}
 }

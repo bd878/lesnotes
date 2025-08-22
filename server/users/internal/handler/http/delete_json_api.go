@@ -48,13 +48,13 @@ func (h *Handler) DeleteJsonAPI(w http.ResponseWriter, req *http.Request) error 
 		return errors.New("cannot get token from request")
 	}
 
-	if jsonRequest.Name == "" {
+	if jsonRequest.Login == "" {
 		json.NewEncoder(w).Encode(servermodel.ServerResponse{
 			Status: "error",
-			Description: "no name",
+			Description: "no login",
 		})
 
-		return errors.New("cannot get name from request")
+		return errors.New("cannot get login from request")
 	}
 
 	if jsonRequest.Password == "" {
