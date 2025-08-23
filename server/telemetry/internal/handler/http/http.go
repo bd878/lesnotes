@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 
 	"github.com/bd878/gallery/server/logger"
-	servermodel "github.com/bd878/gallery/server/pkg/model"
+	server "github.com/bd878/gallery/server/pkg/model"
 )
 
 type Handler struct {
@@ -21,9 +21,12 @@ func (h *Handler) SendLog(w http.ResponseWriter, req *http.Request) error {
 	if err != nil {
 		req.Body.Close()
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "cannot read",
+			Error:  &server.ErrorCode{
+				Code:   server.CodeReadFailed,
+				Explain: "cannot read",
+			},
 		})
 		return err
 	}
@@ -31,9 +34,8 @@ func (h *Handler) SendLog(w http.ResponseWriter, req *http.Request) error {
 	defer req.Body.Close()
 
 	logger.Infoln(string(data))
-	json.NewEncoder(w).Encode(servermodel.ServerResponse{
+	json.NewEncoder(w).Encode(server.ServerResponse{
 		Status: "ok",
-		Description: "accepted",
 	})
 	return nil
 }

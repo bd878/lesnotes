@@ -13,4 +13,5 @@ var (
 	CodeNoBody             int = 20
 	CodeWrongQuery         int = 21
 	CodeStatusFailed       int = 22
+	CodeReadFailed         int = 23
 )
