@@ -5,19 +5,22 @@ import (
 	"fmt"
 	"encoding/json"
 
-	servermodel "github.com/bd878/gallery/server/pkg/model"
-	usermodel "github.com/bd878/gallery/server/users/pkg/model"
 	"github.com/bd878/gallery/server/utils"
-	"github.com/bd878/gallery/server/messages/pkg/model"
+	messages "github.com/bd878/gallery/server/messages/pkg/model"
+	server "github.com/bd878/gallery/server/pkg/model"
+	users "github.com/bd878/gallery/server/users/pkg/model"
 )
 
-func (h *Handler) SendMessageJsonAPI(w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) SendMessageJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
 	user, ok := utils.GetUser(w, req)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "user required",
+			Error:  &server.ErrorCode{
+				Code:   server.CodeNoUser,
+				Explain: "user required",
+			},
 		})
 
 		return fmt.Errorf("no user")
@@ -26,20 +29,26 @@ func (h *Handler) SendMessageJsonAPI(w http.ResponseWriter, req *http.Request) e
 	data, ok := utils.GetJsonRequestBody(w, req)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "body data required",
+			Error:  &server.ErrorCode{
+				Code:  server.CodeNoBody,
+				Explain: "body data required",
+			},
 		})
 
 		return fmt.Errorf("no req data")
 	}
 
-	var message model.Message
-	if err := json.Unmarshal(data, &message); err != nil {
+	var message messages.Message
+	if err = json.Unmarshal(data, &message); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "failed to parse message",
+			Error:  &server.ErrorCode{
+				Code:  server.CodeWrongFormat,
+				Explain: "failed to parse message",
+			},
 		})
 
 		return err
@@ -47,9 +56,12 @@ func (h *Handler) SendMessageJsonAPI(w http.ResponseWriter, req *http.Request) e
 
 	if message.Text == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "text required",
+			Error:  &server.ErrorCode{
+				Code:    messages.CodeNoText,
+				Explain: "text required",
+			},
 		})
 
 		return nil
@@ -57,15 +69,18 @@ func (h *Handler) SendMessageJsonAPI(w http.ResponseWriter, req *http.Request) e
 
 	if message.ThreadID != 0 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "cannot save with thread_id yet",
+			Error:  &server.ErrorCode{
+				Code:    server.CodeNoID,
+				Explain: "cannot save with thread_id yet",
+			},
 		})
 
 		return nil
 	}
 
-	if user.ID == usermodel.PublicUserID {
+	if user.ID == users.PublicUserID {
 		message.Private = false
 	}
 

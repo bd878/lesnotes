@@ -5,20 +5,23 @@ import (
 	"fmt"
 	"encoding/json"
 
-	servermodel "github.com/bd878/gallery/server/pkg/model"
-	"github.com/bd878/gallery/server/messages/pkg/model"
 	"github.com/bd878/gallery/server/utils"
+	messages "github.com/bd878/gallery/server/messages/pkg/model"
+	server "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) ReadMessageOrMessagesJsonAPI(w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) ReadMessageOrMessagesJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
 	var public int
 
 	user, ok := utils.GetUser(w, req)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "user required",
+			Error:  &server.ErrorCode{
+				Code:    server.CodeNoUser,
+				Explain: "user required",
+			},
 		})
 
 		return fmt.Errorf("no user")
@@ -27,31 +30,37 @@ func (h *Handler) ReadMessageOrMessagesJsonAPI(w http.ResponseWriter, req *http.
 	data, ok := utils.GetJsonRequestBody(w, req)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "body data required",
+			Error:  &server.ErrorCode{
+				Code: server.CodeNoBody,
+				Explain: "body data required",
+			},
 		})
 
 		return fmt.Errorf("no req data")
 	}
 
-	var jsonRequest model.ReadMessageOrMessagesJsonRequest
-	if err := json.Unmarshal(data, &jsonRequest); err != nil {
+	var request messages.ReadRequest
+	if err := json.Unmarshal(data, &request); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "failed to parse message",
+			Error: &server.ErrorCode{
+				Code: messages.CodeNoMessage,
+				Explain: "failed to parse message",
+			},
 		})
 
 		return err
 	}
 
-	if jsonRequest.Public == nil {
+	if request.Public == nil {
 		public = -1
 	} else {
-		public = *jsonRequest.Public
+		public = *request.Public
 	}
 
 	return h.readMessageOrMessages(req.Context(), w, user,
-		jsonRequest.Limit, jsonRequest.Offset, public, jsonRequest.MessageID, jsonRequest.ThreadID, jsonRequest.Asc)
+		request.Limit, request.Offset, public, request.MessageID, request.ThreadID, request.Asc)
 }

@@ -7,22 +7,24 @@ import (
 	"fmt"
 	"encoding/json"
 
-	servermodel "github.com/bd878/gallery/server/pkg/model"
-	usermodel "github.com/bd878/gallery/server/users/pkg/model"
-	"github.com/bd878/gallery/server/messages/pkg/model"
 	"github.com/bd878/gallery/server/utils"
-	"github.com/bd878/gallery/server/logger"
+	server "github.com/bd878/gallery/server/pkg/model"
+	users "github.com/bd878/gallery/server/users/pkg/model"
+	messages "github.com/bd878/gallery/server/messages/pkg/model"
 )
 
-func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) (err error) {
 	var public, threadID int
 
 	user, ok := utils.GetUser(w, req)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "user required",
+			Error: &server.ErrorCode{
+				Code: server.CodeNoUser,
+				Explain: "user required",
+			},
 		})
 
 		return fmt.Errorf("user not found")
@@ -31,9 +33,12 @@ func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) error 
 	values := req.URL.Query()
 	if values.Get("id") == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "empty message id",
+			Error: &server.ErrorCode{
+				Code: server.CodeNoID,
+				Explain: "empty message id",
+			},
 		})
 
 		return nil
@@ -42,9 +47,12 @@ func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) error 
 	id, err := strconv.Atoi(values.Get("id"))
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "invalid id",
+			Error: &server.ErrorCode{
+				Code: server.CodeNoID,
+				Explain: "invalid id",
+			},
 		})
 
 		return err
@@ -56,9 +64,12 @@ func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) error 
 		threadID, err = strconv.Atoi(req.PostFormValue("thread_id"))
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			json.NewEncoder(w).Encode(server.ServerResponse{
 				Status: "error",
-				Description: "invalid thread id",
+				Error: &server.ErrorCode{
+					Code: server.CodeNoID,
+					Explain: "invalid thread id",
+				},
 			})
 
 			return err
@@ -70,11 +81,13 @@ func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) error 
 	if req.PostFormValue("public") != "" {
 		public, err = strconv.Atoi(req.PostFormValue("public"))
 		if err != nil {
-			logger.Errorw("wrong public param", "public", public)
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			json.NewEncoder(w).Encode(server.ServerResponse{
 				Status: "error",
-				Description: "invalid public param",
+				Error: &server.ErrorCode{
+					Code: server.CodeWrongFormat,
+					Explain: "invalid public param",
+				},
 			})
 
 			return err
@@ -86,9 +99,9 @@ func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) error 
 	return h.updateMessage(req.Context(), w, int64(id), user, text, int64(threadID), public)
 }
 
-func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, messageID int64, user *usermodel.User,
+func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, messageID int64, user *users.User,
 	text string, threadID int64, public int,
-) error {
+) (err error) {
 	var private int32
 
 	if public == 1 {
@@ -99,35 +112,44 @@ func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, mess
 		private = -1
 	}
 
-	if user.ID == usermodel.PublicUserID && threadID != -1 {
+	if user.ID == users.PublicUserID && threadID != -1 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "cannot move public message",
+			Error: &server.ErrorCode{
+				Code: messages.CodeMessagePublic,
+				Explain: "cannot move public message",
+			},
 		})
 
-		return nil
+		return
 	}
 
-	if user.ID == usermodel.PublicUserID && private == 1 {
+	if user.ID == users.PublicUserID && private == 1 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "cannot make private public message",
+			Error:  &server.ErrorCode{
+				Code: messages.CodeMessagePublic,
+				Explain: "cannot make private public message",
+			},
 		})
 
-		return nil
+		return
 	}
 
-	msg, err := h.controller.ReadOneMessage(ctx, &model.ReadOneMessageParams{
+	msg, err := h.controller.ReadOneMessage(ctx, &messages.ReadOneMessageParams{
 		ID: messageID,
 		UserIDs: []int64{user.ID},
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "failed to read message",
+			Error: &server.ErrorCode{
+				Code: messages.CodeNoMessage,
+				Explain: "failed to read message",
+			},
 		})
 
 		return err		
@@ -135,9 +157,12 @@ func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, mess
 
 	if text == "" && threadID == -1 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "text or thread_id or both must be provided",
+			Error: &server.ErrorCode{
+				Code:    server.CodeWrongFormat,
+				Explain: "text or thread_id or both must be provided",
+			},
 		})
 
 		return nil
@@ -147,7 +172,7 @@ func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, mess
 		text = msg.Text
 	}
 
-	resp, err := h.controller.UpdateMessage(ctx, &model.UpdateMessageParams{
+	resp, err := h.controller.UpdateMessage(ctx, &messages.UpdateMessageParams{
 		ID:     messageID,
 		UserID: user.ID,
 		Text:   text,
@@ -156,22 +181,31 @@ func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, mess
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "failed to update message",
+			Error:  &server.ErrorCode{
+				Code:    messages.CodeUpdateFailed,
+				Explain: "failed to update message",
+			},
 		})
 
 		return err
 	}
 
-	json.NewEncoder(w).Encode(model.UpdateMessageServerResponse{
-		ServerResponse: servermodel.ServerResponse{
-			Status: "ok",
-			Description: "accepted",
-		},
+	response, err := json.Marshal(messages.UpdateResponse{
+		Description: "updated",
 		ID: resp.ID,
 		UpdateUTCNano: resp.UpdateUTCNano,
 		Private: resp.Private,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return err
+	}
+
+	json.NewEncoder(w).Encode(server.ServerResponse{
+		Status: "ok",
+		Response: json.RawMessage(response),
 	})
 
 	return nil

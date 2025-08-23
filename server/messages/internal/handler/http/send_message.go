@@ -7,26 +7,28 @@ import (
 	"path/filepath"
 	"encoding/json"
 
-	filesmodel "github.com/bd878/gallery/server/files/pkg/model"
-	servermodel "github.com/bd878/gallery/server/pkg/model"
-	usermodel "github.com/bd878/gallery/server/users/pkg/model"
-	"github.com/bd878/gallery/server/messages/pkg/model"
 	"github.com/bd878/gallery/server/utils"
 	"github.com/bd878/gallery/server/logger"
+	messages "github.com/bd878/gallery/server/messages/pkg/model"
+	files "github.com/bd878/gallery/server/files/pkg/model"
+	server "github.com/bd878/gallery/server/pkg/model"
+	users "github.com/bd878/gallery/server/users/pkg/model"
 )
 
-func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) (err error) {
 	var (
-		err error
 		fileID, threadID int64
 		private, hasFile bool
 	)
 
 	if err = req.ParseMultipartForm(50 << 20) /* 50 MB */; err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "failed to parse form",
+			Error: &server.ErrorCode{
+				Code: server.CodeNoForm,
+				Explain: "failed to parse form",
+			},
 		})
 
 		return err
@@ -35,9 +37,12 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) error {
 	user, ok := utils.GetUser(w, req)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "user required",
+			Error: &server.ErrorCode{
+				Code: server.CodeNoUser,
+				Explain: "user required",
+			},
 		})
 
 		return fmt.Errorf("no user")
@@ -49,9 +54,12 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) error {
 		fileid, err := strconv.Atoi(req.PostFormValue("file_id"))
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			json.NewEncoder(w).Encode(server.ServerResponse{
 				Status: "error",
-				Description: "invalid file_id",
+				Error: &server.ErrorCode{
+					Code: messages.CodeWrongFileID,
+					Explain: "invalid file_id",
+				},
 			})
 
 			return err
@@ -65,9 +73,12 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) error {
 		threadid, err := strconv.Atoi(values.Get("thread_id"))
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			json.NewEncoder(w).Encode(server.ServerResponse{
 				Status: "error",
-				Description: "invalid thread id",
+				Error: &server.ErrorCode{
+					Code: messages.CodeWrongThreadID,
+					Explain: "invalid thread id",
+				},
 			})
 
 			return err
@@ -80,9 +91,12 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) error {
 		public, err := strconv.Atoi(values.Get("public"))
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			json.NewEncoder(w).Encode(server.ServerResponse{
 				Status: "error",
-				Description: "invalid public param",
+				Error:  &server.ErrorCode{
+					Code: messages.CodeWrongPublic,
+					Explain: "invalid public param",
+				},
 			})
 
 			return err
@@ -99,7 +113,7 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) error {
 		private = true
 	}
 
-	if user.ID == usermodel.PublicUserID {
+	if user.ID == users.PublicUserID {
 		private = false
 	}
 
@@ -107,13 +121,14 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) error {
 		hasFile = true
 	}
 
-	logger.Infow("received message", "text", text, "name", user.Name, "file_id", fileID, "has_file", hasFile)
-
 	if fileID == 0 && !hasFile && text == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "text or file_id or file required",
+			Error: &server.ErrorCode{
+				Code: server.CodeWrongFormat,
+				Explain: "text or file_id or file required",
+			},
 		})
 
 		return nil
@@ -121,9 +136,12 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) error {
 
 	if fileID != 0 && hasFile {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "should be either file_id or file, not both",
+			Error: &server.ErrorCode{
+				Code: server.CodeWrongFormat,
+				Explain: "should be either file_id or file, not both",
+			},
 		})
 
 		return nil
@@ -133,9 +151,12 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) error {
 		f, fh, err := req.FormFile("file")
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			json.NewEncoder(w).Encode(server.ServerResponse{
 				Status: "error",
-				Description: "cannot read file",
+				Error: &server.ErrorCode{
+					Code: messages.CodeNoFile,
+					Explain: "cannot read file",
+				},
 			})
 
 			return err
@@ -143,15 +164,18 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) error {
 
 		fileName := filepath.Base(fh.Filename)
 
-		fileResult, err := h.filesGateway.SaveFile(req.Context(), f, &model.SaveFileParams{
+		fileResult, err := h.filesGateway.SaveFile(req.Context(), f, &messages.SaveFileParams{
 			UserID: user.ID,
 			Name:   fileName,
 		})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			json.NewEncoder(w).Encode(server.ServerResponse{
 				Status: "error",
-				Description: "cannot save file",
+				Error: &server.ErrorCode{
+					Code: messages.CodeSaveFileFailed,
+					Explain: "cannot save file",
+				},
 			})
 
 			return err
@@ -160,7 +184,7 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) error {
 		fileID = fileResult.ID
 	}
 
-	message := &model.Message{
+	message := &messages.Message{
 		Text: text,
 		FileID: fileID,
 		ThreadID: threadID,
@@ -171,13 +195,16 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) error {
 	return h.saveMessage(w, req, message)
 }
 
-func (h *Handler) saveMessage(w http.ResponseWriter, req *http.Request, message *model.Message) error {
+func (h *Handler) saveMessage(w http.ResponseWriter, req *http.Request, message *messages.Message) error {
 	resp, err := h.controller.SaveMessage(req.Context(), message)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "failed to save message",
+			Error: &server.ErrorCode{
+				Code: messages.CodeSaveFailed,
+				Explain: "failed to save message",
+			},
 		})
 
 		return err
@@ -193,19 +220,24 @@ func (h *Handler) saveMessage(w http.ResponseWriter, req *http.Request, message 
 		if err != nil {
 			logger.Errorw("failed to read file for a message", "user_id", message.UserID, "file_id", message.FileID, "message_id", resp.ID)
 		} else {
-			message.File = &filesmodel.File{
+			message.File = &files.File{
 				Name: fileRes.Name,
 				ID: message.FileID,
 			}
 		}
 	}
 
-	json.NewEncoder(w).Encode(model.NewMessageServerResponse{
-		ServerResponse: servermodel.ServerResponse{
-			Status: "ok",
-			Description: "accepted",
-		},
-		Message: message,
+	response, err := json.Marshal(messages.SaveResponse{
+		Message:   message,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return err
+	}
+
+	json.NewEncoder(w).Encode(server.ServerResponse{
+		Status: "ok",
+		Response: json.RawMessage(response),
 	})
 
 	return nil

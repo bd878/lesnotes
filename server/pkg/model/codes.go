@@ -10,4 +10,7 @@ var (
 	CodeNoID               int = 17
 	CodeTokenExpired       int = 18
 	CodeWrongToken         int = 19
+	CodeNoBody             int = 20
+	CodeWrongQuery         int = 21
+	CodeStatusFailed       int = 22
 )
