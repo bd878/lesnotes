@@ -10,8 +10,8 @@ import (
 
 	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/utils"
-	"github.com/bd878/gallery/server/files/pkg/model"
-	servermodel "github.com/bd878/gallery/server/pkg/model"
+	files "github.com/bd878/gallery/server/files/pkg/model"
+	server "github.com/bd878/gallery/server/pkg/model"
 )
 
 func (h *Handler) DownloadFile(w http.ResponseWriter, req *http.Request) error {
@@ -24,9 +24,12 @@ func (h *Handler) DownloadFile(w http.ResponseWriter, req *http.Request) error {
 		fileid, err := strconv.Atoi(values.Get("id"))
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			json.NewEncoder(w).Encode(server.ServerResponse{
 				Status: "error",
-				Description: "id is empty",
+				Error: &server.ErrorCode{
+					Code: server.CodeNoID,
+					Explain: "id is empty",
+				},
 			})
 			return err
 		}
@@ -36,19 +39,25 @@ func (h *Handler) DownloadFile(w http.ResponseWriter, req *http.Request) error {
 	user, ok := utils.GetUser(w, req)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "user required",
+			Error: &server.ErrorCode{
+				Code: server.CodeNoUser,
+				Explain: "user required",
+			},
 		})
 		return errors.New("user required")
 	}
 
-	file, stream, err := h.controller.ReadFileStream(req.Context(), &model.ReadFileStreamParams{FileID: fileID, UserID: user.ID})
+	file, stream, err := h.controller.ReadFileStream(req.Context(), &files.ReadFileStreamParams{FileID: fileID, UserID: user.ID})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
-			Description: "failed to read file",
+			Error: &server.ErrorCode{
+				Code: files.CodeReadFailed,
+				Explain: "failed to read file",
+			},
 		})
 		return err
 	}
@@ -61,9 +70,12 @@ func (h *Handler) DownloadFile(w http.ResponseWriter, req *http.Request) error {
 	_, err = io.Copy(w, stream)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
-			Description: "failed to write file to response",
+			Error: &server.ErrorCode{
+				Code: files.CodeWriteFailed,
+				Explain: "failed to write file to response",
+			},
 		})
 		return err
 	}

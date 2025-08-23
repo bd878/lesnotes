@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"encoding/json"
 
-	servermodel "github.com/bd878/gallery/server/pkg/model"
+	server "github.com/bd878/gallery/server/pkg/model"
 )
 
 func (h *Handler) UploadFileV2(w http.ResponseWriter, req *http.Request) (err error) {
@@ -16,9 +16,12 @@ func (h *Handler) UploadFileV2(w http.ResponseWriter, req *http.Request) (err er
 		public, err = strconv.Atoi(values.Get("public"))
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(servermodel.ServerResponse{
+			json.NewEncoder(w).Encode(server.ServerResponse{
 				Status: "error",
-				Description: fmt.Sprintf("wrong \"%s\" query param", "public"),
+				Error: &server.ErrorCode{
+					Code: server.CodeWrongFormat,
+					Explain: fmt.Sprintf("wrong \"%s\" query param", "public"),
+				},
 			})
 
 			return err
