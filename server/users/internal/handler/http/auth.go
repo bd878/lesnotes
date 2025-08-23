@@ -6,17 +6,20 @@ import (
 	"encoding/json"
 
 	"github.com/bd878/gallery/server/users/internal/controller"
-	"github.com/bd878/gallery/server/users/pkg/model"
-	servermodel "github.com/bd878/gallery/server/pkg/model"
+	users "github.com/bd878/gallery/server/users/pkg/model"
+	server "github.com/bd878/gallery/server/pkg/model"
 )
 
 func (h *Handler) Auth(w http.ResponseWriter, req *http.Request) error {
 	cookie, err := req.Cookie("token")
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
-			Description: "no token",
+			Error: &server.ErrorCode{
+				Code: server.CodeNoToken,
+				Explain: "no token",
+			},
 		})
 
 		return err
@@ -37,38 +40,41 @@ func (h *Handler) Auth(w http.ResponseWriter, req *http.Request) error {
 			HttpOnly:       true,
 		})
 
-		json.NewEncoder(w).Encode(model.ServerAuthorizeResponse{
-			ServerResponse: servermodel.ServerResponse{
-				Status:      "error",
-				Description: "token expired",
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status: "error",
+			Error: &server.ErrorCode{
+				Code: server.CodeTokenExpired,
+				Explain: "token expired",
 			},
-			Expired: true,
 		})
 
 		return err
 	}
 
 	if err != nil {
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
-			Description: "user not found",
+			Error: &server.ErrorCode{
+				Code: server.CodeNoUser,
+				Explain: "user not found",
+			},
 		})
 
 		return err
 	}
 
-	json.NewEncoder(w).Encode(model.ServerAuthorizeResponse{
-		ServerResponse: servermodel.ServerResponse{
-			Status:      "ok",
-			Description: "token valid",
-		},
+	response, err := json.Marshal(users.AuthResponse{
 		Expired: false,
-		User: model.User{
-			ID:               user.ID,
-			Login:            user.Login,
-			Token:            user.Token,
-			ExpiresUTCNano:   user.ExpiresUTCNano,
-		},
+		User: user,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return err
+	}
+
+	json.NewEncoder(w).Encode(server.ServerResponse{
+		Status: "ok",
+		Response: json.RawMessage(response),
 	})
 
 	return nil

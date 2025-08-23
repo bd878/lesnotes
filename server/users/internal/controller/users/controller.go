@@ -2,14 +2,12 @@ package users
 
 import (
 	"time"
-	"errors"
 	"context"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/bd878/gallery/server/users/pkg/model"
 	"github.com/bd878/gallery/server/users/internal/controller"
-	"github.com/bd878/gallery/server/users/internal/repository"
-	sessionsmodel "github.com/bd878/gallery/server/sessions/pkg/model"
+	sessions "github.com/bd878/gallery/server/sessions/pkg/model"
 )
 
 type Repository interface {
@@ -19,10 +17,10 @@ type Repository interface {
 }
 
 type SessionsGateway interface {
-	GetSession(ctx context.Context, token string) (session *sessionsmodel.Session, err error)
-	ListUserSessions(ctx context.Context, userID int64) (sessions []*sessionsmodel.Session, err error)
+	GetSession(ctx context.Context, token string) (session *sessions.Session, err error)
+	ListUserSessions(ctx context.Context, userID int64) (sessions []*sessions.Session, err error)
 	RemoveAllUserSessions(ctx context.Context, userID int64) (err error)
-	CreateSession(ctx context.Context, userID int64) (session *sessionsmodel.Session, err error)
+	CreateSession(ctx context.Context, userID int64) (session *sessions.Session, err error)
 	RemoveSession(ctx context.Context, token string) (err error)
 }
 
@@ -41,8 +39,6 @@ func New(repo Repository, messages MessagesGateway, sessions SessionsGateway) *C
 }
 
 func (c *Controller) CreateUser(ctx context.Context, id int64, login, password string) (user *model.User, err error) {
-	// TODO: verify password
-
 	hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
@@ -82,9 +78,7 @@ func (c *Controller) DeleteUser(ctx context.Context, userID int64) (err error) {
 
 	err = c.repo.Delete(ctx, userID)
 	if err != nil {
-		if errors.Is(repository.ErrNoRows, err) {
-			return controller.ErrUserNotFound
-		}
+		return controller.ErrUserNotFound
 	}
 	return
 }
@@ -107,22 +101,15 @@ func (c *Controller) FindUser(ctx context.Context, id int64, login, token string
 	}
 
 	if err != nil {
-		if errors.Is(err, repository.ErrNoRows) {
-			return nil, controller.ErrUserNotFound
-		} else {
-			return nil, err
-		}
+		return nil, err
 	}
 
 	return
 }
 
-func (c *Controller) LoginUser(ctx context.Context, login, hashedPassword string) (session *sessionsmodel.Session, err error) {
+func (c *Controller) LoginUser(ctx context.Context, login, hashedPassword string) (session *sessions.Session, err error) {
 	user, err := c.repo.Find(ctx, 0, login)
 	if err != nil {
-		if errors.Is(err, repository.ErrNoRows) {
-			return nil, controller.ErrUserNotFound
-		}
 		return nil, err
 	}
 
@@ -148,11 +135,7 @@ func (c *Controller) AuthUser(ctx context.Context, token string) (user *model.Us
 
 	user, err = c.repo.Find(ctx, int64(session.UserID), "")
 	if err != nil {
-		if errors.Is(err, repository.ErrNoRows) {
-			return nil, controller.ErrUserNotFound
-		}
-
-		return
+		return nil, controller.ErrUserNotFound
 	}
 
 	user.Token = session.Token
@@ -163,7 +146,7 @@ func (c *Controller) AuthUser(ctx context.Context, token string) (user *model.Us
 
 func (c *Controller) GetUser(ctx context.Context, id int64) (user *model.User, err error) {
 	user, err = c.repo.Find(ctx, id, "")
-	if errors.Is(err, repository.ErrNoRows) {
+	if err != nil {
 		return nil, controller.ErrUserNotFound
 	}
 	return

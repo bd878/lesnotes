@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"encoding/json"
 
-	"github.com/bd878/gallery/server/pkg/model"
 	"github.com/bd878/gallery/server/logger"
-	usersmodel "github.com/bd878/gallery/server/users/pkg/model"
-	sessionsmodel "github.com/bd878/gallery/server/sessions/pkg/model"
+	server "github.com/bd878/gallery/server/pkg/model"
+	users "github.com/bd878/gallery/server/users/pkg/model"
+	sessions "github.com/bd878/gallery/server/sessions/pkg/model"
 )
 
 var (
@@ -22,11 +22,11 @@ var (
 type UserContextKey struct {}
 
 type UsersGateway interface {
-	GetUser(ctx context.Context, userID int64) (*usersmodel.User, error)
+	GetUser(ctx context.Context, userID int64) (*users.User, error)
 }
 
 type SessionsGateway interface {
-	GetSession(ctx context.Context, token string) (*sessionsmodel.Session, error)
+	GetSession(ctx context.Context, token string) (*sessions.Session, error)
 }
 
 type authBuilder struct {
@@ -45,7 +45,7 @@ func AuthBuilder(log *logger.Logger, users UsersGateway, sessions SessionsGatewa
 
 func (b *authBuilder) Handle(w http.ResponseWriter, req *http.Request) (err error) {
 	var (
-		user   *usersmodel.User
+		user   *users.User
 		cookie *http.Cookie
 	)
 
@@ -56,21 +56,25 @@ func (b *authBuilder) Handle(w http.ResponseWriter, req *http.Request) (err erro
 	case nil:
 		user, err = b.restoreAuthorizedUser(req, cookie)
 	default:
-		b.log.Errorw("bad cookie", "cookie", cookie, "error", err)
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(model.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "bad cookie",
+			Error: &server.ErrorCode{
+				Code: server.CodeWrongToken,
+				Explain: "bad cookie",
+			},
 		})
 
 		return
 	}
 
 	if err != nil {
-		b.log.Errorw("auth middleware failed to restore user, error occured, exit", "error", err)
-		json.NewEncoder(w).Encode(model.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "token not found",
+			Error: &server.ErrorCode{
+				Code: server.CodeNoToken,
+				Explain: "token not found",
+			},
 		})
 		return
 	}
@@ -80,7 +84,7 @@ func (b *authBuilder) Handle(w http.ResponseWriter, req *http.Request) (err erro
 	return b.next.Handle(w, req)
 }
 
-func (b *authBuilder) restorePublicUser(req *http.Request) (user *usersmodel.User, err error) {
+func (b *authBuilder) restorePublicUser(req *http.Request) (user *users.User, err error) {
 	if b.publicUserID == 0 {
 		return nil, ErrNoPublicID
 	}
@@ -90,7 +94,7 @@ func (b *authBuilder) restorePublicUser(req *http.Request) (user *usersmodel.Use
 	return user, nil
 }
 
-func (b *authBuilder) restoreAuthorizedUser(req *http.Request, cookie *http.Cookie) (user *usersmodel.User, err error) {
+func (b *authBuilder) restoreAuthorizedUser(req *http.Request, cookie *http.Cookie) (user *users.User, err error) {
 	if cookie == nil {
 		return nil, ErrEmptyToken
 	}

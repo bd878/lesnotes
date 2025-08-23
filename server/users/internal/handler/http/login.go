@@ -7,46 +7,77 @@ import (
 	"encoding/json"
 
 	"github.com/bd878/gallery/server/users/internal/controller"
-	servermodel "github.com/bd878/gallery/server/pkg/model"
+	users "github.com/bd878/gallery/server/users/pkg/model"
+	server "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) Login(w http.ResponseWriter, req *http.Request) error {
-	login, ok := getTextField(w, req, "login")
-	if !ok {
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status:      "error",
-			Description: "no login",
+func (h *Handler) Login(w http.ResponseWriter, req *http.Request) (err error) {
+	var login, password string
+
+	err = req.ParseMultipartForm(1024 /* 1 KB */)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status: "error",
+			Error: &server.ErrorCode{
+				Code:  server.CodeNoForm,
+				Explain: "failed to parse form",
+			},
 		})
 
-		return errors.New("no login field")
+		return
 	}
 
-	password, ok := getTextField(w, req, "password")
-	if !ok {
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status:      "error",
-			Description: "no password",
+	login, password = req.PostFormValue("login"), req.PostFormValue("password")
+
+	if login == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status: "error",
+			Error: &server.ErrorCode{
+				Code:  users.CodeNoLogin,
+				Explain: "login required",
+			},
 		})
 
-		return errors.New("no password field")
+		return errors.New("login required")
+	}
+
+	if password == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status: "error",
+			Error: &server.ErrorCode{
+				Code:  users.CodeNoPassword,
+				Explain: "password required",
+			},
+		})
+
+		return errors.New("password required")
 	}
 
 	session, err := h.controller.LoginUser(req.Context(), login, password)
 	switch err {
 	case controller.ErrUserNotFound:
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
-			Description: "no user,password pair",
+			Error: &server.ErrorCode{
+				Code:     users.CodeAuthFailed,
+				Explain: "no user,password pair",
+			},
 		})
 
 		return err
 
 	case controller.ErrWrongPassword:
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
-			Description: "wrong password",
+			Error: &server.ErrorCode{
+				Code: server.CodeWrongPassword,
+				Explain: "wrong password",
+			},
 		})
 
 		return err
@@ -64,17 +95,29 @@ func (h *Handler) Login(w http.ResponseWriter, req *http.Request) error {
 
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
-			Description: "cannot get user",
+			Error: &server.ErrorCode{
+				Code:    server.CodeNoUser,
+				Explain: "cannot get user",
+			},
 		})
 
 		return err
 	}
 
-	json.NewEncoder(w).Encode(servermodel.ServerResponse{
-		Status:      "ok",
-		Description: "authenticated",
+	response, err := json.Marshal(users.LoginResponse{
+		Token:          session.Token,
+		ExpiresUTCNano: session.ExpiresUTCNano,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return err
+	}
+
+	json.NewEncoder(w).Encode(server.ServerResponse{
+		Status:       "ok",
+		Response:     json.RawMessage(response),
 	})
 
 	return nil

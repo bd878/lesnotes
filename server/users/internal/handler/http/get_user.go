@@ -6,17 +6,20 @@ import (
 	"errors"
 	"encoding/json"
 
-	"github.com/bd878/gallery/server/users/pkg/model"
-	servermodel "github.com/bd878/gallery/server/pkg/model"
+	users "github.com/bd878/gallery/server/users/pkg/model"
+	server "github.com/bd878/gallery/server/pkg/model"
 )
 
 func (h *Handler) GetUser(w http.ResponseWriter, req *http.Request) error {
 	values := req.URL.Query()
 	if values.Get("id") == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
-			Description: "empty user id",
+			Error: &server.ErrorCode{
+				Code: server.CodeNoID,
+				Explain: "empty user id",
+			},
 		})
 
 		return errors.New("empty user id")
@@ -25,9 +28,12 @@ func (h *Handler) GetUser(w http.ResponseWriter, req *http.Request) error {
 	id, err := strconv.Atoi(values.Get("id"))
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
-			Description: "invalid id",
+			Error: &server.ErrorCode{
+				Code: server.CodeWrongFormat,
+				Explain: "invalid id",
+			},
 		})
 
 		return err
@@ -36,23 +42,28 @@ func (h *Handler) GetUser(w http.ResponseWriter, req *http.Request) error {
 	user, err := h.controller.GetUser(req.Context(), int64(id))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
-			Description: "cannot find user",
+			Error: &server.ErrorCode{
+				Code: server.CodeNoUser,
+				Explain: "cannot find user",
+			},
 		})
 
 		return err
 	}
 
-	json.NewEncoder(w).Encode(model.ServerUserResponse{
-		ServerResponse: servermodel.ServerResponse{
-			Status:      "ok",
-			Description: "exists",
-		},
-		User: model.User{
-			ID:    user.ID,
-			Login: user.Login,
-		},
+	response, err := json.Marshal(users.GetUserResponse{
+		User: user,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return err
+	}
+
+	json.NewEncoder(w).Encode(server.ServerResponse{
+		Status:   "ok",
+		Response: json.RawMessage(response),
 	})
 
 	return nil

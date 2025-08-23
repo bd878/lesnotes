@@ -1,7 +1,5 @@
 package model
 
-import "github.com/bd878/gallery/server/pkg/model"
-
 const (
 	PublicUserID int64 = 9_999_999
 )
@@ -15,48 +13,48 @@ type (
 		ExpiresUTCNano   int64            `json:"expires_utc_nano,omitempty"` // TODO: ExpiresAt
 	}
 
-	LoginUserJsonRequest struct {
-		Login            string           `json:"login"`
-		Password         string           `json:"password"`
-	}
-
-	SignupUserJsonRequest struct {
-		Login            string           `json:"login"`
-		Password         string           `json:"password"`
-	}
-
-	DeleteUserJsonRequest struct {
-		Token            string           `json:"token"`
-		Login            string           `json:"login"`
-		Password         string           `json:"password"`
-	}
-
-	DeleteUserJsonServerResponse struct {
-		model.ServerResponse
-		Expired          bool             `json:"expired,omitempty"`
-	}
-
-	ServerAuthorizeResponse struct {
-		model.ServerResponse
-		Expired          bool             `json:"expired"`
-		User             User             `json:"user"`
-	}
-
-	ServerUserResponse struct {
-		model.ServerResponse
-		User             User             `json:"user"`
-	}
-
-	SignupJsonUserServerResponse struct {
-		model.ServerResponse
+	SignupResponse struct {
+		Description      string           `json:"description"`
 		ID               int64            `json:"id"`
 		Token            string           `json:"token"`
 		ExpiresUTCNano   int64            `json:"expires_utc_nano"`
 	}
 
-	LoginJsonUserServerResponse struct {
-		model.ServerResponse
+	SignupRequest struct {
+		Login            string           `json:"login"`
+		Password         string           `json:"password"`
+	}
+
+	LogoutResponse struct {
+		Description      string           `json:"description"`
+	}
+
+	LoginRequest struct {
+		Login            string           `json:"login"`
+		Password         string           `json:"password"`
+	}
+
+	LoginResponse struct {
 		Token            string           `json:"token"`
 		ExpiresUTCNano   int64            `json:"expires_utc_nano"`
+	}
+
+	GetUserResponse struct {
+		User             *User            `json:"user,omitempty"`
+	}
+
+	DeleteUserRequest struct {
+		Token            string           `json:"token"`
+		Login            string           `json:"login"`
+		Password         string           `json:"password"`
+	}
+
+	DeleteUserResponse struct {
+		Description      string           `json:"description"`
+	}
+
+	AuthResponse struct {
+		Expired          bool             `json:"expired"`
+		User             *User            `json:"user.omitempty"`
 	}
 )

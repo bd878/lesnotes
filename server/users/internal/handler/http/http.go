@@ -5,20 +5,18 @@ import (
 	"time"
 	"io"
 	"context"
-	"encoding/json"
 
-	"github.com/bd878/gallery/server/users/pkg/model"
-	servermodel "github.com/bd878/gallery/server/pkg/model"
-	sessionsmodel "github.com/bd878/gallery/server/sessions/pkg/model"
 	"github.com/bd878/gallery/server/utils"
+	users "github.com/bd878/gallery/server/users/pkg/model"
+	sessions "github.com/bd878/gallery/server/sessions/pkg/model"
 )
 
 type Controller interface {
-	CreateUser(ctx context.Context, id int64, login, password string) (user *model.User, err error)
-	FindUser(ctx context.Context, id int64, login, token string) (user *model.User, err error)
-	AuthUser(ctx context.Context, token string) (user *model.User, err error)
-	GetUser(ctx context.Context, userID int64) (user *model.User, err error)
-	LoginUser(ctx context.Context, login, hashedPassword string) (session *sessionsmodel.Session, err error)
+	CreateUser(ctx context.Context, id int64, login, password string) (user *users.User, err error)
+	FindUser(ctx context.Context, id int64, login, token string) (user *users.User, err error)
+	AuthUser(ctx context.Context, token string) (user *users.User, err error)
+	GetUser(ctx context.Context, userID int64) (user *users.User, err error)
+	LoginUser(ctx context.Context, login, hashedPassword string) (session *sessions.Session, err error)
 	DeleteUser(ctx context.Context, userID int64) (err error)
 	LogoutUser(ctx context.Context, token string) (err error)
 }
@@ -43,20 +41,6 @@ func (h *Handler) Status(w http.ResponseWriter, _ *http.Request) error {
 	}
 
 	return nil
-}
-
-func getTextField(w http.ResponseWriter, req *http.Request, field string) (value string, ok bool) {
-	value = req.PostFormValue(field)
-	if value == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "no " + field,
-		})
-	} else {
-		ok = true
-	}
-	return
 }
 
 func createToken(w http.ResponseWriter, cookieDomain string) (token string, expires int64) {

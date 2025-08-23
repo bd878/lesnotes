@@ -2,13 +2,22 @@ package model
 
 import "encoding/json"
 
-type ServerResponse struct {
-	Status              string        `json:"status"`
-	Code                string        `json:"code,omitempty"`
-	Description         string        `json:"description,omitempty"`
-}
+type (
+	ErrorCode struct {
+		Code                int              `json:"code"`
+		Explain             string           `json:"explain"`
+	}
 
-type JSONServerRequest struct {
-	Token               string          `json:"token"`
-	Req                 json.RawMessage `json:"req"`
-}
+	ServerResponse struct {
+		Status              string           `json:"status"`
+		Error               *ErrorCode       `json:"error,omitempty"`
+		Response            json.RawMessage  `json:"response,omitempty"`
+		Data                json.RawMessage  `json:"data,omitempty"`
+	}
+
+	ServerRequest struct {
+		Token               string           `json:"token"`
+		Request             json.RawMessage  `json:"req"`
+	}
+)
+
