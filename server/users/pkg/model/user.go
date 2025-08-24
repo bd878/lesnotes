@@ -39,8 +39,9 @@ type (
 		ExpiresUTCNano   int64            `json:"expires_utc_nano"`
 	}
 
-	GetUserResponse struct {
-		User             *User            `json:"user,omitempty"`
+	GetMeResponse struct {
+		ID               int64            `json:"id"`
+		Login            string           `json:"login"`
 	}
 
 	DeleteUserRequest struct {

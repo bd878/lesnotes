@@ -5,13 +5,17 @@ info:
     This API allows authenticating requests.
   version: 1.0.0
 paths:
-  /users/v1/get:
+  /users/v1/me:
     parameters:
-      - $ref: '#/components/parameters/userId'
+      - in: header
+        name: Cookie
+        schema:
+          type: string
+          example: token=AAAAAA
     get:
-      summary: Get user data
+      summary: Get this user's data
       description: |
-        Returns given user's metadata info
+        Returns authorized user's data
       operationId: getMe
       responses:
         "200":
@@ -19,13 +23,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/user'
+                $ref: '#/components/schemas/getMeOk'
         "4XX":
           description: error
           content:
             application:
               schema:
-                $ref: '#/components/schemas/getUserErr'
+                $ref: '#/components/schemas/getMeErr'
 
   /users/v1/auth:
     parameters:
@@ -408,14 +412,18 @@ components:
           type: string
           default: "no password"
 
-    getUserErr:
+    getMeErr:
       type: object
       status:
         type: string
         default: "error"
-      description:
-        type: string
-        default: ""
+      error:
+        type: object
+        properties:
+          code:
+            type: integer
+          explain:
+            type: string
 
     signupOkJson:
       type: object
@@ -470,6 +478,19 @@ components:
         default: false
       user:
         $ref: '#/components/schemas/user'
+
+    getMeOk:
+      type: object
+      status:
+        type: string
+        default: "ok"
+      response:
+        type: object
+        properties:
+          id:
+            type: integer
+          login:
+            type: string
 
     user:
       type: object
