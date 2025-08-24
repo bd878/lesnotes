@@ -44,18 +44,15 @@ type (
 		Login            string           `json:"login"`
 	}
 
-	DeleteUserRequest struct {
-		Token            string           `json:"token"`
+	DeleteMeRequest struct {
 		Login            string           `json:"login"`
-		Password         string           `json:"password"`
 	}
 
-	DeleteUserResponse struct {
+	DeleteMeResponse struct {
 		Description      string           `json:"description"`
 	}
 
 	AuthResponse struct {
 		Expired          bool             `json:"expired"`
-		User             *User            `json:"user.omitempty"`
 	}
 )

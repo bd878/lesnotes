@@ -10,7 +10,7 @@ import (
 	server "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) AuthJsonAPI(w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) AuthJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
 	data, err := io.ReadAll(req.Body)
 	defer req.Body.Close()
 	if err != nil {
@@ -40,7 +40,7 @@ func (h *Handler) AuthJsonAPI(w http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
-	user, err := h.controller.AuthUser(req.Context(), request.Token)
+	_, err = h.controller.AuthUser(req.Context(), request.Token)
 	if err == controller.ErrTokenExpired {
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -51,7 +51,7 @@ func (h *Handler) AuthJsonAPI(w http.ResponseWriter, req *http.Request) error {
 			},
 		})
 
-		return err
+		return
 	}
 
 	if err != nil {
@@ -63,12 +63,11 @@ func (h *Handler) AuthJsonAPI(w http.ResponseWriter, req *http.Request) error {
 			},
 		})
 
-		return err
+		return
 	}
 
 	response, err := json.Marshal(users.AuthResponse{
 		Expired: false,
-		User: user,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

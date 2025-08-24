@@ -27,7 +27,7 @@ func (h *Handler) DeleteJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 		return err
 	}
 
-	var request users.DeleteUserRequest
+	var request users.DeleteMeRequest
 	if err = json.Unmarshal(data, &request); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -41,18 +41,6 @@ func (h *Handler) DeleteJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 		return err
 	}
 
-	if request.Token == "" {
-		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status: "error",
-			Error: &server.ErrorCode{
-				Code: server.CodeNoToken,
-				Explain: "no token",
-			},
-		})
-
-		return errors.New("cannot get token from request")
-	}
-
 	if request.Login == "" {
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
@@ -63,18 +51,6 @@ func (h *Handler) DeleteJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 		})
 
 		return errors.New("cannot get login from request")
-	}
-
-	if request.Password == "" {
-		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status: "error",
-			Error: &server.ErrorCode{
-				Code: users.CodeNoPassword,
-				Explain: "no password",
-			},
-		})
-
-		return errors.New("cannot get password from request")
 	}
 
 	user, ok := utils.GetUser(w, req)
@@ -105,7 +81,7 @@ func (h *Handler) DeleteJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 		return err
 	}
 
-	response, err := json.Marshal(users.DeleteUserResponse{
+	response, err := json.Marshal(users.DeleteMeResponse{
 		Description: "deleted",
 	})
 	if err != nil {

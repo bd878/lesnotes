@@ -10,7 +10,7 @@ import (
 	server "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) Auth(w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) Auth(w http.ResponseWriter, req *http.Request) (err error) {
 	cookie, err := req.Cookie("token")
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -27,7 +27,7 @@ func (h *Handler) Auth(w http.ResponseWriter, req *http.Request) error {
 
 	token := cookie.Value
 
-	user, err := h.controller.AuthUser(req.Context(), token)
+	_, err = h.controller.AuthUser(req.Context(), token)
 	if err == controller.ErrTokenExpired {
 		w.WriteHeader(http.StatusUnauthorized)
 
@@ -48,7 +48,7 @@ func (h *Handler) Auth(w http.ResponseWriter, req *http.Request) error {
 			},
 		})
 
-		return err
+		return
 	}
 
 	if err != nil {
@@ -60,12 +60,11 @@ func (h *Handler) Auth(w http.ResponseWriter, req *http.Request) error {
 			},
 		})
 
-		return err
+		return
 	}
 
 	response, err := json.Marshal(users.AuthResponse{
 		Expired: false,
-		User: user,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
