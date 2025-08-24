@@ -3,10 +3,10 @@
 # Signs user up via json api
 
 stage=${STAGE:-"stage."}
-name=${NAME:?"Usage: env NAME= PASSWORD= ./signup.sh"}
-password=${PASSWORD:?"Usage: env NAME= PASSWORD= ./signup.sh"}
+login=${LOGIN:?"Usage: env LOGIN= PASSWORD= ./signup_json.sh"}
+password=${PASSWORD:?"Usage: env LOGIN= PASSWORD= ./signup_json.sh"}
 
-json=$(echo -n '{\"name\":\"%NAME%\",\"password\":\"%PASSWORD\"}' | sed -e "s/%NAME%/$name/g" -e "s/%PASSWORD%/$password/g")
+json=$(echo -n '{\"login\":\"%LOGIN%\",\"password\":\"%PASSWORD%\"}' | sed -e "s/%LOGIN%/$login/g" -e "s/%PASSWORD%/$password/g")
 
 cmd=`cat <<HERE
 sed -e "s/%STAGE%/$stage/g" \

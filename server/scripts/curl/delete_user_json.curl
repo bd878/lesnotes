@@ -1,0 +1,3 @@
+url = https://%STAGE%lesnotes.space/users/v2/delete
+-H "Content-Type: application/json"
+--data-binary %JSON%

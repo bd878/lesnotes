@@ -3,7 +3,6 @@ package http
 import (
 	"net/http"
 	"io"
-	"errors"
 	"encoding/json"
 
 	"github.com/bd878/gallery/server/utils"
@@ -29,21 +28,21 @@ func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 		return
 	}
 
-	var body users.SignupRequest
-	if err = json.Unmarshal(data, &body); err != nil {
+	var request users.SignupRequest
+	if err = json.Unmarshal(data, &request); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{	
 			Status: "error",
 			Error:   &server.ErrorCode {
 				Code:     server.CodeWrongFormat,
-				Explain: "failed to parse signup body",
+				Explain: "failed to parse signup request",
 			},
 		})
 
 		return
 	}
 
-	if body.Login == "" {
+	if request.Login == "" {
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:   &server.ErrorCode{
@@ -52,10 +51,10 @@ func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 			},
 		})
 
-		return errors.New("cannot get user login from request")
+		return
 	}
 
-	if body.Password == "" {
+	if request.Password == "" {
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:   &server.ErrorCode{
@@ -64,10 +63,10 @@ func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 			},
 		})
 
-		return errors.New("cannot get password from request")
+		return
 	}
 
-	eightOrMore, twoLetters, oneNumber, oneSpecial := verifyPassword(body.Password)
+	eightOrMore, twoLetters, oneNumber, oneSpecial := verifyPassword(request.Password)
 	if !eightOrMore {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -77,7 +76,7 @@ func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 				Explain: "password is less than 8 symbols",
 			},
 		})
-		return errors.New("password must have > 8 symbols")
+		return
 	}
 	if !twoLetters {
 		w.WriteHeader(http.StatusBadRequest)
@@ -88,7 +87,7 @@ func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 				Explain: "password must have upper und lower letter",
 			},
 		})
-		return errors.New("upper and lower letters required")
+		return
 	}
 	if !oneNumber {
 		w.WriteHeader(http.StatusBadRequest)
@@ -99,7 +98,7 @@ func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 				Explain: "password must have at least one number",
 			},
 		})
-		return errors.New("password must have at least one number")
+		return
 	}
 	if !oneSpecial {
 		w.WriteHeader(http.StatusBadRequest)
@@ -110,12 +109,12 @@ func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 				Explain: "password must have at least one special symbol",
 			},
 		})
-		return errors.New("password must have at least one special symbol")
+		return
 	}
 
 	id := utils.RandomID()
 
-	user, err := h.controller.CreateUser(req.Context(), int64(id), body.Login, body.Password)
+	user, err := h.controller.CreateUser(req.Context(), int64(id), request.Login, request.Password)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

@@ -3,7 +3,6 @@ package http
 import (
 	"time"
 	"net/http"
-	"errors"
 	"encoding/json"
 	"unicode"
 
@@ -71,7 +70,7 @@ func (h *Handler) Signup( w http.ResponseWriter, req *http.Request) (err error) 
 			},
 		})
 
-		return errors.New("login required")
+		return
 	}
 
 	if password == "" {
@@ -84,7 +83,7 @@ func (h *Handler) Signup( w http.ResponseWriter, req *http.Request) (err error) 
 			},
 		})
 
-		return errors.New("password required")
+		return
 	}
 
 	eightOrMore, twoLetters, oneNumber, oneSpecial := verifyPassword(password)
@@ -97,7 +96,7 @@ func (h *Handler) Signup( w http.ResponseWriter, req *http.Request) (err error) 
 				Explain: "password is less than 8 symbols",
 			},
 		})
-		return errors.New("password must have > 8 symbols")
+		return
 	}
 	if !twoLetters {
 		w.WriteHeader(http.StatusBadRequest)
@@ -108,7 +107,7 @@ func (h *Handler) Signup( w http.ResponseWriter, req *http.Request) (err error) 
 				Explain: "password must have upper und lower letter",
 			},
 		})
-		return errors.New("upper and lower letters required")
+		return
 	}
 	if !oneNumber {
 		w.WriteHeader(http.StatusBadRequest)
@@ -119,7 +118,7 @@ func (h *Handler) Signup( w http.ResponseWriter, req *http.Request) (err error) 
 				Explain: "password must have at least one number",
 			},
 		})
-		return errors.New("password must have at least one number")
+		return
 	}
 	if !oneSpecial {
 		w.WriteHeader(http.StatusBadRequest)
@@ -130,7 +129,7 @@ func (h *Handler) Signup( w http.ResponseWriter, req *http.Request) (err error) 
 				Explain: "password must have at least one special symbol",
 			},
 		})
-		return errors.New("password must have at least one special symbol")
+		return
 	}
 
 	eightOrMore = verifyLogin(login)
@@ -143,7 +142,7 @@ func (h *Handler) Signup( w http.ResponseWriter, req *http.Request) (err error) 
 				Explain: "login is less than 8 symbols",
 			},
 		})
-		return errors.New("login is less than 8 symbols")
+		return
 	}
 
 	id := utils.RandomID()
