@@ -3,12 +3,11 @@ package http
 import (
 	"net/http"
 	"strconv"
-	"fmt"
 	"path/filepath"
 	"encoding/json"
 
-	"github.com/bd878/gallery/server/utils"
 	"github.com/bd878/gallery/server/logger"
+	middleware "github.com/bd878/gallery/server/internal/middleware/http"
 	messages "github.com/bd878/gallery/server/messages/pkg/model"
 	files "github.com/bd878/gallery/server/files/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
@@ -17,7 +16,8 @@ import (
 
 func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) (err error) {
 	var (
-		fileID, threadID int64
+		threadID int64
+		fileIDs  []int64
 		private, hasFile bool
 	)
 
@@ -26,7 +26,7 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) (err err
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code: server.CodeNoForm,
+				Code:     server.CodeNoForm,
 				Explain: "failed to parse form",
 			},
 		})
@@ -34,68 +34,66 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) (err err
 		return err
 	}
 
-	user, ok := utils.GetUser(w, req)
+	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code: server.CodeNoUser,
+				Code:    server.CodeNoUser,
 				Explain: "user required",
 			},
 		})
 
-		return fmt.Errorf("no user")
+		return
 	}
 
 	text := req.PostFormValue("text")
 
-	if req.PostFormValue("file_id") != "" {
-		fileid, err := strconv.Atoi(req.PostFormValue("file_id"))
+	if req.PostFormValue("file_ids") != "" {
+		fileIDs = make([]int64, 0)
+
+		if err = json.Unmarshal([]byte(req.PostFormValue("file_ids")), &fileIDs); err != nil {		
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(server.ServerResponse{
+				Status: "error",
+				Error: &server.ErrorCode{
+					Code:    messages.CodeWrongFileID,
+					Explain: "invalid file_ids",
+				},
+			})
+
+			return
+		}
+	}
+
+	if req.PostFormValue("thread") != "" {
+		id, err := strconv.Atoi(req.PostFormValue("thread"))
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(server.ServerResponse{
 				Status: "error",
 				Error: &server.ErrorCode{
-					Code: messages.CodeWrongFileID,
-					Explain: "invalid file_id",
+					Code:    messages.CodeWrongThreadID,
+					Explain: "invalid thread",
 				},
 			})
 
 			return err
 		}
 
-		fileID = int64(fileid)
+		threadID = int64(id)
 	}
 
-	values := req.URL.Query()
-	if values.Get("thread_id") != "" {
-		threadid, err := strconv.Atoi(values.Get("thread_id"))
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(server.ServerResponse{
-				Status: "error",
-				Error: &server.ErrorCode{
-					Code: messages.CodeWrongThreadID,
-					Explain: "invalid thread id",
-				},
-			})
-
-			return err
-		}
-
-		threadID = int64(threadid)
-	}
-
-	if values.Has("public") {
-		public, err := strconv.Atoi(values.Get("public"))
+	if req.PostFormValue("public") != "" {
+		public, err := strconv.Atoi(req.PostFormValue("public"))
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(server.ServerResponse{
 				Status: "error",
 				Error:  &server.ErrorCode{
-					Code: messages.CodeWrongPublic,
-					Explain: "invalid public param",
+					Code:    messages.CodeWrongPublic,
+					Explain: "invalid public",
 				},
 			})
 
@@ -121,20 +119,20 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) (err err
 		hasFile = true
 	}
 
-	if fileID == 0 && !hasFile && text == "" {
+	if fileIDs == nil && !hasFile && text == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code: server.CodeWrongFormat,
+				Code:     server.CodeWrongFormat,
 				Explain: "text or file_id or file required",
 			},
 		})
 
-		return nil
+		return
 	}
 
-	if fileID != 0 && hasFile {
+	if fileIDs != nil && hasFile {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
@@ -147,6 +145,7 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) (err err
 		return nil
 	}
 
+	// TODO: move file saving logic in controller
 	if hasFile {
 		f, fh, err := req.FormFile("file")
 		if err != nil {
@@ -173,7 +172,7 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) (err err
 			json.NewEncoder(w).Encode(server.ServerResponse{
 				Status: "error",
 				Error: &server.ErrorCode{
-					Code: messages.CodeSaveFileFailed,
+					Code:    messages.CodeSaveFileFailed,
 					Explain: "cannot save file",
 				},
 			})
@@ -181,15 +180,15 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) (err err
 			return err
 		}
 
-		fileID = fileResult.ID
+		fileIDs = append(fileIDs, int64(fileResult.ID))
 	}
 
 	message := &messages.Message{
-		Text: text,
-		FileID: fileID,
+		Text:     text,
+		FileIDs:  fileIDs,
 		ThreadID: threadID,
-		UserID: user.ID,
-		Private: private,
+		UserID:   user.ID,
+		Private:  private,
 	}
 
 	return h.saveMessage(w, req, message)
@@ -215,19 +214,24 @@ func (h *Handler) saveMessage(w http.ResponseWriter, req *http.Request, message 
 	message.UpdateUTCNano = resp.UpdateUTCNano
 	message.CreateUTCNano = resp.CreateUTCNano
 
-	if message.FileID != 0 {
-		fileRes, err := h.filesGateway.ReadFile(req.Context(), message.UserID, message.FileID)
+	var list []*files.File
+	for _, id := range message.FileIDs {
+		file, err := h.filesGateway.ReadFile(req.Context(), message.UserID, id)
 		if err != nil {
-			logger.Errorw("failed to read file for a message", "user_id", message.UserID, "file_id", message.FileID, "message_id", resp.ID)
-		} else {
-			message.File = &files.File{
-				Name: fileRes.Name,
-				ID: message.FileID,
-			}
+			logger.Errorw("failed to read file for a message", "user_id", message.UserID, "file_id", id, "message_id", message.ID)
+			continue
 		}
-	}
 
-	response, err := json.Marshal(messages.SaveResponse{
+		list = append(list, &files.File{
+			Name: file.Name,
+			ID:   file.ID,
+		})
+	}
+	message.Files = list
+
+	// TODO: load a user to message by UserID
+
+	response, err := json.Marshal(messages.SendResponse{
 		Message:   message,
 	})
 	if err != nil {
@@ -236,7 +240,7 @@ func (h *Handler) saveMessage(w http.ResponseWriter, req *http.Request, message 
 	}
 
 	json.NewEncoder(w).Encode(server.ServerResponse{
-		Status: "ok",
+		Status:   "ok",
 		Response: json.RawMessage(response),
 	})
 

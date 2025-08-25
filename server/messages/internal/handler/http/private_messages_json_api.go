@@ -10,7 +10,7 @@ import (
 	server "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) UpdateMessageJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
+func (h *Handler) PrivateMessageOrMessagesJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
 	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
@@ -39,54 +39,32 @@ func (h *Handler) UpdateMessageJsonAPI(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	var request messages.UpdateRequest
+	var request messages.PrivateRequest
 	if err = json.Unmarshal(data, &request); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error: &server.ErrorCode{
-				Code:    server.CodeWrongFormat,
-				Explain: "failed to parse message",
+			Error:  &server.ErrorCode{
+				Code: server.CodeWrongFormat,
+				Explain: "failed to parse request",
 			},
 		})
 
 		return
 	}
 
-	if request.MessageID == 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status: "error",
-			Error: &server.ErrorCode{
-				Code:    server.CodeNoID,
-				Explain: "empty message id",
-			},
-		})
-
-		return nil
+	if request.IDs != nil {
+		return h.privateMessages(w, req, user, request.IDs)
 	}
 
-	var (
-		threadID int64
-		public   int
-		text     string
-	)
+	w.WriteHeader(http.StatusBadRequest)
+	json.NewEncoder(w).Encode(server.ServerResponse{
+		Status: "error",
+		Error:  &server.ErrorCode{
+			Code:  server.CodeWrongFormat,
+			Explain: "empty ids",
+		},
+	})
 
-	if request.ThreadID != nil {
-		threadID = *request.ThreadID
-	} else {
-		threadID = -1
-	}
-
-	if request.Public != nil {
-		public = *request.Public
-	} else {
-		public = -1
-	}
-
-	if request.Text != nil {
-		text = *request.Text
-	}
-
-	return h.updateMessage(req.Context(), w, request.MessageID, user, text, threadID, public)
+	return
 }

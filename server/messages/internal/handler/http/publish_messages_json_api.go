@@ -2,71 +2,69 @@ package http
 
 import (
 	"net/http"
-	"fmt"
 	"encoding/json"
 
-	"github.com/bd878/gallery/server/utils"
+	middleware "github.com/bd878/gallery/server/internal/middleware/http"
+	users "github.com/bd878/gallery/server/users/pkg/model"
 	messages "github.com/bd878/gallery/server/messages/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
 )
 
 func (h *Handler) PublishMessageOrMessagesJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
-	user, ok := utils.GetUser(w, req)
+	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    server.CodeNoUser,
 				Explain: "user required",
 			},
 		})
 
-		return fmt.Errorf("no user")
+		return
 	}
 
-	data, ok := utils.GetJsonRequestBody(w, req)
+	data, ok := req.Context().Value(middleware.RequestContextKey{}).(json.RawMessage)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:  &server.ErrorCode{
 				Code:    server.CodeNoBody,
-				Explain: "body data required",
+				Explain: "request required",
 			},
 		})
 
-		return fmt.Errorf("no req data")
+		return
 	}
 
 	var request messages.PublishRequest
-	if err := json.Unmarshal(data, &request); err != nil {
+	if err = json.Unmarshal(data, &request); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:  &server.ErrorCode{
 				Code:   server.CodeWrongFormat,
-				Explain: "failed to parse message",
+				Explain: "failed to parse request",
 			},
 		})
 
-		return err
+		return
 	}
 
-	if request.MessageID != nil {
-		return h.publishMessage(w, req, user, *request.MessageID)
-	} else if request.IDs != nil {
-		return h.publishMessages(w, req, user, *request.IDs)
-	} else {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status: "error",
-			Error: &server.ErrorCode{
-				Code: server.CodeNoID,
-				Explain: "empty message id or batch ids",
-			},
-		})
-
-		return fmt.Errorf("empty message id or batch ids")
+	if request.IDs != nil {
+		return h.publishMessages(w, req, user, request.IDs)
 	}
+
+	w.WriteHeader(http.StatusBadRequest)
+	json.NewEncoder(w).Encode(server.ServerResponse{
+		Status: "error",
+		Error: &server.ErrorCode{
+			Code: server.CodeNoID,
+			Explain: "empty ids",
+		},
+	})
+
+	return
 }

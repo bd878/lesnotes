@@ -2,43 +2,43 @@ package http
 
 import (
 	"net/http"
-	"fmt"
 	"encoding/json"
 
-	"github.com/bd878/gallery/server/utils"
+	middleware "github.com/bd878/gallery/server/internal/middleware/http"
+	users "github.com/bd878/gallery/server/users/pkg/model"
 	messages "github.com/bd878/gallery/server/messages/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) ReadMessageOrMessagesJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
+func (h *Handler) ReadMessagesJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
 	var public int
 
-	user, ok := utils.GetUser(w, req)
+	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    server.CodeNoUser,
 				Explain: "user required",
 			},
 		})
 
-		return fmt.Errorf("no user")
+		return
 	}
 
-	data, ok := utils.GetJsonRequestBody(w, req)
+	data, ok := req.Context().Value(middleware.RequestContextKey{}).(json.RawMessage)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:  &server.ErrorCode{
-				Code: server.CodeNoBody,
-				Explain: "body data required",
+				Code:    server.CodeNoBody,
+				Explain: "request required",
 			},
 		})
 
-		return fmt.Errorf("no req data")
+		return
 	}
 
 	var request messages.ReadRequest
