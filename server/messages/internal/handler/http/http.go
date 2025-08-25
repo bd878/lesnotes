@@ -1,19 +1,17 @@
 package http
 
 import (
-	"net/http"
 	"io"
 	"context"
-	"encoding/json"
+	"net/http"
 
 	messages "github.com/bd878/gallery/server/messages/pkg/model"
 	files "github.com/bd878/gallery/server/files/pkg/model"
-	server "github.com/bd878/gallery/server/pkg/model"
 )
 
 type Controller interface {
-	ReadOneMessage(ctx context.Context, params *messages.ReadOneMessageParams) (*messages.Message, error)
-	SaveMessage(ctx context.Context, message *messages.Message) (*messages.SaveMessageResult, error)
+	ReadOneMessage(ctx context.Context, id int64, userIDs []int64) (message *messages.Message, err error)
+	SaveMessage(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private bool) (message *messages.Message, err error)
 	UpdateMessage(ctx context.Context, params *messages.UpdateMessageParams) (*messages.UpdateMessageResult, error)
 	DeleteMessage(ctx context.Context, params *messages.DeleteMessageParams) (*messages.DeleteMessageResult, error)
 	DeleteMessages(ctx context.Context, params *messages.DeleteMessagesParams) (*messages.DeleteMessagesResult, error)
@@ -41,14 +39,6 @@ func New(controller Controller, filesGateway FilesGateway) *Handler {
 func (h *Handler) GetStatus(w http.ResponseWriter, _ *http.Request) error {
 	if _, err := io.WriteString(w, "ok\n"); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status: "error",
-			Error: &server.ErrorCode{
-				Code:    server.CodeStatusFailed,
-				Explain: "failed to get status",
-			},
-		})
-
 		return err
 	}
 

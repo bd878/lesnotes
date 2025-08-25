@@ -25,7 +25,7 @@ type MessagesClient interface {
 	PublishMessages(ctx context.Context, in *PublishMessagesRequest, opts ...grpc.CallOption) (*PublishMessagesResponse, error)
 	PrivateMessages(ctx context.Context, in *PrivateMessagesRequest, opts ...grpc.CallOption) (*PrivateMessagesResponse, error)
 	UpdateMessage(ctx context.Context, in *UpdateMessageRequest, opts ...grpc.CallOption) (*UpdateMessageResponse, error)
-	ReadOneMessage(ctx context.Context, in *ReadOneMessageRequest, opts ...grpc.CallOption) (*Message, error)
+	ReadOneMessage(ctx context.Context, in *ReadMessageRequest, opts ...grpc.CallOption) (*Message, error)
 	ReadAllMessages(ctx context.Context, in *ReadMessagesRequest, opts ...grpc.CallOption) (*ReadMessagesResponse, error)
 	ReadThreadMessages(ctx context.Context, in *ReadThreadMessagesRequest, opts ...grpc.CallOption) (*ReadThreadMessagesResponse, error)
 }
@@ -110,7 +110,7 @@ func (c *messagesClient) UpdateMessage(ctx context.Context, in *UpdateMessageReq
 	return out, nil
 }
 
-func (c *messagesClient) ReadOneMessage(ctx context.Context, in *ReadOneMessageRequest, opts ...grpc.CallOption) (*Message, error) {
+func (c *messagesClient) ReadOneMessage(ctx context.Context, in *ReadMessageRequest, opts ...grpc.CallOption) (*Message, error) {
 	out := new(Message)
 	err := c.cc.Invoke(ctx, "/messages.v1.Messages/ReadOneMessage", in, out, opts...)
 	if err != nil {
@@ -149,7 +149,7 @@ type MessagesServer interface {
 	PublishMessages(context.Context, *PublishMessagesRequest) (*PublishMessagesResponse, error)
 	PrivateMessages(context.Context, *PrivateMessagesRequest) (*PrivateMessagesResponse, error)
 	UpdateMessage(context.Context, *UpdateMessageRequest) (*UpdateMessageResponse, error)
-	ReadOneMessage(context.Context, *ReadOneMessageRequest) (*Message, error)
+	ReadOneMessage(context.Context, *ReadMessageRequest) (*Message, error)
 	ReadAllMessages(context.Context, *ReadMessagesRequest) (*ReadMessagesResponse, error)
 	ReadThreadMessages(context.Context, *ReadThreadMessagesRequest) (*ReadThreadMessagesResponse, error)
 	mustEmbedUnimplementedMessagesServer()
@@ -183,7 +183,7 @@ func (UnimplementedMessagesServer) PrivateMessages(context.Context, *PrivateMess
 func (UnimplementedMessagesServer) UpdateMessage(context.Context, *UpdateMessageRequest) (*UpdateMessageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateMessage not implemented")
 }
-func (UnimplementedMessagesServer) ReadOneMessage(context.Context, *ReadOneMessageRequest) (*Message, error) {
+func (UnimplementedMessagesServer) ReadOneMessage(context.Context, *ReadMessageRequest) (*Message, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadOneMessage not implemented")
 }
 func (UnimplementedMessagesServer) ReadAllMessages(context.Context, *ReadMessagesRequest) (*ReadMessagesResponse, error) {
@@ -350,7 +350,7 @@ func _Messages_UpdateMessage_Handler(srv interface{}, ctx context.Context, dec f
 }
 
 func _Messages_ReadOneMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReadOneMessageRequest)
+	in := new(ReadMessageRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -362,7 +362,7 @@ func _Messages_ReadOneMessage_Handler(srv interface{}, ctx context.Context, dec 
 		FullMethod: "/messages.v1.Messages/ReadOneMessage",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MessagesServer).ReadOneMessage(ctx, req.(*ReadOneMessageRequest))
+		return srv.(MessagesServer).ReadOneMessage(ctx, req.(*ReadMessageRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

@@ -236,10 +236,7 @@ func (h *Handler) readMessageOrMessages(ctx context.Context, w http.ResponseWrit
 }
 
 func (h *Handler) readMessage(ctx context.Context, w http.ResponseWriter, user *users.User, messageID int64) (err error) {
-	message, err := h.controller.ReadOneMessage(ctx, &messages.ReadOneMessageParams{
-		ID:      messageID,
-		UserIDs: []int64{user.ID, users.PublicUserID},
-	})
+	message, err := h.controller.ReadOneMessage(ctx, messageID, []int64{user.ID, users.PublicUserID})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

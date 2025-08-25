@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"encoding/json"
 
+	"github.com/bd878/gallery/server/utils"
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
 	messages "github.com/bd878/gallery/server/messages/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
@@ -79,19 +80,15 @@ func (h *Handler) SendMessageJsonAPI(w http.ResponseWriter, req *http.Request) (
 		return
 	}
 
-	message := &messages.Message{
-		Text:     request.Text,
-		FileIDs:  request.FileIDs,
-		ThreadID: request.ThreadID,
-		UserID:   user.ID,
+	private := true
+	if user.ID == users.PublicUserID {
+		private = false
 	}
 
-	if user.ID == users.PublicUserID {
-		message.Private = false
-	}
+	id := utils.RandomID()
 
 	// TODO: check file by file_id exists
 	// TODO: check thread by thread_id exists
 
-	return h.saveMessage(w, req, message)
+	return h.saveMessage(w, req, int64(id), request.Text, request.FileIDs, request.ThreadID, user.ID, private)
 }

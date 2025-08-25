@@ -12,11 +12,6 @@ type (
 		Private           bool
 	}
 
-	ReadOneMessageParams struct {
-		ID int64
-		UserIDs []int64
-	}
-
 	UpdateMessageParams struct {
 		ID                int64
 		ThreadID          int64

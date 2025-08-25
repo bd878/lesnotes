@@ -13,7 +13,7 @@ service Messages {
 	rpc PublishMessages(PublishMessagesRequest) returns (PublishMessagesResponse) {}
 	rpc PrivateMessages(PrivateMessagesRequest) returns (PrivateMessagesResponse) {}
 	rpc UpdateMessage(UpdateMessageRequest) returns (UpdateMessageResponse) {}
-	rpc ReadOneMessage(ReadOneMessageRequest) returns (Message) {}
+	rpc ReadOneMessage(ReadMessageRequest) returns (Message) {}
 	rpc ReadAllMessages(ReadMessagesRequest) returns (ReadMessagesResponse) {}
 	rpc ReadThreadMessages(ReadThreadMessagesRequest) returns (ReadThreadMessagesResponse) {}
 }
@@ -141,7 +141,7 @@ message Server {
 	bool   is_leader = 3;
 }
 
-message ReadOneMessageRequest {
+message ReadMessageRequest {
 	int64  id = 1;
 	repeated int64  user_ids = 2;
 }

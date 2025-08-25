@@ -18,7 +18,7 @@ type Controller interface {
 	DeleteMessages(ctx context.Context, params *model.DeleteMessagesParams) (*model.DeleteMessagesResult, error)
 	PublishMessages(ctx context.Context, params *model.PublishMessagesParams) (*model.PublishMessagesResult, error)
 	PrivateMessages(ctx context.Context, params *model.PrivateMessagesParams) (*model.PrivateMessagesResult, error)
-	ReadMessage(ctx context.Context, params *model.ReadOneMessageParams) (*model.Message, error)
+	ReadMessage(ctx context.Context, id int64, userIDs []int64) (*model.Message, error)
 	ReadAllMessages(ctx context.Context, params *model.ReadMessagesParams) (messages []*model.Message, isLastPage bool, err error,)
 	ReadThreadMessages(ctx context.Context, params *model.ReadThreadMessagesParams) (messages []*model.Message, isLastPage bool, err error,)
 	GetServers(ctx context.Context) ([]*api.Server, error)
@@ -185,11 +185,8 @@ func (h *Handler) GetServers(ctx context.Context, _ *api.GetServersRequest) (*ap
 	}, nil
 }
 
-func (h *Handler) ReadOneMessage(ctx context.Context, req *api.ReadOneMessageRequest) (*api.Message, error) {
-	message, err := h.controller.ReadMessage(ctx, &model.ReadOneMessageParams{
-		ID: req.Id,
-		UserIDs: req.UserIds,
-	})
+func (h *Handler) ReadOneMessage(ctx context.Context, req *api.ReadMessageRequest) (*api.Message, error) {
+	message, err := h.controller.ReadMessage(ctx, req.Id, req.UserIds)
 	if err != nil {
 		return nil, err
 	}

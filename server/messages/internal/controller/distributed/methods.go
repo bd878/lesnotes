@@ -183,10 +183,10 @@ func (m *DistributedMessages) PrivateMessages(ctx context.Context, params *model
 	}, nil
 }
 
-func (m *DistributedMessages) ReadMessage(ctx context.Context, params *model.ReadOneMessageParams) (
+func (m *DistributedMessages) ReadMessage(ctx context.Context, id int64, userIDs []int64) (
 	*model.Message, error,
 ) {
-	return m.repo.Read(ctx, params.UserIDs, params.ID)
+	return m.repo.Read(ctx, userIDs, id)
 }
 
 func (m *DistributedMessages) ReadThreadMessages(ctx context.Context, params *model.ReadThreadMessagesParams) (

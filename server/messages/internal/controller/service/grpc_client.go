@@ -60,13 +60,20 @@ func (s *Messages) isConnFailed() bool {
 	return state == connectivity.Shutdown || state == connectivity.TransientFailure
 }
 
-func (s *Messages) SaveMessage(ctx context.Context, message *model.Message) (
-	*model.SaveMessageResult, error,
-) {
+func (s *Messages) SaveMessage(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private bool) (message *model.Message, err error) {
 	if s.isConnFailed() {
 		if err := s.setupConnection(); err != nil {
 			return nil, err
 		}
+	}
+
+	message = &model.Message{
+		ID:       id,
+		Text:     text,
+		FileIDs:  fileIDs,
+		ThreadID: threadID,
+		UserID:   userID,
+		Private:  private,
 	}
 
 	res, err := s.client.SaveMessage(ctx, &api.SaveMessageRequest{
@@ -76,12 +83,10 @@ func (s *Messages) SaveMessage(ctx context.Context, message *model.Message) (
 		return nil, err 
 	}
 
-	return &model.SaveMessageResult{
-		ID: res.Id,
-		UpdateUTCNano: res.UpdateUtcNano,
-		CreateUTCNano: res.CreateUtcNano,
-		Private: res.Private,
-	}, nil
+	message.UpdateUTCNano = res.UpdateUtcNano
+	message.CreateUTCNano = res.CreateUtcNano
+
+	return message, nil
 }
 
 func (s *Messages) DeleteMessage(ctx context.Context, params *model.DeleteMessageParams) (
@@ -260,18 +265,16 @@ func (s *Messages) ReadAllMessages(ctx context.Context, params *model.ReadMessag
 	}, err
 }
 
-func (s *Messages) ReadOneMessage(ctx context.Context, params *model.ReadOneMessageParams) (
-	*model.Message, error,
-) {
+func (s *Messages) ReadOneMessage(ctx context.Context, id int64, userIDs []int64) (*model.Message, error) {
 	if s.isConnFailed() {
 		if err := s.setupConnection(); err != nil {
 			return nil, err
 		}
 	}
 
-	res, err := s.client.ReadOneMessage(ctx, &api.ReadOneMessageRequest{
-		Id: params.ID,
-		UserIds: params.UserIDs,
+	res, err := s.client.ReadOneMessage(ctx, &api.ReadMessageRequest{
+		Id:      id,
+		UserIds: userIDs,
 	})
 	if err != nil {
 		return nil, err

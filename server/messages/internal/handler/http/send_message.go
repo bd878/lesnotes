@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 
 	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/utils"
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
 	messages "github.com/bd878/gallery/server/messages/pkg/model"
 	files "github.com/bd878/gallery/server/files/pkg/model"
@@ -183,19 +184,13 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) (err err
 		fileIDs = append(fileIDs, int64(fileResult.ID))
 	}
 
-	message := &messages.Message{
-		Text:     text,
-		FileIDs:  fileIDs,
-		ThreadID: threadID,
-		UserID:   user.ID,
-		Private:  private,
-	}
+	id := utils.RandomID()
 
-	return h.saveMessage(w, req, message)
+	return h.saveMessage(w, req, int64(id), text, fileIDs, threadID, user.ID, private)
 }
 
-func (h *Handler) saveMessage(w http.ResponseWriter, req *http.Request, message *messages.Message) error {
-	resp, err := h.controller.SaveMessage(req.Context(), message)
+func (h *Handler) saveMessage(w http.ResponseWriter, req *http.Request, id int64, text string, fileIDs []int64, threadID int64, userID int64, private bool) error {
+	message, err := h.controller.SaveMessage(req.Context(), id, text, fileIDs, threadID, userID, private)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -208,11 +203,6 @@ func (h *Handler) saveMessage(w http.ResponseWriter, req *http.Request, message 
 
 		return err
 	}
-
-	message.ID = resp.ID
-	message.Private = resp.Private
-	message.UpdateUTCNano = resp.UpdateUTCNano
-	message.CreateUTCNano = resp.CreateUTCNano
 
 	var list []*files.File
 	for _, id := range message.FileIDs {
