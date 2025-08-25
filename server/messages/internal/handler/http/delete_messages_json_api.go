@@ -10,7 +10,7 @@ import (
 	server "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) DeleteMessageOrMessagesJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
+func (h *Handler) DeleteMessagesJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
 	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)

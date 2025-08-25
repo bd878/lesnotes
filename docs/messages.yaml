@@ -6,21 +6,21 @@ info:
     from messages service.
   version: 1.0.0
 paths:
+# SEND
   /messages/v1/send:
     parameters:
-      - $ref: '#/components/parameters/threadId'
-      - $ref: '#/components/parameters/public'
+      - $ref: '#/components/parameters/token'
     post:
       summary: Send a message
       description: |
-        Send a message and replicate throughout the cluster,
-        message with file possibly
+        Send a message in a thread, may contain file_ids or entire file.
+        If thread is omit, sends on the root thread
       operationId: sendMessage
       requestBody:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/sendMessage'
+              $ref: '#/components/schemas/sendForm'
       responses:
         "200":
           description: OK
@@ -33,20 +33,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/sendErr'
+                $ref: '#/components/schemas/serverError'
 
   /messages/v2/send:
     post:
       summary: Send a message public API
       description: |
-        Send a message and replicate throughout the cluster,
-        message
+        Send a message via json api, must contain file_ids,
+        entire file is prohibited
       operationId: sendMessageJson
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/sendMessageJson'
+              $ref: '#/components/schemas/sendJson'
       responses:
         "200":
           description: OK
@@ -59,17 +59,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/sendErr'
+                $ref: '#/components/schemas/serverError'
+# END SEND
 
+# PUBLISH
   /messages/v1/publish:
     parameters:
-      - $ref: '#/components/parameters/messageId'
-      - $ref: '#/components/parameters/batchIds'
+      - $ref: '#/components/parameters/messages'
+      - $ref: '#/components/parameters/token'
     put:
-      summary: Make message or messages public
+      summary: Make messages public
       description: |
-        Update private field of a message or messages to make it public
-      operationId: publicMessageOrMessages
+        Update private field of a messages to make it public
+      operationId: publishMessages
       requestBody:
         content:
           application/json:
@@ -88,19 +90,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/statusErr'
+                $ref: '#/components/schemas/serverError'
 
   /messages/v2/publish:
     put:
-      summary: Make message public public API
+      summary: Make messages public
       description: |
-        Update private field of a message to make it public
-      operationId: publicMessageJson
+        Update private field of a messages to make it public
+      operationId: publishMessagesJson
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/publishMessageOrMessagesJson'
+              $ref: '#/components/schemas/publishJson'
       responses:
         "200":
           description: OK
@@ -113,17 +115,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/statusErr'
+                $ref: '#/components/schemas/serverError'
+# END PUBLISH
 
+# PRIVATE
   /messages/v1/private:
     parameters:
-      - $ref: '#/components/parameters/messageId'
-      - $ref: '#/components/parameters/batchIds'
+      - $ref: '#/components/parameters/messages'
+      - $ref: '#/components/parameters/token'
     put:
-      summary: Make message or messages private
+      summary: Make messages private
       description: |
-        Update private field of a message or messages to make it private
-      operationId: privateMessageOrMessages
+        Update private field of a messages to make it private
+      operationId: privateMessages
       requestBody:
         content:
           application/json:
@@ -136,13 +140,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/publishOk'
+                $ref: '#/components/schemas/privateOk'
         "4XX":
           description: error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/statusErr'
+                $ref: '#/components/schemas/serverError'
 
   /messages/v2/private:
     put:
@@ -154,34 +158,36 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/publishMessageOrMessagesJson'
+              $ref: '#/components/schemas/privateJson'
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/publishOk'
+                $ref: '#/components/schemas/privateOk'
         "4XX":
           description: error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/statusErr'
+                $ref: '#/components/schemas/serverError'
+# END PRIVATE
 
+# UPDATE
   /messages/v1/update:
     parameters:
-      - $ref: '#/components/parameters/messageId'
+      - $ref: '#/components/parameters/token'
     put:
       summary: Update a message
       description: |
-        Update a message text or file. Message text cannot be empty
+        Update a message text or file
       operationId: updateMessage
       requestBody:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/updateMessage'
+              $ref: '#/components/schemas/updateForm'
       responses:
         "200":
           description: OK
@@ -194,19 +200,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/statusErr'
+                $ref: '#/components/schemas/serverError'
 
   /messages/v2/update:
     put:
-      summary: Update a message public API
+      summary: Update a message
       description: |
-        Update a message text or file. Message text cannot be empty
+        Update a message text or file
       operationId: updateMessageJson
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/updateMessageJson'
+              $ref: '#/components/schemas/updateJson'
       responses:
         "200":
           description: OK
@@ -219,17 +225,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/statusErr'
+                $ref: '#/components/schemas/serverError'
+# END UPDATE
 
+# DELETE
   /messages/v1/delete:
     parameters:
-      - $ref: '#/components/parameters/messageId'
-      - $ref: '#/components/parameters/batchIds'
+      - $ref: '#/components/parameters/messages'
+      - $ref: '#/components/parameters/token'
     delete:
-      operationId: deleteMessageOrMessages
-      summary: Delete a message or messages batch
+      operationId: deleteMessages
+      summary: Delete messages
       description: |
-        Deletes a user's message and attached file.
+        Deletes a user's messages and attached files.
         Thread messages becomes root thread messages, i.e. thread_id = 0
       responses:
         "200":
@@ -237,51 +245,53 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/statusOk'
+                $ref: '#/components/schemas/deleteOk'
         "4XX":
           description: error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/statusErr'
+                $ref: '#/components/schemas/serverError'
 
   /messages/v2/delete:
     delete:
-      operationId: deleteMessageOrMessagesJson
-      summary: Delete a message or messages batch public API
+      operationId: deleteMessagesJson
+      summary: Delete a messages
       description: |
         Deletes a user's message and attached file.
         Thread messages becomes root thread messages, i.e. thread_id = 0
-      operationId: deleteMessageOrMessagesJson
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/deleteMessageOrMessagesJson'
+              $ref: '#/components/schemas/deleteJson'
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/statusOk'
+                $ref: '#/components/schemas/deleteOk'
         "4XX":
           description: error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/statusErr'
+                $ref: '#/components/schemas/serverError'
+# END DELETE
 
+# READ
   /messages/v1/read:
     parameters:
+      - $ref: '#/components/parameters/token'
       - $ref: '#/components/parameters/public'
-      - $ref: '#/components/parameters/messageId'
-      - $ref: '#/components/parameters/threadId'
+      - $ref: '#/components/parameters/message'
+      - $ref: '#/components/parameters/thread'
       - $ref: '#/components/parameters/limit'
       - $ref: '#/components/parameters/offset'
       - $ref: '#/components/parameters/asc'
     get:
-      summary: Get user messages or message
+      summary: Get user messages
       description: |
         Read messages for a given user, a single message, or a specific thread,
         or public messages for a user
@@ -292,18 +302,14 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/messagesListResponse'
-                  - $ref: '#/components/schemas/messageResponse'
+                - $ref: '#/components/schemas/readOk'
 
         "4XX":
           description: error 
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/messagesListFail'
-                  - $ref: '#/components/schemas/messageFail'
+                $ref: '#/components/schemas/serverError'
 
   /messages/v2/read:
     post:
@@ -311,49 +317,43 @@ paths:
       description: |
         Read messages for a given user, a single message, or a specific thread,
         or public messages for a user
-      operationId: readMessageJson
+      operationId: readMessagesJson
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/readMessageOrMessagesJson'
+              $ref: '#/components/schemas/readJson'
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/messagesListResponse'
-                  - $ref: '#/components/schemas/messageResponse'
+                - $ref: '#/components/schemas/readOk'
 
         "4XX":
           description: error 
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/messagesListFail'
-                  - $ref: '#/components/schemas/messageFail'
+                $ref: '#/components/schemas/serverError'
+# END READ
 
+# STATUS
   /messages/v1/status:
     get:
-      operationId: reportStatus
+      operationId: status
       summary: Show server status
       responses:
-        "2XX":
-          description: Success response
+        "200":
+          description: ok
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/statusOk'
-        "4XX":
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/statusErr'
+            text/plain:
+              content:
+                default: "ok"
+# END STATUS
 
+# TODO: delete
   /messages/v1/read_file:
     parameters:
       - $ref: '#/components/parameters/fileId'
@@ -376,21 +376,27 @@ paths:
 
 components:
   parameters:
+    token:
+      name: Cookie
+      in: header
+      schema:
+        type: string
+        example: token=AAAAAA
     fileId:
-      name: file_id
+      name: file
       in: query
       required: true
       schema:
         type: integer
         example: 1
-    messageId:
+    message:
       name: id
       in: query
       required: false
       schema:
         type: integer
         example: 1
-    batchIds:
+    messages:
       name: ids
       in: query
       required: false
@@ -398,8 +404,8 @@ components:
         type: array
         items:
           type: integer
-    threadId:
-      name: thread_id
+    thread:
+      name: thread
       in: query
       required: false
       schema:
@@ -432,99 +438,152 @@ components:
       required: false
       schema:
         type: integer
-        example: 1
 
   schemas:
-    messagesListFail:
+# ERROR
+    serverError:
       type: object
-      properties:
-        status:
-          type: string
-          default: "fail"
-        description:
-          type: string
-          default: ""
-        messages:
-          type: array
-          items:
-            type: object
-          example: []
+      status:
+        type: string
+        default: "error"
+      error:
+        type: object
+        properties:
+          code:
+            type: integer
+          explain:
+            type: string
+# END ERROR
 
-    messageFail:
-      type: object
-      properties:
-        status:
-          type: string
-          default: "fail"
-        description:
-          type: string
-          default: ""
-        message:
-          type: object
-          default: {}
-
-    messagesListResponse:
-      type: object
-      properties:
-        status:
-          type: string
-          default: "ok"
-        description:
-          type: string
-          default: ""
-        is_last_page:
-          type: boolean
-        messages:
-          type: array
-          items:
-            allOf:
-              - $ref: '#/components/schemas/message'
-
-    messageResponse:
-      type: object
-      properties:
-        status:
-          type: string
-          default: "ok"
-        description:
-          type: string
-          default: ""
-        message:
-          $ref: '#/components/schemas/message'
-
-    updateMessage:
+# SEND
+    sendForm:
       oneOf:
         - type: object
           properties:
+            thread:
+              type: integer
+              default: 0
             public:
               type: integer
-              example: 1
+              default: false
             text:
               type: string
-              example: "test message"
-            file_id:
-              type: string
-              example: ""
-            thread_id:
-              type: integer
+              default: ""
               required: false
-
+            file_ids:
+              type: array
+              items:
+                type: integer
         - type: object
           properties:
+            thread:
+              type: integer
+              default: 0
             public:
               type: integer
-              example: 1
+              default: false
             text:
               type: string
-              example: "test message"
+              default: ""
+              required: false
             file:
               type: string
               format: binary
-            thread_id:
+              required: false
+
+    sendJson:
+      type: object
+      properties:
+        token:
+          type: string
+          default: ""
+          required: true
+        req:
+          type: object
+          properties:
+            text:
+              type: string
+              default: ""
+              required: true
+            file_ids:
+              type: array
+              items:
+                type: integer
+            private:
+              type: boolean
+              required: false
+              example: 0
+            thread:
               type: integer
               required: false
 
-    updateMessageJson:
+    sendOk:
+      type: object
+      status:
+        type: string
+      response:
+        type: object
+        properties:
+          message:
+            schema:
+              $ref: '#/components/schemas/message'
+# END SEND
+
+# READ
+    readJson:
+      type: object
+      properties:
+        token:
+          type: string
+          default: ""
+          required: true
+        req:
+          type: object
+          properties:
+            public:
+              type: integer
+              required: false
+              default: 0
+            id:
+              type: integer
+              required: false
+            thread:
+              type: integer
+              required: false
+            limit:
+              type: integer
+              required: false
+            offset:
+              type: integer
+              required: False
+            asc:
+              type: integer
+              required: false
+              example: 0
+
+    readOk:
+      type: object
+      properties:
+        status:
+          type: string
+          default: "ok"
+        response:
+          type: object
+          properties:
+            description:
+              type: string
+              default: ""
+            is_last_page:
+              type: boolean
+            messages:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/message'
+# END READ
+
+# UPDATE
+    updateJson:
       type: object
       properties:
         token:
@@ -545,10 +604,10 @@ components:
                 text:
                   type: string
                   example: "test message"
-                file_id:
+                file_ids:
                   type: string
                   example: ""
-                thread_id:
+                thread:
                   type: integer
                   required: false
 
@@ -567,179 +626,35 @@ components:
                 file:
                   type: string
                   format: binary
-                thread_id:
+                thread:
                   type: integer
                   required: false
 
-    readMessageOrMessagesJson:
-      type: object
-      properties:
-        token:
-          type: string
-          default: ""
-          required: true
-        req:
-          type: object
-          properties:
-            public:
-              type: integer
-              required: false
-              default: 0
-            id:
-              type: integer
-              required: false
-            thread_id:
-              type: integer
-              required: false
-            limit:
-              type: integer
-              required: false
-            offset:
-              type: integer
-              required: False
-            asc:
-              type: integer
-              required: false
-              example: 0
-
-    publishMessageOrMessagesJson:
-      type: object
-      properties:
-        token:
-          type: string
-          default: ""
-          required: true
-        req:
-          type: object
-          properties:
-            id:
-              type: integer
-              required: false
-            ids:
-              type: array
-              required: false
-              items:
-                type: integer
-
-    deleteMessageOrMessagesJson:
-      type: object
-      properties:
-        token:
-          type: string
-          default: ""
-          required: true
-        req:
-          type: object
-          properties:
-            id:
-              type: integer
-              required: false
-            ids:
-              type: array
-              required: false
-              items:
-                type: integer
-
-    sendMessage:
+    updateForm:
       oneOf:
         - type: object
           properties:
+            public:
+              type: integer
+              example: 1
             text:
               type: string
-              default: ""
-            file_id:
-              type: string
-              default: ""
-        - type: object
-          properties:
-            text:
-              type: string
-              default: ""
-            file:
-              type: string
-              format: binary
-
-    sendMessageJson:
-      type: object
-      properties:
-        token:
-          type: string
-          default: ""
-          required: true
-        req:
-          type: object
-          properties:
-            text:
-              type: string
-              default: ""
-              required: true
-            file_id:
-              type: string
-              default: ""
-              required: false
-            private:
-              type: boolean
-              required: false
-              example: 0
-            thread_id:
+              example: "test message"
+            thread:
               type: integer
               required: false
 
-    sendOk:
-      type: object
-      properties:
-        status:
-          type: string
-          default: ok
-        description:
-          type: string
-          default: ""
-        id:
-          type: integer
-          example: 1
-        thread_id:
-          type: integer
-          example: 1
-        create_utc_nano:
-          type: integer
-          example: 1234566700000000
-        update_utc_nano:
-          type: integer
-          example: 1234566700000000
-        file_id:
-          type: integer
-          example: 1234
-        file:
-          $ref: '#/components/schemas/file'
-        text:
-          type: string
-          example: "message text"
-    sendErr:
-      type: object
-      properties:
-        status:
-          type: string
-          default: fail
-        description:
-          type: string
-          default: ""
-
-    publishOk:
-      type: object
-      properties:
-        status:
-          type: string 
-          default: "ok"
-        description:
-          type: string 
-          default: ""
-        ids:
-          type: array
-          items:
-            type: integer
-        update_utc_nano:
-          type: integer
-          example: 1234566700000000
+        - type: object
+          properties:
+            public:
+              type: integer
+              example: 1
+            text:
+              type: string
+              example: "test message"
+            thread:
+              type: integer
+              required: false
 
     updateOk:
       type: object
@@ -747,35 +662,107 @@ components:
         status:
           type: string 
           default: "ok"
-        description:
-          type: string 
-          default: ""
-        id:
-          type: integer
-          example: 1
-        update_utc_nano:
-          type: integer
-          example: 1234566700000000
+        response:
+          type: object
+          properties:
+            description:
+              type: string 
+              default: ""
+            id:
+              type: integer
+              example: 1
+            update_utc_nano:
+              type: integer
+              example: 1234566700000000
+# END UPDATE
 
-    statusOk:
+# DELETE
+    deleteJson:
+      type: object
+      properties:
+        token:
+          type: string
+          default: ""
+          required: true
+        req:
+          type: object
+          properties:
+            ids:
+              type: array
+              required: false
+              items:
+                type: integer
+# DELETE JSON
+
+# PUBLISH
+    publishOk:
       type: object
       properties:
         status:
           type: string 
           default: "ok"
-        description:
-          type: string 
-          default: ""
+        response:
+          type: object
+          properties:
+            description:
+              type: string 
+              default: ""
+            ids:
+              type: array
+              items:
+                type: integer
 
-    statusErr:
+    publishJson:
+      type: object
+      properties:
+        token:
+          type: string
+          default: ""
+          required: true
+        req:
+          type: object
+          properties:
+            ids:
+              type: array
+              required: false
+              items:
+                type: integer
+# END PUBLISH
+
+# PRIVATE
+    privateOk:
       type: object
       properties:
         status:
-          type: string
-          default: "error"
-        description:
+          type: string 
+          default: "ok"
+        response:
+          type: object
+          properties:
+            description:
+              type: string 
+              default: ""
+            ids:
+              type: array
+              items:
+                type: integer
+
+    privateJson:
+      type: object
+      properties:
+        token:
           type: string
           default: ""
+          required: true
+        req:
+          type: object
+          properties:
+            ids:
+              type: array
+              required: false
+              items:
+                type: integer
+# END PRIVATE
 
     file:
       type: object
@@ -792,28 +779,22 @@ components:
       properties:
         id:
           type: integer
-          example: 1
-          readOnly: true
         user_id:
           type: integer
-          example: 1
+        thread:
+          type: integer
+        name:
+          type: string
         text:
           type: string
-          example: "test message"
         create_utc_nano:
           type: integer
-          format: integer
         update_utc_nano:
           type: integer
-          format: integer
         private:
-          type: integer
-          format: integer
-          example: 1
-        file:
-          type: object
-          properties:
-            id:
-              type: string
-            name:
-              type: string
+          type: boolean
+        files:
+          type: array
+          items:
+            schema:
+              $ref: '#/components/schemas/file'

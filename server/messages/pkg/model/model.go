@@ -21,7 +21,7 @@ type (
 		ID                int64
 		ThreadID          int64
 		UserID            int64
-		FileID            int64
+		FileIDs           []int64
 		Text              string
 		UpdateUTCNano     int64
 		Private           int32
@@ -119,5 +119,11 @@ type (
 	SaveFileResult struct {
 		ID                int64
 		CreateUTCNano     int64
+	}
+
+	DeleteMessageStatus struct {
+		ID                int64           `json:"id"`
+		OK                bool            `json:"ok"`
+		Explain           string          `json:"explain"`
 	}
 )

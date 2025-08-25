@@ -191,7 +191,7 @@ func (s *Messages) UpdateMessage(ctx context.Context, params *model.UpdateMessag
 	resp, err := s.client.UpdateMessage(ctx, &api.UpdateMessageRequest{
 		Id: params.ID,
 		UserId: params.UserID,
-		FileId: params.FileID,
+		FileIds: params.FileIDs,
 		Text: params.Text,
 		Private: params.Private,
 		ThreadId: params.ThreadID,

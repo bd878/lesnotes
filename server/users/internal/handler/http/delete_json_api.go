@@ -5,7 +5,6 @@ import (
 	"errors"
 	"encoding/json"
 
-	"github.com/bd878/gallery/server/utils"
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
 	users "github.com/bd878/gallery/server/users/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
@@ -52,18 +51,18 @@ func (h *Handler) DeleteJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 		return errors.New("cannot get login from request")
 	}
 
-	user, ok := utils.GetUser(w, req)
+	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code: server.CodeNoUser,
+				Code:    server.CodeNoUser,
 				Explain: "user required",
 			},
 		})
 
-		return errors.New("user required")
+		return
 	}
 
 	err = h.controller.DeleteUser(req.Context(), int64(user.ID))

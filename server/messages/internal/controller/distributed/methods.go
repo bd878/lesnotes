@@ -60,7 +60,7 @@ func (m *DistributedMessages) UpdateMessage(ctx context.Context, params *model.U
 	cmd, _ := proto.Marshal(&UpdateCommand{
 		Id: params.ID,
 		UserId: params.UserID,
-		FileId: params.FileID,
+		FileIds: params.FileIDs,
 		ThreadId: params.ThreadID,
 		Text:   params.Text,
 		UpdateUtcNano: params.UpdateUTCNano,

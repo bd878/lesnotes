@@ -10,7 +10,7 @@ import (
 	users "github.com/bd878/gallery/server/users/pkg/model"
 )
 
-func (h *Handler) PrivateMessageOrMessages(w http.ResponseWriter, req *http.Request) (err error) {
+func (h *Handler) PrivateMessages(w http.ResponseWriter, req *http.Request) (err error) {
 	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
