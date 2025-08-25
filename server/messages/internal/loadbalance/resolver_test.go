@@ -108,7 +108,7 @@ func (s *grpcServer) SaveMessage(_ context.Context, _ *api.SendMessageRequest) (
 	return nil, nil
 }
 
-func (s *grpcServer) ReadAllMessages(_ context.Context, _ *api.ReadMessageRequest) (
+func (s *grpcServer) ReadMessages(_ context.Context, _ *api.ReadMessageRequest) (
 	*api.ReadMessageResponse, error,
 ) {
 	return nil, nil

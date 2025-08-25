@@ -236,7 +236,7 @@ func (h *Handler) readMessageOrMessages(ctx context.Context, w http.ResponseWrit
 }
 
 func (h *Handler) readMessage(ctx context.Context, w http.ResponseWriter, user *users.User, messageID int64) (err error) {
-	message, err := h.controller.ReadOneMessage(ctx, messageID, []int64{user.ID, users.PublicUserID})
+	message, err := h.controller.ReadMessage(ctx, messageID, []int64{user.ID, users.PublicUserID})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -286,20 +286,13 @@ func (h *Handler) readMessage(ctx context.Context, w http.ResponseWriter, user *
 }
 
 func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter, user *users.User, threadID int64, limit, offset int32, ascending bool, private int32) (err error) {
-	res, err := h.controller.ReadThreadMessages(ctx, &messages.ReadThreadMessagesParams{
-		UserID:    user.ID,
-		ThreadID:  threadID,
-		Limit:     limit,
-		Offset:    offset,
-		Ascending: ascending,
-		Private:   private,
-	})
+	list, isLastPage, err := h.controller.ReadThreadMessages(ctx, user.ID, threadID, limit, offset, ascending, private)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:   &server.ErrorCode{
-				Code: messages.CodeReadFailed,
+				Code:     server.CodeReadFailed,
 				Explain: "failed to read thread messages",
 			},
 		})
@@ -307,27 +300,22 @@ func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter,
 		return err
 	}
 
-	isLastPage := res.IsLastPage
-
 	fileIDs := make([]int64, 0)
-	for _, message := range res.Messages {
+	for _, message := range list {
 		if message.FileIDs != nil {
 			// TODO: fileIDs set
 			fileIDs = append(fileIDs, message.FileIDs...)
 		}
 	}
 
-	filesRes, err := h.filesGateway.ReadBatchFiles(ctx, &messages.ReadBatchFilesParams{
-		UserID: user.ID,
-		IDs:    fileIDs,
-	})
+	filesRes, err := h.filesGateway.ReadBatchFiles(ctx, fileIDs, user.ID)
 	if err != nil {
 		logger.Errorw("failed to read batch files", "user_id", user.ID, "error", err)
 	} else {
-		for _, message := range res.Messages {
+		for _, message := range list {
 			var list []*files.File
 			for _, id := range message.FileIDs {
-				file := filesRes.Files[id]
+				file := filesRes[id]
 				if file != nil {
 					list = append(list, &files.File{
 						ID: file.ID,
@@ -345,7 +333,7 @@ func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter,
 
 	response, err := json.Marshal(messages.ReadResponse{
 		ThreadID:   &threadID,
-		Messages:   res.Messages,
+		Messages:   list,
 		IsLastPage: &isLastPage,
 	})
 	if err != nil {
@@ -362,13 +350,7 @@ func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter,
 }
 
 func (h *Handler) readMessages(ctx context.Context, w http.ResponseWriter, user *users.User, limit, offset int32, ascending bool, private int32) (err error) {
-	res, err := h.controller.ReadAllMessages(ctx, &messages.ReadMessagesParams{
-		UserID:    user.ID,
-		Limit:     limit,
-		Offset:    offset,
-		Ascending: ascending,
-		Private:   private,
-	})
+	list, isLastPage, err := h.controller.ReadMessages(ctx, user.ID, limit, offset, ascending, private)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -382,27 +364,22 @@ func (h *Handler) readMessages(ctx context.Context, w http.ResponseWriter, user 
 		return err
 	}
 
-	isLastPage := res.IsLastPage
-
 	fileIDs := make([]int64, 0)
-	for _, message := range res.Messages {
+	for _, message := range list {
 		if message.FileIDs != nil {
 			// TODO: fileIDs set
 			fileIDs = append(fileIDs, message.FileIDs...)
 		}
 	}
 
-	filesRes, err := h.filesGateway.ReadBatchFiles(ctx, &messages.ReadBatchFilesParams{
-		UserID: user.ID,
-		IDs:    fileIDs,
-	})
+	filesRes, err := h.filesGateway.ReadBatchFiles(ctx, fileIDs, user.ID)
 	if err != nil {
 		logger.Errorw("failed to read batch files", "user_id", user.ID, "error", err)
 	} else {
-		for _, message := range res.Messages {
+		for _, message := range list {
 			var list []*files.File
 			for _, id := range message.FileIDs {
-				file := filesRes.Files[id]
+				file := filesRes[id]
 				if file != nil {
 					list = append(list, &files.File{
 						ID: file.ID,
@@ -419,7 +396,7 @@ func (h *Handler) readMessages(ctx context.Context, w http.ResponseWriter, user 
 	}
 
 	response, err := json.Marshal(messages.ReadResponse{
-		Messages:   res.Messages,
+		Messages:   list,
 		IsLastPage: &isLastPage,
 	})
 	if err != nil {

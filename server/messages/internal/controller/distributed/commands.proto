@@ -1,15 +1,15 @@
 syntax = "proto3";
 
-import "protos/messages.proto";
-
 option go_package = "github.com/bd878/gallery/server/messages/internal/controller/distributed";
 
 message AppendCommand {
-	messages.v1.Message message = 1;
-}
-
-message AppendCommandResult {
 	int64   id = 1;
+	int64   user_id = 2;
+	repeated int64   file_ids = 3;
+	int64   thread_id = 4;
+	string  text = 5;
+	string  name = 6;
+	bool    private = 7;
 }
 
 message UpdateCommand {
@@ -19,13 +19,7 @@ message UpdateCommand {
 	int64   thread_id = 4;
 	string  text = 5;
 	string  name = 6;
-	int64   update_utc_nano = 7;
-	int32   private = 8;
-}
-
-message UpdateCommandResult {
-	int64   update_utc_nano = 1;
-	bool    private = 2;
+	int32   private = 7;
 }
 
 message DeleteCommand {
@@ -33,29 +27,16 @@ message DeleteCommand {
 	int64   user_id = 2;
 }
 
-message DeleteAllUserMessagesCommand {
+message DeleteUserMessagesCommand {
 	int64   user_id = 1;
 }
-
-message DeleteCommandResult {
-	bool    ok = 1;
-	string  explain = 2;
-}
-
-message DeleteAllUserMessagesCommandResult {}
 
 message PublishCommand {
 	repeated int64   ids = 1;
 	int64   user_id = 2;
-	int64   update_utc_nano = 3;
 }
 
 message PrivateCommand {
 	repeated int64 ids = 1;
 	int64   user_id = 2;
-	int64   update_utc_nano = 3;
 }
-
-message PublishCommandResult {}
-
-message PrivateCommandResult {}

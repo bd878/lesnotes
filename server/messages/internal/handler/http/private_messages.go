@@ -69,10 +69,7 @@ func (h *Handler) PrivateMessages(w http.ResponseWriter, req *http.Request) (err
 }
 
 func (h *Handler) privateMessages(w http.ResponseWriter, req *http.Request, user *users.User, ids []int64) (err error) {
-	_, err = h.controller.PrivateMessages(req.Context(), &messages.PrivateMessagesParams{
-		IDs:    ids,
-		UserID: user.ID,
-	})
+	err = h.controller.PrivateMessages(req.Context(), ids, user.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

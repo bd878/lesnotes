@@ -25,7 +25,7 @@ type SessionsGateway interface {
 }
 
 type MessagesGateway interface {
-	DeleteAllUserMessages(ctx context.Context, userID int64) error
+	DeleteUserMessages(ctx context.Context, userID int64) error
 }
 
 type Controller struct {
@@ -71,7 +71,7 @@ func (c *Controller) DeleteUser(ctx context.Context, userID int64) (err error) {
 		return
 	}
 
-	err = c.messages.DeleteAllUserMessages(ctx, userID)
+	err = c.messages.DeleteUserMessages(ctx, userID)
 	if err != nil {
 		return
 	}

@@ -70,10 +70,7 @@ func (h *Handler) PublishMessages(w http.ResponseWriter, req *http.Request) (err
 }
 
 func (h *Handler) publishMessages(w http.ResponseWriter, req *http.Request, user *users.User, ids []int64) (err error) {
-	_, err = h.controller.PublishMessages(req.Context(), &messages.PublishMessagesParams{
-		IDs:    ids,
-		UserID: user.ID,
-	})
+	err = h.controller.PublishMessages(req.Context(), ids, user.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -97,7 +94,7 @@ func (h *Handler) publishMessages(w http.ResponseWriter, req *http.Request, user
 	}
 
 	json.NewEncoder(w).Encode(server.ServerResponse{
-		Status: "ok",
+		Status:   "ok",
 		Response: json.RawMessage(response),
 	})
 

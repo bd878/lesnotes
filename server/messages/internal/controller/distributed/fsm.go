@@ -11,15 +11,15 @@ import (
 )
 
 type Repository interface {
-	Create(ctx context.Context, message *model.Message) (err error)
-	Update(ctx context.Context, userID, id int64, newText string, newThreadID int64, newFileIDs []int64, newPrivate int) (result *model.UpdateMessageResult, err error)
+	Create(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (err error)
+	Update(ctx context.Context, userID, id int64, newText string, newThreadID int64, newFileIDs []int64, newPrivate int) (err error)
 	DeleteMessage(ctx context.Context, userID, id int64) (err error)
 	Publish(ctx context.Context, userID int64, ids []int64) (err error)
 	Private(ctx context.Context, userID int64, ids []int64) (err error)
 	Read(ctx context.Context, userIDs []int64, id int64) (message *model.Message, err error)
-	DeleteAllUserMessages(ctx context.Context, userID int64) (err error)
+	DeleteUserMessages(ctx context.Context, userID int64) (err error)
 	ReadThreadMessages(ctx context.Context, userID, threadID int64, limit, offset, private int32) (messages []*model.Message, isLastPage bool, err error)
-	ReadAllMessages(ctx context.Context, userID int64, limit, offset, private int32) (messages []*model.Message, isLastPage bool, err error)
+	ReadMessages(ctx context.Context, userID int64, limit, offset, private int32) (messages []*model.Message, isLastPage bool, err error)
 	Truncate(ctx context.Context) error
 }
 
@@ -44,8 +44,8 @@ func (f *fsm) Apply(record *raft.Log) interface{} {
 		return f.applyAppend(buf[1:])
 	case UpdateRequest:
 		return f.applyUpdate(buf[1:])
-	case DeleteAllUserMessagesRequest:
-		return f.applyDeleteAllUserMessages(buf[1:])
+	case DeleteUserMessagesRequest:
+		return f.applyDeleteUserMessages(buf[1:])
 	case DeleteRequest:
 		return f.applyDelete(buf[1:])
 	case PublishRequest:
@@ -63,38 +63,36 @@ func (f *fsm) applyAppend(raw []byte) interface{} {
 	proto.Unmarshal(raw, &cmd)
 
 	// Put does not put message with same id twice
-	err := f.repo.Create(context.Background(), model.MessageFromProto(cmd.Message))
+	err := f.repo.Create(context.Background(), cmd.Id, cmd.Text, cmd.FileIds, cmd.ThreadId, cmd.UserId, cmd.Private, cmd.Name)
 	if err != nil {
 		return err
 	}
-	return &AppendCommandResult{}
+
+	return nil
 }
 
 func (f *fsm) applyUpdate(raw []byte) interface{} {
 	var cmd UpdateCommand
 	proto.Unmarshal(raw, &cmd)
 
-	res, err := f.repo.Update(context.Background(), cmd.UserId, cmd.Id, cmd.Text, cmd.ThreadId, cmd.FileIds, int(cmd.Private))
+	err := f.repo.Update(context.Background(), cmd.UserId, cmd.Id, cmd.Text, cmd.ThreadId, cmd.FileIds, int(cmd.Private))
 	if err != nil {
 		return err
 	}
 
-	return &UpdateCommandResult{
-		UpdateUtcNano: cmd.UpdateUtcNano,
-		Private: res.Private,
-	}
+	return nil
 }
 
-func (f *fsm) applyDeleteAllUserMessages(raw []byte) interface{} {
-	var cmd DeleteAllUserMessagesCommand
+func (f *fsm) applyDeleteUserMessages(raw []byte) interface{} {
+	var cmd DeleteUserMessagesCommand
 	proto.Unmarshal(raw, &cmd)
 
-	err := f.repo.DeleteAllUserMessages(context.Background(), cmd.UserId)
+	err := f.repo.DeleteUserMessages(context.Background(), cmd.UserId)
 	if err != nil {
 		return err
 	}
 
-	return &DeleteCommandResult{}
+	return nil
 }
 
 func (f *fsm) applyDelete(raw []byte) interface{} {
@@ -106,7 +104,7 @@ func (f *fsm) applyDelete(raw []byte) interface{} {
 		return err
 	}
 
-	return &DeleteCommandResult{Ok: true, Explain: "deleted"}
+	return nil
 }
 
 func (f *fsm) applyPublish(raw []byte) interface{} {
@@ -118,7 +116,7 @@ func (f *fsm) applyPublish(raw []byte) interface{} {
 		return err
 	}
 
-	return &PublishCommandResult{}
+	return nil
 }
 
 func (f *fsm) applyPrivate(raw []byte) interface{} {
@@ -130,7 +128,7 @@ func (f *fsm) applyPrivate(raw []byte) interface{} {
 		return err
 	}
 
-	return &PrivateCommandResult{}
+	return nil
 }
 
 func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {

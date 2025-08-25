@@ -23,10 +23,12 @@ type Messages struct {
 	conn   *grpc.ClientConn
 }
 
-func New(cfg Config) *Messages {
-	msg := &Messages{conf: cfg}
-	msg.setupConnection()
-	return msg
+func New(cfg Config) (messages *Messages) {
+	messages = &Messages{conf: cfg}
+
+	messages.setupConnection()
+
+	return messages
 }
 
 func (s *Messages) Close() {
@@ -35,7 +37,7 @@ func (s *Messages) Close() {
 	}
 }
 
-func (s *Messages) setupConnection() error {
+func (s *Messages) setupConnection() (err error) {
 	conn, err := grpc.NewClient(
 		fmt.Sprintf(
 			"%s:///%s",
@@ -52,7 +54,8 @@ func (s *Messages) setupConnection() error {
 
 	s.conn = conn
 	s.client = client
-	return nil
+
+	return
 }
 
 func (s *Messages) isConnFailed() bool {
@@ -62,8 +65,8 @@ func (s *Messages) isConnFailed() bool {
 
 func (s *Messages) SaveMessage(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private bool) (message *model.Message, err error) {
 	if s.isConnFailed() {
-		if err := s.setupConnection(); err != nil {
-			return nil, err
+		if err = s.setupConnection(); err != nil {
+			return
 		}
 	}
 
@@ -76,203 +79,139 @@ func (s *Messages) SaveMessage(ctx context.Context, id int64, text string, fileI
 		Private:  private,
 	}
 
-	res, err := s.client.SaveMessage(ctx, &api.SaveMessageRequest{
-		Message: model.MessageToProto(message),
+	_, err = s.client.SaveMessage(ctx, &api.SaveMessageRequest{
+		Id:       id,
+		Text:     text,
+		FileIds:  fileIDs,
+		ThreadId: threadID,
+		UserId:   userID,
+		Private:  private,
 	})
-	if err != nil {
-		return nil, err 
-	}
 
-	message.UpdateUTCNano = res.UpdateUtcNano
-	message.CreateUTCNano = res.CreateUtcNano
-
-	return message, nil
+	return
 }
 
-func (s *Messages) DeleteMessage(ctx context.Context, params *model.DeleteMessageParams) (
-	*model.DeleteMessageResult, error,
-) {
+func (s *Messages) DeleteMessages(ctx context.Context, ids []int64, userID int64) (err error) {
 	if s.isConnFailed() {
-		if err := s.setupConnection(); err != nil {
-			return nil, err
+		if err = s.setupConnection(); err != nil {
+			return
 		}
 	}
 
-	_, err := s.client.DeleteMessage(ctx, &api.DeleteMessageRequest{
-		Id: params.ID,
-		UserId: params.UserID,
+	_, err = s.client.DeleteMessages(ctx, &api.DeleteMessagesRequest{
+		Ids:    ids,
+		UserId: userID,
 	})
-	if err != nil {
-		return nil, err
-	}
 
-	return &model.DeleteMessageResult{}, nil
+	return
 }
 
-func (s *Messages) DeleteMessages(ctx context.Context, params *model.DeleteMessagesParams) (
-	*model.DeleteMessagesResult, error,
-) {
+func (s *Messages) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
 	if s.isConnFailed() {
-		if err := s.setupConnection(); err != nil {
-			return nil, err
+		if err = s.setupConnection(); err != nil {
+			return
 		}
 	}
 
-	res, err := s.client.DeleteMessages(ctx, &api.DeleteMessagesRequest{
-		Ids: params.IDs,
-		UserId: params.UserID,
+	_, err = s.client.PublishMessages(ctx, &api.PublishMessagesRequest{
+		Ids:    ids,
+		UserId: userID,
 	})
-	if err != nil {
-		return nil, err
-	}
 
-	var ids []*model.DeleteMessageStatus
-	for _, status := range res.Ids {
-		ids = append(ids, &model.DeleteMessageStatus{
-			ID: status.Id,
-			OK: status.Ok,
-			Explain: status.Explain,
-		})
-	}
-
-	return &model.DeleteMessagesResult{
-		IDs: ids,
-	}, nil
+	return
 }
 
-func (s *Messages) PublishMessages(ctx context.Context, params *model.PublishMessagesParams) (
-	*model.PublishMessagesResult, error,
-) {
+func (s *Messages) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
 	if s.isConnFailed() {
-		if err := s.setupConnection(); err != nil {
-			return nil, err
+		if err = s.setupConnection(); err != nil {
+			return
 		}
 	}
 
-	resp, err := s.client.PublishMessages(ctx, &api.PublishMessagesRequest{
-		Ids: params.IDs,
-		UserId: params.UserID,
+	_, err = s.client.PrivateMessages(ctx, &api.PrivateMessagesRequest{
+		Ids:    ids,
+		UserId: userID,
 	})
-	if err != nil {
-		return nil, err
-	}
 
-	return &model.PublishMessagesResult{
-		UpdateUTCNano: resp.UpdateUtcNano,
-	}, nil
+	return
 }
 
-func (s *Messages) PrivateMessages(ctx context.Context, params *model.PrivateMessagesParams) (
-	*model.PrivateMessagesResult, error,
-) {
+func (s *Messages) UpdateMessage(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private int32) (err error) {
 	if s.isConnFailed() {
-		if err := s.setupConnection(); err != nil {
-			return nil, err
+		if err = s.setupConnection(); err != nil {
+			return
 		}
 	}
 
-	resp, err := s.client.PrivateMessages(ctx, &api.PrivateMessagesRequest{
-		Ids: params.IDs,
-		UserId: params.UserID,
+	_, err = s.client.UpdateMessage(ctx, &api.UpdateMessageRequest{
+		Id:        id,
+		UserId:    userID,
+		FileIds:   fileIDs,
+		Text:      text,
+		Private:   private,
+		ThreadId:  threadID,
 	})
-	if err != nil {
-		return nil, err
-	}
 
-	return &model.PrivateMessagesResult{
-		UpdateUTCNano: resp.UpdateUtcNano,
-	}, nil
+	return
 }
 
-func (s *Messages) UpdateMessage(ctx context.Context, params *model.UpdateMessageParams) (
-	*model.UpdateMessageResult, error,
-) {
+func (s *Messages) ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool, private int32) (messages []*model.Message, isLastPage bool, err error) {
 	if s.isConnFailed() {
-		if err := s.setupConnection(); err != nil {
-			return nil, err
-		}
-	}
-
-	resp, err := s.client.UpdateMessage(ctx, &api.UpdateMessageRequest{
-		Id: params.ID,
-		UserId: params.UserID,
-		FileIds: params.FileIDs,
-		Text: params.Text,
-		Private: params.Private,
-		ThreadId: params.ThreadID,
-	})
-	if err != nil {
-		return nil, err 
-	}
-
-	return &model.UpdateMessageResult{
-		ID: params.ID,
-		UpdateUTCNano: resp.UpdateUtcNano,
-		Private: resp.Private,
-	}, nil
-}
-
-func (s *Messages) ReadThreadMessages(ctx context.Context, params *model.ReadThreadMessagesParams) (
-	*model.ReadThreadMessagesResult, error,
-) {
-	if s.isConnFailed() {
-		if err := s.setupConnection(); err != nil {
-			return nil, err
+		if err = s.setupConnection(); err != nil {
+			return
 		}
 	}
 
 	res, err := s.client.ReadThreadMessages(ctx, &api.ReadThreadMessagesRequest{
-		UserId: params.UserID,
-		ThreadId: params.ThreadID,
-		Limit:  params.Limit,
-		Offset: params.Offset,
-		Asc:    params.Ascending,
-		Private: params.Private,
+		UserId:   userID,
+		ThreadId: threadID,
+		Limit:    limit,
+		Offset:   offset,
+		Asc:      ascending,
+		Private:  private,
 	})
 	if err != nil {
-		return nil, err
+		return nil, true, err
 	}
 
-	return &model.ReadThreadMessagesResult{
-		Messages: model.MapMessagesFromProto(model.MessageFromProto, res.Messages),
-		IsLastPage: res.IsLastPage,
-	}, err
+	messages = model.MapMessagesFromProto(model.MessageFromProto, res.Messages)
+	isLastPage = res.IsLastPage
+
+	return
 }
 
-func (s *Messages) ReadAllMessages(ctx context.Context, params *model.ReadMessagesParams) (
-	*model.ReadMessagesResult, error,
-) {
+func (s *Messages) ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool, private int32) (messages []*model.Message, isLastPage bool, err error) {
+	if s.isConnFailed() {
+		if err = s.setupConnection(); err != nil {
+			return
+		}
+	}
+
+	res, err := s.client.ReadMessages(ctx, &api.ReadMessagesRequest{
+		UserId:   userID,
+		Limit:    limit,
+		Offset:   offset,
+		Asc:      ascending,
+		Private:  private,
+	})
+	if err != nil {
+		return nil, true, err
+	}
+
+	messages = model.MapMessagesFromProto(model.MessageFromProto, res.Messages)
+	isLastPage = res.IsLastPage
+
+	return
+}
+
+func (s *Messages) ReadMessage(ctx context.Context, id int64, userIDs []int64) (message *model.Message, err error) {
 	if s.isConnFailed() {
 		if err := s.setupConnection(); err != nil {
 			return nil, err
 		}
 	}
 
-	res, err := s.client.ReadAllMessages(ctx, &api.ReadMessagesRequest{
-		UserId: params.UserID,
-		Limit:  params.Limit,
-		Offset: params.Offset,
-		Asc:    params.Ascending,
-		Private: params.Private,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return &model.ReadMessagesResult{
-		Messages: model.MapMessagesFromProto(model.MessageFromProto, res.Messages),
-		IsLastPage: res.IsLastPage,
-	}, err
-}
-
-func (s *Messages) ReadOneMessage(ctx context.Context, id int64, userIDs []int64) (*model.Message, error) {
-	if s.isConnFailed() {
-		if err := s.setupConnection(); err != nil {
-			return nil, err
-		}
-	}
-
-	res, err := s.client.ReadOneMessage(ctx, &api.ReadMessageRequest{
+	res, err := s.client.ReadMessage(ctx, &api.ReadMessageRequest{
 		Id:      id,
 		UserIds: userIDs,
 	})
@@ -280,5 +219,7 @@ func (s *Messages) ReadOneMessage(ctx context.Context, id int64, userIDs []int64
 		return nil, err
 	}
 
-	return model.MessageFromProto(res), nil
+	message = model.MessageFromProto(res)
+
+	return
 }

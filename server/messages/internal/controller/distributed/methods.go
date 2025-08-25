@@ -2,28 +2,23 @@ package distributed
 
 import (
 	"time"
-	"fmt"
 	"context"
-	"errors"
 	"bytes"
 
 	"google.golang.org/protobuf/proto"
-	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/messages/pkg/model"
 )
 
-func (m *DistributedMessages) apply(ctx context.Context, reqType RequestType, cmd []byte) (
-	interface{}, error,
-) {
+func (m *DistributedMessages) apply(ctx context.Context, reqType RequestType, cmd []byte) (res interface{}, err error) {
 	var buf bytes.Buffer
-	_, err := buf.Write([]byte{byte(reqType)})
+	_, err = buf.Write([]byte{byte(reqType)})
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	_, err = buf.Write(cmd)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	timeout := 10*time.Second
@@ -33,170 +28,127 @@ func (m *DistributedMessages) apply(ctx context.Context, reqType RequestType, cm
 		return nil, future.Error()
 	}
 
-	res := future.Response()
+	res = future.Response()
 	if err, ok := res.(error); ok {
 		return nil, err
 	}
-	return res, nil
+
+	return
 }
 
-func (m *DistributedMessages) SaveMessage(ctx context.Context, message *model.Message) error {
-	cmd, _ := proto.Marshal(&AppendCommand{
-		Message: model.MessageToProto(message),
+func (m *DistributedMessages) SaveMessage(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (err error) {
+	cmd, err := proto.Marshal(&AppendCommand{
+		Id:       id,
+		Text:     text,
+		FileIds:  fileIDs,
+		ThreadId: threadID,
+		UserId:   userID,
+		Private:  private,
+		Name:     name,
 	})
-
-	_, err := m.apply(ctx, AppendRequest, cmd)
 	if err != nil {
-		logger.Errorln("raft failed to apply save message")
 		return err
 	}
 
-	return nil
+	_, err = m.apply(ctx, AppendRequest, cmd)
+
+	return
 }
 
-func (m *DistributedMessages) UpdateMessage(ctx context.Context, params *model.UpdateMessageParams) (
-	*model.UpdateMessageResult, error,
-) {
-	cmd, _ := proto.Marshal(&UpdateCommand{
-		Id: params.ID,
-		UserId: params.UserID,
-		FileIds: params.FileIDs,
-		ThreadId: params.ThreadID,
-		Text:   params.Text,
-		UpdateUtcNano: params.UpdateUTCNano,
-		Private: params.Private,
+func (m *DistributedMessages) UpdateMessage(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private int32) (err error) {
+	cmd, err := proto.Marshal(&UpdateCommand{
+		Id:       id,
+		UserId:   userID,
+		FileIds:  fileIDs,
+		ThreadId: threadID,
+		Text:     text,
+		Private:  private,
 	})
+	if err != nil {
+		return err
+	}
 
 	res, err := m.apply(ctx, UpdateRequest, cmd)
 	if err != nil {
-		logger.Errorln("raft failed to apply save message")
-		return nil, err
+		return err
 	}
 
-	switch val := res.(type) {
-	case *UpdateCommandResult:
-		return &model.UpdateMessageResult{
-			Private: val.Private,
-		}, nil
+	switch updatedAt := res.(type) {
 	case error:
-		return nil, val
+		return updatedAt
 	default:
-		logger.Errorln("update request reseived unknown type")
-		return nil, errors.New("unknown message update type")
+		return nil
 	}
 }
 
-func (m *DistributedMessages) DeleteAllUserMessages(ctx context.Context, params *model.DeleteAllUserMessagesParams) error {
-	cmd, _ := proto.Marshal(&DeleteAllUserMessagesCommand{
-		UserId: params.UserID,
+func (m *DistributedMessages) DeleteUserMessages(ctx context.Context, userID int64) (err error) {
+	cmd, err := proto.Marshal(&DeleteUserMessagesCommand{
+		UserId: userID,
 	})
-
-	_, err := m.apply(ctx, DeleteAllUserMessagesRequest, cmd)
 	if err != nil {
-		logger.Errorln("raft failed to apply delete all messages")
 		return err
 	}
 
-	return nil
+	_, err = m.apply(ctx, DeleteUserMessagesRequest, cmd)
+
+	return
 }
 
-func (m *DistributedMessages) DeleteMessage(ctx context.Context, params *model.DeleteMessageParams) error {
-	cmd, _ := proto.Marshal(&DeleteCommand{
-		Id: params.ID,
-		UserId: params.UserID,
-	})
-
-	_, err := m.apply(ctx, DeleteRequest, cmd)
-	if err != nil {
-		logger.Errorln("raft failed to apply delete message")
-		return err
-	}
-
-	return nil
-}
-
-func (m *DistributedMessages) DeleteMessages(ctx context.Context, params *model.DeleteMessagesParams) (*model.DeleteMessagesResult, error) {
-	statuses := make([]*model.DeleteMessageStatus, 0, len(params.IDs))
-	for _, id := range params.IDs {
-		cmd, _ := proto.Marshal(&DeleteCommand{
-			Id: id,
-			UserId: params.UserID,
+func (m *DistributedMessages) DeleteMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+	for _, id := range ids {
+		cmd, err := proto.Marshal(&DeleteCommand{
+			Id:     id,
+			UserId: userID,
 		})
-
-		res, err := m.apply(ctx, DeleteRequest, cmd)
 		if err != nil {
-			logger.Errorw("raft failed to apply delete message", "error", err)
-			statuses = append(statuses, &model.DeleteMessageStatus{
-				ID: id,
-				OK: false,
-				Explain: "error",
-			})
-			continue
+			return err
 		}
 
-		status, ok := res.(*DeleteCommandResult)
-		if !ok {
-			return nil, fmt.Errorf("cannot cast %T to *DeleteCommandResult\n", status)
+		_, err = m.apply(ctx, DeleteRequest, cmd)
+		if err != nil {
+			return err
 		}
-
-		statuses = append(statuses, &model.DeleteMessageStatus{
-			ID: id,
-			OK: status.Ok,
-			Explain: status.Explain,
-		})
 	}
 
-	return &model.DeleteMessagesResult{IDs: statuses}, nil
+	return
 }
 
-func (m *DistributedMessages) PublishMessages(ctx context.Context, params *model.PublishMessagesParams) (*model.PublishMessagesResult, error) {
-	cmd, _ := proto.Marshal(&PublishCommand{
-		Ids: params.IDs,
-		UserId: params.UserID,
-		UpdateUtcNano: params.UpdateUTCNano,
+func (m *DistributedMessages) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+	cmd, err := proto.Marshal(&PublishCommand{
+		Ids:           ids,
+		UserId:        userID,
 	})
-
-	_, err := m.apply(ctx, PublishRequest, cmd)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return &model.PublishMessagesResult{
-		UpdateUTCNano: params.UpdateUTCNano,
-	}, nil
+	_, err = m.apply(ctx, PublishRequest, cmd)
+
+	return
 }
 
-func (m *DistributedMessages) PrivateMessages(ctx context.Context, params *model.PrivateMessagesParams) (*model.PrivateMessagesResult, error) {
-	cmd, _ := proto.Marshal(&PrivateCommand{
-		Ids: params.IDs,
-		UserId: params.UserID,
-		UpdateUtcNano: params.UpdateUTCNano,
+func (m *DistributedMessages) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+	cmd, err := proto.Marshal(&PrivateCommand{
+		Ids:           ids,
+		UserId:        userID,
 	})
-
-	_, err := m.apply(ctx, PrivateRequest, cmd)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return &model.PrivateMessagesResult{
-		UpdateUTCNano: params.UpdateUTCNano,
-	}, nil
+	_, err = m.apply(ctx, PrivateRequest, cmd)
+
+	return
 }
 
-func (m *DistributedMessages) ReadMessage(ctx context.Context, id int64, userIDs []int64) (
-	*model.Message, error,
-) {
+func (m *DistributedMessages) ReadMessage(ctx context.Context, id int64, userIDs []int64) (message *model.Message, err error) {
 	return m.repo.Read(ctx, userIDs, id)
 }
 
-func (m *DistributedMessages) ReadThreadMessages(ctx context.Context, params *model.ReadThreadMessagesParams) (
-	messages []*model.Message, isLastPage bool, err error,
-) {
-	return m.repo.ReadThreadMessages(ctx, params.UserID, params.ThreadID, params.Limit, params.Offset, params.Private)
+func (m *DistributedMessages) ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool, private int32) (messages []*model.Message, isLastPage bool, err error) {
+	return m.repo.ReadThreadMessages(ctx, userID, threadID, limit, offset, private)
 }
 
-func (m *DistributedMessages) ReadAllMessages(ctx context.Context, params *model.ReadMessagesParams) (
-	messages []*model.Message, isLastPage bool, err error,
-) {
-	return m.repo.ReadAllMessages(ctx, params.UserID, params.Limit, params.Offset, params.Private)
+func (m *DistributedMessages) ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool, private int32) (messages []*model.Message, isLastPage bool, err error) {
+	return m.repo.ReadMessages(ctx, userID, limit, offset, private)
 }

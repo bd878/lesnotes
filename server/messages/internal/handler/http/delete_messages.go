@@ -69,10 +69,7 @@ func (h *Handler) DeleteMessages(w http.ResponseWriter, req *http.Request) (err 
 }
 
 func (h *Handler) deleteMessages(w http.ResponseWriter, req *http.Request, user *users.User, ids []int64) (err error) {
-	_, err = h.controller.DeleteMessages(req.Context(), &messages.DeleteMessagesParams{
-		IDs:    ids,
-		UserID: user.ID,
-	})
+	err = h.controller.DeleteMessages(req.Context(), ids, user.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

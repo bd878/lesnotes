@@ -10,21 +10,20 @@ import (
 )
 
 type Controller interface {
-	ReadOneMessage(ctx context.Context, id int64, userIDs []int64) (message *messages.Message, err error)
 	SaveMessage(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private bool) (message *messages.Message, err error)
-	UpdateMessage(ctx context.Context, params *messages.UpdateMessageParams) (*messages.UpdateMessageResult, error)
-	DeleteMessage(ctx context.Context, params *messages.DeleteMessageParams) (*messages.DeleteMessageResult, error)
-	DeleteMessages(ctx context.Context, params *messages.DeleteMessagesParams) (*messages.DeleteMessagesResult, error)
-	PublishMessages(ctx context.Context, params *messages.PublishMessagesParams) (*messages.PublishMessagesResult, error)
-	PrivateMessages(ctx context.Context, params *messages.PrivateMessagesParams) (*messages.PrivateMessagesResult, error)
-	ReadAllMessages(ctx context.Context, params *messages.ReadMessagesParams) (*messages.ReadMessagesResult, error)
-	ReadThreadMessages(ctx context.Context, params *messages.ReadThreadMessagesParams) (*messages.ReadThreadMessagesResult, error)
+	UpdateMessage(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private int32) (err error)
+	DeleteMessages(ctx context.Context, ids []int64, userID int64) (err error)
+	PublishMessages(ctx context.Context, ids []int64, userID int64) (err error)
+	PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error)
+	ReadMessage(ctx context.Context, id int64, userIDs []int64) (message *messages.Message, err error)
+	ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool, private int32) (messages []*messages.Message, isLastPage bool, err error)
+	ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool, private int32) (messages []*messages.Message, isLastPage bool, err error)
 }
 
 type FilesGateway interface {
-	ReadBatchFiles(ctx context.Context, params *messages.ReadBatchFilesParams) (*messages.ReadBatchFilesResult, error)
-	ReadFile(ctx context.Context, userID, fileID int64) (*files.File, error)
-	SaveFile(ctx context.Context, stream io.Reader, params *messages.SaveFileParams) (*messages.SaveFileResult, error)
+	ReadBatchFiles(ctx context.Context, fileIDs []int64, userID int64) (files map[int64]*files.File, err error)
+	ReadFile(ctx context.Context, userID, fileID int64) (file *files.File, err error)
+	SaveFile(ctx context.Context, stream io.Reader, name string, userID int64) (fileID int64, err error)
 }
 
 type Handler struct {

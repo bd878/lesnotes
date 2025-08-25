@@ -164,10 +164,7 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) (err err
 
 		fileName := filepath.Base(fh.Filename)
 
-		fileResult, err := h.filesGateway.SaveFile(req.Context(), f, &messages.SaveFileParams{
-			UserID: user.ID,
-			Name:   fileName,
-		})
+		fileID, err := h.filesGateway.SaveFile(req.Context(), f, fileName, user.ID)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(server.ServerResponse{
@@ -181,7 +178,7 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) (err err
 			return err
 		}
 
-		fileIDs = append(fileIDs, int64(fileResult.ID))
+		fileIDs = append(fileIDs, fileID)
 	}
 
 	id := utils.RandomID()
