@@ -2,21 +2,19 @@ package grpc
 
 import (
 	"io"
-	"time"
 	"context"
 	"bytes"
 	"sync"
 	"errors"
 
-	"github.com/bd878/gallery/server/utils"
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/files/pkg/model"
 )
 
 type Repository interface {
-	SaveFile(ctx context.Context, reader io.Reader, file *model.File) (err error)
-	GetMeta(ctx context.Context, ownerID, id int64) (file *model.File, err error)
+	SaveFile(ctx context.Context, reader io.Reader, id, userID int64, private bool, name, mime string) (err error)
+	GetMeta(ctx context.Context, ownerID, id int64, fileName string) (file *model.File, err error)
 	DeleteFile(ctx context.Context, ownerID, id int64) (err error)
 	ReadFile(ctx context.Context, oid int32, writer io.Writer) (err error)
 }
@@ -30,9 +28,7 @@ func New(repo Repository) *Handler {
 	return &Handler{repo: repo}
 }
 
-func (h *Handler) ReadBatchFiles(ctx context.Context, req *api.ReadBatchFilesRequest) (
-	*api.ReadBatchFilesResponse, error,
-) {
+func (h *Handler) ReadBatchFiles(ctx context.Context, req *api.ReadBatchFilesRequest) (*api.ReadBatchFilesResponse, error) {
 	files := make(map[int64]*model.File, len(req.Ids))
 	for _, id := range req.Ids {
 		files[id] = &model.File{
@@ -40,7 +36,7 @@ func (h *Handler) ReadBatchFiles(ctx context.Context, req *api.ReadBatchFilesReq
 			UserID: req.UserId,
 		}
 
-		file, err := h.repo.GetMeta(ctx, req.UserId, id)
+		file, err := h.repo.GetMeta(ctx, req.UserId, id, "")
 		if err != nil {
 			files[id].Error = "can not found file"
 			logger.Errorw("failed to read file", "user_id", req.UserId, "id", id, "error", err)
@@ -56,12 +52,9 @@ func (h *Handler) ReadBatchFiles(ctx context.Context, req *api.ReadBatchFilesReq
 	}, nil
 }
 
-func (h *Handler) ReadFile(ctx context.Context, req *api.ReadFileRequest) (
-	*api.File, error,
-) {
-	file, err := h.repo.GetMeta(ctx, req.UserId, req.Id)
+func (h *Handler) ReadFile(ctx context.Context, req *api.ReadFileRequest) (*api.File, error) {
+	file, err := h.repo.GetMeta(ctx, req.UserId, req.Id, "")
 	if err != nil {
-		logger.Errorw("failed to read one file", "user_id", req.UserId, "file_id", req.Id, "error", err)
 		return nil, err
 	}
 	return model.FileToProto(file), nil
@@ -86,7 +79,7 @@ func (w *streamWriter) Write(p []byte) (n int, err error) {
 }
 
 func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.Files_ReadFileStreamServer) (err error) {
-	file, err := h.repo.GetMeta(context.Background(), params.UserId, params.Id)
+	file, err := h.repo.GetMeta(context.Background(), params.UserId, params.Id, params.Name)
 	if err != nil {
 		logger.Errorw("failed to read file", "user_id", params.UserId, "id", params.Id, "name", params.Name, "public", params.Public, "error", err)
 		return err
@@ -103,6 +96,7 @@ func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.F
 				Id:             file.ID,
 				UserId:         file.UserID,
 				Name:           file.Name,
+				Mime:           file.Mime,
 				CreateUtcNano:  file.CreateUTCNano,
 				Private:        file.Private,
 				Size:           file.Size,
@@ -169,26 +163,10 @@ func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) error {
 		return errors.New("wrong format: file meta expected")
 	}
 
-	id := utils.RandomID()
-	timeCreated := time.Now().UnixNano()
-
-	err = h.repo.SaveFile(context.Background(), &streamReader{Files_SaveFileStreamServer: stream}, &model.File{
-		ID:              int64(id),
-		UserID:          file.File.UserId,
-		Name:            file.File.Name,
-		CreateUTCNano:   timeCreated,
-		Private:         file.File.Private,
-	})
+	err = h.repo.SaveFile(context.Background(), &streamReader{Files_SaveFileStreamServer: stream}, file.File.Id, file.File.UserId, file.File.Private, file.File.Name, file.File.Mime)
 	if err != nil {
-		logger.Errorw("failed to save file meta", "user_id", file.File.UserId, "name", file.File.Name, "error", err)
 		return err
 	}
 
-	return stream.SendAndClose(&api.SaveFileStreamResponse{
-		File: &api.File{
-			Id:               int64(id),
-			Name:             file.File.Name,
-			CreateUtcNano:    timeCreated,
-		},
-	})
+	return stream.SendAndClose(&api.SaveFileStreamResponse{})
 }

@@ -19,7 +19,7 @@ func (h *Handler) UploadFileV2(w http.ResponseWriter, req *http.Request) (err er
 			json.NewEncoder(w).Encode(server.ServerResponse{
 				Status: "error",
 				Error: &server.ErrorCode{
-					Code: server.CodeWrongFormat,
+					Code:    server.CodeWrongFormat,
 					Explain: fmt.Sprintf("wrong \"%s\" query param", "public"),
 				},
 			})

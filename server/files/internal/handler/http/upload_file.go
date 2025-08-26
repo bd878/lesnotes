@@ -2,11 +2,14 @@ package http
 
 import (
 	"errors"
+	"io"
+	"bytes"
 	"net/http"
 	"encoding/json"
 	"path/filepath"
 
 	"github.com/bd878/gallery/server/utils"
+	middleware "github.com/bd878/gallery/server/internal/middleware/http"
 	files "github.com/bd878/gallery/server/files/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
 	users "github.com/bd878/gallery/server/users/pkg/model"
@@ -27,18 +30,18 @@ func (h *Handler) uploadFile(w http.ResponseWriter, req *http.Request, public in
 		private = true
 	}
 
-	user, ok := utils.GetUser(w, req)
+	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code: server.CodeNoUser,
+				Code:    server.CodeNoUser,
 				Explain: "user required",
 			},
 		})
 
-		return errors.New("user required")
+		return
 	}
 
 	if user.ID == users.PublicUserID {
@@ -50,7 +53,7 @@ func (h *Handler) uploadFile(w http.ResponseWriter, req *http.Request, public in
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code: server.CodeWrongFormat,
+				Code:    server.CodeWrongFormat,
 				Explain: "failed to parse form",
 			},
 		})
@@ -63,7 +66,7 @@ func (h *Handler) uploadFile(w http.ResponseWriter, req *http.Request, public in
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:  &server.ErrorCode{
-				Code: files.CodeNoFile,
+				Code:    files.CodeNoFile,
 				Explain: "file required",
 			},
 		})
@@ -77,7 +80,7 @@ func (h *Handler) uploadFile(w http.ResponseWriter, req *http.Request, public in
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:  &server.ErrorCode{
-				Code: files.CodeReadFailed,
+				Code:    files.CodeReadFailed,
 				Explain: "cannot read file",
 			},
 		})
@@ -87,17 +90,20 @@ func (h *Handler) uploadFile(w http.ResponseWriter, req *http.Request, public in
 
 	fileName := filepath.Base(fh.Filename)
 
-	fileResult, err := h.controller.SaveFileStream(req.Context(), f, &files.SaveFileParams{
-		UserID: user.ID,
-		Name:   fileName,
-		Private: private,
-	})
+	var buf bytes.Buffer
+	io.CopyN(&buf, f, 512)
+	mime := http.DetectContentType(buf.Bytes())
+	f.Seek(0, io.SeekStart)
+
+	id := utils.RandomID()
+
+	err = h.controller.SaveFileStream(req.Context(), f, int64(id), user.ID, fileName, private, mime)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code: files.CodeSaveFailed,
+				Code:    files.CodeSaveFailed,
 				Explain: "cannot save file",
 			},
 		})
@@ -106,8 +112,8 @@ func (h *Handler) uploadFile(w http.ResponseWriter, req *http.Request, public in
 	}
 
 	response, err := json.Marshal(files.UploadResponse{
-		ID: fileResult.ID,
-		Name: fileName,
+		ID:          int64(id),
+		Name:        fileName,
 		Description: "saved",
 	})
 	if err != nil {
@@ -116,7 +122,7 @@ func (h *Handler) uploadFile(w http.ResponseWriter, req *http.Request, public in
 	}
 
 	json.NewEncoder(w).Encode(server.ServerResponse{
-		Status: "ok",
+		Status:   "ok",
 		Response: json.RawMessage(response),
 	})
 

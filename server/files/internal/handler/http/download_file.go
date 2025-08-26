@@ -2,19 +2,19 @@ package http
 
 import (
 	"io"
-	"errors"
 	"fmt"
 	"strconv"
 	"net/http"
 	"encoding/json"
 
 	"github.com/bd878/gallery/server/logger"
-	"github.com/bd878/gallery/server/utils"
+	users "github.com/bd878/gallery/server/users/pkg/model"
+	middleware "github.com/bd878/gallery/server/internal/middleware/http"
 	files "github.com/bd878/gallery/server/files/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) DownloadFile(w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) DownloadFile(w http.ResponseWriter, req *http.Request) (err error) {
 	var (
 		fileID int64
 	)
@@ -27,7 +27,7 @@ func (h *Handler) DownloadFile(w http.ResponseWriter, req *http.Request) error {
 			json.NewEncoder(w).Encode(server.ServerResponse{
 				Status: "error",
 				Error: &server.ErrorCode{
-					Code: server.CodeNoID,
+					Code:    server.CodeNoID,
 					Explain: "id is empty",
 				},
 			})
@@ -36,26 +36,27 @@ func (h *Handler) DownloadFile(w http.ResponseWriter, req *http.Request) error {
 		fileID = int64(fileid)
 	}
 
-	user, ok := utils.GetUser(w, req)
+	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code: server.CodeNoUser,
+				Code:    server.CodeNoUser,
 				Explain: "user required",
 			},
 		})
-		return errors.New("user required")
+
+		return
 	}
 
-	file, stream, err := h.controller.ReadFileStream(req.Context(), &files.ReadFileStreamParams{FileID: fileID, UserID: user.ID})
+	file, stream, err := h.controller.ReadFileStream(req.Context(), fileID, user.ID, "", false)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
 			Error: &server.ErrorCode{
-				Code: files.CodeReadFailed,
+				Code:    files.CodeReadFailed,
 				Explain: "failed to read file",
 			},
 		})
@@ -73,12 +74,12 @@ func (h *Handler) DownloadFile(w http.ResponseWriter, req *http.Request) error {
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
 			Error: &server.ErrorCode{
-				Code: files.CodeWriteFailed,
+				Code:    files.CodeWriteFailed,
 				Explain: "failed to write file to response",
 			},
 		})
-		return err
+		return
 	}
 
-	return nil
+	return
 }

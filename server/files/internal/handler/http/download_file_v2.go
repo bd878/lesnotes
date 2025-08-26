@@ -20,11 +20,11 @@ func (h *Handler) DownloadFileV2(w http.ResponseWriter, req *http.Request) (err 
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:  &server.ErrorCode{
-				Code: server.CodeNoUser,
+				Code:    server.CodeNoUser,
 				Explain: "user_id required",
 			},
 		})
-		return errors.New("no user_id in path given")
+		return
 	}
 
 	userID, err := strconv.Atoi(userIDStr)
@@ -33,7 +33,7 @@ func (h *Handler) DownloadFileV2(w http.ResponseWriter, req *http.Request) (err 
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:  &server.ErrorCode{
-				Code: server.CodeWrongFormat,
+				Code:    server.CodeWrongFormat,
 				Explain: "error parsing request",
 			},
 		})
@@ -46,20 +46,20 @@ func (h *Handler) DownloadFileV2(w http.ResponseWriter, req *http.Request) (err 
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:  &server.ErrorCode{
-				Code: files.CodeNoFileName,
+				Code:    files.CodeNoFileName,
 				Explain: "name required",
 			},
 		})
 		return errors.New("no name in path given")
 	}
 
-	file, stream, err := h.controller.ReadFileStream(req.Context(), &files.ReadFileStreamParams{FileName: fileName, UserID: int64(userID), Public: true})
+	file, stream, err := h.controller.ReadFileStream(req.Context(), 0, int64(userID), fileName, true)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
 			Error:  &server.ErrorCode{
-				Code:  files.CodeReadFailed,
+				Code:    files.CodeReadFailed,
 				Explain: "failed to read file",
 			},
 		})
@@ -81,8 +81,8 @@ func (h *Handler) DownloadFileV2(w http.ResponseWriter, req *http.Request) (err 
 				Explain: "failed to write file to response",
 			},
 		})
-		return err
+		return
 	}
 
-	return nil
+	return
 }

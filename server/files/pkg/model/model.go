@@ -18,29 +18,4 @@ type (
 		Name           string        `json:"name,omitempty"`
 		Description    string        `json:"description,omitempty"`
 	}
-
-	ReadFileParams struct {
-		ID             int64         `json:"id,omitempty"`
-		Name           string        `json:"name,omitempty"`
-		UserID         int64         `json:"user_id"`
-	}
-
-	ReadFileStreamParams struct {
-		FileName       string        `json:"name,omitempty"`
-		FileID         int64         `json:"file_id,omitempty"`
-		UserID         int64         `json:"user_id"`
-		Public         bool          `json:"public,omitempty"`
-	}
-
-	SaveFileParams struct {
-		Name              string
-		UserID            int64
-		Private           bool
-	}
-
-	SaveFileResult struct {
-		ID                int64
-		CreateUTCNano     int64
-	}
-
 )
