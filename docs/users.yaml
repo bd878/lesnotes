@@ -5,13 +5,18 @@ info:
     This API allows authenticating requests.
   version: 1.0.0
 paths:
-  /users/v1/get:
+# ME
+  /users/v1/me:
     parameters:
-      - $ref: '#/components/parameters/userId'
+      - in: header
+        name: Cookie
+        schema:
+          type: string
+          example: token=AAAAAA
     get:
-      summary: Get user data
+      summary: Get this user's data
       description: |
-        Returns given user's metadata info
+        Returns authorized user's data
       operationId: getMe
       responses:
         "200":
@@ -19,14 +24,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/user'
+                $ref: '#/components/schemas/meOk'
         "4XX":
           description: error
           content:
             application:
               schema:
-                $ref: '#/components/schemas/getUserErr'
+                $ref: '#/components/schemas/serverError'
+# END ME
 
+# AUTH
   /users/v1/auth:
     parameters:
       - in: header
@@ -52,7 +59,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/authErr'
+                $ref: '#/components/schemas/serverError'
 
   /users/v2/auth:
     post:
@@ -65,7 +72,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/authUserJson'
+              $ref: '#/components/schemas/authJson'
       responses:
         "200":
           description: OK
@@ -78,8 +85,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/authErr'
+                $ref: '#/components/schemas/serverError'
+# END AUTH
 
+# SIGNUP
   /users/v1/signup:
     post:
       summary: Registers user
@@ -90,7 +99,7 @@ paths:
         content:
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/signupUser'
+              $ref: '#/components/schemas/signupForm'
       responses:
         "200":
           description: OK
@@ -103,7 +112,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/signupErr'
+                $ref: '#/components/schemas/serverError'
 
   /users/v2/signup:
     post:
@@ -115,21 +124,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/signupUserJson'
+              $ref: '#/components/schemas/signupJson'
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/signupOkJson'
+                $ref: '#/components/schemas/signupOk'
         "4XX":
           description: error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/signupErr'
+                $ref: '#/components/schemas/serverError'
+# END SIGNUP
 
+# LOGIN
   /users/v1/login:
     post:
       summary: Logs in user
@@ -140,7 +151,7 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/loginUser'
+              $ref: '#/components/schemas/loginForm'
       responses:
         "200":
           description: OK
@@ -153,7 +164,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/loginErr'
+                $ref: '#/components/schemas/serverError'
 
   /users/v2/login:
     post:
@@ -165,21 +176,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/loginUserJson'
+              $ref: '#/components/schemas/loginJson'
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/loginOkJson'
+                $ref: '#/components/schemas/loginOk'
         "4XX":
           description: error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/loginErr'
+                $ref: '#/components/schemas/serverError'
+# END LOGIN
 
+# LOGOUT
   /users/v1/logout:
     parameters:
       - in: header
@@ -197,63 +210,43 @@ paths:
           description: OK
           content:
             application/json:
-              type: object
-              status:
-                type: string
-                default: "ok"
-              description:
-                type: string
-                default: "deleted"
+              schema:
+                $ref: '#/components/schemas/logoutOk'
         "4XX":
           description: error
           content:
             application/json:
-              type: object
-              status:
-                type: string
-                default: "error"
-              description:
-                type: string
-                default: "failed to logout"
+              schema:
+                $ref: '#/components/schemas/serverError'
+# END LOGOUT
 
+# DELETE
   /users/v2/delete:
     post:
-      summary: Deletes user via json api
+      summary: Deletes this user via json api
       description: |
         Deletes user and all releated notes, public and private
-      operationId: deleteUserJson
+      operationId: deleteUser
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/deleteUserJson'
+              $ref: '#/components/schemas/deleteJson'
       responses:
         "200":
           description: OK
           content:
             application/json:
-              type: object
-              status:
-                type: string
-                default: "ok"
-              description:
-                type: string
-                default: ""
+              $ref: '#/components/schemas/deleteOk'
         "4XX":
           description: error
           content:
             application/json:
-              type: object
-              status:
-                type: string
-                default: "error"
-              description:
-                type: string
-                default: "failed to delete"
-              expired:
-                type: boolean
-                default: true
+              schema:
+                $ref: '#/components/schemas/serverError'
+# END DELETE
 
+# STATUS
   /users/v1/status:
     get:
       summary: Returns operational status
@@ -262,237 +255,175 @@ paths:
         "200":
           description: ok
           content:
-            application/json:
-              type: object
-              status:
-                type: string
+            text/plain:
+              content:
                 default: "ok"
-              description:
-                type: string
-                default: "working"
+# END STATUS
 
 components:
-  parameters:
-    userId:
-      name: id
-      in: query
-      required: true
-      schema:
-        type: integer
-        example: 1
-
   schemas:
-    loginErr:
+# ERROR
+    serverError:
       type: object
-      oneOf:
-      - type: object
-        status:
-          type: string
-          default: "ok"
-        description:
-          type: string
-          default: "user not found"
-      - type: object
-        status:
-          type: string
-          default: "ok"
-        description:
-          type: string
-          default: "no password"
+      status:
+        type: string
+        default: "error"
+      error:
+        type: object
+        properties:
+          code:
+            type: integer
+          explain:
+            type: string
+# END ERROR
 
-    loginOkJson:
-      type: object
-      properties:
-        status:
-          type: string
-          default: "ok"
-        description:
-          type: string
-          default: "authenticated"
-        token:
-          type: string
-          required: true
-        expires_utc_nano:
-          type: integer
-          example: 1
-
+# LOGIN
     loginOk:
       type: object
       status:
         type: string
         default: "ok"
-      description:
-        type: string
-        default: "authenticated"
+      response:
+        type: object
+        properties:
+          token:
+            type: string
+          expires_utc_nano:
+            type: integer
 
-    deleteUserJson:
+    loginForm:
       type: object
-      token:
-        type: string
-        example: "AAAAAA"
-      name:
-        type: string
-        example: "abc"
-      password:
-        type: string
-        example: "pass"
-
-    loginUserJson:
-      type: object
-      name:
+      login:
         type: string
         example: test
       password:
         type: string
         example: "12345"
 
-    authUserJson:
+    loginJson:
+      type: object
+      token:
+        type: string
+        example: "AAAAAA"
+      request:
+        type: object
+        properties:
+          login:
+            type: string
+            example: test
+          password:
+            type: string
+            example: "12345"
+# END LOGIN
+
+# LOGOUT
+    logoutOk:
+      type: object
+      status:
+        type: string
+        default: "ok"
+      response:
+        type: object
+        properties:
+          description:
+            type: string
+# END LOGOUT
+
+# DELETE
+    deleteJson:
+      type: object
+      token:
+        type: string
+        example: "AAAAAA"
+      request:
+        type: object
+        properties:
+          login:
+            type: string
+            example: "abc"
+
+    deleteOk:
+      type: object
+      status:
+        type: string
+        default: "ok"
+      response:
+        type: object
+        properties:
+          description:
+            type: string
+# END DELETE
+
+# AUTH
+    authJson:
       type: object
       properties:
         token:
           type: string
           default: ""
           required: true
-        req:
-          type: object
-          required: false
-
-    loginUser:
-      type: object
-      name:
-        type: string
-        example: test
-      password:
-        type: string
-        example: "12345"
-
-    signupUserJson:
-      type: object
-      name:
-        type: string
-        example: text
-      password:
-        type: string
-        example: "12345"
-
-    signupUser:
-      type: object
-      name:
-        type: string
-        example: test
-      password:
-        type: string
-        example: "12345"
-
-    signupErr:
-      oneOf:
-      - type: object
-        status:
-          type: string
-          default: "ok"
-        description:
-          type: string
-          default: "name exists"
-      - type: object
-        status:
-          type: string
-          default: "ok"
-        description:
-          type: string
-          default: "no name"
-      - type: object
-        status:
-          type: string
-          default: "ok"
-        description:
-          type: string
-          default: "no password"
-
-    getUserErr:
-      type: object
-      status:
-        type: string
-        default: "error"
-      description:
-        type: string
-        default: ""
-
-    signupOkJson:
-      type: object
-      properties:
-        status:
-          type: string
-          default: "ok"
-        description:
-          type: string
-          default: "created"
-        token:
-          type: string
-          example: "AAA"
-        id:
-          type: integer
-          example: 1
-        expires_utc_nano:
-          type: integer
-          example: 1
-
-    signupOk:
-      type: object
-      status:
-        type: string
-        default: "ok"
-      description:
-        type: string
-        default: "created"
-
-    authErr:
-      type: object
-      status:
-        type: string
-        default: "ok"
-      description:
-        type: string
-        default: "token expired"
-      expired:
-        type: boolean
-        default: true
 
     authOk:
       type: object
       status:
         type: string
         default: "ok"
-      description:
-        type: string
-        default: "token valid"
-      expired:
-        type: boolean
-        default: false
-      user:
-        $ref: '#/components/schemas/user'
-
-    user:
-      type: object
-      oneOf:
-      - type: object
+      response:
+        type: object
         properties:
+          expired:
+            type: boolean
+            default: false
+# END AUTH
+
+# SIGNUP
+    signupJson:
+      type: object
+      login:
+        type: string
+        example: text
+      password:
+        type: string
+        example: "12345"
+
+    signupForm:
+      type: object
+      login:
+        type: string
+        example: test
+      password:
+        type: string
+        example: "12345"
+
+    signupOk:
+      type: object
+      status:
+        type: string
+        default: "ok"
+      response:
+        type: object
+        properties:
+          description:
+            type: string
           id:
             type: integer
-            example: 1
-          name:
-            type: string
-            example: test
           token:
             type: string
-            example: AAAAAA
           expires_utc_nano:
             type: integer
-            example: 1234598000000
-      - type: object
+# END SIGNUP
+
+# ME
+    meOk:
+      type: object
+      status:
+        type: string
+        default: "ok"
+      response:
+        type: object
         properties:
           id:
             type: integer
-            example: 1
-          name:
+          login:
             type: string
-            example: test
+# END ME

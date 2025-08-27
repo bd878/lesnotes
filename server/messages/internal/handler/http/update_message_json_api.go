@@ -2,77 +2,91 @@ package http
 
 import (
 	"net/http"
-	"fmt"
 	"encoding/json"
 
-	servermodel "github.com/bd878/gallery/server/pkg/model"
-	"github.com/bd878/gallery/server/utils"
-	"github.com/bd878/gallery/server/messages/pkg/model"
+	middleware "github.com/bd878/gallery/server/internal/middleware/http"
+	users "github.com/bd878/gallery/server/users/pkg/model"
+	messages "github.com/bd878/gallery/server/messages/pkg/model"
+	server "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) UpdateMessageJsonAPI(w http.ResponseWriter, req *http.Request) error {
-	var threadID int64
-	var public int
-	var text string
-
-	user, ok := utils.GetUser(w, req)
+func (h *Handler) UpdateMessageJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
+	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "user required",
+			Error: &server.ErrorCode{
+				Code:    server.CodeNoUser,
+				Explain: "user required",
+			},
 		})
 
-		return fmt.Errorf("no user")
+		return
 	}
 
-	data, ok := utils.GetJsonRequestBody(w, req)
+	data, ok := req.Context().Value(middleware.RequestContextKey{}).(json.RawMessage)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "body data required",
+			Error:  &server.ErrorCode{
+				Code:    server.CodeNoBody,
+				Explain: "request required",
+			},
 		})
 
-		return fmt.Errorf("no req data")
+		return
 	}
 
-	var jsonRequest model.UpdateMessageJsonRequest
-	if err := json.Unmarshal(data, &jsonRequest); err != nil {
+	var request messages.UpdateRequest
+	if err = json.Unmarshal(data, &request); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "failed to parse message",
+			Error: &server.ErrorCode{
+				Code:    server.CodeWrongFormat,
+				Explain: "failed to parse message",
+			},
 		})
 
-		return err
+		return
 	}
 
-	if jsonRequest.MessageID == nil {
+	if request.MessageID == 0 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "empty message id",
+			Error: &server.ErrorCode{
+				Code:    server.CodeNoID,
+				Explain: "empty message id",
+			},
 		})
 
 		return nil
 	}
 
-	if jsonRequest.ThreadID != nil {
-		threadID = *jsonRequest.ThreadID
+	var (
+		threadID int64
+		public   int
+		text     string
+	)
+
+	if request.ThreadID != nil {
+		threadID = *request.ThreadID
 	} else {
 		threadID = -1
 	}
 
-	if jsonRequest.Public != nil {
-		public = *jsonRequest.Public
+	if request.Public != nil {
+		public = *request.Public
 	} else {
 		public = -1
 	}
 
-	if jsonRequest.Text != nil {
-		text = *jsonRequest.Text
+	if request.Text != nil {
+		text = *request.Text
 	}
 
-	return h.updateMessage(req.Context(), w, *jsonRequest.MessageID, user, text, threadID, public)
+	return h.updateMessage(req.Context(), w, request.MessageID, user, text, threadID, public)
 }

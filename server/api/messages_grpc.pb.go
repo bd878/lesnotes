@@ -19,14 +19,13 @@ const _ = grpc.SupportPackageIsVersion7
 type MessagesClient interface {
 	GetServers(ctx context.Context, in *GetServersRequest, opts ...grpc.CallOption) (*GetServersResponse, error)
 	SaveMessage(ctx context.Context, in *SaveMessageRequest, opts ...grpc.CallOption) (*SaveMessageResponse, error)
-	DeleteMessage(ctx context.Context, in *DeleteMessageRequest, opts ...grpc.CallOption) (*DeleteMessageResponse, error)
 	DeleteMessages(ctx context.Context, in *DeleteMessagesRequest, opts ...grpc.CallOption) (*DeleteMessagesResponse, error)
-	DeleteAllUserMessages(ctx context.Context, in *DeleteAllUserMessagesRequest, opts ...grpc.CallOption) (*DeleteAllUserMessagesResponse, error)
+	DeleteUserMessages(ctx context.Context, in *DeleteUserMessagesRequest, opts ...grpc.CallOption) (*DeleteUserMessagesResponse, error)
 	PublishMessages(ctx context.Context, in *PublishMessagesRequest, opts ...grpc.CallOption) (*PublishMessagesResponse, error)
 	PrivateMessages(ctx context.Context, in *PrivateMessagesRequest, opts ...grpc.CallOption) (*PrivateMessagesResponse, error)
 	UpdateMessage(ctx context.Context, in *UpdateMessageRequest, opts ...grpc.CallOption) (*UpdateMessageResponse, error)
-	ReadOneMessage(ctx context.Context, in *ReadOneMessageRequest, opts ...grpc.CallOption) (*Message, error)
-	ReadAllMessages(ctx context.Context, in *ReadMessagesRequest, opts ...grpc.CallOption) (*ReadMessagesResponse, error)
+	ReadMessage(ctx context.Context, in *ReadMessageRequest, opts ...grpc.CallOption) (*Message, error)
+	ReadMessages(ctx context.Context, in *ReadMessagesRequest, opts ...grpc.CallOption) (*ReadMessagesResponse, error)
 	ReadThreadMessages(ctx context.Context, in *ReadThreadMessagesRequest, opts ...grpc.CallOption) (*ReadThreadMessagesResponse, error)
 }
 
@@ -56,15 +55,6 @@ func (c *messagesClient) SaveMessage(ctx context.Context, in *SaveMessageRequest
 	return out, nil
 }
 
-func (c *messagesClient) DeleteMessage(ctx context.Context, in *DeleteMessageRequest, opts ...grpc.CallOption) (*DeleteMessageResponse, error) {
-	out := new(DeleteMessageResponse)
-	err := c.cc.Invoke(ctx, "/messages.v1.Messages/DeleteMessage", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *messagesClient) DeleteMessages(ctx context.Context, in *DeleteMessagesRequest, opts ...grpc.CallOption) (*DeleteMessagesResponse, error) {
 	out := new(DeleteMessagesResponse)
 	err := c.cc.Invoke(ctx, "/messages.v1.Messages/DeleteMessages", in, out, opts...)
@@ -74,9 +64,9 @@ func (c *messagesClient) DeleteMessages(ctx context.Context, in *DeleteMessagesR
 	return out, nil
 }
 
-func (c *messagesClient) DeleteAllUserMessages(ctx context.Context, in *DeleteAllUserMessagesRequest, opts ...grpc.CallOption) (*DeleteAllUserMessagesResponse, error) {
-	out := new(DeleteAllUserMessagesResponse)
-	err := c.cc.Invoke(ctx, "/messages.v1.Messages/DeleteAllUserMessages", in, out, opts...)
+func (c *messagesClient) DeleteUserMessages(ctx context.Context, in *DeleteUserMessagesRequest, opts ...grpc.CallOption) (*DeleteUserMessagesResponse, error) {
+	out := new(DeleteUserMessagesResponse)
+	err := c.cc.Invoke(ctx, "/messages.v1.Messages/DeleteUserMessages", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -110,18 +100,18 @@ func (c *messagesClient) UpdateMessage(ctx context.Context, in *UpdateMessageReq
 	return out, nil
 }
 
-func (c *messagesClient) ReadOneMessage(ctx context.Context, in *ReadOneMessageRequest, opts ...grpc.CallOption) (*Message, error) {
+func (c *messagesClient) ReadMessage(ctx context.Context, in *ReadMessageRequest, opts ...grpc.CallOption) (*Message, error) {
 	out := new(Message)
-	err := c.cc.Invoke(ctx, "/messages.v1.Messages/ReadOneMessage", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/messages.v1.Messages/ReadMessage", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *messagesClient) ReadAllMessages(ctx context.Context, in *ReadMessagesRequest, opts ...grpc.CallOption) (*ReadMessagesResponse, error) {
+func (c *messagesClient) ReadMessages(ctx context.Context, in *ReadMessagesRequest, opts ...grpc.CallOption) (*ReadMessagesResponse, error) {
 	out := new(ReadMessagesResponse)
-	err := c.cc.Invoke(ctx, "/messages.v1.Messages/ReadAllMessages", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/messages.v1.Messages/ReadMessages", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -143,14 +133,13 @@ func (c *messagesClient) ReadThreadMessages(ctx context.Context, in *ReadThreadM
 type MessagesServer interface {
 	GetServers(context.Context, *GetServersRequest) (*GetServersResponse, error)
 	SaveMessage(context.Context, *SaveMessageRequest) (*SaveMessageResponse, error)
-	DeleteMessage(context.Context, *DeleteMessageRequest) (*DeleteMessageResponse, error)
 	DeleteMessages(context.Context, *DeleteMessagesRequest) (*DeleteMessagesResponse, error)
-	DeleteAllUserMessages(context.Context, *DeleteAllUserMessagesRequest) (*DeleteAllUserMessagesResponse, error)
+	DeleteUserMessages(context.Context, *DeleteUserMessagesRequest) (*DeleteUserMessagesResponse, error)
 	PublishMessages(context.Context, *PublishMessagesRequest) (*PublishMessagesResponse, error)
 	PrivateMessages(context.Context, *PrivateMessagesRequest) (*PrivateMessagesResponse, error)
 	UpdateMessage(context.Context, *UpdateMessageRequest) (*UpdateMessageResponse, error)
-	ReadOneMessage(context.Context, *ReadOneMessageRequest) (*Message, error)
-	ReadAllMessages(context.Context, *ReadMessagesRequest) (*ReadMessagesResponse, error)
+	ReadMessage(context.Context, *ReadMessageRequest) (*Message, error)
+	ReadMessages(context.Context, *ReadMessagesRequest) (*ReadMessagesResponse, error)
 	ReadThreadMessages(context.Context, *ReadThreadMessagesRequest) (*ReadThreadMessagesResponse, error)
 	mustEmbedUnimplementedMessagesServer()
 }
@@ -165,14 +154,11 @@ func (UnimplementedMessagesServer) GetServers(context.Context, *GetServersReques
 func (UnimplementedMessagesServer) SaveMessage(context.Context, *SaveMessageRequest) (*SaveMessageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveMessage not implemented")
 }
-func (UnimplementedMessagesServer) DeleteMessage(context.Context, *DeleteMessageRequest) (*DeleteMessageResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteMessage not implemented")
-}
 func (UnimplementedMessagesServer) DeleteMessages(context.Context, *DeleteMessagesRequest) (*DeleteMessagesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteMessages not implemented")
 }
-func (UnimplementedMessagesServer) DeleteAllUserMessages(context.Context, *DeleteAllUserMessagesRequest) (*DeleteAllUserMessagesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteAllUserMessages not implemented")
+func (UnimplementedMessagesServer) DeleteUserMessages(context.Context, *DeleteUserMessagesRequest) (*DeleteUserMessagesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteUserMessages not implemented")
 }
 func (UnimplementedMessagesServer) PublishMessages(context.Context, *PublishMessagesRequest) (*PublishMessagesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PublishMessages not implemented")
@@ -183,11 +169,11 @@ func (UnimplementedMessagesServer) PrivateMessages(context.Context, *PrivateMess
 func (UnimplementedMessagesServer) UpdateMessage(context.Context, *UpdateMessageRequest) (*UpdateMessageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateMessage not implemented")
 }
-func (UnimplementedMessagesServer) ReadOneMessage(context.Context, *ReadOneMessageRequest) (*Message, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ReadOneMessage not implemented")
+func (UnimplementedMessagesServer) ReadMessage(context.Context, *ReadMessageRequest) (*Message, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReadMessage not implemented")
 }
-func (UnimplementedMessagesServer) ReadAllMessages(context.Context, *ReadMessagesRequest) (*ReadMessagesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ReadAllMessages not implemented")
+func (UnimplementedMessagesServer) ReadMessages(context.Context, *ReadMessagesRequest) (*ReadMessagesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReadMessages not implemented")
 }
 func (UnimplementedMessagesServer) ReadThreadMessages(context.Context, *ReadThreadMessagesRequest) (*ReadThreadMessagesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadThreadMessages not implemented")
@@ -241,24 +227,6 @@ func _Messages_SaveMessage_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Messages_DeleteMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteMessageRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MessagesServer).DeleteMessage(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/messages.v1.Messages/DeleteMessage",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MessagesServer).DeleteMessage(ctx, req.(*DeleteMessageRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Messages_DeleteMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteMessagesRequest)
 	if err := dec(in); err != nil {
@@ -277,20 +245,20 @@ func _Messages_DeleteMessages_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Messages_DeleteAllUserMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteAllUserMessagesRequest)
+func _Messages_DeleteUserMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteUserMessagesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MessagesServer).DeleteAllUserMessages(ctx, in)
+		return srv.(MessagesServer).DeleteUserMessages(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/messages.v1.Messages/DeleteAllUserMessages",
+		FullMethod: "/messages.v1.Messages/DeleteUserMessages",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MessagesServer).DeleteAllUserMessages(ctx, req.(*DeleteAllUserMessagesRequest))
+		return srv.(MessagesServer).DeleteUserMessages(ctx, req.(*DeleteUserMessagesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -349,38 +317,38 @@ func _Messages_UpdateMessage_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Messages_ReadOneMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReadOneMessageRequest)
+func _Messages_ReadMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReadMessageRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MessagesServer).ReadOneMessage(ctx, in)
+		return srv.(MessagesServer).ReadMessage(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/messages.v1.Messages/ReadOneMessage",
+		FullMethod: "/messages.v1.Messages/ReadMessage",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MessagesServer).ReadOneMessage(ctx, req.(*ReadOneMessageRequest))
+		return srv.(MessagesServer).ReadMessage(ctx, req.(*ReadMessageRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Messages_ReadAllMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Messages_ReadMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ReadMessagesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MessagesServer).ReadAllMessages(ctx, in)
+		return srv.(MessagesServer).ReadMessages(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/messages.v1.Messages/ReadAllMessages",
+		FullMethod: "/messages.v1.Messages/ReadMessages",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MessagesServer).ReadAllMessages(ctx, req.(*ReadMessagesRequest))
+		return srv.(MessagesServer).ReadMessages(ctx, req.(*ReadMessagesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -416,16 +384,12 @@ var _Messages_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Messages_SaveMessage_Handler,
 		},
 		{
-			MethodName: "DeleteMessage",
-			Handler:    _Messages_DeleteMessage_Handler,
-		},
-		{
 			MethodName: "DeleteMessages",
 			Handler:    _Messages_DeleteMessages_Handler,
 		},
 		{
-			MethodName: "DeleteAllUserMessages",
-			Handler:    _Messages_DeleteAllUserMessages_Handler,
+			MethodName: "DeleteUserMessages",
+			Handler:    _Messages_DeleteUserMessages_Handler,
 		},
 		{
 			MethodName: "PublishMessages",
@@ -440,12 +404,12 @@ var _Messages_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Messages_UpdateMessage_Handler,
 		},
 		{
-			MethodName: "ReadOneMessage",
-			Handler:    _Messages_ReadOneMessage_Handler,
+			MethodName: "ReadMessage",
+			Handler:    _Messages_ReadMessage_Handler,
 		},
 		{
-			MethodName: "ReadAllMessages",
-			Handler:    _Messages_ReadAllMessages_Handler,
+			MethodName: "ReadMessages",
+			Handler:    _Messages_ReadMessages_Handler,
 		},
 		{
 			MethodName: "ReadThreadMessages",

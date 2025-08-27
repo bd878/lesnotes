@@ -4,10 +4,10 @@
 
 stage=${STAGE:-"stage."}
 cookie=${COOKIE:-"cookie.txt"}
-name=${NAME:?"Usage: env NAME= PASSWORD= ./login.sh"}
-password=${PASSWORD:?"Usage: env NAME= PASSWORD= ./login.sh"}
+login=${LOGIN:?"Usage: env LOGIN= PASSWORD= ./login.sh"}
+password=${PASSWORD:?"Usage: env LOGIN= PASSWORD= ./login.sh"}
 
-json=$(echo -n '{\"name\":\"%NAME%\",\"password\":\"%PASSWORD\"}' | sed -e "s/%NAME%/$name/g" -e "s/%PASSWORD%/$password/g")
+json=$(echo -n '{\"login\":\"%LOGIN%\",\"password\":\"%PASSWORD\"}' | sed -e "s/%LOGIN%/$login/g" -e "s/%PASSWORD%/$password/g")
 
 cmd=`cat <<HERE
 sed -e "s/%STAGE%/$stage/g" \

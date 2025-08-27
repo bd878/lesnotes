@@ -6,94 +6,117 @@ import (
 	"errors"
 	"encoding/json"
 
-	"github.com/bd878/gallery/server/users/pkg/model"
 	"github.com/bd878/gallery/server/users/internal/controller"
-	servermodel "github.com/bd878/gallery/server/pkg/model"
+	users "github.com/bd878/gallery/server/users/pkg/model"
+	server "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) LoginJsonAPI(w http.ResponseWriter, req *http.Request) error {
-	var err error
-
+func (h *Handler) LoginJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
 	data, err := io.ReadAll(req.Body)
-	if err != nil {
-		req.Body.Close()
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status:      "error",
-			Description: "failed to parse request",
-		})
-
-		return err
-	}
-
 	defer req.Body.Close()
-
-	var body model.LoginUserJsonRequest
-	if err := json.Unmarshal(data, &body); err != nil {
+	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
-			Description: "failed to parse user",
+			Error: &server.ErrorCode{
+				Code:     server.CodeWrongFormat,
+				Explain: "failed to parse request",
+			},
 		})
 
 		return err
 	}
 
-	if body.Login == "" {
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+	var request users.LoginRequest
+	if err = json.Unmarshal(data, &request); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
-			Description: "no name",
+			Error: &server.ErrorCode{
+				Code:    server.CodeWrongFormat,
+				Explain: "failed to parse login request",
+			},
 		})
 
-		return errors.New("cannot get user name from request")
+		return
 	}
 
-	if body.Password == "" {
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+	if request.Login == "" {
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
-			Description: "no password",
+			Error: &server.ErrorCode{
+				Code:     users.CodeNoLogin,
+				Explain: "no login",
+			},
+		})
+
+		return errors.New("cannot get user login from request")
+	}
+
+	if request.Password == "" {
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status:      "error",
+			Error: &server.ErrorCode{
+				Code:    users.CodeNoPassword,
+				Explain: "no password",
+			},
 		})
 
 		return errors.New("cannot get password from request")
 	}
 
 
-	session, err := h.controller.LoginUser(req.Context(), body.Login, body.Password)
+	session, err := h.controller.LoginUser(req.Context(), request.Login, request.Password)
 	switch err {
 	case controller.ErrUserNotFound:
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
-			Description: "no user,password pair",
+			Error: &server.ErrorCode{
+				Code:    server.CodeNoUser,
+				Explain: "no user,password pair",
+			},
 		})
 
 		return err
 
 	case controller.ErrWrongPassword:
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
-			Description: "wrong password",
+			Error:   &server.ErrorCode{
+				Code: users.CodeBadPassword,
+				Explain: "wrong password",
+			},
 		})
 
 		return err
 
 	case nil:
-		json.NewEncoder(w).Encode(&model.LoginJsonUserServerResponse{
-			ServerResponse: servermodel.ServerResponse{
-				Status: "ok",
-				Description: "authenticated",
-			},
+		response, err := json.Marshal(users.LoginResponse{
 			Token:          session.Token,
 			ExpiresUTCNano: session.ExpiresUTCNano,
 		})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return err
+		}
+
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status:       "ok",
+			Response:     json.RawMessage(response),
+		})
+
 		return nil
 
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
-			Description: "cannot get user",
+			Error: &server.ErrorCode{
+				Code: server.CodeNoUser,
+				Explain: "cannot get user",
+			},
 		})
 
 		return err

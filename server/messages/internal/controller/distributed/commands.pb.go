@@ -7,7 +7,6 @@
 package distributed
 
 import (
-	api "github.com/bd878/gallery/server/api"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -26,7 +25,13 @@ type AppendCommand struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Message *api.Message `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	Id       int64   `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId   int64   `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	FileIds  []int64 `protobuf:"varint,3,rep,packed,name=file_ids,json=fileIds,proto3" json:"file_ids,omitempty"`
+	ThreadId int64   `protobuf:"varint,4,opt,name=thread_id,json=threadId,proto3" json:"thread_id,omitempty"`
+	Text     string  `protobuf:"bytes,5,opt,name=text,proto3" json:"text,omitempty"`
+	Name     string  `protobuf:"bytes,6,opt,name=name,proto3" json:"name,omitempty"`
+	Private  bool    `protobuf:"varint,7,opt,name=private,proto3" json:"private,omitempty"`
 }
 
 func (x *AppendCommand) Reset() {
@@ -61,58 +66,53 @@ func (*AppendCommand) Descriptor() ([]byte, []int) {
 	return file_messages_internal_controller_distributed_commands_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *AppendCommand) GetMessage() *api.Message {
-	if x != nil {
-		return x.Message
-	}
-	return nil
-}
-
-type AppendCommandResult struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-}
-
-func (x *AppendCommandResult) Reset() {
-	*x = AppendCommandResult{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[1]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *AppendCommandResult) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AppendCommandResult) ProtoMessage() {}
-
-func (x *AppendCommandResult) ProtoReflect() protoreflect.Message {
-	mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[1]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AppendCommandResult.ProtoReflect.Descriptor instead.
-func (*AppendCommandResult) Descriptor() ([]byte, []int) {
-	return file_messages_internal_controller_distributed_commands_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *AppendCommandResult) GetId() int64 {
+func (x *AppendCommand) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
+}
+
+func (x *AppendCommand) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *AppendCommand) GetFileIds() []int64 {
+	if x != nil {
+		return x.FileIds
+	}
+	return nil
+}
+
+func (x *AppendCommand) GetThreadId() int64 {
+	if x != nil {
+		return x.ThreadId
+	}
+	return 0
+}
+
+func (x *AppendCommand) GetText() string {
+	if x != nil {
+		return x.Text
+	}
+	return ""
+}
+
+func (x *AppendCommand) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *AppendCommand) GetPrivate() bool {
+	if x != nil {
+		return x.Private
+	}
+	return false
 }
 
 type UpdateCommand struct {
@@ -120,19 +120,19 @@ type UpdateCommand struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id            int64  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	UserId        int64  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	FileId        int64  `protobuf:"varint,3,opt,name=file_id,json=fileId,proto3" json:"file_id,omitempty"`
-	ThreadId      int64  `protobuf:"varint,4,opt,name=thread_id,json=threadId,proto3" json:"thread_id,omitempty"`
-	Text          string `protobuf:"bytes,5,opt,name=text,proto3" json:"text,omitempty"`
-	UpdateUtcNano int64  `protobuf:"varint,6,opt,name=update_utc_nano,json=updateUtcNano,proto3" json:"update_utc_nano,omitempty"`
-	Private       int32  `protobuf:"varint,7,opt,name=private,proto3" json:"private,omitempty"`
+	Id       int64   `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId   int64   `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	FileIds  []int64 `protobuf:"varint,3,rep,packed,name=file_ids,json=fileIds,proto3" json:"file_ids,omitempty"`
+	ThreadId int64   `protobuf:"varint,4,opt,name=thread_id,json=threadId,proto3" json:"thread_id,omitempty"`
+	Text     string  `protobuf:"bytes,5,opt,name=text,proto3" json:"text,omitempty"`
+	Name     string  `protobuf:"bytes,6,opt,name=name,proto3" json:"name,omitempty"`
+	Private  int32   `protobuf:"varint,7,opt,name=private,proto3" json:"private,omitempty"`
 }
 
 func (x *UpdateCommand) Reset() {
 	*x = UpdateCommand{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[2]
+		mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -145,7 +145,7 @@ func (x *UpdateCommand) String() string {
 func (*UpdateCommand) ProtoMessage() {}
 
 func (x *UpdateCommand) ProtoReflect() protoreflect.Message {
-	mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[2]
+	mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -158,7 +158,7 @@ func (x *UpdateCommand) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateCommand.ProtoReflect.Descriptor instead.
 func (*UpdateCommand) Descriptor() ([]byte, []int) {
-	return file_messages_internal_controller_distributed_commands_proto_rawDescGZIP(), []int{2}
+	return file_messages_internal_controller_distributed_commands_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *UpdateCommand) GetId() int64 {
@@ -175,11 +175,11 @@ func (x *UpdateCommand) GetUserId() int64 {
 	return 0
 }
 
-func (x *UpdateCommand) GetFileId() int64 {
+func (x *UpdateCommand) GetFileIds() []int64 {
 	if x != nil {
-		return x.FileId
+		return x.FileIds
 	}
-	return 0
+	return nil
 }
 
 func (x *UpdateCommand) GetThreadId() int64 {
@@ -196,11 +196,11 @@ func (x *UpdateCommand) GetText() string {
 	return ""
 }
 
-func (x *UpdateCommand) GetUpdateUtcNano() int64 {
+func (x *UpdateCommand) GetName() string {
 	if x != nil {
-		return x.UpdateUtcNano
+		return x.Name
 	}
-	return 0
+	return ""
 }
 
 func (x *UpdateCommand) GetPrivate() int32 {
@@ -208,61 +208,6 @@ func (x *UpdateCommand) GetPrivate() int32 {
 		return x.Private
 	}
 	return 0
-}
-
-type UpdateCommandResult struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	UpdateUtcNano int64 `protobuf:"varint,1,opt,name=update_utc_nano,json=updateUtcNano,proto3" json:"update_utc_nano,omitempty"`
-	Private       bool  `protobuf:"varint,2,opt,name=private,proto3" json:"private,omitempty"`
-}
-
-func (x *UpdateCommandResult) Reset() {
-	*x = UpdateCommandResult{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[3]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *UpdateCommandResult) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateCommandResult) ProtoMessage() {}
-
-func (x *UpdateCommandResult) ProtoReflect() protoreflect.Message {
-	mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[3]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateCommandResult.ProtoReflect.Descriptor instead.
-func (*UpdateCommandResult) Descriptor() ([]byte, []int) {
-	return file_messages_internal_controller_distributed_commands_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *UpdateCommandResult) GetUpdateUtcNano() int64 {
-	if x != nil {
-		return x.UpdateUtcNano
-	}
-	return 0
-}
-
-func (x *UpdateCommandResult) GetPrivate() bool {
-	if x != nil {
-		return x.Private
-	}
-	return false
 }
 
 type DeleteCommand struct {
@@ -277,7 +222,7 @@ type DeleteCommand struct {
 func (x *DeleteCommand) Reset() {
 	*x = DeleteCommand{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[4]
+		mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -290,7 +235,7 @@ func (x *DeleteCommand) String() string {
 func (*DeleteCommand) ProtoMessage() {}
 
 func (x *DeleteCommand) ProtoReflect() protoreflect.Message {
-	mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[4]
+	mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -303,7 +248,7 @@ func (x *DeleteCommand) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteCommand.ProtoReflect.Descriptor instead.
 func (*DeleteCommand) Descriptor() ([]byte, []int) {
-	return file_messages_internal_controller_distributed_commands_proto_rawDescGZIP(), []int{4}
+	return file_messages_internal_controller_distributed_commands_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *DeleteCommand) GetId() int64 {
@@ -320,7 +265,7 @@ func (x *DeleteCommand) GetUserId() int64 {
 	return 0
 }
 
-type DeleteAllUserMessagesCommand struct {
+type DeleteUserMessagesCommand struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -328,23 +273,23 @@ type DeleteAllUserMessagesCommand struct {
 	UserId int64 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 }
 
-func (x *DeleteAllUserMessagesCommand) Reset() {
-	*x = DeleteAllUserMessagesCommand{}
+func (x *DeleteUserMessagesCommand) Reset() {
+	*x = DeleteUserMessagesCommand{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[5]
+		mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
 }
 
-func (x *DeleteAllUserMessagesCommand) String() string {
+func (x *DeleteUserMessagesCommand) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DeleteAllUserMessagesCommand) ProtoMessage() {}
+func (*DeleteUserMessagesCommand) ProtoMessage() {}
 
-func (x *DeleteAllUserMessagesCommand) ProtoReflect() protoreflect.Message {
-	mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[5]
+func (x *DeleteUserMessagesCommand) ProtoReflect() protoreflect.Message {
+	mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -355,109 +300,16 @@ func (x *DeleteAllUserMessagesCommand) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DeleteAllUserMessagesCommand.ProtoReflect.Descriptor instead.
-func (*DeleteAllUserMessagesCommand) Descriptor() ([]byte, []int) {
-	return file_messages_internal_controller_distributed_commands_proto_rawDescGZIP(), []int{5}
+// Deprecated: Use DeleteUserMessagesCommand.ProtoReflect.Descriptor instead.
+func (*DeleteUserMessagesCommand) Descriptor() ([]byte, []int) {
+	return file_messages_internal_controller_distributed_commands_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *DeleteAllUserMessagesCommand) GetUserId() int64 {
+func (x *DeleteUserMessagesCommand) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
 	}
 	return 0
-}
-
-type DeleteCommandResult struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Ok      bool   `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`
-	Explain string `protobuf:"bytes,2,opt,name=explain,proto3" json:"explain,omitempty"`
-}
-
-func (x *DeleteCommandResult) Reset() {
-	*x = DeleteCommandResult{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[6]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *DeleteCommandResult) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteCommandResult) ProtoMessage() {}
-
-func (x *DeleteCommandResult) ProtoReflect() protoreflect.Message {
-	mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[6]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteCommandResult.ProtoReflect.Descriptor instead.
-func (*DeleteCommandResult) Descriptor() ([]byte, []int) {
-	return file_messages_internal_controller_distributed_commands_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *DeleteCommandResult) GetOk() bool {
-	if x != nil {
-		return x.Ok
-	}
-	return false
-}
-
-func (x *DeleteCommandResult) GetExplain() string {
-	if x != nil {
-		return x.Explain
-	}
-	return ""
-}
-
-type DeleteAllUserMessagesCommandResult struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-}
-
-func (x *DeleteAllUserMessagesCommandResult) Reset() {
-	*x = DeleteAllUserMessagesCommandResult{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[7]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *DeleteAllUserMessagesCommandResult) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteAllUserMessagesCommandResult) ProtoMessage() {}
-
-func (x *DeleteAllUserMessagesCommandResult) ProtoReflect() protoreflect.Message {
-	mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[7]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteAllUserMessagesCommandResult.ProtoReflect.Descriptor instead.
-func (*DeleteAllUserMessagesCommandResult) Descriptor() ([]byte, []int) {
-	return file_messages_internal_controller_distributed_commands_proto_rawDescGZIP(), []int{7}
 }
 
 type PublishCommand struct {
@@ -465,15 +317,14 @@ type PublishCommand struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Ids           []int64 `protobuf:"varint,1,rep,packed,name=ids,proto3" json:"ids,omitempty"`
-	UserId        int64   `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	UpdateUtcNano int64   `protobuf:"varint,3,opt,name=update_utc_nano,json=updateUtcNano,proto3" json:"update_utc_nano,omitempty"`
+	Ids    []int64 `protobuf:"varint,1,rep,packed,name=ids,proto3" json:"ids,omitempty"`
+	UserId int64   `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 }
 
 func (x *PublishCommand) Reset() {
 	*x = PublishCommand{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[8]
+		mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -486,7 +337,7 @@ func (x *PublishCommand) String() string {
 func (*PublishCommand) ProtoMessage() {}
 
 func (x *PublishCommand) ProtoReflect() protoreflect.Message {
-	mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[8]
+	mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -499,7 +350,7 @@ func (x *PublishCommand) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PublishCommand.ProtoReflect.Descriptor instead.
 func (*PublishCommand) Descriptor() ([]byte, []int) {
-	return file_messages_internal_controller_distributed_commands_proto_rawDescGZIP(), []int{8}
+	return file_messages_internal_controller_distributed_commands_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *PublishCommand) GetIds() []int64 {
@@ -516,27 +367,19 @@ func (x *PublishCommand) GetUserId() int64 {
 	return 0
 }
 
-func (x *PublishCommand) GetUpdateUtcNano() int64 {
-	if x != nil {
-		return x.UpdateUtcNano
-	}
-	return 0
-}
-
 type PrivateCommand struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Ids           []int64 `protobuf:"varint,1,rep,packed,name=ids,proto3" json:"ids,omitempty"`
-	UserId        int64   `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	UpdateUtcNano int64   `protobuf:"varint,3,opt,name=update_utc_nano,json=updateUtcNano,proto3" json:"update_utc_nano,omitempty"`
+	Ids    []int64 `protobuf:"varint,1,rep,packed,name=ids,proto3" json:"ids,omitempty"`
+	UserId int64   `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 }
 
 func (x *PrivateCommand) Reset() {
 	*x = PrivateCommand{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[9]
+		mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -549,7 +392,7 @@ func (x *PrivateCommand) String() string {
 func (*PrivateCommand) ProtoMessage() {}
 
 func (x *PrivateCommand) ProtoReflect() protoreflect.Message {
-	mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[9]
+	mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -562,7 +405,7 @@ func (x *PrivateCommand) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PrivateCommand.ProtoReflect.Descriptor instead.
 func (*PrivateCommand) Descriptor() ([]byte, []int) {
-	return file_messages_internal_controller_distributed_commands_proto_rawDescGZIP(), []int{9}
+	return file_messages_internal_controller_distributed_commands_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *PrivateCommand) GetIds() []int64 {
@@ -579,156 +422,56 @@ func (x *PrivateCommand) GetUserId() int64 {
 	return 0
 }
 
-func (x *PrivateCommand) GetUpdateUtcNano() int64 {
-	if x != nil {
-		return x.UpdateUtcNano
-	}
-	return 0
-}
-
-type PublishCommandResult struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-}
-
-func (x *PublishCommandResult) Reset() {
-	*x = PublishCommandResult{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[10]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *PublishCommandResult) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PublishCommandResult) ProtoMessage() {}
-
-func (x *PublishCommandResult) ProtoReflect() protoreflect.Message {
-	mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[10]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PublishCommandResult.ProtoReflect.Descriptor instead.
-func (*PublishCommandResult) Descriptor() ([]byte, []int) {
-	return file_messages_internal_controller_distributed_commands_proto_rawDescGZIP(), []int{10}
-}
-
-type PrivateCommandResult struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-}
-
-func (x *PrivateCommandResult) Reset() {
-	*x = PrivateCommandResult{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[11]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *PrivateCommandResult) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PrivateCommandResult) ProtoMessage() {}
-
-func (x *PrivateCommandResult) ProtoReflect() protoreflect.Message {
-	mi := &file_messages_internal_controller_distributed_commands_proto_msgTypes[11]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PrivateCommandResult.ProtoReflect.Descriptor instead.
-func (*PrivateCommandResult) Descriptor() ([]byte, []int) {
-	return file_messages_internal_controller_distributed_commands_proto_rawDescGZIP(), []int{11}
-}
-
 var File_messages_internal_controller_distributed_commands_proto protoreflect.FileDescriptor
 
 var file_messages_internal_controller_distributed_commands_proto_rawDesc = []byte{
 	0x0a, 0x37, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x2f, 0x69, 0x6e, 0x74, 0x65, 0x72,
 	0x6e, 0x61, 0x6c, 0x2f, 0x63, 0x6f, 0x6e, 0x74, 0x72, 0x6f, 0x6c, 0x6c, 0x65, 0x72, 0x2f, 0x64,
 	0x69, 0x73, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 0x65, 0x64, 0x2f, 0x63, 0x6f, 0x6d, 0x6d, 0x61,
-	0x6e, 0x64, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x15, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x73, 0x2f, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x22, 0x3f, 0x0a, 0x0d, 0x41, 0x70, 0x70, 0x65, 0x6e, 0x64, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e,
-	0x64, 0x12, 0x2e, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x18, 0x01, 0x20, 0x01,
-	0x28, 0x0b, 0x32, 0x14, 0x2e, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x2e, 0x76, 0x31,
-	0x2e, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x52, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67,
-	0x65, 0x22, 0x25, 0x0a, 0x13, 0x41, 0x70, 0x70, 0x65, 0x6e, 0x64, 0x43, 0x6f, 0x6d, 0x6d, 0x61,
-	0x6e, 0x64, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x22, 0xc4, 0x01, 0x0a, 0x0d, 0x55, 0x70, 0x64,
-	0x61, 0x74, 0x65, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73,
-	0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x75, 0x73, 0x65,
-	0x72, 0x49, 0x64, 0x12, 0x17, 0x0a, 0x07, 0x66, 0x69, 0x6c, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x03,
-	0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x66, 0x69, 0x6c, 0x65, 0x49, 0x64, 0x12, 0x1b, 0x0a, 0x09,
-	0x74, 0x68, 0x72, 0x65, 0x61, 0x64, 0x5f, 0x69, 0x64, 0x18, 0x04, 0x20, 0x01, 0x28, 0x03, 0x52,
-	0x08, 0x74, 0x68, 0x72, 0x65, 0x61, 0x64, 0x49, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x74, 0x65, 0x78,
-	0x74, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x74, 0x65, 0x78, 0x74, 0x12, 0x26, 0x0a,
-	0x0f, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x5f, 0x75, 0x74, 0x63, 0x5f, 0x6e, 0x61, 0x6e, 0x6f,
-	0x18, 0x06, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0d, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x55, 0x74,
-	0x63, 0x4e, 0x61, 0x6e, 0x6f, 0x12, 0x18, 0x0a, 0x07, 0x70, 0x72, 0x69, 0x76, 0x61, 0x74, 0x65,
-	0x18, 0x07, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07, 0x70, 0x72, 0x69, 0x76, 0x61, 0x74, 0x65, 0x22,
-	0x57, 0x0a, 0x13, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64,
-	0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x12, 0x26, 0x0a, 0x0f, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65,
-	0x5f, 0x75, 0x74, 0x63, 0x5f, 0x6e, 0x61, 0x6e, 0x6f, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52,
-	0x0d, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x55, 0x74, 0x63, 0x4e, 0x61, 0x6e, 0x6f, 0x12, 0x18,
-	0x0a, 0x07, 0x70, 0x72, 0x69, 0x76, 0x61, 0x74, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x08, 0x52,
-	0x07, 0x70, 0x72, 0x69, 0x76, 0x61, 0x74, 0x65, 0x22, 0x38, 0x0a, 0x0d, 0x44, 0x65, 0x6c, 0x65,
-	0x74, 0x65, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65,
-	0x72, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72,
-	0x49, 0x64, 0x22, 0x37, 0x0a, 0x1c, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x41, 0x6c, 0x6c, 0x55,
-	0x73, 0x65, 0x72, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x43, 0x6f, 0x6d, 0x6d, 0x61,
-	0x6e, 0x64, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x03, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x22, 0x3f, 0x0a, 0x13, 0x44,
-	0x65, 0x6c, 0x65, 0x74, 0x65, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x52, 0x65, 0x73, 0x75,
-	0x6c, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x6f, 0x6b, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x02,
-	0x6f, 0x6b, 0x12, 0x18, 0x0a, 0x07, 0x65, 0x78, 0x70, 0x6c, 0x61, 0x69, 0x6e, 0x18, 0x02, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x07, 0x65, 0x78, 0x70, 0x6c, 0x61, 0x69, 0x6e, 0x22, 0x24, 0x0a, 0x22,
-	0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x41, 0x6c, 0x6c, 0x55, 0x73, 0x65, 0x72, 0x4d, 0x65, 0x73,
-	0x73, 0x61, 0x67, 0x65, 0x73, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x52, 0x65, 0x73, 0x75,
-	0x6c, 0x74, 0x22, 0x63, 0x0a, 0x0e, 0x50, 0x75, 0x62, 0x6c, 0x69, 0x73, 0x68, 0x43, 0x6f, 0x6d,
-	0x6d, 0x61, 0x6e, 0x64, 0x12, 0x10, 0x0a, 0x03, 0x69, 0x64, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28,
-	0x03, 0x52, 0x03, 0x69, 0x64, 0x73, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69,
-	0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12,
-	0x26, 0x0a, 0x0f, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x5f, 0x75, 0x74, 0x63, 0x5f, 0x6e, 0x61,
-	0x6e, 0x6f, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0d, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65,
-	0x55, 0x74, 0x63, 0x4e, 0x61, 0x6e, 0x6f, 0x22, 0x63, 0x0a, 0x0e, 0x50, 0x72, 0x69, 0x76, 0x61,
-	0x74, 0x65, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x12, 0x10, 0x0a, 0x03, 0x69, 0x64, 0x73,
-	0x18, 0x01, 0x20, 0x03, 0x28, 0x03, 0x52, 0x03, 0x69, 0x64, 0x73, 0x12, 0x17, 0x0a, 0x07, 0x75,
+	0x6e, 0x64, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0xb2, 0x01, 0x0a, 0x0d, 0x41, 0x70,
+	0x70, 0x65, 0x6e, 0x64, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x12, 0x0e, 0x0a, 0x02, 0x69,
+	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x12, 0x17, 0x0a, 0x07, 0x75,
 	0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x75, 0x73,
-	0x65, 0x72, 0x49, 0x64, 0x12, 0x26, 0x0a, 0x0f, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x5f, 0x75,
-	0x74, 0x63, 0x5f, 0x6e, 0x61, 0x6e, 0x6f, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0d, 0x75,
-	0x70, 0x64, 0x61, 0x74, 0x65, 0x55, 0x74, 0x63, 0x4e, 0x61, 0x6e, 0x6f, 0x22, 0x16, 0x0a, 0x14,
-	0x50, 0x75, 0x62, 0x6c, 0x69, 0x73, 0x68, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x52, 0x65,
-	0x73, 0x75, 0x6c, 0x74, 0x22, 0x16, 0x0a, 0x14, 0x50, 0x72, 0x69, 0x76, 0x61, 0x74, 0x65, 0x43,
-	0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x42, 0x4a, 0x5a, 0x48,
-	0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x62, 0x64, 0x38, 0x37, 0x38,
-	0x2f, 0x67, 0x61, 0x6c, 0x6c, 0x65, 0x72, 0x79, 0x2f, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2f,
-	0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x2f, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61,
-	0x6c, 0x2f, 0x63, 0x6f, 0x6e, 0x74, 0x72, 0x6f, 0x6c, 0x6c, 0x65, 0x72, 0x2f, 0x64, 0x69, 0x73,
-	0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 0x65, 0x64, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x65, 0x72, 0x49, 0x64, 0x12, 0x19, 0x0a, 0x08, 0x66, 0x69, 0x6c, 0x65, 0x5f, 0x69, 0x64, 0x73,
+	0x18, 0x03, 0x20, 0x03, 0x28, 0x03, 0x52, 0x07, 0x66, 0x69, 0x6c, 0x65, 0x49, 0x64, 0x73, 0x12,
+	0x1b, 0x0a, 0x09, 0x74, 0x68, 0x72, 0x65, 0x61, 0x64, 0x5f, 0x69, 0x64, 0x18, 0x04, 0x20, 0x01,
+	0x28, 0x03, 0x52, 0x08, 0x74, 0x68, 0x72, 0x65, 0x61, 0x64, 0x49, 0x64, 0x12, 0x12, 0x0a, 0x04,
+	0x74, 0x65, 0x78, 0x74, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x74, 0x65, 0x78, 0x74,
+	0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04,
+	0x6e, 0x61, 0x6d, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x70, 0x72, 0x69, 0x76, 0x61, 0x74, 0x65, 0x18,
+	0x07, 0x20, 0x01, 0x28, 0x08, 0x52, 0x07, 0x70, 0x72, 0x69, 0x76, 0x61, 0x74, 0x65, 0x22, 0xb2,
+	0x01, 0x0a, 0x0d, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64,
+	0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64,
+	0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x03, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12, 0x19, 0x0a, 0x08, 0x66, 0x69, 0x6c,
+	0x65, 0x5f, 0x69, 0x64, 0x73, 0x18, 0x03, 0x20, 0x03, 0x28, 0x03, 0x52, 0x07, 0x66, 0x69, 0x6c,
+	0x65, 0x49, 0x64, 0x73, 0x12, 0x1b, 0x0a, 0x09, 0x74, 0x68, 0x72, 0x65, 0x61, 0x64, 0x5f, 0x69,
+	0x64, 0x18, 0x04, 0x20, 0x01, 0x28, 0x03, 0x52, 0x08, 0x74, 0x68, 0x72, 0x65, 0x61, 0x64, 0x49,
+	0x64, 0x12, 0x12, 0x0a, 0x04, 0x74, 0x65, 0x78, 0x74, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x04, 0x74, 0x65, 0x78, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x06, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x70, 0x72, 0x69,
+	0x76, 0x61, 0x74, 0x65, 0x18, 0x07, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07, 0x70, 0x72, 0x69, 0x76,
+	0x61, 0x74, 0x65, 0x22, 0x38, 0x0a, 0x0d, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x43, 0x6f, 0x6d,
+	0x6d, 0x61, 0x6e, 0x64, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03,
+	0x52, 0x02, 0x69, 0x64, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x22, 0x34, 0x0a,
+	0x19, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x55, 0x73, 0x65, 0x72, 0x4d, 0x65, 0x73, 0x73, 0x61,
+	0x67, 0x65, 0x73, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73,
+	0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x75, 0x73, 0x65,
+	0x72, 0x49, 0x64, 0x22, 0x3b, 0x0a, 0x0e, 0x50, 0x75, 0x62, 0x6c, 0x69, 0x73, 0x68, 0x43, 0x6f,
+	0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x12, 0x10, 0x0a, 0x03, 0x69, 0x64, 0x73, 0x18, 0x01, 0x20, 0x03,
+	0x28, 0x03, 0x52, 0x03, 0x69, 0x64, 0x73, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f,
+	0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64,
+	0x22, 0x3b, 0x0a, 0x0e, 0x50, 0x72, 0x69, 0x76, 0x61, 0x74, 0x65, 0x43, 0x6f, 0x6d, 0x6d, 0x61,
+	0x6e, 0x64, 0x12, 0x10, 0x0a, 0x03, 0x69, 0x64, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x03, 0x52,
+	0x03, 0x69, 0x64, 0x73, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x42, 0x4a, 0x5a,
+	0x48, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x62, 0x64, 0x38, 0x37,
+	0x38, 0x2f, 0x67, 0x61, 0x6c, 0x6c, 0x65, 0x72, 0x79, 0x2f, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72,
+	0x2f, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x2f, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e,
+	0x61, 0x6c, 0x2f, 0x63, 0x6f, 0x6e, 0x74, 0x72, 0x6f, 0x6c, 0x6c, 0x65, 0x72, 0x2f, 0x64, 0x69,
+	0x73, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 0x65, 0x64, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x33,
 }
 
 var (
@@ -743,29 +486,21 @@ func file_messages_internal_controller_distributed_commands_proto_rawDescGZIP() 
 	return file_messages_internal_controller_distributed_commands_proto_rawDescData
 }
 
-var file_messages_internal_controller_distributed_commands_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_messages_internal_controller_distributed_commands_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_messages_internal_controller_distributed_commands_proto_goTypes = []interface{}{
-	(*AppendCommand)(nil),                      // 0: AppendCommand
-	(*AppendCommandResult)(nil),                // 1: AppendCommandResult
-	(*UpdateCommand)(nil),                      // 2: UpdateCommand
-	(*UpdateCommandResult)(nil),                // 3: UpdateCommandResult
-	(*DeleteCommand)(nil),                      // 4: DeleteCommand
-	(*DeleteAllUserMessagesCommand)(nil),       // 5: DeleteAllUserMessagesCommand
-	(*DeleteCommandResult)(nil),                // 6: DeleteCommandResult
-	(*DeleteAllUserMessagesCommandResult)(nil), // 7: DeleteAllUserMessagesCommandResult
-	(*PublishCommand)(nil),                     // 8: PublishCommand
-	(*PrivateCommand)(nil),                     // 9: PrivateCommand
-	(*PublishCommandResult)(nil),               // 10: PublishCommandResult
-	(*PrivateCommandResult)(nil),               // 11: PrivateCommandResult
-	(*api.Message)(nil),                        // 12: messages.v1.Message
+	(*AppendCommand)(nil),             // 0: AppendCommand
+	(*UpdateCommand)(nil),             // 1: UpdateCommand
+	(*DeleteCommand)(nil),             // 2: DeleteCommand
+	(*DeleteUserMessagesCommand)(nil), // 3: DeleteUserMessagesCommand
+	(*PublishCommand)(nil),            // 4: PublishCommand
+	(*PrivateCommand)(nil),            // 5: PrivateCommand
 }
 var file_messages_internal_controller_distributed_commands_proto_depIdxs = []int32{
-	12, // 0: AppendCommand.message:type_name -> messages.v1.Message
-	1,  // [1:1] is the sub-list for method output_type
-	1,  // [1:1] is the sub-list for method input_type
-	1,  // [1:1] is the sub-list for extension type_name
-	1,  // [1:1] is the sub-list for extension extendee
-	0,  // [0:1] is the sub-list for field type_name
+	0, // [0:0] is the sub-list for method output_type
+	0, // [0:0] is the sub-list for method input_type
+	0, // [0:0] is the sub-list for extension type_name
+	0, // [0:0] is the sub-list for extension extendee
+	0, // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_messages_internal_controller_distributed_commands_proto_init() }
@@ -787,18 +522,6 @@ func file_messages_internal_controller_distributed_commands_proto_init() {
 			}
 		}
 		file_messages_internal_controller_distributed_commands_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AppendCommandResult); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_messages_internal_controller_distributed_commands_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*UpdateCommand); i {
 			case 0:
 				return &v.state
@@ -810,19 +533,7 @@ func file_messages_internal_controller_distributed_commands_proto_init() {
 				return nil
 			}
 		}
-		file_messages_internal_controller_distributed_commands_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*UpdateCommandResult); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_messages_internal_controller_distributed_commands_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+		file_messages_internal_controller_distributed_commands_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*DeleteCommand); i {
 			case 0:
 				return &v.state
@@ -834,8 +545,8 @@ func file_messages_internal_controller_distributed_commands_proto_init() {
 				return nil
 			}
 		}
-		file_messages_internal_controller_distributed_commands_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*DeleteAllUserMessagesCommand); i {
+		file_messages_internal_controller_distributed_commands_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*DeleteUserMessagesCommand); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -846,31 +557,7 @@ func file_messages_internal_controller_distributed_commands_proto_init() {
 				return nil
 			}
 		}
-		file_messages_internal_controller_distributed_commands_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*DeleteCommandResult); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_messages_internal_controller_distributed_commands_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*DeleteAllUserMessagesCommandResult); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_messages_internal_controller_distributed_commands_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+		file_messages_internal_controller_distributed_commands_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*PublishCommand); i {
 			case 0:
 				return &v.state
@@ -882,32 +569,8 @@ func file_messages_internal_controller_distributed_commands_proto_init() {
 				return nil
 			}
 		}
-		file_messages_internal_controller_distributed_commands_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+		file_messages_internal_controller_distributed_commands_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*PrivateCommand); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_messages_internal_controller_distributed_commands_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PublishCommandResult); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_messages_internal_controller_distributed_commands_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PrivateCommandResult); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -925,7 +588,7 @@ func file_messages_internal_controller_distributed_commands_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_messages_internal_controller_distributed_commands_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

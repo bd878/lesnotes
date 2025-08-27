@@ -10,8 +10,7 @@ import (
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/logger"
-	"github.com/bd878/gallery/server/messages/pkg/model"
-	filesmodel "github.com/bd878/gallery/server/files/pkg/model"
+	files "github.com/bd878/gallery/server/files/pkg/model"
 )
 
 type Gateway struct {
@@ -41,69 +40,69 @@ func (g *Gateway) isConnFailed() bool {
 	return state == connectivity.Shutdown || state == connectivity.TransientFailure
 }
 
-func (g *Gateway) ReadBatchFiles(ctx context.Context, params *model.ReadBatchFilesParams) (
-	*model.ReadBatchFilesResult, error,
-) {
+func (g *Gateway) ReadBatchFiles(ctx context.Context, fileIDs []int64, userID int64) (result map[int64]*files.File, err error) {
 	if g.isConnFailed() {
 		logger.Info("conn failed, setup new connection")
 		g.setupConnection()
 	}
 
+	logger.Debugw("read batch files", "file_ids", fileIDs, "user_id", userID)
+
 	batch, err := g.client.ReadBatchFiles(ctx, &api.ReadBatchFilesRequest{
-		UserId: params.UserID,
-		Ids:    params.IDs,
+		UserId: userID,
+		Ids:    fileIDs,
 	})
 	if err != nil {
-		logger.Errorln("client failed to read batch files")
 		return nil, err
 	}
 
-	return &model.ReadBatchFilesResult{
-		Files: filesmodel.MapFilesDictFromProto(filesmodel.FileFromProto, batch.Files),
-	}, nil
+	result = files.MapFilesDictFromProto(files.FileFromProto, batch.Files)
+
+	return
 }
 
-func (g *Gateway) ReadFile(ctx context.Context, userID, fileID int64) (
-	*filesmodel.File, error,
-) {
+func (g *Gateway) ReadFile(ctx context.Context, userID, fileID int64) (resp *files.File, err error) {
+	logger.Debugw("read file", "user_id", userID, "file_id", fileID)
+
 	file, err := g.client.ReadFile(ctx, &api.ReadFileRequest{
 		UserId: userID,
-		Id: fileID,
+		Id:     fileID,
 	})
 	if err != nil {
-		logger.Errorw("client failed to read one file", "user_id", userID, "file_id", fileID)
 		return nil, err
 	}
 
-	return filesmodel.FileFromProto(file), nil
+	resp = files.FileFromProto(file)
+
+	return
 }
 
 // copied from files/internal/controller/service
-func (g *Gateway) SaveFile(ctx context.Context, fileStream io.Reader, params *model.SaveFileParams) (
-	*model.SaveFileResult, error,
-) {
+func (g *Gateway) SaveFile(ctx context.Context, fileStream io.Reader, id, userID int64, fileName string, private bool, mime string) (err error) {
 	if g.isConnFailed() {
-		logger.Info("conn failed, setup new connection")
 		g.setupConnection()
 	}
 
+	logger.Debugw("save file", "id", id, "user_id", userID, "file_name", fileName, "private", private, "mime", mime)
+
 	stream, err := g.client.SaveFileStream(ctx)
 	if err != nil {
-		logger.Errorln("client failed to obtain file stream")
-		return nil, err
+		return err
 	}
 
 	err = stream.Send(&api.FileData{
 		Data: &api.FileData_File{
 			File: &api.File{
-				Name:    params.Name,
-				UserId:  params.UserID,
+				Id:      id,
+				Private: private,
+				Mime:    mime,
+				Name:    fileName,
+				UserId:  userID,
 			},
 		},
 	})
 	if err != nil {
-		logger.Errorln("failed to save file meta")
-		return nil, err
+		return
 	}
 
 	buffer := make([]byte, 1024)
@@ -113,8 +112,7 @@ func (g *Gateway) SaveFile(ctx context.Context, fileStream io.Reader, params *mo
 			break
 		}
 		if err != nil {
-			logger.Errorln("failed to read file data in buffer")
-			return nil, err
+			return err
 		}
 
 		err = stream.Send(&api.FileData{
@@ -123,19 +121,11 @@ func (g *Gateway) SaveFile(ctx context.Context, fileStream io.Reader, params *mo
 			},
 		})
 		if err != nil {
-			logger.Errorln("failed to send chunk on file server")
-			return nil, err
+			return err
 		}
 	}
 
-	res, err := stream.CloseAndRecv()
-	if err != nil {
-		logger.Errorln("failed to close and recv result")
-		return nil, err
-	}
+	_, err = stream.CloseAndRecv()
 
-	return &model.SaveFileResult{
-		ID:              res.File.Id,
-		CreateUTCNano:   res.File.CreateUtcNano,
-	}, nil
+	return
 }

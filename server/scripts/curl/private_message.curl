@@ -1,2 +1,2 @@
-url = https://%STAGE%lesnotes.space/messages/v1/private?id=%ID%
+url = https://%STAGE%lesnotes.space/messages/v1/private?ids=%5B%ID%%5D
 -XPUT

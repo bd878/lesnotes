@@ -49,23 +49,23 @@ func New(cfg Config) *Server {
 	})
 	handler := httphandler.New(grpcCtrl, filesGateway)
 
-	mux.Handle("/messages/v1/send", middleware.Build(handler.SendMessage))
-	mux.Handle("/messages/v1/read", middleware.Build(handler.ReadMessageOrMessages))
-	mux.Handle("/messages/v1/update", middleware.Build(handler.UpdateMessage))
-	mux.Handle("/messages/v1/publish", middleware.Build(handler.PublishMessageOrMessages))
-	mux.Handle("/messages/v1/private", middleware.Build(handler.PrivateMessageOrMessages))
-	mux.Handle("/messages/v1/delete", middleware.Build(handler.DeleteMessageOrMessages))
+	mux.Handle("/messages/v1/send",     middleware.Build(handler.SendMessage))
+	mux.Handle("/messages/v1/read",     middleware.Build(handler.ReadMessages))
+	mux.Handle("/messages/v1/update",   middleware.Build(handler.UpdateMessage))
+	mux.Handle("/messages/v1/publish",  middleware.Build(handler.PublishMessages))
+	mux.Handle("/messages/v1/private",  middleware.Build(handler.PrivateMessages))
+	mux.Handle("/messages/v1/delete",   middleware.Build(handler.DeleteMessages))
 
 	middleware.NoAuth()
-	mux.Handle("/messages/v1/status", middleware.Build(handler.GetStatus))
+	mux.Handle("/messages/v1/status",   middleware.Build(handler.GetStatus))
 
 	middleware.WithAuth(httpmiddleware.TokenAuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
-	mux.Handle("/messages/v2/send", middleware.Build(handler.SendMessageJsonAPI))
-	mux.Handle("/messages/v2/read", middleware.Build(handler.ReadMessageOrMessagesJsonAPI))
-	mux.Handle("/messages/v2/publish", middleware.Build(handler.PublishMessageOrMessagesJsonAPI))
-	mux.Handle("/messages/v2/private", middleware.Build(handler.PrivateMessageOrMessagesJsonAPI))
-	mux.Handle("/messages/v2/delete", middleware.Build(handler.DeleteMessageOrMessagesJsonAPI))
-	mux.Handle("/messages/v2/update", middleware.Build(handler.UpdateMessageJsonAPI))
+	mux.Handle("/messages/v2/send",     middleware.Build(handler.SendMessageJsonAPI))
+	mux.Handle("/messages/v2/read",     middleware.Build(handler.ReadMessagesJsonAPI))
+	mux.Handle("/messages/v2/publish",  middleware.Build(handler.PublishMessagesJsonAPI))
+	mux.Handle("/messages/v2/private",  middleware.Build(handler.PrivateMessagesJsonAPI))
+	mux.Handle("/messages/v2/delete",   middleware.Build(handler.DeleteMessagesJsonAPI))
+	mux.Handle("/messages/v2/update",   middleware.Build(handler.UpdateMessageJsonAPI))
 
 	server := &Server{
 		Server: &http.Server{

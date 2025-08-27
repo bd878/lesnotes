@@ -25,7 +25,7 @@ func New(tableName string, pool *pgxpool.Pool) *Repository {
 	}
 }
 
-func (r *Repository) Create(ctx context.Context, message *model.Message) (err error) {
+func (r *Repository) Create(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (err error) {
 	const query = "INSERT INTO %s(id, text, file_ids, private, name, user_id, thread_id) VALUES ($1, $2, $3, $4, $5, $6, $7)"
 
 	var tx pgx.Tx
@@ -47,42 +47,34 @@ func (r *Repository) Create(ctx context.Context, message *model.Message) (err er
 		}
 	}()
 
-	var fileIDs []byte
-	if message.FileIDs != nil {
-		fileIDs, err = json.Marshal(message.FileIDs)
-		if err != nil {
-			return err
-		}
-	} else if message.FileID != 0 {
-		fileIDs, err = json.Marshal([]int64{message.FileID})
+	var files []byte
+	if fileIDs != nil {
+		files, err = json.Marshal(fileIDs)
 		if err != nil {
 			return err
 		}
 	}
 
-	_, err = tx.Exec(ctx, r.table(query), message.ID, message.Text, fileIDs, message.Private, message.Name, message.UserID, message.ThreadID)
-	if err != nil {
-		return
-	}
+	_, err = tx.Exec(ctx, r.table(query), id, text, files, private, name, userID, threadID)
 
-	return nil
+	return
 }
 
 /**
  * newText == "" : left as is
  * newThreadID == -1 : left as is
  * newPrivate == -1 : left as is
- * @param  {[type]} r *Repository)  Update(ctx context.Context, userID, id int64, text string, threadID int64, fileIDs []int64, private int) (*model.UpdateMessageResult, error [description]
+ * @param  {[type]} r *Repository)  Update(ctx context.Context, userID, id int64, text string, threadID int64, fileIDs []int64, private int) (error [description]
  * @return {error}   error
  */
-func (r *Repository) Update(ctx context.Context, userID, id int64, newText string, newThreadID int64, newFileIDs []int64, newPrivate int) (result *model.UpdateMessageResult, err error) {
+func (r *Repository) Update(ctx context.Context, userID, id int64, newText string, newThreadID int64, newFileIDs []int64, newPrivate int) (err error) {
 	const query = "UPDATE %s SET text = $3, thread_id = $4, file_ids = $5, private = $6 WHERE user_id = $1 AND id = $2"
 	const selectQuery = "SELECT text, thread_id, file_ids, private FROM %s WHERE user_id = $1 AND id = $2"
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
-		return nil, err
+		return
 	}
 	defer func() {
 		p := recover()
@@ -138,17 +130,6 @@ func (r *Repository) Update(ctx context.Context, userID, id int64, newText strin
 		return
 	}
 
-	var updatedAt time.Time
-	err = tx.QueryRow(ctx, r.table("SELECT updated_at FROM %s WHERE user_id = $1 AND id = $2"), userID, id).Scan(&updatedAt)
-	if err != nil {
-		return
-	}
-
-	result = &model.UpdateMessageResult{
-		UpdateUTCNano: updatedAt.UnixNano(),
-		Private:       private,
-	}
-
 	return
 }
 
@@ -189,11 +170,8 @@ func (r *Repository) DeleteMessage(ctx context.Context, userID, id int64) (err e
 	}
 
 	_, err = tx.Exec(ctx, r.table("DELETE FROM %s WHERE id = $1 AND user_id = $2"), id, userID)
-	if err != nil {
-		return
-	}
 
-	return nil
+	return
 }
 
 func (r *Repository) Publish(ctx context.Context, userID int64, ids []int64) (err error) {
@@ -266,7 +244,7 @@ func (r *Repository) Read(ctx context.Context, userIDs []int64, id int64) (messa
 
 	ids := "$2"
 	for i := 1; i < len(userIDs); i++ {
-		ids += fmt.Sprintf(",%d", i+2)
+		ids += fmt.Sprintf(",$%d", i+2)
 	}
 
 	list := make([]interface{}, len(userIDs))
@@ -291,15 +269,10 @@ SELECT user_id, thread_id, file_ids, created_at, updated_at, text, private, name
 	message.CreateUTCNano = createdAt.UnixNano()
 	message.UpdateUTCNano = updatedAt.UnixNano()
 
-	// TODO: rewrite on fileIDs completely, drop fileID
-	if message.FileIDs != nil && len(message.FileIDs) == 1 {
-		message.FileID = message.FileIDs[0]
-	}
-
 	return
 }
 
-func (r *Repository) DeleteAllUserMessages(ctx context.Context, userID int64) (err error) {
+func (r *Repository) DeleteUserMessages(ctx context.Context, userID int64) (err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -369,11 +342,6 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID in
 
 		message.CreateUTCNano = createdAt.UnixNano()
 		message.UpdateUTCNano = updatedAt.UnixNano()
-
-		if message.FileIDs != nil && len(message.FileIDs) == 1 {
-			message.FileID = message.FileIDs[0]
-		}
-
 		messages = append(messages, message)
 	}
 
@@ -401,10 +369,10 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID in
 /**
  * Read all user messages from all threads
  * private == -1 : do not consider private in select
- * @param  {[type]} r *Repository)  ReadAllMessages(ctx context.Context, userID int64, limit, offset, private int32) (messages []*model.Message, isLastPage bool, err error [description]
+ * @param  {[type]} r *Repository)  ReadMessages(ctx context.Context, userID int64, limit, offset, private int32) (messages []*model.Message, isLastPage bool, err error [description]
  * @return {[type]}   [description]
  */
-func (r *Repository) ReadAllMessages(ctx context.Context, userID int64, limit, offset, private int32) (messages []*model.Message, isLastPage bool, err error) {
+func (r *Repository) ReadMessages(ctx context.Context, userID int64, limit, offset, private int32) (messages []*model.Message, isLastPage bool, err error) {
 	var rows pgx.Rows
 
 	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at FROM %s WHERE user_id = $1 "
@@ -446,10 +414,6 @@ func (r *Repository) ReadAllMessages(ctx context.Context, userID int64, limit, o
 		message.CreateUTCNano = createdAt.UnixNano()
 		message.UpdateUTCNano = updatedAt.UnixNano()
 
-		if message.FileIDs != nil && len(message.FileIDs) == 1 {
-			message.FileID = message.FileIDs[0]
-		}
-
 		messages = append(messages, message)
 	}
 
@@ -476,7 +440,7 @@ func (r *Repository) ReadAllMessages(ctx context.Context, userID int64, limit, o
 
 func (r *Repository) Truncate(ctx context.Context) (err error) {
 	_, err = r.pool.Exec(ctx, r.table("DELETE FROM %s"))
-	return nil
+	return
 }
 
 func (r Repository) table(query string) string {

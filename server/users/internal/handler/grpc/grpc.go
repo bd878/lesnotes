@@ -34,8 +34,8 @@ func (h *Handler) FindUser(ctx context.Context, req *api.FindUserRequest) (*api.
 	var login, token string
 
 	switch key := req.SearchKey.(type) {
-	case *api.FindUserRequest_Name:
-		login = key.Name
+	case *api.FindUserRequest_Login:
+		login = key.Login
 	case *api.FindUserRequest_Token:
 		token = key.Token
 	}

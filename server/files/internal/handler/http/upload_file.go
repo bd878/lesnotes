@@ -2,21 +2,24 @@ package http
 
 import (
 	"errors"
+	"io"
+	"bytes"
 	"net/http"
 	"encoding/json"
 	"path/filepath"
 
 	"github.com/bd878/gallery/server/utils"
-	"github.com/bd878/gallery/server/files/pkg/model"
-	servermodel "github.com/bd878/gallery/server/pkg/model"
-	usermodel "github.com/bd878/gallery/server/users/pkg/model"
+	middleware "github.com/bd878/gallery/server/internal/middleware/http"
+	files "github.com/bd878/gallery/server/files/pkg/model"
+	server "github.com/bd878/gallery/server/pkg/model"
+	users "github.com/bd878/gallery/server/users/pkg/model"
 )
 
 func (h *Handler) UploadFile(w http.ResponseWriter, req *http.Request) error {
 	return h.uploadFile(w, req, 0)
 }
 
-func (h *Handler) uploadFile(w http.ResponseWriter, req *http.Request, public int) error {
+func (h *Handler) uploadFile(w http.ResponseWriter, req *http.Request, public int) (err error) {
 	var private bool
 
 	if public > 0 {
@@ -27,26 +30,32 @@ func (h *Handler) uploadFile(w http.ResponseWriter, req *http.Request, public in
 		private = true
 	}
 
-	user, ok := utils.GetUser(w, req)
+	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "user required",
+			Error: &server.ErrorCode{
+				Code:    server.CodeNoUser,
+				Explain: "user required",
+			},
 		})
 
-		return errors.New("user required")
+		return
 	}
 
-	if user.ID == usermodel.PublicUserID {
+	if user.ID == users.PublicUserID {
 		private = false
 	}
 
 	if err := req.ParseMultipartForm(50 << 20) /* 50 MB */; err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "failed to parse form",
+			Error: &server.ErrorCode{
+				Code:    server.CodeWrongFormat,
+				Explain: "failed to parse form",
+			},
 		})
 
 		return err
@@ -54,9 +63,12 @@ func (h *Handler) uploadFile(w http.ResponseWriter, req *http.Request, public in
 
 	if _, ok := req.MultipartForm.File["file"]; !ok {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "file required",
+			Error:  &server.ErrorCode{
+				Code:    files.CodeNoFile,
+				Explain: "file required",
+			},
 		})
 
 		return errors.New("file required")
@@ -65,9 +77,12 @@ func (h *Handler) uploadFile(w http.ResponseWriter, req *http.Request, public in
 	f, fh, err := req.FormFile("file")
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "cannot read file",
+			Error:  &server.ErrorCode{
+				Code:    files.CodeReadFailed,
+				Explain: "cannot read file",
+			},
 		})
 
 		return errors.New("cannot read file")
@@ -75,28 +90,40 @@ func (h *Handler) uploadFile(w http.ResponseWriter, req *http.Request, public in
 
 	fileName := filepath.Base(fh.Filename)
 
-	fileResult, err := h.controller.SaveFileStream(req.Context(), f, &model.SaveFileParams{
-		UserID: user.ID,
-		Name:   fileName,
-		Private: private,
-	})
+	var buf bytes.Buffer
+	io.CopyN(&buf, f, 512)
+	mime := http.DetectContentType(buf.Bytes())
+	f.Seek(0, io.SeekStart)
+
+	id := utils.RandomID()
+
+	err = h.controller.SaveFileStream(req.Context(), f, int64(id), user.ID, fileName, private, mime)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "cannot save file",
+			Error: &server.ErrorCode{
+				Code:    files.CodeSaveFailed,
+				Explain: "cannot save file",
+			},
 		})
 
 		return err
 	}
 
-	json.NewEncoder(w).Encode(model.UploadFileServerResponse{
-		ServerResponse: servermodel.ServerResponse{
-			Status: "ok",
-			Description: "saved",
-		},
-		ID: fileResult.ID,
-		Name: fileName,
+	response, err := json.Marshal(files.UploadResponse{
+		ID:          int64(id),
+		Name:        fileName,
+		Description: "saved",
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return err
+	}
+
+	json.NewEncoder(w).Encode(server.ServerResponse{
+		Status:   "ok",
+		Response: json.RawMessage(response),
 	})
 
 	return nil

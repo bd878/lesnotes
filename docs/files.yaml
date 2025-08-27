@@ -5,6 +5,7 @@ info:
     This API handles files requests.
   version: 1.0.0
 paths:
+# UPLOAD
   /files/v1/upload:
     security:
       - apiKey: []
@@ -17,7 +18,7 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/uploadFile'
+              $ref: '#/components/schemas/uploadForm'
       responses:
         "200":
           description: OK
@@ -30,7 +31,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/statusErr'
+                $ref: '#/components/schemas/serverError'
 
   /files/v2/upload:
     parameters:
@@ -54,7 +55,7 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/uploadFile'
+              $ref: '#/components/schemas/uploadForm'
       responses:
         "200":
           description: OK
@@ -67,8 +68,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/statusErr'              
+                $ref: '#/components/schemas/serverError'              
+# END UPLOAD
 
+# DOWNLOAD
   /files/v1/download:
     security:
       - apiKey: []
@@ -103,28 +106,26 @@ paths:
       description: |
         Download public file of a given user
       operationId: downloadPublicFile
+# END DOWNLOAD
 
+# STATUS
   /files/v1/status:
     get:
       operationId: getStatus
       summary: Shows server status
       responses:
-        "2XX":
-          description: Success response
+        "200":
+          description: ok
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/statusOk'
-        "4XX":
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/statusErr'
+            text/plain:
+              content:
+                default: "ok"
+# END STATUS
 
 components:
   schemas:
-    uploadFile:
+# UPLOAD
+    uploadForm:
       type: object
       properties:
         file:
@@ -146,26 +147,20 @@ components:
         name:
           type: string
           required: true
+# END UPLOAD
 
-    statusOk:
+    serverError:
       type: object
-      properties:
-        status:
-          type: string 
-          default: "ok"
-        description:
-          type: string 
-          default: ""
-
-    statusErr:
-      type: object
-      properties:
-        status:
-          type: string
-          default: "error"
-        description:
-          type: string
-          default: ""
+      status:
+        type: string
+        default: "error"
+      error:
+        type: object
+        properties:
+          code:
+            type: integer
+          explain:
+            type: string
 
   securitySchemes:
     apiKey:

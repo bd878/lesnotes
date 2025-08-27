@@ -13,7 +13,7 @@ import (
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/logger"
-	"github.com/bd878/gallery/server/files/pkg/model"
+	files "github.com/bd878/gallery/server/files/pkg/model"
 )
 
 type Config struct {
@@ -88,17 +88,17 @@ func (s *streamReader) Read(p []byte) (int, error) {
 	return s.buf.Read(p)
 }
 
-func (f *Files) ReadFileStream(ctx context.Context, params *model.ReadFileStreamParams) (*model.File, io.Reader, error) {
+func (f *Files) ReadFileStream(ctx context.Context, id, userID int64, fileName string, public bool) (result *files.File, reader io.Reader, err error) {
 	if f.isConnFailed() {
 		logger.Info("conn failed, setup new connection")
 		f.setupConnection()
 	}
 
 	stream, err := f.client.ReadFileStream(ctx, &api.ReadFileStreamRequest{
-		Id:      params.FileID,
-		UserId:  params.UserID,
-		Name:    params.FileName,
-		Public:  params.Public,
+		Id:      id,
+		UserId:  userID,
+		Name:    fileName,
+		Public:  public,
 	})
 	if err != nil {
 		return nil, nil, err
@@ -115,16 +115,14 @@ func (f *Files) ReadFileStream(ctx context.Context, params *model.ReadFileStream
 		return nil, nil, errors.New("wrong format: FileData_File expected")
 	}
 
-	reader := &streamReader{
+	reader = &streamReader{
 		Files_ReadFileStreamClient: stream,
 	}
 
-	return model.FileFromProto(meta.File), reader, nil
+	return files.FileFromProto(meta.File), reader, nil
 }
 
-func (f *Files) SaveFileStream(ctx context.Context, fileStream io.Reader, params *model.SaveFileParams) (
-	*model.SaveFileResult, error,
-) {
+func (f *Files) SaveFileStream(ctx context.Context, fileStream io.Reader, id, userID int64, fileName string, private bool, mime string) (err error) {
 	if f.isConnFailed() {
 		logger.Info("conn failed, setup new connection")
 		f.setupConnection()
@@ -132,22 +130,22 @@ func (f *Files) SaveFileStream(ctx context.Context, fileStream io.Reader, params
 
 	stream, err := f.client.SaveFileStream(ctx)
 	if err != nil {
-		logger.Errorw("client failed to obtain file stream", "error", err)
-		return nil, err
+		return err
 	}
 
 	err = stream.Send(&api.FileData{
 		Data: &api.FileData_File{
 			File: &api.File{
-				Name:    params.Name,
-				UserId:  params.UserID,
-				Private: params.Private,
+				Id:      id,
+				Name:    fileName,
+				UserId:  userID,
+				Private: private,
+				Mime:    mime,
 			},
 		},
 	})
 	if err != nil {
-		logger.Errorw("failed to save file meta", "error", err)
-		return nil, err
+		return
 	}
 
 	buffer := make([]byte, 1024)
@@ -157,8 +155,7 @@ func (f *Files) SaveFileStream(ctx context.Context, fileStream io.Reader, params
 			break
 		}
 		if err != nil {
-			logger.Errorw("failed to read file data in buffer", "error", err)
-			return nil, err
+			return err
 		}
 
 		err = stream.Send(&api.FileData{
@@ -167,19 +164,11 @@ func (f *Files) SaveFileStream(ctx context.Context, fileStream io.Reader, params
 			},
 		})
 		if err != nil {
-			logger.Errorw("failed to send chunk on file server", "error", err)
-			return nil, err
+			return err
 		}
 	}
 
-	res, err := stream.CloseAndRecv()
-	if err != nil {
-		logger.Errorw("failed to close and recv result", "error", err)
-		return nil, err
-	}
+	_, err = stream.CloseAndRecv()
 
-	return &model.SaveFileResult{
-		ID:              res.File.Id,
-		CreateUTCNano:   res.File.CreateUtcNano,
-	}, nil
+	return
 }

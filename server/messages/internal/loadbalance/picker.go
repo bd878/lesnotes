@@ -49,17 +49,16 @@ func (p *Picker) Pick(info balancer.PickInfo) (
 
 	var result balancer.PickResult
 	if strings.Contains(info.FullMethodName, "SaveMessage") ||
-		 strings.Contains(info.FullMethodName, "DeleteMessage") ||
 		 strings.Contains(info.FullMethodName, "DeleteMessages") ||
-		 strings.Contains(info.FullMethodName, "DeleteAllUserMessages") ||
+		 strings.Contains(info.FullMethodName, "DeleteUserMessages") ||
 		 strings.Contains(info.FullMethodName, "PublishMessages") ||
 		 strings.Contains(info.FullMethodName, "PrivateMessages") ||
 		 strings.Contains(info.FullMethodName, "UpdateMessage") ||
 		len(p.followers) == 0 {
 			result.SubConn = p.leader
-	} else if strings.Contains(info.FullMethodName, "ReadAllMessages") ||
+	} else if strings.Contains(info.FullMethodName, "ReadMessages") ||
 						strings.Contains(info.FullMethodName, "ReadThreadMessages") ||
-						strings.Contains(info.FullMethodName, "ReadOneMessage") {
+						strings.Contains(info.FullMethodName, "ReadMessage") {
 		result.SubConn = p.nextFollower()
 	}
 	if result.SubConn == nil {

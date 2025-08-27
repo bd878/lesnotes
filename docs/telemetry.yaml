@@ -5,49 +5,42 @@ info:
     This API handles telemetry requests.
   version: 1.0.0
 paths:
+# SEND
   /telemetry/v1/send:
     post:
       summary: Send log
       description: |
         Send a log to the server
       operationId: sendLog
+# END SEND
 
+# STATUS
   /telemetry/v1/status:
     get:
       operationId: getStatus
       summary: Shows server status
       responses:
-        "2XX":
-          description: Success response
+        "200":
+          description: ok
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/statusOk'
-        "4XX":
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/statusErr'
+            text/plain:
+              content:
+                default: "ok"
+# END STATUS
 
 components:
   schemas:
-    statusOk:
+# ERROR
+    serverError:
       type: object
-      properties:
-        status:
-          type: string 
-          default: "ok"
-        description:
-          type: string 
-          default: ""
-
-    statusErr:
-      type: object
-      properties:
-        status:
-          type: string
-          default: "error"
-        description:
-          type: string
-          default: ""
+      status:
+        type: string
+        default: "error"
+      error:
+        type: object
+        properties:
+          code:
+            type: integer
+          explain:
+            type: string
+# END ERROR

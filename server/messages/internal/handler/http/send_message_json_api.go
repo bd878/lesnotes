@@ -2,77 +2,96 @@ package http
 
 import (
 	"net/http"
-	"fmt"
 	"encoding/json"
 
-	servermodel "github.com/bd878/gallery/server/pkg/model"
-	usermodel "github.com/bd878/gallery/server/users/pkg/model"
+	"github.com/google/uuid"
+
 	"github.com/bd878/gallery/server/utils"
-	"github.com/bd878/gallery/server/messages/pkg/model"
+	middleware "github.com/bd878/gallery/server/internal/middleware/http"
+	messages "github.com/bd878/gallery/server/messages/pkg/model"
+	server "github.com/bd878/gallery/server/pkg/model"
+	users "github.com/bd878/gallery/server/users/pkg/model"
 )
 
-func (h *Handler) SendMessageJsonAPI(w http.ResponseWriter, req *http.Request) error {
-	user, ok := utils.GetUser(w, req)
+func (h *Handler) SendMessageJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
+	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "user required",
+			Error: &server.ErrorCode{
+				Code:    server.CodeNoUser,
+				Explain: "user required",
+			},
 		})
 
-		return fmt.Errorf("no user")
+		return
 	}
 
-	data, ok := utils.GetJsonRequestBody(w, req)
+	data, ok := req.Context().Value(middleware.RequestContextKey{}).(json.RawMessage)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "body data required",
+			Error:  &server.ErrorCode{
+				Code:    server.CodeNoBody,
+				Explain: "request required",
+			},
 		})
 
-		return fmt.Errorf("no req data")
+		return
 	}
 
-	var message model.Message
-	if err := json.Unmarshal(data, &message); err != nil {
+	var request messages.SendRequest
+	if err = json.Unmarshal(data, &request); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "failed to parse message",
+			Error:  &server.ErrorCode{
+				Code:    server.CodeWrongFormat,
+				Explain: "failed to parse request",
+			},
 		})
 
-		return err
+		return
 	}
 
-	if message.Text == "" {
+	if request.Text == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "text required",
+			Error:  &server.ErrorCode{
+				Code:    messages.CodeNoText,
+				Explain: "text required",
+			},
 		})
 
-		return nil
+		return
 	}
 
-	if message.ThreadID != 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+	if request.ThreadID != 0 {
+		w.WriteHeader(http.StatusNotImplemented)
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "cannot save with thread_id yet",
+			Error:  &server.ErrorCode{
+				Code:    server.CodeNoID,
+				Explain: "cannot save with thread_id yet",
+			},
 		})
 
-		return nil
+		return
 	}
 
-	if user.ID == usermodel.PublicUserID {
-		message.Private = false
+	private := true
+	if user.ID == users.PublicUserID {
+		private = false
 	}
 
-	message.UserID = user.ID
+	id := utils.RandomID()
+	name := uuid.New().String()
 
 	// TODO: check file by file_id exists
 	// TODO: check thread by thread_id exists
 
-	return h.saveMessage(w, req, &message)
+	return h.saveMessage(w, req, int64(id), request.Text, request.FileIDs, request.ThreadID, user.ID, private, name)
 }

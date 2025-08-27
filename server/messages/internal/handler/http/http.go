@@ -1,32 +1,29 @@
 package http
 
 import (
-	"net/http"
 	"io"
 	"context"
-	"encoding/json"
+	"net/http"
 
-	filesmodel "github.com/bd878/gallery/server/files/pkg/model"
-	servermodel "github.com/bd878/gallery/server/pkg/model"
-	"github.com/bd878/gallery/server/messages/pkg/model"
+	messages "github.com/bd878/gallery/server/messages/pkg/model"
+	files "github.com/bd878/gallery/server/files/pkg/model"
 )
 
 type Controller interface {
-	ReadOneMessage(ctx context.Context, params *model.ReadOneMessageParams) (*model.Message, error)
-	SaveMessage(ctx context.Context, message *model.Message) (*model.SaveMessageResult, error)
-	UpdateMessage(ctx context.Context, params *model.UpdateMessageParams) (*model.UpdateMessageResult, error)
-	DeleteMessage(ctx context.Context, params *model.DeleteMessageParams) (*model.DeleteMessageResult, error)
-	DeleteMessages(ctx context.Context, params *model.DeleteMessagesParams) (*model.DeleteMessagesResult, error)
-	PublishMessages(ctx context.Context, params *model.PublishMessagesParams) (*model.PublishMessagesResult, error)
-	PrivateMessages(ctx context.Context, params *model.PrivateMessagesParams) (*model.PrivateMessagesResult, error)
-	ReadAllMessages(ctx context.Context, params *model.ReadMessagesParams) (*model.ReadMessagesResult, error)
-	ReadThreadMessages(ctx context.Context, params *model.ReadThreadMessagesParams) (*model.ReadThreadMessagesResult, error)
+	SaveMessage(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (message *messages.Message, err error)
+	UpdateMessage(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private int32) (err error)
+	DeleteMessages(ctx context.Context, ids []int64, userID int64) (err error)
+	PublishMessages(ctx context.Context, ids []int64, userID int64) (err error)
+	PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error)
+	ReadMessage(ctx context.Context, id int64, userIDs []int64) (message *messages.Message, err error)
+	ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool, private int32) (messages []*messages.Message, isLastPage bool, err error)
+	ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool, private int32) (messages []*messages.Message, isLastPage bool, err error)
 }
 
 type FilesGateway interface {
-	ReadBatchFiles(ctx context.Context, params *model.ReadBatchFilesParams) (*model.ReadBatchFilesResult, error)
-	ReadFile(ctx context.Context, userID, fileID int64) (*filesmodel.File, error)
-	SaveFile(ctx context.Context, stream io.Reader, params *model.SaveFileParams) (*model.SaveFileResult, error)
+	ReadBatchFiles(ctx context.Context, fileIDs []int64, userID int64) (files map[int64]*files.File, err error)
+	ReadFile(ctx context.Context, userID, fileID int64) (file *files.File, err error)
+	SaveFile(ctx context.Context, stream io.Reader, id, userID int64, name string, private bool, mime string) (err error)
 }
 
 type Handler struct {
@@ -41,11 +38,6 @@ func New(controller Controller, filesGateway FilesGateway) *Handler {
 func (h *Handler) GetStatus(w http.ResponseWriter, _ *http.Request) error {
 	if _, err := io.WriteString(w, "ok\n"); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "failed to get status",
-		})
-
 		return err
 	}
 

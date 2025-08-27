@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"encoding/json"
 
-	"github.com/bd878/gallery/server/pkg/model"
 	"github.com/bd878/gallery/server/logger"
-	usersmodel "github.com/bd878/gallery/server/users/pkg/model"
+	server "github.com/bd878/gallery/server/pkg/model"
+	users "github.com/bd878/gallery/server/users/pkg/model"
 )
 
 type RequestContextKey struct {}
@@ -38,7 +38,7 @@ func (b *tokenAuthBuilder) Handle(w http.ResponseWriter, req *http.Request) (err
 }
 
 func (b *tokenAuthBuilder) handleMultipartFormData(w http.ResponseWriter, req *http.Request) (err error) {
-	var user *usersmodel.User
+	var user *users.User
 
 	if req.URL.Query().Has("token") {
 		user, err = b.restoreAuthorizedUser(w, req, req.URL.Query().Get("token"))
@@ -47,10 +47,12 @@ func (b *tokenAuthBuilder) handleMultipartFormData(w http.ResponseWriter, req *h
 	}
 
 	if err != nil {
-		b.log.Errorw("auth middleware failed to restore user, error occured, exit", "error", err)
-		json.NewEncoder(w).Encode(model.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "token not found",
+			Error: &server.ErrorCode{
+				Code: server.CodeNoToken,
+				Explain: "token not found",
+			},
 		})
 		return
 	}
@@ -61,69 +63,74 @@ func (b *tokenAuthBuilder) handleMultipartFormData(w http.ResponseWriter, req *h
 }
 
 func (b *tokenAuthBuilder) handleJson(w http.ResponseWriter, req *http.Request) (err error) {
-	var user *usersmodel.User
+	var user *users.User
 
 	data, err := io.ReadAll(req.Body)
 	defer req.Body.Close()
 	if err != nil {
-		b.log.Errorln("failed to read request body")
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(model.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "failed to read body",
+			Error: &server.ErrorCode{
+				Code: server.CodeWrongFormat,
+				Explain: "failed to read body",
+			},
 		})
 
 		return err
 	}
 
-	var jsonApiRequest model.JSONServerRequest
-	if err := json.Unmarshal(data, &jsonApiRequest); err != nil {
-		b.log.Errorln("failed to parse json body request")
+	var request server.ServerRequest
+	if err := json.Unmarshal(data, &request); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(model.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "failed to parse request",
+			Error: &server.ErrorCode{
+				Code: server.CodeWrongFormat,
+				Explain: "failed to parse request",
+			},
 		})
 
 		return err
 	}
 
-	if jsonApiRequest.Token != "" {
-		user, err = b.restoreAuthorizedUser(w, req, jsonApiRequest.Token)
+	if request.Token != "" {
+		user, err = b.restoreAuthorizedUser(w, req, request.Token)
 	} else {
 		user, err = b.restorePublicUser(w, req)
 	}
 
 	if err != nil {
-		b.log.Errorw("auth middleware failed to restore user, error occured, exit", "error", err)
-		json.NewEncoder(w).Encode(model.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "token not found",
+			Error: &server.ErrorCode{
+				Code: server.CodeNoToken,
+				Explain: "token not found",
+			},
 		})
 		return
 	}
 
-	req = req.WithContext(context.WithValue(req.Context(), RequestContextKey{}, jsonApiRequest.Req))
+	req = req.WithContext(context.WithValue(req.Context(), RequestContextKey{}, request.Request))
 	req = req.WithContext(context.WithValue(req.Context(), UserContextKey{}, user))
 
 	return b.next.Handle(w, req)
 }
 
-func (b *tokenAuthBuilder) restorePublicUser(w http.ResponseWriter, req *http.Request) (*usersmodel.User, error) {
+func (b *tokenAuthBuilder) restorePublicUser(w http.ResponseWriter, req *http.Request) (*users.User, error) {
 	if b.publicUserID == 0 {
 		return nil, ErrNoPublicID
 	}
 
 	user, err := b.users.GetUser(req.Context(), b.publicUserID)
 	if err != nil {
-		b.log.Errorw("middleware failed to restore public user, gateway error", "id", b.publicUserID)
 		return nil, err
 	}
 
 	return user, nil
 }
 
-func (b *tokenAuthBuilder) restoreAuthorizedUser(w http.ResponseWriter, req *http.Request, token string) (user *usersmodel.User, err error) {
+func (b *tokenAuthBuilder) restoreAuthorizedUser(w http.ResponseWriter, req *http.Request, token string) (user *users.User, err error) {
 	session, err := b.sessions.GetSession(req.Context(), token)
 	if err != nil {
 		return nil, ErrNoSession

@@ -1,77 +1,87 @@
 package model
 
 import (
-	"github.com/bd878/gallery/server/pkg/model"
-	filesmodel "github.com/bd878/gallery/server/files/pkg/model"
+	files "github.com/bd878/gallery/server/files/pkg/model"
 )
 
-type Message struct {
-	ID                  int64               `json:"id,omitempty"`
-	ThreadID            int64               `json:"thread_id,omitempty"`
-	CreateUTCNano       int64               `json:"create_utc_nano,omitempty"`
-	UpdateUTCNano       int64               `json:"update_utc_nano,omitempty"`
-	UserID              int64               `json:"user_id,omitempty"`
-	FileID              int64               `json:"file_id,omitempty"`
-	FileIDs             []int64             `json:"file_ids,omitempty"`
-	Name                string              `json:"name,omitempty"`
-	File                *filesmodel.File    `json:"file,omitempty"`
-	Text                string              `json:"text"`
-	Private             bool                `json:"private,omitempty"`
-}
+type (
+	Message struct {
+		ID                  int64               `json:"id"`
+		ThreadID            int64               `json:"thread"`
+		CreateUTCNano       int64               `json:"create_utc_nano,omitempty"`
+		UpdateUTCNano       int64               `json:"update_utc_nano,omitempty"`
+		UserID              int64               `json:"user_id"`         // TODO: load user, == 0 for public user
+		Name                string              `json:"name"`
+		FileIDs             []int64             `json:"-"`
+		Files               []*files.File       `json:"files"`
+		Text                string              `json:"text"`
+		Private             bool                `json:"private"`
+	}
 
-type MessagesList struct {
-	Messages            []*Message    `json:"messages"`
-	IsLastPage          bool          `json:"is_last_page"`
-}
+	SendRequest struct {
+		Text                string              `json:"text"`
+		FileIDs             []int64             `json:"file_ids,omitempty"`
+		Private             bool                `json:"private"`
+		ThreadID            int64               `json:"thread"`
+	}
 
-type ReadMessageServerResponse struct {
-	model.ServerResponse
-	Message             *Message       `json:"message"`
-}
+	SendResponse struct {
+		Message             *Message            `json:"message"`
+	}
 
-type NewMessageServerResponse struct {
-	model.ServerResponse
-	Message             *Message       `json:"message"`
-}
+	PublishRequest struct {
+		IDs                 []int64            `json:"ids"`
+	}
 
-type UpdateMessageServerResponse struct {
-	model.ServerResponse
-	ID                  int64         `json:"id"`
-	UpdateUTCNano       int64         `json:"update_utc_nano"`
-	Private             bool          `json:"private"`
-}
+	PublishResponse struct {
+		IDs                 []int64             `json:"ids"`
+		Description         string              `json:"description"`
+	}
 
-type DeleteMessageServerResponse struct {
-	model.ServerResponse
-	ID                  int64         `json:"id"`
-}
+	PrivateRequest struct {
+		IDs                 []int64             `json:"ids"`
+	}
 
-type PublishMessagesServerResponse struct {
-	model.ServerResponse
-	IDs                  []int64       `json:"ids"`
-	UpdateUTCNano        int64         `json:"update_utc_nano"`
-}
+	PrivateResponse struct {
+		IDs                 []int64             `json:"ids"`
+		Description         string              `json:"description"`
+	}
 
-type PrivateMessagesServerResponse struct {
-	model.ServerResponse
-	IDs                  []int64       `json:"ids"`
-	UpdateUTCNano        int64         `json:"update_utc_nano"`
-}
+	ReadResponse struct {
+		ThreadID            *int64              `json:"thread,omitempty"`
+		Messages            []*Message          `json:"messages"`
+		IsLastPage          *bool               `json:"is_last_page"`
+		Description         string              `json:"description"`
+	}
 
-type DeleteMessageStatus struct {
-	ID                int64           `json:"id"`
-	OK                bool            `json:"ok"`
-	Explain           string          `json:"explain"`
-}
+	ReadRequest struct {
+		Public              *int                `json:"public,omitempty"`
+		MessageID           int64               `json:"id"`
+		ThreadID            int64               `json:"thread"`
+		Limit               int                 `json:"limit"`
+		Offset              int                 `json:"offset"`
+		Asc                 int                 `json:"asc"`
+	}
 
-type DeleteMessagesServerResponse struct {
-	model.ServerResponse
-	IDs              []*DeleteMessageStatus `json:"ids"`
-}
+	DeleteRequest struct {
+		IDs                 []int64             `json:"ids"`
+	}
 
-type MessagesListServerResponse struct {
-	model.ServerResponse
-	ThreadID            int64         `json:"thread_id"`
-	Messages            []*Message    `json:"messages"`
-	IsLastPage          bool          `json:"is_last_page"`
-}
+	DeleteResponse struct {
+		Description         string              `json:"description"`
+		IDs                 []int64             `json:"ids"`
+	}
+
+	UpdateRequest struct {
+		MessageID           int64               `json:"id"`
+		ThreadID            *int64              `json:"thread,omitempty"`
+		Text                *string             `json:"text,omitempty"`
+		Public              *int                `json:"public,omitempty"`
+	}
+
+	UpdateResponse struct {
+		ID                  int64               `json:"id"`
+		UpdateUTCNano       int64               `json:"update_utc_nano"`
+		Description         string              `json:"description"`
+	}
+)

@@ -1,2 +1,2 @@
-url = https://%STAGE%lesnotes.space/messages/v1/delete?id=%ID%
+url = https://%STAGE%lesnotes.space/messages/v1/delete?ids=%5B%ID%%5D
 -XDELETE

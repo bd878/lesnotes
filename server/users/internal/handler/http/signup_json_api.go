@@ -3,81 +3,112 @@ package http
 import (
 	"net/http"
 	"io"
-	"errors"
 	"encoding/json"
 
 	"github.com/bd878/gallery/server/utils"
-	"github.com/bd878/gallery/server/users/pkg/model"
-	servermodel "github.com/bd878/gallery/server/pkg/model"
+	users "github.com/bd878/gallery/server/users/pkg/model"
+	server "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) error {
-	var err error
+func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
+	var data []byte
 
-	data, err := io.ReadAll(req.Body)
-	if err != nil {
-		req.Body.Close()
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "failed to parse request",
-		})
-
-		return err
-	}
-
+	data, err = io.ReadAll(req.Body)
 	defer req.Body.Close()
-
-	var body model.SignupUserJsonRequest
-	if err := json.Unmarshal(data, &body); err != nil {
+	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "failed to parse user",
+			Error:  &server.ErrorCode{
+				Code:    server.CodeWrongFormat,
+				Explain: "failed to parse request",
+			},
 		})
 
-		return err
+		return
 	}
 
-	if body.Login == "" {
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+	var request users.SignupRequest
+	if err = json.Unmarshal(data, &request); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(server.ServerResponse{	
 			Status: "error",
-			Description: "no name",
+			Error:   &server.ErrorCode {
+				Code:     server.CodeWrongFormat,
+				Explain: "failed to parse signup request",
+			},
 		})
 
-		return errors.New("cannot get user name from request")
+		return
 	}
 
-	if body.Password == "" {
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+	if request.Login == "" {
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "no password",
+			Error:   &server.ErrorCode{
+				Code:    users.CodeNoLogin,
+				Explain: "no login",
+			},
 		})
 
-		return errors.New("cannot get password from request")
+		return
+	}
+
+	if request.Password == "" {
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status: "error",
+			Error:   &server.ErrorCode{
+				Code:    users.CodeNoPassword,
+				Explain: "no password",
+			},
+		})
+
+		return
+	}
+
+	fiveOrMore, _, _, _ := verifyPassword(request.Password)
+	if !fiveOrMore {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status: "error",
+			Error: &server.ErrorCode{
+				Code:    users.CodePasswordTooShort,
+				Explain: "password is less than 5 symbols",
+			},
+		})
+		return
 	}
 
 	id := utils.RandomID()
 
-	user, err := h.controller.CreateUser(req.Context(), int64(id), body.Login, body.Password)
+	user, err := h.controller.CreateUser(req.Context(), int64(id), request.Login, request.Password)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "cannot check user",
+			Error:   &server.ErrorCode{
+				Code:    users.CodeRegisterFailed,
+				Explain: "cannot signup user",
+			},
 		})
 
 		return err
 	}
 
-	json.NewEncoder(w).Encode(&model.SignupJsonUserServerResponse{
-		ServerResponse: servermodel.ServerResponse{
-			Status:      "ok",
-			Description: "created",
-		},
+	response, err := json.Marshal(users.SignupResponse{
+		Description:    "user registered",
+		ID:             user.ID,
 		Token:          user.Token,
 		ExpiresUTCNano: user.ExpiresUTCNano,
-		ID:             user.ID,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return err
+	}
+
+	json.NewEncoder(w).Encode(server.ServerResponse{
+		Status:      "ok",
+		Response:    json.RawMessage(response),
 	})
 
 	return nil

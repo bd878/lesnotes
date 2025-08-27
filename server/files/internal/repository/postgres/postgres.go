@@ -27,7 +27,7 @@ func New(pool *pgxpool.Pool) *Repository {
 	}
 }
 
-func (r *Repository) SaveFile(ctx context.Context, reader io.Reader, file *model.File) (err error) {
+func (r *Repository) SaveFile(ctx context.Context, reader io.Reader, id, userID int64, private bool, name string, mime string) (err error) {
 	const query = "INSERT INTO %s(id, owner_id, name, private, oid, mime, size) VALUES ($1, $2, $3, $4, $5, $6, $7)"
 	const createdAtQuery = "SELECT created_at FROM %s WHERE id = $1"
 
@@ -70,7 +70,7 @@ func (r *Repository) SaveFile(ctx context.Context, reader io.Reader, file *model
 		return
 	}
 
-	_, err = tx.Exec(ctx, r.table(query), file.ID, file.UserID, file.Name, file.Private, oid, file.Mime, size)
+	_, err = tx.Exec(ctx, r.table(query), id, userID, name, private, oid, mime, size)
 	if err != nil {
 		return
 	}
@@ -78,24 +78,29 @@ func (r *Repository) SaveFile(ctx context.Context, reader io.Reader, file *model
 	return
 }
 
-func (r *Repository) GetMeta(ctx context.Context, ownerID int64, id int64) (file *model.File, err error) {
-	const query = "SELECT name, private, oid, mime, size, created_at FROM %s WHERE owner_id = $1 AND id = $2"
-
-	logger.Infow("get meta", "owner_id", ownerID, "id", id)
+func (r *Repository) GetMeta(ctx context.Context, ownerID, id int64, fileName string) (file *model.File, err error) {
+	query := "SELECT id, name, private, oid, mime, size, created_at FROM %s WHERE owner_id = $1"
 
 	file = &model.File{
 		UserID: ownerID,
-		ID:     id,
 	}
 
-	var created time.Time
+	var createdAt time.Time
 
-	err = r.pool.QueryRow(ctx, r.table(query), ownerID, id).Scan(&file.Name, &file.Private, &file.OID, &file.Mime, &file.Size, &created)
+	if id != 0 {
+		query += " AND id = $2"
+		err = r.pool.QueryRow(ctx, r.table(query), ownerID, id).Scan(&file.ID, &file.Name, &file.Private, &file.OID, &file.Mime, &file.Size, &createdAt)
+	} else if fileName != "" {
+		query += " AND name = $2"
+		err = r.pool.QueryRow(ctx, r.table(query), ownerID, fileName).Scan(&file.ID, &file.Name, &file.Private, &file.OID, &file.Mime, &file.Size, &createdAt)
+	} else {
+		err = errors.New("id = 0 and fileName is empty")
+	}
 	if err != nil {
 		return
 	}
 
-	file.CreateUTCNano = created.UnixNano()
+	file.CreateUTCNano = createdAt.UnixNano()
 
 	return
 }

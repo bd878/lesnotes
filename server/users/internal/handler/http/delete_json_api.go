@@ -2,97 +2,94 @@ package http
 
 import (
 	"net/http"
-	"io"
 	"errors"
 	"encoding/json"
 
-	"github.com/bd878/gallery/server/utils"
-	"github.com/bd878/gallery/server/users/pkg/model"
-	servermodel "github.com/bd878/gallery/server/pkg/model"
+	middleware "github.com/bd878/gallery/server/internal/middleware/http"
+	users "github.com/bd878/gallery/server/users/pkg/model"
+	server "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) DeleteJsonAPI(w http.ResponseWriter, req *http.Request) error {
-	var err error
+func (h *Handler) DeleteJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
+	body, ok := req.Context().Value(middleware.RequestContextKey{}).(json.RawMessage)
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status:      "error",
+			Error: &server.ErrorCode{
+				Code: server.CodeNoBody,
+				Explain: "cannot find json request",
+			},
+		})
 
-	data, err := io.ReadAll(req.Body)
-	if err != nil {
-		req.Body.Close()
+		return nil
+	}
+
+	var request users.DeleteMeRequest
+	if err = json.Unmarshal(body, &request); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "failed to parse request",
+			Error: &server.ErrorCode{
+				Code: server.CodeWrongFormat,
+				Explain: "failed to parse json request",
+			},
 		})
 
 		return err
 	}
 
-	defer req.Body.Close()
-
-	var jsonRequest model.DeleteUserJsonRequest
-	if err := json.Unmarshal(data, &jsonRequest); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+	if request.Login == "" {
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "failed to parse json request",
+			Error: &server.ErrorCode{
+				Code: users.CodeNoLogin,
+				Explain: "no login",
+			},
 		})
 
-		return err
+		return errors.New("cannot get login from request")
 	}
 
-	if jsonRequest.Token == "" {
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "no token",
-		})
-
-		return errors.New("cannot get token from request")
-	}
-
-	if jsonRequest.Name == "" {
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "no name",
-		})
-
-		return errors.New("cannot get name from request")
-	}
-
-	if jsonRequest.Password == "" {
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
-			Status: "error",
-			Description: "no password",
-		})
-
-		return errors.New("cannot get password from request")
-	}
-
-	user, ok := utils.GetUser(w, req)
+	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "user required",
+			Error: &server.ErrorCode{
+				Code:    server.CodeNoUser,
+				Explain: "user required",
+			},
 		})
 
-		return errors.New("user required")
+		return
 	}
 
 	err = h.controller.DeleteUser(req.Context(), int64(user.ID))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(servermodel.ServerResponse{
+		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Description: "cannot delete user",
+			Error: &server.ErrorCode{
+				Code: users.CodeDeleteFailed,
+				Explain: "cannot delete user",
+			},
 		})
 
 		return err
 	}
 
-	json.NewEncoder(w).Encode(&model.DeleteUserJsonServerResponse{
-		ServerResponse: servermodel.ServerResponse{
-			Status: "ok",
-			Description: "deleted",
-		},
+	response, err := json.Marshal(users.DeleteMeResponse{
+		Description: "deleted",
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return err
+	}
+
+	json.NewEncoder(w).Encode(server.ServerResponse{
+		Status: "ok",
+		Response: json.RawMessage(response),
 	})
 
 	return nil

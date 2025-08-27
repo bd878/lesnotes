@@ -19,6 +19,7 @@ message File {
 	string        error = 5;
 	int64         size = 6;
 	bool          private = 7;
+	string        mime = 8;
 }
 
 message FileChunk {
@@ -33,7 +34,6 @@ message FileData {
 }
 
 message SaveFileStreamResponse {
-	File     file = 1;
 }
 
 message ReadFileStreamRequest {
