@@ -244,7 +244,7 @@ func (r *Repository) Read(ctx context.Context, userIDs []int64, id int64) (messa
 
 	ids := "$2"
 	for i := 1; i < len(userIDs); i++ {
-		ids += fmt.Sprintf(",%d", i+2)
+		ids += fmt.Sprintf(",$%d", i+2)
 	}
 
 	list := make([]interface{}, len(userIDs))
