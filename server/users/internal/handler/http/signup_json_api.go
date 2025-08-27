@@ -73,7 +73,7 @@ func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 			Status: "error",
 			Error: &server.ErrorCode{
 				Code:    users.CodePasswordTooShort,
-				Explain: "password is less than 8 symbols",
+				Explain: "password is less than 5 symbols",
 			},
 		})
 		return

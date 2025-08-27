@@ -106,7 +106,7 @@ func (h *Handler) Signup( w http.ResponseWriter, req *http.Request) (err error) 
 			Status: "error",
 			Error: &server.ErrorCode{
 				Code:    users.CodeLoginTooShort,
-				Explain: "login is less than 8 symbols",
+				Explain: "login is less than 5 symbols",
 			},
 		})
 		return
