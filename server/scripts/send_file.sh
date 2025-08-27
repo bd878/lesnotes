@@ -2,9 +2,7 @@
 
 # Send a file
 
-[ -e ".env" ] && source ".env"
-
-stage=${STAGE:-""}
+stage=${STAGE:-"stage."}
 cookie=${COOKIE:-"cookie.txt"}
 
 cmd=`cat <<HERE

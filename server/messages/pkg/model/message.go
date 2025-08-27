@@ -6,16 +6,16 @@ import (
 
 type (
 	Message struct {
-		ID                  int64               `json:"id,omitempty"`
-		ThreadID            int64               `json:"thread,omitempty"`
+		ID                  int64               `json:"id"`
+		ThreadID            int64               `json:"thread"`
 		CreateUTCNano       int64               `json:"create_utc_nano,omitempty"`
 		UpdateUTCNano       int64               `json:"update_utc_nano,omitempty"`
-		UserID              int64               `json:"user_id,omitempty"`         // TODO: load user, == 0 for public user
-		Name                string              `json:"name,omitempty"`
+		UserID              int64               `json:"user_id"`         // TODO: load user, == 0 for public user
+		Name                string              `json:"name"`
 		FileIDs             []int64             `json:"-"`
-		Files               []*files.File       `json:"files,omitempty"`
+		Files               []*files.File       `json:"files"`
 		Text                string              `json:"text"`
-		Private             bool                `json:"private,omitempty"`
+		Private             bool                `json:"private"`
 	}
 
 	SendRequest struct {
@@ -69,7 +69,7 @@ type (
 
 	DeleteResponse struct {
 		Description         string              `json:"description"`
-		IDs                 []int64             `json:"ids,omitempty"`
+		IDs                 []int64             `json:"ids"`
 	}
 
 	UpdateRequest struct {
