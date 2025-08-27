@@ -46,7 +46,7 @@ func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:   &server.ErrorCode{
-				Code: users.CodeNoLogin,
+				Code:    users.CodeNoLogin,
 				Explain: "no login",
 			},
 		})
@@ -66,47 +66,14 @@ func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 		return
 	}
 
-	eightOrMore, twoLetters, oneNumber, oneSpecial := verifyPassword(request.Password)
-	if !eightOrMore {
+	fiveOrMore, _, _, _ := verifyPassword(request.Password)
+	if !fiveOrMore {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code:  users.CodePasswordTooShort,
+				Code:    users.CodePasswordTooShort,
 				Explain: "password is less than 8 symbols",
-			},
-		})
-		return
-	}
-	if !twoLetters {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status: "error",
-			Error: &server.ErrorCode{
-				Code: users.CodePasswordUpperLower,
-				Explain: "password must have upper und lower letter",
-			},
-		})
-		return
-	}
-	if !oneNumber {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status: "error",
-			Error: &server.ErrorCode{
-				Code:  users.CodePasswordOneNumber,
-				Explain: "password must have at least one number",
-			},
-		})
-		return
-	}
-	if !oneSpecial {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status: "error",
-			Error: &server.ErrorCode{
-				Code:  users.CodePasswordOneSpecial,
-				Explain: "password must have at least one special symbol",
 			},
 		})
 		return

@@ -11,9 +11,9 @@ import (
 	server "github.com/bd878/gallery/server/pkg/model"
 )
 
-func verifyPassword(password string) (eightOrMore, twoLetters, oneNumber, oneSpecial bool) {
-	if len(password) >= 8 {
-		eightOrMore = true
+func verifyPassword(password string) (fiveOrMore, twoLetters, oneNumber, oneSpecial bool) {
+	if len(password) >= 5 {
+		fiveOrMore = true
 	}
 
 	var oneLower, oneUpper bool
@@ -34,9 +34,9 @@ func verifyPassword(password string) (eightOrMore, twoLetters, oneNumber, oneSpe
 	return
 }
 
-func verifyLogin(login string) (eightOrMore bool) {
-	if len(login) >= 8 {
-		eightOrMore = true
+func verifyLogin(login string) (fiveOrMore bool) {
+	if len(login) >= 5 {
+		fiveOrMore = true
 	}
 	return
 }
@@ -86,59 +86,26 @@ func (h *Handler) Signup( w http.ResponseWriter, req *http.Request) (err error) 
 		return
 	}
 
-	eightOrMore, twoLetters, oneNumber, oneSpecial := verifyPassword(password)
-	if !eightOrMore {
+	fiveOrMore, _, _, _ := verifyPassword(password)
+	if !fiveOrMore {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code:  users.CodePasswordTooShort,
-				Explain: "password is less than 8 symbols",
-			},
-		})
-		return
-	}
-	if !twoLetters {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status: "error",
-			Error: &server.ErrorCode{
-				Code: users.CodePasswordUpperLower,
-				Explain: "password must have upper und lower letter",
-			},
-		})
-		return
-	}
-	if !oneNumber {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status: "error",
-			Error: &server.ErrorCode{
-				Code:  users.CodePasswordOneNumber,
-				Explain: "password must have at least one number",
-			},
-		})
-		return
-	}
-	if !oneSpecial {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status: "error",
-			Error: &server.ErrorCode{
-				Code:  users.CodePasswordOneSpecial,
-				Explain: "password must have at least one special symbol",
+				Code:    users.CodePasswordTooShort,
+				Explain: "password is less than 5 symbols",
 			},
 		})
 		return
 	}
 
-	eightOrMore = verifyLogin(login)
-	if !eightOrMore {
+	fiveOrMore = verifyLogin(login)
+	if !fiveOrMore {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code:  users.CodeLoginTooShort,
+				Code:    users.CodeLoginTooShort,
 				Explain: "login is less than 8 symbols",
 			},
 		})
