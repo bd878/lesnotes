@@ -46,6 +46,8 @@ func (g *Gateway) ReadBatchFiles(ctx context.Context, fileIDs []int64, userID in
 		g.setupConnection()
 	}
 
+	logger.Debugw("read batch files", "file_ids", fileIDs, "user_id", userID)
+
 	batch, err := g.client.ReadBatchFiles(ctx, &api.ReadBatchFilesRequest{
 		UserId: userID,
 		Ids:    fileIDs,
@@ -60,6 +62,8 @@ func (g *Gateway) ReadBatchFiles(ctx context.Context, fileIDs []int64, userID in
 }
 
 func (g *Gateway) ReadFile(ctx context.Context, userID, fileID int64) (resp *files.File, err error) {
+	logger.Debugw("read file", "user_id", userID, "file_id", fileID)
+
 	file, err := g.client.ReadFile(ctx, &api.ReadFileRequest{
 		UserId: userID,
 		Id:     fileID,
@@ -74,21 +78,25 @@ func (g *Gateway) ReadFile(ctx context.Context, userID, fileID int64) (resp *fil
 }
 
 // copied from files/internal/controller/service
-func (g *Gateway) SaveFile(ctx context.Context, fileStream io.Reader, name string, userID int64) (fileID int64, err error) {
+func (g *Gateway) SaveFile(ctx context.Context, fileStream io.Reader, id, userID int64, fileName string, private bool, mime string) (err error) {
 	if g.isConnFailed() {
-		logger.Info("conn failed, setup new connection")
 		g.setupConnection()
 	}
 
+	logger.Debugw("save file", "id", id, "user_id", userID, "file_name", fileName, "private", private, "mime", mime)
+
 	stream, err := g.client.SaveFileStream(ctx)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	err = stream.Send(&api.FileData{
 		Data: &api.FileData_File{
 			File: &api.File{
-				Name:    name,
+				Id:      id,
+				Private: private,
+				Mime:    mime,
+				Name:    fileName,
 				UserId:  userID,
 			},
 		},
@@ -104,7 +112,7 @@ func (g *Gateway) SaveFile(ctx context.Context, fileStream io.Reader, name strin
 			break
 		}
 		if err != nil {
-			return 0, err
+			return err
 		}
 
 		err = stream.Send(&api.FileData{
@@ -113,16 +121,11 @@ func (g *Gateway) SaveFile(ctx context.Context, fileStream io.Reader, name strin
 			},
 		})
 		if err != nil {
-			return 0, err
+			return err
 		}
 	}
 
-	res, err := stream.CloseAndRecv()
-	if err != nil {
-		return 0, err
-	}
-
-	fileID = res.File.Id
+	_, err = stream.CloseAndRecv()
 
 	return
 }

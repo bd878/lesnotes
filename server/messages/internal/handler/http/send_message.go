@@ -1,6 +1,8 @@
 package http
 
 import (
+	"io"
+	"bytes"
 	"net/http"
 	"strconv"
 	"path/filepath"
@@ -164,7 +166,14 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) (err err
 
 		fileName := filepath.Base(fh.Filename)
 
-		fileID, err := h.filesGateway.SaveFile(req.Context(), f, fileName, user.ID)
+		var buf bytes.Buffer
+		io.CopyN(&buf, f, 512)
+		mime := http.DetectContentType(buf.Bytes())
+		f.Seek(0, io.SeekStart)
+
+		id := int64(utils.RandomID())
+
+		err = h.filesGateway.SaveFile(req.Context(), f, id, user.ID, fileName, private, mime)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(server.ServerResponse{
@@ -178,7 +187,7 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) (err err
 			return err
 		}
 
-		fileIDs = append(fileIDs, fileID)
+		fileIDs = append(fileIDs, id)
 	}
 
 	id := utils.RandomID()

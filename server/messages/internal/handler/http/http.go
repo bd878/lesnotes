@@ -23,7 +23,7 @@ type Controller interface {
 type FilesGateway interface {
 	ReadBatchFiles(ctx context.Context, fileIDs []int64, userID int64) (files map[int64]*files.File, err error)
 	ReadFile(ctx context.Context, userID, fileID int64) (file *files.File, err error)
-	SaveFile(ctx context.Context, stream io.Reader, name string, userID int64) (fileID int64, err error)
+	SaveFile(ctx context.Context, stream io.Reader, id, userID int64, name string, private bool, mime string) (err error)
 }
 
 type Handler struct {

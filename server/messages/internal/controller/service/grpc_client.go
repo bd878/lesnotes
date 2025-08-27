@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/messages/pkg/loadbalance"
 	"github.com/bd878/gallery/server/messages/pkg/model"
 )
@@ -60,7 +61,11 @@ func (s *Messages) setupConnection() (err error) {
 
 func (s *Messages) isConnFailed() bool {
 	state := s.conn.GetState()
-	return state == connectivity.Shutdown || state == connectivity.TransientFailure
+	if state == connectivity.Shutdown || state == connectivity.TransientFailure {
+		logger.Debugln("connection failed")
+		return true
+	}
+	return false
 }
 
 func (s *Messages) SaveMessage(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private bool) (message *model.Message, err error) {
@@ -69,6 +74,8 @@ func (s *Messages) SaveMessage(ctx context.Context, id int64, text string, fileI
 			return
 		}
 	}
+
+	logger.Debugw("save message", "id", id, "text", text, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private)
 
 	message = &model.Message{
 		ID:       id,
@@ -98,6 +105,8 @@ func (s *Messages) DeleteMessages(ctx context.Context, ids []int64, userID int64
 		}
 	}
 
+	logger.Debugw("delete messages", "ids", ids, "user_id", userID)
+
 	_, err = s.client.DeleteMessages(ctx, &api.DeleteMessagesRequest{
 		Ids:    ids,
 		UserId: userID,
@@ -112,6 +121,8 @@ func (s *Messages) PublishMessages(ctx context.Context, ids []int64, userID int6
 			return
 		}
 	}
+
+	logger.Debugw("publish messages", "ids", ids, "user_id", userID)
 
 	_, err = s.client.PublishMessages(ctx, &api.PublishMessagesRequest{
 		Ids:    ids,
@@ -128,6 +139,8 @@ func (s *Messages) PrivateMessages(ctx context.Context, ids []int64, userID int6
 		}
 	}
 
+	logger.Debugw("private messages", "ids", ids, "user_id", userID)
+
 	_, err = s.client.PrivateMessages(ctx, &api.PrivateMessagesRequest{
 		Ids:    ids,
 		UserId: userID,
@@ -142,6 +155,8 @@ func (s *Messages) UpdateMessage(ctx context.Context, id int64, text string, fil
 			return
 		}
 	}
+
+	logger.Debugw("update message", "id", id, "text", text, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private)
 
 	_, err = s.client.UpdateMessage(ctx, &api.UpdateMessageRequest{
 		Id:        id,
@@ -161,6 +176,8 @@ func (s *Messages) ReadThreadMessages(ctx context.Context, userID int64, threadI
 			return
 		}
 	}
+
+	logger.Debugw("read thread messages", "user_id", userID, "thread_id", threadID, "limit", limit, "offset", offset, "ascending", ascending, "private", private)
 
 	res, err := s.client.ReadThreadMessages(ctx, &api.ReadThreadMessagesRequest{
 		UserId:   userID,
@@ -187,6 +204,8 @@ func (s *Messages) ReadMessages(ctx context.Context, userID int64, limit, offset
 		}
 	}
 
+	logger.Debugw("read messages", "user_id", userID, "limit", limit, "offset", offset, "ascending", ascending, "private", private)
+
 	res, err := s.client.ReadMessages(ctx, &api.ReadMessagesRequest{
 		UserId:   userID,
 		Limit:    limit,
@@ -210,6 +229,8 @@ func (s *Messages) ReadMessage(ctx context.Context, id int64, userIDs []int64) (
 			return nil, err
 		}
 	}
+
+	logger.Debugw("read message", "id", id, "user_ids", userIDs)
 
 	res, err := s.client.ReadMessage(ctx, &api.ReadMessageRequest{
 		Id:      id,
