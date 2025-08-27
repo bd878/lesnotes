@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"encoding/json"
 
+	"github.com/google/uuid"
+
 	"github.com/bd878/gallery/server/utils"
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
 	messages "github.com/bd878/gallery/server/messages/pkg/model"
@@ -86,9 +88,10 @@ func (h *Handler) SendMessageJsonAPI(w http.ResponseWriter, req *http.Request) (
 	}
 
 	id := utils.RandomID()
+	name := uuid.New().String()
 
 	// TODO: check file by file_id exists
 	// TODO: check thread by thread_id exists
 
-	return h.saveMessage(w, req, int64(id), request.Text, request.FileIDs, request.ThreadID, user.ID, private)
+	return h.saveMessage(w, req, int64(id), request.Text, request.FileIDs, request.ThreadID, user.ID, private, name)
 }

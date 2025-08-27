@@ -68,18 +68,19 @@ func (s *Messages) isConnFailed() bool {
 	return false
 }
 
-func (s *Messages) SaveMessage(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private bool) (message *model.Message, err error) {
+func (s *Messages) SaveMessage(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (message *model.Message, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
 		}
 	}
 
-	logger.Debugw("save message", "id", id, "text", text, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private)
+	logger.Debugw("save message", "id", id, "text", text, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private, "name", name)
 
 	message = &model.Message{
 		ID:       id,
 		Text:     text,
+		Name:     name,
 		FileIDs:  fileIDs,
 		ThreadID: threadID,
 		UserID:   userID,
@@ -93,6 +94,7 @@ func (s *Messages) SaveMessage(ctx context.Context, id int64, text string, fileI
 		ThreadId: threadID,
 		UserId:   userID,
 		Private:  private,
+		Name:     name,
 	})
 
 	return

@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"encoding/json"
 
+	"github.com/google/uuid"
+
 	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/utils"
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
@@ -191,12 +193,13 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) (err err
 	}
 
 	id := utils.RandomID()
+	name := uuid.New().String()
 
-	return h.saveMessage(w, req, int64(id), text, fileIDs, threadID, user.ID, private)
+	return h.saveMessage(w, req, int64(id), text, fileIDs, threadID, user.ID, private, name)
 }
 
-func (h *Handler) saveMessage(w http.ResponseWriter, req *http.Request, id int64, text string, fileIDs []int64, threadID int64, userID int64, private bool) error {
-	message, err := h.controller.SaveMessage(req.Context(), id, text, fileIDs, threadID, userID, private)
+func (h *Handler) saveMessage(w http.ResponseWriter, req *http.Request, id int64, text string, fileIDs []int64, threadID int64, userID int64, private bool, name string) error {
+	message, err := h.controller.SaveMessage(req.Context(), id, text, fileIDs, threadID, userID, private, name)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

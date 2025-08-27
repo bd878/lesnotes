@@ -6,6 +6,7 @@ import (
 	"bytes"
 
 	"google.golang.org/protobuf/proto"
+	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/messages/pkg/model"
 )
 
@@ -37,6 +38,8 @@ func (m *DistributedMessages) apply(ctx context.Context, reqType RequestType, cm
 }
 
 func (m *DistributedMessages) SaveMessage(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (err error) {
+	logger.Debugw("save message", "id", id, "text", text, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private, "name", name)
+
 	cmd, err := proto.Marshal(&AppendCommand{
 		Id:       id,
 		Text:     text,
