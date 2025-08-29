@@ -11,7 +11,7 @@ async function readUserMessage(ctx) {
 		const filePath = resolve(path.join(Config.get('basedir'), 'templates/message.mustache'));
 		const template = await readFile(filePath, { encoding: 'utf-8' });
 
-		const id = ctx.params.id
+		const id = parseInt(ctx.params.id, 10)
 		const user = parseInt(ctx.params.user, 10)
 		const token = ctx.cookies.get("token")
 
