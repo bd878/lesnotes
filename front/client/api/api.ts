@@ -81,31 +81,31 @@ export default function api(url, props: any = {}): Promise<any> {
 
 					if (is.notEmpty(value.error))
 						return {
-							value,
 							error:   true,
+							status:  res.status,
+							value:   {},
 							data:    value.data,
-							status:  value.status,
+							explain: text,
 							code:    value.error.code,
-							explain: value.error.explain,
 						}
 					else
 						return {
+							error:   false,
+							status:  res.status,
 							value:   value.response,
 							data:    value.data,
-							status:  value.status,
-							error:   false,
 							explain: "",
 							code:    0,
 						}
 				} catch (e) {
 					console.error("[api]: error occured", e)
 					return {
-						value:   {},
-						data:    text,
 						error:   true,
+						status:  res.status,
+						value:   {},
+						data:    {},
+						explain: text,
 						code:    0,
-						status:  "error",
-						explain: i18n("cannot_parse_response"),
 					}
 				}
 			})

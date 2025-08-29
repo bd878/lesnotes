@@ -8,9 +8,6 @@ import { resolve } from 'node:path';
 
 async function readUserMessage(ctx) {
 	try {
-		const filePath = resolve(path.join(Config.get('basedir'), 'templates/message.mustache'));
-		const template = await readFile(filePath, { encoding: 'utf-8' });
-
 		const id = parseInt(ctx.params.id, 10)
 		const user = parseInt(ctx.params.user, 10)
 		const token = ctx.cookies.get("token")
@@ -20,10 +17,20 @@ async function readUserMessage(ctx) {
 		const resp = await api.readMessageJson(token, user, id)
 
 		if (resp.error) {
-			ctx.body = "<html>" + resp.explain + "</html>"
-			ctx.status = 500
-			throw Error(resp.explain)
+			const filePath = resolve(path.join(Config.get('basedir'), 'templates/error.mustache'));
+			const template = await readFile(filePath, { encoding: 'utf-8' });
+
+			ctx.body = mustache.render(template, {
+				code:     resp.code,
+				explain:  resp.explain,
+				styles:   ["/public/styles.css"],
+			})
+
+			ctx.status = resp.status
 		} else {
+			const filePath = resolve(path.join(Config.get('basedir'), 'templates/message.mustache'));
+			const template = await readFile(filePath, { encoding: 'utf-8' });
+
 			ctx.body = mustache.render(template, {
 				id:       id,
 				userId:   user,
