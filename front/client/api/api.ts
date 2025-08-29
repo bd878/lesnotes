@@ -84,6 +84,7 @@ export default function api(url, props: any = {}): Promise<any> {
 							value,
 							error:   true,
 							data:    value.data,
+							status:  value.status,
 							code:    value.error.code,
 							explain: value.error.explain,
 						}
@@ -94,13 +95,16 @@ export default function api(url, props: any = {}): Promise<any> {
 							status:  value.status,
 							error:   false,
 							explain: "",
+							code:    0,
 						}
 				} catch (e) {
 					console.error("[api]: error occured", e)
 					return {
 						value:   {},
 						data:    text,
-						error:   i18n("bad_response"),
+						error:   true,
+						code:    0,
+						status:  "error",
 						explain: i18n("cannot_parse_response"),
 					}
 				}
