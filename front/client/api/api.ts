@@ -1,4 +1,5 @@
 import i18n from '../i18n';
+import * as is from '../third_party/is'
 
 const methodsWithBody = [
 	'POST', 'PUT', 'DELETE', 'PATCH',
@@ -76,9 +77,9 @@ export default function api(url: string, props = {}) {
 			if (!res.ok) {
 				console.error(`[api] request to ${url} returned ${res.status} status`)
 				return {
-					value: null,
-					error: i18n("bad_status_code"),
-					explain: i18n("token_expired_error"),
+					value:   null,
+					error:   i18n("bad_status_code"),
+					explain: res,
 				};
 			}
 
@@ -87,16 +88,20 @@ export default function api(url: string, props = {}) {
 				.then(text => {
 					try {
 						const value = JSON.parse(text);
-						if (value.status === "error")
+						if (value.status === "error" && is.notEmpty(value.error))
 							return {
 								value,
-								error: i18n("bad_status_code"),
-								explain: value.description,
+								error:   true,
+								data:    value.data,
+								code:    value.error.code,
+								explain: value.error.explain,
 							}
 						else
 							return {
-								value,
-								error: "",
+								value:   value.response,
+								data:    value.data,
+								status:  value.status,
+								error:   false,
 								explain: "",
 							}
 					} catch (e) {

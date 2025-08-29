@@ -1,6 +1,7 @@
-import loadMessages from './loadMessages';
-import loadMessagesJson from './loadMessagesJson';
-import loadOneMessage from './loadOneMessage';
+import readMessages from './readMessages';
+import readMessagesJson from './readMessagesJson';
+import readMessage from './readMessage';
+import readMessageJson from './readMessageJson';
 import sendMessage from './sendMessage';
 import updateMessage from './updateMessage';
 import deleteMessage from './deleteMessage';
@@ -24,9 +25,10 @@ export default {
 	login,
 	logout,
 	auth,
-	loadMessages,
-	loadMessagesJson,
-	loadOneMessage,
+	readMessages,
+	readMessagesJson,
+	readMessageJson,
+	readMessage,
 	sendMessage,
 	updateMessage,
 	deleteMessage,

@@ -18,7 +18,9 @@ import register from './routes/register.js';
 import home from './routes/home.js';
 import status from './routes/status.js';
 import xxx from './routes/xxx.js';
-import message from './routes/message.js';
+import readUserMessage from './routes/readUserMessage.js';
+import readPublicMessage from './routes/readPublicMessage.js';
+import createNewMessage from './routes/createNewMessage.js';
 import miniapp from './routes/miniapp.js';
 import authTelegram from './routes/authTelegram.js';
 
@@ -44,9 +46,9 @@ router
 	.get('/home', etag, home)
 	.get('/status', status)
 	.get("/tg_auth", authTelegram)
-	.get("/new", etag, message)
-	.get("/m/:userId/:id", etag, message)
-	.get("/m/:id", etag, publicMessage)
+	.get("/new", etag, createNewMessage)
+	.get("/m/:user/:id", etag, readUserMessage)
+	.get("/m/:id", etag, readPublicMessage)
 	.get("/miniapp", etag, miniapp)
 	.get('/:any*', xxx)
 

@@ -38,17 +38,17 @@ interface FetchMessagesPayload {
 	order:  number;
 }
 
-function* loadMessages(bodyOrQueryParams) {
+function* readMessages(bodyOrQueryParams) {
 	const isMiniapp = yield select(selectIsMiniapp)
 	if (isMiniapp) {
 		api.sendLog("miniapp")
 		const token = yield select(selectToken)
 		api.sendLog("token: " + token)
-		const response = yield call(api.loadMessagesJson, token, bodyOrQueryParams)
+		const response = yield call(api.readMessagesJson, token, bodyOrQueryParams)
 		return response
 	} else {
 		api.sendLog("not miniapp")
-		const response = yield call(api.loadMessages, bodyOrQueryParams)
+		const response = yield call(api.readMessages, bodyOrQueryParams)
 		return response
 	}
 }
@@ -56,7 +56,7 @@ function* loadMessages(bodyOrQueryParams) {
 function* fetchMessages({index, payload}: {payload: FetchMessagesPayload}) {
 	try {
 		api.sendLog("fetch message")
-		const response = yield call(loadMessages,
+		const response = yield call(readMessages,
 			{limit: payload.limit, offset: payload.offset, order: payload.order, threadID: payload.threadID})
 
 		response.messages.reverse();

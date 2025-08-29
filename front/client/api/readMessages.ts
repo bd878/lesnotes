@@ -2,21 +2,7 @@ import i18n from '../i18n';
 import api from './api';
 import models from './models';
 
-interface LoadMessagesResult {
-	error: string;
-	explain: string;
-	messages: any[];
-	isLastPage: boolean;
-}
-
-interface LoadMessagesParams {
-	limit: number;
-	offset: number;
-	order: number;
-	threadID: number;
-}
-
-async function loadMessages(params: LoadMessagesParams): LoadMessagesResult {
+async function readMessages(params) {
 	const {
 		limit,
 		offset,
@@ -25,7 +11,7 @@ async function loadMessages(params: LoadMessagesParams): LoadMessagesResult {
 	} = params
 
 	let response = {};
-	let result: LoadMessagesResult = {
+	let result = {
 		error: "",
 		explain: "",
 		messages: [],
@@ -49,7 +35,7 @@ async function loadMessages(params: LoadMessagesParams): LoadMessagesResult {
 		});
 
 		if (response.error != "") {
-			console.error('[loadMessages]: /read response returned error')
+			console.error('[readMessages]: /read response returned error')
 			result.error = response.error
 			result.explain = response.explain
 		} else {
@@ -64,4 +50,4 @@ async function loadMessages(params: LoadMessagesParams): LoadMessagesResult {
 	return result;
 }
 
-export default loadMessages;
+export default readMessages;

@@ -3,16 +3,9 @@ import api from './api';
 import sendLog from './sendLog';
 import models from './models';
 
-interface LoadMessagesResult {
-	error: string;
-	explain: string;
-	messages: any[];
-	isLastPage: boolean;
-}
-
-async function loadMessagesJson(token, req): LoadMessagesResult {
+async function readMessagesJson(token, req) {
 	let response = {};
-	let result: LoadMessagesResult = {
+	let result = {
 		error: "",
 		explain: "",
 		messages: [],
@@ -31,7 +24,7 @@ async function loadMessagesJson(token, req): LoadMessagesResult {
 		});
 
 		if (response.error != "") {
-			console.error('[loadMessagesJson]: /read response returned error')
+			console.error('[readMessagesJson]: /read response returned error')
 			result.error = response.error
 			result.explain = response.explain
 		} else {
@@ -46,4 +39,4 @@ async function loadMessagesJson(token, req): LoadMessagesResult {
 	return result;
 }
 
-export default loadMessagesJson;
+export default readMessagesJson;

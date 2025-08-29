@@ -8,8 +8,8 @@ const empty = {
 	updateUTCNano: 0,
 	userID: 0,
 	text: "",
-	fileID: 0,
-	file: file(),
+	name: "",
+	files:  [file()],
 	threadID: 0,
 	private: true,
 }
@@ -24,7 +24,6 @@ export default function mapMessageFromProto(message) {
 		createUTCNano = createUTCNano.toLocaleString()
 	}
 
-// TODO: createUTCNano -> dateCreatedString
 	let updateUTCNano = 0
 	if (message.update_utc_nano) {
 		updateUTCNano = new Date(Math.floor(message.update_utc_nano / ns_in_ms))

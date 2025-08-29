@@ -1,13 +1,14 @@
 const empty = {
 	ID: 0,
-	name: "",
+	login: "",
 }
+
 export default function mapUserFromProto(user) {
 	if (!user)
 		return empty
 
 	return {
-		ID: user.id,
-		name: user.name,
+		ID:    user.id,
+		login: user.login,
 	}
 }

@@ -18,7 +18,7 @@ function MessagePageContainer(props) {
 		async function loadMessage(id) {
 			setLoading(true)
 
-			const result = await api.loadOneMessage(id)
+			const result = await api.readMessage(id)
 			if (is.notEmpty(result.error)) {
 				console.error(result.error, result.explain)
 				setError(result.error)

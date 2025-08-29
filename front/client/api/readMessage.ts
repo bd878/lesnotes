@@ -2,15 +2,9 @@ import i18n from '../i18n';
 import api from './api';
 import models from './models';
 
-interface LoadOneMessageResult {
-	error: string;
-	explain: string;
-	message: any;
-}
-
-async function loadOneMessage(messageID: number): LoadOneMessageResult {
+async function readMessage(messageID: number) {
 	let response = {};
-	let result: LoadOneMessageResult = {
+	let result = {
 		error: "",
 		explain: "",
 		message: {},
@@ -26,7 +20,7 @@ async function loadOneMessage(messageID: number): LoadOneMessageResult {
 		});
 
 		if (response.error != "") {
-			console.error('[loadOneMessage]: /read response returned error')
+			console.error('[readMessage]: /read response returned error')
 			result.error = response.error
 			result.explain = response.explain
 		} else {
@@ -40,4 +34,4 @@ async function loadOneMessage(messageID: number): LoadOneMessageResult {
 	return result;
 }
 
-export default loadOneMessage;
+export default readMessage;

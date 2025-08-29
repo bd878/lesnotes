@@ -7,7 +7,7 @@ export default function mapFileFromProto(file) {
 		return empty
 
 	return {
-		ID: file.id,
+		ID:   file.id,
 		name: file.name,
 	}
 }
