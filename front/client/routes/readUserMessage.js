@@ -12,7 +12,7 @@ async function readUserMessage(ctx) {
 		const template = await readFile(filePath, { encoding: 'utf-8' });
 
 		const id = ctx.params.id
-		const user = ctx.params.user
+		const user = parseInt(ctx.params.user, 10)
 		const token = ctx.cookies.get("token")
 
 		console.log(`[readUserMessage]: token ${token} user ${user} id ${id}`)
