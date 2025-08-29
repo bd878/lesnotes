@@ -43,9 +43,10 @@ router
 	.get('/signup', etag, register)
 	.get('/home', etag, home)
 	.get('/status', status)
-	.get("/new", etag, message)
 	.get("/tg_auth", authTelegram)
+	.get("/new", etag, message)
 	.get("/m/:userId/:id", etag, message)
+	.get("/m/:id", etag, publicMessage)
 	.get("/miniapp", etag, miniapp)
 	.get('/:any*', xxx)
 

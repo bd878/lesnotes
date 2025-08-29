@@ -55,7 +55,7 @@ type (
 	}
 
 	ReadRequest struct {
-		Public              *int                `json:"public,omitempty"`
+		UserID              int64               `json:"user"`
 		MessageID           int64               `json:"id"`
 		ThreadID            int64               `json:"thread"`
 		Limit               int                 `json:"limit"`

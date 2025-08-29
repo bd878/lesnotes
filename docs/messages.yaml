@@ -284,8 +284,8 @@ paths:
   /messages/v1/read:
     parameters:
       - $ref: '#/components/parameters/token'
-      - $ref: '#/components/parameters/public'
       - $ref: '#/components/parameters/message'
+      - $ref: '#/components/parameters/user'
       - $ref: '#/components/parameters/thread'
       - $ref: '#/components/parameters/limit'
       - $ref: '#/components/parameters/offset'
@@ -356,7 +356,7 @@ paths:
 # TODO: delete
   /messages/v1/read_file:
     parameters:
-      - $ref: '#/components/parameters/fileId'
+      - $ref: '#/components/parameters/file'
     get:
       operationId: readFile
       summary: Read attached file
@@ -382,10 +382,17 @@ components:
       schema:
         type: string
         example: token=AAAAAA
-    fileId:
+    file:
       name: file
       in: query
       required: true
+      schema:
+        type: integer
+        example: 1
+    user:
+      name: user
+      in: query
+      required: false
       schema:
         type: integer
         example: 1
@@ -431,12 +438,6 @@ components:
       required: false
       schema:
         enum: [1, 0]
-        type: integer
-    public:
-      name: public
-      in: query
-      required: false
-      schema:
         type: integer
 
   schemas:
@@ -540,10 +541,9 @@ components:
         req:
           type: object
           properties:
-            public:
+            user:
               type: integer
               required: false
-              default: 0
             id:
               type: integer
               required: false

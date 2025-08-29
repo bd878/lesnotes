@@ -172,14 +172,14 @@ func (s *Messages) UpdateMessage(ctx context.Context, id int64, text string, fil
 	return
 }
 
-func (s *Messages) ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool, private int32) (messages []*model.Message, isLastPage bool, err error) {
+func (s *Messages) ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool) (messages []*model.Message, isLastPage bool, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
 		}
 	}
 
-	logger.Debugw("read thread messages", "user_id", userID, "thread_id", threadID, "limit", limit, "offset", offset, "ascending", ascending, "private", private)
+	logger.Debugw("read thread messages", "user_id", userID, "thread_id", threadID, "limit", limit, "offset", offset, "ascending", ascending)
 
 	res, err := s.client.ReadThreadMessages(ctx, &api.ReadThreadMessagesRequest{
 		UserId:   userID,
@@ -187,7 +187,6 @@ func (s *Messages) ReadThreadMessages(ctx context.Context, userID int64, threadI
 		Limit:    limit,
 		Offset:   offset,
 		Asc:      ascending,
-		Private:  private,
 	})
 	if err != nil {
 		return nil, true, err
@@ -199,21 +198,20 @@ func (s *Messages) ReadThreadMessages(ctx context.Context, userID int64, threadI
 	return
 }
 
-func (s *Messages) ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool, private int32) (messages []*model.Message, isLastPage bool, err error) {
+func (s *Messages) ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (messages []*model.Message, isLastPage bool, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
 		}
 	}
 
-	logger.Debugw("read messages", "user_id", userID, "limit", limit, "offset", offset, "ascending", ascending, "private", private)
+	logger.Debugw("read messages", "user_id", userID, "limit", limit, "offset", offset, "ascending", ascending)
 
 	res, err := s.client.ReadMessages(ctx, &api.ReadMessagesRequest{
 		UserId:   userID,
 		Limit:    limit,
 		Offset:   offset,
 		Asc:      ascending,
-		Private:  private,
 	})
 	if err != nil {
 		return nil, true, err

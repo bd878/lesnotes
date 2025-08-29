@@ -148,10 +148,10 @@ func (m *DistributedMessages) ReadMessage(ctx context.Context, id int64, userIDs
 	return m.repo.Read(ctx, userIDs, id)
 }
 
-func (m *DistributedMessages) ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool, private int32) (messages []*model.Message, isLastPage bool, err error) {
-	return m.repo.ReadThreadMessages(ctx, userID, threadID, limit, offset, private)
+func (m *DistributedMessages) ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool) (messages []*model.Message, isLastPage bool, err error) {
+	return m.repo.ReadThreadMessages(ctx, userID, threadID, limit, offset)
 }
 
-func (m *DistributedMessages) ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool, private int32) (messages []*model.Message, isLastPage bool, err error) {
-	return m.repo.ReadMessages(ctx, userID, limit, offset, private)
+func (m *DistributedMessages) ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (messages []*model.Message, isLastPage bool, err error) {
+	return m.repo.ReadMessages(ctx, userID, limit, offset)
 }

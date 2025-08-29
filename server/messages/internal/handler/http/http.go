@@ -16,8 +16,8 @@ type Controller interface {
 	PublishMessages(ctx context.Context, ids []int64, userID int64) (err error)
 	PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error)
 	ReadMessage(ctx context.Context, id int64, userIDs []int64) (message *messages.Message, err error)
-	ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool, private int32) (messages []*messages.Message, isLastPage bool, err error)
-	ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool, private int32) (messages []*messages.Message, isLastPage bool, err error)
+	ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (messages []*messages.Message, isLastPage bool, err error)
+	ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool) (messages []*messages.Message, isLastPage bool, err error)
 }
 
 type FilesGateway interface {

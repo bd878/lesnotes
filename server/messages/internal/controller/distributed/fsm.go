@@ -18,8 +18,8 @@ type Repository interface {
 	Private(ctx context.Context, userID int64, ids []int64) (err error)
 	Read(ctx context.Context, userIDs []int64, id int64) (message *model.Message, err error)
 	DeleteUserMessages(ctx context.Context, userID int64) (err error)
-	ReadThreadMessages(ctx context.Context, userID, threadID int64, limit, offset, private int32) (messages []*model.Message, isLastPage bool, err error)
-	ReadMessages(ctx context.Context, userID int64, limit, offset, private int32) (messages []*model.Message, isLastPage bool, err error)
+	ReadThreadMessages(ctx context.Context, userID, threadID int64, limit, offset int32) (messages []*model.Message, isLastPage bool, err error)
+	ReadMessages(ctx context.Context, userID int64, limit, offset int32) (messages []*model.Message, isLastPage bool, err error)
 	Truncate(ctx context.Context) error
 }
 

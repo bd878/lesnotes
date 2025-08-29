@@ -11,8 +11,6 @@ import (
 )
 
 func (h *Handler) ReadMessagesJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
-	var public int
-
 	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
@@ -47,7 +45,7 @@ func (h *Handler) ReadMessagesJsonAPI(w http.ResponseWriter, req *http.Request) 
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code: messages.CodeNoMessage,
+				Code:    messages.CodeNoMessage,
 				Explain: "failed to parse message",
 			},
 		})
@@ -55,12 +53,9 @@ func (h *Handler) ReadMessagesJsonAPI(w http.ResponseWriter, req *http.Request) 
 		return err
 	}
 
-	if request.Public == nil {
-		public = -1
+	if request.UserID != 0 {
+		return h.readMessageOrMessages(req.Context(), w, request.UserID, request.Limit, request.Offset, request.MessageID, request.ThreadID, request.Asc, true)
 	} else {
-		public = *request.Public
+		return h.readMessageOrMessages(req.Context(), w, user.ID, request.Limit, request.Offset, request.MessageID, request.ThreadID, request.Asc, false)
 	}
-
-	return h.readMessageOrMessages(req.Context(), w, user,
-		request.Limit, request.Offset, public, request.MessageID, request.ThreadID, request.Asc)
 }

@@ -15,8 +15,8 @@ type Controller interface {
 	PublishMessages(ctx context.Context, ids []int64, userID int64) (err error)
 	PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error)
 	ReadMessage(ctx context.Context, id int64, userIDs []int64) (message *messages.Message, err error)
-	ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool, private int32) (messages []*messages.Message, isLastPage bool, err error)
-	ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool, private int32) (messages []*messages.Message, isLastPage bool, err error)
+	ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (messages []*messages.Message, isLastPage bool, err error)
+	ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool) (messages []*messages.Message, isLastPage bool, err error)
 	GetServers(ctx context.Context) (servers []*api.Server, err error)
 }
 
@@ -80,7 +80,7 @@ func (h *Handler) PrivateMessages(ctx context.Context, req *api.PrivateMessagesR
 }
 
 func (h *Handler) ReadThreadMessages(ctx context.Context, req *api.ReadThreadMessagesRequest) (resp *api.ReadThreadMessagesResponse, err error) {
-	list, isLastPage, err := h.controller.ReadThreadMessages(ctx, req.UserId, req.ThreadId, req.Limit, req.Offset, req.Asc, req.Private)
+	list, isLastPage, err := h.controller.ReadThreadMessages(ctx, req.UserId, req.ThreadId, req.Limit, req.Offset, req.Asc)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +94,7 @@ func (h *Handler) ReadThreadMessages(ctx context.Context, req *api.ReadThreadMes
 }
 
 func (h *Handler) ReadMessages(ctx context.Context, req *api.ReadMessagesRequest) (resp *api.ReadMessagesResponse, err error) {
-	list, isLastPage, err := h.controller.ReadMessages(ctx, req.UserId, req.Limit, req.Offset, req.Asc, req.Private)
+	list, isLastPage, err := h.controller.ReadMessages(ctx, req.UserId, req.Limit, req.Offset, req.Asc)
 	if err != nil {
 		return nil, err
 	}

@@ -297,25 +297,15 @@ func (r *Repository) DeleteUserMessages(ctx context.Context, userID int64) (err 
 }
 
 /**
- * private == -1 : do not consider private in select
- * @param  {[type]} r *Repository)  ReadThreadMessages(ctx context.Context, userID, threadID int64, limit, offset int32, private int32) (messages []*model.Message, isLastPage bool, err error [description]
+ * @param  {[type]} r *Repository)  ReadThreadMessages(ctx context.Context, userID, threadID int64, limit, offset int32) (messages []*model.Message, isLastPage bool, err error [description]
  * @return {[type]}   [description]
  */
-func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID int64, limit, offset, private int32) (messages []*model.Message, isLastPage bool, err error) {
+func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID int64, limit, offset int32) (messages []*model.Message, isLastPage bool, err error) {
 	var rows pgx.Rows
 
-	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at FROM %s WHERE user_id = $1 AND thread_id = $2 "
+	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at FROM %s WHERE user_id = $1 AND thread_id = $2 ORDER BY created_at DESC LIMIT $3 OFFSET $4"
 
-	if private == 0 {
-		query += "AND private = false ORDER BY created_at DESC LIMIT $3 OFFSET $4"
-		rows, err = r.pool.Query(ctx, r.table(query), userID, threadID, limit, offset)
-	} else if private == 1 {
-		query += "AND private = true ORDER BY created_at DESC LIMIT $3 OFFSET $4"
-		rows, err = r.pool.Query(ctx, r.table(query), userID, threadID, limit, offset)
-	} else {
-		query += "ORDER BY created_at DESC LIMIT $3 OFFSET $4"
-		rows, err = r.pool.Query(ctx, r.table(query), userID, threadID, limit, offset)
-	}
+	rows, err = r.pool.Query(ctx, r.table(query), userID, threadID, limit, offset)
 
 	defer rows.Close()
 
@@ -369,25 +359,15 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID in
 
 /**
  * Read all user messages from all threads
- * private == -1 : do not consider private in select
- * @param  {[type]} r *Repository)  ReadMessages(ctx context.Context, userID int64, limit, offset, private int32) (messages []*model.Message, isLastPage bool, err error [description]
+ * @param  {[type]} r *Repository)  ReadMessages(ctx context.Context, userID int64, limit, offset int32) (messages []*model.Message, isLastPage bool, err error [description]
  * @return {[type]}   [description]
  */
-func (r *Repository) ReadMessages(ctx context.Context, userID int64, limit, offset, private int32) (messages []*model.Message, isLastPage bool, err error) {
+func (r *Repository) ReadMessages(ctx context.Context, userID int64, limit, offset int32) (messages []*model.Message, isLastPage bool, err error) {
 	var rows pgx.Rows
 
-	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at FROM %s WHERE user_id = $1 "
+	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at FROM %s WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3"
 
-	if private == 0 {
-		query += "AND private = false ORDER BY created_at DESC LIMIT $2 OFFSET $3"
-		rows, err = r.pool.Query(ctx, r.table(query), userID, limit, offset)
-	} else if private == 1 {
-		query += "AND private = true ORDER BY created_at DESC LIMIT $2 OFFSET $3"
-		rows, err = r.pool.Query(ctx, r.table(query), userID, limit, offset)
-	} else {
-		query += "ORDER BY created_at DESC LIMIT $2 OFFSET $3"
-		rows, err = r.pool.Query(ctx, r.table(query), userID, limit, offset)
-	}
+	rows, err = r.pool.Query(ctx, r.table(query), userID, limit, offset)
 
 	defer rows.Close()
 
