@@ -3,7 +3,7 @@ import api from './api';
 import models from './models';
 
 async function readMessage(messageID: number) {
-	let response = {};
+	let response: any = {};
 	let result = {
 		error: "",
 		explain: "",

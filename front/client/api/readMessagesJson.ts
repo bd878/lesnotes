@@ -4,7 +4,7 @@ import sendLog from './sendLog';
 import models from './models';
 
 async function readMessagesJson(token, req) {
-	let response = {};
+	let response: any = {};
 	let result = {
 		error: "",
 		explain: "",

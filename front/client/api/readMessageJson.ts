@@ -4,7 +4,7 @@ import sendLog from './sendLog';
 import models from './models';
 
 async function readMessageJson(token, user, id) {
-	let response = {};
+	let response: any = {};
 	let result = {
 		error:   false,
 		explain: "",
@@ -12,8 +12,6 @@ async function readMessageJson(token, user, id) {
 	}
 
 	try {
-		await sendLog(token + " : " + JSON.stringify(req))
-
 		response = await api('/messages/v2/read', {
 			method: "POST",
 			body: {

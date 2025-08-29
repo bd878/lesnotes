@@ -2,7 +2,7 @@ import i18n from '../i18n';
 import api from './api';
 
 async function validateMiniappData(body) {
-	let result: SendMessageResult = {
+	let result = {
 		error: "",
 		explain: "",
 		ok: false,

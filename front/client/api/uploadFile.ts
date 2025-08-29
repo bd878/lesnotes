@@ -3,7 +3,7 @@ import api from './api';
 import models from './models';
 
 async function uploadFile(file: any) {
-	let response = {};
+	let response: any = {};
 	let result = {
 		error: "",
 		explain: "",
@@ -26,15 +26,13 @@ async function uploadFile(file: any) {
 			body: form,
 		});
 
-		if (response.error != "") {
+		if (response.error) {
 			result.error = response.error
 			result.explain = response.explain
 		} else {
-			if (response.value) {
-				const model = models.file(response.value)
-				result.ID = model.ID
-				result.Name = model.name
-			}
+			const model = models.file(response.value)
+			result.ID = model.ID
+			result.Name = model.name
 		}
 	} catch (e) {
 		console.error(i18n("error_occured"), e);

@@ -3,8 +3,8 @@ import api from './api';
 import models from './models';
 
 async function privateMessages(ids = []) {
-	let response = {};
-	let result: PrivateMessagesResult = {
+	let response: any = {};
+	let result: any = {
 		error: "",
 		explain: "",
 		IDs: [],

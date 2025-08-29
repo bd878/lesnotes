@@ -1,4 +1,5 @@
 import file from './file';
+import * as is from '../../third_party/is'
 
 const ns_in_ms = 10**6
 
@@ -18,13 +19,13 @@ export default function mapMessageFromProto(message) {
 	if (!message)
 		return empty
 
-	let createUTCNano = 0
+	let createUTCNano = "0"
 	if (message.create_utc_nano) {
 		createUTCNano = new Date(Math.floor(message.create_utc_nano / ns_in_ms))
 		createUTCNano = createUTCNano.toLocaleString()
 	}
 
-	let updateUTCNano = 0
+	let updateUTCNano = "0"
 	if (message.update_utc_nano) {
 		updateUTCNano = new Date(Math.floor(message.update_utc_nano / ns_in_ms))
 		updateUTCNano = updateUTCNano.toLocaleString()
@@ -38,10 +39,10 @@ export default function mapMessageFromProto(message) {
 		text: message.text,
 		private: Boolean(message.private),
 		threadID: message.thread_id,
+		files: [],
 	}
-	if (message.file && message.file_id) {
-		res.fileID = message.file_id
-		res.file = file(message.file)
+	if (is.array(message.files)) {
+		res.files = message.files.map(message.file)
 	}
 
 	return res

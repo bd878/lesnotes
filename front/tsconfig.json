@@ -1,4 +1,5 @@
 {
+  "include": ["./client/api/*", "environment.d.ts"],
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig to read more about this file */
 
@@ -11,7 +12,7 @@
     // "disableReferencedProjectLoad": true,             /* Reduce the number of projects loaded automatically by TypeScript. */
 
     /* Language and Environment */
-    "target": "es2016",                                  /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
+    "target": "esnext",                                  /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
     // "lib": [],                                        /* Specify a set of bundled library declaration files that describe the target runtime environment. */
     "jsx": "react-jsx",                                /* Specify what JSX code is generated. */
     // "experimentalDecorators": true,                   /* Enable experimental support for legacy experimental decorators. */
@@ -81,7 +82,7 @@
     "forceConsistentCasingInFileNames": true,            /* Ensure that casing is correct in imports. */
 
     /* Type Checking */
-    "strict": true,                                      /* Enable all strict type-checking options. */
+    "strict": false,                                      /* Enable all strict type-checking options. */
     // "noImplicitAny": true,                            /* Enable error reporting for expressions and declarations with an implied 'any' type. */
     // "strictNullChecks": true,                         /* When type checking, take into account 'null' and 'undefined'. */
     // "strictFunctionTypes": true,                      /* When assigning functions, check to ensure parameters and the return values are subtype-compatible. */

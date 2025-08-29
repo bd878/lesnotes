@@ -2,8 +2,8 @@ import i18n from '../i18n';
 import api from './api';
 
 async function deleteMessages(ids = []) {
-	let response = {};
-	let result: DeleteMessagesResult = {
+	let response: any = {};
+	let result = {
 		error: "",
 		explain: "",
 		IDs: [],

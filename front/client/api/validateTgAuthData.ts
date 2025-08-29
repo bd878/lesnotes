@@ -2,7 +2,7 @@ import i18n from '../i18n';
 import api from './api';
 
 async function validateTgAuthData(body) {
-	let result: SendMessageResult = {
+	let result = {
 		error: "",
 		explain: "",
 		ok: false,

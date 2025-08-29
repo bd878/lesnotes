@@ -2,7 +2,7 @@ import i18n from '../i18n';
 import api from './api';
 
 async function register(name, password) {
-	let response = {}
+	let response: any = {}
 	const result = {
 		error: "",
 		explain: "",

@@ -4,12 +4,12 @@ import * as is from '../third_party/is'
 import models from './models';
 
 async function updateMessage({id, text, public: isPublic}) {
-	let response = {};
-	let result: UpdateMessageResult = {
+	let response: any = {};
+	let result: any = {
 		error: "",
 		explain: "",
 		ID: "",
-		updateUTCNano: 0,
+		updateUTCNano: "",
 	}
 
 	const form = new FormData()

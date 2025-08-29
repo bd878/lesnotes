@@ -65,7 +65,7 @@ function getOptions(props) {
 
 export {getFileDownloadUrl, getMessageLinkUrl};
 
-export default function api(url: string, props = {}) {
+export default function api(url, props: any = {}): Promise<any> {
 	const { isFullUrl = false, queryParams } = props;
 
 	let fullUrl = getFullUrl(url, isFullUrl);
@@ -77,8 +77,8 @@ export default function api(url: string, props = {}) {
 			if (!res.ok) {
 				console.error(`[api] request to ${url} returned ${res.status} status`)
 				return {
-					value:   null,
-					error:   i18n("bad_status_code"),
+					value:   {},
+					error:   true,
 					explain: res,
 				};
 			}
@@ -107,7 +107,8 @@ export default function api(url: string, props = {}) {
 					} catch (e) {
 						console.error("[api]: error occured", e)
 						return {
-							value: text,
+							value: {},
+							data: text,
 							error: i18n("bad_response"),
 							explain: i18n("cannot_parse_response"),
 						}

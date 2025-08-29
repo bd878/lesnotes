@@ -3,24 +3,18 @@ import api from './api';
 import * as is from '../third_party/is'
 import models from './models';
 
-interface SendMessageParams {
-	text: any;
-	fileID?: any;
-	threadID?: number;
-}
-
-async function sendMessage(params: SendMessageParams) {
+async function sendMessage(params) {
 	const {
 		text,
 		fileID,
 		threadID,
 	} = params
 
-	let response = {};
-	let result: SendMessageResult = {
+	let response: any = {};
+	let result = {
 		error: "",
 		explain: "",
-		message: "",
+		message: {},
 	}
 
 	const form = new FormData()
@@ -28,9 +22,9 @@ async function sendMessage(params: SendMessageParams) {
 	if (is.notUndef(fileID))
 		form.append("file_id", fileID);
 
-	const queryParams = {}
+	const queryParams: any = {}
 	if (is.notEmpty(threadID))
-		queryParams.thread_id = threadID
+		queryParams.thread = threadID
 
 	try {
 		response = await api("/messages/v1/send", {

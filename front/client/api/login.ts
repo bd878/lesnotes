@@ -2,7 +2,7 @@ import i18n from '../i18n';
 import api from './api';
 
 async function login(name, password) {
-	let response = {}
+	let response: any = {}
 	let result = {
 		error: "",
 		explain: "",

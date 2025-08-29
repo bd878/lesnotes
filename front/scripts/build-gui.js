@@ -1,5 +1,5 @@
 import {unlink, readdir, stat, rm} from "node:fs/promises";
-// TODO: import ts from "typescript";
+import ts from "typescript";
 import Config from "config";
 import path from "node:path";
 import esbuild from 'esbuild';
@@ -37,7 +37,8 @@ let ctx = await esbuild.context({
 	outdir: "public",
 	format: 'esm',
 	outbase: 'client/gui/',
-	plugins: [postcss()],
+	logLevel: "debug",
+	plugins: [postcss()]
 })
 
 await ctx.watch()

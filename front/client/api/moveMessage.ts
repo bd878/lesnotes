@@ -4,7 +4,7 @@ import * as is from '../third_party/is'
 import models from './models';
 
 async function moveMessage(id, threadID) {
-	let response = {};
+	let response: any = {};
 	let result = {
 		error: "",
 		explain: "",

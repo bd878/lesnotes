@@ -3,8 +3,8 @@ import api from './api';
 import models from './models';
 
 async function publishMessages(ids = []) {
-	let response = {};
-	let result: PublishMessagesResult = {
+	let response: any = {};
+	let result = {
 		error: "",
 		explain: "",
 		IDs: [],

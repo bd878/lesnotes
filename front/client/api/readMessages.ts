@@ -10,7 +10,7 @@ async function readMessages(params) {
 		threadID,
 	} = params
 
-	let response = {};
+	let response: any = {};
 	let result = {
 		error: "",
 		explain: "",
@@ -18,14 +18,14 @@ async function readMessages(params) {
 		isLastPage: false,
 	}
 
-	const queryParams = {
+	const queryParams: any = {
 		limit: limit,
 		offset: offset,
 		asc: order,
 	}
 
 	if (threadID)
-		queryParams.thread_id = threadID
+		queryParams.thread = threadID
 
 	try {
 		response = await api('/messages/v1/read', {
