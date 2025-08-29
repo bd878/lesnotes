@@ -73,49 +73,38 @@ export default function api(url, props: any = {}): Promise<any> {
 	const options = getOptions(props);
 
 	return fetch(fullUrl, options)
-		.then(res => {
-			if (!res.ok) {
-				console.error(`[api] request to ${url} returned ${res.status} status`)
-				return res
-					.text()
-					.then(text => ({
-						value:   {},
-						error:   true,
-						explain: text,
-					}))
-			}
+		.then(res => res
+			.text()
+			.then(text => {
+				try {
+					const value = JSON.parse(text);
 
-			return res
-				.text()
-				.then(text => {
-					try {
-						const value = JSON.parse(text);
-						if (value.status === "error" && is.notEmpty(value.error))
-							return {
-								value,
-								error:   true,
-								data:    value.data,
-								code:    value.error.code,
-								explain: value.error.explain,
-							}
-						else
-							return {
-								value:   value.response,
-								data:    value.data,
-								status:  value.status,
-								error:   false,
-								explain: "",
-							}
-					} catch (e) {
-						console.error("[api]: error occured", e)
+					if (is.notEmpty(value.error))
 						return {
-							value: {},
-							data: text,
-							error: i18n("bad_response"),
-							explain: i18n("cannot_parse_response"),
+							value,
+							error:   true,
+							data:    value.data,
+							code:    value.error.code,
+							explain: value.error.explain,
 						}
+					else
+						return {
+							value:   value.response,
+							data:    value.data,
+							status:  value.status,
+							error:   false,
+							explain: "",
+						}
+				} catch (e) {
+					console.error("[api]: error occured", e)
+					return {
+						value:   {},
+						data:    text,
+						error:   i18n("bad_response"),
+						explain: i18n("cannot_parse_response"),
 					}
-				})
-		})
+				}
+			})
+		)
 		.catch(e => Promise.reject(e));
 }
