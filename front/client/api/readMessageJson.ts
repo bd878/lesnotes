@@ -24,7 +24,7 @@ async function readMessageJson(token, user, id) {
 		});
 
 		if (response.error) {
-			console.error('[readMessageJson]: /read response returned error')
+			console.error('[readMessageJson]: /read response returned error', response.explain, response.data)
 			result.error = true
 			result.explain = response.explain
 		} else {

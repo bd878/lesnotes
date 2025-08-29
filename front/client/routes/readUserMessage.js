@@ -19,15 +19,21 @@ async function readUserMessage(ctx) {
 
 		const resp = await api.readMessageJson(token, user, id)
 
-		ctx.body = mustache.render(template, {
-			id:       id,
-			userId:   user,
-			react:    false,
-			message:  resp.message,
-			styles:   ["/public/styles.css"],
-		})
+		if (resp.error) {
+			ctx.body = "<html>" + resp.explain + "</html>"
+			ctx.status = 500
+			throw Error(resp.explain)
+		} else {
+			ctx.body = mustache.render(template, {
+				id:       id,
+				userId:   user,
+				react:    false,
+				message:  resp.message,
+				styles:   ["/public/styles.css"],
+			})
 
-		ctx.status = 200;
+			ctx.status = 200;
+		}
 	} catch (err) {
 		ctx.body = "<html>Pas de template</html>";
 		ctx.status = 500;
