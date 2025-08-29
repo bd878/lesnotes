@@ -50,7 +50,7 @@ func (b *tokenAuthBuilder) handleMultipartFormData(w http.ResponseWriter, req *h
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code: server.CodeNoToken,
+				Code:    server.CodeNoToken,
 				Explain: "token not found",
 			},
 		})
@@ -72,7 +72,7 @@ func (b *tokenAuthBuilder) handleJson(w http.ResponseWriter, req *http.Request) 
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code: server.CodeWrongFormat,
+				Code:    server.CodeWrongFormat,
 				Explain: "failed to read body",
 			},
 		})
@@ -86,7 +86,7 @@ func (b *tokenAuthBuilder) handleJson(w http.ResponseWriter, req *http.Request) 
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code: server.CodeWrongFormat,
+				Code:    server.CodeWrongFormat,
 				Explain: "failed to parse request",
 			},
 		})
@@ -104,7 +104,7 @@ func (b *tokenAuthBuilder) handleJson(w http.ResponseWriter, req *http.Request) 
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code: server.CodeNoToken,
+				Code:    server.CodeNoToken,
 				Explain: "token not found",
 			},
 		})

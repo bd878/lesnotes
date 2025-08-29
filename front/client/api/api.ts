@@ -76,11 +76,13 @@ export default function api(url, props: any = {}): Promise<any> {
 		.then(res => {
 			if (!res.ok) {
 				console.error(`[api] request to ${url} returned ${res.status} status`)
-				return {
-					value:   {},
-					error:   true,
-					explain: res,
-				};
+				return res
+					.text()
+					.then(text => ({
+						value:   {},
+						error:   true,
+						explain: text,
+					}))
 			}
 
 			return res
