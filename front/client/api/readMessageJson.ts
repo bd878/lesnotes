@@ -4,15 +4,16 @@ import sendLog from './sendLog';
 import models from './models';
 
 async function readMessageJson(token, user, id) {
-	let response: any = {};
 	let result = {
 		error:   false,
+		status:  200,
 		explain: "",
-		message: {},
+		code:    0,
+		message: models.message(),
 	}
 
 	try {
-		response = await api('/messages/v2/read', {
+		const response = await api('/messages/v2/read', {
 			method: "POST",
 			body: {
 				token: token,
@@ -23,17 +24,22 @@ async function readMessageJson(token, user, id) {
 			},
 		});
 
-		if (response.error) {
-			console.error('[readMessageJson]: read response returned error', "code:", response.code, "explain:", response.explain)
+		result.error    = response.error
+		result.status   = response.status
+		result.explain  = response.explain
+		result.code     = response.code
 
-			result.error = true
-			result.explain = response.explain
+		if (response.error) {
+			console.error('[readMessageJson]: read response returned error', "status:", response.status, "code:", response.code, "explain:", response.explain)
+
+			return result
 		} else {
 			result.message = models.message(response.messages[0])
 		}
 	} catch (e) {
 		console.error(i18n("error_occured"), e);
-		result.error = e
+		result.error = 500
+		result.explain = e
 	}
 
 	return result;

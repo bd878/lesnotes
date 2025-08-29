@@ -84,7 +84,6 @@ export default function api(url, props: any = {}): Promise<any> {
 							error:   true,
 							status:  res.status,
 							value:   {},
-							data:    value.data,
 							explain: text,
 							code:    value.error.code,
 						}
@@ -93,7 +92,6 @@ export default function api(url, props: any = {}): Promise<any> {
 							error:   false,
 							status:  res.status,
 							value:   value.response,
-							data:    value.data,
 							explain: "",
 							code:    0,
 						}
@@ -103,7 +101,6 @@ export default function api(url, props: any = {}): Promise<any> {
 						error:   true,
 						status:  res.status,
 						value:   {},
-						data:    {},
 						explain: text,
 						code:    0,
 					}
