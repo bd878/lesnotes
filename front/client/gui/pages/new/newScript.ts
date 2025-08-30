@@ -28,7 +28,7 @@ async function onFormSubmit(e) {
 
 	let response;
 
-	response = await api.uploadFile(elems.formElem.files[0])
+	response = await api.uploadFile(elems.formElem.file[0])
 	if (response.error.error) {
 		console.log("[onFormSubmit]: error uploading file", response)
 		return
