@@ -1,5 +1,5 @@
 {
-  "include": ["./client/api/*", "environment.d.ts"],
+  "include": ["./client/api/*", "./client/gui/pages/new/newScript.ts", "environment.d.ts"],
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig to read more about this file */
 

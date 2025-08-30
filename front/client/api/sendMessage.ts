@@ -1,7 +1,7 @@
 import api from './api';
 import models from './models';
 
-async function sendMessage(text: string, file: number, thread: number) {
+async function sendMessage(text: string, file?: number, thread?: number) {
 	let result = {
 		error:   models.error(),
 		message: models.message(),

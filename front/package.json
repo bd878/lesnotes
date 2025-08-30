@@ -6,8 +6,8 @@
 	"author": "bd878",
 	"license": "MIT",
 	"scripts": {
-		"server": "npx tsc -p tsconfig-server.json && node ./scripts/build-gui.js",
-		"gui": "npx tsc -p tsconfig-gui.json && node ./scripts/build-server.js"
+		"server": "npx tsc -p tsconfig-server.json && node ./scripts/build-server.js",
+		"gui": "npx tsc -p tsconfig-gui.json && node ./scripts/build-gui.js"
 	},
 	"dependencies": {
 		"@koa/router": "^12.0.1",
