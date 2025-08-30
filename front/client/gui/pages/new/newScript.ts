@@ -26,7 +26,12 @@ window.addEventListener("load", () => {
 async function onFormSubmit(e) {
 	e.preventDefault()
 
-	let response;
+	let response, user;
+
+	user = await api.getMe()
+	if (user.error.error) {
+		console.log("[onFormSubmit]: error loading me", user)
+	}
 
 	response = await api.uploadFile(elems.formElem.file.files[0])
 	if (response.error.error) {
@@ -40,5 +45,9 @@ async function onFormSubmit(e) {
 		return
 	}
 
-	setTimeout(() => { location.href = "/m/" + response.message.ID }, 0)
+	if (user.error.error) {
+		setTimeout(() => { location.href = "/m/" + response.message.ID }, 0)
+	} else {
+		setTimeout(() => { location.href = "/m/" + user.ID + "/" + response.message.ID }, 0)
+	}
 }

@@ -6,41 +6,39 @@ import { readFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 
 async function readPublicMessage(ctx) {
-	try {
-		const id = parseInt(ctx.params.id, 10)
-		const token = ctx.cookies.get("token")
+	const id = parseInt(ctx.params.id, 10)
+	const token = ctx.cookies.get("token")
 
-		console.log(`[readPublicMessage]: token ${token} id ${id}`)
+	console.log(`[readPublicMessage]: token ${token} id ${id}`)
 
-		const resp = await api.readMessageJson(token, 0, id)
+	const resp = await api.readMessageJson(token, 0, id)
 
-		if (resp.error.error) {
-			const filePath = resolve(join(Config.get('basedir'), 'templates/error.mustache'));
-			const template = await readFile(filePath, { encoding: 'utf-8' });
+	if (resp.error.error) {
+		const filePath = resolve(join(Config.get('basedir'), 'templates/error.mustache'));
+		const template = await readFile(filePath, { encoding: 'utf-8' });
 
-			ctx.body = mustache.render(template, {
-				code:     resp.error.code,
-				explain:  resp.error.explain,
-				styles:   ["/public/styles.css"],
-			})
+		ctx.body = mustache.render(template, {
+			code:     resp.error.code,
+			explain:  resp.error.explain,
+			styles:   ["/public/styles.css"],
+		})
 
-			ctx.status = resp.error.status
-		} else {
-			const filePath = resolve(join(Config.get('basedir'), 'templates/message.mustache'));
-			const template = await readFile(filePath, { encoding: 'utf-8' });
+		ctx.status = resp.error.status
 
-			ctx.body = mustache.render(template, {
-				id:       id,
-				message:  resp.message,
-				files:    resp.message.files,
-				styles:   ["/public/styles.css"],
-			})
-
-			ctx.status = 200;
-		}
-	} catch (err) {
-		throw Error(err);
+		return
 	}
+
+	const filePath = resolve(join(Config.get('basedir'), 'templates/message.mustache'));
+	const template = await readFile(filePath, { encoding: 'utf-8' });
+
+	ctx.body = mustache.render(template, {
+		id:       id,
+		message:  resp.message,
+		files:    resp.message.files,
+		styles:   ["/public/styles.css"],
+	})
+
+	ctx.status = 200;
 }
 
 export default readPublicMessage;

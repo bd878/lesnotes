@@ -15,8 +15,10 @@ import validateMiniappData from './validateMiniappData';
 import validateTgAuthData from './validateTgAuthData';
 import sendLog from './sendLog';
 import auth from './auth';
+import authJson from './authJson';
 import login from './login';
 import logout from './logout';
+import getMe from './getMe';
 import register from './register';
 import {getFileDownloadUrl, getMessageLinkUrl} from './api';
 
@@ -26,6 +28,8 @@ export default {
 	login,
 	logout,
 	auth,
+	authJson,
+	getMe,
 	readMessages,
 	readMessagesJson,
 	readMessageJson,

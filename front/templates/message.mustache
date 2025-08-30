@@ -5,7 +5,7 @@
 		<link rel="icon" href="/public/favicon.ico">
 		<meta name="viewport" content="width=device-width,initial-scale=1" />
 		{{#styles}}
-			<link rel="stylesheet" href="{{.}}">
+			<link rel="stylesheet" href="{{{.}}}">
 		{{/styles}}
 		<title>Les notes</title>
 	</head>
@@ -13,7 +13,7 @@
 		<div class="whitespace-pre">{{message.text}}</div>
 
 		{{#files}}
-			<a css="underline text-blue-600 visited:text-purple-600" href="/files/v2/{{ID}}" target="_blank" download="{{name}}">{{name}}</a>
+			<a class="underline text-blue-600 visited:text-purple-600" href="/files/v2/{{ID}}" target="_blank" download="{{name}}">{{name}}</a>
 		{{/files}}
 	</body>
 </html>

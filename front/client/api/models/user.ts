@@ -8,7 +8,7 @@ const empty: User = {
 	login: "",
 }
 
-export default function mapUserFromProto(user): User {
+export default function mapUserFromProto(user?: any): User {
 	if (!user)
 		return empty
 
