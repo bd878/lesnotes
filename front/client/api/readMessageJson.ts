@@ -42,7 +42,7 @@ async function readMessageJson(token: string, user: number, id: number) {
 
 			return result
 		} else {
-			result.message = models.message(response.messages[0])
+			result.message = models.message(response.value.messages[0])
 		}
 	} catch (e) {
 		console.error(i18n("error_occured"), e);
