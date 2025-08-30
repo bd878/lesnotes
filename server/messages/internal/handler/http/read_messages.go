@@ -237,10 +237,6 @@ func (h *Handler) readMessage(ctx context.Context, w http.ResponseWriter, userID
 		return
 	}
 
-	if message.UserID == users.PublicUserID {
-		message.UserID = 0
-	}
-
 	var list []*files.File
 	for _, id := range message.FileIDs {
 		file, err := h.filesGateway.ReadFile(ctx, message.UserID, id)
@@ -255,6 +251,10 @@ func (h *Handler) readMessage(ctx context.Context, w http.ResponseWriter, userID
 		})
 	}
 	message.Files = list
+
+	if message.UserID == users.PublicUserID {
+		message.UserID = 0
+	}
 
 	response, err := json.Marshal(messages.ReadResponse{
 		Messages:   []*messages.Message{message},
