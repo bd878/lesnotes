@@ -54,7 +54,7 @@ export default function mapMessageFromProto(message?: any): Message {
 		files: [],
 	}
 	if (is.array(message.files)) {
-		res.files = message.files.map(message.file)
+		res.files = message.files.map(file)
 	}
 
 	return res
