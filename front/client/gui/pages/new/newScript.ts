@@ -32,7 +32,7 @@ async function onFormSubmit(e) {
 	if (user.error.error) {
 		console.log("[onFormSubmit]: error loading me", user)
 	}
-
+	
 	response = await api.uploadFile(elems.formElem.file.files[0])
 	if (response.error.error) {
 		console.log("[onFormSubmit]: error uploading file", response)

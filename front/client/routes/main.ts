@@ -1,6 +1,7 @@
 import Config from 'config';
 import mustache from 'mustache';
 import api from '../api';
+import i18n from '../i18n';
 import { readFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 
@@ -13,9 +14,11 @@ async function main(ctx) {
 		const template = await readFile(filePath, { encoding: 'utf-8' });
 
 		ctx.body = mustache.render(template, {
-			react:   false,
-			scripts: ["/public/mainScript.js"],
-			styles:  ["/public/styles.css"],
+			react:    false,
+			login:    i18n("login"),
+			register: i18n("register"),
+			scripts:  ["/public/mainScript.js"],
+			styles:   ["/public/styles.css"],
 		});
 
 		ctx.status = 200;
