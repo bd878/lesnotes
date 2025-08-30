@@ -3,10 +3,21 @@ import * as is from '../../third_party/is'
 
 const ns_in_ms = 10**6
 
-const empty = {
+interface Message {
+	ID:            number;
+	createUTCNano: string;
+	userID:        number;
+	text:          string;
+	name:          string;
+	files:         file.File[];
+	threadID:      number;
+	private:       boolean;
+}
+
+const empty: Message = {
 	ID: 0,
-	createUTCNano: 0,
-	updateUTCNano: 0,
+	createUTCNano: "",
+	updateUTCNano: "",
 	userID: 0,
 	text: "",
 	name: "",
@@ -15,7 +26,7 @@ const empty = {
 	private: true,
 }
 
-export default function mapMessageFromProto(message) {
+export default function mapMessageFromProto(message): Message {
 	if (!message)
 		return empty
 

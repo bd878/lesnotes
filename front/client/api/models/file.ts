@@ -1,8 +1,14 @@
-const empty = {
-	ID: 0,
+interface File {
+	ID:        number;
+	name:      string;
+}
+
+const empty: File = {
+	ID:   0,
 	name: "",
 }
-export default function mapFileFromProto(file) {
+
+export default function mapFileFromProto(file): File {
 	if (!file)
 		return empty
 

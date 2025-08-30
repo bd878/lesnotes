@@ -3,7 +3,15 @@ import api from './api';
 import sendLog from './sendLog';
 import models from './models';
 
-async function readMessageJson(token, user, id) {
+interface ReadMessageResult {
+	error:   boolean;
+	status:  number;
+	explain: string;
+	code:    number;
+	message: models.Message;
+}
+
+async function readMessageJson(token: string, user: number, id: number) {
 	let result = {
 		error:   false,
 		status:  200,
