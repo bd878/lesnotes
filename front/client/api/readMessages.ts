@@ -1,50 +1,36 @@
-import i18n from '../i18n';
 import api from './api';
 import models from './models';
 
-async function readMessages(params) {
-	const {
-		limit,
-		offset,
-		order,
-		threadID,
-	} = params
-
-	let response: any = {};
+async function readMessages(thread: number, order: number, limit: number, offset: number) {
 	let result = {
-		error: "",
-		explain: "",
-		messages: [],
-		isLastPage: false,
+		error:       models.error(),
+		messages:    models.message(),
+		isLastPage:  false,
 	}
-
-	const queryParams: any = {
-		limit: limit,
-		offset: offset,
-		asc: order,
-	}
-
-	if (threadID)
-		queryParams.thread = threadID
 
 	try {
-		response = await api('/messages/v1/read', {
-			queryParams: queryParams,
+		const [response, error] = await api('/messages/v1/read', {
+			queryParams: {
+				thread: thread,
+				limit:  limit,
+				order:  order,
+				offset: offset,
+			},
 			method: "GET",
 			credentials: 'include',
 		});
 
-		if (response.error != "") {
-			console.error('[readMessages]: /read response returned error')
-			result.error = response.error
-			result.explain = response.explain
-		} else {
-			result.messages = response.value.messages.map(models.message)
-			result.isLastPage = response.value.is_last_page
+		if (error)
+			result.error = models.error(error)
+
+		if (response) {
+			result.messages = response.messages.map(models.message)
+			result.isLastPage = response.isLastPage
 		}
 	} catch (e) {
-		console.error(i18n("error_occured"), e);
-		result.error = e
+		result.error.error   = true
+		result.error.status  = 500
+		result.error.explain = e.toString()
 	}
 
 	return result;

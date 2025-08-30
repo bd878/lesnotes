@@ -634,6 +634,9 @@ components:
       oneOf:
         - type: object
           properties:
+            id:
+              type: integer
+              required: true
             public:
               type: integer
               example: 1
@@ -646,6 +649,9 @@ components:
 
         - type: object
           properties:
+            id:
+              type: integer
+              required: true
             public:
               type: integer
               example: 1
@@ -692,6 +698,23 @@ components:
               required: false
               items:
                 type: integer
+
+    deleteOk:
+      type: object
+      properties:
+        status:
+          type: string
+          default: "ok"
+        response:
+          type: object
+          properties:
+            ids:
+              type: array:
+              items:
+                type: integer
+            description:
+              type: string
+
 # DELETE JSON
 
 # PUBLISH

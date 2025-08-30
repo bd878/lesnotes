@@ -1,34 +1,30 @@
-import i18n from '../i18n';
 import api from './api';
 import models from './models';
 
-async function readMessage(messageID: number) {
-	let response: any = {};
+async function readMessage(id: number) {
 	let result = {
-		error: "",
-		explain: "",
-		message: {},
+		error:    models.error(),
+		message:  models.message(),
 	}
 
 	try {
-		response = await api('/messages/v1/read', {
+		const [response, error] = await api('/messages/v1/read', {
 			queryParams: {
-				id: messageID,
+				id: id,
 			},
 			method: "GET",
 			credentials: 'include',
 		});
 
-		if (response.error != "") {
-			console.error('[readMessage]: /read response returned error')
-			result.error = response.error
-			result.explain = response.explain
-		} else {
-			result.message = models.message(response.value.message)
-		}
+		if (error)
+			result.error = models.error(error)
+
+		if (response)
+			result.message = models.message(response.messages[0])
 	} catch (e) {
-		console.error(i18n("error_occured"), e);
-		result.error = e
+		result.error.error   = true
+		result.error.status  = 500
+		result.error.explain = e.toString()
 	}
 
 	return result;

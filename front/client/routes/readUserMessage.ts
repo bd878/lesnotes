@@ -15,17 +15,17 @@ async function readUserMessage(ctx) {
 
 		const resp = await api.readMessageJson(token, user, id)
 
-		if (resp.error) {
+		if (resp.error.error) {
 			const filePath = resolve(join(Config.get('basedir'), 'templates/error.mustache'));
 			const template = await readFile(filePath, { encoding: 'utf-8' });
 
 			ctx.body = mustache.render(template, {
-				code:     resp.code,
-				explain:  resp.explain,
+				code:     resp.error.code,
+				explain:  resp.error.explain,
 				styles:   ["/public/styles.css"],
 			})
 
-			ctx.status = resp.status
+			ctx.status = resp.error.status
 		} else {
 			const filePath = resolve(join(Config.get('basedir'), 'templates/message.mustache'));
 			const template = await readFile(filePath, { encoding: 'utf-8' });
@@ -41,7 +41,6 @@ async function readUserMessage(ctx) {
 			ctx.status = 200;
 		}
 	} catch (err) {
-		console.error("[readUserMessage]: failed to return message template");
 		throw Error(err);
 	}
 }

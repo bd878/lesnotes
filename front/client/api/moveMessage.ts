@@ -1,46 +1,32 @@
-import i18n from '../i18n';
 import api from './api';
-import * as is from '../third_party/is'
 import models from './models';
 
-async function moveMessage(id, threadID) {
-	let response: any = {};
+async function moveMessage(id: number, thread: number) {
 	let result = {
-		error: "",
-		explain: "",
-		ID: "",
-		threadID: 0,
-		updateUTCNano: 0,
+		error:  models.error(),
 	}
 
 	const form = new FormData()
-	if (is.notUndef(threadID))
-		form.append("thread_id", threadID);
+
+	if (thread)
+		form.append("thread", `${thread}`);
+
+	if (id)
+		form.append("id", `${id}`);
 
 	try {
-		response = await api("/messages/v1/update", {
-			queryParams: {
-				id: id,
-			},
+		const [_1, error] = await api("/messages/v1/update", {
 			method: "POST",
 			credentials: "include",
 			body: form,
 		});
 
-		if (response.error !== "") {
-			result.error = response.error
-			result.explain = response.explain
-		} else {
-			if (response.value) {
-				const model = models.message({update_utc_nano: response.value.update_utc_nano})
-				result.ID = id
-				result.threadID = threadID
-				result.updateUTCNano = model.updateUTCNano
-			}
-		}
+		if (error)
+			result.error = models.error(error)
 	} catch (e) {
-		console.error(i18n("error_occured"), e);
-		result.error = e
+		result.error.error   = true
+		result.error.status  = 500
+		result.error.explain = e.toString()
 	}
 
 	return result

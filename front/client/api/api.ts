@@ -13,7 +13,7 @@ if (HTTPS && (HTTPS !== "")) {
 	proto = "https"
 }
 
-function getFullUrl(url: string, isFullUrl: string) {
+function getFullUrl(url: string, isFullUrl: boolean) {
 	return isFullUrl ? url : `${proto}://${BACKEND_URL}${url}`;
 }
 
@@ -46,7 +46,7 @@ function prepareBody(body, method) {
 	return JSON.stringify(body);
 }
 
-function getOptions(props) {
+function getOptions(props): any {
 	const {
 		headers,
 		body,
@@ -79,33 +79,47 @@ export default function api(url, props: any = {}): Promise<any> {
 				try {
 					const value = JSON.parse(text);
 
-					if (is.notEmpty(value.error))
-						return {
+					if (is.notEmpty(value.error)) {
+						console.error(`[${url}]: failed`, "props:", JSON.stringify(props), "res:", text)
+
+						return Promise.resolve([null, {
 							error:   true,
 							status:  res.status,
-							value:   {},
 							explain: text,
 							code:    value.error.code,
-						}
-					else
-						return {
+						}])
+					} else {
+						console.log(`[${url}]: success`, "props:", JSON.stringify(props), "res:", text)
+
+						return Promise.resolve([value.response, {
 							error:   false,
 							status:  res.status,
-							value:   value.response,
 							explain: "",
 							code:    0,
-						}
+						}])
+					}
 				} catch (e) {
-					console.error("[api]: error occured", e)
-					return {
+					console.error(`[${url}]: error:`, e.toString(), "props:", JSON.stringify(props))
+
+					return Promise.resolve([null, {
 						error:   true,
 						status:  res.status,
-						value:   {},
 						explain: text,
 						code:    0,
-					}
+					}])
 				}
 			})
+			.catch(e => Promise.reject([null, {
+				error:   true,
+				status:  500,
+				code:    0,
+				explain: e.toString(),
+			}]))
 		)
-		.catch(e => Promise.reject(e));
+		.catch(e => Promise.reject([null, {
+			error:   true,
+			status:  500,
+			code:    0,
+			explain: e.toString(),
+		}]));
 }

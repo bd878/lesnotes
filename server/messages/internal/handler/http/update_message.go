@@ -13,7 +13,10 @@ import (
 )
 
 func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) (err error) {
-	var public, threadID int
+	var (
+		id, thread int64
+		public int
+	)
 
 	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
 	if !ok {
@@ -29,8 +32,23 @@ func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) (err e
 		return
 	}
 
-	values := req.URL.Query()
-	if values.Get("id") == "" {
+	if req.PostFormValue("id") != "" {
+		messageID, err := strconv.Atoi(req.PostFormValue("id"))
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(server.ServerResponse{
+				Status: "error",
+				Error: &server.ErrorCode{
+					Code:    server.CodeNoID,
+					Explain: "invalid id",
+				},
+			})
+
+			return err
+		}
+
+		id = int64(messageID)
+	} else {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
@@ -40,27 +58,13 @@ func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) (err e
 			},
 		})
 
-		return nil
-	}
-
-	id, err := strconv.Atoi(values.Get("id"))
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status: "error",
-			Error: &server.ErrorCode{
-				Code:    server.CodeNoID,
-				Explain: "invalid id",
-			},
-		})
-
-		return err
+		return
 	}
 
 	text := req.PostFormValue("text")
 
 	if req.PostFormValue("thread") != "" {
-		threadID, err = strconv.Atoi(req.PostFormValue("thread"))
+		id, err := strconv.Atoi(req.PostFormValue("thread"))
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(server.ServerResponse{
@@ -71,10 +75,12 @@ func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) (err e
 				},
 			})
 
-			return
+			return err
 		}
+
+		thread = int64(id)
 	} else {
-		threadID = -1
+		thread = -1
 	}
 
 	if req.PostFormValue("public") != "" {
@@ -95,7 +101,7 @@ func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) (err e
 		public = -1
 	}
 
-	return h.updateMessage(req.Context(), w, int64(id), user, text, int64(threadID), public)
+	return h.updateMessage(req.Context(), w, id, user, text, thread, public)
 }
 
 func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, messageID int64, user *users.User,

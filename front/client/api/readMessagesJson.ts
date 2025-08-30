@@ -1,39 +1,38 @@
-import i18n from '../i18n';
 import api from './api';
-import sendLog from './sendLog';
 import models from './models';
 
-async function readMessagesJson(token, req) {
-	let response: any = {};
+async function readMessagesJson(token: string, thread: number, order: number, limit: number, offset: number) {
 	let result = {
-		error: "",
-		explain: "",
-		messages: [],
-		isLastPage: false,
+		error:       models.error(),
+		messages:    models.message(),
+		isLastPage:  false,
 	}
 
 	try {
-		await sendLog(token + " : " + JSON.stringify(req))
-
-		response = await api('/messages/v2/read', {
+		const [response, error] = await api('/messages/v2/read', {
 			method: "POST",
 			body: {
 				token: token,
-				req: req,
+				req:   {
+					thread: thread,
+					limit:  limit,
+					offset: offset,
+					order:  order,
+				},
 			},
 		});
 
-		if (response.error != "") {
-			console.error('[readMessagesJson]: /read response returned error')
-			result.error = response.error
-			result.explain = response.explain
-		} else {
-			result.messages = response.value.messages.map(models.message)
-			result.isLastPage = response.value.is_last_page
+		if (error)
+			result.error = models.error(error)
+
+		if (response) {
+			result.messages = response.messages.map(models.message)
+			result.isLastPage = response.isLastPage
 		}
 	} catch (e) {
-		console.error(i18n("error_occured"), e);
-		result.error = e
+		result.error.error   = true
+		result.error.status  = 500
+		result.error.explain = e.toString()
 	}
 
 	return result;

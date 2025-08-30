@@ -3,6 +3,7 @@ import readMessagesJson from './readMessagesJson';
 import readMessage from './readMessage';
 import readMessageJson from './readMessageJson';
 import sendMessage from './sendMessage';
+import sendMessageJson from './sendMessageJson';
 import updateMessage from './updateMessage';
 import deleteMessage from './deleteMessage';
 import deleteMessages from './deleteMessages';
@@ -30,6 +31,7 @@ export default {
 	readMessageJson,
 	readMessage,
 	sendMessage,
+	sendMessageJson,
 	updateMessage,
 	deleteMessage,
 	deleteMessages,

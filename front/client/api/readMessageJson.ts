@@ -1,27 +1,14 @@
-import i18n from '../i18n';
 import api from './api';
-import sendLog from './sendLog';
 import models from './models';
-
-interface ReadMessageResult {
-	error:   boolean;
-	status:  number;
-	explain: string;
-	code:    number;
-	message: models.Message;
-}
 
 async function readMessageJson(token: string, user: number, id: number) {
 	let result = {
-		error:   false,
-		status:  200,
-		explain: "",
-		code:    0,
-		message: models.message(),
+		error:     models.error(),
+		message:   models.message(),
 	}
 
 	try {
-		const response = await api('/messages/v2/read', {
+		const [response, error] = await api('/messages/v2/read', {
 			method: "POST",
 			body: {
 				token: token,
@@ -32,22 +19,15 @@ async function readMessageJson(token: string, user: number, id: number) {
 			},
 		});
 
-		result.error    = response.error
-		result.status   = response.status
-		result.explain  = response.explain
-		result.code     = response.code
+		if (error)
+			result.error = models.error(error)
 
-		if (response.error) {
-			console.error('[readMessageJson]: read response returned error', "status:", response.status, "code:", response.code, "explain:", response.explain)
-
-			return result
-		} else {
-			result.message = models.message(response.value.messages[0])
-		}
+		if (response)
+			result.message = models.message(response.messages[0])
 	} catch (e) {
-		console.error(i18n("error_occured"), e);
-		result.error = 500
-		result.explain = e
+		result.error.error   = true
+		result.error.status  = 500
+		result.error.explain = e.toString()
 	}
 
 	return result;

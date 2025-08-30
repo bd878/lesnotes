@@ -12,7 +12,7 @@ async function authTelegram(ctx) {
 		const filePath = resolve(path.join(Config.get('basedir'), 'templates/tg_auth.mustache'));
 		const template = await readFile(filePath, { encoding: 'utf-8' });
 
-		if (resp.ok) {
+		if (!resp.error.error) {
 			var expireDate = new Date().getTime()
 			const age = 1 * 24 * 60 * 60 * 1000 /* 1 day */
 			expireDate += age
@@ -29,8 +29,8 @@ async function authTelegram(ctx) {
 			ctx.status = 301
 		} else {
 			ctx.body = mustache.render(template, {
-				error: resp.error,
-				explain: resp.explain,
+				error: resp.error.error,
+				explain: resp.error.explain,
 				styles: [
 					"/public/styles.css",
 				],
