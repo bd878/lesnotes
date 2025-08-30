@@ -23,7 +23,7 @@ const empty: Message = {
 	userID: 0,
 	text: "",
 	name: "",
-	files:  [file()],
+	files:  [],
 	threadID: 0,
 	private: true,
 }

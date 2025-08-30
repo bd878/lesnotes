@@ -32,9 +32,9 @@ async function readUserMessage(ctx) {
 
 			ctx.body = mustache.render(template, {
 				id:       id,
-				userId:   user,
-				react:    false,
+				user:     user,
 				message:  resp.message,
+				files:    resp.message.files,
 				styles:   ["/public/styles.css"],
 			})
 

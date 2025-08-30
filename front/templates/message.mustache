@@ -9,13 +9,11 @@
 		{{/styles}}
 		<title>Les notes</title>
 	</head>
-	<body data-id="{{id}}" data-user-id="{{userId}}">
-		{{#react}}
-			<div id="app"></div>
-			<script type="module" src="{{{ script }}}"></script>
-		{{/react}}
-		{{^react}}
-			<div class="whitespace-pre">{{message.text}}</div>
-		{{/react}}
+	<body data-id="{{id}}" data-user-id="{{user}}">
+		<div class="whitespace-pre">{{message.text}}</div>
+
+		{{#files}}
+			<a css="underline text-blue-600 visited:text-purple-600" href="/files/v2/{{user}}/{{name}}" target="_blank" download="{{name}}"></a>
+		{{/files}}
 	</body>
 </html>

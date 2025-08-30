@@ -31,8 +31,8 @@ async function readPublicMessage(ctx) {
 
 			ctx.body = mustache.render(template, {
 				id:       id,
-				react:    false,
 				message:  resp.message,
+				files:    resp.message.files,
 				styles:   ["/public/styles.css"],
 			})
 
