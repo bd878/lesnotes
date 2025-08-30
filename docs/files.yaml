@@ -90,30 +90,30 @@ paths:
         Download a file for a provided user
       operationId: downloadFile
 
-  /files/v2/{user_id}/{name}:
+  /files/v2/{user_id}/{id}:
     parameters:
       user_id:
         in: path
         type: integer
         required: true
-      name:
+      id:
         in: path
-        type: string
+        type: integer
         required: true
-        example: file_1.jpeg
+        example: 1
     get:
       summary: Download public file
       description: |
         Download public file of a given user
       operationId: downloadPublicFile
 
-  /files/v2/{name}:
+  /files/v2/{id}:
     parameters:
-      name:
+      id:
         in: path
-        type: string
+        type: integer
         required: true
-        example: file_2.jpeg
+        example: 1
     get:
       summary: Download public file for public user
       description: |

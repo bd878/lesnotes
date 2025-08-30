@@ -3,6 +3,7 @@ package http
 import (
 	"io"
 	"fmt"
+	"strconv"
 	"net/http"
 	"encoding/json"
 
@@ -13,21 +14,35 @@ import (
 )
 
 func (h *Handler) DownloadPublicFileV2(w http.ResponseWriter, req *http.Request) (err error) {
-	fileName := req.PathValue("name")
-	if fileName == "" {
+	fileIDStr := req.PathValue("id")
+	if fileIDStr == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:  &server.ErrorCode{
-				Code:    files.CodeNoFileName,
-				Explain: "name required",
+				Code:    server.CodeNoID,
+				Explain: "file id required",
 			},
 		})
 
 		return
 	}
 
-	file, stream, err := h.controller.ReadFileStream(req.Context(), 0, users.PublicUserID, fileName, true)
+	fileID, err := strconv.Atoi(fileIDStr)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status: "error",
+			Error:  &server.ErrorCode{
+				Code:    server.CodeWrongFormat,
+				Explain: "error parsing request",
+			},
+		})
+
+		return err
+	}
+
+	file, stream, err := h.controller.ReadFileStream(req.Context(), int64(fileID), users.PublicUserID, "", true)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

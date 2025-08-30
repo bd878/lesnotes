@@ -13,7 +13,7 @@ import (
 )
 
 func (h *Handler) DownloadFileV2(w http.ResponseWriter, req *http.Request) (err error) {
-	userIDStr, fileName := req.PathValue("user_id"), req.PathValue("name")
+	userIDStr, fileIDStr := req.PathValue("user_id"), req.PathValue("id")
 	if userIDStr == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -40,19 +40,33 @@ func (h *Handler) DownloadFileV2(w http.ResponseWriter, req *http.Request) (err 
 		return err
 	}
 
-	if fileName == "" {
+	if fileIDStr == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:  &server.ErrorCode{
-				Code:    files.CodeNoFileName,
-				Explain: "name required",
+				Code:    server.CodeNoID,
+				Explain: "id required",
 			},
 		})
 		return
 	}
 
-	file, stream, err := h.controller.ReadFileStream(req.Context(), 0, int64(userID), fileName, true)
+	fileID, err := strconv.Atoi(fileIDStr)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status: "error",
+			Error:  &server.ErrorCode{
+				Code:    server.CodeWrongFormat,
+				Explain: "error parsing request",
+			},
+		})
+
+		return err
+	}
+
+	file, stream, err := h.controller.ReadFileStream(req.Context(), int64(fileID), int64(userID), "", true)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

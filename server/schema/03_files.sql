@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS files.files
 (
 	id            bigint        UNIQUE NOT NULL,
 	owner_id      bigint        NOT NULL,
-	name          VARCHAR(256)  UNIQUE NOT NULL,
+	name          VARCHAR(256)  NOT NULL,
 	private       bool          NOT NULL DEFAULT true,
 	oid           int           UNIQUE DEFAULT NULL, -- large object id
 	mime          VARCHAR(256)  NOT NULL,

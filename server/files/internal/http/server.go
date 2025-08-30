@@ -50,8 +50,8 @@ func New(cfg Config) *Server {
 
 	middleware.NoAuth()
 	mux.Handle("/files/v1/status",    middleware.Build(handler.GetStatus))
-	mux.Handle("/files/v2/{user_id}/{name}", middleware.Build(handler.DownloadFileV2))
-	mux.Handle("/files/v2/{name}",    middleware.Build(handler.DownloadPublicFileV2))
+	mux.Handle("/files/v2/{user_id}/{id}", middleware.Build(handler.DownloadFileV2))
+	mux.Handle("/files/v2/{id}",      middleware.Build(handler.DownloadPublicFileV2))
 
 	middleware.NoAuth().WithAuth(httpmiddleware.TokenAuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
 	mux.Handle("/files/v2/upload",    middleware.Build(handler.UploadFileV2))
