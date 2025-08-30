@@ -40,5 +40,5 @@ async function onFormSubmit(e) {
 		return
 	}
 
-	setTimeout(() => { location.href = "/m/" + response.message.id }, 0)
+	setTimeout(() => { location.href = "/m/" + response.message.ID }, 0)
 }
