@@ -6,7 +6,7 @@ const elems = {
 	get formElem() {
 		const formElem = document.getElementById("new_message")
 		if (!formElem) {
-			console.error("[formEleme]: no \"new_message\" form")
+			console.error("[formElem]: no \"new_message\" form")
 			return empty
 		}
 
@@ -26,6 +26,19 @@ window.addEventListener("load", () => {
 async function onFormSubmit(e) {
 	e.preventDefault()
 
-	console.log("submitted")
-	await api.sendMessage("test form")
+	let response;
+
+	response = await api.uploadFile(elems.formElem.files[0])
+	if (response.error.error) {
+		console.log("[onFormSubmit]: error uploading file", response)
+		return
+	}
+
+	response = await api.sendMessage(elems.formElem.text.value, response.id)
+	if (response.error.error) {
+		console.log("[onFormSubmit]: error saving message", response)
+		return
+	}
+
+	setTimeout(() => { location.href = "/m/" + response.message.id }, 0)
 }
