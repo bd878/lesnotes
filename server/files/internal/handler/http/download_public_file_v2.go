@@ -3,43 +3,17 @@ package http
 import (
 	"io"
 	"fmt"
-	"strconv"
 	"net/http"
 	"encoding/json"
 
 	"github.com/bd878/gallery/server/logger"
 	files "github.com/bd878/gallery/server/files/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
+	users "github.com/bd878/gallery/server/users/pkg/model"
 )
 
-func (h *Handler) DownloadFileV2(w http.ResponseWriter, req *http.Request) (err error) {
-	userIDStr, fileName := req.PathValue("user_id"), req.PathValue("name")
-	if userIDStr == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status: "error",
-			Error:  &server.ErrorCode{
-				Code:    server.CodeNoUser,
-				Explain: "user_id required",
-			},
-		})
-		return
-	}
-
-	userID, err := strconv.Atoi(userIDStr)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status: "error",
-			Error:  &server.ErrorCode{
-				Code:    server.CodeWrongFormat,
-				Explain: "error parsing request",
-			},
-		})
-
-		return err
-	}
-
+func (h *Handler) DownloadPublicFileV2(w http.ResponseWriter, req *http.Request) (err error) {
+	fileName := req.PathValue("name")
 	if fileName == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -49,10 +23,11 @@ func (h *Handler) DownloadFileV2(w http.ResponseWriter, req *http.Request) (err 
 				Explain: "name required",
 			},
 		})
+
 		return
 	}
 
-	file, stream, err := h.controller.ReadFileStream(req.Context(), 0, int64(userID), fileName, true)
+	file, stream, err := h.controller.ReadFileStream(req.Context(), 0, users.PublicUserID, fileName, true)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -65,7 +40,7 @@ func (h *Handler) DownloadFileV2(w http.ResponseWriter, req *http.Request) (err 
 		return err
 	}
 
-	logger.Infow("downloading file", "name", file.Name, "user", userID)
+	logger.Infow("downloading public file", "name", file.Name)
 
 	w.Header().Set("Content-Disposition", "attachment; " + "filename*=UTF-8''" + file.Name)
 	w.Header().Set("Content-Length", fmt.Sprintf("%d", file.Size))

@@ -106,6 +106,19 @@ paths:
       description: |
         Download public file of a given user
       operationId: downloadPublicFile
+
+  /files/v2/{name}:
+    parameters:
+      name:
+        in: path
+        type: string
+        required: true
+        example: file_2.jpeg
+    get:
+      summary: Download public file for public user
+      description: |
+        Download public file of a public user
+      operationId: downloadPublicUserFile
 # END DOWNLOAD
 
 # STATUS
