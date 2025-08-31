@@ -1,24 +1,22 @@
 import createTgAuth from '../../scripts/createTgAuth';
 import api from '../../../api';
 
-const emptyElem = document.createElement("div")
-
 const elems = {
-	get formElem() {
+	get formElem(): HTMLFormElement {
 		const formElem = document.getElementById("login-form")
 		if (!formElem) {
 			console.error("[loginScript]: no \"login-form\" form")
-			return emptyElem
+			return document.createElement("form")
 		}
 
-		return formElem
+		return formElem as HTMLFormElement
 	},
 
 	get widgetElem() {
 		const widgetElem = document.getElementById("telegram-login-widget")
 		if (!widgetElem) {
 			console.error("[loginScript]: no widget element")
-			return emptyElem
+			return document.createElement("div")
 		}
 
 		return widgetElem
@@ -38,8 +36,8 @@ window.addEventListener("load", () => {
 async function onFormSubmit(e) {
 	e.preventDefault()
 
-	if (!elems.formElem.name) {
-		console.error("[onFormSubmit]: form \"login-form\" has no field \"name\"")
+	if (!elems.formElem.login) {
+		console.error("[onFormSubmit]: form \"login-form\" has no field \"login\"")
 		return
 	}
 
@@ -53,15 +51,14 @@ async function onFormSubmit(e) {
 	// - show error under form field
 	// - set loading state
 
-	let name = elems.formElem.name.value
+	let login = elems.formElem.login.value
 	let password = elems.formElem.password.value
 
-	console.log("[onFormSubmit]: submitting", "name:", name, "password:", password)
+	console.log("[onFormSubmit]: submitting", "login:", login, "password:", password)
 
-	let response = await api.login(name, password)
+	let response = await api.login(login, password)
 	console.log("[onFormSubmit]: login:", response)
 	if (response.error.error) {
-		console.error("[onFormSubmit]: error logging in", response)
 		// TODO: show form error
 		return
 	}

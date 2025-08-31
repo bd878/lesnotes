@@ -1,16 +1,14 @@
 import api from '../../../api';
 
-const emptyElem = document.createElement("div")
-
 const elems = {
-	get formElem() {
+	get formElem(): HTMLFormElement {
 		const formElem = document.getElementById("new_message")
 		if (!formElem) {
 			console.error("[formElem]: no \"new_message\" form")
-			return emptyElem
+			return document.createElement("form")
 		}
 
-		return formElem
+		return formElem as HTMLFormElement
 	}
 }
 
@@ -32,21 +30,16 @@ async function onFormSubmit(e) {
 
 	user = await api.getMe()
 	console.log("[onFormSubmit]: user:", user)
-	if (user.error.error) {
-		console.log("[onFormSubmit]: error loading me", user)
-	}
 
 	response = await api.uploadFile(elems.formElem.file.files[0])
 	console.log("[onFormSubmit]: file:", response)
 	if (response.error.error) {
-		console.log("[onFormSubmit]: error uploading file", response)
 		return
 	}
 
 	response = await api.sendMessage(elems.formElem.text.value, response.id)
 	console.log("[onFormSubmit]: message:", response)
 	if (response.error.error) {
-		console.log("[onFormSubmit]: error saving message", response)
 		return
 	}
 
