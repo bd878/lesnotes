@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 	<head>
 		<meta charset="UTF-8" />
 		<link rel="icon" href="/public/favicon.ico">
 		<meta name="viewport" content="width=device-width,initial-scale=1" />
-		{{#styles}}
-			<link rel="stylesheet" href="{{{.}}}">
-		{{/styles}}
+
+		<style type="text/css">{{{styles}}}</style>
+
 		{{#manifest}}
 			<link rel="manifest" href={{{.}}} />
 		{{/manifest}}
+
 		<title>Les notes</title>
 	</head>
 	<body>
