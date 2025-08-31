@@ -1,40 +1,12 @@
-<!DOCTYPE html>
-<html lang="fr">
-	<head>
-		<meta charset="UTF-8" />
-		<link rel="icon" href="/public/favicon.ico">
-		<meta name="viewport" content="width=device-width,initial-scale=1" />
-		{{#styles}}
-			<link rel="stylesheet" href="{{{.}}}">
-		{{/styles}}
-		{{#manifest}}
-			<link rel="manifest" href={{{.}}} />
-		{{/manifest}}
-		<title>Les notes</title>
-	</head>
-	<body>
-		<div class="p-8 pt-10 h-screen flex flex-col items-start relative">
-			<div class="w-full grow">
-				<div class="max-w-md min-w-3xs w-full flex flex-row justify-between">
-					<a class="italic text-2xl inline-block cursor-pointer" href="/" target="_self">Les Notes</a>
+<div class="max-w-md min-w-3xs w-full flex flex-row justify-between">
+	<a class="italic text-2xl inline-block cursor-pointer" href="/" target="_self">Les Notes</a>
 
-					<div class="inline-block py-1">
-						<a href="/login" class="underline">{{login}}</a>
-						 | 
-						<a href="/signup" class="underline">{{register}}</a>
-					</div>
-				</div>
+	<div class="inline-block py-1">
+		<a href="/login" class="underline">{{login}}</a>
+		 | 
+		<a href="/signup" class="underline">{{register}}</a>
+	</div>
+</div>
 
-				<div id="telegram-login-widget">
-				</div>
-			</div>
-
-			<div class="w-full flex justify-center">
-				<div class="text-sm w-full flex justify-center text-gray-950 dark:text-white">Les Notes © 2025</div>
-			</div>
-		</div>
-	</body>
-	{{#scripts}}
-		<script async type="module" src="{{{.}}}"></script>
-	{{/scripts}}
-</html>
+<div id="telegram-login-widget">
+</div>

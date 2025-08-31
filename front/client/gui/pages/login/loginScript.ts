@@ -3,7 +3,7 @@ import createTgAuth from '../../scripts/createTgAuth';
 function init() {
 	const widgetElem = document.getElementById("telegram-login-widget")
 	if (!widgetElem) {
-		console.error("[mainScript]: no widget element")
+		console.error("[loginScript]: no widget element")
 		return
 	}
 	widgetElem.appendChild(createTgAuth())
