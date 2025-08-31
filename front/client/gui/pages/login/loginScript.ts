@@ -12,7 +12,7 @@ const elems = {
 		}
 
 		return formElem
-	}
+	},
 
 	get widgetElem() {
 		const widgetElem = document.getElementById("telegram-login-widget")
