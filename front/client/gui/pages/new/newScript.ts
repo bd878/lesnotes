@@ -1,13 +1,13 @@
 import api from '../../../api';
 
-const empty = Object.create(null)
+const emptyElem = Document.createElement("div")
 
 const elems = {
 	get formElem() {
 		const formElem = document.getElementById("new_message")
 		if (!formElem) {
 			console.error("[formElem]: no \"new_message\" form")
-			return empty
+			return emptyElem
 		}
 
 		return formElem
@@ -28,18 +28,23 @@ async function onFormSubmit(e) {
 
 	let response, user;
 
+	console.log("[onFormSubmit]: submitting...")
+
 	user = await api.getMe()
+	console.log("[onFormSubmit]: user:", user)
 	if (user.error.error) {
 		console.log("[onFormSubmit]: error loading me", user)
 	}
-	
+
 	response = await api.uploadFile(elems.formElem.file.files[0])
+	console.log("[onFormSubmit]: file:", response)
 	if (response.error.error) {
 		console.log("[onFormSubmit]: error uploading file", response)
 		return
 	}
 
 	response = await api.sendMessage(elems.formElem.text.value, response.id)
+	console.log("[onFormSubmit]: message:", response)
 	if (response.error.error) {
 		console.log("[onFormSubmit]: error saving message", response)
 		return
