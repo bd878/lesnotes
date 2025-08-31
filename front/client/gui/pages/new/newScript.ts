@@ -1,6 +1,6 @@
 import api from '../../../api';
 
-const emptyElem = Document.createElement("div")
+const emptyElem = document.createElement("div")
 
 const elems = {
 	get formElem() {
