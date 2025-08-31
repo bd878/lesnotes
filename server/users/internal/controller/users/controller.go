@@ -5,6 +5,7 @@ import (
 	"context"
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/users/pkg/model"
 	"github.com/bd878/gallery/server/users/internal/controller"
 	sessions "github.com/bd878/gallery/server/sessions/pkg/model"
@@ -39,6 +40,8 @@ func New(repo Repository, messages MessagesGateway, sessions SessionsGateway) *C
 }
 
 func (c *Controller) CreateUser(ctx context.Context, id int64, login, password string) (user *model.User, err error) {
+	logger.Debugw("create user", "id", id, "login", login, "password", password)
+
 	hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
@@ -66,6 +69,8 @@ func (c *Controller) CreateUser(ctx context.Context, id int64, login, password s
 }
 
 func (c *Controller) DeleteUser(ctx context.Context, userID int64) (err error) {
+	logger.Debugw("delete user", "id", userID)
+
 	err = c.sessions.RemoveAllUserSessions(ctx, userID)
 	if err != nil {
 		return
@@ -84,11 +89,16 @@ func (c *Controller) DeleteUser(ctx context.Context, userID int64) (err error) {
 }
 
 func (c *Controller) LogoutUser(ctx context.Context, token string) (err error) {
+	logger.Debugw("logout user", "token", token)
+
 	err = c.sessions.RemoveSession(ctx, token)
+
 	return
 }
 
 func (c *Controller) FindUser(ctx context.Context, id int64, login, token string) (user *model.User, err error) {
+	logger.Debugw("find user", "id", id, "login", login, "token", token)
+
 	if token != "" {
 		session, err := c.sessions.GetSession(ctx, token)
 		if err != nil {
@@ -100,22 +110,22 @@ func (c *Controller) FindUser(ctx context.Context, id int64, login, token string
 		user, err = c.repo.Find(ctx, 0, login)
 	}
 
-	if err != nil {
-		return nil, err
-	}
-
 	return
 }
 
-func (c *Controller) LoginUser(ctx context.Context, login, hashedPassword string) (session *sessions.Session, err error) {
+func (c *Controller) LoginUser(ctx context.Context, login, password string) (session *sessions.Session, err error) {
+	logger.Debugw("login user", "login", login, "password", password)
+
 	user, err := c.repo.Find(ctx, 0, login)
 	if err != nil {
-		return nil, err
+		logger.Errorln(err)
+		return nil, controller.ErrUserNotFound
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.HashedPassword), []byte(hashedPassword))
+	err = bcrypt.CompareHashAndPassword([]byte(user.HashedPassword), []byte(password))
 	if err != nil {
-		return nil, err
+		logger.Errorln(err)
+		return nil, controller.ErrWrongPassword
 	}
 
 	session, err = c.sessions.CreateSession(ctx, int64(user.ID))
@@ -124,6 +134,8 @@ func (c *Controller) LoginUser(ctx context.Context, login, hashedPassword string
 }
 
 func (c *Controller) AuthUser(ctx context.Context, token string) (user *model.User, err error) {
+	logger.Debugw("auth user", "token", token)
+
 	session, err := c.sessions.GetSession(ctx, token)
 	if err != nil {
 		return nil, err
@@ -145,9 +157,12 @@ func (c *Controller) AuthUser(ctx context.Context, token string) (user *model.Us
 }
 
 func (c *Controller) GetUser(ctx context.Context, id int64) (user *model.User, err error) {
+	logger.Debugw("get user", "id", id)
+
 	user, err = c.repo.Find(ctx, id, "")
 	if err != nil {
 		return nil, controller.ErrUserNotFound
 	}
+
 	return
 }

@@ -16,7 +16,7 @@ type Controller interface {
 	FindUser(ctx context.Context, id int64, login, token string) (user *users.User, err error)
 	AuthUser(ctx context.Context, token string) (user *users.User, err error)
 	GetUser(ctx context.Context, userID int64) (user *users.User, err error)
-	LoginUser(ctx context.Context, login, hashedPassword string) (session *sessions.Session, err error)
+	LoginUser(ctx context.Context, login, password string) (session *sessions.Session, err error)
 	DeleteUser(ctx context.Context, userID int64) (err error)
 	LogoutUser(ctx context.Context, token string) (err error)
 }
