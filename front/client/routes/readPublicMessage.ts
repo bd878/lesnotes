@@ -14,13 +14,14 @@ async function readPublicMessage(ctx) {
 	const resp = await api.readMessageJson(token, 0, id)
 
 	if (resp.error.error) {
+		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles.css')), { encoding: 'utf-8' });
 		const filePath = resolve(join(Config.get('basedir'), 'templates/error.mustache'));
 		const template = await readFile(filePath, { encoding: 'utf-8' });
 
 		ctx.body = mustache.render(template, {
 			code:     resp.error.code,
 			explain:  resp.error.explain,
-			styles:   ["/public/styles.css"],
+			styles:   styles,
 		})
 
 		ctx.status = resp.error.status
@@ -28,6 +29,7 @@ async function readPublicMessage(ctx) {
 		return
 	}
 
+	const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles.css')), { encoding: 'utf-8' });
 	const filePath = resolve(join(Config.get('basedir'), 'templates/message.mustache'));
 	const template = await readFile(filePath, { encoding: 'utf-8' });
 
@@ -35,7 +37,7 @@ async function readPublicMessage(ctx) {
 		id:       id,
 		message:  resp.message,
 		files:    resp.message.files,
-		styles:   ["/public/styles.css"],
+		styles:   styles,
 	})
 
 	ctx.status = 200;

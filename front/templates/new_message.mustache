@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 	<head>
 		<meta charset="UTF-8" />
 		<link rel="icon" href="/public/favicon.ico">
 		<meta name="viewport" content="width=device-width,initial-scale=1" />
-		{{#styles}}
-			<link rel="stylesheet" href="{{{.}}}">
-		{{/styles}}
+		<style type="text/css">{{{styles}}}</style>
+
 		<title>Les notes</title>
 	</head>
 	<body>
@@ -24,7 +23,8 @@
 			</form>
 		</div>
 	</body>
+
 	{{#scripts}}
-		<script async type="module" src="{{{.}}}"></script>
+		<script type="module" src="{{{.}}}"></script>
 	{{/scripts}}
 </html>
