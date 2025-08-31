@@ -3,7 +3,9 @@
 
 	<form
 		id="login-form"
-		autoComplete="off"
+		action=""
+		onsubmit="return false;"
+		autocomplete="off"
 		name="login-form"
 		class="flex flex-col"
 	>
@@ -25,23 +27,23 @@
 				class="block w-full border-solid border-1"
 			/>
 		</div>
+
+		<div class="flex flex-row justify-between mt-3">
+			<a
+				el="a"
+				href="/signup"
+				target="_self"
+				class="underline italic text-blue-600 text-left cursor-pointer"
+			>
+				{{register}}
+			</a>
+
+			<button
+				type="submit"
+				class="border-1 px-4 border-solid text-left cursor-pointer"
+			>{{login}}</button>
+		</div>
 	</form>
-
-	<div class="flex flex-row justify-between mt-3">
-		<a
-			el="a"
-			href="/signup"
-			target="_self"
-			class="underline italic text-blue-600 text-left cursor-pointer"
-		>
-			{{register}}
-		</a>
-
-		<button
-			type="button"
-			class="border-1 px-4 border-solid text-left cursor-pointer"
-		>{{login}}</button>
-	</div>
 </div>
 
 <div id="telegram-login-widget">
