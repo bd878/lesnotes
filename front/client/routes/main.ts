@@ -31,7 +31,7 @@ async function main(ctx) {
 	}
 
 	ctx.redirect('/home')
-	ctx.status = 301
+	ctx.status = 302
 }
 
 export default main;

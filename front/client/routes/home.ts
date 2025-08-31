@@ -11,7 +11,7 @@ async function renderer(ctx) {
 	const resp = await api.authJson(token)
 	if (resp.error.error || resp.expired) {
 		ctx.redirect("/login")
-		ctx.status = 301
+		ctx.status = 302
 		return
 	}
 

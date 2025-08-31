@@ -33,7 +33,7 @@ async function login(ctx) {
 	}
 
 	ctx.redirect('/home')
-	ctx.status = 301
+	ctx.status = 302
 }
 
 export default login;
