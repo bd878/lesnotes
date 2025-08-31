@@ -2,40 +2,12 @@ import i18n from '../../../i18n';
 import {takeLatest,put,call} from 'redux-saga/effects'
 import {
 	LOGOUT,
-	AUTH,
-	AUTH_FAILED,
-	AUTH_SUCCEEDED,
 } from './userActions'
 import {
 	logoutActionCreator,
-	authSucceededActionCreator,
-	authFailedActionCreator,
-	willRedirectActionCreator,
-	resetRedirectActionCreator,
 } from './userActionCreators';
 import * as is from '../../../third_party/is'
 import api from '../../../api'
-
-function* redirectHome({shouldRedirect = true}) {
-	if (location && !location.pathname.includes("/home") && shouldRedirect)
-		setTimeout(() => {location.href = "/home"})
-	else
-		yield put(resetRedirectActionCreator())
-}
-
-function* auth({shouldSuccessRedirect = true, shouldFailRedirect = true}) {
-	try {
-		const response = yield call(api.auth)
-
-		yield put(willRedirectActionCreator())
-		if (is.notEmpty(response.error))
-			yield put(authFailedActionCreator(response.error, shouldFailRedirect))
-		else
-			yield put(authSucceededActionCreator(response, shouldSuccessRedirect))
-	} catch (e) {
-		yield put(authFailedActionCreator(e.message, shouldFailRedirect))
-	}
-}
 
 function* logout() {
 	try {
@@ -48,8 +20,6 @@ function* logout() {
 
 function* userSaga() {
 	yield takeLatest(LOGOUT, logout)
-	yield takeLatest(AUTH, auth)
-	yield takeLatest(AUTH_SUCCEEDED, redirectHome)
 }
 
 export {userSaga}

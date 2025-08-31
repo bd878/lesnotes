@@ -1,6 +1,1 @@
-export const AUTH = "@me/AUTH"
-export const AUTH_SUCCEEDED = "@me/AUTH_SUCCEEDED"
-export const AUTH_FAILED = "@me/AUTH_FAILED"
 export const LOGOUT = "@me/LOGOUT"
-export const WILL_REDIRECT = "@me/WILL_REDIRECT"
-export const RESET_REDIRECT = "@me/RESET_REDIRECT"

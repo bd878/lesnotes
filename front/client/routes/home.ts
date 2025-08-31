@@ -1,42 +1,47 @@
 import Config from 'config';
 import mustache from 'mustache';
-import path from 'path';
+import api from '../api';
+import i18n from '../i18n';
 import { readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { resolve, join } from 'node:path';
 
 async function renderer(ctx) {
-	try {
-		const filePath = resolve(path.join(Config.get('basedir'), 'templates/index.mustache'));
-		const template = await readFile(filePath, { encoding: 'utf-8' });
+	const token = ctx.cookies.get("token")
 
-		let browser = ""
-		if (ctx.userAgent.isFirefox)
-			browser = "firefox"
-		else if (ctx.userAgent.isChrome)
-			browser = "chrome"
-		else if (ctx.userAgent.isSafari)
-			browser = "safari"
-
-		let mobile = false
-		if (ctx.userAgent.isMobile)
-			mobile = true
-
-		ctx.body = mustache.render(template, {
-			script: "/public/home.js",
-			manifest: "/public/manifest.json",
-			browser: browser,
-			mobile: mobile,
-			styles: [
-				"/public/styles.css",
-			],
-		});
-		ctx.status = 200;
-	} catch (err) {
-		ctx.body = "<html>Pas de template</html>";
-		ctx.status = 500;
-		console.log("failed to return index template");
-		throw Error(err);
+	const resp = await api.authJson(token)
+	if (resp.error.error || resp.expired) {
+		ctx.redirect("/login")
+		ctx.status = 301
+		return
 	}
+
+	const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles.css')), { encoding: 'utf-8' });
+	const home = await readFile(resolve(join(Config.get('basedir'), 'templates/home.mustache')), { encoding: 'utf-8' });
+	const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
+	const footer = await readFile(resolve(join(Config.get("basedir"), 'templates/footer.mustache')), { encoding: 'utf-8' });
+
+	let browser = ""
+	if (ctx.userAgent.isFirefox)
+		browser = "firefox"
+	else if (ctx.userAgent.isChrome)
+		browser = "chrome"
+	else if (ctx.userAgent.isSafari)
+		browser = "safari"
+
+	let mobile = false
+	if (ctx.userAgent.isMobile)
+		mobile = true
+
+	ctx.body = mustache.render(layout, {
+		scripts:  ["/public/home.js"],
+		manifest: "/public/manifest.json",
+		styles:   styles,
+	}, {
+		content: home,
+		footer:  footer,
+	});
+
+	ctx.status = 200;
 }
 
 export default renderer;
