@@ -61,6 +61,7 @@ type (
 		Limit               int                 `json:"limit"`
 		Offset              int                 `json:"offset"`
 		Asc                 int                 `json:"asc"`
+		IDs                 []int64             `json:"ids"`
 	}
 
 	DeleteRequest struct {

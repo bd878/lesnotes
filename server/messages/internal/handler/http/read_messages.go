@@ -19,6 +19,7 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) (err er
 	var (
 		limit, offset, order int
 		threadID, messageID int64
+		ids []int64
 	)
 
 	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
@@ -121,6 +122,20 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) (err er
 		}
 	}
 
+	if values.Get("ids") != "" {
+		if err := json.Unmarshal([]byte(values.Get("ids")), &ids); err != nil {
+			json.NewEncoder(w).Encode(server.ServerResponse{
+				Status: "error",
+				Error:  &server.ErrorCode{
+					Code:    server.CodeWrongQuery,
+					Explain: "wrong \"ids\" query field format",
+				},
+			})
+
+			return err
+		}
+	}
+
 	if values.Get("user") != "" {
 		id, err := strconv.Atoi(values.Get("user"))
 		if err != nil {
@@ -138,10 +153,18 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) (err er
 
 		// read public messages only
 		return h.readMessageOrMessages(req.Context(), w, int64(id), limit, offset, messageID, threadID, order, true)
+	} else if len(ids) > 0 {
+		// read batch messages by given ids
+		return h.readBatchMessages(req.Context(), w, user.ID, ids)
 	} else {
 		// read both public and private messages, 
 		return h.readMessageOrMessages(req.Context(), w, user.ID, limit, offset, messageID, threadID, order, false)
 	}
+}
+
+func (h *Handler) readBatchMessages(ctx context.Context, w http.ResponseWriter, userID int64, ids []int64) (err error) {
+	// TODO: implement
+	return nil
 }
 
 func (h *Handler) readMessageOrMessages(ctx context.Context, w http.ResponseWriter, userID int64,
