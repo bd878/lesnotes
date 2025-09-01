@@ -27,6 +27,7 @@ type MessagesClient interface {
 	ReadMessage(ctx context.Context, in *ReadMessageRequest, opts ...grpc.CallOption) (*Message, error)
 	ReadMessages(ctx context.Context, in *ReadMessagesRequest, opts ...grpc.CallOption) (*ReadMessagesResponse, error)
 	ReadThreadMessages(ctx context.Context, in *ReadThreadMessagesRequest, opts ...grpc.CallOption) (*ReadThreadMessagesResponse, error)
+	ReadBatchMessages(ctx context.Context, in *ReadBatchMessagesRequest, opts ...grpc.CallOption) (*ReadBatchMessagesResponse, error)
 }
 
 type messagesClient struct {
@@ -127,6 +128,15 @@ func (c *messagesClient) ReadThreadMessages(ctx context.Context, in *ReadThreadM
 	return out, nil
 }
 
+func (c *messagesClient) ReadBatchMessages(ctx context.Context, in *ReadBatchMessagesRequest, opts ...grpc.CallOption) (*ReadBatchMessagesResponse, error) {
+	out := new(ReadBatchMessagesResponse)
+	err := c.cc.Invoke(ctx, "/messages.v1.Messages/ReadBatchMessages", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MessagesServer is the server API for Messages service.
 // All implementations must embed UnimplementedMessagesServer
 // for forward compatibility
@@ -141,6 +151,7 @@ type MessagesServer interface {
 	ReadMessage(context.Context, *ReadMessageRequest) (*Message, error)
 	ReadMessages(context.Context, *ReadMessagesRequest) (*ReadMessagesResponse, error)
 	ReadThreadMessages(context.Context, *ReadThreadMessagesRequest) (*ReadThreadMessagesResponse, error)
+	ReadBatchMessages(context.Context, *ReadBatchMessagesRequest) (*ReadBatchMessagesResponse, error)
 	mustEmbedUnimplementedMessagesServer()
 }
 
@@ -177,6 +188,9 @@ func (UnimplementedMessagesServer) ReadMessages(context.Context, *ReadMessagesRe
 }
 func (UnimplementedMessagesServer) ReadThreadMessages(context.Context, *ReadThreadMessagesRequest) (*ReadThreadMessagesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadThreadMessages not implemented")
+}
+func (UnimplementedMessagesServer) ReadBatchMessages(context.Context, *ReadBatchMessagesRequest) (*ReadBatchMessagesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReadBatchMessages not implemented")
 }
 func (UnimplementedMessagesServer) mustEmbedUnimplementedMessagesServer() {}
 
@@ -371,6 +385,24 @@ func _Messages_ReadThreadMessages_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Messages_ReadBatchMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReadBatchMessagesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MessagesServer).ReadBatchMessages(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/messages.v1.Messages/ReadBatchMessages",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MessagesServer).ReadBatchMessages(ctx, req.(*ReadBatchMessagesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Messages_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "messages.v1.Messages",
 	HandlerType: (*MessagesServer)(nil),
@@ -414,6 +446,10 @@ var _Messages_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReadThreadMessages",
 			Handler:    _Messages_ReadThreadMessages_Handler,
+		},
+		{
+			MethodName: "ReadBatchMessages",
+			Handler:    _Messages_ReadBatchMessages_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

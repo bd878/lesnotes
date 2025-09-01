@@ -20,6 +20,7 @@ type Repository interface {
 	DeleteUserMessages(ctx context.Context, userID int64) (err error)
 	ReadThreadMessages(ctx context.Context, userID, threadID int64, limit, offset int32) (messages []*model.Message, isLastPage bool, err error)
 	ReadMessages(ctx context.Context, userID int64, limit, offset int32) (messages []*model.Message, isLastPage bool, err error)
+	ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*model.Message, err error)
 	Truncate(ctx context.Context) error
 }
 

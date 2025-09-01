@@ -272,6 +272,60 @@ SELECT user_id, thread_id, file_ids, created_at, updated_at, text, private, name
 	return
 }
 
+func (r *Repository) ReadBatchMessages(ctx context.Context, userID int64, messageIDs []int64) (messages []*model.Message, err error) {
+	var rows pgx.Rows
+
+	ids := "$2"
+	for i := 1; i < len(messageIDs); i++ {
+		ids += fmt.Sprintf(",$%d", i+2)
+	}
+
+	list := make([]interface{}, len(messageIDs))
+	for i, id := range messageIDs {
+		list[i] = id
+	}
+
+	rows, err = r.pool.Query(ctx, r.table(`
+SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at FROM %s WHERE user_id = $1 AND (id IN (` + ids + `))
+`), append([]interface{}{userID}, list...)...)
+	if err != nil {
+		return
+	}
+
+	messages = make([]*model.Message, 0)
+	for rows.Next() {
+		message := &model.Message{}
+
+		var (
+			fileIDs []byte
+			createdAt, updatedAt time.Time
+		)
+
+		err = rows.Scan(&message.ID, &message.UserID, &message.ThreadID, &fileIDs, &message.Name, &message.Text, &message.Private, &createdAt, &updatedAt)
+		if err != nil {
+			return
+		}
+
+		if fileIDs != nil {
+			err = json.Unmarshal(fileIDs, &message.FileIDs)
+			if err != nil {
+				return
+			}
+		}
+
+		message.CreateUTCNano = createdAt.UnixNano()
+		message.UpdateUTCNano = updatedAt.UnixNano()
+
+		messages = append(messages, message)
+	}
+
+	if err = rows.Err(); err != nil {
+		return
+	}
+
+	return
+}
+
 func (r *Repository) DeleteUserMessages(ctx context.Context, userID int64) (err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
@@ -306,8 +360,10 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID in
 	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at FROM %s WHERE user_id = $1 AND thread_id = $2 ORDER BY created_at DESC LIMIT $3 OFFSET $4"
 
 	rows, err = r.pool.Query(ctx, r.table(query), userID, threadID, limit, offset)
-
 	defer rows.Close()
+	if err != nil {
+		return
+	}
 
 	messages = make([]*model.Message, 0)
 	for rows.Next() {

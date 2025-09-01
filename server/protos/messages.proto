@@ -15,6 +15,7 @@ service Messages {
 	rpc ReadMessage(ReadMessageRequest) returns (Message) {}
 	rpc ReadMessages(ReadMessagesRequest) returns (ReadMessagesResponse) {}
 	rpc ReadThreadMessages(ReadThreadMessagesRequest) returns (ReadThreadMessagesResponse) {}
+	rpc ReadBatchMessages(ReadBatchMessagesRequest) returns (ReadBatchMessagesResponse) {}
 }
 
 message Message {
@@ -47,6 +48,15 @@ message ReadMessagesRequest {
 	int32    offset = 2;
 	int32    limit = 3;
 	bool     asc = 4;
+}
+
+message ReadBatchMessagesRequest {
+	int64    user_id = 1;
+	repeated int64 ids = 2;
+}
+
+message ReadBatchMessagesResponse {
+	repeated Message messages = 1;
 }
 
 message ReadMessagesResponse {

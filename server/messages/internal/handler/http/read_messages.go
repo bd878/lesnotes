@@ -163,8 +163,65 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) (err er
 }
 
 func (h *Handler) readBatchMessages(ctx context.Context, w http.ResponseWriter, userID int64, ids []int64) (err error) {
-	// TODO: implement
-	return nil
+	list, err := h.controller.ReadBatchMessages(ctx, userID, ids)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status: "error",
+			Error:  &server.ErrorCode{
+				Code:     server.CodeReadFailed,
+				Explain:  "failed to read batch messages",
+			},
+		})
+
+		return err
+	}
+
+	fileIDs := make([]int64, 0)
+	for _, message := range list {
+		if message.FileIDs != nil {
+			// TODO: fileIDs set
+			fileIDs = append(fileIDs, message.FileIDs...)
+		}
+	}
+
+	filesRes, err := h.filesGateway.ReadBatchFiles(ctx, fileIDs, userID)
+	if err != nil {
+		logger.Errorw("failed to read batch files", "user_id", userID, "error", err)
+	} else {
+		for _, message := range list {
+			var list []*files.File
+			for _, id := range message.FileIDs {
+				file := filesRes[id]
+				if file != nil {
+					list = append(list, &files.File{
+						ID:   file.ID,
+						Name: file.Name,
+					})
+				}
+			}
+			message.Files = list
+
+			if message.UserID == users.PublicUserID {
+				message.UserID = 0
+			}
+		}
+	}
+
+	response, err := json.Marshal(messages.ReadResponse{
+		Messages:   list,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return err
+	}
+
+	json.NewEncoder(w).Encode(server.ServerResponse{
+		Status:   "ok",
+		Response: json.RawMessage(response),
+	})
+
+	return
 }
 
 func (h *Handler) readMessageOrMessages(ctx context.Context, w http.ResponseWriter, userID int64,

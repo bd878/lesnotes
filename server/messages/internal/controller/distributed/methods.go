@@ -155,3 +155,7 @@ func (m *DistributedMessages) ReadThreadMessages(ctx context.Context, userID int
 func (m *DistributedMessages) ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (messages []*model.Message, isLastPage bool, err error) {
 	return m.repo.ReadMessages(ctx, userID, limit, offset)
 }
+
+func (m *DistributedMessages) ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*model.Message, err error) {
+	return m.repo.ReadBatchMessages(ctx, userID, ids)
+}

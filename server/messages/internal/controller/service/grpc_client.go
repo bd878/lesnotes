@@ -198,6 +198,28 @@ func (s *Messages) ReadThreadMessages(ctx context.Context, userID int64, threadI
 	return
 }
 
+func (s *Messages) ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*model.Message, err error) {
+	if s.isConnFailed() {
+		if err = s.setupConnection(); err != nil {
+			return
+		}
+	}
+
+	logger.Debugw("read batch messages", "user_id", userID, "ids", ids)
+
+	res, err := s.client.ReadBatchMessages(ctx, &api.ReadBatchMessagesRequest{
+		UserId:   userID,
+		Ids:      ids,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	messages = model.MapMessagesFromProto(model.MessageFromProto, res.Messages)
+
+	return
+}
+
 func (s *Messages) ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (messages []*model.Message, isLastPage bool, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {

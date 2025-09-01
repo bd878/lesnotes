@@ -18,6 +18,7 @@ type Controller interface {
 	ReadMessage(ctx context.Context, id int64, userIDs []int64) (message *messages.Message, err error)
 	ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (messages []*messages.Message, isLastPage bool, err error)
 	ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool) (messages []*messages.Message, isLastPage bool, err error)
+	ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*messages.Message, err error)
 }
 
 type FilesGateway interface {
