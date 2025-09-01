@@ -3,7 +3,7 @@
 	"addr": "127.0.0.1",
 	"basedir": "",
 	"https": "1",
-	"backend_url": "dev.lesnotes.space",
+	"backend_url": "stage.lesnotes.space",
 	"bot_username": "stage_les_notes_bot",
 	"bot_validate_url": "https://bot.lesnotes.space/validate",
 	"bot_validate_auth_url": "https://bot.lesnotes.space/validate_auth",

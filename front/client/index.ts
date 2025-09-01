@@ -1,4 +1,4 @@
-import './node_fetch.ts'
+import './node_fetch'
 
 import Koa from 'koa';
 import Router from '@koa/router';

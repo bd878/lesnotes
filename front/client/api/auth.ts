@@ -20,6 +20,7 @@ async function auth() {
 			result.expired = response.expired
 	} catch(e) {
 		result.error.error   = true
+		result.error.code    = 912
 		result.error.status  = 500
 		result.error.explain = e.toString()
 	}

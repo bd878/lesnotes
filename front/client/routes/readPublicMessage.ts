@@ -9,6 +9,7 @@ async function readPublicMessage(ctx) {
 	const id = parseInt(ctx.params.id, 10)
 	const token = ctx.cookies.get("token")
 
+	ctx.set({ "Cache-Control": "no-cache,max-age=0" })
 	console.log(`[readPublicMessage]: token ${token} id ${id}`)
 
 	const resp = await api.readMessageJson(token, 0, id)

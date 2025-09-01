@@ -21,9 +21,10 @@ async function authJson(token: string) {
 		if (response)
 			result.expired = response.expired
 	} catch(e) {
+		console.error(e)
 		result.error.error   = true
+		result.error.code    = 911
 		result.error.status  = 500
-		result.error.explain = e.toString()
 	}
 
 	return result

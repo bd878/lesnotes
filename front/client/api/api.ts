@@ -57,7 +57,6 @@ function getOptions(props): any {
 	return {
 		headers: new Headers({ ...headers }),
 		body: prepareBody(body, method),
-		mode: 'cors',
 		method,
 		credentials,
 	};
@@ -72,54 +71,68 @@ export default function api(url, props: any = {}): Promise<any> {
 	fullUrl = appendQueryParams(fullUrl, new URLSearchParams(queryParams));
 	const options = getOptions(props);
 
-	return fetch(fullUrl, options)
-		.then(res => res
-			.text()
-			.then(text => {
-				try {
-					const value = JSON.parse(text);
+	console.log(`[${url}]: api`, "fullUrl", fullUrl, "options", options)
 
-					if (is.notEmpty(value.error)) {
-						console.error(`[${url}]: failed`, "props:", JSON.stringify(props), "res:", text)
+	return fetch(fullUrl, options)
+		.then(res => {
+			console.log(`[${url}]: res:`, res)
+
+			return res
+				.text()
+				.then(text => {
+					try {
+						const value = JSON.parse(text);
+
+						if (is.notEmpty(value.error)) {
+							console.error(`[${url}]: failed`, "props:", JSON.stringify(props), "res:", text)
+
+							return Promise.resolve([null, {
+								error:   true,
+								status:  res.status,
+								explain: text,
+								code:    value.error.code,
+							}])
+						} else {
+							console.log(`[${url}]: success`, "props:", JSON.stringify(props), "res:", text)
+
+							return Promise.resolve([value.response, {
+								error:   false,
+								status:  res.status,
+								explain: "",
+								code:    994,
+							}])
+						}
+					} catch (e) {
+						console.error(`[${url}]: error:`, e.toString(), "props:", JSON.stringify(props))
 
 						return Promise.resolve([null, {
 							error:   true,
 							status:  res.status,
 							explain: text,
-							code:    value.error.code,
-						}])
-					} else {
-						console.log(`[${url}]: success`, "props:", JSON.stringify(props), "res:", text)
-
-						return Promise.resolve([value.response, {
-							error:   false,
-							status:  res.status,
-							explain: "",
-							code:    0,
+							code:    993,
 						}])
 					}
-				} catch (e) {
-					console.error(`[${url}]: error:`, e.toString(), "props:", JSON.stringify(props))
+				})
+				.catch(e => {
+					console.error(`[${url}]: deserialize response error:`, e.toString())
 
-					return Promise.resolve([null, {
+					return Promise.reject([null, {
 						error:   true,
-						status:  res.status,
-						explain: text,
-						code:    0,
+						status:  500,
+						code:    992,
+						explain: e.toString(),
 					}])
-				}
-			})
-			.catch(e => Promise.reject([null, {
+				})
+			}
+		)
+		.catch(e => {
+			console.error(`[${url}]: request error`, e.toString())
+
+			return Promise.reject([null, {
 				error:   true,
 				status:  500,
-				code:    0,
+				code:    991,
 				explain: e.toString(),
-			}]))
-		)
-		.catch(e => Promise.reject([null, {
-			error:   true,
-			status:  500,
-			code:    0,
-			explain: e.toString(),
-		}]));
+			}])
+		});
 }

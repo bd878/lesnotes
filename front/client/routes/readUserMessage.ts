@@ -10,6 +10,7 @@ async function readUserMessage(ctx) {
 	const user = parseInt(ctx.params.user, 10)
 	const token = ctx.cookies.get("token")
 
+	ctx.set({ "Cache-Control": "no-cache,max-age=0" })
 	console.log(`[readUserMessage]: token ${token} user ${user} id ${id}`)
 
 	const resp = await api.readMessageJson(token, user, id)
