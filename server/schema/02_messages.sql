@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS messages.messages1
 (
 	id           bigint        UNIQUE NOT NULL,         -- thread id for child messages
 	text         TEXT          NOT NULL,
+	title        TEXT          NOT NULL DEFAULT '';,
 	file_ids     jsonb         DEFAULT NULL,
 	private      bool          NOT NULL DEFAULT true,
 	name         VARCHAR(256)  UNIQUE NOT NULL,
@@ -26,6 +27,7 @@ CREATE TABLE IF NOT EXISTS messages.messages2
 (
 	id           bigint        UNIQUE NOT NULL,         -- thread id for child messages
 	text         TEXT          NOT NULL,
+	title        TEXT          NOT NULL DEFAULT '',
 	file_ids     jsonb         DEFAULT NULL,
 	private      bool          NOT NULL DEFAULT true,
 	name         VARCHAR(256)  UNIQUE NOT NULL,
@@ -46,6 +48,7 @@ CREATE TABLE IF NOT EXISTS messages.messages3
 (
 	id           bigint        UNIQUE NOT NULL,         -- thread id for child messages
 	text         TEXT          NOT NULL,
+	title        TEXT          NOT NULL DEFAULT '',
 	file_ids     jsonb         DEFAULT NULL,
 	private      bool          NOT NULL DEFAULT true,
 	name         VARCHAR(256)  UNIQUE NOT NULL,
