@@ -4,6 +4,7 @@
     "./client/gui/pages/new/newScript.ts",
     "./client/gui/pages/main/mainScript.ts",
     "./client/gui/pages/login/loginScript.ts",
+    "./client/gui/pages/home/homeScript.ts",
     "./client/gui/pages/register/registerScript.ts",
     "environment.d.ts"
   ],

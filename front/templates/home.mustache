@@ -14,7 +14,10 @@
 				<div id="threads">
 					<ul class="flex flex-col">
 						{{#threads}}
-							<li data-thread-id="{{ID}}" class="pb-2">{{text}}</li>
+							<li data-thread-id="{{ID}}" class="pb-2">
+								<span>{{text}}</span>
+								<span>{{ID}}</span>
+							</li>
 						{{/threads}}
 					</ul>
 				</div>
@@ -22,7 +25,10 @@
 				<div id="messages-list">
 					<ul class="flex flex-col">
 						{{#messages}}
-							<li data-message-id="{{ID}}" class="pb-2 grow-1 max-w-full flex flex-row justify-between cursor-move">{{text}}</li>
+							<li data-message-id="{{ID}}" class="pb-2 grow-1 max-w-full flex flex-row justify-between">
+								<span>{{text}}</span>
+								<span>{{ID}}</span>
+							</li>
 						{{/messages}}
 					</ul>
 				</div>
@@ -33,11 +39,17 @@
 	<div id="editor" class=" ml-4 flex flex-row">
 		{{#message}}
 			<div id="message">
-				{{text}}
+				<span>{{text}}</span>
+				<span>{{ID}}</span>
 			</div>
 		{{/message}}
 		{{^message}}
 			<form id="message-form" name="message-form" autocomplete="off" onsubmit="return false;">
+				<textarea name="text" type="input" class="focus:outline-none w-full resize-none px-2 py-1"></textarea>
+
+				<input id="file" name="file" type="file"></input>
+
+				<button type="submit" css="border-1 px-4 border-solid text-left cursor-pointer">{{send}}</button>
 			</form>
 		{{/message}}
 	</div>

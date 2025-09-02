@@ -59,13 +59,13 @@ async function home(ctx) {
 			return;
 		}
 
-		ctx.body = await renderBody(threads.messages, messages.messages, message.message)
+		ctx.body = await renderBody(threads.messages, reverse(messages.messages), message.message)
 		ctx.status = 200;
 
 		return
 	}
 
-	ctx.body = await renderBody(threads.messages, messages.messages)
+	ctx.body = await renderBody(threads.messages, reverse(messages.messages))
 	ctx.status = 200;
 
 	return;
@@ -75,16 +75,16 @@ async function renderError(err: string): Promise<string> {
 	const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles.css')), { encoding: 'utf-8' });
 	const home = await readFile(resolve(join(Config.get('basedir'), 'templates/home.mustache')), { encoding: 'utf-8' });
 	const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
-	const footer = await readFile(resolve(join(Config.get("basedir"), 'templates/footer.mustache')), { encoding: 'utf-8' });
 
 	return mustache.render(layout, {
-		scripts:  ["/public/home.js"],
+		scripts:  ["/public/homeScript.js"],
 		manifest: "/public/manifest.json",
 		styles:   styles,
 		error:    err,
+		send:     i18n("send"),
+		logout:   i18n("logout"),
 	}, {
 		content: home,
-		footer:  footer,
 	});
 }
 
@@ -92,17 +92,18 @@ async function renderBody(threads: Message[], messages: Message[], message?: Mes
 	const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles.css')), { encoding: 'utf-8' });
 	const home = await readFile(resolve(join(Config.get('basedir'), 'templates/home.mustache')), { encoding: 'utf-8' });
 	const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
-	const footer = await readFile(resolve(join(Config.get("basedir"), 'templates/footer.mustache')), { encoding: 'utf-8' });
 
 	return mustache.render(layout, {
-		scripts:  ["/public/home.js"],
+		scripts:  ["/public/homeScript.js"],
 		manifest: "/public/manifest.json",
 		styles:   styles,
 		threads:  threads,
 		messages: messages,
+		message:  message,
+		send:     i18n("send"),
+		logout:   i18n("logout"),
 	}, {
 		content: home,
-		footer:  footer,
 	});
 }
 
