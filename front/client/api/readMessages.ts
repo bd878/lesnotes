@@ -4,7 +4,7 @@ import models from './models';
 async function readMessages(thread: number, order: number, limit: number, offset: number) {
 	let result = {
 		error:       models.error(),
-		messages:    models.message(),
+		messages:    [],
 		isLastPage:  false,
 	}
 

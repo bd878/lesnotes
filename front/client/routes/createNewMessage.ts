@@ -1,5 +1,6 @@
 import Config from 'config';
 import mustache from 'mustache';
+import i18n from '../i18n';
 import { readFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 
@@ -10,6 +11,9 @@ async function createNewMessage(ctx) {
 	ctx.body = mustache.render(template, {
 		scripts:  ["/public/newScript.js"],
 		styles:   styles,
+		send:     i18n('send'),
+		file:     i18n("file"),
+		text:     i18n("text"),
 	})
 
 	ctx.status = 200;

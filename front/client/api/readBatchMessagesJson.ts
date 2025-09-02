@@ -1,11 +1,10 @@
 import api from './api';
 import models from './models';
 
-async function readMessagesJson(token: string, thread: number, order: number, limit: number, offset: number) {
+async function readBatchMessagesJson(token: string, ids: number[]) {
 	let result = {
 		error:       models.error(),
 		messages:    [],
-		isLastPage:  false,
 	}
 
 	try {
@@ -14,10 +13,7 @@ async function readMessagesJson(token: string, thread: number, order: number, li
 			body: {
 				token: token,
 				req:   {
-					thread: thread,
-					limit:  limit,
-					offset: offset,
-					order:  order,
+					ids: ids,
 				},
 			},
 		});
@@ -27,7 +23,6 @@ async function readMessagesJson(token: string, thread: number, order: number, li
 
 		if (response) {
 			result.messages = response.messages.map(models.message)
-			result.isLastPage = response.isLastPage
 		}
 	} catch (e) {
 		result.error.error   = true
@@ -38,4 +33,4 @@ async function readMessagesJson(token: string, thread: number, order: number, li
 	return result;
 }
 
-export default readMessagesJson;
+export default readBatchMessagesJson;

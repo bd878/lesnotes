@@ -75,8 +75,6 @@ export default function api(url, props: any = {}): Promise<any> {
 
 	return fetch(fullUrl, options)
 		.then(res => {
-			console.log(`[${url}]: res:`, res)
-
 			return res
 				.text()
 				.then(text => {
@@ -93,7 +91,7 @@ export default function api(url, props: any = {}): Promise<any> {
 								code:    value.error.code,
 							}])
 						} else {
-							console.log(`[${url}]: success`, "props:", JSON.stringify(props), "res:", text)
+							console.log(`[${url}]: OK`, "request:", JSON.stringify(props), "response:", text)
 
 							return Promise.resolve([value.response, {
 								error:   false,

@@ -290,6 +290,7 @@ paths:
       - $ref: '#/components/parameters/limit'
       - $ref: '#/components/parameters/offset'
       - $ref: '#/components/parameters/asc'
+      - $ref: '#/components/parameters/messages'
     get:
       summary: Get user messages
       description: |
@@ -544,6 +545,11 @@ components:
             user:
               type: integer
               required: false
+            ids:
+              type: array
+              required: false
+              items:
+                type: integer
             id:
               type: integer
               required: false

@@ -16,6 +16,7 @@ import main from './routes/main';
 import login from './routes/login';
 import register from './routes/register';
 import home from './routes/home';
+import logout from './routes/logout';
 import status from './routes/status';
 import xxx from './routes/xxx';
 import readUserMessage from './routes/readUserMessage';
@@ -42,6 +43,7 @@ router
 	})
 	.get('/', etag, main)
 	.get('/login', etag, login)
+	.get('/logout', etag, logout)
 	.get('/signup', etag, register)
 	.get('/home', etag, home)
 	.get('/status', status)

@@ -12,14 +12,14 @@
 		<div>
 			<form id="new_message" name="new_message" action="" type="multipart/form-data" autocomplete="off" onsubmit="return false;">
 				<div class="flex flex-col">
-					<label for="text">Text:</label>
+					<label for="text">{{text}}:</label>
 					<input type="text" name="text">
 
-					<label for="file">File:</label>
+					<label for="file">{{file}}:</label>
 					<input type="file" name="file">
 				</div>
 
-				<button type="submit">Send</button>
+				<button type="submit">{{send}}</button>
 			</form>
 		</div>
 	</body>

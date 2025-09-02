@@ -1,10 +1,44 @@
 <div id="content" class="flex flex-row">
-	<div id="sidebar" class="">
+	<div id="sidebar" class="flex flex-col">
+		<h2 class="italic text-2xl inline-block cursor-pointer">Les Notes</h2>
+
+		<a href="/logout" target="_self" class="underline text-blue-600 visited:text-purple-600">{{logout}}</a>
 	</div>
 
-	<div id="messages" class="">
+	<div id="messages" class="ml-4 flex flex-col">
+		<div class="flex flex-col w-full">
+			{{#error}}
+				<span>{{.}}</span>
+			{{/error}}
+			{{^error}}
+				<div id="threads">
+					<ul class="flex flex-col">
+						{{#threads}}
+							<li data-thread-id="{{ID}}" class="pb-2">{{text}}</li>
+						{{/threads}}
+					</ul>
+				</div>
+
+				<div id="messages-list">
+					<ul class="flex flex-col">
+						{{#messages}}
+							<li data-message-id="{{ID}}" class="pb-2 grow-1 max-w-full flex flex-row justify-between cursor-move">{{text}}</li>
+						{{/messages}}
+					</ul>
+				</div>
+			{{/error}}
+		</div>
 	</div>
 
-	<div id="editor" class="">
+	<div id="editor" class=" ml-4 flex flex-row">
+		{{#message}}
+			<div id="message">
+				{{text}}
+			</div>
+		{{/message}}
+		{{^message}}
+			<form id="message-form" name="message-form" autocomplete="off" onsubmit="return false;">
+			</form>
+		{{/message}}
 	</div>
 </div>

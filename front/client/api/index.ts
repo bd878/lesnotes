@@ -1,5 +1,6 @@
 import readMessages from './readMessages';
 import readMessagesJson from './readMessagesJson';
+import readBatchMessagesJson from './readBatchMessagesJson';
 import readMessage from './readMessage';
 import readMessageJson from './readMessageJson';
 import sendMessage from './sendMessage';
@@ -32,6 +33,7 @@ export default {
 	getMe,
 	readMessages,
 	readMessagesJson,
+	readBatchMessagesJson,
 	readMessageJson,
 	readMessage,
 	sendMessage,
