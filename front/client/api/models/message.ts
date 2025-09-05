@@ -16,7 +16,7 @@ export interface Message {
 	private:       boolean;
 }
 
-const empty: Message = {
+const EmptyMessage: Message = Object.freeze({
 	ID: 0,
 	createUTCNano: "",
 	updateUTCNano: "",
@@ -26,11 +26,11 @@ const empty: Message = {
 	files:  [],
 	threadID: 0,
 	private: true,
-}
+})
 
 export default function mapMessageFromProto(message?: any): Message {
 	if (!message)
-		return empty
+		return EmptyMessage
 
 	let createUTCNano = "0"
 	if (message.create_utc_nano) {
@@ -59,3 +59,5 @@ export default function mapMessageFromProto(message?: any): Message {
 
 	return res
 }
+
+export { EmptyMessage }

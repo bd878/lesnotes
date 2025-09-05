@@ -8,17 +8,19 @@ export interface FileProto {
 	name:      string;
 }
 
-const empty: File = {
+const EmptyFile: File = Object.freeze({
 	ID:   0,
 	name: "",
-}
+})
 
 export default function mapFileFromProto(file?: FileProto): File {
 	if (!file)
-		return empty
+		return EmptyFile
 
 	return {
 		ID:   file.id,
 		name: file.name,
 	}
 }
+
+export { EmptyFile }

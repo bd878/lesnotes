@@ -83,6 +83,9 @@ async function renderError(err: string): Promise<string> {
 		error:    err,
 		send:     i18n("send"),
 		logout:   i18n("logout"),
+		search:   i18n("search"),
+		title_placeholder: i18n("title_placeholder"),
+		text_placeholder:  i18n("text_placeholder"),
 	}, {
 		content: home,
 	});
@@ -102,6 +105,9 @@ async function renderBody(threads: Message[], messages: Message[], message?: Mes
 		message:  message,
 		send:     i18n("send"),
 		logout:   i18n("logout"),
+		search:   i18n("search"),
+		title_placeholder: i18n("title_placeholder"),
+		text_placeholder:  i18n("text_placeholder"),
 	}, {
 		content: home,
 	});

@@ -1,6 +1,6 @@
 import message from './message'
 import user from './user'
-import file from './file'
+import file, { EmptyFile } from './file'
 import error from './error'
 
 export default {
@@ -8,6 +8,7 @@ export default {
 	user,
 	file,
 	error,
+	EmptyFile,
 }
 
 export type { Message } from './message'

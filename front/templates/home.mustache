@@ -1,11 +1,15 @@
-<div id="content" class="flex flex-row">
-	<div id="sidebar" class="flex flex-col">
-		<h2 class="italic text-2xl inline-block cursor-pointer">Les Notes</h2>
+<div id="content" class="h-full flex flex-row">
+	<div id="sidebar" class="flex flex-col justify-between mt-2 pr-2 max-w-2xs min-w-3xs w-full grow">
+		<div class="flex flex-col">
+			<h2 class="italic text-2xl mb-4 inline-block">Les Notes</h2>
+
+			<input class="italic px-1 text-gray-600 border border-black" type="text" id="search" name="search" placeholder="{{search}}"></input>
+		</div>
 
 		<a href="/logout" target="_self" class="underline text-blue-600 visited:text-purple-600">{{logout}}</a>
 	</div>
 
-	<div id="messages" class="ml-4 flex flex-col">
+	<div id="messages" class="ml-2 pr-2 flex flex-col min-w-xs max-w-md w-md">
 		<div class="flex flex-col w-full">
 			{{#error}}
 				<span>{{.}}</span>
@@ -25,9 +29,10 @@
 				<div id="messages-list">
 					<ul class="flex flex-col">
 						{{#messages}}
-							<li data-message-id="{{ID}}" class="pb-2 grow-1 max-w-full flex flex-row justify-between">
-								<span>{{text}}</span>
-								<span>{{ID}}</span>
+							<li class="mb-2 grow-1 max-w-full flex flex-row justify-between">
+								<button type="button" class="bg-gray-300 hover:bg-gray-500 hover:text-white cursor-pointer text-left px-2 italic w-full" data-message-id="{{ID}}">{{text}}</button>
+
+								<button type="button" class="bg-gray-300 hover:bg-gray-500 hover:text-white cursor-pointer px-2 ml-2" data-message-id="{{ID}}"> > </button>
 							</li>
 						{{/messages}}
 					</ul>
@@ -36,7 +41,7 @@
 		</div>
 	</div>
 
-	<div id="editor" class=" ml-4 flex flex-row">
+	<div id="editor" class="ml-2 flex flex-row grow border-1 border-solid p-4">
 		{{#message}}
 			<div id="message">
 				<span>{{text}}</span>
@@ -44,12 +49,17 @@
 			</div>
 		{{/message}}
 		{{^message}}
-			<form id="message-form" name="message-form" autocomplete="off" onsubmit="return false;">
-				<textarea name="text" type="input" class="focus:outline-none w-full resize-none px-2 py-1"></textarea>
+			<form id="message-form" name="message-form" autocomplete="off" onsubmit="return false;" class="w-full flex flex-col">
+				<div class="flex flex-col grow">
+					<input name="title" class="focus:outline-none w-full resize-none italic text-gray-600 text-lg mb-2" placeholder="{{title_placeholder}}"></input>
+					<textarea name="text" type="input" class="focus:outline-none w-full resize-none italic text-gray-600 text-sm h-full" placeholder="{{text_placeholder}}"></textarea>
+				</div>
 
-				<input id="file" name="file" type="file"></input>
+				<div class="flex flex-col">
+					<input id="file" name="file" type="file"></input>
 
-				<button type="submit" css="border-1 px-4 border-solid text-left cursor-pointer">{{send}}</button>
+					<button type="submit" class="border-1 px-4 border-solid text-left cursor-pointer">{{send}}</button>
+				</div>
 			</form>
 		{{/message}}
 	</div>

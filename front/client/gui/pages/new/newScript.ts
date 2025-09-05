@@ -37,7 +37,7 @@ async function onFormSubmit(e) {
 		return
 	}
 
-	response = await api.sendMessage(elems.formElem.text.value, response.id)
+	response = await api.sendMessage(elems.formElem.text.value, response.ID)
 	console.log("[onFormSubmit]: message:", response)
 	if (response.error.error) {
 		return

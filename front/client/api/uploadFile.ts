@@ -4,7 +4,7 @@ import models from './models';
 async function uploadFile(file: any) {
 	let result = {
 		error:   models.error(),
-		id:      0,
+		ID:      0,
 		name:    "",
 	}
 
@@ -23,7 +23,7 @@ async function uploadFile(file: any) {
 			result.error = models.error(error)
 
 		if (response) {
-			result.id = response.id
+			result.ID = response.id
 			result.name = response.name
 		}
 	} catch (e) {

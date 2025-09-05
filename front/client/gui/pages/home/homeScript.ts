@@ -1,4 +1,6 @@
 import api from '../../../api';
+import models from '../../../api/models';
+import * as is from '../../../third_party/is';
 
 const elems = {
 	get formElem(): HTMLFormElement {
@@ -24,37 +26,38 @@ window.addEventListener("load", () => {
 async function onFormSubmit(e) {
 	e.preventDefault()
 
-	if (!elems.formElem.text) {
-		console.error("[onFormSubmit]: form \"message-form\" has no field \"text\"")
+	if (either(elems.formElem.text, elems.formElem.file)) {
+		console.error("[onFormSubmit]: either text of file must be present")
 		return
 	}
+	const user = await api.getMe()
 
-	if (!elems.formElem.file) {
-		console.error("[onFormSubmit]: form \"message-form\" has no field \"file\"")
-		return
+	let fileID = 0;
+
+	if (elems.formElem.file && is.notUndef(elems.formElem.file.files[0])) {
+		const file = await api.uploadFile(elems.formElem.file.files[0])
+		if (file.error.error) {
+			console.error("[onFormSubmit]: cannot upload file:", file)
+			return
+		}
+
+		fileID = file.ID
 	}
 
-	console.log("[onFormSubmit]: submitting...")
-
-	let response, user;
-
-	user = await api.getMe()
-	console.log("[onFormSubmit]: user:", user)
-
-	response = await api.uploadFile(elems.formElem.file.files[0])
-	console.log("[onFormSubmit]: file:", response)
-	if (response.error.error) {
-		return
-	}
-
-	response = await api.sendMessage(elems.formElem.text.value, response.id)
-	console.log("[onFormSubmit]: message:", response)
-	if (response.error.error) {
-		return
+	if (elems.formElem.text) {
+		const response = await api.sendMessage(elems.formElem.text.value, fileID)
+		if (response.error.error) {
+			console.log("[onFormSubmit]: cannod send message:", response)
+			return
+		}
 	}
 
 	elems.formElem.reset()
 
 	const params = new URL(location.toString()).searchParams
 	setTimeout(() => { location.href = "/home" + params.toString() }, 0)
+}
+
+function either(st1: boolean, st2: boolean): boolean {
+	return (!st1 && !st2)
 }
