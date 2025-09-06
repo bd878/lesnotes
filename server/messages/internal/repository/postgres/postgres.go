@@ -364,16 +364,18 @@ SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, update
 		message.CreateUTCNano = createdAt.UnixNano()
 		message.UpdateUTCNano = updatedAt.UnixNano()
 
-		message.Count, err = r.countThreadMessages(ctx, tx, message.ID)
-		if err != nil {
-			logger.Errorln(err)
-		}
-
 		messages = append(messages, message)
 	}
 
 	if err = rows.Err(); err != nil {
 		return
+	}
+
+	for _, message := range messages {
+		message.Count, err = r.countThreadMessages(ctx, tx, message.ID)
+		if err != nil {
+			logger.Errorln(err)
+		}
 	}
 
 	return
@@ -461,11 +463,6 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID in
 		message.CreateUTCNano = createdAt.UnixNano()
 		message.UpdateUTCNano = updatedAt.UnixNano()
 
-		message.Count, err = r.countThreadMessages(ctx, tx, message.ID)
-		if err != nil {
-			logger.Errorln(err)
-		}
-
 		messages = append(messages, message)
 	}
 
@@ -484,6 +481,13 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID in
 
 		if count <= offset + limit {
 			isLastPage = true
+		}
+	}
+
+	for _, message := range messages {
+		message.Count, err = r.countThreadMessages(ctx, tx, message.ID)
+		if err != nil {
+			logger.Errorln(err)
 		}
 	}
 
@@ -550,11 +554,6 @@ func (r *Repository) ReadMessages(ctx context.Context, userID int64, limit, offs
 		message.CreateUTCNano = createdAt.UnixNano()
 		message.UpdateUTCNano = updatedAt.UnixNano()
 
-		message.Count, err = r.countThreadMessages(ctx, tx, message.ID)
-		if err != nil {
-			logger.Errorln(err)
-		}
-
 		messages = append(messages, message)
 	}
 
@@ -573,6 +572,13 @@ func (r *Repository) ReadMessages(ctx context.Context, userID int64, limit, offs
 
 		if count <= offset + limit {
 			isLastPage = true
+		}
+	}
+
+	for _, message := range messages {
+		message.Count, err = r.countThreadMessages(ctx, tx, message.ID)
+		if err != nil {
+			logger.Errorln(err)
 		}
 	}
 
