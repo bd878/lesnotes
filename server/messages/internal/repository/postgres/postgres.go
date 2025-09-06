@@ -631,8 +631,6 @@ func (r *Repository) Truncate(ctx context.Context) (err error) {
 }
 
 func (r *Repository) countThreadMessages(ctx context.Context, tx pgx.Tx, userIDs []int64, threadID int64) (count int32, err error) {
-	const query = "SELECT COUNT(*) FROM %s WHERE thread_id = $1 AND (user_id IN (` + ids + `)"
-
 	ids := "$2"
 	for i := 1; i < len(userIDs); i++ {
 		ids += fmt.Sprintf(",$%d", i+2)
@@ -643,7 +641,7 @@ func (r *Repository) countThreadMessages(ctx context.Context, tx pgx.Tx, userIDs
 		list[i] = id
 	}
 
-	err = tx.QueryRow(ctx, r.table(query), append([]interface{}{threadID}, list...)...).Scan(&count)
+	err = tx.QueryRow(ctx, r.table(`SELECT COUNT(*) FROM %s WHERE thread_id = $1 AND (user_id IN (` + ids + `)`), append([]interface{}{threadID}, list...)...).Scan(&count)
 
 	return
 }
