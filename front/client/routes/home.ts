@@ -32,11 +32,10 @@ async function home(ctx) {
 
 	const limit = parseInt(ctx.query.limit) || 10
 	const offset = parseInt(ctx.query.offset) || 0
-	const threadID = parseInt(last(ctx.query.threads))
-	const threadIDs = tail(reverse(ctx.query.threads), []).map(parseInt)
+	const threadID = parseInt(ctx.query.thread) || 0
 	const id = parseInt(ctx.query.id) || 0
 
-	const threads = await api.readBatchMessagesJson(token, threadIDs)
+	const threads = await api.readMessagePathJson(token, threadID)
 	if (threads.error.error) {
 		ctx.body = await renderError("failed to load batch messages");
 		ctx.status = 400;

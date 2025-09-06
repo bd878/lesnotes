@@ -12,16 +12,31 @@ const elems = {
 
 		return formElem as HTMLFormElement
 	},
+
+	get messagesListElem(): HTMLDivElement {
+		const divElem = document.getElementById("messages-list")
+		if (!divElem) {
+			console.error("[homeScript]: no \"messages-list\" elem")
+			return document.createElement("div")
+		}
+
+		return divElem as HTMLDivElement
+	}
 }
 
 function init() {
 	elems.formElem.addEventListener("submit", onFormSubmit)
+	elems.messagesListElem.addEventListener("click", onMessagesListClick)
 }
 
 window.addEventListener("load", () => {
 	console.log("loaded")
 	init()
 })
+
+function onMessagesListClick(e) {
+	console.log("[homeScript]: messages list click:", e)
+}
 
 async function onFormSubmit(e) {
 	e.preventDefault()
