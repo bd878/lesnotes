@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/messages/pkg/model"
 )
 
@@ -293,6 +294,9 @@ SELECT user_id, thread_id, file_ids, created_at, updated_at, text, private, name
 	message.UpdateUTCNano = updatedAt.UnixNano()
 
 	message.Count, err = r.countThreadMessages(ctx, tx, message.ThreadID)
+	if err != nil {
+		logger.Errorln(err)
+	}
 
 	return
 }
@@ -360,7 +364,10 @@ SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, update
 		message.CreateUTCNano = createdAt.UnixNano()
 		message.UpdateUTCNano = updatedAt.UnixNano()
 
-		message.Count, _ = r.countThreadMessages(ctx, tx, message.ThreadID)
+		message.Count, err = r.countThreadMessages(ctx, tx, message.ThreadID)
+		if err != nil {
+			logger.Errorln(err)
+		}
 
 		messages = append(messages, message)
 	}
@@ -454,7 +461,10 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID in
 		message.CreateUTCNano = createdAt.UnixNano()
 		message.UpdateUTCNano = updatedAt.UnixNano()
 
-		message.Count, _ = r.countThreadMessages(ctx, tx, message.ThreadID)
+		message.Count, err = r.countThreadMessages(ctx, tx, message.ThreadID)
+		if err != nil {
+			logger.Errorln(err)
+		}
 
 		messages = append(messages, message)
 	}
@@ -540,7 +550,10 @@ func (r *Repository) ReadMessages(ctx context.Context, userID int64, limit, offs
 		message.CreateUTCNano = createdAt.UnixNano()
 		message.UpdateUTCNano = updatedAt.UnixNano()
 
-		message.Count, _ = r.countThreadMessages(ctx, tx, message.ThreadID)
+		message.Count, err = r.countThreadMessages(ctx, tx, message.ThreadID)
+		if err != nil {
+			logger.Errorln(err)
+		}
 
 		messages = append(messages, message)
 	}
@@ -615,7 +628,10 @@ func (r *Repository) ReadPath(ctx context.Context, userID, id int64) (path []*mo
 		message.CreateUTCNano = createdAt.UnixNano()
 		message.UpdateUTCNano = updatedAt.UnixNano()
 
-		message.Count, _ = r.countThreadMessages(ctx, tx, message.ThreadID)
+		message.Count, err = r.countThreadMessages(ctx, tx, message.ThreadID)
+		if err != nil {
+			logger.Errorln(err)
+		}
 
 		path = append(path, message)
 
