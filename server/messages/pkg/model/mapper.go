@@ -28,7 +28,7 @@ func MessageToProto(msg *Message) *api.Message {
 		CreateUtcNano:  msg.CreateUTCNano,
 		UpdateUtcNano:  msg.UpdateUTCNano,
 		Text:           msg.Text,
-		// Count:          msg.Count, // Count is read-only
+		Count:          msg.Count, // Count is read-only
 		Title:          msg.Title,
 		FileIds:        msg.FileIDs,
 		Private:        msg.Private,
