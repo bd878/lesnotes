@@ -12,7 +12,7 @@ import (
 
 	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/waiter"
-	usersmodel "github.com/bd878/gallery/server/users/pkg/model"
+	users "github.com/bd878/gallery/server/users/pkg/model"
 	httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
 	repository "github.com/bd878/gallery/server/users/internal/repository/postgres"
 	httphandler "github.com/bd878/gallery/server/users/internal/handler/http"
@@ -61,11 +61,11 @@ func New(cfg Config) (server *Server) {
 
 	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log)
 
-	middleware.WithAuth(httpmiddleware.AuthBuilder(logger.Default(), control, sessionsGateway, usersmodel.PublicUserID))
+	middleware.WithAuth(httpmiddleware.AuthBuilder(logger.Default(), control, sessionsGateway, users.PublicUserID))
 	mux.Handle("/users/v1/me",     middleware.Build(handler.GetMe))
 	mux.Handle("/users/v1/logout", middleware.Build(handler.Logout))
 
-	middleware.NoAuth().WithAuth(httpmiddleware.TokenAuthBuilder(logger.Default(), control, sessionsGateway, usersmodel.PublicUserID))
+	middleware.NoAuth().WithAuth(httpmiddleware.TokenAuthBuilder(logger.Default(), control, sessionsGateway, users.PublicUserID))
 	mux.Handle("/users/v2/delete", middleware.Build(handler.DeleteJsonAPI))
 
 	middleware.NoAuth()
