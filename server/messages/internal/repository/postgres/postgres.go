@@ -292,7 +292,7 @@ SELECT user_id, thread_id, file_ids, created_at, updated_at, text, private, name
 	message.CreateUTCNano = createdAt.UnixNano()
 	message.UpdateUTCNano = updatedAt.UnixNano()
 
-	message.Count, err = r.countThreadMessages(ctx, tx, userIDs, message.ThreadID)
+	message.Count, err = r.countThreadMessages(ctx, tx, message.ThreadID)
 
 	return
 }
@@ -360,7 +360,7 @@ SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, update
 		message.CreateUTCNano = createdAt.UnixNano()
 		message.UpdateUTCNano = updatedAt.UnixNano()
 
-		message.Count, _ = r.countThreadMessages(ctx, tx, []int64{userID}, message.ThreadID)
+		message.Count, _ = r.countThreadMessages(ctx, tx, message.ThreadID)
 
 		messages = append(messages, message)
 	}
@@ -454,7 +454,7 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID in
 		message.CreateUTCNano = createdAt.UnixNano()
 		message.UpdateUTCNano = updatedAt.UnixNano()
 
-		message.Count, _ = r.countThreadMessages(ctx, tx, []int64{userID}, message.ThreadID)
+		message.Count, _ = r.countThreadMessages(ctx, tx, message.ThreadID)
 
 		messages = append(messages, message)
 	}
@@ -540,7 +540,7 @@ func (r *Repository) ReadMessages(ctx context.Context, userID int64, limit, offs
 		message.CreateUTCNano = createdAt.UnixNano()
 		message.UpdateUTCNano = updatedAt.UnixNano()
 
-		message.Count, _ = r.countThreadMessages(ctx, tx, []int64{userID}, message.ThreadID)
+		message.Count, _ = r.countThreadMessages(ctx, tx, message.ThreadID)
 
 		messages = append(messages, message)
 	}
@@ -615,7 +615,7 @@ func (r *Repository) ReadPath(ctx context.Context, userID, id int64) (path []*mo
 		message.CreateUTCNano = createdAt.UnixNano()
 		message.UpdateUTCNano = updatedAt.UnixNano()
 
-		message.Count, _ = r.countThreadMessages(ctx, tx, []int64{userID}, message.ThreadID)
+		message.Count, _ = r.countThreadMessages(ctx, tx, message.ThreadID)
 
 		path = append(path, message)
 
@@ -630,18 +630,8 @@ func (r *Repository) Truncate(ctx context.Context) (err error) {
 	return
 }
 
-func (r *Repository) countThreadMessages(ctx context.Context, tx pgx.Tx, userIDs []int64, threadID int64) (count int32, err error) {
-	ids := "$2"
-	for i := 1; i < len(userIDs); i++ {
-		ids += fmt.Sprintf(",$%d", i+2)
-	}
-
-	list := make([]interface{}, len(userIDs))
-	for i, id := range userIDs {
-		list[i] = id
-	}
-
-	err = tx.QueryRow(ctx, r.table(`SELECT COUNT(*) FROM %s WHERE thread_id = $1 AND (user_id IN (` + ids + `)`), append([]interface{}{threadID}, list...)...).Scan(&count)
+func (r *Repository) countThreadMessages(ctx context.Context, tx pgx.Tx, threadID int64) (count int32, err error) {
+	err = tx.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE thread_id = $1"), threadID).Scan(&count)
 
 	return
 }
