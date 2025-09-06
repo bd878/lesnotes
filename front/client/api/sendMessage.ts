@@ -1,7 +1,7 @@
 import api from './api';
 import models from './models';
 
-async function sendMessage(text: string, file?: number, thread?: number) {
+async function sendMessage(text: string, title?: string, file?: number, thread?: number) {
 	let result = {
 		error:   models.error(),
 		message: models.message(),
@@ -14,6 +14,9 @@ async function sendMessage(text: string, file?: number, thread?: number) {
 
 	if (file)
 		form.append("file_ids", JSON.stringify([file]));
+
+	if (title)
+		form.append("title", title);
 
 	if (thread)
 		form.append("thread", `${thread}`)

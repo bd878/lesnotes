@@ -11,6 +11,8 @@ export interface Message {
 	userID:        number;
 	text:          string;
 	name:          string;
+	title:         string;
+	count:         number;
 	files:         File[];
 	threadID:      number;
 	private:       boolean;
@@ -22,6 +24,8 @@ const EmptyMessage: Message = Object.freeze({
 	updateUTCNano: "",
 	userID: 0,
 	text: "",
+	title: "",
+	count: 0,
 	name: "",
 	files:  [],
 	threadID: 0,
@@ -49,6 +53,8 @@ export default function mapMessageFromProto(message?: any): Message {
 		userID: message.user_id,
 		text: message.text,
 		name: "",
+		title: message.title,
+		count: message.count,
 		private: Boolean(message.private),
 		threadID: message.thread_id,
 		files: [],

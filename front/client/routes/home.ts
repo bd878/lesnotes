@@ -58,13 +58,13 @@ async function home(ctx) {
 			return;
 		}
 
-		ctx.body = await renderBody(threads.messages, reverse(messages.messages), message.message)
+		ctx.body = await renderBody(threads.path, reverse(messages.messages), message.message)
 		ctx.status = 200;
 
 		return
 	}
 
-	ctx.body = await renderBody(threads.messages, reverse(messages.messages))
+	ctx.body = await renderBody(threads.path, reverse(messages.messages))
 	ctx.status = 200;
 
 	return;

@@ -26,17 +26,12 @@ const elems = {
 
 function init() {
 	elems.formElem.addEventListener("submit", onFormSubmit)
-	elems.messagesListElem.addEventListener("click", onMessagesListClick)
 }
 
 window.addEventListener("load", () => {
 	console.log("loaded")
 	init()
 })
-
-function onMessagesListClick(e) {
-	console.log("[homeScript]: messages list click:", e)
-}
 
 async function onFormSubmit(e) {
 	e.preventDefault()
@@ -49,6 +44,9 @@ async function onFormSubmit(e) {
 
 	let fileID = 0;
 
+	const params = new URL(location.toString()).searchParams
+	const threadID = parseInt(params.get("thread")) || 0
+
 	if (elems.formElem.file && is.notUndef(elems.formElem.file.files[0])) {
 		const file = await api.uploadFile(elems.formElem.file.files[0])
 		if (file.error.error) {
@@ -60,7 +58,7 @@ async function onFormSubmit(e) {
 	}
 
 	if (elems.formElem.text) {
-		const response = await api.sendMessage(elems.formElem.text.value, fileID)
+		const response = await api.sendMessage(elems.formElem.text.value, elems.formElem.messageTitle.value, fileID, threadID)
 		if (response.error.error) {
 			console.log("[onFormSubmit]: cannod send message:", response)
 			return
@@ -69,8 +67,7 @@ async function onFormSubmit(e) {
 
 	elems.formElem.reset()
 
-	const params = new URL(location.toString()).searchParams
-	setTimeout(() => { location.href = "/home" + params.toString() }, 0)
+	setTimeout(() => { location.href = "/home?" + params.toString() }, 0)
 }
 
 function either(st1: boolean, st2: boolean): boolean {

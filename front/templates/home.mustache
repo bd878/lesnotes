@@ -1,7 +1,7 @@
 <div id="content" class="h-full flex flex-row">
-	<div id="sidebar" class="flex flex-col justify-between mt-2 pr-2 max-w-2xs min-w-3xs w-full grow">
+	<div id="sidebar" class="flex flex-col justify-between mt-2 pr-2 w-xs min-w-xs">
 		<div class="flex flex-col">
-			<h2 class="italic text-2xl mb-4 inline-block">Les Notes</h2>
+			<a class="italic text-2xl mb-4 inline-block cursor-pointer" href="/home" target="_self">Les Notes</a>
 
 			<input class="italic px-1 text-gray-600 border border-black" type="text" id="search" name="search" placeholder="{{search}}"></input>
 		</div>
@@ -9,7 +9,7 @@
 		<a href="/logout" target="_self" class="underline text-blue-600 visited:text-purple-600">{{logout}}</a>
 	</div>
 
-	<div id="messages" class="ml-2 pr-2 flex flex-col min-w-xs max-w-lg">
+	<div id="messages" class="ml-2 pr-2 flex flex-col w-lg min-w-lg">
 		<div class="flex flex-col w-full">
 			{{#error}}
 				<span>{{.}}</span>
@@ -19,7 +19,14 @@
 					<ul class="flex flex-col">
 						{{#threads}}
 							<li data-thread-id="{{ID}}" class="pb-2 whitespace-nowrap">
-								<span class="overflow-hidden text-ellipsis">{{text}}</span>
+								<span class="overflow-hidden text-ellipsis">
+									{{#title}}
+										{{title}}
+									{{/title}}
+									{{^title}}
+										{{text}}
+									{{/title}}
+								</span>
 								<span>{{ID}}</span>
 							</li>
 						{{/threads}}
@@ -30,9 +37,23 @@
 					<ul class="flex flex-col">
 						{{#messages}}
 							<li class="mb-2 grow-1 max-w-full flex flex-row justify-between whitespace-nowrap">
-								<button type="button" class="overflow-hidden text-ellipsis bg-gray-300 hover:bg-gray-500 hover:text-white cursor-pointer text-left px-2 italic w-full" data-message-id="{{ID}}" onclick="location.href = '/home?id=' + {{ID}}">{{text}}</button>
+								<button type="button" class="flex flex-row justify-between overflow-hidden bg-gray-300 hover:bg-gray-500 hover:text-white cursor-pointer text-left px-2 italic w-full"
+									data-message-id="{{ID}}" onclick="location.href = '/home?id=' + {{ID}}">
+									<div class="overflow-hidden text-ellipsis mr-2">
+										{{#title}}
+											{{title}}
+										{{/title}}
+										{{^title}}
+											{{text}}
+										{{/title}}
+									</div>
+									<div>
+										{{count}}
+									</div>
+								</button>
 
-								<button type="button" class="bg-gray-300 hover:bg-gray-500 hover:text-white cursor-pointer px-2 ml-2" data-message-id="{{ID}}" onclick="location.href = '/home?thread=' + {{ID}}"> > </button>
+								<button type="button" class="bg-gray-300 hover:bg-gray-500 hover:text-white cursor-pointer px-2 ml-2"
+									data-message-id="{{ID}}" onclick="location.href = '/home?thread=' + {{ID}}"> > </button>
 							</li>
 						{{/messages}}
 					</ul>
@@ -44,6 +65,9 @@
 	<div id="editor" class="ml-2 max-w-2xl flex flex-row grow border-1 border-solid p-4">
 		{{#message}}
 			<div id="message">
+				{{#title}}
+					<div class="whitespace-pre-wrap">{{title}}</div>
+				{{/title}}
 				<span class="whitespace-pre-wrap">{{text}}</span>
 				<span>{{ID}}</span>
 			</div>
@@ -51,7 +75,7 @@
 		{{^message}}
 			<form id="message-form" name="message-form" autocomplete="off" onsubmit="return false;" class="w-full flex flex-col">
 				<div class="flex flex-col grow">
-					<input name="title" class="focus:outline-none w-full resize-none italic text-gray-600 text-lg mb-2" placeholder="{{title_placeholder}}"></input>
+					<input name="messageTitle" class="focus:outline-none w-full resize-none italic text-gray-600 text-lg mb-2" placeholder="{{title_placeholder}}"></input>
 					<textarea name="text" type="input" class="focus:outline-none w-full resize-none italic text-gray-600 text-sm h-full" placeholder="{{text_placeholder}}"></textarea>
 				</div>
 
