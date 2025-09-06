@@ -11,6 +11,8 @@ import (
 )
 
 func (h *Handler) ReadMessagesJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
+	var threadID int64
+
 	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
@@ -53,11 +55,17 @@ func (h *Handler) ReadMessagesJsonAPI(w http.ResponseWriter, req *http.Request) 
 		return err
 	}
 
+	if request.ThreadID != nil {
+		threadID = *request.ThreadID
+	} else {
+		threadID = -1
+	}
+
 	if request.UserID != 0 {
-		return h.readMessageOrMessages(req.Context(), w, request.UserID, request.Limit, request.Offset, request.MessageID, request.ThreadID, request.Asc, true)
+		return h.readMessageOrMessages(req.Context(), w, request.UserID, request.Limit, request.Offset, request.MessageID, threadID, request.Asc, true)
 	} else if len(request.IDs) > 0 {
 		return h.readBatchMessages(req.Context(), w, user.ID, request.IDs)
 	} else {
-		return h.readMessageOrMessages(req.Context(), w, user.ID, request.Limit, request.Offset, request.MessageID, request.ThreadID, request.Asc, false)
+		return h.readMessageOrMessages(req.Context(), w, user.ID, request.Limit, request.Offset, request.MessageID, threadID, request.Asc, false)
 	}
 }

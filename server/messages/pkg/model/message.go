@@ -60,7 +60,7 @@ type (
 	ReadRequest struct {
 		UserID              int64               `json:"user"`
 		MessageID           int64               `json:"id"`
-		ThreadID            int64               `json:"thread"`
+		ThreadID            *int64              `json:"thread"`
 		Limit               int                 `json:"limit"`
 		Offset              int                 `json:"offset"`
 		Asc                 int                 `json:"asc"`

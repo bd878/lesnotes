@@ -104,6 +104,8 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) (err er
 		}
 
 		threadID = int64(id)
+	} else {
+		threadID = -1
 	}
 
 	if values.Has("asc") {
@@ -225,7 +227,7 @@ func (h *Handler) readBatchMessages(ctx context.Context, w http.ResponseWriter, 
 }
 
 func (h *Handler) readMessageOrMessages(ctx context.Context, w http.ResponseWriter, userID int64,
-	limit int, offset int, messageID int64, threadID int64, order int, publicOnly bool,
+	limit, offset int, messageID, threadID int64, order int, publicOnly bool,
 ) (err error) {
 	var ascending bool
 
@@ -251,7 +253,7 @@ func (h *Handler) readMessageOrMessages(ctx context.Context, w http.ResponseWrit
 		ascending = true
 	}
 
-	if messageID != 0 && threadID != 0 {
+	if messageID != 0 && threadID != -1 {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
@@ -280,7 +282,7 @@ func (h *Handler) readMessageOrMessages(ctx context.Context, w http.ResponseWrit
 	if messageID != 0 {
 		// read one message
 		return h.readMessage(ctx, w, userID, messageID, publicOnly)
-	} else if threadID != 0 {
+	} else if threadID != -1 {
 		// read thread messages
 		return h.readThreadMessages(ctx, w, userID, threadID, int32(limit), int32(offset), ascending, publicOnly)
 	} else {
@@ -289,7 +291,7 @@ func (h *Handler) readMessageOrMessages(ctx context.Context, w http.ResponseWrit
 	}
 }
 
-func (h *Handler) readMessage(ctx context.Context, w http.ResponseWriter, userID int64, messageID int64, publicOnly bool) (err error) {
+func (h *Handler) readMessage(ctx context.Context, w http.ResponseWriter, userID, messageID int64, publicOnly bool) (err error) {
 	message, err := h.controller.ReadMessage(ctx, messageID, []int64{userID, users.PublicUserID})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -362,7 +364,7 @@ func filterPublicMessages(list []*messages.Message) (filtered []*messages.Messag
 	return
 }
 
-func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter, userID int64, threadID int64, limit, offset int32, ascending bool, publicOnly bool) (err error) {
+func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter, userID, threadID int64, limit, offset int32, ascending, publicOnly bool) (err error) {
 	// TODO: read if thread is public
 
 	list, isLastPage, err := h.controller.ReadThreadMessages(ctx, userID, threadID, limit, offset, ascending)
