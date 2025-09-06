@@ -50,6 +50,7 @@ func New(cfg Config) *Server {
 	handler := httphandler.New(grpcCtrl, filesGateway)
 
 	mux.Handle("/messages/v1/send",     middleware.Build(handler.SendMessage))
+	mux.Handle("/messages/v1/read_path", middleware.Build(handler.ReadPath))
 	mux.Handle("/messages/v1/read",     middleware.Build(handler.ReadMessages))
 	mux.Handle("/messages/v1/update",   middleware.Build(handler.UpdateMessage))
 	mux.Handle("/messages/v1/publish",  middleware.Build(handler.PublishMessages))

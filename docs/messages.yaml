@@ -341,12 +341,40 @@ paths:
 # END READ
 
 # READ PATH
-  /messages/v2/read_path:
+  /messages/v1/read_path:
+    parameters:
+      - $ref: '#/components/parameters/message'
     get:
+      summary: Get message path
+      description: |
+        Read path for given message id, returns a list of message threads
+      operationId: readMessagePath
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/readPathOk'
+
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/serverError'
+                
+  /messages/v2/read_path:
+    post:
       summary: Get thread messages of a message
       description: |
         Read path for given path id, returns a list of message threads
-      operationId: readMessagePath
+      operationId: readMessagePathJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              - $ref: '#/components/schemas/readPathJson'
       responses:
         "200":
           description: OK
@@ -625,6 +653,19 @@ components:
 # END READ
 
 # READ PATH
+    readPathJson:
+      type: object
+      properties:
+        token:
+          type: string
+          required: true
+        req:
+          type: object
+          properties:
+            id:
+              type: integer
+              required: true
+
     readPathOk:
       type: object
       properties:
