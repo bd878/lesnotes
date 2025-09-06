@@ -30,6 +30,7 @@ message Message {
 	string   name = 8;
 	repeated int64 file_ids = 9;
 	string   title = 10;
+	int32    count = 11;
 }
 
 message ReadThreadMessagesRequest {

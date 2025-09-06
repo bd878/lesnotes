@@ -363,7 +363,7 @@ paths:
             application/json:
               schema:
                 - $ref: '#/components/schemas/serverError'
-                
+
   /messages/v2/read_path:
     post:
       summary: Get thread messages of a message
@@ -918,6 +918,8 @@ components:
         user_id:
           type: integer
         thread:
+          type: integer
+        count:
           type: integer
         name:
           type: string

@@ -12,6 +12,7 @@ type (
 		UpdateUTCNano       int64               `json:"update_utc_nano,omitempty"`
 		UserID              int64               `json:"user_id"`         // TODO: load user, == 0 for public user
 		Name                string              `json:"name"`
+		Count               int32               `json:"count"`           // count messages in this message thread
 		FileIDs             []int64             `json:"-"`
 		Files               []*files.File       `json:"files"`
 		Text                string              `json:"text"`

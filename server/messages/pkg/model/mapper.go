@@ -10,6 +10,7 @@ func MessageFromProto(proto *api.Message) *Message {
 		CreateUTCNano:  proto.CreateUtcNano,
 		UpdateUTCNano:  proto.UpdateUtcNano,
 		UserID:         proto.UserId,
+		Count:          proto.Count,
 		ThreadID:       proto.ThreadId,
 		Text:           proto.Text,
 		Title:          proto.Title,
@@ -27,6 +28,7 @@ func MessageToProto(msg *Message) *api.Message {
 		CreateUtcNano:  msg.CreateUTCNano,
 		UpdateUtcNano:  msg.UpdateUTCNano,
 		Text:           msg.Text,
+		// Count:          msg.Count, // Count is read-only
 		Title:          msg.Title,
 		FileIds:        msg.FileIDs,
 		Private:        msg.Private,

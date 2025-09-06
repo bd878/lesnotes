@@ -239,6 +239,25 @@ func (r *Repository) Private(ctx context.Context, userID int64, ids []int64) (er
 }
 
 func (r *Repository) Read(ctx context.Context, userIDs []int64, id int64) (message *model.Message, err error) {
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			err = tx.Rollback(ctx)
+		default:
+			err = tx.Commit(ctx)
+		}
+	}()
+
 	message = &model.Message{ID: id}
 
 	var (
@@ -256,7 +275,7 @@ func (r *Repository) Read(ctx context.Context, userIDs []int64, id int64) (messa
 		list[i] = id
 	}
 
-	err = r.pool.QueryRow(ctx, r.table(`
+	err = tx.QueryRow(ctx, r.table(`
 SELECT user_id, thread_id, file_ids, created_at, updated_at, text, private, name, title FROM %s WHERE id = $1 AND (user_id IN (` + ids + `) OR private = false)
 `), append([]interface{}{id}, list...)...).Scan(&message.UserID, &message.ThreadID, &fileIDs, &createdAt, &updatedAt, &message.Text, &message.Private, &message.Name, &message.Title)
 	if err != nil {
@@ -273,10 +292,31 @@ SELECT user_id, thread_id, file_ids, created_at, updated_at, text, private, name
 	message.CreateUTCNano = createdAt.UnixNano()
 	message.UpdateUTCNano = updatedAt.UnixNano()
 
+	message.Count, err = r.countThreadMessages(ctx, tx, userIDs, id)
+
 	return
 }
 
 func (r *Repository) ReadBatchMessages(ctx context.Context, userID int64, messageIDs []int64) (messages []*model.Message, err error) {
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			err = tx.Rollback(ctx)
+		default:
+			err = tx.Commit(ctx)
+		}
+	}()
+
 	var rows pgx.Rows
 
 	ids := "$2"
@@ -289,7 +329,7 @@ func (r *Repository) ReadBatchMessages(ctx context.Context, userID int64, messag
 		list[i] = id
 	}
 
-	rows, err = r.pool.Query(ctx, r.table(`
+	rows, err = tx.Query(ctx, r.table(`
 SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE user_id = $1 AND (id IN (` + ids + `))
 `), append([]interface{}{userID}, list...)...)
 	if err != nil {
@@ -319,6 +359,8 @@ SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, update
 
 		message.CreateUTCNano = createdAt.UnixNano()
 		message.UpdateUTCNano = updatedAt.UnixNano()
+
+		message.Count, _ = r.countThreadMessages(ctx, tx, []int64{userID}, message.ID)
 
 		messages = append(messages, message)
 	}
@@ -359,11 +401,30 @@ func (r *Repository) DeleteUserMessages(ctx context.Context, userID int64) (err 
  * @return {[type]}   [description]
  */
 func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID int64, limit, offset int32) (messages []*model.Message, isLastPage bool, err error) {
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			err = tx.Rollback(ctx)
+		default:
+			err = tx.Commit(ctx)
+		}
+	}()
+
 	var rows pgx.Rows
 
 	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE user_id = $1 AND thread_id = $2 ORDER BY created_at DESC LIMIT $3 OFFSET $4"
 
-	rows, err = r.pool.Query(ctx, r.table(query), userID, threadID, limit, offset)
+	rows, err = tx.Query(ctx, r.table(query), userID, threadID, limit, offset)
 	defer rows.Close()
 	if err != nil {
 		return
@@ -393,6 +454,8 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID in
 		message.CreateUTCNano = createdAt.UnixNano()
 		message.UpdateUTCNano = updatedAt.UnixNano()
 
+		message.Count, _ = r.countThreadMessages(ctx, tx, []int64{userID}, message.ID)
+
 		messages = append(messages, message)
 	}
 
@@ -404,7 +467,7 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID in
 		isLastPage = true
 	} else {
 		var count int32
-		err = r.pool.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE user_id = $1 AND thread_id = $2"), userID, threadID).Scan(&count)
+		err = tx.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE user_id = $1 AND thread_id = $2"), userID, threadID).Scan(&count)
 		if err != nil {
 			return
 		}
@@ -423,11 +486,33 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID in
  * @return {[type]}   [description]
  */
 func (r *Repository) ReadMessages(ctx context.Context, userID int64, limit, offset int32) (messages []*model.Message, isLastPage bool, err error) {
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			err = tx.Rollback(ctx)
+		default:
+			err = tx.Commit(ctx)
+		}
+	}()
+
 	var rows pgx.Rows
 
 	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3"
 
-	rows, err = r.pool.Query(ctx, r.table(query), userID, limit, offset)
+	rows, err = tx.Query(ctx, r.table(query), userID, limit, offset)
+	if err != nil {
+		return
+	}
 
 	defer rows.Close()
 
@@ -455,6 +540,8 @@ func (r *Repository) ReadMessages(ctx context.Context, userID int64, limit, offs
 		message.CreateUTCNano = createdAt.UnixNano()
 		message.UpdateUTCNano = updatedAt.UnixNano()
 
+		message.Count, _ = r.countThreadMessages(ctx, tx, []int64{userID}, message.ID)
+
 		messages = append(messages, message)
 	}
 
@@ -466,7 +553,7 @@ func (r *Repository) ReadMessages(ctx context.Context, userID int64, limit, offs
 		isLastPage = true
 	} else {
 		var count int32
-		err = r.pool.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE user_id = $1"), userID).Scan(&count)
+		err = tx.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE user_id = $1"), userID).Scan(&count)
 		if err != nil {
 			return
 		}
@@ -528,6 +615,8 @@ func (r *Repository) ReadPath(ctx context.Context, userID, id int64) (path []*mo
 		message.CreateUTCNano = createdAt.UnixNano()
 		message.UpdateUTCNano = updatedAt.UnixNano()
 
+		message.Count, _ = r.countThreadMessages(ctx, tx, []int64{userID}, message.ID)
+
 		path = append(path, message)
 
 		threadID = message.ThreadID
@@ -538,6 +627,24 @@ func (r *Repository) ReadPath(ctx context.Context, userID, id int64) (path []*mo
 
 func (r *Repository) Truncate(ctx context.Context) (err error) {
 	_, err = r.pool.Exec(ctx, r.table("DELETE FROM %s"))
+	return
+}
+
+func (r *Repository) countThreadMessages(ctx context.Context, tx pgx.Tx, userIDs []int64, id int64) (count int32, err error) {
+	const query = "SELECT COUNT(*) FROM %s WHERE id = $1 AND (user_id IN (` + ids + `)"
+
+	ids := "$2"
+	for i := 1; i < len(userIDs); i++ {
+		ids += fmt.Sprintf(",$%d", i+2)
+	}
+
+	list := make([]interface{}, len(userIDs))
+	for i, id := range userIDs {
+		list[i] = id
+	}
+
+	err = tx.QueryRow(ctx, r.table(query), append([]interface{}{id}, list...)...).Scan(&count)
+
 	return
 }
 
