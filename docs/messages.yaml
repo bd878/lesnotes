@@ -337,8 +337,32 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/serverError'
+                - $ref: '#/components/schemas/serverError'
 # END READ
+
+# READ PATH
+  /messages/v2/read_path:
+    get:
+      summary: Get thread messages of a message
+      description: |
+        Read path for given path id, returns a list of message threads
+      operationId: readMessagePath
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/readPathOk'
+
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/serverError'
+
+# END READ PATH
 
 # STATUS
   /messages/v1/status:
@@ -587,6 +611,24 @@ components:
                 allOf:
                   - $ref: '#/components/schemas/message'
 # END READ
+
+# READ PATH
+    readPathOk:
+      type: object
+      properties:
+        status:
+          type: string
+          default: "ok"
+        response:
+          type: object
+          properties:
+            path:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/message'
+
+# END READ PATH
 
 # UPDATE
     updateJson:

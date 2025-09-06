@@ -475,6 +475,63 @@ func (r *Repository) ReadMessages(ctx context.Context, userID int64, limit, offs
 	return
 }
 
+func (r *Repository) ReadPath(ctx context.Context, userID, id int64) (path []*model.Message, err error) {
+	const query = "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at FROM %s WHERE user_id = $1 AND id = $2"
+
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			err = tx.Rollback(ctx)
+		default:
+			err = tx.Commit(ctx)
+		}
+	}()
+
+	threadID := id
+
+	path = make([]*model.Message, 0)
+
+	for threadID != 0 {
+		message := &model.Message{}
+
+		var (
+			fileIDs []byte
+			createdAt, updatedAt time.Time
+		)
+
+		err = tx.QueryRow(ctx, r.table(query), userID, threadID).Scan(&message.ID, &message.UserID, &message.ThreadID, &fileIDs, &message.Name, &message.Text, &message.Private, &createdAt, &updatedAt)
+		if err != nil {
+			return
+		}
+
+		if fileIDs != nil {
+			err = json.Unmarshal(fileIDs, &message.FileIDs)
+			if err != nil {
+				return
+			}
+		}
+
+		message.CreateUTCNano = createdAt.UnixNano()
+		message.UpdateUTCNano = updatedAt.UnixNano()
+
+		path = append(path, message)
+
+		threadID = message.ThreadID
+	}
+
+	return
+}
+
 func (r *Repository) Truncate(ctx context.Context) (err error) {
 	_, err = r.pool.Exec(ctx, r.table("DELETE FROM %s"))
 	return

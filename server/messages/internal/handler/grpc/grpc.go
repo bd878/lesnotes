@@ -14,6 +14,7 @@ type Controller interface {
 	DeleteUserMessages(ctx context.Context, userID int64) (err error)
 	PublishMessages(ctx context.Context, ids []int64, userID int64) (err error)
 	PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error)
+	ReadPath(ctx context.Context, userID, id int64) (path []*messages.Message, err error)
 	ReadMessage(ctx context.Context, id int64, userIDs []int64) (message *messages.Message, err error)
 	ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (messages []*messages.Message, isLastPage bool, err error)
 	ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool) (messages []*messages.Message, isLastPage bool, err error)
@@ -141,6 +142,19 @@ func (h *Handler) ReadMessage(ctx context.Context, req *api.ReadMessageRequest) 
 	}
 
 	resp = messages.MessageToProto(message)
+
+	return
+}
+
+func (h *Handler) ReadPath(ctx context.Context, req *api.ReadPathRequest) (resp *api.ReadPathResponse, err error) {
+	path, err := h.controller.ReadPath(ctx, req.UserId, req.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	resp = &api.ReadPathResponse{
+		Path:   messages.MapMessagesToProto(messages.MessageToProto, path),
+	}
 
 	return
 }

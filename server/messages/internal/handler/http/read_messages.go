@@ -452,6 +452,7 @@ func (h *Handler) readMessages(ctx context.Context, w http.ResponseWriter, userI
 		list = filterPublicMessages(list)
 	}
 
+	// TODO: derive readBatchFiles to separate function
 	fileIDs := make([]int64, 0)
 	for _, message := range list {
 		if message.FileIDs != nil {

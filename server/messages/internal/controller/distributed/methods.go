@@ -159,3 +159,7 @@ func (m *DistributedMessages) ReadMessages(ctx context.Context, userID int64, li
 func (m *DistributedMessages) ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*model.Message, err error) {
 	return m.repo.ReadBatchMessages(ctx, userID, ids)
 }
+
+func (m *DistributedMessages) ReadPath(ctx context.Context, userID, id int64) (path []*model.Message, err error) {
+	return m.repo.ReadPath(ctx, userID, id)
+}

@@ -266,3 +266,25 @@ func (s *Messages) ReadMessage(ctx context.Context, id int64, userIDs []int64) (
 
 	return
 }
+
+func (s *Messages) ReadPath(ctx context.Context, userID, id int64) (path []*model.Message, err error) {
+	if s.isConnFailed() {
+		if err := s.setupConnection(); err != nil {
+			return nil, err
+		}
+	}
+
+	logger.Debugw("read path", "user_id", userID, "id", id)
+
+	res, err := s.client.ReadPath(ctx, &api.ReadPathRequest{
+		Id:     id,
+		UserId: userID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	path = model.MapMessagesFromProto(model.MessageFromProto, res.Path)
+
+	return
+}

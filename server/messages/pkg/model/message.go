@@ -64,6 +64,14 @@ type (
 		IDs                 []int64             `json:"ids"`
 	}
 
+	ReadPathRequest struct {
+		ID                  int64               `json:"id"`
+	}
+
+	ReadPathResponse struct {
+		Messages            []*Message          `json:"path"`
+	}
+
 	DeleteRequest struct {
 		IDs                 []int64             `json:"ids"`
 	}
