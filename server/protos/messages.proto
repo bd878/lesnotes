@@ -29,6 +29,7 @@ message Message {
 	bool     private = 7;
 	string   name = 8;
 	repeated int64 file_ids = 9;
+	string   title = 10;
 }
 
 message ReadThreadMessagesRequest {
@@ -72,6 +73,7 @@ message UpdateMessageRequest {
 	string   text = 4;
 	int32    private = 5;
 	repeated int64 file_ids = 6;
+	string   title = 7;
 }
 
 message UpdateMessageResponse {
@@ -85,6 +87,7 @@ message SaveMessageRequest {
 	bool     private = 5;
 	string   name = 6;
 	repeated int64 file_ids = 7;
+	string   title = 8;
 }
 
 message SaveMessageResponse {

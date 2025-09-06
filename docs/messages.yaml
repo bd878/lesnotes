@@ -492,6 +492,10 @@ components:
             public:
               type: integer
               default: false
+            title:
+              type: string
+              required: false
+              default: ""
             text:
               type: string
               default: ""
@@ -508,6 +512,10 @@ components:
             public:
               type: integer
               default: false
+            title:
+              type: string
+              required: false
+              default: ""
             text:
               type: string
               default: ""
@@ -527,6 +535,10 @@ components:
         req:
           type: object
           properties:
+            title:
+              type: string
+              required: false
+              default: ""
             text:
               type: string
               default: ""
@@ -649,6 +661,9 @@ components:
                 public:
                   type: integer
                   example: 1
+                title:
+                  type: string
+                  required: false
                 text:
                   type: string
                   example: "test message"
@@ -668,6 +683,9 @@ components:
                 public:
                   type: integer
                   example: 1
+                title:
+                  type: string
+                  required: false
                 text:
                   type: string
                   example: "test message"
@@ -688,6 +706,9 @@ components:
             public:
               type: integer
               example: 1
+            title:
+              type: string
+              required: false
             text:
               type: string
               example: "test message"
@@ -703,6 +724,9 @@ components:
             public:
               type: integer
               example: 1
+            title:
+              type: string
+              required: false
             text:
               type: string
               example: "test message"
@@ -855,6 +879,8 @@ components:
         thread:
           type: integer
         name:
+          type: string
+        title:
           type: string
         text:
           type: string

@@ -25,8 +25,8 @@ func New(tableName string, pool *pgxpool.Pool) *Repository {
 	}
 }
 
-func (r *Repository) Create(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (err error) {
-	const query = "INSERT INTO %s(id, text, file_ids, private, name, user_id, thread_id) VALUES ($1, $2, $3, $4, $5, $6, $7)"
+func (r *Repository) Create(ctx context.Context, id int64, text string, title string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (err error) {
+	const query = "INSERT INTO %s(id, text, file_ids, private, name, user_id, thread_id, title) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
@@ -55,7 +55,7 @@ func (r *Repository) Create(ctx context.Context, id int64, text string, fileIDs 
 		}
 	}
 
-	_, err = tx.Exec(ctx, r.table(query), id, text, files, private, name, userID, threadID)
+	_, err = tx.Exec(ctx, r.table(query), id, text, files, private, name, userID, threadID, title)
 
 	return
 }
@@ -67,9 +67,9 @@ func (r *Repository) Create(ctx context.Context, id int64, text string, fileIDs 
  * @param  {[type]} r *Repository)  Update(ctx context.Context, userID, id int64, text string, threadID int64, fileIDs []int64, private int) (error [description]
  * @return {error}   error
  */
-func (r *Repository) Update(ctx context.Context, userID, id int64, newText string, newThreadID int64, newFileIDs []int64, newPrivate int) (err error) {
-	const query = "UPDATE %s SET text = $3, thread_id = $4, file_ids = $5, private = $6 WHERE user_id = $1 AND id = $2"
-	const selectQuery = "SELECT text, thread_id, file_ids, private FROM %s WHERE user_id = $1 AND id = $2"
+func (r *Repository) Update(ctx context.Context, userID, id int64, newText string, newTitle string, newThreadID int64, newFileIDs []int64, newPrivate int) (err error) {
+	const query = "UPDATE %s SET text = $3, thread_id = $4, file_ids = $5, private = $6, title = $7 WHERE user_id = $1 AND id = $2"
+	const selectQuery = "SELECT text, thread_id, file_ids, private, title FROM %s WHERE user_id = $1 AND id = $2"
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
@@ -91,19 +91,23 @@ func (r *Repository) Update(ctx context.Context, userID, id int64, newText strin
 	}()
 
 	var (
-		text     string
+		text, title  string
 		threadID int64
 		fileIDs  []byte
 		private  bool
 	)
 
-	err = tx.QueryRow(ctx, r.table(selectQuery), userID, id).Scan(&text, &threadID, &fileIDs, &private)
+	err = tx.QueryRow(ctx, r.table(selectQuery), userID, id).Scan(&text, &threadID, &fileIDs, &private, &title)
 	if err != nil {
 		return
 	}
 
 	if newText != "" {
 		text = newText
+	}
+
+	if newTitle != "" {
+		title = newTitle
 	}
 
 	if newThreadID != -1 {
@@ -125,7 +129,7 @@ func (r *Repository) Update(ctx context.Context, userID, id int64, newText strin
 		}
 	}
 
-	_, err = tx.Exec(ctx, r.table(query), userID, id, text, threadID, fileIDs, private)
+	_, err = tx.Exec(ctx, r.table(query), userID, id, text, threadID, fileIDs, private, title)
 	if err != nil {
 		return
 	}
@@ -253,8 +257,8 @@ func (r *Repository) Read(ctx context.Context, userIDs []int64, id int64) (messa
 	}
 
 	err = r.pool.QueryRow(ctx, r.table(`
-SELECT user_id, thread_id, file_ids, created_at, updated_at, text, private, name FROM %s WHERE id = $1 AND (user_id IN (` + ids + `) OR private = false)
-`), append([]interface{}{id}, list...)...).Scan(&message.UserID, &message.ThreadID, &fileIDs, &createdAt, &updatedAt, &message.Text, &message.Private, &message.Name)
+SELECT user_id, thread_id, file_ids, created_at, updated_at, text, private, name, title FROM %s WHERE id = $1 AND (user_id IN (` + ids + `) OR private = false)
+`), append([]interface{}{id}, list...)...).Scan(&message.UserID, &message.ThreadID, &fileIDs, &createdAt, &updatedAt, &message.Text, &message.Private, &message.Name, &message.Title)
 	if err != nil {
 		return
 	}
@@ -286,7 +290,7 @@ func (r *Repository) ReadBatchMessages(ctx context.Context, userID int64, messag
 	}
 
 	rows, err = r.pool.Query(ctx, r.table(`
-SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at FROM %s WHERE user_id = $1 AND (id IN (` + ids + `))
+SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE user_id = $1 AND (id IN (` + ids + `))
 `), append([]interface{}{userID}, list...)...)
 	if err != nil {
 		return
@@ -301,7 +305,7 @@ SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, update
 			createdAt, updatedAt time.Time
 		)
 
-		err = rows.Scan(&message.ID, &message.UserID, &message.ThreadID, &fileIDs, &message.Name, &message.Text, &message.Private, &createdAt, &updatedAt)
+		err = rows.Scan(&message.ID, &message.UserID, &message.ThreadID, &fileIDs, &message.Name, &message.Text, &message.Private, &createdAt, &updatedAt, &message.Title)
 		if err != nil {
 			return
 		}
@@ -357,7 +361,7 @@ func (r *Repository) DeleteUserMessages(ctx context.Context, userID int64) (err 
 func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID int64, limit, offset int32) (messages []*model.Message, isLastPage bool, err error) {
 	var rows pgx.Rows
 
-	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at FROM %s WHERE user_id = $1 AND thread_id = $2 ORDER BY created_at DESC LIMIT $3 OFFSET $4"
+	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE user_id = $1 AND thread_id = $2 ORDER BY created_at DESC LIMIT $3 OFFSET $4"
 
 	rows, err = r.pool.Query(ctx, r.table(query), userID, threadID, limit, offset)
 	defer rows.Close()
@@ -374,7 +378,7 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID in
 			createdAt, updatedAt time.Time
 		)
 
-		err = rows.Scan(&message.ID, &message.UserID, &message.ThreadID, &fileIDs, &message.Name, &message.Text, &message.Private, &createdAt, &updatedAt)
+		err = rows.Scan(&message.ID, &message.UserID, &message.ThreadID, &fileIDs, &message.Name, &message.Text, &message.Private, &createdAt, &updatedAt, &message.Title)
 		if err != nil {
 			return
 		}
@@ -421,7 +425,7 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID in
 func (r *Repository) ReadMessages(ctx context.Context, userID int64, limit, offset int32) (messages []*model.Message, isLastPage bool, err error) {
 	var rows pgx.Rows
 
-	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at FROM %s WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3"
+	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3"
 
 	rows, err = r.pool.Query(ctx, r.table(query), userID, limit, offset)
 
@@ -436,7 +440,7 @@ func (r *Repository) ReadMessages(ctx context.Context, userID int64, limit, offs
 			createdAt, updatedAt time.Time
 		)
 
-		err = rows.Scan(&message.ID, &message.UserID, &message.ThreadID, &fileIDs, &message.Name, &message.Text, &message.Private, &createdAt, &updatedAt)
+		err = rows.Scan(&message.ID, &message.UserID, &message.ThreadID, &fileIDs, &message.Name, &message.Text, &message.Private, &createdAt, &updatedAt, &message.Title)
 		if err != nil {
 			return
 		}
@@ -476,7 +480,7 @@ func (r *Repository) ReadMessages(ctx context.Context, userID int64, limit, offs
 }
 
 func (r *Repository) ReadPath(ctx context.Context, userID, id int64) (path []*model.Message, err error) {
-	const query = "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at FROM %s WHERE user_id = $1 AND id = $2"
+	const query = "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE user_id = $1 AND id = $2"
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
@@ -509,7 +513,7 @@ func (r *Repository) ReadPath(ctx context.Context, userID, id int64) (path []*mo
 			createdAt, updatedAt time.Time
 		)
 
-		err = tx.QueryRow(ctx, r.table(query), userID, threadID).Scan(&message.ID, &message.UserID, &message.ThreadID, &fileIDs, &message.Name, &message.Text, &message.Private, &createdAt, &updatedAt)
+		err = tx.QueryRow(ctx, r.table(query), userID, threadID).Scan(&message.ID, &message.UserID, &message.ThreadID, &fileIDs, &message.Name, &message.Text, &message.Private, &createdAt, &updatedAt, &message.Title)
 		if err != nil {
 			return
 		}

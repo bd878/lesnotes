@@ -11,8 +11,8 @@ import (
 )
 
 type Repository interface {
-	Create(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (err error)
-	Update(ctx context.Context, userID, id int64, newText string, newThreadID int64, newFileIDs []int64, newPrivate int) (err error)
+	Create(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (err error)
+	Update(ctx context.Context, userID, id int64, newText, newTitle string, newThreadID int64, newFileIDs []int64, newPrivate int) (err error)
 	DeleteMessage(ctx context.Context, userID, id int64) (err error)
 	Publish(ctx context.Context, userID int64, ids []int64) (err error)
 	Private(ctx context.Context, userID int64, ids []int64) (err error)
@@ -65,7 +65,7 @@ func (f *fsm) applyAppend(raw []byte) interface{} {
 	proto.Unmarshal(raw, &cmd)
 
 	// Put does not put message with same id twice
-	err := f.repo.Create(context.Background(), cmd.Id, cmd.Text, cmd.FileIds, cmd.ThreadId, cmd.UserId, cmd.Private, cmd.Name)
+	err := f.repo.Create(context.Background(), cmd.Id, cmd.Text, cmd.Title, cmd.FileIds, cmd.ThreadId, cmd.UserId, cmd.Private, cmd.Name)
 	if err != nil {
 		return err
 	}
@@ -77,7 +77,7 @@ func (f *fsm) applyUpdate(raw []byte) interface{} {
 	var cmd UpdateCommand
 	proto.Unmarshal(raw, &cmd)
 
-	err := f.repo.Update(context.Background(), cmd.UserId, cmd.Id, cmd.Text, cmd.ThreadId, cmd.FileIds, int(cmd.Private))
+	err := f.repo.Update(context.Background(), cmd.UserId, cmd.Id, cmd.Text, cmd.Title, cmd.ThreadId, cmd.FileIds, int(cmd.Private))
 	if err != nil {
 		return err
 	}

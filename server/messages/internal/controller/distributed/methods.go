@@ -37,12 +37,13 @@ func (m *DistributedMessages) apply(ctx context.Context, reqType RequestType, cm
 	return
 }
 
-func (m *DistributedMessages) SaveMessage(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (err error) {
-	logger.Debugw("save message", "id", id, "text", text, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private, "name", name)
+func (m *DistributedMessages) SaveMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (err error) {
+	logger.Debugw("save message", "id", id, "text", text, "title", title, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private, "name", name)
 
 	cmd, err := proto.Marshal(&AppendCommand{
 		Id:       id,
 		Text:     text,
+		Title:    title,
 		FileIds:  fileIDs,
 		ThreadId: threadID,
 		UserId:   userID,
@@ -58,13 +59,14 @@ func (m *DistributedMessages) SaveMessage(ctx context.Context, id int64, text st
 	return
 }
 
-func (m *DistributedMessages) UpdateMessage(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private int32) (err error) {
+func (m *DistributedMessages) UpdateMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private int32) (err error) {
 	cmd, err := proto.Marshal(&UpdateCommand{
 		Id:       id,
 		UserId:   userID,
 		FileIds:  fileIDs,
 		ThreadId: threadID,
 		Text:     text,
+		Title:    title,
 		Private:  private,
 	})
 	if err != nil {

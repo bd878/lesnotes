@@ -8,8 +8,8 @@ import (
 )
 
 type Controller interface {
-	SaveMessage(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (err error)
-	UpdateMessage(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private int32) (err error)
+	SaveMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (err error)
+	UpdateMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private int32) (err error)
 	DeleteMessages(ctx context.Context, ids []int64, userID int64) (err error)
 	DeleteUserMessages(ctx context.Context, userID int64) (err error)
 	PublishMessages(ctx context.Context, ids []int64, userID int64) (err error)
@@ -34,7 +34,7 @@ func New(ctrl Controller) *Handler {
 }
 
 func (h *Handler) SaveMessage(ctx context.Context, req *api.SaveMessageRequest) (resp *api.SaveMessageResponse, err error) {
-	err = h.controller.SaveMessage(ctx, req.Id, req.Text, req.FileIds, req.ThreadId, req.UserId, req.Private, req.Name)
+	err = h.controller.SaveMessage(ctx, req.Id, req.Text, req.Title, req.FileIds, req.ThreadId, req.UserId, req.Private, req.Name)
 
 	resp = &api.SaveMessageResponse{}
 
@@ -50,7 +50,7 @@ func (h *Handler) DeleteUserMessages(ctx context.Context, req *api.DeleteUserMes
 }
 
 func (h *Handler) UpdateMessage(ctx context.Context, req *api.UpdateMessageRequest) (resp *api.UpdateMessageResponse, err error) {
-	err = h.controller.UpdateMessage(ctx, req.Id, req.Text, nil, req.ThreadId, req.UserId, req.Private)
+	err = h.controller.UpdateMessage(ctx, req.Id, req.Text, req.Title, nil, req.ThreadId, req.UserId, req.Private)
 
 	resp = &api.UpdateMessageResponse{}
 

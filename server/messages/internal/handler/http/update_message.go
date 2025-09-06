@@ -62,6 +62,7 @@ func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) (err e
 	}
 
 	text := req.PostFormValue("text")
+	title := req.PostFormValue("title")
 
 	if req.PostFormValue("thread") != "" {
 		id, err := strconv.Atoi(req.PostFormValue("thread"))
@@ -101,11 +102,11 @@ func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) (err e
 		public = -1
 	}
 
-	return h.updateMessage(req.Context(), w, id, user, text, thread, public)
+	return h.updateMessage(req.Context(), w, id, user, text, title, thread, public)
 }
 
 func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, messageID int64, user *users.User,
-	text string, threadID int64, public int,
+	text, title string, threadID int64, public int,
 ) (err error) {
 	var private int32
 
@@ -174,7 +175,11 @@ func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, mess
 		text = msg.Text
 	}
 
-	err = h.controller.UpdateMessage(ctx, messageID, text, nil, threadID, user.ID, private)
+	if title == "" {
+		title = msg.Title
+	}
+
+	err = h.controller.UpdateMessage(ctx, messageID, text, title, nil, threadID, user.ID, private)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

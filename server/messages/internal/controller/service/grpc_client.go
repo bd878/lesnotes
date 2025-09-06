@@ -68,18 +68,19 @@ func (s *Messages) isConnFailed() bool {
 	return false
 }
 
-func (s *Messages) SaveMessage(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (message *model.Message, err error) {
+func (s *Messages) SaveMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (message *model.Message, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
 		}
 	}
 
-	logger.Debugw("save message", "id", id, "text", text, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private, "name", name)
+	logger.Debugw("save message", "id", id, "text", text, "title", title, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private, "name", name)
 
 	message = &model.Message{
 		ID:       id,
 		Text:     text,
+		Title:    title,
 		Name:     name,
 		FileIDs:  fileIDs,
 		ThreadID: threadID,
@@ -90,6 +91,7 @@ func (s *Messages) SaveMessage(ctx context.Context, id int64, text string, fileI
 	_, err = s.client.SaveMessage(ctx, &api.SaveMessageRequest{
 		Id:       id,
 		Text:     text,
+		Title:    title,
 		FileIds:  fileIDs,
 		ThreadId: threadID,
 		UserId:   userID,
@@ -151,20 +153,21 @@ func (s *Messages) PrivateMessages(ctx context.Context, ids []int64, userID int6
 	return
 }
 
-func (s *Messages) UpdateMessage(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private int32) (err error) {
+func (s *Messages) UpdateMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private int32) (err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
 		}
 	}
 
-	logger.Debugw("update message", "id", id, "text", text, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private)
+	logger.Debugw("update message", "id", id, "text", text, "title", title, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private)
 
 	_, err = s.client.UpdateMessage(ctx, &api.UpdateMessageRequest{
 		Id:        id,
 		UserId:    userID,
 		FileIds:   fileIDs,
 		Text:      text,
+		Title:     title,
 		Private:   private,
 		ThreadId:  threadID,
 	})

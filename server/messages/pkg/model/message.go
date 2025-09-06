@@ -15,11 +15,13 @@ type (
 		FileIDs             []int64             `json:"-"`
 		Files               []*files.File       `json:"files"`
 		Text                string              `json:"text"`
+		Title               string              `json:"title"`
 		Private             bool                `json:"private"`
 	}
 
 	SendRequest struct {
 		Text                string              `json:"text"`
+		Title               string              `json:"title"`
 		FileIDs             []int64             `json:"file_ids,omitempty"`
 		Private             bool                `json:"private"`
 		ThreadID            int64               `json:"thread"`
@@ -86,6 +88,7 @@ type (
 		ThreadID            *int64              `json:"thread,omitempty"`
 		Text                *string             `json:"text,omitempty"`
 		Public              *int                `json:"public,omitempty"`
+		Title               *string             `json:"title,omitempty"`
 	}
 
 	UpdateResponse struct {
