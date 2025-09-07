@@ -15,19 +15,24 @@
 				<span>{{.}}</span>
 			{{/error}}
 			{{^error}}
-				<div id="threads">
+				<div id="threads-list">
 					<ul class="flex flex-col">
 						{{#threads}}
-							<li data-thread-id="{{ID}}" class="pb-2 whitespace-nowrap">
-								<span class="overflow-hidden text-ellipsis">
-									{{#title}}
-										{{title}}
-									{{/title}}
-									{{^title}}
-										{{text}}
-									{{/title}}
-								</span>
-								<span>{{ID}}</span>
+							<li class="flex flex-row justify-between last:mb-2">
+								<div class="overflow-hidden justify-between flex flex-row w-full text-lg">
+									<div class="overflow-hidden text-ellipsis mr-2">
+										{{#title}}
+											{{title}}
+										{{/title}}
+										{{^title}}
+											{{text}}
+										{{/title}}
+									</div>
+
+									<div>{{count}}</div>
+								</div>
+
+								<button type="button" class="hover:text-blue-600 px-2 ml-2 cursor-pointer" data-thread-id="{{threadID}}"> < </button>
 							</li>
 						{{/threads}}
 					</ul>
@@ -37,9 +42,8 @@
 					<ul class="flex flex-col">
 						{{#messages}}
 							<li class="mb-2 grow-1 max-w-full flex flex-row justify-between whitespace-nowrap">
-								<button type="button" class="flex flex-row justify-between overflow-hidden bg-gray-300 hover:bg-gray-500 hover:text-white cursor-pointer text-left px-2 italic w-full"
-									data-message-id="{{ID}}" onclick="location.href = '/home?id=' + {{ID}}">
-									<div class="overflow-hidden text-ellipsis mr-2">
+								<button type="button" class="flex flex-row justify-between overflow-hidden bg-gray-300 hover:bg-gray-500 hover:text-white cursor-pointer text-left px-2 italic w-full" data-message-id="{{ID}}">
+									<div class="overflow-hidden text-ellipsis mr-2" data-message-id="{{ID}}">
 										{{#title}}
 											{{title}}
 										{{/title}}
@@ -47,13 +51,11 @@
 											{{text}}
 										{{/title}}
 									</div>
-									<div>
-										{{count}}
-									</div>
+
+									<div data-message-id="{{ID}}">{{count}}</div>
 								</button>
 
-								<button type="button" class="bg-gray-300 hover:bg-gray-500 hover:text-white cursor-pointer px-2 ml-2"
-									data-message-id="{{ID}}" onclick="location.href = '/home?thread=' + {{ID}}"> > </button>
+								<button type="button" class="bg-gray-300 hover:bg-gray-500 hover:text-white cursor-pointer px-2 ml-2" data-thread-id="{{ID}}"> > </button>
 							</li>
 						{{/messages}}
 					</ul>

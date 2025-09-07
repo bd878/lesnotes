@@ -21,17 +21,59 @@ const elems = {
 		}
 
 		return divElem as HTMLDivElement
+	},
+
+	get threadsListElem(): HTMLDivElement {
+		const divElem = document.getElementById("threads-list")
+		if (!divElem) {
+			console.error("[homeScript]: no \"threads-list\" elem")
+			return document.createElement("div")
+		}
+
+		return divElem as HTMLDivElement
 	}
 }
 
 function init() {
 	elems.formElem.addEventListener("submit", onFormSubmit)
+	elems.messagesListElem.addEventListener("click", onMessagesListClick)
+	elems.threadsListElem.addEventListener("click", onThreadsListClick)
 }
 
 window.addEventListener("load", () => {
 	console.log("loaded")
 	init()
 })
+
+function onMessagesListClick(e) {
+	if (is.notEmpty(e.target.dataset.messageId)) {
+		handleMessageClick(e.target.dataset.messageId)
+	} else if (is.notEmpty(e.target.dataset.threadId)) {
+		handleThreadClick(e.target.dataset.threadId)
+	}
+}
+
+function onThreadsListClick(e) {
+	if (is.notUndef(e.target.dataset.threadId))
+		handleThreadClick(e.target.dataset.threadId)
+}
+
+function handleMessageClick(messageID) {
+	const params = new URLSearchParams(location.search)
+	params.set("id", messageID)
+
+	location.href = "/home?" + params.toString()
+}
+
+function handleThreadClick(threadID) {
+	const params = new URLSearchParams(location.search)
+	if (threadID == 0)
+		params.delete("thread")
+	else
+		params.set("thread", threadID)
+
+	location.href = "/home?" + params.toString()
+}
 
 async function onFormSubmit(e) {
 	e.preventDefault()
@@ -67,7 +109,7 @@ async function onFormSubmit(e) {
 
 	elems.formElem.reset()
 
-	setTimeout(() => { location.href = "/home?" + params.toString() }, 0)
+	location.href = "/home?" + params.toString()
 }
 
 function either(st1: boolean, st2: boolean): boolean {

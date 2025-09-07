@@ -56,7 +56,7 @@ export default function mapMessageFromProto(message?: any): Message {
 		title: message.title,
 		count: message.count,
 		private: Boolean(message.private),
-		threadID: message.thread_id,
+		threadID: message.thread,
 		files: [],
 	}
 	if (is.array(message.files)) {
