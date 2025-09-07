@@ -30,6 +30,7 @@ async function home(ctx) {
 		return
 	}
 
+	const edit = ctx.query.edit
 	const limit = parseInt(ctx.query.limit) || 10
 	const offset = parseInt(ctx.query.offset) || 0
 	const threadID = parseInt(ctx.query.thread) || 0
@@ -58,13 +59,13 @@ async function home(ctx) {
 			return;
 		}
 
-		ctx.body = await renderBody(reverse(threads.path), reverse(messages.messages), message.message)
+		ctx.body = await renderBody(reverse(threads.path), reverse(messages.messages), message.message, edit)
 		ctx.status = 200;
 
 		return
 	}
 
-	ctx.body = await renderBody(reverse(threads.path), reverse(messages.messages))
+	ctx.body = await renderBody(reverse(threads.path), reverse(messages.messages), undefined, edit)
 	ctx.status = 200;
 
 	return;
@@ -83,6 +84,12 @@ async function renderError(err: string): Promise<string> {
 		send:     i18n("send"),
 		logout:   i18n("logout"),
 		search:   i18n("search"),
+		delete:   i18n("delete"),
+		edit:     i18n("edit"),
+		publish:  i18n("publish"),
+		private:  i18n("private"),
+		update:   i18n("update"),
+		cancelEdit:        i18n("cancel"),
 		title_placeholder: i18n("title_placeholder"),
 		text_placeholder:  i18n("text_placeholder"),
 	}, {
@@ -90,7 +97,7 @@ async function renderError(err: string): Promise<string> {
 	});
 }
 
-async function renderBody(threads: Message[], messages: Message[], message?: Message): Promise<string> {
+async function renderBody(threads: Message[], messages: Message[], message?: Message, editMessage?: boolean): Promise<string> {
 	const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles.css')), { encoding: 'utf-8' });
 	const home = await readFile(resolve(join(Config.get('basedir'), 'templates/home.mustache')), { encoding: 'utf-8' });
 	const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
@@ -105,6 +112,13 @@ async function renderBody(threads: Message[], messages: Message[], message?: Mes
 		send:     i18n("send"),
 		logout:   i18n("logout"),
 		search:   i18n("search"),
+		delete:   i18n("delete"),
+		edit:     i18n("edit"),
+		editMessage: editMessage,
+		publish:  i18n("publish"),
+		private:  i18n("private"),
+		update:   i18n("update"),
+		cancelEdit:        i18n("cancel"),
 		title_placeholder: i18n("title_placeholder"),
 		text_placeholder:  i18n("text_placeholder"),
 	}, {

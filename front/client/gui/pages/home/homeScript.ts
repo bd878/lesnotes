@@ -13,6 +13,16 @@ const elems = {
 		return formElem as HTMLFormElement
 	},
 
+	get messageEditFormElem(): HTMLFormElement {
+		const formElem = document.getElementById("message-edit-form")
+		if (!formElem) {
+			console.error("[homeScript]: no \"message-edit-form\" form")
+			return document.createElement("form")
+		}
+
+		return formElem as HTMLFormElement
+	},
+
 	get messagesListElem(): HTMLDivElement {
 		const divElem = document.getElementById("messages-list")
 		if (!divElem) {
@@ -31,13 +41,69 @@ const elems = {
 		}
 
 		return divElem as HTMLDivElement
-	}
+	},
+
+	get messageDeleteElem(): HTMLButtonElement {
+		const buttonElem = document.getElementById("message-delete")
+		if (!buttonElem) {
+			console.error("[homeScript]: no \"message-delete\" elem")
+			return document.createElement("button")
+		}
+
+		return buttonElem as HTMLButtonElement
+	},
+
+	get messageEditElem(): HTMLButtonElement {
+		const buttonElem = document.getElementById("message-edit")
+		if (!buttonElem) {
+			console.error("[homeScript]: no \"message-edit\" elem")
+			return document.createElement("button")
+		}
+
+		return buttonElem as HTMLButtonElement
+	},
+
+	get messagePublishElem(): HTMLButtonElement {
+		const buttonElem = document.getElementById("message-publish")
+		if (!buttonElem) {
+			console.error("[homeScript]: no \"message-publish\" elem")
+			return document.createElement("button")
+		}
+
+		return buttonElem as HTMLButtonElement
+	},
+
+	get messagePrivateElem(): HTMLButtonElement {
+		const buttonElem = document.getElementById("message-private")
+		if (!buttonElem) {
+			console.error("[homeScript]: no \"message-private\" elem")
+			return document.createElement("button")
+		}
+
+		return buttonElem as HTMLButtonElement
+	},
+
+	get messageCancelEditElem(): HTMLButtonElement {
+		const buttonElem = document.getElementById("message-cancel-edit")
+		if (!buttonElem) {
+			console.error("[homeScript]: no \"message-cancel-edit\" elem")
+			return document.createElement("button")
+		}
+
+		return buttonElem as HTMLButtonElement
+	},
 }
 
 function init() {
 	elems.formElem.addEventListener("submit", onFormSubmit)
+	elems.messageEditFormElem.addEventListener("submit", onMessageUpdateFormSubmit)
 	elems.messagesListElem.addEventListener("click", onMessagesListClick)
 	elems.threadsListElem.addEventListener("click", onThreadsListClick)
+	elems.messageDeleteElem.addEventListener("click", onMessageDeleteClick)
+	elems.messageEditElem.addEventListener("click", onMessageEditClick)
+	elems.messagePublishElem.addEventListener("click", onMessagePublishClick)
+	elems.messagePrivateElem.addEventListener("click", onMessagePrivateClick)
+	elems.messageCancelEditElem.addEventListener("click", onMessageCancelEditClick)
 }
 
 window.addEventListener("load", () => {
@@ -54,25 +120,82 @@ function onMessagesListClick(e) {
 }
 
 function onThreadsListClick(e) {
-	if (is.notUndef(e.target.dataset.threadId))
+	if (is.notUndef(e.target.dataset.threadId)) {
 		handleThreadClick(e.target.dataset.threadId)
+	} else if (is.notEmpty(e.target.dataset.messageId)) {
+		handleMessageClick(e.target.dataset.messageId)
+	}
+}
+
+function onMessagePublishClick(e) {
+
+}
+
+function onMessagePrivateClick(e) {
+
+}
+
+function onMessageCancelEditClick(e) {
+	const params = new URLSearchParams(location.search)
+	params.delete("edit")
+
+	location.href = params.toString() ? ("/home?" + params.toString()) : "/home"
+}
+
+async function onMessageDeleteClick(e) {
+	if (is.notEmpty(e.target.dataset.messageId)) {
+		const messageID = parseInt(e.target.dataset.messageId) || 0
+
+		const response = await api.deleteMessage(messageID)
+		if (response.error.error) {
+			console.error("[onMessageDeleteClick]: cannot delete message:", response)
+			return
+		}
+
+		const params = new URLSearchParams(location.search)
+		params.delete("id")
+
+		location.href = params.toString() ? ("/home?" + params.toString()) : "/home" 
+	} else {
+		console.error("[onMessageDeleteClick]: no data-message-id attribute on target")
+	}
+}
+
+function onMessageEditClick(e) {
+	if (is.notEmpty(e.target.dataset.messageId)) {
+		const messageID = e.target.dataset.messageId
+
+		const params = new URLSearchParams(location.search)
+		params.set("edit", "1")
+
+		location.href = "/home?" + params.toString()
+	} else {
+		console.error("[onMessageEditClick]: no data-message-id attribute on target")
+	}
 }
 
 function handleMessageClick(messageID) {
 	const params = new URLSearchParams(location.search)
 	params.set("id", messageID)
 
-	location.href = "/home?" + params.toString()
+	location.href = params.toString() ? ("/home?" + params.toString()) : "/home"
 }
 
 function handleThreadClick(threadID) {
 	const params = new URLSearchParams(location.search)
-	if (threadID == 0)
+	if (threadID == 0 || threadID == "0" || threadID == "") {
 		params.delete("thread")
-	else
+	} else {
 		params.set("thread", threadID)
+	}
 
-	location.href = "/home?" + params.toString()
+	params.delete("id")
+
+	location.href = params.toString() ? ("/home?" + params.toString()) : "/home"
+}
+
+async function onMessageUpdateFormSubmit(e) {
+	e.preventDefault()
 }
 
 async function onFormSubmit(e) {
@@ -109,7 +232,7 @@ async function onFormSubmit(e) {
 
 	elems.formElem.reset()
 
-	location.href = "/home?" + params.toString()
+	location.href = params.toString() ? ("/home?" + params.toString()) : "/home"
 }
 
 function either(st1: boolean, st2: boolean): boolean {
