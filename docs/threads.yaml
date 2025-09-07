@@ -1,0 +1,138 @@
+openapi: "3.0.0"
+info:
+  title: API Specification for threads service
+  description: |
+    This API allows publishing or making private
+    threads with related messages
+  version: 1.0.0
+paths:
+# PUBLISH
+  /threads/v1/publish:
+    parameters:
+      - $ref: "#/components/parameters/thread"
+      - $ref: "#/components/parameters/token"
+    put:
+      summary: Make thread public
+      description: |
+        Makes given thread public and all it's messages that exist.
+        It does not enforce public visibility to all new messages.
+        To make message public, one must make it public explicitly
+      operationId: publishThread
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              nullable: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/publishOk'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+# END PUBLISH
+
+# PRIVATE
+  /threads/v1/private:
+    parameters:
+      - $ref: "#/components/parameters/thread"
+      - $ref: "#/components/parameters/token"
+    put:
+      summary: Make thread private
+      description: |
+        Makes given thread private and all it's messages that exist.
+        To make message public in a private thread, one must make it public explicitly
+      operationId: privateThread
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              nullable: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/publishOk'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+
+# END PRIVATE
+components:
+  parameters:
+    token:
+      name: Cookie
+      in: header
+      schema:
+        type: string
+        example: token=AAAAAA
+    thread:
+      name: id
+      in: query
+      required: false
+      schema:
+        type: integer
+        example: 1
+
+  schemas:
+# ERROR
+    serverError:
+      type: object
+      status:
+        type: string
+        default: "error"
+      error:
+        type: object
+        properties:
+          code:
+            type: integer
+          explain:
+            type: string
+# END ERROR
+
+# PUBLISH
+    publishOk:
+      type: object
+      properties:
+        status:
+          type: string 
+          default: "ok"
+        response:
+          type: object
+          properties:
+            description:
+              type: string 
+              default: ""
+            id:
+              type: integer
+# END PUBLISH
+
+# PRIVATE
+    privateOk:
+      type: object
+      properties:
+        status:
+          type: string 
+          default: "ok"
+        response:
+          type: object
+          properties:
+            description:
+              type: string 
+              default: ""
+            id:
+              type: integer
+# END PRIVATE
