@@ -127,12 +127,38 @@ function onThreadsListClick(e) {
 	}
 }
 
-function onMessagePublishClick(e) {
+async function onMessagePublishClick(e) {
+	if (is.notEmpty(e.target.dataset.messageId)) {
+		const messageID = parseInt(e.target.dataset.messageId) || 0
 
+		const response = await api.publishMessages([messageID])
+		if (response.error.error) {
+			console.error("[onMessagePublishClick]: cannot publish message:", response)
+			return
+		}
+
+		location.reload()
+	} else {
+		console.error("[onMessagePublishClick]: no data-message-id attribute on target")
+		return
+	}
 }
 
-function onMessagePrivateClick(e) {
+async function onMessagePrivateClick(e) {
+	if (is.notEmpty(e.target.dataset.messageId)) {
+		const messageID = parseInt(e.target.dataset.messageId) || 0
 
+		const response = await api.privateMessages([messageID])
+		if (response.error.error) {
+			console.error("[onMessagePrivateClick]: cannot private message:", response)
+			return
+		}
+
+		location.reload()
+	} else {
+		console.error("[onMessagePrivateClick]: no data-message-id attribute on target")
+		return
+	}
 }
 
 function onMessageCancelEditClick(e) {

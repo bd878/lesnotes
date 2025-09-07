@@ -9,8 +9,8 @@ import { resolve, join } from 'node:path';
 /**
  * Renders home page
  * 
- * Example: /home?threads=[123,345]&id=111&limit=5&offset=10
- * threads - thread ids to load messages
+ * Example: /home?thread=123&id=111&limit=5&offset=10
+ * thread - message thread id
  * id - message to render
  * limit - limit messages of final thread to load
  * offset - messages offset of final thread
@@ -25,6 +25,13 @@ async function home(ctx) {
 	const resp = await api.authJson(token)
 	console.log(`[home]: auth response`, JSON.stringify(resp))
 	if (resp.error.error || resp.expired) {
+		ctx.redirect("/login")
+		ctx.status = 302
+		return
+	}
+
+	const me = await api.getMeJson(token)
+	if (me.error.error) {
 		ctx.redirect("/login")
 		ctx.status = 302
 		return
@@ -59,13 +66,13 @@ async function home(ctx) {
 			return;
 		}
 
-		ctx.body = await renderBody(reverse(threads.path), reverse(messages.messages), message.message, edit)
+		ctx.body = await renderBody(reverse(threads.path), reverse(messages.messages), me.user.ID, message.message, edit)
 		ctx.status = 200;
 
 		return
 	}
 
-	ctx.body = await renderBody(reverse(threads.path), reverse(messages.messages), undefined, edit)
+	ctx.body = await renderBody(reverse(threads.path), reverse(messages.messages), me.user.ID, undefined, edit)
 	ctx.status = 200;
 
 	return;
@@ -87,7 +94,7 @@ async function renderError(err: string): Promise<string> {
 		delete:   i18n("delete"),
 		edit:     i18n("edit"),
 		publish:  i18n("publish"),
-		private:  i18n("private"),
+		privateText:  i18n("private"),
 		update:   i18n("update"),
 		cancelEdit:        i18n("cancel"),
 		title_placeholder: i18n("title_placeholder"),
@@ -97,7 +104,7 @@ async function renderError(err: string): Promise<string> {
 	});
 }
 
-async function renderBody(threads: Message[], messages: Message[], message?: Message, editMessage?: boolean): Promise<string> {
+async function renderBody(threads: Message[], messages: Message[], userID: number, message?: Message, editMessage?: boolean): Promise<string> {
 	const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles.css')), { encoding: 'utf-8' });
 	const home = await readFile(resolve(join(Config.get('basedir'), 'templates/home.mustache')), { encoding: 'utf-8' });
 	const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
@@ -109,6 +116,8 @@ async function renderBody(threads: Message[], messages: Message[], message?: Mes
 		threads:  threads,
 		messages: messages,
 		message:  message,
+		userID:   userID,
+		domain:   Config.get("domain"),
 		send:     i18n("send"),
 		logout:   i18n("logout"),
 		search:   i18n("search"),
@@ -116,7 +125,7 @@ async function renderBody(threads: Message[], messages: Message[], message?: Mes
 		edit:     i18n("edit"),
 		editMessage: editMessage,
 		publish:  i18n("publish"),
-		private:  i18n("private"),
+		privateText:  i18n("private"),
 		update:   i18n("update"),
 		cancelEdit:        i18n("cancel"),
 		title_placeholder: i18n("title_placeholder"),

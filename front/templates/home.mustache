@@ -19,8 +19,8 @@
 					<ul class="flex flex-col">
 						{{#threads}}
 							<li class="flex flex-row justify-between last:mb-2">
-								<button class="overflow-hidden justify-between flex flex-row w-full text-lg" data-message-id="{{ID}}">
-									<div class="hover:text-blue-600 cursor-pointer overflow-hidden text-ellipsis mr-2" data-message-id="{{ID}}">
+								<button class="overflow-hidden whitespace-nowrap justify-between flex flex-row w-full text-lg" data-message-id="{{ID}}">
+									<div class="hover:text-blue-600 whitespace-nowrap cursor-pointer overflow-hidden text-ellipsis mr-2" data-message-id="{{ID}}">
 										{{#title}}
 											{{title}}
 										{{/title}}
@@ -64,10 +64,14 @@
 		</div>
 	</div>
 
-	<div id="editor" class="ml-2 max-w-2xl flex flex-row grow border-1 border-solid p-4">
+	<div id="editor" class="ml-2 max-w-2xl flex flex-col grow border-1 border-solid p-4">
 		{{#message}}
+			{{^private}}
+				<a class="italic text-blue-600 text-sm" href="/m/{{userID}}/{{ID}}" target="_blank">https://{{domain}}/m/{{userID}}/{{ID}}</a>
+			{{/private}}
+
 			{{#editMessage}}
-				<form id="message-edit-form" name="message-edit-form" autocomplete="off" onsubmit="return false;" class="w-full flex flex-col">
+				<form id="message-edit-form" name="message-edit-form" autocomplete="off" onsubmit="return false;" class="w-full flex flex-col grow">
 					<div class="flex flex-col grow">
 						<input name="messageTitle" class="focus:outline-none w-full resize-none italic text-gray-600 text-lg mb-2" placeholder="{{title_placeholder}}">{{title}}</input>
 						<textarea name="text" type="input" class="focus:outline-none w-full resize-none italic text-gray-600 text-sm h-full" placeholder="{{text_placeholder}}">{{text}}</textarea>
@@ -85,14 +89,12 @@
 				</form>
 			{{/editMessage}}
 			{{^editMessage}}
-				<div id="message" class="flex flex-col justify-between">
+				<div id="message" class="flex flex-col justify-between grow">
 					<div>
 						{{#title}}
 							<div class="whitespace-pre-wrap text-lg">{{title}}</div>
 						{{/title}}
-						<div>
-							<p class="whitespace-pre-wrap">{{text}}</p>
-						</div>
+						<p class="whitespace-pre-wrap">{{text}}</p>
 					</div>
 
 					<div class="flex flex-row">
@@ -102,14 +104,14 @@
 							<button id="message-publish" data-message-id="{{ID}}" type="button" class="border-1 px-4 border-solid text-left cursor-pointer">{{publish}}</button>
 						{{/private}}
 						{{^private}}
-							<button id="message-private" data-message-id="{{ID}}" type="button" class="border-1 px-4 border-solid text-left cursor-pointer">{{private}}</button>
+							<button id="message-private" data-message-id="{{ID}}" type="button" class="border-1 px-4 border-solid text-left cursor-pointer">{{privateText}}</button>
 						{{/private}}
 					</div>
 				</div>
 			{{/editMessage}}
 		{{/message}}
 		{{^message}}
-			<form id="message-form" name="message-form" autocomplete="off" onsubmit="return false;" class="w-full flex flex-col">
+			<form id="message-form" name="message-form" autocomplete="off" onsubmit="return false;" class="w-full flex flex-col grow">
 				<div class="flex flex-col grow">
 					<input name="messageTitle" class="focus:outline-none w-full resize-none italic text-gray-600 text-lg mb-2" placeholder="{{title_placeholder}}"></input>
 					<textarea name="text" type="input" class="focus:outline-none w-full resize-none italic text-gray-600 text-sm h-full" placeholder="{{text_placeholder}}"></textarea>

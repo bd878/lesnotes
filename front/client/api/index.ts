@@ -7,6 +7,8 @@ import readMessageJson from './readMessageJson';
 import sendMessage from './sendMessage';
 import sendMessageJson from './sendMessageJson';
 import updateMessage from './updateMessage';
+import privateThread from './privateThread';
+import publishThread from './publishThread';
 import deleteMessage from './deleteMessage';
 import deleteMessages from './deleteMessages';
 import publishMessages from './publishMessages'
@@ -21,6 +23,7 @@ import authJson from './authJson';
 import login from './login';
 import logout from './logout';
 import getMe from './getMe';
+import getMeJson from './getMeJson';
 import register from './register';
 import {getFileDownloadUrl, getMessageLinkUrl} from './api';
 
@@ -32,6 +35,7 @@ export default {
 	auth,
 	authJson,
 	getMe,
+	getMeJson,
 	readMessages,
 	readMessagesJson,
 	readBatchMessagesJson,
@@ -45,6 +49,8 @@ export default {
 	deleteMessages,
 	publishMessages,
 	privateMessages,
+	privateThread,
+	publishThread,
 	moveMessage,
 	uploadFile,
 	getFileDownloadUrl,

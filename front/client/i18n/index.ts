@@ -36,7 +36,7 @@ const i18n = {
 		delete: "Удалить",
 		edit: "Редактировать",
 		publish: "Опубликовать",
-		private: "Скрыть",
+		private: "Скрыть от всех",
 		update: "Сохранить",
 		cancel: "Отмена",
 		miniapp_only: "Эта страница работает только из приложения Telegram",
