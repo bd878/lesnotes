@@ -2,7 +2,6 @@ package http
 
 import (
 	"io"
-	"errors"
 	"fmt"
 	"strconv"
 	"net/http"
@@ -14,7 +13,7 @@ import (
 )
 
 func (h *Handler) DownloadFileV2(w http.ResponseWriter, req *http.Request) (err error) {
-	userIDStr, fileName := req.PathValue("user_id"), req.PathValue("name")
+	userIDStr, fileIDStr := req.PathValue("user_id"), req.PathValue("id")
 	if userIDStr == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -41,19 +40,33 @@ func (h *Handler) DownloadFileV2(w http.ResponseWriter, req *http.Request) (err 
 		return err
 	}
 
-	if fileName == "" {
+	if fileIDStr == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:  &server.ErrorCode{
-				Code:    files.CodeNoFileName,
-				Explain: "name required",
+				Code:    server.CodeNoID,
+				Explain: "id required",
 			},
 		})
-		return errors.New("no name in path given")
+		return
 	}
 
-	file, stream, err := h.controller.ReadFileStream(req.Context(), 0, int64(userID), fileName, true)
+	fileID, err := strconv.Atoi(fileIDStr)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status: "error",
+			Error:  &server.ErrorCode{
+				Code:    server.CodeWrongFormat,
+				Explain: "error parsing request",
+			},
+		})
+
+		return err
+	}
+
+	file, stream, err := h.controller.ReadFileStream(req.Context(), int64(fileID), int64(userID), "", true)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -66,7 +79,7 @@ func (h *Handler) DownloadFileV2(w http.ResponseWriter, req *http.Request) (err 
 		return err
 	}
 
-	logger.Infow("downloading file", "name", file.Name)
+	logger.Infow("downloading file", "name", file.Name, "user", userID)
 
 	w.Header().Set("Content-Disposition", "attachment; " + "filename*=UTF-8''" + file.Name)
 	w.Header().Set("Content-Length", fmt.Sprintf("%d", file.Size))

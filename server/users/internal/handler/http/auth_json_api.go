@@ -18,7 +18,7 @@ func (h *Handler) AuthJsonAPI(w http.ResponseWriter, req *http.Request) (err err
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
 			Error: &server.ErrorCode{
-				Code: server.CodeWrongFormat,
+				Code:    server.CodeWrongFormat,
 				Explain: "failed to read json body",
 			},
 		})
@@ -32,7 +32,7 @@ func (h *Handler) AuthJsonAPI(w http.ResponseWriter, req *http.Request) (err err
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
 			Error: &server.ErrorCode{
-				Code: server.CodeWrongFormat,
+				Code:    server.CodeWrongFormat,
 				Explain: "failed to parse json request",
 			},
 		})
@@ -46,7 +46,7 @@ func (h *Handler) AuthJsonAPI(w http.ResponseWriter, req *http.Request) (err err
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code: server.CodeTokenExpired,
+				Code:    server.CodeTokenExpired,
 				Explain: "token expired",
 			},
 		})
@@ -55,10 +55,11 @@ func (h *Handler) AuthJsonAPI(w http.ResponseWriter, req *http.Request) (err err
 	}
 
 	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
 			Error: &server.ErrorCode{
-				Code: server.CodeNoUser,
+				Code:    server.CodeNoUser,
 				Explain: "no user",
 			},
 		})
@@ -75,7 +76,7 @@ func (h *Handler) AuthJsonAPI(w http.ResponseWriter, req *http.Request) (err err
 	}
 
 	json.NewEncoder(w).Encode(server.ServerResponse{
-		Status: "ok",
+		Status:   "ok",
 		Response: json.RawMessage(response),
 	})
 

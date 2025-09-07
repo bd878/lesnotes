@@ -1,17 +1,14 @@
-import i18n from '../i18n';
 import api from './api';
 import models from './models';
 
-async function privateMessages(ids = []) {
-	let response = {};
-	let result: PrivateMessagesResult = {
-		error: "",
-		explain: "",
-		IDs: [],
+async function privateMessages(ids: number[] = []) {
+	let result = {
+		error:  models.error(),
+		ids:    [],
 	}
 
 	try {
-		response = await api("/messages/v1/private", {
+		const [response, error] = await api("/messages/v1/private", {
 			queryParams: {
 				ids: JSON.stringify(ids),
 			},
@@ -19,19 +16,15 @@ async function privateMessages(ids = []) {
 			credentials: "include",
 		});
 
-		if (response.error != "") {
-			result.error = response.error
-			result.explain = response.explain
-		} else {
-			if (response.value) {
-				const model = models.message({update_utc_nano: response.value.update_utc_nano})
-				result.IDs = response.value.ids
-				result.updateUTCNano = model.updateUTCNano
-			}
-		}
+		if (error)
+			result.error = models.error(error)
+
+		if (response)
+			result.ids = response.ids
 	} catch (e) {
-		console.error(i18n("error_occured"), e);
-		result.error = e
+		result.error.error   = true
+		result.error.status  = 500
+		result.error.explain = e.toString()
 	}
 
 	return result

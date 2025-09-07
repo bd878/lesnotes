@@ -61,7 +61,7 @@ func (h *Handler) PublishMessagesJsonAPI(w http.ResponseWriter, req *http.Reques
 	json.NewEncoder(w).Encode(server.ServerResponse{
 		Status: "error",
 		Error: &server.ErrorCode{
-			Code: server.CodeNoID,
+			Code:    server.CodeNoID,
 			Explain: "empty ids",
 		},
 	})

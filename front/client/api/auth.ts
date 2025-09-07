@@ -1,35 +1,28 @@
-import i18n from '../i18n';
 import api from './api';
 import models from './models';
-import * as is from '../third_party/is'
 
 async function auth() {
-	let response = {};
 	let result = {
-		error: "",
-		explain: "",
-		expired: false,
+		error:     models.error(),
+		expired:   true,
 	}
 
 	try {
-		response = await api("/users/v1/auth", {
-			method: 'POST',
+		const [response, error] = await api("/users/v1/auth", {
+			method:      'POST',
 			credentials: 'include',
 		});
 
-		if (is.empty(response.error)) {
-			if (response.value.expired)
-				result.expired = true
-			else
-				result.user = models.user(response.value.user)
-		} else {
-			result.error = response.error
-			result.explain = response.explain
-		}
+		if (error)
+			result.error = models.error(error)
 
+		if (response)
+			result.expired = response.expired
 	} catch(e) {
-		console.error(i18n("error_occured"), e);
-		result.error = e
+		result.error.error   = true
+		result.error.code    = 912
+		result.error.status  = 500
+		result.error.explain = e.toString()
 	}
 
 	return result

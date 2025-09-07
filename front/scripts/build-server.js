@@ -2,7 +2,9 @@ import esbuild from 'esbuild'
 import Config from "config"
 
 let ctx = await esbuild.context({
-	entryPoints: ['client/index.js'],
+	entryPoints: [
+		'client/index.ts'
+	],
 	entryNames: '[name]',
 	define: {
 		ENV: '"' + Config.get("env") + '"',
@@ -16,6 +18,7 @@ let ctx = await esbuild.context({
 	platform: 'node',
 	outdir: "build",
 	outbase: "client",
+	logLevel: "error",
 	format: 'cjs',
 })
 

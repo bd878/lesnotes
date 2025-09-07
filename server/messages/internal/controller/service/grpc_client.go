@@ -68,18 +68,19 @@ func (s *Messages) isConnFailed() bool {
 	return false
 }
 
-func (s *Messages) SaveMessage(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (message *model.Message, err error) {
+func (s *Messages) SaveMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (message *model.Message, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
 		}
 	}
 
-	logger.Debugw("save message", "id", id, "text", text, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private, "name", name)
+	logger.Debugw("save message", "id", id, "text", text, "title", title, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private, "name", name)
 
 	message = &model.Message{
 		ID:       id,
 		Text:     text,
+		Title:    title,
 		Name:     name,
 		FileIDs:  fileIDs,
 		ThreadID: threadID,
@@ -90,6 +91,7 @@ func (s *Messages) SaveMessage(ctx context.Context, id int64, text string, fileI
 	_, err = s.client.SaveMessage(ctx, &api.SaveMessageRequest{
 		Id:       id,
 		Text:     text,
+		Title:    title,
 		FileIds:  fileIDs,
 		ThreadId: threadID,
 		UserId:   userID,
@@ -151,20 +153,21 @@ func (s *Messages) PrivateMessages(ctx context.Context, ids []int64, userID int6
 	return
 }
 
-func (s *Messages) UpdateMessage(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private int32) (err error) {
+func (s *Messages) UpdateMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private int32) (err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
 		}
 	}
 
-	logger.Debugw("update message", "id", id, "text", text, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private)
+	logger.Debugw("update message", "id", id, "text", text, "title", title, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private)
 
 	_, err = s.client.UpdateMessage(ctx, &api.UpdateMessageRequest{
 		Id:        id,
 		UserId:    userID,
 		FileIds:   fileIDs,
 		Text:      text,
+		Title:     title,
 		Private:   private,
 		ThreadId:  threadID,
 	})
@@ -172,14 +175,14 @@ func (s *Messages) UpdateMessage(ctx context.Context, id int64, text string, fil
 	return
 }
 
-func (s *Messages) ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool, private int32) (messages []*model.Message, isLastPage bool, err error) {
+func (s *Messages) ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool) (messages []*model.Message, isLastPage bool, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
 		}
 	}
 
-	logger.Debugw("read thread messages", "user_id", userID, "thread_id", threadID, "limit", limit, "offset", offset, "ascending", ascending, "private", private)
+	logger.Debugw("read thread messages", "user_id", userID, "thread_id", threadID, "limit", limit, "offset", offset, "ascending", ascending)
 
 	res, err := s.client.ReadThreadMessages(ctx, &api.ReadThreadMessagesRequest{
 		UserId:   userID,
@@ -187,7 +190,6 @@ func (s *Messages) ReadThreadMessages(ctx context.Context, userID int64, threadI
 		Limit:    limit,
 		Offset:   offset,
 		Asc:      ascending,
-		Private:  private,
 	})
 	if err != nil {
 		return nil, true, err
@@ -199,21 +201,42 @@ func (s *Messages) ReadThreadMessages(ctx context.Context, userID int64, threadI
 	return
 }
 
-func (s *Messages) ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool, private int32) (messages []*model.Message, isLastPage bool, err error) {
+func (s *Messages) ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*model.Message, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
 		}
 	}
 
-	logger.Debugw("read messages", "user_id", userID, "limit", limit, "offset", offset, "ascending", ascending, "private", private)
+	logger.Debugw("read batch messages", "user_id", userID, "ids", ids)
+
+	res, err := s.client.ReadBatchMessages(ctx, &api.ReadBatchMessagesRequest{
+		UserId:   userID,
+		Ids:      ids,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	messages = model.MapMessagesFromProto(model.MessageFromProto, res.Messages)
+
+	return
+}
+
+func (s *Messages) ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (messages []*model.Message, isLastPage bool, err error) {
+	if s.isConnFailed() {
+		if err = s.setupConnection(); err != nil {
+			return
+		}
+	}
+
+	logger.Debugw("read messages", "user_id", userID, "limit", limit, "offset", offset, "ascending", ascending)
 
 	res, err := s.client.ReadMessages(ctx, &api.ReadMessagesRequest{
 		UserId:   userID,
 		Limit:    limit,
 		Offset:   offset,
 		Asc:      ascending,
-		Private:  private,
 	})
 	if err != nil {
 		return nil, true, err
@@ -243,6 +266,28 @@ func (s *Messages) ReadMessage(ctx context.Context, id int64, userIDs []int64) (
 	}
 
 	message = model.MessageFromProto(res)
+
+	return
+}
+
+func (s *Messages) ReadPath(ctx context.Context, userID, id int64) (path []*model.Message, err error) {
+	if s.isConnFailed() {
+		if err := s.setupConnection(); err != nil {
+			return nil, err
+		}
+	}
+
+	logger.Debugw("read path", "user_id", userID, "id", id)
+
+	res, err := s.client.ReadPath(ctx, &api.ReadPathRequest{
+		Id:     id,
+		UserId: userID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	path = model.MapMessagesFromProto(model.MessageFromProto, res.Path)
 
 	return
 }

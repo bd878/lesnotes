@@ -1,13 +1,19 @@
-const empty = {
-	ID: 0,
-	name: "",
+export interface User {
+	ID:         number;
+	login:      string;
 }
-export default function mapUserFromProto(user) {
+
+const empty: User = {
+	ID:    0,
+	login: "",
+}
+
+export default function mapUserFromProto(user?: any): User {
 	if (!user)
 		return empty
 
 	return {
-		ID: user.id,
-		name: user.name,
+		ID:    user.id,
+		login: user.login,
 	}
 }

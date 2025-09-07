@@ -1,5 +1,5 @@
 import {unlink, readdir, stat, rm} from "node:fs/promises";
-// TODO: import ts from "typescript";
+import ts from "typescript";
 import Config from "config";
 import path from "node:path";
 import esbuild from 'esbuild';
@@ -20,11 +20,12 @@ for (const file of files) {
 let ctx = await esbuild.context({
 	entryPoints: [
 		'client/gui/pages/**/*.tsx',
+		'client/gui/pages/**/*.ts',
 		'client/styles/styles.css'
 	],
 	entryNames: '[name]',
 	define: {
-		BACKEND_URL: '"' + Config.get("backend_url") + '"',
+		BACKEND_URL: '"' + Config.get("domain") + '"',
 		BOT_USERNAME: '"' + Config.get("bot_username") + '"',
 		BOT_VALIDATE_URL: '"' + Config.get("bot_validate_url") + '"',
 		BOT_VALIDATE_AUTH_URL: '"' + Config.get("bot_validate_auth_url") + '"',
@@ -37,7 +38,8 @@ let ctx = await esbuild.context({
 	outdir: "public",
 	format: 'esm',
 	outbase: 'client/gui/',
-	plugins: [postcss()],
+	logLevel: "debug",
+	plugins: [postcss()]
 })
 
 await ctx.watch()

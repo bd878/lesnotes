@@ -1,41 +1,31 @@
-import i18n from '../i18n';
+import models from './models';
 import api from './api';
 
-async function register(name, password) {
-	let response = {}
-	const result = {
-		error: "",
-		explain: "",
-		isOk: false,
+async function register(login: string, password: string) {
+	let result = {
+		error:       models.error(),
 	}
 
+	const form = new FormData()
+
+	if (login)
+		form.append("login", login);
+
+	if (password)
+		form.append("password", password);
+
 	try {
-		response = await api("/users/v1/signup", {
+		const [_1, error] = await api("/users/v1/signup", {
 			method: "POST",
-			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-			},
-			body: new URLSearchParams({
-				'name': name,
-				'password': password,
-			})
+			body: form
 		});
 
-		if (response.error != "") {
-			console.error("[RegisterForm]: /signup response returned error", response.error, response.explain)
-			result.error = response.error
-			result.explain = response.explain
-		} else {
-			if (response.value.status == "ok") {
-				result.isOk = true
-			} else {
-				result.isOk = false
-				result.explain = response.value.status
-			}
-		}
+		if (error)
+			result.error = models.error(error)
 	} catch (e) {
-		console.error(i18n("error_occured"), e)
-		result.error = e
+		result.error.error   = true
+		result.error.status  = 500
+		result.error.explain = e.toString()
 	}
 
 	return result

@@ -10,6 +10,7 @@ message AppendCommand {
 	string  text = 5;
 	string  name = 6;
 	bool    private = 7;
+	string  title = 8;
 }
 
 message UpdateCommand {
@@ -20,6 +21,7 @@ message UpdateCommand {
 	string  text = 5;
 	string  name = 6;
 	int32   private = 7;
+	string  title = 8;
 }
 
 message DeleteCommand {

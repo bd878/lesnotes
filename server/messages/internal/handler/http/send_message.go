@@ -54,6 +54,7 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) (err err
 	}
 
 	text := req.PostFormValue("text")
+	title := req.PostFormValue("title")
 
 	if req.PostFormValue("file_ids") != "" {
 		fileIDs = make([]int64, 0)
@@ -124,13 +125,13 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) (err err
 		hasFile = true
 	}
 
-	if fileIDs == nil && !hasFile && text == "" {
+	if fileIDs == nil && !hasFile && text == "" && title == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
 				Code:     server.CodeWrongFormat,
-				Explain: "text or file_id or file required",
+				Explain: "text or file_id or file or title required",
 			},
 		})
 
@@ -142,7 +143,7 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) (err err
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code: server.CodeWrongFormat,
+				Code:    server.CodeWrongFormat,
 				Explain: "should be either file_id or file, not both",
 			},
 		})
@@ -158,7 +159,7 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) (err err
 			json.NewEncoder(w).Encode(server.ServerResponse{
 				Status: "error",
 				Error: &server.ErrorCode{
-					Code: messages.CodeNoFile,
+					Code:    messages.CodeNoFile,
 					Explain: "cannot read file",
 				},
 			})
@@ -195,17 +196,17 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) (err err
 	id := utils.RandomID()
 	name := uuid.New().String()
 
-	return h.saveMessage(w, req, int64(id), text, fileIDs, threadID, user.ID, private, name)
+	return h.saveMessage(w, req, int64(id), text, title, fileIDs, threadID, user.ID, private, name)
 }
 
-func (h *Handler) saveMessage(w http.ResponseWriter, req *http.Request, id int64, text string, fileIDs []int64, threadID int64, userID int64, private bool, name string) error {
-	message, err := h.controller.SaveMessage(req.Context(), id, text, fileIDs, threadID, userID, private, name)
+func (h *Handler) saveMessage(w http.ResponseWriter, req *http.Request, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private bool, name string) error {
+	message, err := h.controller.SaveMessage(req.Context(), id, text, title, fileIDs, threadID, userID, private, name)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code: messages.CodeSaveFailed,
+				Code:    messages.CodeSaveFailed,
 				Explain: "failed to save message",
 			},
 		})

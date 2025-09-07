@@ -9,19 +9,32 @@ import (
 	server "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) GetMe(w http.ResponseWriter, req *http.Request) error {
+func (h *Handler) GetMe(w http.ResponseWriter, req *http.Request) (err error) {
 	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
 			Error: &server.ErrorCode{
-				Code: server.CodeNoUser,
+				Code:    server.CodeNoUser,
 				Explain: "cannot find user",
 			},
 		})
 
-		return nil
+		return
+	}
+
+	if user.ID == users.PublicUserID {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status:   "error",
+			Error:    &server.ErrorCode{
+				Code:     server.CodeNoUser,
+				Explain:  "not authorized",
+			},
+		})
+
+		return
 	}
 
 	response, err := json.Marshal(users.GetMeResponse{
@@ -38,5 +51,5 @@ func (h *Handler) GetMe(w http.ResponseWriter, req *http.Request) error {
 		Response: json.RawMessage(response),
 	})
 
-	return nil
+	return
 }

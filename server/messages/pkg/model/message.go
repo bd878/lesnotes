@@ -12,14 +12,17 @@ type (
 		UpdateUTCNano       int64               `json:"update_utc_nano,omitempty"`
 		UserID              int64               `json:"user_id"`         // TODO: load user, == 0 for public user
 		Name                string              `json:"name"`
+		Count               int32               `json:"count"`           // count messages in this message thread
 		FileIDs             []int64             `json:"-"`
 		Files               []*files.File       `json:"files"`
 		Text                string              `json:"text"`
+		Title               string              `json:"title"`
 		Private             bool                `json:"private"`
 	}
 
 	SendRequest struct {
 		Text                string              `json:"text"`
+		Title               string              `json:"title"`
 		FileIDs             []int64             `json:"file_ids,omitempty"`
 		Private             bool                `json:"private"`
 		ThreadID            int64               `json:"thread"`
@@ -55,12 +58,21 @@ type (
 	}
 
 	ReadRequest struct {
-		Public              *int                `json:"public,omitempty"`
+		UserID              int64               `json:"user"`
 		MessageID           int64               `json:"id"`
-		ThreadID            int64               `json:"thread"`
+		ThreadID            *int64              `json:"thread"`
 		Limit               int                 `json:"limit"`
 		Offset              int                 `json:"offset"`
 		Asc                 int                 `json:"asc"`
+		IDs                 []int64             `json:"ids"`
+	}
+
+	ReadPathRequest struct {
+		ID                  int64               `json:"id"`
+	}
+
+	ReadPathResponse struct {
+		Messages            []*Message          `json:"path"`
 	}
 
 	DeleteRequest struct {
@@ -77,6 +89,7 @@ type (
 		ThreadID            *int64              `json:"thread,omitempty"`
 		Text                *string             `json:"text,omitempty"`
 		Public              *int                `json:"public,omitempty"`
+		Title               *string             `json:"title,omitempty"`
 	}
 
 	UpdateResponse struct {

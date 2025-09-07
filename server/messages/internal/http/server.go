@@ -50,6 +50,7 @@ func New(cfg Config) *Server {
 	handler := httphandler.New(grpcCtrl, filesGateway)
 
 	mux.Handle("/messages/v1/send",     middleware.Build(handler.SendMessage))
+	mux.Handle("/messages/v1/read_path", middleware.Build(handler.ReadPath))
 	mux.Handle("/messages/v1/read",     middleware.Build(handler.ReadMessages))
 	mux.Handle("/messages/v1/update",   middleware.Build(handler.UpdateMessage))
 	mux.Handle("/messages/v1/publish",  middleware.Build(handler.PublishMessages))
@@ -62,6 +63,8 @@ func New(cfg Config) *Server {
 	middleware.WithAuth(httpmiddleware.TokenAuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
 	mux.Handle("/messages/v2/send",     middleware.Build(handler.SendMessageJsonAPI))
 	mux.Handle("/messages/v2/read",     middleware.Build(handler.ReadMessagesJsonAPI))
+	// TODO: /threads/v2/read
+	mux.Handle("/messages/v2/read_path",  middleware.Build(handler.ReadPathJsonAPI))
 	mux.Handle("/messages/v2/publish",  middleware.Build(handler.PublishMessagesJsonAPI))
 	mux.Handle("/messages/v2/private",  middleware.Build(handler.PrivateMessagesJsonAPI))
 	mux.Handle("/messages/v2/delete",   middleware.Build(handler.DeleteMessagesJsonAPI))

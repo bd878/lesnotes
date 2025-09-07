@@ -1,20 +1,51 @@
-<!DOCTYPE html>
-<html lang="fr">
-	<head>
-		<meta charset="UTF-8" />
-		<link rel="icon" href="/public/favicon.ico">
-		<meta name="viewport" content="width=device-width,initial-scale=1" />
+<div class="mt-2 max-w-md min-w-3xs w-full grow">
+	<a class="italic text-2xl inline-block cursor-pointer" href="/" target="_self">Les Notes</a>
 
-		{{#styles}}
-			<link rel="stylesheet" href="{{.}}">
-		{{/styles}}
-		{{#manifest}}
-			<link rel="manifest" href={{.}} />
-		{{/manifest}}
-		<title>Les notes</title>
-	</head>
-	<body data-browser="{{browser}}" data-mobile="{{mobile}}">
-		<div id="app"></div>
-		<script type="module" src="{{{ script }}}"></script>
-	</body>
-</html>
+	<form
+		id="login-form"
+		action=""
+		onsubmit="return false;"
+		type="multipart/form-data"
+		autocomplete="off"
+		name="login-form"
+		class="flex flex-col"
+	>
+		<div>
+			<label htmlFor="login">{{username}}</label>
+			<input
+				required
+				name="login"
+				type="text"
+				class="block w-full border-solid border-1"
+			/>
+		</div>
+		<div class="mt-2">
+			<div el="label" htmlFor="password">{{password}}</div>
+			<input
+				required
+				name="password"
+				type="password"
+				class="block w-full border-solid border-1"
+			/>
+		</div>
+
+		<div class="flex flex-row justify-between mt-3">
+			<a
+				el="a"
+				href="/signup"
+				target="_self"
+				class="underline italic text-blue-600 text-left cursor-pointer"
+			>
+				{{register}}
+			</a>
+
+			<button
+				type="submit"
+				class="border-1 px-4 border-solid text-left cursor-pointer"
+			>{{login}}</button>
+		</div>
+	</form>
+</div>
+
+<div class="mt-2" id="telegram-login-widget">
+</div>

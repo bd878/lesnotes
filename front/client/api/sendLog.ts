@@ -1,30 +1,24 @@
-import i18n from '../i18n';
+import models from './models';
 import api from './api';
 
-async function sendLog(body) {
-	let result: SendMessageResult = {
-		error: "",
-		explain: "",
-		ok: false,
+async function sendLog(body: any) {
+	let result = {
+		error:       models.error(),
 	}
 
 	try {
-		let response = await api("/telemetry/v1/send", {
-			method: "POST",
+		let [response, error] = await api("/telemetry/v1/send", {
+			method:    "POST",
 			isFullUrl: true,
-			body: body,
+			body:      body,
 		});
 
-		if (response.error != "") {
-			result.error = response.error
-			result.explain = response.explain
-			result.ok = false
-		} else {
-			result.ok = true
-		}
+		if (error)
+			result.error = models.error(error)
 	} catch (e) {
-		console.error(i18n("error_occured"), e);
-		result.error = e.toString()
+		result.error.error   = true
+		result.error.status  = 500
+		result.error.explain = e.toString()
 	}
 
 	return result

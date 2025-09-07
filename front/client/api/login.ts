@@ -1,41 +1,31 @@
-import i18n from '../i18n';
 import api from './api';
+import models from './models';
 
-async function login(name, password) {
-	let response = {}
+async function login(login: string, password: string) {
 	let result = {
-		error: "",
-		explain: "",
-		isOk: false,
+		error:   models.error(),
 	}
 
+	const form = new FormData()
+
+	if (login)
+		form.append("login", login);
+
+	if (password)
+		form.append("password", password);
+
 	try {
-		response = await api("/users/v1/login", {
+		const [_1, error] = await api("/users/v1/login", {
 			method: "POST",
-			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-			},
-			body: new URLSearchParams({
-				'name': name,
-				'password': password,
-			})
+			body: form,
 		});
 
-		if (response.error == "") {
-			if (response.value.status == "ok") {
-				result.isOk = true
-			} else {
-				result.isOk = false
-				result.explain = result.value.status
-			}
-		} else {
-			console.error(i18n("error_occured"), response.error, response.explain)
-			result.error = response.error
-			result.explain = response.explain
-		}
+		if (error)
+			result.error = models.error(error)
 	} catch (e) {
-		console.error(i18n("error_occured"), e);
-		result.error = e
+		result.error.error   = true
+		result.error.status  = 500
+		result.error.explain = e.toString()
 	}
 
 	return result

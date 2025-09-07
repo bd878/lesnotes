@@ -8,15 +8,17 @@ import (
 )
 
 type Controller interface {
-	SaveMessage(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (err error)
-	UpdateMessage(ctx context.Context, id int64, text string, fileIDs []int64, threadID int64, userID int64, private int32) (err error)
+	SaveMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (err error)
+	UpdateMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private int32) (err error)
 	DeleteMessages(ctx context.Context, ids []int64, userID int64) (err error)
 	DeleteUserMessages(ctx context.Context, userID int64) (err error)
 	PublishMessages(ctx context.Context, ids []int64, userID int64) (err error)
 	PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error)
+	ReadPath(ctx context.Context, userID, id int64) (path []*messages.Message, err error)
 	ReadMessage(ctx context.Context, id int64, userIDs []int64) (message *messages.Message, err error)
-	ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool, private int32) (messages []*messages.Message, isLastPage bool, err error)
-	ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool, private int32) (messages []*messages.Message, isLastPage bool, err error)
+	ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (messages []*messages.Message, isLastPage bool, err error)
+	ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool) (messages []*messages.Message, isLastPage bool, err error)
+	ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*messages.Message, err error)
 	GetServers(ctx context.Context) (servers []*api.Server, err error)
 }
 
@@ -32,7 +34,7 @@ func New(ctrl Controller) *Handler {
 }
 
 func (h *Handler) SaveMessage(ctx context.Context, req *api.SaveMessageRequest) (resp *api.SaveMessageResponse, err error) {
-	err = h.controller.SaveMessage(ctx, req.Id, req.Text, req.FileIds, req.ThreadId, req.UserId, req.Private, req.Name)
+	err = h.controller.SaveMessage(ctx, req.Id, req.Text, req.Title, req.FileIds, req.ThreadId, req.UserId, req.Private, req.Name)
 
 	resp = &api.SaveMessageResponse{}
 
@@ -48,7 +50,7 @@ func (h *Handler) DeleteUserMessages(ctx context.Context, req *api.DeleteUserMes
 }
 
 func (h *Handler) UpdateMessage(ctx context.Context, req *api.UpdateMessageRequest) (resp *api.UpdateMessageResponse, err error) {
-	err = h.controller.UpdateMessage(ctx, req.Id, req.Text, nil, req.ThreadId, req.UserId, req.Private)
+	err = h.controller.UpdateMessage(ctx, req.Id, req.Text, req.Title, nil, req.ThreadId, req.UserId, req.Private)
 
 	resp = &api.UpdateMessageResponse{}
 
@@ -80,7 +82,7 @@ func (h *Handler) PrivateMessages(ctx context.Context, req *api.PrivateMessagesR
 }
 
 func (h *Handler) ReadThreadMessages(ctx context.Context, req *api.ReadThreadMessagesRequest) (resp *api.ReadThreadMessagesResponse, err error) {
-	list, isLastPage, err := h.controller.ReadThreadMessages(ctx, req.UserId, req.ThreadId, req.Limit, req.Offset, req.Asc, req.Private)
+	list, isLastPage, err := h.controller.ReadThreadMessages(ctx, req.UserId, req.ThreadId, req.Limit, req.Offset, req.Asc)
 	if err != nil {
 		return nil, err
 	}
@@ -93,8 +95,21 @@ func (h *Handler) ReadThreadMessages(ctx context.Context, req *api.ReadThreadMes
 	return
 }
 
+func (h *Handler) ReadBatchMessages(ctx context.Context, req *api.ReadBatchMessagesRequest) (resp *api.ReadBatchMessagesResponse, err error) {
+	list, err := h.controller.ReadBatchMessages(ctx, req.UserId, req.Ids)
+	if err != nil {
+		return nil, err
+	}
+
+	resp = &api.ReadBatchMessagesResponse{
+		Messages:   messages.MapMessagesToProto(messages.MessageToProto, list),
+	}
+
+	return
+}
+
 func (h *Handler) ReadMessages(ctx context.Context, req *api.ReadMessagesRequest) (resp *api.ReadMessagesResponse, err error) {
-	list, isLastPage, err := h.controller.ReadMessages(ctx, req.UserId, req.Limit, req.Offset, req.Asc, req.Private)
+	list, isLastPage, err := h.controller.ReadMessages(ctx, req.UserId, req.Limit, req.Offset, req.Asc)
 	if err != nil {
 		return nil, err
 	}
@@ -127,6 +142,19 @@ func (h *Handler) ReadMessage(ctx context.Context, req *api.ReadMessageRequest) 
 	}
 
 	resp = messages.MessageToProto(message)
+
+	return
+}
+
+func (h *Handler) ReadPath(ctx context.Context, req *api.ReadPathRequest) (resp *api.ReadPathResponse, err error) {
+	path, err := h.controller.ReadPath(ctx, req.UserId, req.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	resp = &api.ReadPathResponse{
+		Path:   messages.MapMessagesToProto(messages.MessageToProto, path),
+	}
 
 	return
 }

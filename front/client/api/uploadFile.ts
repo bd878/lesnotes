@@ -1,44 +1,35 @@
-import i18n from '../i18n';
 import api from './api';
 import models from './models';
 
 async function uploadFile(file: any) {
-	let response = {};
 	let result = {
-		error: "",
-		explain: "",
-		ID: "",
-		Name: "",
+		error:   models.error(),
+		ID:      0,
+		name:    "",
 	}
 
 	const form = new FormData()
-	if (file != null && file.name != "") {
+	if (file)
 		form.append('file', file, file.name);
-	} else {
-		result.error = "file required"
-		return result
-	}
 
 	try {
-		response = await api("/files/v1/upload", {
+		const [response, error] = await api("/files/v1/upload", {
 			method: "POST",
 			credentials: "include",
 			body: form,
 		});
 
-		if (response.error != "") {
-			result.error = response.error
-			result.explain = response.explain
-		} else {
-			if (response.value) {
-				const model = models.file(response.value)
-				result.ID = model.ID
-				result.Name = model.name
-			}
+		if (error)
+			result.error = models.error(error)
+
+		if (response) {
+			result.ID = response.id
+			result.name = response.name
 		}
 	} catch (e) {
-		console.error(i18n("error_occured"), e);
-		result.error = e
+		result.error.error    = true
+		result.error.status   = 500
+		result.error.explain  = e.toString()
 	}
 
 	return result

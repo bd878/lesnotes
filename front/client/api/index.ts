@@ -1,7 +1,11 @@
-import loadMessages from './loadMessages';
-import loadMessagesJson from './loadMessagesJson';
-import loadOneMessage from './loadOneMessage';
+import readMessages from './readMessages';
+import readMessagesJson from './readMessagesJson';
+import readMessagePathJson from './readMessagePathJson';
+import readBatchMessagesJson from './readBatchMessagesJson';
+import readMessage from './readMessage';
+import readMessageJson from './readMessageJson';
 import sendMessage from './sendMessage';
+import sendMessageJson from './sendMessageJson';
 import updateMessage from './updateMessage';
 import deleteMessage from './deleteMessage';
 import deleteMessages from './deleteMessages';
@@ -13,8 +17,10 @@ import validateMiniappData from './validateMiniappData';
 import validateTgAuthData from './validateTgAuthData';
 import sendLog from './sendLog';
 import auth from './auth';
+import authJson from './authJson';
 import login from './login';
 import logout from './logout';
+import getMe from './getMe';
 import register from './register';
 import {getFileDownloadUrl, getMessageLinkUrl} from './api';
 
@@ -24,10 +30,16 @@ export default {
 	login,
 	logout,
 	auth,
-	loadMessages,
-	loadMessagesJson,
-	loadOneMessage,
+	authJson,
+	getMe,
+	readMessages,
+	readMessagesJson,
+	readBatchMessagesJson,
+	readMessagePathJson,
+	readMessageJson,
+	readMessage,
 	sendMessage,
+	sendMessageJson,
 	updateMessage,
 	deleteMessage,
 	deleteMessages,

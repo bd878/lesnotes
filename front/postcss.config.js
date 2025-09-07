@@ -1,7 +1,7 @@
 const config = {
-	plugins: [
-		require("@tailwindcss/postcss")
-	]
+	plugins: {
+		"@tailwindcss/postcss": {},
+	}
 }
 
 module.exports = config

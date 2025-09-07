@@ -30,7 +30,7 @@ func (h *Handler) PrivateMessages(w http.ResponseWriter, req *http.Request) (err
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code: messages.CodeMessagePublic,
+				Code:    messages.CodeMessagePublic,
 				Explain: "can private messages of a user only",
 			},
 		})
@@ -45,7 +45,7 @@ func (h *Handler) PrivateMessages(w http.ResponseWriter, req *http.Request) (err
 			json.NewEncoder(w).Encode(server.ServerResponse{
 				Status: "error",
 				Error: &server.ErrorCode{
-					Code:  server.CodeWrongQuery,
+					Code:    server.CodeWrongQuery,
 					Explain: "wrong \"ids\" query field format",
 				},
 			})

@@ -1,13 +1,26 @@
-const empty = {
-	ID: 0,
-	name: "",
+export interface File {
+	ID:        number;
+	name:      string;
 }
-export default function mapFileFromProto(file) {
+
+export interface FileProto {
+	id:        number;
+	name:      string;
+}
+
+const EmptyFile: File = Object.freeze({
+	ID:   0,
+	name: "",
+})
+
+export default function mapFileFromProto(file?: FileProto): File {
 	if (!file)
-		return empty
+		return EmptyFile
 
 	return {
-		ID: file.id,
+		ID:   file.id,
 		name: file.name,
 	}
 }
+
+export { EmptyFile }

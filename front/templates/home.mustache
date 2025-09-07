@@ -1,0 +1,129 @@
+<div id="content" class="h-full flex flex-row">
+	<div id="sidebar" class="flex flex-col justify-between mt-2 pr-2 w-xs min-w-xs">
+		<div class="flex flex-col">
+			<a class="italic text-2xl mb-4 inline-block cursor-pointer" href="/home" target="_self">Les Notes</a>
+
+			<input class="italic px-1 text-gray-600 border border-black" type="text" id="search" name="search" placeholder="{{search}}"></input>
+		</div>
+
+		<a href="/logout" target="_self" class="underline text-blue-600 visited:text-purple-600">{{logout}}</a>
+	</div>
+
+	<div id="messages" class="ml-2 pr-2 flex flex-col w-lg min-w-lg">
+		<div class="flex flex-col w-full">
+			{{#error}}
+				<span>{{.}}</span>
+			{{/error}}
+			{{^error}}
+				<div id="threads-list">
+					<ul class="flex flex-col">
+						{{#threads}}
+							<li class="flex flex-row justify-between last:mb-2">
+								<button class="overflow-hidden justify-between flex flex-row w-full text-lg" data-message-id="{{ID}}">
+									<div class="hover:text-blue-600 cursor-pointer overflow-hidden text-ellipsis mr-2" data-message-id="{{ID}}">
+										{{#title}}
+											{{title}}
+										{{/title}}
+										{{^title}}
+											{{text}}
+										{{/title}}
+									</div>
+
+									<div data-message-id="{{ID}}">{{count}}</div>
+								</button>
+
+								<button type="button" class="hover:text-blue-600 px-2 ml-2 cursor-pointer" data-thread-id="{{threadID}}"> < </button>
+							</li>
+						{{/threads}}
+					</ul>
+				</div>
+
+				<div id="messages-list">
+					<ul class="flex flex-col">
+						{{#messages}}
+							<li class="mb-2 grow-1 max-w-full flex flex-row justify-between whitespace-nowrap">
+								<button type="button" class="flex flex-row justify-between overflow-hidden bg-gray-300 hover:bg-gray-500 hover:text-white cursor-pointer text-left px-2 italic w-full" data-message-id="{{ID}}">
+									<div class="overflow-hidden text-ellipsis mr-2" data-message-id="{{ID}}">
+										{{#title}}
+											{{title}}
+										{{/title}}
+										{{^title}}
+											{{text}}
+										{{/title}}
+									</div>
+
+									<div data-message-id="{{ID}}">{{count}}</div>
+								</button>
+
+								<button type="button" class="bg-gray-300 hover:bg-gray-500 hover:text-white cursor-pointer px-2 ml-2" data-thread-id="{{ID}}"> > </button>
+							</li>
+						{{/messages}}
+					</ul>
+				</div>
+			{{/error}}
+		</div>
+	</div>
+
+	<div id="editor" class="ml-2 max-w-2xl flex flex-row grow border-1 border-solid p-4">
+		{{#message}}
+			{{#editMessage}}
+				<form id="message-edit-form" name="message-edit-form" autocomplete="off" onsubmit="return false;" class="w-full flex flex-col">
+					<div class="flex flex-col grow">
+						<input name="messageTitle" class="focus:outline-none w-full resize-none italic text-gray-600 text-lg mb-2" placeholder="{{title_placeholder}}">{{title}}</input>
+						<textarea name="text" type="input" class="focus:outline-none w-full resize-none italic text-gray-600 text-sm h-full" placeholder="{{text_placeholder}}">{{text}}</textarea>
+					</div>
+
+					<div class="flex flex-col">
+						<div></div>
+						<div class="flex flex-row justify-between">
+							<input id="file" name="file" type="file"></input>
+
+							<button type="submit" class="border-1 px-4 border-solid text-left cursor-pointer">{{update}}</button>
+							<button id="message-cancel-edit" class="border-1 px-4 border-solid text-left cursor-pointer">{{cancelEdit}}</button>
+						</div>
+					</div>
+				</form>
+			{{/editMessage}}
+			{{^editMessage}}
+				<div id="message" class="flex flex-col justify-between">
+					<div>
+						{{#title}}
+							<div class="whitespace-pre-wrap text-lg">{{title}}</div>
+						{{/title}}
+						<div>
+							<p class="whitespace-pre-wrap">{{text}}</p>
+						</div>
+					</div>
+
+					<div class="flex flex-row">
+						<button id="message-delete" data-message-id="{{ID}}" type="button" class="border-1 px-4 border-solid text-left cursor-pointer mr-2">{{delete}}</button>
+						<button id="message-edit" data-message-id="{{ID}}" type="button" class="border-1 px-4 border-solid text-left cursor-pointer mr-2">{{edit}}</button>
+						{{#private}}
+							<button id="message-publish" data-message-id="{{ID}}" type="button" class="border-1 px-4 border-solid text-left cursor-pointer">{{publish}}</button>
+						{{/private}}
+						{{^private}}
+							<button id="message-private" data-message-id="{{ID}}" type="button" class="border-1 px-4 border-solid text-left cursor-pointer">{{private}}</button>
+						{{/private}}
+					</div>
+				</div>
+			{{/editMessage}}
+		{{/message}}
+		{{^message}}
+			<form id="message-form" name="message-form" autocomplete="off" onsubmit="return false;" class="w-full flex flex-col">
+				<div class="flex flex-col grow">
+					<input name="messageTitle" class="focus:outline-none w-full resize-none italic text-gray-600 text-lg mb-2" placeholder="{{title_placeholder}}"></input>
+					<textarea name="text" type="input" class="focus:outline-none w-full resize-none italic text-gray-600 text-sm h-full" placeholder="{{text_placeholder}}"></textarea>
+				</div>
+
+				<div class="flex flex-col">
+					<div></div>
+					<div class="flex flex-row justify-between">
+						<input id="file" name="file" type="file"></input>
+
+						<button type="submit" class="border-1 px-4 border-solid text-left cursor-pointer">{{send}}</button>
+					</div>
+				</div>
+			</form>
+		{{/message}}
+	</div>
+</div>

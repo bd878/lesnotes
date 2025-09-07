@@ -38,7 +38,7 @@ func (h *Handler) ReadBatchFiles(ctx context.Context, req *api.ReadBatchFilesReq
 
 		file, err := h.repo.GetMeta(ctx, req.UserId, id, "")
 		if err != nil {
-			files[id].Error = "can not found file"
+			files[id].Error = "can not find file"
 			logger.Errorw("failed to read file", "user_id", req.UserId, "id", id, "error", err)
 			continue
 		}

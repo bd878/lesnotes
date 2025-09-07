@@ -1,32 +1,28 @@
-import i18n from '../i18n';
 import api from './api';
+import models from './models';
 
-async function validateMiniappData(body) {
-	let result: SendMessageResult = {
-		error: "",
-		explain: "",
-		ok: false,
-		token: "",
+async function validateMiniappData(body: any) {
+	let result = {
+		error:   models.error(),
+		token:   "",
 	}
 
 	try {
-		let response = await api(`${BOT_VALIDATE_URL}`, {
+		const [response, error] = await api(`${BOT_VALIDATE_URL}`, {
 			method: "POST",
 			isFullUrl: true,
 			body: body,
 		});
 
-		if (response.error != "") {
-			result.error = response.error
-			result.explain = response.explain
-			result.ok = false
-		} else {
-			result.ok = true
-			result.token = response.value.token
-		}
+		if (error)
+			result.error = models.error(error)
+
+		if (response)
+			result.token = response.token
 	} catch (e) {
-		console.error(i18n("error_occured"), e);
-		result.error = e.toString()
+		result.error.error    = true
+		result.error.status   = 500
+		result.error.explain  = e.toString()
 	}
 
 	return result

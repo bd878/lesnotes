@@ -59,12 +59,12 @@ func (h *Handler) Login(w http.ResponseWriter, req *http.Request) (err error) {
 	session, err := h.controller.LoginUser(req.Context(), login, password)
 	switch err {
 	case controller.ErrUserNotFound:
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
 			Error: &server.ErrorCode{
 				Code:     users.CodeAuthFailed,
-				Explain: "no user,password pair",
+				Explain: "no login,password pair",
 			},
 		})
 

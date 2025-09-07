@@ -1,26 +1,22 @@
-import i18n from '../i18n';
 import api from './api';
 import * as is from '../third_party/is'
 import models from './models';
 
-async function updateMessage({id, text, public: isPublic}) {
-	let response = {};
-	let result: UpdateMessageResult = {
-		error: "",
-		explain: "",
-		ID: "",
-		updateUTCNano: 0,
+async function updateMessage(id: number, text: string, isPublic: boolean | undefined) {
+	let result = {
+		error:   models.error(),
 	}
 
 	const form = new FormData()
-	if (is.notEmpty(text))
+
+	if (text)
 		form.append("text", text);
 
 	if (is.notUndef(isPublic))
-		form.append("public", isPublic)
+		form.append("public", `${isPublic}`)
 
 	try {
-		response = await api("/messages/v1/update", {
+		const [_1, error] = await api("/messages/v1/update", {
 			queryParams: {
 				id: id,
 			},
@@ -29,19 +25,12 @@ async function updateMessage({id, text, public: isPublic}) {
 			body: form,
 		});
 
-		if (response.error != "") {
-			result.error = response.error
-			result.explain = response.explain
-		} else {
-			if (response.value) {
-				const model = models.message({update_utc_nano: response.value.update_utc_nano})
-				result.ID = id
-				result.updateUTCNano = model.updateUTCNano
-			}
-		}
+		if (error)
+			result.error = models.error(error)
 	} catch (e) {
-		console.error(i18n("error_occured"), e);
-		result.error = e
+		result.error.error    = true
+		result.error.status   = 500
+		result.error.explain  = e.toString()
 	}
 
 	return result

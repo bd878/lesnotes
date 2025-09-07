@@ -4,18 +4,14 @@
 		<meta charset="UTF-8" />
 		<link rel="icon" href="/public/favicon.ico">
 		<meta name="viewport" content="width=device-width,initial-scale=1" />
-		{{#styles}}
-			<link rel="stylesheet" href="{{.}}">
-		{{/styles}}
+		<style type="text/css">{{{styles}}}</style>
 		<title>Les notes</title>
 	</head>
-	<body data-id="{{id}}" data-user-id="{{userId}}">
-		{{#react}}
-			<div id="app"></div>
-			<script type="module" src="{{{ script }}}"></script>
-		{{/react}}
-		{{^react}}
-			<div class="whitespace-pre">{{message.text}}</div>
-		{{/react}}
+	<body data-id="{{id}}" data-user-id="{{user}}">
+		<div class="whitespace-pre">{{message.text}}</div>
+
+		{{#files}}
+			<a class="underline text-blue-600 visited:text-purple-600" href="/files/v2/{{ID}}" target="_blank" download="{{name}}">{{name}}</a>
+		{{/files}}
 	</body>
 </html>

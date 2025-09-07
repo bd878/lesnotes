@@ -1,34 +1,49 @@
+import type {File} from './file'
 import file from './file';
+import * as is from '../../third_party/is'
 
 const ns_in_ms = 10**6
 
-const empty = {
-	ID: 0,
-	createUTCNano: 0,
-	updateUTCNano: 0,
-	userID: 0,
-	text: "",
-	fileID: 0,
-	file: file(),
-	threadID: 0,
-	private: true,
+export interface Message {
+	ID:            number;
+	createUTCNano: string;
+	updateUTCNano: string;
+	userID:        number;
+	text:          string;
+	name:          string;
+	title:         string;
+	count:         number;
+	files:         File[];
+	threadID:      number;
+	private:       boolean;
 }
 
-export default function mapMessageFromProto(message) {
-	if (!message)
-		return empty
+const EmptyMessage: Message = Object.freeze({
+	ID: 0,
+	createUTCNano: "",
+	updateUTCNano: "",
+	userID: 0,
+	text: "",
+	title: "",
+	count: 0,
+	name: "",
+	files:  [],
+	threadID: 0,
+	private: true,
+})
 
-	let createUTCNano = 0
+export default function mapMessageFromProto(message?: any): Message {
+	if (!message)
+		return EmptyMessage
+
+	let createUTCNano = "0"
 	if (message.create_utc_nano) {
-		createUTCNano = new Date(Math.floor(message.create_utc_nano / ns_in_ms))
-		createUTCNano = createUTCNano.toLocaleString()
+		createUTCNano = new Date(Math.floor(message.create_utc_nano / ns_in_ms)).toLocaleString()
 	}
 
-// TODO: createUTCNano -> dateCreatedString
-	let updateUTCNano = 0
+	let updateUTCNano = "0"
 	if (message.update_utc_nano) {
-		updateUTCNano = new Date(Math.floor(message.update_utc_nano / ns_in_ms))
-		updateUTCNano = updateUTCNano.toLocaleString()
+		updateUTCNano = new Date(Math.floor(message.update_utc_nano / ns_in_ms)).toLocaleString()
 	}
 
 	const res = {
@@ -37,13 +52,18 @@ export default function mapMessageFromProto(message) {
 		updateUTCNano: updateUTCNano,
 		userID: message.user_id,
 		text: message.text,
+		name: "",
+		title: message.title,
+		count: message.count,
 		private: Boolean(message.private),
-		threadID: message.thread_id,
+		threadID: message.thread,
+		files: [],
 	}
-	if (message.file && message.file_id) {
-		res.fileID = message.file_id
-		res.file = file(message.file)
+	if (is.array(message.files)) {
+		res.files = message.files.map(file)
 	}
 
 	return res
 }
+
+export { EmptyMessage }

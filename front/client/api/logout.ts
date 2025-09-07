@@ -1,29 +1,23 @@
-import i18n from '../i18n';
 import api from './api';
+import models from './models';
 
 async function logout() {
-	let response = {};
 	let result = {
-		error: "",
-		explain: "",
+		error:  models.error(),
 	}
 
 	try {
-		response = await api("/users/v1/logout", {
+		const [_1, error] = await api("/users/v1/logout", {
 			method: 'POST',
 			credentials: 'include',
 		});
 
-
-		if (response.error == "") {
-			/*ok*/
-		} else {
-			result.error = response.error
-			result.explain = response.explain
-		}
+		if (error)
+			result.error = models.error(error)
 	} catch(e) {
-		console.error(i18n("error_occured"), e);
-		result.error = e
+		result.error.error   = true
+		result.error.status  = 500
+		result.error.explain = e.toString()
 	}
 
 	return result

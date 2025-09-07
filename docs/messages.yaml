@@ -284,12 +284,13 @@ paths:
   /messages/v1/read:
     parameters:
       - $ref: '#/components/parameters/token'
-      - $ref: '#/components/parameters/public'
       - $ref: '#/components/parameters/message'
+      - $ref: '#/components/parameters/user'
       - $ref: '#/components/parameters/thread'
       - $ref: '#/components/parameters/limit'
       - $ref: '#/components/parameters/offset'
       - $ref: '#/components/parameters/asc'
+      - $ref: '#/components/parameters/messages'
     get:
       summary: Get user messages
       description: |
@@ -336,8 +337,60 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/serverError'
+                - $ref: '#/components/schemas/serverError'
 # END READ
+
+# READ PATH
+  /messages/v1/read_path:
+    parameters:
+      - $ref: '#/components/parameters/message'
+    get:
+      summary: Get message path
+      description: |
+        Read path for given message id, returns a list of message threads
+      operationId: readMessagePath
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/readPathOk'
+
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/serverError'
+
+  /messages/v2/read_path:
+    post:
+      summary: Get thread messages of a message
+      description: |
+        Read path for given path id, returns a list of message threads
+      operationId: readMessagePathJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              - $ref: '#/components/schemas/readPathJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/readPathOk'
+
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/serverError'
+
+# END READ PATH
 
 # STATUS
   /messages/v1/status:
@@ -356,7 +409,7 @@ paths:
 # TODO: delete
   /messages/v1/read_file:
     parameters:
-      - $ref: '#/components/parameters/fileId'
+      - $ref: '#/components/parameters/file'
     get:
       operationId: readFile
       summary: Read attached file
@@ -382,10 +435,17 @@ components:
       schema:
         type: string
         example: token=AAAAAA
-    fileId:
+    file:
       name: file
       in: query
       required: true
+      schema:
+        type: integer
+        example: 1
+    user:
+      name: user
+      in: query
+      required: false
       schema:
         type: integer
         example: 1
@@ -432,12 +492,6 @@ components:
       schema:
         enum: [1, 0]
         type: integer
-    public:
-      name: public
-      in: query
-      required: false
-      schema:
-        type: integer
 
   schemas:
 # ERROR
@@ -466,6 +520,10 @@ components:
             public:
               type: integer
               default: false
+            title:
+              type: string
+              required: false
+              default: ""
             text:
               type: string
               default: ""
@@ -482,6 +540,10 @@ components:
             public:
               type: integer
               default: false
+            title:
+              type: string
+              required: false
+              default: ""
             text:
               type: string
               default: ""
@@ -501,6 +563,10 @@ components:
         req:
           type: object
           properties:
+            title:
+              type: string
+              required: false
+              default: ""
             text:
               type: string
               default: ""
@@ -540,10 +606,14 @@ components:
         req:
           type: object
           properties:
-            public:
+            user:
               type: integer
               required: false
-              default: 0
+            ids:
+              type: array
+              required: false
+              items:
+                type: integer
             id:
               type: integer
               required: false
@@ -582,6 +652,37 @@ components:
                   - $ref: '#/components/schemas/message'
 # END READ
 
+# READ PATH
+    readPathJson:
+      type: object
+      properties:
+        token:
+          type: string
+          required: true
+        req:
+          type: object
+          properties:
+            id:
+              type: integer
+              required: true
+
+    readPathOk:
+      type: object
+      properties:
+        status:
+          type: string
+          default: "ok"
+        response:
+          type: object
+          properties:
+            path:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/message'
+
+# END READ PATH
+
 # UPDATE
     updateJson:
       type: object
@@ -601,6 +702,9 @@ components:
                 public:
                   type: integer
                   example: 1
+                title:
+                  type: string
+                  required: false
                 text:
                   type: string
                   example: "test message"
@@ -620,6 +724,9 @@ components:
                 public:
                   type: integer
                   example: 1
+                title:
+                  type: string
+                  required: false
                 text:
                   type: string
                   example: "test message"
@@ -634,9 +741,15 @@ components:
       oneOf:
         - type: object
           properties:
+            id:
+              type: integer
+              required: true
             public:
               type: integer
               example: 1
+            title:
+              type: string
+              required: false
             text:
               type: string
               example: "test message"
@@ -646,9 +759,15 @@ components:
 
         - type: object
           properties:
+            id:
+              type: integer
+              required: true
             public:
               type: integer
               example: 1
+            title:
+              type: string
+              required: false
             text:
               type: string
               example: "test message"
@@ -692,6 +811,23 @@ components:
               required: false
               items:
                 type: integer
+
+    deleteOk:
+      type: object
+      properties:
+        status:
+          type: string
+          default: "ok"
+        response:
+          type: object
+          properties:
+            ids:
+              type: array:
+              items:
+                type: integer
+            description:
+              type: string
+
 # DELETE JSON
 
 # PUBLISH
@@ -783,7 +919,11 @@ components:
           type: integer
         thread:
           type: integer
+        count:
+          type: integer
         name:
+          type: string
+        title:
           type: string
         text:
           type: string
