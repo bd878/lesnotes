@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package threads.v1;
+
+option go_package = "github.com/bd878/gallery/server/api";
+
+service Threads {
+	rpc Publish(PublishRequest) returns (PublishResponse) {}
+	rpc Private(PrivateRequest) returns (PrivateResponse) {}
+	rpc Create(CreateRequest) returns (CreateResponse) {}
+	rpc Delete(DeleteRequest) returns (DeleteResponse) {}
+}
+
+message PublishRequest {
+	int64 id = 1;
+}
+
+message PublishResponse {
+}
+
+message PrivateRequest {
+	int64 id = 1;
+}
+
+message PrivateResponse {
+}
+
+message CreateRequest {
+	int64     id = 1;
+	int64     user_id = 2;
+	string    name = 3;
+}
+
+message CreateResponse {
+}
+
+message DeleteRequest {
+	int64     id = 1;
+}
+
+message DeleteResponse {
+}

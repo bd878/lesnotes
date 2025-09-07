@@ -67,6 +67,7 @@ func New(cfg Config) (server *Server) {
 
 	middleware.NoAuth().WithAuth(httpmiddleware.TokenAuthBuilder(logger.Default(), control, sessionsGateway, users.PublicUserID))
 	mux.Handle("/users/v2/delete", middleware.Build(handler.DeleteJsonAPI))
+	mux.Handle("/users/v2/me",     middleware.Build(handler.GetMe))
 
 	middleware.NoAuth()
 	mux.Handle("/users/v1/signup", middleware.Build(handler.Signup))

@@ -31,6 +31,31 @@ paths:
             application:
               schema:
                 $ref: '#/components/schemas/serverError'
+
+  /users/v2/me:
+    post:
+      summary: Get this user's data via json api
+      description: |
+        Returns authorized user's data via json api
+      operationId: getMeJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getMeJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/meOk'
+        "4XX":
+          description: error
+          content:
+            application:
+              schema:
+                $ref: '#/components/schemas/serverError'
 # END ME
 
 # AUTH
@@ -379,12 +404,18 @@ components:
 # SIGNUP
     signupJson:
       type: object
-      login:
-        type: string
-        example: text
-      password:
-        type: string
-        example: "12345"
+      properties:
+        token:
+          type: string
+        request:
+          type: object
+          properties:
+            login:
+              type: string
+              example: text
+            password:
+              type: string
+              example: "12345"
 
     signupForm:
       type: object
@@ -414,6 +445,12 @@ components:
 # END SIGNUP
 
 # ME
+    getMeJson:
+      type: object
+      properties:
+        token:
+          type: string
+
     meOk:
       type: object
       status:
