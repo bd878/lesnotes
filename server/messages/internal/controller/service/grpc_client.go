@@ -249,18 +249,19 @@ func (s *Messages) ReadMessages(ctx context.Context, userID int64, limit, offset
 	return
 }
 
-func (s *Messages) ReadMessage(ctx context.Context, id int64, userIDs []int64) (message *model.Message, err error) {
+func (s *Messages) ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *model.Message, err error) {
 	if s.isConnFailed() {
 		if err := s.setupConnection(); err != nil {
 			return nil, err
 		}
 	}
 
-	logger.Debugw("read message", "id", id, "user_ids", userIDs)
+	logger.Debugw("read message", "id", id, "name", name, "user_ids", userIDs)
 
 	res, err := s.client.ReadMessage(ctx, &api.ReadMessageRequest{
 		Id:      id,
 		UserIds: userIDs,
+		Name:    name,
 	})
 	if err != nil {
 		return nil, err

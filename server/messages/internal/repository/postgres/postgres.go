@@ -243,7 +243,7 @@ func (r *Repository) Private(ctx context.Context, userID int64, ids []int64) (er
 	return
 }
 
-func (r *Repository) Read(ctx context.Context, userIDs []int64, id int64) (message *model.Message, err error) {
+func (r *Repository) Read(ctx context.Context, userIDs []int64, id int64, name string) (message *model.Message, err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -263,7 +263,7 @@ func (r *Repository) Read(ctx context.Context, userIDs []int64, id int64) (messa
 		}
 	}()
 
-	message = &model.Message{ID: id}
+	message = &model.Message{}
 
 	var (
 		fileIDs   []byte
@@ -280,9 +280,20 @@ func (r *Repository) Read(ctx context.Context, userIDs []int64, id int64) (messa
 		list[i] = id
 	}
 
-	err = tx.QueryRow(ctx, r.table(`
-SELECT user_id, thread_id, file_ids, created_at, updated_at, text, private, name, title FROM %s WHERE id = $1 AND (user_id IN (` + ids + `) OR private = false)
-`), append([]interface{}{id}, list...)...).Scan(&message.UserID, &message.ThreadID, &fileIDs, &createdAt, &updatedAt, &message.Text, &message.Private, &message.Name, &message.Title)
+	if id != 0 {
+
+		err = tx.QueryRow(ctx, r.table(`
+SELECT id, user_id, thread_id, file_ids, created_at, updated_at, text, private, name, title FROM %s WHERE id = $1 AND (user_id IN (` + ids + `) OR private = false)
+`), append([]interface{}{id}, list...)...).Scan(&message.ID, &message.UserID, &message.ThreadID, &fileIDs, &createdAt, &updatedAt, &message.Text, &message.Private, &message.Name, &message.Title)
+
+	} else if name != "" {
+
+		err = tx.QueryRow(ctx, r.table(`
+SELECT id, user_id, thread_id, file_ids, created_at, updated_at, text, private, name, title FROM %s WHERE name = $1 AND (user_id IN (` + ids + `) OR private = false)
+`), append([]interface{}{name}, list...)...).Scan(&message.ID, &message.UserID, &message.ThreadID, &fileIDs, &createdAt, &updatedAt, &message.Text, &message.Private, &message.Name, &message.Title)
+
+	}
+
 	if err != nil {
 		return
 	}

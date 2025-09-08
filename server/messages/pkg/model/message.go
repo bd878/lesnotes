@@ -65,6 +65,7 @@ type (
 		Offset              int                 `json:"offset"`
 		Asc                 int                 `json:"asc"`
 		IDs                 []int64             `json:"ids"`
+		Name                string              `json:"name"`
 	}
 
 	ReadPathRequest struct {

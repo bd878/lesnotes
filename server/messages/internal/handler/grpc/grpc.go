@@ -15,7 +15,7 @@ type Controller interface {
 	PublishMessages(ctx context.Context, ids []int64, userID int64) (err error)
 	PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error)
 	ReadPath(ctx context.Context, userID, id int64) (path []*messages.Message, err error)
-	ReadMessage(ctx context.Context, id int64, userIDs []int64) (message *messages.Message, err error)
+	ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *messages.Message, err error)
 	ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (messages []*messages.Message, isLastPage bool, err error)
 	ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool) (messages []*messages.Message, isLastPage bool, err error)
 	ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*messages.Message, err error)
@@ -136,7 +136,7 @@ func (h *Handler) GetServers(ctx context.Context, _ *api.GetServersRequest) (res
 }
 
 func (h *Handler) ReadMessage(ctx context.Context, req *api.ReadMessageRequest) (resp *api.Message, err error) {
-	message, err := h.controller.ReadMessage(ctx, req.Id, req.UserIds)
+	message, err := h.controller.ReadMessage(ctx, req.Id, req.Name, req.UserIds)
 	if err != nil {
 		return nil, err
 	}

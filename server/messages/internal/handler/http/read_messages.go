@@ -20,6 +20,7 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) (err er
 		limit, offset, order int
 		threadID, messageID int64
 		ids []int64
+		name string
 	)
 
 	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
@@ -88,6 +89,8 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) (err er
 		messageID = int64(id)
 	}
 
+	name = values.Get("name")
+
 	if values.Get("thread") != "" {
 		id, err := strconv.Atoi(values.Get("thread"))
 		if err != nil {
@@ -154,13 +157,13 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) (err er
 		}
 
 		// read public messages only
-		return h.readMessageOrMessages(req.Context(), w, int64(id), limit, offset, messageID, threadID, order, true)
+		return h.readMessageOrMessages(req.Context(), w, int64(id), limit, offset, messageID, threadID, name, order, true)
 	} else if len(ids) > 0 {
 		// read batch messages by given ids
 		return h.readBatchMessages(req.Context(), w, user.ID, ids)
 	} else {
 		// read both public and private messages, 
-		return h.readMessageOrMessages(req.Context(), w, user.ID, limit, offset, messageID, threadID, order, false)
+		return h.readMessageOrMessages(req.Context(), w, user.ID, limit, offset, messageID, threadID, name, order, false)
 	}
 }
 
@@ -227,11 +230,11 @@ func (h *Handler) readBatchMessages(ctx context.Context, w http.ResponseWriter, 
 }
 
 func (h *Handler) readMessageOrMessages(ctx context.Context, w http.ResponseWriter, userID int64,
-	limit, offset int, messageID, threadID int64, order int, publicOnly bool,
+	limit, offset int, messageID, threadID int64, name string, order int, publicOnly bool,
 ) (err error) {
 	var ascending bool
 
-	if userID == users.PublicUserID && messageID == 0 {
+	if userID == users.PublicUserID && (messageID == 0 || name == "") {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
@@ -266,13 +269,39 @@ func (h *Handler) readMessageOrMessages(ctx context.Context, w http.ResponseWrit
 		return
 	}
 
-	if messageID != 0 && (limit > 0 || offset > 0) {
+	if name != "" && threadID != -1 {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:  &server.ErrorCode{
 				Code:    server.CodeWrongQuery,
-				Explain: "both id and limit/offset params given",
+				Explain: "both name and thread params are given",
+			},
+		})
+
+		return
+	}
+
+	if messageID != 0 && name != "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status:  "error",
+			Error:   &server.ErrorCode{
+				Code:    server.CodeWrongQuery,
+				Explain: "both id and name params are given",
+			},
+		})
+
+		return
+	}
+
+	if (messageID != 0 || name != "") && (limit > 0 || offset > 0) {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status: "error",
+			Error:  &server.ErrorCode{
+				Code:    server.CodeWrongQuery,
+				Explain: "both id/name and limit/offset params given",
 			},
 		})
 
@@ -281,7 +310,9 @@ func (h *Handler) readMessageOrMessages(ctx context.Context, w http.ResponseWrit
 
 	if messageID != 0 {
 		// read one message
-		return h.readMessage(ctx, w, userID, messageID, publicOnly)
+		return h.readMessage(ctx, w, userID, messageID, "", publicOnly)
+	} else if name != "" {
+		return h.readMessage(ctx, w, userID, 0, name, publicOnly)
 	} else if threadID != -1 {
 		// read thread messages
 		return h.readThreadMessages(ctx, w, userID, threadID, int32(limit), int32(offset), ascending, publicOnly)
@@ -291,8 +322,8 @@ func (h *Handler) readMessageOrMessages(ctx context.Context, w http.ResponseWrit
 	}
 }
 
-func (h *Handler) readMessage(ctx context.Context, w http.ResponseWriter, userID, messageID int64, publicOnly bool) (err error) {
-	message, err := h.controller.ReadMessage(ctx, messageID, []int64{userID, users.PublicUserID})
+func (h *Handler) readMessage(ctx context.Context, w http.ResponseWriter, userID, messageID int64, name string, publicOnly bool) (err error) {
+	message, err := h.controller.ReadMessage(ctx, messageID, name, []int64{userID, users.PublicUserID})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

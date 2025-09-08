@@ -62,10 +62,10 @@ func (h *Handler) ReadMessagesJsonAPI(w http.ResponseWriter, req *http.Request) 
 	}
 
 	if request.UserID != 0 {
-		return h.readMessageOrMessages(req.Context(), w, request.UserID, request.Limit, request.Offset, request.MessageID, threadID, request.Asc, true)
+		return h.readMessageOrMessages(req.Context(), w, request.UserID, request.Limit, request.Offset, request.MessageID, threadID, request.Name, request.Asc, true)
 	} else if len(request.IDs) > 0 {
 		return h.readBatchMessages(req.Context(), w, user.ID, request.IDs)
 	} else {
-		return h.readMessageOrMessages(req.Context(), w, user.ID, request.Limit, request.Offset, request.MessageID, threadID, request.Asc, false)
+		return h.readMessageOrMessages(req.Context(), w, user.ID, request.Limit, request.Offset, request.MessageID, threadID, request.Name, request.Asc, false)
 	}
 }

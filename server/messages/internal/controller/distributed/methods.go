@@ -157,9 +157,9 @@ func (m *DistributedMessages) PrivateMessages(ctx context.Context, ids []int64, 
 	return
 }
 
-func (m *DistributedMessages) ReadMessage(ctx context.Context, id int64, userIDs []int64) (message *model.Message, err error) {
-	logger.Debugw("read message", "id", id, "user_ids", userIDs)
-	return m.repo.Read(ctx, userIDs, id)
+func (m *DistributedMessages) ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *model.Message, err error) {
+	logger.Debugw("read message", "id", id, "name", name, "user_ids", userIDs)
+	return m.repo.Read(ctx, userIDs, id, name)
 }
 
 func (m *DistributedMessages) ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool) (messages []*model.Message, isLastPage bool, err error) {

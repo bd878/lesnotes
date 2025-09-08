@@ -142,6 +142,7 @@ message Server {
 message ReadMessageRequest {
 	int64  id = 1;
 	repeated int64  user_ids = 2;
+	string name = 3;
 }
 
 message ReadPathRequest {
