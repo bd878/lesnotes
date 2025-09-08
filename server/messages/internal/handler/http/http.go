@@ -11,7 +11,7 @@ import (
 
 type Controller interface {
 	SaveMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (message *messages.Message, err error)
-	UpdateMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private int32) (err error)
+	UpdateMessage(ctx context.Context, id int64, text, title, name string, fileIDs []int64, threadID int64, userID int64, private int32) (err error)
 	DeleteMessages(ctx context.Context, ids []int64, userID int64) (err error)
 	PublishMessages(ctx context.Context, ids []int64, userID int64) (err error)
 	PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error)

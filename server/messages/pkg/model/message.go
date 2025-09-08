@@ -90,6 +90,8 @@ type (
 		Text                *string             `json:"text,omitempty"`
 		Public              *int                `json:"public,omitempty"`
 		Title               *string             `json:"title,omitempty"`
+		Name                *string             `json:"name,omitempty"`
+		FileIDs             []int64             `json:"file_ids,omitempty"`
 	}
 
 	UpdateResponse struct {

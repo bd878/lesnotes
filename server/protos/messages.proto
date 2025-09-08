@@ -75,6 +75,7 @@ message UpdateMessageRequest {
 	int32    private = 5;
 	repeated int64 file_ids = 6;
 	string   title = 7;
+	string   name  = 8;
 }
 
 message UpdateMessageResponse {

@@ -65,12 +65,12 @@ func (r *Repository) Create(ctx context.Context, id int64, text string, title st
  * newText == "" : left as is
  * newThreadID == -1 : left as is
  * newPrivate == -1 : left as is
- * @param  {[type]} r *Repository)  Update(ctx context.Context, userID, id int64, text string, threadID int64, fileIDs []int64, private int) (error [description]
+ * @param  {[type]} r *Repository)  Update(ctx context.Context, userID, id int64, text, title, name string, threadID int64, fileIDs []int64, private int) (error [description]
  * @return {error}   error
  */
-func (r *Repository) Update(ctx context.Context, userID, id int64, newText string, newTitle string, newThreadID int64, newFileIDs []int64, newPrivate int) (err error) {
-	const query = "UPDATE %s SET text = $3, thread_id = $4, file_ids = $5, private = $6, title = $7 WHERE user_id = $1 AND id = $2"
-	const selectQuery = "SELECT text, thread_id, file_ids, private, title FROM %s WHERE user_id = $1 AND id = $2"
+func (r *Repository) Update(ctx context.Context, userID, id int64, newText, newTitle, newName string, newThreadID int64, newFileIDs []int64, newPrivate int) (err error) {
+	const query = "UPDATE %s SET text = $3, thread_id = $4, file_ids = $5, private = $6, title = $7, name = $8 WHERE user_id = $1 AND id = $2"
+	const selectQuery = "SELECT text, thread_id, file_ids, private, title, name FROM %s WHERE user_id = $1 AND id = $2"
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
@@ -92,13 +92,13 @@ func (r *Repository) Update(ctx context.Context, userID, id int64, newText strin
 	}()
 
 	var (
-		text, title  string
+		text, title, name  string
 		threadID int64
 		fileIDs  []byte
 		private  bool
 	)
 
-	err = tx.QueryRow(ctx, r.table(selectQuery), userID, id).Scan(&text, &threadID, &fileIDs, &private, &title)
+	err = tx.QueryRow(ctx, r.table(selectQuery), userID, id).Scan(&text, &threadID, &fileIDs, &private, &title, &name)
 	if err != nil {
 		return
 	}
@@ -109,6 +109,10 @@ func (r *Repository) Update(ctx context.Context, userID, id int64, newText strin
 
 	if newTitle != "" {
 		title = newTitle
+	}
+
+	if newName != "" {
+		name = newName
 	}
 
 	if newThreadID != -1 {
@@ -130,7 +134,7 @@ func (r *Repository) Update(ctx context.Context, userID, id int64, newText strin
 		}
 	}
 
-	_, err = tx.Exec(ctx, r.table(query), userID, id, text, threadID, fileIDs, private, title)
+	_, err = tx.Exec(ctx, r.table(query), userID, id, text, threadID, fileIDs, private, title, name)
 	if err != nil {
 		return
 	}

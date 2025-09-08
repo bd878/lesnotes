@@ -153,14 +153,14 @@ func (s *Messages) PrivateMessages(ctx context.Context, ids []int64, userID int6
 	return
 }
 
-func (s *Messages) UpdateMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private int32) (err error) {
+func (s *Messages) UpdateMessage(ctx context.Context, id int64, text, title, name string, fileIDs []int64, threadID int64, userID int64, private int32) (err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
 		}
 	}
 
-	logger.Debugw("update message", "id", id, "text", text, "title", title, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private)
+	logger.Debugw("update message", "id", id, "text", text, "title", title, "name", name, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private)
 
 	_, err = s.client.UpdateMessage(ctx, &api.UpdateMessageRequest{
 		Id:        id,
@@ -168,6 +168,7 @@ func (s *Messages) UpdateMessage(ctx context.Context, id int64, text, title stri
 		FileIds:   fileIDs,
 		Text:      text,
 		Title:     title,
+		Name:      name,
 		Private:   private,
 		ThreadId:  threadID,
 	})

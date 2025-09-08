@@ -59,8 +59,8 @@ func (m *DistributedMessages) SaveMessage(ctx context.Context, id int64, text, t
 	return
 }
 
-func (m *DistributedMessages) UpdateMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private int32) (err error) {
-	logger.Debugw("update message", "id", id, "text", text, "title", title, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private)
+func (m *DistributedMessages) UpdateMessage(ctx context.Context, id int64, text, title, name string, fileIDs []int64, threadID int64, userID int64, private int32) (err error) {
+	logger.Debugw("update message", "id", id, "text", text, "title", title, "name", name, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private)
 
 	cmd, err := proto.Marshal(&UpdateCommand{
 		Id:       id,
@@ -68,6 +68,7 @@ func (m *DistributedMessages) UpdateMessage(ctx context.Context, id int64, text,
 		FileIds:  fileIDs,
 		ThreadId: threadID,
 		Text:     text,
+		Name:     name,
 		Title:    title,
 		Private:  private,
 	})
