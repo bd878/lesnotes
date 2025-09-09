@@ -205,6 +205,7 @@ function onMessageEditClick(e) {
 function handleMessageClick(messageID) {
 	const params = new URLSearchParams(location.search)
 	params.set("id", messageID)
+	params.delete("edit")
 
 	location.href = params.toString() ? ("/home?" + params.toString()) : "/home"
 }
@@ -218,6 +219,7 @@ function handleThreadClick(threadID) {
 	}
 
 	params.delete("id")
+	params.delete("edit")
 
 	location.href = params.toString() ? ("/home?" + params.toString()) : "/home"
 }
