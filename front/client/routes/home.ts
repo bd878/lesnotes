@@ -97,8 +97,9 @@ async function renderError(err: string): Promise<string> {
 		privateText:  i18n("private"),
 		update:   i18n("update"),
 		cancelEdit:        i18n("cancel"),
-		title_placeholder: i18n("title_placeholder"),
-		text_placeholder:  i18n("text_placeholder"),
+		namePlaceholder:  i18n("namePlaceholder"),
+		titlePlaceholder: i18n("titlePlaceholder"),
+		textPlaceholder:  i18n("textPlaceholder"),
 	}, {
 		content: home,
 	});
@@ -128,8 +129,9 @@ async function renderBody(threads: Message[], messages: Message[], userID: numbe
 		privateText:  i18n("private"),
 		update:   i18n("update"),
 		cancelEdit:        i18n("cancel"),
-		title_placeholder: i18n("title_placeholder"),
-		text_placeholder:  i18n("text_placeholder"),
+		namePlaceholder:  i18n("namePlaceholder"),
+		titlePlaceholder: i18n("titlePlaceholder"),
+		textPlaceholder:  i18n("textPlaceholder"),
 	}, {
 		content: home,
 	});

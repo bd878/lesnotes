@@ -18,8 +18,9 @@ const i18n = {
 		update: "Save",
 		cancel: "Cancel",
 		miniapp_only: "This page should be opened in Telegram only",
-		text_placeholder: "Content...",
-		title_placeholder: "Title..."
+		textPlaceholder: "Content...",
+		titlePlaceholder: "Title...",
+		namePlaceholder: "Public link",
 	},
 	"ru": {
 		logout: "Выйти",
@@ -40,8 +41,9 @@ const i18n = {
 		update: "Сохранить",
 		cancel: "Отмена",
 		miniapp_only: "Эта страница работает только из приложения Telegram",
-		text_placeholder: "Сообщение...",
-		title_placeholder: "Заголовок..."
+		textPlaceholder: "Сообщение...",
+		titlePlaceholder: "Заголовок...",
+		namePlaceholder: "имя ссылки",
 	}
 }
 

@@ -13,7 +13,7 @@ const elems = {
 		return formElem as HTMLFormElement
 	},
 
-	get messageEditFormElem(): HTMLFormElement {
+	get editFormElem(): HTMLFormElement {
 		const formElem = document.getElementById("message-edit-form")
 		if (!formElem) {
 			console.error("[homeScript]: no \"message-edit-form\" form")
@@ -96,7 +96,7 @@ const elems = {
 
 function init() {
 	elems.formElem.addEventListener("submit", onFormSubmit)
-	elems.messageEditFormElem.addEventListener("submit", onMessageUpdateFormSubmit)
+	elems.editFormElem.addEventListener("submit", onMessageUpdateFormSubmit)
 	elems.messagesListElem.addEventListener("click", onMessagesListClick)
 	elems.threadsListElem.addEventListener("click", onThreadsListClick)
 	elems.messageDeleteElem.addEventListener("click", onMessageDeleteClick)
@@ -162,6 +162,8 @@ async function onMessagePrivateClick(e) {
 }
 
 function onMessageCancelEditClick(e) {
+	e.stopPropagation()
+
 	const params = new URLSearchParams(location.search)
 	params.delete("edit")
 
@@ -222,12 +224,35 @@ function handleThreadClick(threadID) {
 
 async function onMessageUpdateFormSubmit(e) {
 	e.preventDefault()
+
+	if (is.notEmpty(e.target.dataset.messageId)) {
+		const messageID = e.target.dataset.messageId
+
+		const text = elems.editFormElem.messageText.value
+		const title = elems.editFormElem.messageTitle.value
+		const name = elems.editFormElem.messageName.value
+
+		const response = await api.updateMessage(messageID, text, title, name)
+		if (response.error.error) {
+			console.error("[onMessageUpdateFormSubmit]: cannot update message:", response)
+			return
+		}
+
+		elems.editFormElem.reset()
+
+		const params = new URL(location.toString()).searchParams
+		params.delete("edit")
+
+		location.href = params.toString() ? ("/home?" + params.toString()) : "/home"
+	} else {
+		console.error("[onMessageUpdateFormSubmit]: no data-message-id attribute on target")
+	}
 }
 
 async function onFormSubmit(e) {
 	e.preventDefault()
 
-	if (either(elems.formElem.text, elems.formElem.file)) {
+	if (either(elems.formElem.messageText, elems.formElem.file)) {
 		console.error("[onFormSubmit]: either text of file must be present")
 		return
 	}
@@ -248,8 +273,8 @@ async function onFormSubmit(e) {
 		fileID = file.ID
 	}
 
-	if (elems.formElem.text) {
-		const response = await api.sendMessage(elems.formElem.text.value, elems.formElem.messageTitle.value, fileID, threadID)
+	if (elems.formElem.messageText) {
+		const response = await api.sendMessage(elems.formElem.messageText.value, elems.formElem.messageTitle.value, fileID, threadID)
 		if (response.error.error) {
 			console.log("[onFormSubmit]: cannod send message:", response)
 			return

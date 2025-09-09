@@ -71,10 +71,13 @@
 			{{/private}}
 
 			{{#editMessage}}
-				<form id="message-edit-form" name="message-edit-form" autocomplete="off" onsubmit="return false;" class="w-full flex flex-col grow">
+				<form data-message-id="{{ID}}" id="message-edit-form" name="message-edit-form" autocomplete="off" onsubmit="return false;" class="w-full flex flex-col grow">
 					<div class="flex flex-col grow">
-						<input name="messageTitle" class="focus:outline-none w-full resize-none italic text-gray-600 text-lg mb-2" placeholder="{{title_placeholder}}">{{title}}</input>
-						<textarea name="text" type="input" class="focus:outline-none w-full resize-none italic text-gray-600 text-sm h-full" placeholder="{{text_placeholder}}">{{text}}</textarea>
+						{{^private}}
+							<input name="messageName" class="focus:outline-none w-full resize-none italic text-gray-600 text-sm" placeholder="{{namePlaceholder}}" value="{{name}}"></input>
+						{{/private}}
+						<input name="messageTitle" class="focus:outline-none w-full resize-none italic text-gray-600 text-lg mb-2" placeholder="{{titlePlaceholder}}" value="{{title}}"></input>
+						<textarea name="messageText" type="input" class="focus:outline-none w-full resize-none italic text-gray-600 text-sm h-full" placeholder="{{textPlaceholder}}">{{text}}</textarea>
 					</div>
 
 					<div class="flex flex-col">
@@ -82,7 +85,7 @@
 						<div class="flex flex-row justify-between">
 							<input id="file" name="file" type="file"></input>
 
-							<button type="submit" class="border-1 px-4 border-solid text-left cursor-pointer">{{update}}</button>
+							<button data-message-id="{{ID}}" type="submit" class="border-1 px-4 border-solid text-left cursor-pointer">{{update}}</button>
 							<button id="message-cancel-edit" class="border-1 px-4 border-solid text-left cursor-pointer">{{cancelEdit}}</button>
 						</div>
 					</div>
@@ -113,8 +116,8 @@
 		{{^message}}
 			<form id="message-form" name="message-form" autocomplete="off" onsubmit="return false;" class="w-full flex flex-col grow">
 				<div class="flex flex-col grow">
-					<input name="messageTitle" class="focus:outline-none w-full resize-none italic text-gray-600 text-lg mb-2" placeholder="{{title_placeholder}}"></input>
-					<textarea name="text" type="input" class="focus:outline-none w-full resize-none italic text-gray-600 text-sm h-full" placeholder="{{text_placeholder}}"></textarea>
+					<input name="messageTitle" class="focus:outline-none w-full resize-none italic text-gray-600 text-lg mb-2" placeholder="{{titlePlaceholder}}"></input>
+					<textarea name="messageText" type="input" class="focus:outline-none w-full resize-none italic text-gray-600 text-sm h-full" placeholder="{{textPlaceholder}}"></textarea>
 				</div>
 
 				<div class="flex flex-col">
