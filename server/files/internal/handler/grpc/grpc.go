@@ -14,7 +14,7 @@ import (
 
 type Repository interface {
 	SaveFile(ctx context.Context, reader io.Reader, id, userID int64, private bool, name, mime string) (err error)
-	GetMeta(ctx context.Context, ownerID, id int64, fileName string) (file *model.File, err error)
+	GetMeta(ctx context.Context, id int64, fileName string) (file *model.File, err error)
 	DeleteFile(ctx context.Context, ownerID, id int64) (err error)
 	ReadFile(ctx context.Context, oid int32, writer io.Writer) (err error)
 }
@@ -29,6 +29,8 @@ func New(repo Repository) *Handler {
 }
 
 func (h *Handler) ReadBatchFiles(ctx context.Context, req *api.ReadBatchFilesRequest) (*api.ReadBatchFilesResponse, error) {
+	logger.Debugw("read batch files", "user_id", req.UserId, "ids", req.Ids)
+
 	files := make(map[int64]*model.File, len(req.Ids))
 	for _, id := range req.Ids {
 		files[id] = &model.File{
@@ -36,7 +38,7 @@ func (h *Handler) ReadBatchFiles(ctx context.Context, req *api.ReadBatchFilesReq
 			UserID: req.UserId,
 		}
 
-		file, err := h.repo.GetMeta(ctx, req.UserId, id, "")
+		file, err := h.repo.GetMeta(ctx, id, "")
 		if err != nil {
 			files[id].Error = "can not find file"
 			logger.Errorw("failed to read file", "user_id", req.UserId, "id", id, "error", err)
@@ -53,10 +55,13 @@ func (h *Handler) ReadBatchFiles(ctx context.Context, req *api.ReadBatchFilesReq
 }
 
 func (h *Handler) ReadFile(ctx context.Context, req *api.ReadFileRequest) (*api.File, error) {
-	file, err := h.repo.GetMeta(ctx, req.UserId, req.Id, "")
+	logger.Debugw("read file", "user_id", req.UserId, "id", req.Id)
+
+	file, err := h.repo.GetMeta(ctx, req.Id, "")
 	if err != nil {
 		return nil, err
 	}
+
 	return model.FileToProto(file), nil
 }
 
@@ -72,21 +77,19 @@ func (w *streamWriter) Write(p []byte) (n int, err error) {
 			Chunk: p,
 		},
 	})
-	if err != nil {
-		logger.Errorw("failed to send chunk", "error", err)
-	}
+
 	return len(p), err
 }
 
 func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.Files_ReadFileStreamServer) (err error) {
-	file, err := h.repo.GetMeta(context.Background(), params.UserId, params.Id, params.Name)
+	logger.Debugw("read file stream", "id", params.Id, "name", params.Name, "public", params.Public)
+
+	file, err := h.repo.GetMeta(context.Background(), params.Id, params.Name)
 	if err != nil {
-		logger.Errorw("failed to read file", "user_id", params.UserId, "id", params.Id, "name", params.Name, "public", params.Public, "error", err)
 		return err
 	}
 
 	if file.Private && params.Public {
-		logger.Errorw("failed to read private file", "user_id", params.UserId, "id", params.Id, "name", params.Name, "public", params.Public)
 		return errors.New("cannot read private file, when public requested")
 	}
 
@@ -104,14 +107,10 @@ func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.F
 		},
 	})
 	if err != nil {
-		logger.Errorw("stream failed to send filedata", "user_id", file.UserID, "id", file.ID, "error", err)
 		return
 	}
 
 	err = h.repo.ReadFile(context.Background(), file.OID, &streamWriter{stream})
-	if err != nil {
-		logger.Errorw("failed to read file", "error", err)
-	}
 
 	return
 }
@@ -153,15 +152,15 @@ func (r *streamReader) Read(p []byte) (n int, err error) {
 func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) error {
 	meta, err := stream.Recv()
 	if err != nil {
-		logger.Errorw("save file stream failed to receive meta", "error", err)
 		return err
 	}
 
 	file, ok := meta.Data.(*api.FileData_File)
 	if !ok {
-		logger.Errorw("send file data first, then chunk", "error", "wrong format")
 		return errors.New("wrong format: file meta expected")
 	}
+
+	logger.Debugw("save file stream", "id", file.File.Id, "user_id", file.File.UserId, "private", file.File.Private, "name", file.File.Name, "mime", file.File.Mime)
 
 	err = h.repo.SaveFile(context.Background(), &streamReader{Files_SaveFileStreamServer: stream}, file.File.Id, file.File.UserId, file.File.Private, file.File.Name, file.File.Mime)
 	if err != nil {

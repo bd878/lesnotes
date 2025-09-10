@@ -72,53 +72,19 @@ paths:
 # END UPLOAD
 
 # DOWNLOAD
-  /files/v1/download:
+  /files/v1/{id}/download:
     security:
       - apiKey: []
     parameters:
-      user_id:
-        in: query
-        required: true
-        type: string
       id:
-        in: query
+        in: path
         required: true
-        type: string
+        type: integer
     get:
       summary: Download a file
       description: |
-        Download a file for a provided user
+        Download a file for a provided user or public file
       operationId: downloadFile
-
-  /files/v2/{user_id}/{id}:
-    parameters:
-      user_id:
-        in: path
-        type: integer
-        required: true
-      id:
-        in: path
-        type: integer
-        required: true
-        example: 1
-    get:
-      summary: Download public file
-      description: |
-        Download public file of a given user
-      operationId: downloadPublicFile
-
-  /files/v2/{id}:
-    parameters:
-      id:
-        in: path
-        type: integer
-        required: true
-        example: 1
-    get:
-      summary: Download public file for public user
-      description: |
-        Download public file of a public user
-      operationId: downloadPublicUserFile
 # END DOWNLOAD
 
 # STATUS

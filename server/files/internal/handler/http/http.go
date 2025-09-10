@@ -10,7 +10,7 @@ import (
 
 type Controller interface {
 	SaveFileStream(ctx context.Context, stream io.Reader, id, userID int64, fileName string, private bool, mime string) (err error)
-	ReadFileStream(ctx context.Context, id, userID int64, fileName string, public bool) (meta *files.File, reader io.Reader, err error)
+	ReadFileStream(ctx context.Context, id int64, fileName string, public bool) (meta *files.File, reader io.Reader, err error)
 }
 
 type Handler struct {

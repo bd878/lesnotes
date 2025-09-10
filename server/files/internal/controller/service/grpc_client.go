@@ -88,15 +88,16 @@ func (s *streamReader) Read(p []byte) (int, error) {
 	return s.buf.Read(p)
 }
 
-func (f *Files) ReadFileStream(ctx context.Context, id, userID int64, fileName string, public bool) (result *files.File, reader io.Reader, err error) {
+func (f *Files) ReadFileStream(ctx context.Context, id int64, fileName string, public bool) (result *files.File, reader io.Reader, err error) {
 	if f.isConnFailed() {
 		logger.Info("conn failed, setup new connection")
 		f.setupConnection()
 	}
 
+	logger.Debugw("read file stream", "id", id, "name", fileName, "public", public)
+
 	stream, err := f.client.ReadFileStream(ctx, &api.ReadFileStreamRequest{
 		Id:      id,
-		UserId:  userID,
 		Name:    fileName,
 		Public:  public,
 	})
@@ -127,6 +128,8 @@ func (f *Files) SaveFileStream(ctx context.Context, fileStream io.Reader, id, us
 		logger.Info("conn failed, setup new connection")
 		f.setupConnection()
 	}
+
+	logger.Debugw("save file stream", "user_id", userID, "name", fileName, "private", private, "mime", mime)
 
 	stream, err := f.client.SaveFileStream(ctx)
 	if err != nil {
