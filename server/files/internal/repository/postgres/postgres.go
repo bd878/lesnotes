@@ -87,10 +87,10 @@ func (r *Repository) GetMeta(ctx context.Context, id int64, fileName string) (fi
 	var createdAt time.Time
 
 	if id != 0 {
-		query += " AND id = $1"
+		query += " id = $1"
 		err = r.pool.QueryRow(ctx, r.table(query), id).Scan(&file.UserID, &file.ID, &file.Name, &file.Private, &file.OID, &file.Mime, &file.Size, &createdAt)
 	} else if fileName != "" {
-		query += " AND name = $1"
+		query += " name = $1"
 		err = r.pool.QueryRow(ctx, r.table(query), fileName).Scan(&file.UserID, &file.ID, &file.Name, &file.Private, &file.OID, &file.Mime, &file.Size, &createdAt)
 	} else {
 		err = errors.New("id = 0 and fileName is empty")
