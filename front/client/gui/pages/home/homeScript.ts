@@ -6,17 +6,42 @@ const elems = {
 	get formElem(): HTMLFormElement {
 		const formElem = document.getElementById("message-form")
 		if (!formElem) {
-			console.error("[homeScript]: no \"message-form\" form")
 			return document.createElement("form")
 		}
 
 		return formElem as HTMLFormElement
 	},
 
+	get filesButtonElem(): HTMLButtonElement {
+		const buttonElem = document.getElementById("select-files-button")
+		if (!buttonElem) {
+			return document.createElement("button")
+		}
+
+		return buttonElem as HTMLButtonElement
+	},
+
+	get filesInputElem(): HTMLInputElement {
+		const inputElem = document.getElementById("files-input")
+		if (!inputElem) {
+			return document.createElement("input")
+		}
+
+		return inputElem as HTMLInputElement
+	},
+
 	get editFormElem(): HTMLFormElement {
 		const formElem = document.getElementById("message-edit-form")
 		if (!formElem) {
-			console.error("[homeScript]: no \"message-edit-form\" form")
+			return document.createElement("form")
+		}
+
+		return formElem as HTMLFormElement
+	},
+
+	get fileFormElem(): HTMLFormElement {
+		const formElem = document.getElementById("file-form")
+		if (!formElem) {
 			return document.createElement("form")
 		}
 
@@ -26,7 +51,6 @@ const elems = {
 	get messagesListElem(): HTMLDivElement {
 		const divElem = document.getElementById("messages-list")
 		if (!divElem) {
-			console.error("[homeScript]: no \"messages-list\" elem")
 			return document.createElement("div")
 		}
 
@@ -36,7 +60,6 @@ const elems = {
 	get threadsListElem(): HTMLDivElement {
 		const divElem = document.getElementById("threads-list")
 		if (!divElem) {
-			console.error("[homeScript]: no \"threads-list\" elem")
 			return document.createElement("div")
 		}
 
@@ -46,7 +69,6 @@ const elems = {
 	get messageDeleteElem(): HTMLButtonElement {
 		const buttonElem = document.getElementById("message-delete")
 		if (!buttonElem) {
-			console.error("[homeScript]: no \"message-delete\" elem")
 			return document.createElement("button")
 		}
 
@@ -56,7 +78,6 @@ const elems = {
 	get messageEditElem(): HTMLButtonElement {
 		const buttonElem = document.getElementById("message-edit")
 		if (!buttonElem) {
-			console.error("[homeScript]: no \"message-edit\" elem")
 			return document.createElement("button")
 		}
 
@@ -66,7 +87,6 @@ const elems = {
 	get messagePublishElem(): HTMLButtonElement {
 		const buttonElem = document.getElementById("message-publish")
 		if (!buttonElem) {
-			console.error("[homeScript]: no \"message-publish\" elem")
 			return document.createElement("button")
 		}
 
@@ -76,7 +96,6 @@ const elems = {
 	get messagePrivateElem(): HTMLButtonElement {
 		const buttonElem = document.getElementById("message-private")
 		if (!buttonElem) {
-			console.error("[homeScript]: no \"message-private\" elem")
 			return document.createElement("button")
 		}
 
@@ -86,16 +105,26 @@ const elems = {
 	get messageCancelEditElem(): HTMLButtonElement {
 		const buttonElem = document.getElementById("message-cancel-edit")
 		if (!buttonElem) {
-			console.error("[homeScript]: no \"message-cancel-edit\" elem")
 			return document.createElement("button")
 		}
 
 		return buttonElem as HTMLButtonElement
 	},
+
+	get messageCancelElem(): HTMLButtonElement {
+		const buttonElem = document.getElementById("message-cancel")
+		if (!buttonElem) {
+			return document.createElement("button")
+		}
+
+		return buttonElem as HTMLButtonElement
+	}
 }
 
 function init() {
 	elems.formElem.addEventListener("submit", onFormSubmit)
+	elems.filesButtonElem.addEventListener("click", onSelectFilesClick)
+	elems.messageCancelElem.addEventListener("click", onMessageCancelClick)
 	elems.editFormElem.addEventListener("submit", onMessageUpdateFormSubmit)
 	elems.messagesListElem.addEventListener("click", onMessagesListClick)
 	elems.threadsListElem.addEventListener("click", onThreadsListClick)
@@ -110,6 +139,21 @@ window.addEventListener("load", () => {
 	console.log("loaded")
 	init()
 })
+
+function onSelectFilesClick(e) {
+	if (is.notEmpty(elems.filesInputElem.id)) {
+		elems.filesInputElem.click()
+	}
+}
+
+function onMessageCancelClick(e) {
+	e.stopPropagation()
+
+	const params = new URLSearchParams(location.search)
+	params.delete("id")
+
+	location.href = params.toString() ? ("/home?" + params.toString()) : "/home"
+}
 
 function onMessagesListClick(e) {
 	if (is.notEmpty(e.target.dataset.messageId)) {
@@ -254,7 +298,7 @@ async function onMessageUpdateFormSubmit(e) {
 async function onFormSubmit(e) {
 	e.preventDefault()
 
-	if (either(elems.formElem.messageText, elems.formElem.file)) {
+	if (either(elems.formElem.messageText, elems.fileFormElem.files.files.length > 0)) {
 		console.error("[onFormSubmit]: either text of file must be present")
 		return
 	}
@@ -265,18 +309,22 @@ async function onFormSubmit(e) {
 	const params = new URL(location.toString()).searchParams
 	const threadID = parseInt(params.get("thread")) || 0
 
-	if (elems.formElem.file && is.notUndef(elems.formElem.file.files[0])) {
-		const file = await api.uploadFile(elems.formElem.file.files[0])
-		if (file.error.error) {
-			console.error("[onFormSubmit]: cannot upload file:", file)
-			return
-		}
+	const fileIDs = []
 
-		fileID = file.ID
+	if (elems.fileFormElem.files && is.notUndef(elems.fileFormElem.files.files[0])) {
+		for (const file of elems.fileFormElem.files.files) {
+			const response = await api.uploadFile(file)
+			if (response.error.error) {
+				console.error("[onFormSubmit]: cannot upload file:", response)
+				return
+			}
+
+			fileIDs.push(response.ID)
+		}
 	}
 
 	if (elems.formElem.messageText) {
-		const response = await api.sendMessage(elems.formElem.messageText.value, elems.formElem.messageTitle.value, fileID, threadID)
+		const response = await api.sendMessage(elems.formElem.messageText.value, elems.formElem.messageTitle.value, fileIDs, threadID)
 		if (response.error.error) {
 			console.log("[onFormSubmit]: cannod send message:", response)
 			return

@@ -1,7 +1,7 @@
 <div id="content" class="h-full flex flex-row">
 	<div id="sidebar" class="flex flex-col justify-between mt-2 pr-2 w-xs min-w-xs">
 		<div class="flex flex-col">
-			<a class="italic text-2xl mb-4 inline-block cursor-pointer" href="/home" target="_self">Les Notes</a>
+			<a class="italic text-2xl mb-4 inline-block cursor-pointer underline hover:text-blue-600" href="/home" target="_self">Les Notes</a>
 
 			<input class="italic px-1 text-gray-600 border border-black" type="text" id="search" name="search" placeholder="{{search}}"></input>
 		</div>
@@ -9,7 +9,7 @@
 		<a href="/logout" target="_self" class="underline text-blue-600 visited:text-purple-600">{{logout}}</a>
 	</div>
 
-	<div id="messages" class="ml-2 pr-2 flex flex-col w-lg min-w-lg">
+	<div id="messages" class="ml-2 pr-2 flex flex-col w-md min-w-md">
 		<div class="flex flex-col w-full">
 			{{#error}}
 				<span>{{.}}</span>
@@ -58,13 +58,18 @@
 								<button type="button" class="bg-gray-300 hover:bg-gray-500 hover:text-white cursor-pointer px-2 ml-2" data-thread-id="{{ID}}"> > </button>
 							</li>
 						{{/messages}}
+						{{^messages}}
+							{{^message}}
+								<li class="text-gray-600 italic">{{newMessageText}}</li>
+							{{/message}}
+						{{/messages}}
 					</ul>
 				</div>
 			{{/error}}
 		</div>
 	</div>
 
-	<div id="editor" class="ml-2 max-w-2xl flex flex-col grow border-1 border-solid p-4">
+	<div id="editor" class="ml-2 mr-2 max-w-xl flex flex-col grow border-1 border-solid p-4">
 		{{#message}}
 			{{#editMessage}}
 				{{#private}}
@@ -87,10 +92,8 @@
 					<div class="flex flex-col">
 						<div></div>
 						<div class="flex flex-row justify-between">
-							<input id="file" name="file" type="file"></input>
-
 							<button data-message-id="{{ID}}" type="submit" class="border-1 px-4 border-solid text-left cursor-pointer">{{update}}</button>
-							<button id="message-cancel-edit" class="border-1 px-4 border-solid text-left cursor-pointer">{{cancelEdit}}</button>
+							<button id="message-cancel-edit" class="border-1 px-4 border-solid text-left cursor-pointer">{{cancel}}</button>
 						</div>
 					</div>
 				</form>
@@ -116,11 +119,12 @@
 						<button id="message-delete" data-message-id="{{ID}}" type="button" class="border-1 px-4 border-solid text-left cursor-pointer mr-2">{{delete}}</button>
 						<button id="message-edit" data-message-id="{{ID}}" type="button" class="border-1 px-4 border-solid text-left cursor-pointer mr-2">{{edit}}</button>
 						{{#private}}
-							<button id="message-publish" data-message-id="{{ID}}" type="button" class="border-1 px-4 border-solid text-left cursor-pointer">{{publish}}</button>
+							<button id="message-publish" data-message-id="{{ID}}" type="button" class="border-1 px-4 border-solid text-left cursor-pointer mr-2">{{publish}}</button>
 						{{/private}}
 						{{^private}}
-							<button id="message-private" data-message-id="{{ID}}" type="button" class="border-1 px-4 border-solid text-left cursor-pointer">{{privateText}}</button>
+							<button id="message-private" data-message-id="{{ID}}" type="button" class="border-1 px-4 border-solid text-left cursor-pointer mr-2">{{privateText}}</button>
 						{{/private}}
+						<button id="message-cancel" type="button" class="border-1 px-4 border-solid text-left cursor-pointer">{{cancel}}</button>
 					</div>
 				</div>
 			{{/editMessage}}
@@ -135,11 +139,43 @@
 				<div class="flex flex-col">
 					<div></div>
 					<div class="flex flex-row justify-between">
-						<input id="file" name="file" type="file"></input>
-
 						<button type="submit" class="border-1 px-4 border-solid text-left cursor-pointer">{{send}}</button>
 					</div>
 				</div>
+			</form>
+		{{/message}}
+	</div>
+
+	<div id="files" class="ml-2 max-w-md flex flex-col">
+		{{#message}}
+			<p class="text-xl mb-2">{{filesPlaceholder}}</p>
+
+			<ul class="flex flex-col">
+				{{#files}}
+					<li class="grow-1 max-w-full flex flex-row justify-between whitespace-nowrap">
+						<a target="_blank" href="/files/v1/{{ID}}/download" class="flex flex-row justify-between overflow-hidden cursor-pointer">{{name}}</a>
+					</li>
+				{{/files}}
+				{{^files}}
+					{{^editMessage}}
+						<li class="text-gray-600 italic">{{noFiles}}</li>
+					{{/editMessage}}
+				{{/files}}
+			</ul>
+
+			{{#editMessage}}
+				<form id="file-form" name="file-form" autocomplete="off" onsubmit="return false;" class="flex flex-row">
+					<input id="files" type="file" multiple></input>
+					<button id="select-files-button" type="button" class="border-1 px-4 border-solid text-left cursor-pointer">{{selectFiles}}</button>
+				</form>
+			{{/editMessage}}
+		{{/message}}
+		{{^message}}
+			<p class="text-xl mb-2">{{filesPlaceholder}}</p>
+
+			<form id="file-form" name="file-form" autocomplete="off" onsubmit="return false;" class="flex flex-row">
+				<input id="files" type="file" class="cursor-pointer" multiple></input>
+				<button id="select-files-button" type="button" class="border-1 px-4 border-solid text-left cursor-pointer">{{selectFiles}}</button>
 			</form>
 		{{/message}}
 	</div>
