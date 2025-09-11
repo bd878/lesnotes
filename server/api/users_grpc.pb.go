@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 type UsersClient interface {
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*User, error)
 	FindUser(ctx context.Context, in *FindUserRequest, opts ...grpc.CallOption) (*User, error)
+	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*UpdateUserResponse, error)
 }
 
 type usersClient struct {
@@ -47,12 +48,22 @@ func (c *usersClient) FindUser(ctx context.Context, in *FindUserRequest, opts ..
 	return out, nil
 }
 
+func (c *usersClient) UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*UpdateUserResponse, error) {
+	out := new(UpdateUserResponse)
+	err := c.cc.Invoke(ctx, "/users.v1.Users/UpdateUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UsersServer is the server API for Users service.
 // All implementations must embed UnimplementedUsersServer
 // for forward compatibility
 type UsersServer interface {
 	GetUser(context.Context, *GetUserRequest) (*User, error)
 	FindUser(context.Context, *FindUserRequest) (*User, error)
+	UpdateUser(context.Context, *UpdateUserRequest) (*UpdateUserResponse, error)
 	mustEmbedUnimplementedUsersServer()
 }
 
@@ -65,6 +76,9 @@ func (UnimplementedUsersServer) GetUser(context.Context, *GetUserRequest) (*User
 }
 func (UnimplementedUsersServer) FindUser(context.Context, *FindUserRequest) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FindUser not implemented")
+}
+func (UnimplementedUsersServer) UpdateUser(context.Context, *UpdateUserRequest) (*UpdateUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateUser not implemented")
 }
 func (UnimplementedUsersServer) mustEmbedUnimplementedUsersServer() {}
 
@@ -115,6 +129,24 @@ func _Users_FindUser_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Users_UpdateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServer).UpdateUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/users.v1.Users/UpdateUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServer).UpdateUser(ctx, req.(*UpdateUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Users_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "users.v1.Users",
 	HandlerType: (*UsersServer)(nil),
@@ -126,6 +158,10 @@ var _Users_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "FindUser",
 			Handler:    _Users_FindUser_Handler,
+		},
+		{
+			MethodName: "UpdateUser",
+			Handler:    _Users_UpdateUser_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

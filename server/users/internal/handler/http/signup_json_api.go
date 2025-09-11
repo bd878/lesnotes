@@ -2,26 +2,23 @@ package http
 
 import (
 	"net/http"
-	"io"
 	"encoding/json"
 
 	"github.com/bd878/gallery/server/utils"
+	middleware "github.com/bd878/gallery/server/internal/middleware/http"
 	users "github.com/bd878/gallery/server/users/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
 )
 
 func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
-	var data []byte
-
-	data, err = io.ReadAll(req.Body)
-	defer req.Body.Close()
-	if err != nil {
+	data, ok := req.Context().Value(middleware.RequestContextKey{}).(json.RawMessage)
+	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:  &server.ErrorCode{
-				Code:    server.CodeWrongFormat,
-				Explain: "failed to parse request",
+				Code:    server.CodeNoBody,
+				Explain: "request required",
 			},
 		})
 

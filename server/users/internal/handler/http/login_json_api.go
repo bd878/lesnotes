@@ -2,29 +2,27 @@ package http
 
 import (
 	"net/http"
-	"io"
-	"errors"
 	"encoding/json"
 
 	"github.com/bd878/gallery/server/users/internal/controller"
+	middleware "github.com/bd878/gallery/server/internal/middleware/http"
 	users "github.com/bd878/gallery/server/users/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
 )
 
 func (h *Handler) LoginJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
-	data, err := io.ReadAll(req.Body)
-	defer req.Body.Close()
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+	data, ok := req.Context().Value(middleware.RequestContextKey{}).(json.RawMessage)
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
 			Error: &server.ErrorCode{
-				Code:     server.CodeWrongFormat,
-				Explain: "failed to parse request",
+				Code:    server.CodeNoBody,
+				Explain: "cannot find json request",
 			},
 		})
 
-		return err
+		return
 	}
 
 	var request users.LoginRequest
@@ -50,7 +48,7 @@ func (h *Handler) LoginJsonAPI(w http.ResponseWriter, req *http.Request) (err er
 			},
 		})
 
-		return errors.New("cannot get user login from request")
+		return
 	}
 
 	if request.Password == "" {
@@ -62,7 +60,7 @@ func (h *Handler) LoginJsonAPI(w http.ResponseWriter, req *http.Request) (err er
 			},
 		})
 
-		return errors.New("cannot get password from request")
+		return
 	}
 
 
@@ -85,7 +83,7 @@ func (h *Handler) LoginJsonAPI(w http.ResponseWriter, req *http.Request) (err er
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
 			Error:   &server.ErrorCode{
-				Code: users.CodeBadPassword,
+				Code:    users.CodeBadPassword,
 				Explain: "wrong password",
 			},
 		})
@@ -114,7 +112,7 @@ func (h *Handler) LoginJsonAPI(w http.ResponseWriter, req *http.Request) (err er
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
 			Error: &server.ErrorCode{
-				Code: server.CodeNoUser,
+				Code:    server.CodeNoUser,
 				Explain: "cannot get user",
 			},
 		})

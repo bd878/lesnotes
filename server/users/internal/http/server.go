@@ -64,10 +64,12 @@ func New(cfg Config) (server *Server) {
 	middleware.WithAuth(httpmiddleware.AuthBuilder(logger.Default(), control, sessionsGateway, users.PublicUserID))
 	mux.Handle("/users/v1/me",     middleware.Build(handler.GetMe))
 	mux.Handle("/users/v1/logout", middleware.Build(handler.Logout))
+	mux.Handle("/users/v1/update", middleware.Build(handler.Update))
 
 	middleware.NoAuth().WithAuth(httpmiddleware.TokenAuthBuilder(logger.Default(), control, sessionsGateway, users.PublicUserID))
 	mux.Handle("/users/v2/delete", middleware.Build(handler.DeleteJsonAPI))
 	mux.Handle("/users/v2/me",     middleware.Build(handler.GetMe))
+	mux.Handle("/users/v2/update", middleware.Build(handler.UpdateJsonAPI))
 
 	middleware.NoAuth()
 	mux.Handle("/users/v1/signup", middleware.Build(handler.Signup))

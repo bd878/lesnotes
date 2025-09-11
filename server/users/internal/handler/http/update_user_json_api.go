@@ -2,7 +2,6 @@ package http
 
 import (
 	"net/http"
-	"errors"
 	"encoding/json"
 
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
@@ -10,15 +9,15 @@ import (
 	server "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) DeleteJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
+func (h *Handler) UpdateJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
 	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status: "error",
+			Status:      "error",
 			Error: &server.ErrorCode{
 				Code:    server.CodeNoUser,
-				Explain: "user required",
+				Explain: "cannot find user",
 			},
 		})
 
@@ -44,15 +43,15 @@ func (h *Handler) DeleteJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
 			Error: &server.ErrorCode{
-				Code:    server.CodeNoBody,
+				Code: server.CodeNoBody,
 				Explain: "cannot find json request",
 			},
 		})
 
-		return nil
+		return
 	}
 
-	var request users.DeleteMeRequest
+	var request users.UpdateRequest
 	if err = json.Unmarshal(data, &request); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -63,37 +62,25 @@ func (h *Handler) DeleteJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 			},
 		})
 
-		return err
+		return
 	}
 
-	if request.Login == "" {
-		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status: "error",
-			Error: &server.ErrorCode{
-				Code:    users.CodeNoLogin,
-				Explain: "no login",
-			},
-		})
-
-		return errors.New("cannot get login from request")
-	}
-
-	err = h.controller.DeleteUser(req.Context(), int64(user.ID))
+	err = h.controller.UpdateUser(req.Context(), user.ID, request.Login, request.Theme)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error: &server.ErrorCode{
-				Code:    users.CodeDeleteFailed,
-				Explain: "cannot delete user",
+			Error:   &server.ErrorCode{
+				Code:    users.CodeUpdateFailed,
+				Explain: "cannot update user",
 			},
 		})
 
 		return err
 	}
 
-	response, err := json.Marshal(users.DeleteMeResponse{
-		Description: "deleted",
+	response, err := json.Marshal(users.UpdateResponse{
+		Description: "updated",
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -101,8 +88,8 @@ func (h *Handler) DeleteJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 	}
 
 	json.NewEncoder(w).Encode(server.ServerResponse{
-		Status:   "ok",
-		Response: json.RawMessage(response),
+		Status:       "ok",
+		Response:     json.RawMessage(response),
 	})
 
 	return nil

@@ -10,6 +10,7 @@ func UserToProto(u *User) *api.User {
 		Login:            u.Login,
 		HashedPassword:   u.HashedPassword,
 		Token:            u.Token,
+		Theme:            u.Theme,
 		ExpiresUtcNano:   u.ExpiresUTCNano,
 	}
 }
@@ -19,6 +20,7 @@ func UserFromProto(u *api.User) *User {
 		ID:               u.Id,
 		Login:            u.Login,
 		Token:            u.Token,
+		Theme:            u.Theme,
 		HashedPassword:   u.HashedPassword,
 		ExpiresUTCNano:   u.ExpiresUtcNano,
 	}

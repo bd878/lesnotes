@@ -113,6 +113,65 @@ paths:
                 $ref: '#/components/schemas/serverError'
 # END AUTH
 
+# UPDATE
+  /users/v1/update:
+    parameters:
+      - in: header
+        name: Cookie
+        schema:
+          type: string
+          example: token=AAAAAA
+    post:
+      summary: Update user info
+      description: |
+        Update user's information and settings
+      operationId: updateUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updateForm'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/updateOk'
+        "401":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+
+  /users/v2/update:
+    post:
+      summary: Update user info
+      description: |
+        Update user's info
+      operationId: updateUserJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updateUserJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/updateOk'
+        "401":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+
+# END UPDATE
+
 # SIGNUP
   /users/v1/signup:
     post:
@@ -463,4 +522,46 @@ components:
             type: integer
           login:
             type: string
+          theme:
+            type: string
 # END ME
+
+# UPDATE
+    updateForm:
+      type: object
+      theme:
+        type: string
+        example: "dark"
+      login:
+        type: string
+        example: "new-login"
+
+    updateJson:
+      type: object
+      properties:
+        token:
+          type: string
+        req:
+          type: object
+          properties:
+            theme:
+              type: string
+              required: false
+              example: "dark"
+            login:
+              type: string
+              required: false
+              example: "abc"
+
+    updateOk:
+      type: object
+      status:
+        type: string
+        default: "ok"
+      response:
+        type: object
+        properties:
+          description:
+            type: string
+
+# END UPDATE

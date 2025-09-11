@@ -20,7 +20,7 @@ func (h *Handler) Login(w http.ResponseWriter, req *http.Request) (err error) {
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code:  server.CodeNoForm,
+				Code:    server.CodeNoForm,
 				Explain: "failed to parse form",
 			},
 		})
@@ -35,7 +35,7 @@ func (h *Handler) Login(w http.ResponseWriter, req *http.Request) (err error) {
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code:  users.CodeNoLogin,
+				Code:    users.CodeNoLogin,
 				Explain: "login required",
 			},
 		})
@@ -48,7 +48,7 @@ func (h *Handler) Login(w http.ResponseWriter, req *http.Request) (err error) {
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code:  users.CodeNoPassword,
+				Code:    users.CodeNoPassword,
 				Explain: "password required",
 			},
 		})
@@ -75,7 +75,7 @@ func (h *Handler) Login(w http.ResponseWriter, req *http.Request) (err error) {
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
 			Error: &server.ErrorCode{
-				Code: server.CodeWrongPassword,
+				Code:    server.CodeWrongPassword,
 				Explain: "wrong password",
 			},
 		})
