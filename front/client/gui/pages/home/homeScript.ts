@@ -276,7 +276,11 @@ async function onMessageUpdateFormSubmit(e) {
 
 		const text = elems.editFormElem.messageText.value
 		const title = elems.editFormElem.messageTitle.value
-		const name = elems.editFormElem.messageName.value
+
+		let name = ""
+		if (is.notUndef(elems.editFormElem.messageName)) {
+			name = elems.editFormElem.messageName.value
+		}
 
 		const response = await api.updateMessage(messageID, text, title, name)
 		if (response.error.error) {
