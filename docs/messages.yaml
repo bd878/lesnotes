@@ -296,7 +296,9 @@ paths:
       summary: Get user messages
       description: |
         Read messages for a given user, a single message, or a specific thread,
-        or public messages for a user by id or name
+        or public messages for a user by id or name.
+        If a message, thread_id, and limit given, it reads a message, limit messages before and
+        limit messages after it
       operationId: readMessages
       responses:
         "200":
@@ -317,7 +319,9 @@ paths:
       summary: Get user messages or message
       description: |
         Read messages for a given user, a single message, or a specific thread,
-        or public messages for a user
+        or public messages for a user.
+        If a message, thread_id, and limit given, it reads a message, limit messages before and
+        limit messages after it
       operationId: readMessagesJson
       requestBody:
         content:

@@ -54,6 +54,7 @@ type (
 		ThreadID            *int64              `json:"thread,omitempty"`
 		Messages            []*Message          `json:"messages"`
 		IsLastPage          *bool               `json:"is_last_page"`
+		IsFirstPage         *bool               `json:"is_first_page,omitempty"`
 		Description         string              `json:"description"`
 	}
 

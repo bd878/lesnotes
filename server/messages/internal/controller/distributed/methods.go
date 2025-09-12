@@ -181,3 +181,8 @@ func (m *DistributedMessages) ReadPath(ctx context.Context, userID, id int64) (p
 	logger.Debugw("read path", "user_id", userID, "id", id)
 	return m.repo.ReadPath(ctx, userID, id)
 }
+
+func (m *DistributedMessages) ReadMessagesAround(ctx context.Context, userID, threadID, id int64, limit int32) (messages []*model.Message, isLastPage, isFirstPage bool, err error) {
+	logger.Debugw("read messages around", "user_id", userID, "thread_id", threadID, "id", id)
+	return m.repo.ReadMessagesAround(ctx, userID, threadID, id, limit)
+}

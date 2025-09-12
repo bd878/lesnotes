@@ -15,6 +15,7 @@ type Controller interface {
 	PublishMessages(ctx context.Context, ids []int64, userID int64) (err error)
 	PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error)
 	ReadPath(ctx context.Context, userID, id int64) (path []*messages.Message, err error)
+	ReadMessagesAround(ctx context.Context, userID, threadID, id int64, limit int32) (messages []*messages.Message, isLastPage, isFirstPage bool, err error)
 	ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *messages.Message, err error)
 	ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (messages []*messages.Message, isLastPage bool, err error)
 	ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool) (messages []*messages.Message, isLastPage bool, err error)
@@ -119,7 +120,7 @@ func (h *Handler) ReadMessages(ctx context.Context, req *api.ReadMessagesRequest
 		IsLastPage: isLastPage,
 	}
 
-	return resp, nil
+	return
 }
 
 func (h *Handler) GetServers(ctx context.Context, _ *api.GetServersRequest) (resp *api.GetServersResponse, err error) {
@@ -154,6 +155,21 @@ func (h *Handler) ReadPath(ctx context.Context, req *api.ReadPathRequest) (resp 
 
 	resp = &api.ReadPathResponse{
 		Path:   messages.MapMessagesToProto(messages.MessageToProto, path),
+	}
+
+	return
+}
+
+func (h *Handler) ReadMessagesAround(ctx context.Context, req *api.ReadMessagesAroundRequest) (resp *api.ReadMessagesAroundResponse, err error) {
+	list, isLastPage, isFirstPage, err := h.controller.ReadMessagesAround(ctx, req.UserId, req.ThreadId, req.Id, req.Limit)
+	if err != nil {
+		return nil, err
+	}
+
+	resp = &api.ReadMessagesAroundResponse{
+		Messages:    messages.MapMessagesToProto(messages.MessageToProto, list),
+		IsLastPage:  isLastPage,
+		IsFirstPage: isFirstPage,
 	}
 
 	return

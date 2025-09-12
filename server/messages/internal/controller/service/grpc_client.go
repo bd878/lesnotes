@@ -293,3 +293,29 @@ func (s *Messages) ReadPath(ctx context.Context, userID, id int64) (path []*mode
 
 	return
 }
+
+func (s *Messages) ReadMessagesAround(ctx context.Context, userID, threadID, id int64, limit int32) (messages []*model.Message, isLastPage, isFirstPage bool, err error) {
+	if s.isConnFailed() {
+		if err = s.setupConnection(); err != nil {
+			return
+		}
+	}
+
+	logger.Debugw("read messages around", "user_id", userID, "thread_id", threadID, "id", id, "limit", limit)
+
+	res, err := s.client.ReadMessagesAround(ctx, &api.ReadMessagesAroundRequest{
+		UserId:   userID,
+		ThreadId: threadID,
+		Limit:    limit,
+		Id:       id,
+	})
+	if err != nil {
+		return nil, false, false, err
+	}
+
+	messages = model.MapMessagesFromProto(model.MessageFromProto, res.Messages)
+	isLastPage = res.IsLastPage
+	isFirstPage = res.IsFirstPage
+
+	return
+}
