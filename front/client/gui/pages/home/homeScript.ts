@@ -21,6 +21,15 @@ const elems = {
 		return buttonElem as HTMLButtonElement
 	},
 
+	get filesListElem(): HTMLDivElement {
+		const divElem = document.getElementById("files-list")
+		if (!divElem) {
+			return document.createElement("div")
+		}
+
+		return divElem as HTMLDivElement
+	},
+
 	get filesInputElem(): HTMLInputElement {
 		const inputElem = document.getElementById("files-input")
 		if (!inputElem) {
@@ -32,15 +41,6 @@ const elems = {
 
 	get editFormElem(): HTMLFormElement {
 		const formElem = document.getElementById("message-edit-form")
-		if (!formElem) {
-			return document.createElement("form")
-		}
-
-		return formElem as HTMLFormElement
-	},
-
-	get fileFormElem(): HTMLFormElement {
-		const formElem = document.getElementById("file-form")
 		if (!formElem) {
 			return document.createElement("form")
 		}
@@ -123,6 +123,7 @@ const elems = {
 
 function init() {
 	elems.formElem.addEventListener("submit", onFormSubmit)
+	elems.filesInputElem.addEventListener("change", onFileInputChange)
 	elems.filesButtonElem.addEventListener("click", onSelectFilesClick)
 	elems.messageCancelElem.addEventListener("click", onMessageCancelClick)
 	elems.editFormElem.addEventListener("submit", onMessageUpdateFormSubmit)
@@ -155,6 +156,33 @@ function onMessageCancelClick(e) {
 	location.href = params.toString() ? ("/home?" + params.toString()) : "/home"
 }
 
+function createFilesListElement(fileName: string): HTMLDivElement {
+	const elem = document.createElement("div")
+
+	const textElem = document.createElement("span")
+	const removeButton = document.createElement("button")
+
+	removeButton.textContent = "X"
+	removeButton.classList.add(...("cursor-pointer underline hover:text-blue-600 mr-2").split(" "))
+
+	removeButton.onclick = () => { elem.remove() }
+
+	textElem.textContent = fileName
+	textElem.classList.add(...("overflow-hidden text-ellipsis").split(" "))
+
+	elem.classList.add(...("mb-2 overflow-hidden text-ellipsis".split(" ")))
+	elem.appendChild(removeButton)
+	elem.appendChild(textElem)
+
+	return elem
+}
+
+function onFileInputChange(e) {
+	for (const file of e.target.files) {
+		elems.filesListElem.appendChild(createFilesListElement(file.name))
+	}
+}
+
 function onMessagesListClick(e) {
 	if (is.notEmpty(e.target.dataset.messageId)) {
 		handleMessageClick(e.target.dataset.messageId)
@@ -172,37 +200,29 @@ function onThreadsListClick(e) {
 }
 
 async function onMessagePublishClick(e) {
-	if (is.notEmpty(e.target.dataset.messageId)) {
-		const messageID = parseInt(e.target.dataset.messageId) || 0
+	e.stopPropagation()
+	const messageID = parseInt(elems.messagePublishElem.dataset.messageId) || 0
 
-		const response = await api.publishMessages([messageID])
-		if (response.error.error) {
-			console.error("[onMessagePublishClick]: cannot publish message:", response)
-			return
-		}
-
-		location.reload()
-	} else {
-		console.error("[onMessagePublishClick]: no data-message-id attribute on target")
+	const response = await api.publishMessages([messageID])
+	if (response.error.error) {
+		console.error("[onMessagePublishClick]: cannot publish message:", response)
 		return
 	}
+
+	location.reload()
 }
 
 async function onMessagePrivateClick(e) {
-	if (is.notEmpty(e.target.dataset.messageId)) {
-		const messageID = parseInt(e.target.dataset.messageId) || 0
+	e.stopPropagation()
+	const messageID = parseInt(elems.messagePrivateElem.dataset.messageId) || 0
 
-		const response = await api.privateMessages([messageID])
-		if (response.error.error) {
-			console.error("[onMessagePrivateClick]: cannot private message:", response)
-			return
-		}
-
-		location.reload()
-	} else {
-		console.error("[onMessagePrivateClick]: no data-message-id attribute on target")
+	const response = await api.privateMessages([messageID])
+	if (response.error.error) {
+		console.error("[onMessagePrivateClick]: cannot private message:", response)
 		return
 	}
+
+	location.reload()
 }
 
 function onMessageCancelEditClick(e) {
@@ -215,35 +235,29 @@ function onMessageCancelEditClick(e) {
 }
 
 async function onMessageDeleteClick(e) {
-	if (is.notEmpty(e.target.dataset.messageId)) {
-		const messageID = parseInt(e.target.dataset.messageId) || 0
+	e.stopPropagation()
+	const messageID = parseInt(elems.messageDeleteElem.dataset.messageId) || 0
 
-		const response = await api.deleteMessage(messageID)
-		if (response.error.error) {
-			console.error("[onMessageDeleteClick]: cannot delete message:", response)
-			return
-		}
-
-		const params = new URLSearchParams(location.search)
-		params.delete("id")
-
-		location.href = params.toString() ? ("/home?" + params.toString()) : "/home" 
-	} else {
-		console.error("[onMessageDeleteClick]: no data-message-id attribute on target")
+	const response = await api.deleteMessage(messageID)
+	if (response.error.error) {
+		console.error("[onMessageDeleteClick]: cannot delete message:", response)
+		return
 	}
+
+	const params = new URLSearchParams(location.search)
+	params.delete("id")
+
+	location.href = params.toString() ? ("/home?" + params.toString()) : "/home" 
 }
 
 function onMessageEditClick(e) {
-	if (is.notEmpty(e.target.dataset.messageId)) {
-		const messageID = e.target.dataset.messageId
+	e.stopPropagation()
+	const messageID = parseInt(elems.messageEditElem.dataset.messageId) || 0
 
-		const params = new URLSearchParams(location.search)
-		params.set("edit", "1")
+	const params = new URLSearchParams(location.search)
+	params.set("edit", "1")
 
-		location.href = "/home?" + params.toString()
-	} else {
-		console.error("[onMessageEditClick]: no data-message-id attribute on target")
-	}
+	location.href = "/home?" + params.toString()
 }
 
 function handleMessageClick(messageID) {
@@ -302,7 +316,7 @@ async function onMessageUpdateFormSubmit(e) {
 async function onFormSubmit(e) {
 	e.preventDefault()
 
-	if (either(elems.formElem.messageText, elems.fileFormElem.files.files.length > 0)) {
+	if (either(elems.formElem.messageText, elems.filesInputElem.files.length > 0)) {
 		console.error("[onFormSubmit]: either text of file must be present")
 		return
 	}
@@ -315,8 +329,8 @@ async function onFormSubmit(e) {
 
 	const fileIDs = []
 
-	if (elems.fileFormElem.files && is.notUndef(elems.fileFormElem.files.files[0])) {
-		for (const file of elems.fileFormElem.files.files) {
+	if (elems.filesInputElem.files && is.notUndef(elems.filesInputElem.files[0])) {
+		for (const file of elems.filesInputElem.files) {
 			const response = await api.uploadFile(file)
 			if (response.error.error) {
 				console.error("[onFormSubmit]: cannot upload file:", response)

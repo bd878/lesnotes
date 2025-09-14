@@ -7,8 +7,8 @@
 		<a href="/logout" target="_self" class="underline text-blue-600 visited:text-purple-600">{{logout}}</a>
 	</div>
 
-	<div class="flex flex-row w-full grow mb-4 max-w-5xl">
-		<div id="editor" class="mr-2 max-w-xl flex flex-col grow-2">
+	<div class="flex flex-row w-full grow-2 mb-4 max-w-5xl">
+		<div id="editor" class="mr-2 min-w-md flex flex-col grow">
 			{{#message}}
 				{{#editMessage}}
 					{{#private}}
@@ -22,10 +22,10 @@
 					<form data-message-id="{{ID}}" id="message-edit-form" name="message-edit-form" autocomplete="off" onsubmit="return false;" class="w-full flex flex-col grow">
 						<div class="flex flex-col grow">
 							{{^private}}
-								<div class="inline text-sm mr-1 italic text-gray-600">/m/<input name="messageName" class="mb-2 focus:outline-none resize-none text-sm" placeholder="{{namePlaceholder}}" value="{{name}}"></input></div>
+								<div class="inline text-sm mr-1">/m/<input name="messageName" class="mb-2 placeholder:italic placeholder:text-gray-600 focus:outline-none resize-none text-sm" placeholder="{{namePlaceholder}}" value="{{name}}"></input></div>
 							{{/private}}
-							<input name="messageTitle" class="focus:outline-none w-full resize-none italic text-gray-600 text-lg" placeholder="{{titlePlaceholder}}" value="{{title}}"></input>
-							<textarea name="messageText" type="input" class="focus:outline-none w-full resize-none italic text-gray-600 text-sm h-full" placeholder="{{textPlaceholder}}">{{text}}</textarea>
+							<input name="messageTitle" class="focus:outline-none w-full resize-none placeholder:italic placeholder:text-gray-600 text-lg" placeholder="{{titlePlaceholder}}" value="{{title}}"></input>
+							<textarea name="messageText" type="input" class="focus:outline-none w-full resize-none placeholder:italic placeholder:text-gray-600 text-sm h-full" placeholder="{{textPlaceholder}}">{{text}}</textarea>
 						</div>
 
 						<div class="flex flex-col">
@@ -54,15 +54,48 @@
 							<p class="whitespace-pre-wrap">{{text}}</p>
 						</div>
 
-						<div class="flex flex-row">
-							<button id="message-delete" data-message-id="{{ID}}" type="button" class="border-1 px-4 border-solid text-left cursor-pointer mr-2">{{delete}}</button>
-							<button id="message-edit" data-message-id="{{ID}}" type="button" class="border-1 px-4 border-solid text-left cursor-pointer mr-2">{{edit}}</button>
-							{{#private}}
-								<button id="message-publish" data-message-id="{{ID}}" type="button" class="border-1 px-4 border-solid text-left cursor-pointer mr-2">{{publish}}</button>
-							{{/private}}
-							{{^private}}
-								<button id="message-private" data-message-id="{{ID}}" type="button" class="border-1 px-4 border-solid text-left cursor-pointer mr-2">{{privateText}}</button>
-							{{/private}}
+						<div class="flex flex-row justify-between items-center">
+							<div>
+								<button id="message-delete" data-message-id="{{ID}}" type="button" class="cursor-pointer mr-4">
+									<svg width="24px" height="24px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20,6H16V5a3,3,0,0,0-3-3H11A3,3,0,0,0,8,5V6H4A1,1,0,0,0,4,8H5V19a3,3,0,0,0,3,3h8a3,3,0,0,0,3-3V8h1a1,1,0,0,0,0-2ZM10,5a1,1,0,0,1,1-1h2a1,1,0,0,1,1,1V6H10Zm7,14a1,1,0,0,1-1,1H8a1,1,0,0,1-1-1V8H17Z"/></svg>
+								</button>
+								<button id="message-edit" data-message-id="{{ID}}" type="button" class="cursor-pointer mr-4">
+									<svg width="24px" height="24px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+									<path fill-rule="evenodd" clip-rule="evenodd" d="M20.8477 1.87868C19.6761 0.707109 17.7766 0.707105 16.605 1.87868L2.44744 16.0363C2.02864 16.4551 1.74317 16.9885 1.62702 17.5692L1.03995 20.5046C0.760062 21.904 1.9939 23.1379 3.39334 22.858L6.32868 22.2709C6.90945 22.1548 7.44285 21.8693 7.86165 21.4505L22.0192 7.29289C23.1908 6.12132 23.1908 4.22183 22.0192 3.05025L20.8477 1.87868ZM18.0192 3.29289C18.4098 2.90237 19.0429 2.90237 19.4335 3.29289L20.605 4.46447C20.9956 4.85499 20.9956 5.48815 20.605 5.87868L17.9334 8.55027L15.3477 5.96448L18.0192 3.29289ZM13.9334 7.3787L3.86165 17.4505C3.72205 17.5901 3.6269 17.7679 3.58818 17.9615L3.00111 20.8968L5.93645 20.3097C6.13004 20.271 6.30784 20.1759 6.44744 20.0363L16.5192 9.96448L13.9334 7.3787Z" fill="#0F0F0F"/>
+									</svg>
+								</button>
+								{{#private}}
+									<button id="message-publish" data-message-id="{{ID}}" type="button" class="cursor-pointer mr-4">
+										<svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<g clip-path="url(#clip0_429_11085)">
+										<path d="M15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12Z" stroke="#292929" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+										<path d="M2 12C3.60014 7.90264 7.33603 5 12 5C16.664 5 20.3999 7.90264 22 12C20.3999 16.0974 16.664 19 12 19C7.33603 19 3.60014 16.0974 2 12Z" stroke="#292929" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+										</g>
+										<defs>
+										<clipPath id="clip0_429_11085">
+										<rect width="24" height="24" fill="white"/>
+										</clipPath>
+										</defs>
+										</svg>
+									</button>
+								{{/private}}
+								{{^private}}
+									<button id="message-private" data-message-id="{{ID}}" type="button" class="cursor-pointer mr-4">
+										<svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<g clip-path="url(#clip0_429_11158)">
+										<path d="M10.7302 5.07319C11.1448 5.02485 11.5684 5 11.9999 5C16.6639 5 20.3998 7.90264 21.9999 12C21.6053 13.0104 21.0809 13.9482 20.4446 14.7877M6.51956 6.51944C4.47949 7.76406 2.90105 9.69259 1.99994 12C3.60008 16.0974 7.33597 19 11.9999 19C14.0375 19 15.8979 18.446 17.4805 17.4804M9.87871 9.87859C9.33576 10.4215 8.99994 11.1715 8.99994 12C8.99994 13.6569 10.3431 15 11.9999 15C12.8284 15 13.5785 14.6642 14.1214 14.1212" stroke="#292929" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+										<path d="M4 4L20 20" stroke="#292929" stroke-width="2.5" stroke-linecap="round"/>
+										</g>
+										<defs>
+										<clipPath id="clip0_429_11158">
+										<rect width="24" height="24" fill="white"/>
+										</clipPath>
+										</defs>
+										</svg>
+									</button>
+								{{/private}}
+							</div>
+
 							<button id="message-cancel" type="button" class="border-1 px-4 border-solid text-left cursor-pointer">{{cancel}}</button>
 						</div>
 					</div>
@@ -70,23 +103,21 @@
 			{{/message}}
 			{{^message}}
 				<form id="message-form" name="message-form" autocomplete="off" onsubmit="return false;" class="w-full flex flex-row grow">
-					<div class="flex flex-col mr-4 mt-4">
-						<button type="submit" class="cursor-pointer">
-							<svg fill="#000000" width="24px" height="24px" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg">
-							    <path d="M960 1807.059c-467.125 0-847.059-379.934-847.059-847.059 0-467.125 379.934-847.059 847.059-847.059 467.125 0 847.059 379.934 847.059 847.059 0 467.125-379.934 847.059-847.059 847.059M960 0C430.645 0 0 430.645 0 960s430.645 960 960 960 960-430.645 960-960S1489.355 0 960 0M854.344 1157.975 583.059 886.69l-79.85 79.85 351.135 351.133L1454.4 717.617l-79.85-79.85-520.206 520.208Z" fill-rule="evenodd"/>
-							</svg>
-						</button>
-					</div>
-
 					<div class="flex flex-col grow">
-						<input name="messageTitle" class="focus:outline-none w-full resize-none italic text-gray-600 text-lg mb-2" placeholder="{{titlePlaceholder}}"></input>
-						<textarea name="messageText" type="input" class="focus:outline-none w-full resize-none italic text-gray-600 text-sm h-full" placeholder="{{textPlaceholder}}"></textarea>
+						<input name="messageTitle" class="focus:outline-none w-full resize-none placeholder:italic placeholder:text-gray-600 text-lg mb-2" placeholder="{{titlePlaceholder}}"></input>
+						<textarea name="messageText" type="input" class="focus:outline-none w-full resize-none placeholder:italic placeholder:text-gray-600 text-sm h-full" placeholder="{{textPlaceholder}}"></textarea>
+
+						<div class="flex flex-row">
+							<button type="submit" class="border-1 px-4 border-solid text-left cursor-pointer">
+								{{send}}
+							</button>
+						</div>
 					</div>
 				</form>
 			{{/message}}
 		</div>
 
-		<div id="files" class="p-2 ml-2 max-w-md flex flex-col border-1 border-solid grow-1">
+		<div id="files" class="ml-2 min-w-sm w-sm flex flex-col">
 			{{#message}}
 				<p class="text-xl mb-2">{{filesPlaceholder}}</p>
 
@@ -117,42 +148,23 @@
 					<input id="files-input" type="file" class="hidden" multiple></input>
 					<button id="select-files-button" type="button" class="border-1 px-4 border-solid text-left cursor-pointer">{{selectFiles}}</button>
 				</form>
+
+				<div id="files-list" class="mb-2 mt-2 overflow-hidden whitespace-nowrap text-ellipsis"></div>
 			{{/message}}
 		</div>
 	</div>
 
-	<div id="messages" class="pr-2 flex flex-col w-md min-w-md">
-		<div class="flex flex-col w-full">
+	<div id="messages" class="mr-2 mb-2 h-[400px] flex flex-col w-md min-w-md">
+		<div class="flex flex-col w-full grow">
 			{{#error}}
 				<span>{{.}}</span>
 			{{/error}}
 			{{^error}}
-				<div id="threads-list">
-					<ul class="flex flex-row mb-2">
-						{{#threads}}
-							<li class="flex before:content-['/'] flex-row justify-between">
-								<button class="overflow-hidden whitespace-nowrap justify-between flex flex-row w-full" data-message-id="{{ID}}">
-									<div class="hover:text-blue-600 whitespace-nowrap cursor-pointer overflow-hidden text-ellipsis mr-2" data-message-id="{{ID}}">
-										{{#title}}
-											{{title}}
-										{{/title}}
-										{{^title}}
-											{{text}}
-										{{/title}}
-									</div>
-
-									<div data-message-id="{{ID}}" class="italic">{ {{count}} }</div>
-								</button>
-							</li>
-						{{/threads}}
-					</ul>
-				</div>
-
-				<div id="messages-list">
+				<div id="messages-list" class="grow">
 					<ul class="flex flex-col">
 						{{#messages}}
 							<li class="mb-2 grow-1 max-w-full flex flex-row justify-between whitespace-nowrap">
-								<button type="button" class="flex flex-row justify-between overflow-hidden bg-gray-300 hover:bg-gray-500 hover:text-white cursor-pointer text-left px-2 italic w-full" data-message-id="{{ID}}">
+								<button type="button" class="flex flex-row justify-between overflow-hidden bg-gray-300 hover:bg-gray-500 hover:text-white cursor-pointer text-left px-2 w-full" data-message-id="{{ID}}">
 									<div class="overflow-hidden text-ellipsis mr-2" data-message-id="{{ID}}">
 										{{#title}}
 											{{title}}
@@ -162,7 +174,7 @@
 										{{/title}}
 									</div>
 
-									<div data-message-id="{{ID}}">{{count}}</div>
+									<div data-message-id="{{ID}}" class="italic">{ {{count}} }</div>
 								</button>
 
 								<button type="button" class="bg-gray-300 hover:bg-gray-500 hover:text-white cursor-pointer px-2 ml-2" data-thread-id="{{ID}}"> > </button>
@@ -175,11 +187,33 @@
 						{{/messages}}
 					</ul>
 				</div>
+
+				<div id="threads-list">
+					<ul class="flex flex-row mb-2">
+						{{#threads}}
+							<li class="flex before:content-['/'] mr-1 flex-row justify-between">
+								<button class="overflow-hidden whitespace-nowrap justify-between flex flex-row w-full" data-thread-id="{{threadID}}">
+									<div class="hover:text-blue-600 whitespace-nowrap cursor-pointer overflow-hidden text-ellipsis mr-2" data-thread-id="{{threadID}}">
+										{{#title}}
+											{{title}}
+										{{/title}}
+										{{^title}}
+											{{text}}
+										{{/title}}
+									</div>
+								</button>
+							</li>
+						{{/threads}}
+						{{^threads}}
+							<li class="before:content-['/']"></li>
+						{{/threads}}
+					</ul>
+				</div>
 			{{/error}}
 		</div>
 	</div>
 
 	<div id="search">
-		<input class="italic px-1 text-gray-600 border border-black" type="text" id="search" name="search" placeholder="{{search}}"></input>
+		<input class="w-md placeholder:italic px-1 placeholder:text-gray-600 border border-black" type="text" id="search" name="search" placeholder="{{search}}"></input>
 	</div>
 </div>
