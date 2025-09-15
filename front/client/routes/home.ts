@@ -82,42 +82,15 @@ async function renderError(err: string): Promise<string> {
 	const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles.css')), { encoding: 'utf-8' });
 	const home = await readFile(resolve(join(Config.get('basedir'), 'templates/home.mustache')), { encoding: 'utf-8' });
 	const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
+	const messageEditForm = await readFile(resolve(join(Config.get('basedir'), 'templates/message_edit_form.mustache')), { encoding: 'utf-8' });
+	const messageView = await readFile(resolve(join(Config.get('basedir'), 'templates/message_view.mustache')), { encoding: 'utf-8' });
+	const newMessageForm = await readFile(resolve(join(Config.get('basedir'), 'templates/new_message_form.mustache')), { encoding: 'utf-8' });
+	const homeSidebar = await readFile(resolve(join(Config.get('basedir'), 'templates/home_sidebar.mustache')), { encoding: 'utf-8' });
+	const messagesList = await readFile(resolve(join(Config.get('basedir'), 'templates/messages_list.mustache')), { encoding: 'utf-8' });
+	const threadsList = await readFile(resolve(join(Config.get('basedir'), 'templates/threads_list.mustache')), { encoding: 'utf-8' });
 
-	return mustache.render(layout, {
-		scripts:  ["/public/homeScript.js"],
-		manifest: "/public/manifest.json",
-		styles:   styles,
+	const content = mustache.render(home, {
 		error:    err,
-		send:     i18n("send"),
-		logout:   i18n("logout"),
-		search:   i18n("search"),
-		filesPlaceholder: i18n("filesPlaceholder"),
-		newMessageText: i18n("newMessageText"),
-		selectFiles: i18n("selectFiles"),
-		delete:   i18n("delete"),
-		edit:     i18n("edit"),
-		publish:  i18n("publish"),
-		privateText:  i18n("private"),
-		update:   i18n("update"),
-		cancel:        i18n("cancel"),
-		noFiles:        i18n("noFiles"),
-		namePlaceholder:  i18n("namePlaceholder"),
-		titlePlaceholder: i18n("titlePlaceholder"),
-		textPlaceholder:  i18n("textPlaceholder"),
-	}, {
-		content: home,
-	});
-}
-
-async function renderBody(threads: Message[], messages: Message[], userID: number, message?: Message, editMessage?: boolean): Promise<string> {
-	const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles.css')), { encoding: 'utf-8' });
-	const home = await readFile(resolve(join(Config.get('basedir'), 'templates/home.mustache')), { encoding: 'utf-8' });
-	const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
-
-	return mustache.render(layout, {
-		scripts:  ["/public/homeScript.js"],
-		manifest: "/public/manifest.json",
-		styles:   styles,
 		threads:  threads,
 		messages: messages,
 		message:  message,
@@ -141,7 +114,72 @@ async function renderBody(threads: Message[], messages: Message[], userID: numbe
 		titlePlaceholder: i18n("titlePlaceholder"),
 		textPlaceholder:  i18n("textPlaceholder"),
 	}, {
-		content: home,
+		messageEditForm,
+		messageView,
+		newMessageForm,
+		homeSidebar,
+		messagesList,
+		threadsList,
+	})
+
+	return mustache.render(layout, {
+		scripts:  ["/public/homeScript.js"],
+		manifest: "/public/manifest.json",
+		styles:   styles,
+	}, {
+		content,
+	});
+}
+
+async function renderBody(threads: Message[], messages: Message[], userID: number, message?: Message, editMessage?: boolean): Promise<string> {
+	const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles.css')), { encoding: 'utf-8' });
+	const home = await readFile(resolve(join(Config.get('basedir'), 'templates/home.mustache')), { encoding: 'utf-8' });
+	const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
+	const messageEditForm = await readFile(resolve(join(Config.get('basedir'), 'templates/message_edit_form.mustache')), { encoding: 'utf-8' });
+	const messageView = await readFile(resolve(join(Config.get('basedir'), 'templates/message_view.mustache')), { encoding: 'utf-8' });
+	const newMessageForm = await readFile(resolve(join(Config.get('basedir'), 'templates/new_message_form.mustache')), { encoding: 'utf-8' });
+	const homeSidebar = await readFile(resolve(join(Config.get('basedir'), 'templates/home_sidebar.mustache')), { encoding: 'utf-8' });
+	const messagesList = await readFile(resolve(join(Config.get('basedir'), 'templates/messages_list.mustache')), { encoding: 'utf-8' });
+	const threadsList = await readFile(resolve(join(Config.get('basedir'), 'templates/threads_list.mustache')), { encoding: 'utf-8' });
+
+	const content = mustache.render(home, {
+		threads:  threads,
+		messages: messages,
+		message:  message,
+		userID:   userID,
+		domain:   Config.get("domain"),
+		send:     i18n("send"),
+		logout:   i18n("logout"),
+		filesPlaceholder: i18n("filesPlaceholder"),
+		newMessageText: i18n("newMessageText"),
+		selectFiles: i18n("selectFiles"),
+		search:   i18n("search"),
+		delete:   i18n("delete"),
+		edit:     i18n("edit"),
+		editMessage: editMessage,
+		publish:  i18n("publish"),
+		privateText:  i18n("private"),
+		update:   i18n("update"),
+		cancel:        i18n("cancel"),
+		noFiles:        i18n("noFiles"),
+		namePlaceholder:  i18n("namePlaceholder"),
+		titlePlaceholder: i18n("titlePlaceholder"),
+		textPlaceholder:  i18n("textPlaceholder"),
+	}, {
+		messageEditForm,
+		messageView,
+		newMessageForm,
+		messagesList,
+		threadsList,
+		homeSidebar,
+	})
+
+	return mustache.render(layout, {
+		scripts:  ["/public/homeScript.js"],
+		manifest: "/public/manifest.json",
+		styles:   styles,
+	}, {
+		content,
 	});
 }
 
