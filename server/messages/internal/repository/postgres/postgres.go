@@ -447,7 +447,7 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID in
 
 	var rows pgx.Rows
 
-	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE user_id = $1 AND thread_id = $2 ORDER BY created_at DESC LIMIT $3 OFFSET $4"
+	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE user_id = $1 AND thread_id = $2 ORDER BY created_at ASC LIMIT $3 OFFSET $4"
 
 	rows, err = tx.Query(ctx, r.table(query), userID, threadID, limit, offset)
 	defer rows.Close()
@@ -537,7 +537,7 @@ func (r *Repository) ReadMessages(ctx context.Context, userID int64, limit, offs
 
 	var rows pgx.Rows
 
-	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3"
+	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE user_id = $1 ORDER BY created_at ASC LIMIT $2 OFFSET $3"
 
 	rows, err = tx.Query(ctx, r.table(query), userID, limit, offset)
 	if err != nil {
