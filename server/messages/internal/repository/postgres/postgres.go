@@ -606,7 +606,7 @@ func (r *Repository) ReadMessagesAround(ctx context.Context, userID, threadID, i
 	const queryOlder = "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE created_at <= $3 AND user_id = $1 AND thread_id = $2 ORDER BY created_at DESC LIMIT $4"
 	const queryCountOlder = "SELECT COUNT(*) FROM %s WHERE created_at <= $3 AND user_id = $1 AND thread_id = $2 LIMIT $4"
 	const queryNewer = "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE created_at > $3 AND user_id = $1 AND thread_id = $2 ORDER BY created_at ASC LIMIT $4"
-	const queryCountNewer = "SELECT COUNT(*) FROM %s WHERE created_at > $3 AND user_id = $1 AND thread_id = $2"
+	const queryCountNewer = "SELECT COUNT(*) FROM %s WHERE created_at > $3 AND user_id = $1 AND thread_id = $2 LIMIT $4"
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
