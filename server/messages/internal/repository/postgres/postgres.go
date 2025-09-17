@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 	"os"
+	"slices"
 	"time"
 	"context"
 	"encoding/json"
@@ -602,8 +603,8 @@ func (r *Repository) ReadMessages(ctx context.Context, userID int64, limit, offs
 
 func (r *Repository) ReadMessagesAround(ctx context.Context, userID, threadID, id int64, limit int32) (messages []*model.Message, isLastPage, isFirstPage bool, err error) {
 	const queryCreatedAt = "SELECT created_at FROM %s WHERE user_id = $1 AND id = $2"
-	const queryOlder = "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE created_at <= $3 AND user_id = $1 AND thread_id = $2 ORDER BY created_at ASC LIMIT $4"
-	const queryCountOlder = "SELECT COUNT(*) FROM %s WHERE created_at <= $3 AND user_id = $1 AND thread_id = $2"
+	const queryOlder = "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE created_at <= $3 AND user_id = $1 AND thread_id = $2 ORDER BY created_at DESC LIMIT $4"
+	const queryCountOlder = "SELECT COUNT(*) FROM %s WHERE created_at <= $3 AND user_id = $1 AND thread_id = $2 LIMIT $4"
 	const queryNewer = "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE created_at > $3 AND user_id = $1 AND thread_id = $2 ORDER BY created_at ASC LIMIT $4"
 	const queryCountNewer = "SELECT COUNT(*) FROM %s WHERE created_at > $3 AND user_id = $1 AND thread_id = $2"
 
@@ -626,14 +627,26 @@ func (r *Repository) ReadMessagesAround(ctx context.Context, userID, threadID, i
 		}
 	}()
 
-	var createdAt time.Time
+	var (
+		createdAt time.Time
+		countOlder int32
+	)
 
 	err = tx.QueryRow(ctx, r.table(queryCreatedAt), userID, id).Scan(&createdAt)
 	if err != nil {
 		return
 	}
 
-	messages = make([]*model.Message, 0, limit*2)
+	err = tx.QueryRow(ctx, r.table(queryCountOlder), userID, threadID, createdAt, limit).Scan(&countOlder)
+	if err != nil {
+		return
+	}
+
+	if countOlder < int32(limit) {
+		isLastPage = true
+	}
+
+	olderMessages := make([]*model.Message, 0, countOlder)
 
 	olderRows, err := tx.Query(ctx, r.table(queryOlder), userID, threadID, createdAt, limit)
 	defer olderRows.Close()
@@ -664,7 +677,7 @@ func (r *Repository) ReadMessagesAround(ctx context.Context, userID, threadID, i
 		message.CreateUTCNano = createdAt.UnixNano()
 		message.UpdateUTCNano = updatedAt.UnixNano()
 
-		messages = append(messages, message)
+		olderMessages = append(olderMessages, message)
 	}
 
 	if err = olderRows.Err(); err != nil {
@@ -672,6 +685,22 @@ func (r *Repository) ReadMessagesAround(ctx context.Context, userID, threadID, i
 	}
 
 	olderRows.Close()
+
+	slices.Reverse(olderMessages)
+
+
+	var countNewer int32
+
+	err = tx.QueryRow(ctx, r.table(queryCountNewer), userID, threadID, createdAt, limit).Scan(&countNewer)
+	if err != nil {
+		return
+	}
+
+	if countNewer < int32(limit) {
+		isFirstPage = true
+	}
+
+	newerMessages := make([]*model.Message, 0, countNewer)
 
 	newerRows, err := tx.Query(ctx, r.table(queryNewer), userID, threadID, createdAt, limit)
 	defer newerRows.Close()
@@ -702,32 +731,14 @@ func (r *Repository) ReadMessagesAround(ctx context.Context, userID, threadID, i
 		message.CreateUTCNano = createdAt.UnixNano()
 		message.UpdateUTCNano = updatedAt.UnixNano()
 
-		messages = append(messages, message)
+		newerMessages = append(newerMessages, message)
 	}
 
 	if err = newerRows.Err(); err != nil {
 		return
 	}
 
-	var countNewer, countOlder int32
-
-	err = tx.QueryRow(ctx, r.table(queryCountNewer), userID, threadID, createdAt).Scan(&countNewer)
-	if err != nil {
-		return
-	}
-
-	if countNewer < int32(limit) {
-		isFirstPage = true
-	}
-
-	err = tx.QueryRow(ctx, r.table(queryCountOlder), userID, threadID, createdAt).Scan(&countOlder)
-	if err != nil {
-		return
-	}
-
-	if countOlder < int32(limit) {
-		isLastPage = true
-	}
+	messages = append(olderMessages, newerMessages...)
 
 	return
 }
