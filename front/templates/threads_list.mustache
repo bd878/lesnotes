@@ -1,21 +1,19 @@
-<div id="threads-list">
-	<ul class="flex flex-row mb-2">
-		{{#threads}}
-			<li class="flex before:content-['/'] mr-1 flex-row justify-between">
-				<button class="overflow-hidden whitespace-nowrap justify-between flex flex-row w-full" data-thread-id="{{threadID}}">
-					<div class="hover:text-blue-600 whitespace-nowrap cursor-pointer overflow-hidden text-ellipsis mr-2" data-thread-id="{{threadID}}">
-						{{#title}}
-							{{title}}
-						{{/title}}
-						{{^title}}
-							{{text}}
-						{{/title}}
-					</div>
-				</button>
-			</li>
-		{{/threads}}
-		{{^threads}}
-			<li class="before:content-['/']"></li>
-		{{/threads}}
-	</ul>
-</div>
+<ul class="flex flex-row mb-2">
+	{{#threads}}
+		<li class="flex before:content-['/'] mr-1 flex-row justify-between">
+			<button class="overflow-hidden whitespace-nowrap justify-between flex flex-row w-full" data-thread-id="{{threadID}}">
+				<div class="hover:text-blue-600 whitespace-nowrap cursor-pointer overflow-hidden text-ellipsis mr-2" data-thread-id="{{threadID}}">
+					{{#title}}
+						{{title}}
+					{{/title}}
+					{{^title}}
+						{{text}}
+					{{/title}}
+				</div>
+			</button>
+		</li>
+	{{/threads}}
+	{{^threads}}
+		<li class="before:content-['/']"></li>
+	{{/threads}}
+</ul>

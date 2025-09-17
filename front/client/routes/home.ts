@@ -1,4 +1,5 @@
 import type { Message } from '../api/models';
+import type { Thread } from '../api/models';
 import Config from 'config';
 import mustache from 'mustache';
 import api from '../api';
@@ -43,16 +44,10 @@ async function home(ctx) {
 	const threadID = parseInt(ctx.query.thread) || 0
 	const id = parseInt(ctx.query.id) || 0
 
-	const threads = await api.readMessagePathJson(token, threadID)
-	if (threads.error.error) {
-		ctx.body = await renderError("failed to load batch messages");
-		ctx.status = 400;
-		return;
-	}
-
-	const messages = await api.readMessagesJson(token, threadID, 0, limit, offset)
-	if (messages.error.error) {
-		ctx.body = await renderError("failed to load thread messages");
+	const stack = await api.readStackJson(token, threadID, id, 10)
+	if (stack.error.error) {
+		console.log(stack.error)
+		ctx.body = await renderError("failed to load messages stack");
 		ctx.status = 400;
 		return;
 	}
@@ -66,13 +61,13 @@ async function home(ctx) {
 			return;
 		}
 
-		ctx.body = await renderBody(reverse(threads.path), reverse(messages.messages), me.user.ID, message.message, edit)
+		ctx.body = await renderBody(stack.stack, me.user.ID, message.message, edit)
 		ctx.status = 200;
 
 		return
 	}
 
-	ctx.body = await renderBody(reverse(threads.path), reverse(messages.messages), me.user.ID, undefined, edit)
+	ctx.body = await renderBody(stack.stack, me.user.ID, undefined, edit)
 	ctx.status = 200;
 
 	return;
@@ -87,14 +82,9 @@ async function renderError(err: string): Promise<string> {
 	const newMessageForm = await readFile(resolve(join(Config.get('basedir'), 'templates/new_message_form.mustache')), { encoding: 'utf-8' });
 	const homeSidebar = await readFile(resolve(join(Config.get('basedir'), 'templates/home_sidebar.mustache')), { encoding: 'utf-8' });
 	const messagesList = await readFile(resolve(join(Config.get('basedir'), 'templates/messages_list.mustache')), { encoding: 'utf-8' });
-	const threadsList = await readFile(resolve(join(Config.get('basedir'), 'templates/threads_list.mustache')), { encoding: 'utf-8' });
 
 	const content = mustache.render(home, {
 		error:    err,
-		threads:  threads,
-		messages: messages,
-		message:  message,
-		userID:   userID,
 		domain:   Config.get("domain"),
 		send:     i18n("send"),
 		logout:   i18n("logout"),
@@ -104,7 +94,6 @@ async function renderError(err: string): Promise<string> {
 		search:   i18n("search"),
 		delete:   i18n("delete"),
 		edit:     i18n("edit"),
-		editMessage: editMessage,
 		publish:  i18n("publish"),
 		privateText:  i18n("private"),
 		update:   i18n("update"),
@@ -119,7 +108,6 @@ async function renderError(err: string): Promise<string> {
 		newMessageForm,
 		homeSidebar,
 		messagesList,
-		threadsList,
 	})
 
 	return mustache.render(layout, {
@@ -131,7 +119,7 @@ async function renderError(err: string): Promise<string> {
 	});
 }
 
-async function renderBody(threads: Message[], messages: Message[], userID: number, message?: Message, editMessage?: boolean): Promise<string> {
+async function renderBody(stack: Thread[], userID: number, message?: Message, editMessage?: boolean): Promise<string> {
 	const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles.css')), { encoding: 'utf-8' });
 	const home = await readFile(resolve(join(Config.get('basedir'), 'templates/home.mustache')), { encoding: 'utf-8' });
 	const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
@@ -140,11 +128,9 @@ async function renderBody(threads: Message[], messages: Message[], userID: numbe
 	const newMessageForm = await readFile(resolve(join(Config.get('basedir'), 'templates/new_message_form.mustache')), { encoding: 'utf-8' });
 	const homeSidebar = await readFile(resolve(join(Config.get('basedir'), 'templates/home_sidebar.mustache')), { encoding: 'utf-8' });
 	const messagesList = await readFile(resolve(join(Config.get('basedir'), 'templates/messages_list.mustache')), { encoding: 'utf-8' });
-	const threadsList = await readFile(resolve(join(Config.get('basedir'), 'templates/threads_list.mustache')), { encoding: 'utf-8' });
 
 	const content = mustache.render(home, {
-		threads:  threads,
-		messages: messages,
+		stack:    stack,
 		message:  message,
 		userID:   userID,
 		domain:   Config.get("domain"),
@@ -170,7 +156,6 @@ async function renderBody(threads: Message[], messages: Message[], userID: numbe
 		messageView,
 		newMessageForm,
 		messagesList,
-		threadsList,
 		homeSidebar,
 	})
 
@@ -181,35 +166,6 @@ async function renderBody(threads: Message[], messages: Message[], userID: numbe
 	}, {
 		content,
 	});
-}
-
-/* list methods */
-function last(target: any[] = [], def: any = 0): any {
-	if (target.length == 0)
-		return def
-
-	return target[target.length-1]
-}
-
-function head(target: any[] = [], def: any = 0): any {
-	if (target.length == 0)
-		return def
-
-	return target[0]
-}
-
-function tail(target: any[] = [], def: any[] = []): any[] {
-	if (target.length == 0)
-		return def
-
-	return target.slice(0, -1)
-}
-
-function reverse(target: any[] = [], def: any[] = []): any[] {
-	if (target.length == 0)
-		return def
-
-	return target.reverse()
 }
 
 export default home;

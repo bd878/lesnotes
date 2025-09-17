@@ -744,6 +744,13 @@ func (r *Repository) ReadMessagesAround(ctx context.Context, userID, threadID, i
 
 	messages = append(olderMessages, newerMessages...)
 
+	for _, message := range messages {
+		message.Count, err = r.countThreadMessages(ctx, tx, message.ID)
+		if err != nil {
+			logger.Errorln(err)
+		}
+	}
+
 	return
 }
 

@@ -78,9 +78,17 @@
 				<span>{{.}}</span>
 			{{/error}}
 			{{^error}}
-				{{> messagesList}}
-
-				{{> threadsList}}
+				<div id="messages-list" class="flex flex-row">
+					{{#stack}}
+						<div class="grow w-md min-w-md first:ml-0 ml-2">
+							{{> messagesList}}
+						</div>
+					{{/stack}}
+					{{^stack}}
+						<div class="grow">
+						</div>
+					{{/stack}}
+				</div>
 			{{/error}}
 		</div>
 	</div>

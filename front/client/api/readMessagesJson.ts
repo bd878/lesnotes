@@ -6,6 +6,7 @@ async function readMessagesJson(token: string, thread: number, order: number, li
 		error:       models.error(),
 		messages:    [],
 		isLastPage:  false,
+		isFirstPage: false,
 	}
 
 	try {
@@ -28,6 +29,7 @@ async function readMessagesJson(token: string, thread: number, order: number, li
 		if (response) {
 			result.messages = response.messages.map(models.message)
 			result.isLastPage = response.isLastPage
+			result.isFirstPage = response.isFirstPage
 		}
 	} catch (e) {
 		result.error.error   = true
