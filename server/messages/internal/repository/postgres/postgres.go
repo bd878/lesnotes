@@ -602,9 +602,9 @@ func (r *Repository) ReadMessages(ctx context.Context, userID int64, limit, offs
 
 func (r *Repository) ReadMessagesAround(ctx context.Context, userID, threadID, id int64, limit int32) (messages []*model.Message, isLastPage, isFirstPage bool, err error) {
 	const queryCreatedAt = "SELECT created_at FROM %s WHERE user_id = $1 AND id = $2"
-	const queryOlder = "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE created_at <= $3 AND user_id = $1 AND thread_id = $2 ORDER BY created_at DESC LIMIT $4"
+	const queryOlder = "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE created_at <= $3 AND user_id = $1 AND thread_id = $2 ORDER BY created_at ASC LIMIT $4"
 	const queryCountOlder = "SELECT COUNT(*) FROM %s WHERE created_at <= $3 AND user_id = $1 AND thread_id = $2"
-	const queryNewer = "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE created_at > $3 AND user_id = $1 AND thread_id = $2 ORDER BY created_at DESC LIMIT $4"
+	const queryNewer = "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE created_at > $3 AND user_id = $1 AND thread_id = $2 ORDER BY created_at ASC LIMIT $4"
 	const queryCountNewer = "SELECT COUNT(*) FROM %s WHERE created_at > $3 AND user_id = $1 AND thread_id = $2"
 
 	var tx pgx.Tx
@@ -633,7 +633,7 @@ func (r *Repository) ReadMessagesAround(ctx context.Context, userID, threadID, i
 		return
 	}
 
-	messages = make([]*model.Message, 0, limit*2+1)
+	messages = make([]*model.Message, 0, limit*2)
 
 	olderRows, err := tx.Query(ctx, r.table(queryOlder), userID, threadID, createdAt, limit)
 	defer olderRows.Close()
