@@ -5,8 +5,8 @@ async function readMessagesAround(threadID: number, id: number, limit: number) {
 	let result = {
 		error:       models.error(),
 		messages:    [],
-		isLastPage:  false,
-		isFirstPage: false,
+		isLastPage:  true,
+		isFirstPage: true,
 	}
 
 	try {
@@ -25,8 +25,8 @@ async function readMessagesAround(threadID: number, id: number, limit: number) {
 
 		if (response) {
 			result.messages = response.messages.map(models.message)
-			result.isLastPage = response.isLastPage
-			result.isFirstPage = response.isFirstPage
+			result.isLastPage = response.is_last_page
+			result.isFirstPage = response.is_first_page
 		}
 	} catch (e) {
 		result.error.error   = true

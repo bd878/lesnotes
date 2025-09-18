@@ -44,12 +44,17 @@ async function home(ctx) {
 	const threadID = parseInt(ctx.query.thread) || 0
 	const id = parseInt(ctx.query.id) || 0
 
-	const stack = await api.readStackJson(token, threadID, id, 10)
+	const stack = await api.readStackJson(token, threadID, 18)
 	if (stack.error.error) {
 		console.log(stack.error)
 		ctx.body = await renderError("failed to load messages stack");
 		ctx.status = 400;
 		return;
+	}
+
+	for (const thread of stack.stack) {
+		thread.isCenter = function() { return this.ID == thread.centerID }
+		thread.isSelected = function() { return this.ID == id }
 	}
 
 	let message;

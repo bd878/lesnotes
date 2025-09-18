@@ -5,8 +5,8 @@ async function readMessagesJson(token: string, thread: number, order: number, li
 	let result = {
 		error:       models.error(),
 		messages:    [],
-		isLastPage:  false,
-		isFirstPage: false,
+		isLastPage:  true,
+		isFirstPage: true,
 	}
 
 	try {
@@ -28,8 +28,9 @@ async function readMessagesJson(token: string, thread: number, order: number, li
 
 		if (response) {
 			result.messages = response.messages.map(models.message)
-			result.isLastPage = response.isLastPage
-			result.isFirstPage = response.isFirstPage
+			result.isLastPage = response.is_last_page
+			if (offset > 0)
+				result.isFirstPage = false
 		}
 	} catch (e) {
 		result.error.error   = true

@@ -2,7 +2,7 @@ import api from './index';
 import models from './models';
 import * as is from '../third_party/is'
 
-async function readStackJson(token: string, threadID: number, lastMessageID: number, limit: number) {
+async function readStackJson(token: string, threadID: number/*, lastMessageID: number*/, limit: number) {
 	let result = {
 		error:       models.error(),
 		stack:       [],
@@ -19,7 +19,7 @@ async function readStackJson(token: string, threadID: number, lastMessageID: num
 
 	// len(threads) == len(centers) == len(path.path)
 	const threads = [0 /* root thread */ , ...ids]
-	const centers = [...ids, lastMessageID]
+	const centers = [...ids, 0/* TODO: remove, lastMessageID is unused*/]
 
 	path.path.push(JSON.parse(JSON.stringify(models.EmptyThread /* root thread */)))
 	path.path.reverse()
@@ -30,7 +30,7 @@ async function readStackJson(token: string, threadID: number, lastMessageID: num
 		const centerID = centers[i] /* first is message : != 0 */
 		const thread = path.path[i] /* first is thread : EmptyThread */
 
-		let messages = { error: models.error(), messages: [], isLastPage: false, isFirstPage: false }
+		let messages = { error: models.error(), messages: [], isLastPage: true, isFirstPage: true }
 		if (is.notEmpty(centerID)) {
 			messages = await api.readMessagesAroundJson(token, threadID, centerID, Math.floor(limit / 2))
 			thread.centerID = centerID

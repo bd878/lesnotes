@@ -72,16 +72,26 @@
 		</div>
 	</div>
 
-	<div id="messages" class="mr-2 mb-2 h-[400px] flex flex-col w-md min-w-md">
+	<div id="messages" class="mr-2 mb-2 h-[400px] flex flex-col overflow-y-scroll w-full">
 		<div class="flex flex-col w-full grow">
 			{{#error}}
 				<span>{{.}}</span>
 			{{/error}}
 			{{^error}}
-				<div id="messages-list" class="flex flex-row">
+				<div id="messages-list" class="w-md min-w-md flex flex-row grow">
 					{{#stack}}
-						<div class="grow w-md min-w-md first:ml-0 ml-2">
-							{{> messagesList}}
+						<div class="grow flex flex-col w-md min-w-md first:ml-0 ml-2">
+							{{^isLastPage}}
+								<button type="button" data-thread-id="{{ID}}" data-direction="up" class="cursor-pointer hover:text-blue-600"><-</button>
+							{{/isLastPage}}
+
+							<div>
+								{{> messagesList}}
+							</div>
+
+							{{^isFirstPage}}
+								<button type="button" data-thread-id="{{ID}}" data-direction="down" class="cursor-pointer hover:text-blue-600">-></button>
+							{{/isFirstPage}}
 						</div>
 					{{/stack}}
 					{{^stack}}

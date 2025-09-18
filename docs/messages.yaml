@@ -659,6 +659,9 @@ components:
               default: ""
             is_last_page:
               type: boolean
+            is_first_page:
+              type: boolean
+              required: false
             messages:
               type: array
               items:

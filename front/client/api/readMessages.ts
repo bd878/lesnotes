@@ -5,7 +5,8 @@ async function readMessages(thread: number, order: number, limit: number, offset
 	let result = {
 		error:       models.error(),
 		messages:    [],
-		isLastPage:  false,
+		isLastPage:  true,
+		isFirstPage: true,
 	}
 
 	try {
@@ -25,7 +26,9 @@ async function readMessages(thread: number, order: number, limit: number, offset
 
 		if (response) {
 			result.messages = response.messages.map(models.message)
-			result.isLastPage = response.isLastPage
+			result.isLastPage = response.is_last_page
+			if (offset > 0)
+				result.isFirstPage = false
 		}
 	} catch (e) {
 		result.error.error   = true
