@@ -24,7 +24,6 @@ async function home(ctx) {
 	ctx.set({ "Cache-Control": "no-cache,max-age=0" })
 
 	const resp = await api.authJson(token)
-	console.log(`[home]: auth response`, JSON.stringify(resp))
 	if (resp.error.error || resp.expired) {
 		ctx.redirect("/login")
 		ctx.status = 302
