@@ -20,6 +20,15 @@ type (
 		Private             bool                `json:"private"`
 	}
 
+	List struct {
+		Messages            []*Message
+		IsLastPage          bool
+		IsFirstPage         bool
+		Total               int32
+		Count               int32
+		Offset              int32
+	}
+
 	SendRequest struct {
 		Text                string              `json:"text"`
 		Title               string              `json:"title"`
@@ -55,6 +64,9 @@ type (
 		Messages            []*Message          `json:"messages"`
 		IsLastPage          *bool               `json:"is_last_page"`
 		IsFirstPage         *bool               `json:"is_first_page,omitempty"`
+		Count               *int32              `json:"count,omitempty"`
+		Total               *int32              `json:"total,omitempty"`
+		Offset              *int32              `json:"offset,omitempty"`
 		Description         string              `json:"description"`
 	}
 

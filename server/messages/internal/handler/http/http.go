@@ -16,9 +16,9 @@ type Controller interface {
 	PublishMessages(ctx context.Context, ids []int64, userID int64) (err error)
 	PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error)
 	ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *messages.Message, err error)
-	ReadMessagesAround(ctx context.Context, userID, threadID, id int64, limit int32) (messages []*messages.Message, isLastPage, isFirstPage bool, err error)
-	ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (messages []*messages.Message, isLastPage bool, err error)
-	ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool) (messages []*messages.Message, isLastPage bool, err error)
+	ReadMessagesAround(ctx context.Context, userID, threadID, id int64, limit int32) (list *messages.List, err error)
+	ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (list *messages.List, err error)
+	ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool) (list *messages.List, err error)
 	ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*messages.Message, err error)
 	ReadPath(ctx context.Context, userID int64, id int64) (messages []*messages.Message, err error)
 }

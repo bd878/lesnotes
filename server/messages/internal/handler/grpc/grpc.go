@@ -14,8 +14,9 @@ type Controller interface {
 	DeleteUserMessages(ctx context.Context, userID int64) (err error)
 	PublishMessages(ctx context.Context, ids []int64, userID int64) (err error)
 	PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error)
+	CountMessages(ctx context.Context, userID, threadID int64) (count int, err error)
 	ReadPath(ctx context.Context, userID, id int64) (path []*messages.Message, err error)
-	ReadMessagesAround(ctx context.Context, userID, threadID, id int64, limit int32) (messages []*messages.Message, isLastPage, isFirstPage bool, err error)
+	ReadMessagesAround(ctx context.Context, userID, threadID, id int64, limit int32) (messages []*messages.Message, isLastPage bool, offset int, err error)
 	ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *messages.Message, err error)
 	ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (messages []*messages.Message, isLastPage bool, err error)
 	ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool) (messages []*messages.Message, isLastPage bool, err error)
@@ -161,7 +162,7 @@ func (h *Handler) ReadPath(ctx context.Context, req *api.ReadPathRequest) (resp 
 }
 
 func (h *Handler) ReadMessagesAround(ctx context.Context, req *api.ReadMessagesAroundRequest) (resp *api.ReadMessagesAroundResponse, err error) {
-	list, isLastPage, isFirstPage, err := h.controller.ReadMessagesAround(ctx, req.UserId, req.ThreadId, req.Id, req.Limit)
+	list, isLastPage, offset, err := h.controller.ReadMessagesAround(ctx, req.UserId, req.ThreadId, req.Id, req.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -169,7 +170,20 @@ func (h *Handler) ReadMessagesAround(ctx context.Context, req *api.ReadMessagesA
 	resp = &api.ReadMessagesAroundResponse{
 		Messages:    messages.MapMessagesToProto(messages.MessageToProto, list),
 		IsLastPage:  isLastPage,
-		IsFirstPage: isFirstPage,
+		Offset:      int32(offset),
+	}
+
+	return
+}
+
+func (h *Handler) CountMessages(ctx context.Context, req *api.CountMessagesRequest) (resp *api.CountMessagesResponse, err error) {
+	count, err := h.controller.CountMessages(ctx, req.UserId, req.ThreadId)
+	if err != nil {
+		return nil, err
+	}
+
+	resp = &api.CountMessagesResponse{
+		Count: int32(count),
 	}
 
 	return

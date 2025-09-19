@@ -402,7 +402,7 @@ func filterPublicMessages(list []*messages.Message) (filtered []*messages.Messag
 func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter, userID, threadID int64, limit, offset int32, ascending, publicOnly bool) (err error) {
 	// TODO: read if thread is public
 
-	list, isLastPage, err := h.controller.ReadThreadMessages(ctx, userID, threadID, limit, offset, ascending)
+	list, err := h.controller.ReadThreadMessages(ctx, userID, threadID, limit, offset, ascending)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -418,11 +418,11 @@ func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter,
 
 	// filter public messages only
 	if publicOnly {
-		list = filterPublicMessages(list)
+		list.Messages = filterPublicMessages(list.Messages)
 	}
 
 	fileIDs := make([]int64, 0)
-	for _, message := range list {
+	for _, message := range list.Messages {
 		if message.FileIDs != nil {
 			// TODO: fileIDs set
 			fileIDs = append(fileIDs, message.FileIDs...)
@@ -433,7 +433,7 @@ func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter,
 	if err != nil {
 		logger.Errorw("failed to read batch files", "user_id", userID, "error", err)
 	} else {
-		for _, message := range list {
+		for _, message := range list.Messages {
 			var list []*files.File
 			for _, id := range message.FileIDs {
 				file := filesRes[id]
@@ -453,9 +453,13 @@ func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter,
 	}
 
 	response, err := json.Marshal(messages.ReadResponse{
-		ThreadID:   &threadID,
-		Messages:   list,
-		IsLastPage: &isLastPage,
+		ThreadID:     &threadID,
+		Messages:     list.Messages,
+		IsLastPage:   &list.IsLastPage,
+		IsFirstPage:  &list.IsFirstPage,
+		Count:        &list.Count,
+		Offset:       &list.Offset,
+		Total:        &list.Total,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -471,7 +475,7 @@ func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter,
 }
 
 func (h *Handler) readMessages(ctx context.Context, w http.ResponseWriter, userID int64, limit, offset int32, ascending, publicOnly bool) (err error) {
-	list, isLastPage, err := h.controller.ReadMessages(ctx, userID, limit, offset, ascending)
+	list, err := h.controller.ReadMessages(ctx, userID, limit, offset, ascending)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -486,12 +490,12 @@ func (h *Handler) readMessages(ctx context.Context, w http.ResponseWriter, userI
 	}
 
 	if publicOnly {
-		list = filterPublicMessages(list)
+		list.Messages = filterPublicMessages(list.Messages)
 	}
 
 	// TODO: derive readBatchFiles to separate function
 	fileIDs := make([]int64, 0)
-	for _, message := range list {
+	for _, message := range list.Messages {
 		if message.FileIDs != nil {
 			// TODO: fileIDs set
 			fileIDs = append(fileIDs, message.FileIDs...)
@@ -502,7 +506,7 @@ func (h *Handler) readMessages(ctx context.Context, w http.ResponseWriter, userI
 	if err != nil {
 		logger.Errorw("failed to read batch files", "user_id", userID, "error", err)
 	} else {
-		for _, message := range list {
+		for _, message := range list.Messages {
 			var list []*files.File
 			for _, id := range message.FileIDs {
 				file := filesRes[id]
@@ -522,8 +526,12 @@ func (h *Handler) readMessages(ctx context.Context, w http.ResponseWriter, userI
 	}
 
 	response, err := json.Marshal(messages.ReadResponse{
-		Messages:   list,
-		IsLastPage: &isLastPage,
+		Messages:      list.Messages,
+		IsLastPage:    &list.IsLastPage,
+		IsFirstPage:   &list.IsFirstPage,
+		Count:         &list.Count,
+		Offset:        &list.Offset,
+		Total:         &list.Total,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -539,7 +547,7 @@ func (h *Handler) readMessages(ctx context.Context, w http.ResponseWriter, userI
 }
 
 func (h *Handler) readMessagesAround(ctx context.Context, w http.ResponseWriter, userID, threadID, messageID int64, limit int32, publicOnly bool) (err error) {
-	list, isLastPage, isFirstPage, err := h.controller.ReadMessagesAround(ctx, userID, threadID, messageID, limit)
+	list, err := h.controller.ReadMessagesAround(ctx, userID, threadID, messageID, limit)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -554,12 +562,12 @@ func (h *Handler) readMessagesAround(ctx context.Context, w http.ResponseWriter,
 	}
 
 	if publicOnly {
-		list = filterPublicMessages(list)
+		list.Messages = filterPublicMessages(list.Messages)
 	}
 
 	// TODO: derive readBatchFiles to separate function
 	fileIDs := make([]int64, 0)
-	for _, message := range list {
+	for _, message := range list.Messages {
 		if message.FileIDs != nil {
 			// TODO: fileIDs set
 			fileIDs = append(fileIDs, message.FileIDs...)
@@ -570,7 +578,7 @@ func (h *Handler) readMessagesAround(ctx context.Context, w http.ResponseWriter,
 	if err != nil {
 		logger.Errorw("failed to read batch files", "user_id", userID, "error", err)
 	} else {
-		for _, message := range list {
+		for _, message := range list.Messages {
 			var list []*files.File
 			for _, id := range message.FileIDs {
 				file := filesRes[id]
@@ -590,9 +598,12 @@ func (h *Handler) readMessagesAround(ctx context.Context, w http.ResponseWriter,
 	}
 
 	response, err := json.Marshal(messages.ReadResponse{
-		Messages:    list,
-		IsLastPage:  &isLastPage,
-		IsFirstPage: &isFirstPage,
+		Messages:      list.Messages,
+		IsLastPage:    &list.IsLastPage,
+		IsFirstPage:   &list.IsFirstPage,
+		Count:         &list.Count,
+		Offset:        &list.Offset,
+		Total:         &list.Total,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

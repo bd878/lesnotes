@@ -18,6 +18,7 @@ service Messages {
 	rpc ReadMessagesAround(ReadMessagesAroundRequest) returns (ReadMessagesAroundResponse) {}
 	rpc ReadThreadMessages(ReadThreadMessagesRequest) returns (ReadThreadMessagesResponse) {}
 	rpc ReadBatchMessages(ReadBatchMessagesRequest) returns (ReadBatchMessagesResponse) {}
+	rpc CountMessages(CountMessagesRequest) returns (CountMessagesResponse) {}
 }
 
 message Message {
@@ -165,5 +166,14 @@ message ReadMessagesAroundRequest {
 message ReadMessagesAroundResponse {
 	repeated Message messages = 1;
 	bool             is_last_page = 2;
-	bool             is_first_page = 3;
+	int32            offset = 3;
+}
+
+message CountMessagesRequest {
+	int64 user_id = 1;
+	int64 thread_id = 2;
+}
+
+message CountMessagesResponse {
+	int32 count = 1;
 }

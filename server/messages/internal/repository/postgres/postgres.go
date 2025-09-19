@@ -421,6 +421,16 @@ func (r *Repository) DeleteUserMessages(ctx context.Context, userID int64) (err 
 	return
 }
 
+func (r *Repository) Count(ctx context.Context, userID, threadID int64) (count int, err error) {
+	if threadID == -1 {
+		err = r.pool.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE user_id = $1"), userID).Scan(&count)
+	} else {
+		err = r.pool.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE user_id = $1 AND thread_id = $2"), userID, threadID).Scan(&count)
+	}
+
+	return
+}
+
 /**
  * @param  {[type]} r *Repository)  ReadThreadMessages(ctx context.Context, userID, threadID int64, limit, offset int32) (messages []*model.Message, isLastPage bool, err error [description]
  * @return {[type]}   [description]
@@ -605,17 +615,17 @@ func (r *Repository) ReadMessages(ctx context.Context, userID int64, limit, offs
 	return
 }
 
-func (r *Repository) ReadMessagesAround(ctx context.Context, userID, threadID, id int64, limit int32) (messages []*model.Message, isLastPage, isFirstPage bool, err error) {
+func (r *Repository) ReadMessagesAround(ctx context.Context, userID, threadID, id int64, limit int32) (messages []*model.Message, isLastPage bool, offset int, err error) {
 	const queryCreatedAt = "SELECT created_at FROM %s WHERE user_id = $1 AND id = $2"
 	const queryOlder = "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE created_at <= $3 AND user_id = $1 AND thread_id = $2 ORDER BY created_at DESC LIMIT $4"
 	const queryCountOlder = "SELECT COUNT(*) FROM %s WHERE created_at <= $3 AND user_id = $1 AND thread_id = $2 LIMIT $4"
 	const queryNewer = "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE created_at > $3 AND user_id = $1 AND thread_id = $2 ORDER BY created_at ASC LIMIT $4"
-	const queryCountNewer = "SELECT COUNT(*) FROM %s WHERE created_at > $3 AND user_id = $1 AND thread_id = $2 LIMIT $4"
+	const queryOffset = "SELECT COUNT(*) FROM %s WHERE created_at > $3 AND user_id = $1 AND thread_id = $2"
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
-		return nil, false, false, err
+		return nil, false, 0, err
 	}
 	defer func() {
 		p := recover()
@@ -655,7 +665,7 @@ func (r *Repository) ReadMessagesAround(ctx context.Context, userID, threadID, i
 	olderRows, err := tx.Query(ctx, r.table(queryOlder), userID, threadID, createdAt, limit)
 	defer olderRows.Close()
 	if err != nil {
-		return nil, false, false, err
+		return nil, false, 0, err
 	}
 
 	for olderRows.Next() {
@@ -693,23 +703,17 @@ func (r *Repository) ReadMessagesAround(ctx context.Context, userID, threadID, i
 	slices.Reverse(olderMessages)
 
 
-	var countNewer int32
-
-	err = tx.QueryRow(ctx, r.table(queryCountNewer), userID, threadID, createdAt, limit).Scan(&countNewer)
+	err = tx.QueryRow(ctx, r.table(queryOffset), userID, threadID, createdAt).Scan(&offset)
 	if err != nil {
 		return
 	}
 
-	if countNewer < int32(limit) {
-		isFirstPage = true
-	}
-
-	newerMessages := make([]*model.Message, 0, countNewer)
+	newerMessages := make([]*model.Message, 0)
 
 	newerRows, err := tx.Query(ctx, r.table(queryNewer), userID, threadID, createdAt, limit)
 	defer newerRows.Close()
 	if err != nil {
-		return nil, false, false, err
+		return nil, false, 0, err
 	}
 
 	for newerRows.Next() {
