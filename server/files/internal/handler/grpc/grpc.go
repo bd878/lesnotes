@@ -111,13 +111,6 @@ func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.F
 	}
 
 	err = h.repo.ReadFile(context.Background(), file.OID, &streamWriter{stream})
-<<<<<<< HEAD
-
-	if err != nil {
-		logger.Errorw("failed to read file", "error", err)
-	}
-=======
->>>>>>> stage
 
 	return
 }
