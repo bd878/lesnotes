@@ -186,8 +186,8 @@ function onFileInputChange(e) {
 function onMessagesListClick(e) {
 	if (is.notEmpty(e.target.dataset.messageId)) {
 		showMessage(e.target.dataset.messageId)
-	} else if (is.notEmpty(e.target.dataset.direction) && is.notEmpty(e.target.dataset.threadId)) {
-		paginateMessages(e.target.dataset.threadId, e.target.dataset.direction)
+	} else if (is.notEmpty(e.target.dataset.threadId) && is.notEmpty(e.target.dataset.direction)) {
+		paginateMessages(e.target.dataset.threadId, e.target.dataset.direction, e.target.dataset.offset, e.target.dataset.limit)
 	} else if (is.notEmpty(e.target.dataset.threadId)) {
 		openThread(e.target.dataset.threadId)
 	}
@@ -300,7 +300,7 @@ async function onFormSubmit(e) {
 	let fileID = 0;
 
 	const params = new URL(location.toString()).searchParams
-	const threadID = parseInt(params.get("thread")) || 0
+	const threadID = parseInt(params.get("cwd")) || 0
 
 	const fileIDs = []
 
@@ -329,7 +329,27 @@ async function onFormSubmit(e) {
 	location.href = params.toString() ? ("/home?" + params.toString()) : "/home"
 }
 
-function paginateMessages(threadID, direction) {/*TODO: implement*/}
+function paginateMessages(threadID, direction, offsetStr, limitStr) {
+	const params = new URLSearchParams(location.search)
+
+	const offset = parseInt(offsetStr)
+	const limit = parseInt(limitStr)
+
+	if (isNaN(offset) || isNaN(limit)) {
+		console.error("[paginateMessages]: offset or limit are nan")
+		return
+	}
+
+	if (direction == "prev") {
+		params.set(threadID, offset + limit)
+	} else if (direction == "next") {
+		params.set(threadID, Math.max(0, offset - limit))
+	} else {
+		console.error("[paginateMessages]: unknown direction:", direction)
+	}
+
+	location.href = params.toString() ? ("/home?" + params.toString()) : "/home"
+}
 
 function editMessage(messageID) {
 	const params = new URLSearchParams(location.search)
@@ -350,9 +370,9 @@ function showMessage(messageID) {
 function openThread(threadID) {
 	const params = new URLSearchParams(location.search)
 	if (threadID == 0 || threadID == "0" || threadID == "") {
-		params.delete("thread")
+		params.delete("cwd")
 	} else {
-		params.set("thread", threadID)
+		params.set("cwd", threadID)
 	}
 
 	params.delete("id")

@@ -2,7 +2,7 @@ import api from './index';
 import models from './models';
 import * as is from '../third_party/is'
 
-async function readStackJson(token: string, threadID: number/*, lastMessageID: number*/, limit: number) {
+async function readStackJson(token: string, threadID: number/*, lastMessageID: number*/, limit: number, offsets: Record<number, number> = {}) {
 	let result = {
 		error:       models.error(),
 		stack:       [],
@@ -30,14 +30,20 @@ async function readStackJson(token: string, threadID: number/*, lastMessageID: n
 		const centerID = centers[i] /* first is message : != 0 */
 		const thread = path.path[i] /* first is thread : EmptyThread */
 
+		const offset = offsets[threadID]
+
 		let messages = { error: models.error(), messages: [], isLastPage: true, isFirstPage: true, count: 0, total: 0, offset: 0 }
-		if (is.notEmpty(centerID)) {
+		if (is.notUndef(offset))
+			messages = await api.readMessagesJson(token, threadID, 1 /* order */, limit, offset)
+		else if (is.notEmpty(centerID))
 			messages = await api.readMessagesAroundJson(token, threadID, centerID, Math.floor(limit / 2))
-			thread.centerID = centerID
-		} else {
+		else
 			messages = await api.readMessagesJson(token, threadID, 1 /* order */, limit, 0)
+
+		if (is.notEmpty(centerID))
+			thread.centerID = centerID
+		else
 			thread.centerID = 0
-		}
 
 		if (messages.error.error) {
 			result.error = messages.error

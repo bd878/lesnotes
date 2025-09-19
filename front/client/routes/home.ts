@@ -10,7 +10,7 @@ import { resolve, join } from 'node:path';
 /**
  * Renders home page
  * 
- * Example: /home?thread=123&id=111&limit=5&offset=10
+ * Example: /home?cwd=123&id=111&limit=5&offset=10
  * thread - message thread id
  * id - message to render
  * limit - limit messages of final thread to load
@@ -38,12 +38,13 @@ async function home(ctx) {
 	}
 
 	const edit = ctx.query.edit
-	const limit = parseInt(ctx.query.limit) || 10
-	const offset = parseInt(ctx.query.offset) || 0
-	const threadID = parseInt(ctx.query.thread) || 0
+	const threadID = parseInt(ctx.query.cwd) || 0
 	const id = parseInt(ctx.query.id) || 0
+	const limit = 14
 
-	const stack = await api.readStackJson(token, threadID, 14)
+	const offsets = buildThreadOffsets(new URLSearchParams(ctx.request.search))
+
+	const stack = await api.readStackJson(token, threadID, limit, offsets)
 	if (stack.error.error) {
 		console.log(stack.error)
 		ctx.body = await renderError("failed to load messages stack");
@@ -75,6 +76,19 @@ async function home(ctx) {
 	ctx.status = 200;
 
 	return;
+}
+
+function buildThreadOffsets(searchParams): Record<number, number> {
+	const threadToOffset = {}
+
+	for (const [key, value] of searchParams) {
+		const threadID = parseInt(key)
+		const offset = parseInt(value)
+		if (!isNaN(threadID) && !isNaN(offset))
+			threadToOffset[threadID] = offset
+	}
+
+	return threadToOffset
 }
 
 async function renderError(err: string): Promise<string> {
@@ -149,6 +163,7 @@ async function renderBody(stack: Thread[], userID: number, message?: Message, ed
 		delete:   i18n("delete"),
 		edit:     i18n("edit"),
 		editMessage: editMessage,
+		limit: 14,
 		publish:  i18n("publish"),
 		privateText:  i18n("private"),
 		update:   i18n("update"),
