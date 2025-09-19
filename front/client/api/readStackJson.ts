@@ -30,7 +30,7 @@ async function readStackJson(token: string, threadID: number/*, lastMessageID: n
 		const centerID = centers[i] /* first is message : != 0 */
 		const thread = path.path[i] /* first is thread : EmptyThread */
 
-		let messages = { error: models.error(), messages: [], isLastPage: true, isFirstPage: true }
+		let messages = { error: models.error(), messages: [], isLastPage: true, isFirstPage: true, count: 0, total: 0, offset: 0 }
 		if (is.notEmpty(centerID)) {
 			messages = await api.readMessagesAroundJson(token, threadID, centerID, Math.floor(limit / 2))
 			thread.centerID = centerID
@@ -44,9 +44,12 @@ async function readStackJson(token: string, threadID: number/*, lastMessageID: n
 			return result;
 		}
 
-		thread.isLastPage = messages.isLastPage
+		thread.isLastPage  = messages.isLastPage
 		thread.isFirstPage = messages.isFirstPage
-		thread.messages = messages.messages
+		thread.messages    = messages.messages
+		thread.total       = messages.total
+		thread.count       = messages.count
+		thread.offset      = messages.offset
 
 		result.stack.push(thread)
 	}

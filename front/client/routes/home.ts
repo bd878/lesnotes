@@ -43,7 +43,7 @@ async function home(ctx) {
 	const threadID = parseInt(ctx.query.thread) || 0
 	const id = parseInt(ctx.query.id) || 0
 
-	const stack = await api.readStackJson(token, threadID, 18)
+	const stack = await api.readStackJson(token, threadID, 14)
 	if (stack.error.error) {
 		console.log(stack.error)
 		ctx.body = await renderError("failed to load messages stack");
@@ -94,6 +94,7 @@ async function renderError(err: string): Promise<string> {
 		logout:   i18n("logout"),
 		filesPlaceholder: i18n("filesPlaceholder"),
 		newMessageText: i18n("newMessageText"),
+		noMessagesText: i18n("noMessagesText"),
 		selectFiles: i18n("selectFiles"),
 		search:   i18n("search"),
 		delete:   i18n("delete"),
@@ -142,6 +143,7 @@ async function renderBody(stack: Thread[], userID: number, message?: Message, ed
 		logout:   i18n("logout"),
 		filesPlaceholder: i18n("filesPlaceholder"),
 		newMessageText: i18n("newMessageText"),
+		noMessagesText: i18n("noMessagesText"),
 		selectFiles: i18n("selectFiles"),
 		search:   i18n("search"),
 		delete:   i18n("delete"),

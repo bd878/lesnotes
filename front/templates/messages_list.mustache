@@ -38,6 +38,9 @@
 		</li>
 	{{/messages}}
 	{{^messages}}
+		{{#message}}
+			<li class="text-gray-600 italic">{{noMessagesText}}</li>
+		{{/message}}
 		{{^message}}
 			<li class="text-gray-600 italic">{{newMessageText}}</li>
 		{{/message}}

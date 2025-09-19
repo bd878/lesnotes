@@ -122,17 +122,17 @@ const elems = {
 }
 
 function init() {
-	elems.formElem.addEventListener("submit", onFormSubmit)
-	elems.filesInputElem.addEventListener("change", onFileInputChange)
-	elems.filesButtonElem.addEventListener("click", onSelectFilesClick)
-	elems.messageCancelElem.addEventListener("click", onMessageCancelClick)
-	elems.editFormElem.addEventListener("submit", onMessageUpdateFormSubmit)
-	elems.messagesListElem.addEventListener("click", onMessagesListClick)
-	elems.threadsListElem.addEventListener("click", onThreadsListClick)
-	elems.messageDeleteElem.addEventListener("click", onMessageDeleteClick)
-	elems.messageEditElem.addEventListener("click", onMessageEditClick)
-	elems.messagePublishElem.addEventListener("click", onMessagePublishClick)
-	elems.messagePrivateElem.addEventListener("click", onMessagePrivateClick)
+	elems.formElem.addEventListener("submit",             onFormSubmit)
+	elems.filesInputElem.addEventListener("change",       onFileInputChange)
+	elems.filesButtonElem.addEventListener("click",       onSelectFilesClick)
+	elems.messageCancelElem.addEventListener("click",     onMessageCancelClick)
+	elems.editFormElem.addEventListener("submit",         onMessageUpdateFormSubmit)
+	elems.messagesListElem.addEventListener("click",      onMessagesListClick)
+	elems.threadsListElem.addEventListener("click",       onThreadsListClick)
+	elems.messageDeleteElem.addEventListener("click",     onMessageDeleteClick)
+	elems.messageEditElem.addEventListener("click",       onMessageEditClick)
+	elems.messagePublishElem.addEventListener("click",    onMessagePublishClick)
+	elems.messagePrivateElem.addEventListener("click",    onMessagePrivateClick)
 	elems.messageCancelEditElem.addEventListener("click", onMessageCancelEditClick)
 }
 
@@ -185,18 +185,25 @@ function onFileInputChange(e) {
 
 function onMessagesListClick(e) {
 	if (is.notEmpty(e.target.dataset.messageId)) {
-		handleMessageClick(e.target.dataset.messageId)
+		showMessage(e.target.dataset.messageId)
+	} else if (is.notEmpty(e.target.dataset.direction) && is.notEmpty(e.target.dataset.threadId)) {
+		paginateMessages(e.target.dataset.threadId, e.target.dataset.direction)
 	} else if (is.notEmpty(e.target.dataset.threadId)) {
-		handleThreadClick(e.target.dataset.threadId)
+		openThread(e.target.dataset.threadId)
 	}
 }
 
 function onThreadsListClick(e) {
 	if (is.notUndef(e.target.dataset.threadId)) {
-		handleThreadClick(e.target.dataset.threadId)
+		openThread(e.target.dataset.threadId)
 	} else if (is.notEmpty(e.target.dataset.messageId)) {
-		handleMessageClick(e.target.dataset.messageId)
+		showMessage(e.target.dataset.messageId)
 	}
+}
+
+function onMessageEditClick(e) {
+	e.stopPropagation()
+	editMessage(parseInt(elems.messageEditElem.dataset.messageId))
 }
 
 async function onMessagePublishClick(e) {
@@ -248,38 +255,6 @@ async function onMessageDeleteClick(e) {
 	params.delete("id")
 
 	location.href = params.toString() ? ("/home?" + params.toString()) : "/home" 
-}
-
-function onMessageEditClick(e) {
-	e.stopPropagation()
-	const messageID = parseInt(elems.messageEditElem.dataset.messageId) || 0
-
-	const params = new URLSearchParams(location.search)
-	params.set("edit", "1")
-
-	location.href = "/home?" + params.toString()
-}
-
-function handleMessageClick(messageID) {
-	const params = new URLSearchParams(location.search)
-	params.set("id", messageID)
-	params.delete("edit")
-
-	location.href = params.toString() ? ("/home?" + params.toString()) : "/home"
-}
-
-function handleThreadClick(threadID) {
-	const params = new URLSearchParams(location.search)
-	if (threadID == 0 || threadID == "0" || threadID == "") {
-		params.delete("thread")
-	} else {
-		params.set("thread", threadID)
-	}
-
-	params.delete("id")
-	params.delete("edit")
-
-	location.href = params.toString() ? ("/home?" + params.toString()) : "/home"
 }
 
 async function onMessageUpdateFormSubmit(e) {
@@ -350,6 +325,38 @@ async function onFormSubmit(e) {
 	}
 
 	elems.formElem.reset()
+
+	location.href = params.toString() ? ("/home?" + params.toString()) : "/home"
+}
+
+function paginateMessages(threadID, direction) {/*TODO: implement*/}
+
+function editMessage(messageID) {
+	const params = new URLSearchParams(location.search)
+	params.set("edit", "1")
+	params.set("id", messageID)
+
+	location.href = "/home?" + params.toString()
+}
+
+function showMessage(messageID) {
+	const params = new URLSearchParams(location.search)
+	params.set("id", messageID)
+	params.delete("edit")
+
+	location.href = params.toString() ? ("/home?" + params.toString()) : "/home"
+}
+
+function openThread(threadID) {
+	const params = new URLSearchParams(location.search)
+	if (threadID == 0 || threadID == "0" || threadID == "") {
+		params.delete("thread")
+	} else {
+		params.set("thread", threadID)
+	}
+
+	params.delete("id")
+	params.delete("edit")
 
 	location.href = params.toString() ? ("/home?" + params.toString()) : "/home"
 }

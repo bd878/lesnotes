@@ -72,33 +72,52 @@
 		</div>
 	</div>
 
-	<div id="messages" class="mr-2 mb-2 h-[400px] flex flex-col overflow-y-scroll w-full">
-		<div class="flex flex-col w-full grow">
+	<div id="messages" class="mr-2 mb-2 h-[400px] flex flex-col w-full">
+		<div id="messages-list" class="flex flex-row w-full grow overflow-x-scroll">
 			{{#error}}
 				<span>{{.}}</span>
 			{{/error}}
 			{{^error}}
-				<div id="messages-list" class="w-md min-w-md flex flex-row grow">
-					{{#stack}}
-						<div class="grow flex flex-col w-md min-w-md first:ml-0 ml-2">
+				{{#stack}}
+					<div class="flex flex-col w-md min-w-md max-w-md first:ml-0 ml-2">
+						{{#ID}}
+							<a target="_self" href="/home?thread={{ID}}" class="mb-2 hover:text-blue-600 cursor-pointer underline">
+						{{/ID}}
+						{{^ID}}
+							<a target="_self" href="/home" class="mb-2 hover:text-blue-600 cursor-pointer underline">
+						{{/ID}}
+							{{#title}}
+								/{{title}}
+							{{/title}}
+							{{^title}}
+								{{#text}}
+									/{{text}}
+								{{/text}}
+								{{^text}}
+									/
+								{{/text}}
+							{{/title}}
+						</a>
+
+						<div class="overflow-y-scroll">
+							{{> messagesList}}
+						</div>
+
+						<div class="flex flex-row mt-2">
 							{{^isLastPage}}
-								<button type="button" data-thread-id="{{ID}}" data-direction="up" class="cursor-pointer hover:text-blue-600"><-</button>
+								<button type="button" data-offset="{{offset}}" data-count="{{count}}" data-thread-id="{{ID}}" data-direction="up" class="grow cursor-pointer hover:bg-gray-300"><-</button>
 							{{/isLastPage}}
 
-							<div>
-								{{> messagesList}}
-							</div>
-
 							{{^isFirstPage}}
-								<button type="button" data-thread-id="{{ID}}" data-direction="down" class="cursor-pointer hover:text-blue-600">-></button>
+								<button type="button" data-offset="{{offset}}" data-count="{{count}}" data-thread-id="{{ID}}" data-direction="down" class="grow cursor-pointer hover:bg-gray-300">-></button>
 							{{/isFirstPage}}
 						</div>
-					{{/stack}}
-					{{^stack}}
-						<div class="grow">
-						</div>
-					{{/stack}}
-				</div>
+					</div>
+				{{/stack}}
+				{{^stack}}
+					<div class="grow">
+					</div>
+				{{/stack}}
 			{{/error}}
 		</div>
 	</div>

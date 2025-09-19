@@ -662,6 +662,15 @@ components:
             is_first_page:
               type: boolean
               required: false
+            offset:
+              type: integer
+              required: false
+            count:
+              type: integer
+              required: false
+            total:
+              type: integer
+              required: false
             messages:
               type: array
               items:
