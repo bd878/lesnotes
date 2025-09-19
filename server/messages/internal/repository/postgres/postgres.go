@@ -702,12 +702,6 @@ func (r *Repository) ReadMessagesAround(ctx context.Context, userID, threadID, i
 
 	slices.Reverse(olderMessages)
 
-
-	err = tx.QueryRow(ctx, r.table(queryOffset), userID, threadID, createdAt).Scan(&offset)
-	if err != nil {
-		return
-	}
-
 	newerMessages := make([]*model.Message, 0)
 
 	newerRows, err := tx.Query(ctx, r.table(queryNewer), userID, threadID, createdAt, limit)
@@ -752,6 +746,15 @@ func (r *Repository) ReadMessagesAround(ctx context.Context, userID, threadID, i
 		message.Count, err = r.countThreadMessages(ctx, tx, message.ID)
 		if err != nil {
 			logger.Errorln(err)
+		}
+	}
+
+	if len(messages) > 0 {
+		newestMessage := messages[len(messages)-1]
+
+		err = tx.QueryRow(ctx, r.table(queryOffset), userID, threadID, time.Unix(0, newestMessage.CreateUTCNano)).Scan(&offset)
+		if err != nil {
+			return
 		}
 	}
 
