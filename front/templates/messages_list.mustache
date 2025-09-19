@@ -1,0 +1,48 @@
+<ul class="flex flex-col">
+	{{#messages}}
+		<li class="grow-1 max-w-full flex flex-row justify-between whitespace-nowrap">
+			{{#isCenter}}
+				{{#isSelected}}
+					<button type="button" class="flex flex-row justify-between overflow-hidden bg-gray-300 hover:text-blue-600 cursor-pointer text-left px-2 w-full" data-message-id="{{ID}}">
+				{{/isSelected}}
+				{{^isSelected}}
+					<button type="button" class="flex flex-row justify-between overflow-hidden bg-blue-100 hover:text-blue-600 cursor-pointer text-left px-2 w-full" data-message-id="{{ID}}">
+				{{/isSelected}}
+			{{/isCenter}}
+			{{^isCenter}}
+				{{#isSelected}}
+					<button type="button" class="flex flex-row justify-between overflow-hidden bg-gray-300 cursor-pointer text-left px-2 w-full" data-message-id="{{ID}}">
+				{{/isSelected}}
+				{{^isSelected}}
+					<button type="button" class="flex flex-row justify-between overflow-hidden hover:bg-gray-300 cursor-pointer text-left px-2 w-full" data-message-id="{{ID}}">
+				{{/isSelected}}
+			{{/isCenter}}
+					<div class="overflow-hidden text-ellipsis mr-2" data-message-id="{{ID}}">
+						{{#title}}
+							{{title}}
+						{{/title}}
+						{{^title}}
+							{{text}}
+						{{/title}}
+					</div>
+
+				<div data-message-id="{{ID}}" class="flex flex-row items-center italic text-gray-600 text-sm">{{createUTCNano}}</div>
+			</button>
+
+			{{#isCenter}}
+				<button type="button" class="px-2 bg-blue-100 hover:text-blue-600 cursor-pointer text-end" data-thread-id="{{ID}}">{{count}} > </button>
+			{{/isCenter}}
+			{{^isCenter}}
+				<button type="button" class="px-2 hover:text-blue-600 cursor-pointer text-end" data-thread-id="{{ID}}">{{count}} > </button>
+			{{/isCenter}}
+		</li>
+	{{/messages}}
+	{{^messages}}
+		{{#message}}
+			<li class="text-gray-600 italic">{{noMessagesText}}</li>
+		{{/message}}
+		{{^message}}
+			<li class="text-gray-600 italic">{{newMessageText}}</li>
+		{{/message}}
+	{{/messages}}
+</ul>

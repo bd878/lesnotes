@@ -16,6 +16,7 @@ func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) (err e
 	var (
 		id, thread int64
 		public int
+		fileIDs []int64
 	)
 
 	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
@@ -63,6 +64,7 @@ func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) (err e
 
 	text := req.PostFormValue("text")
 	title := req.PostFormValue("title")
+	name := req.PostFormValue("name")
 
 	if req.PostFormValue("thread") != "" {
 		id, err := strconv.Atoi(req.PostFormValue("thread"))
@@ -84,6 +86,21 @@ func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) (err e
 		thread = -1
 	}
 
+	if req.PostFormValue("file_ids") != "" {
+		if err = json.Unmarshal([]byte(req.PostFormValue("file_ids")), &fileIDs); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(server.ServerResponse{
+				Status: "error",
+				Error:  &server.ErrorCode{
+					Code:    server.CodeWrongFormat,
+					Explain: "cannot parse file_ids",
+				},
+			})
+
+			return
+		}
+	}
+
 	if req.PostFormValue("public") != "" {
 		public, err = strconv.Atoi(req.PostFormValue("public"))
 		if err != nil {
@@ -102,11 +119,11 @@ func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) (err e
 		public = -1
 	}
 
-	return h.updateMessage(req.Context(), w, id, user, text, title, thread, public)
+	return h.updateMessage(req.Context(), w, id, user, text, title, name, thread, fileIDs, public)
 }
 
 func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, messageID int64, user *users.User,
-	text, title string, threadID int64, public int,
+	text, title, name string, threadID int64, fileIDs []int64, public int,
 ) (err error) {
 	var private int32
 
@@ -144,7 +161,7 @@ func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, mess
 		return
 	}
 
-	msg, err := h.controller.ReadMessage(ctx, messageID, []int64{user.ID})
+	msg, err := h.controller.ReadMessage(ctx, messageID, "", []int64{user.ID})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -179,7 +196,15 @@ func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, mess
 		title = msg.Title
 	}
 
-	err = h.controller.UpdateMessage(ctx, messageID, text, title, nil, threadID, user.ID, private)
+	if name == "" {
+		name = msg.Name
+	}
+
+	if fileIDs == nil {
+		fileIDs = msg.FileIDs
+	}
+
+	err = h.controller.UpdateMessage(ctx, messageID, text, title, name, fileIDs, threadID, user.ID, private)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

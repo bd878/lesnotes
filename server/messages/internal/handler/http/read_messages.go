@@ -20,6 +20,7 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) (err er
 		limit, offset, order int
 		threadID, messageID int64
 		ids []int64
+		name string
 	)
 
 	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
@@ -88,6 +89,8 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) (err er
 		messageID = int64(id)
 	}
 
+	name = values.Get("name")
+
 	if values.Get("thread") != "" {
 		id, err := strconv.Atoi(values.Get("thread"))
 		if err != nil {
@@ -154,13 +157,13 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) (err er
 		}
 
 		// read public messages only
-		return h.readMessageOrMessages(req.Context(), w, int64(id), limit, offset, messageID, threadID, order, true)
+		return h.readMessageOrMessages(req.Context(), w, int64(id), limit, offset, messageID, threadID, name, order, true)
 	} else if len(ids) > 0 {
 		// read batch messages by given ids
 		return h.readBatchMessages(req.Context(), w, user.ID, ids)
 	} else {
 		// read both public and private messages, 
-		return h.readMessageOrMessages(req.Context(), w, user.ID, limit, offset, messageID, threadID, order, false)
+		return h.readMessageOrMessages(req.Context(), w, user.ID, limit, offset, messageID, threadID, name, order, false)
 	}
 }
 
@@ -227,11 +230,11 @@ func (h *Handler) readBatchMessages(ctx context.Context, w http.ResponseWriter, 
 }
 
 func (h *Handler) readMessageOrMessages(ctx context.Context, w http.ResponseWriter, userID int64,
-	limit, offset int, messageID, threadID int64, order int, publicOnly bool,
+	limit, offset int, messageID, threadID int64, name string, order int, publicOnly bool,
 ) (err error) {
 	var ascending bool
 
-	if userID == users.PublicUserID && messageID == 0 {
+	if userID == users.PublicUserID && (messageID == 0 || name == "") {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
@@ -253,46 +256,78 @@ func (h *Handler) readMessageOrMessages(ctx context.Context, w http.ResponseWrit
 		ascending = true
 	}
 
-	if messageID != 0 && threadID != -1 {
+	if messageID != 0 && threadID != -1 && limit == 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:  &server.ErrorCode{
 				Code:    server.CodeWrongQuery,
-				Explain: "both id and thread params are given",
+				Explain: "both id and thread params are given,but limit is not set",
 			},
 		})
 
 		return
 	}
 
-	if messageID != 0 && (limit > 0 || offset > 0) {
+	if name != "" && threadID != -1 {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:  &server.ErrorCode{
 				Code:    server.CodeWrongQuery,
-				Explain: "both id and limit/offset params given",
+				Explain: "both name and thread params are given",
 			},
 		})
 
 		return
 	}
 
-	if messageID != 0 {
+	if messageID != 0 && name != "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status:  "error",
+			Error:   &server.ErrorCode{
+				Code:    server.CodeWrongQuery,
+				Explain: "both id and name params are given",
+			},
+		})
+
+		return
+	}
+
+	if (name != "") && (limit > 0 || offset > 0) {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status: "error",
+			Error:  &server.ErrorCode{
+				Code:    server.CodeWrongQuery,
+				Explain: "both id/name and limit/offset params given",
+			},
+		})
+
+		return
+	}
+
+	if messageID != 0 && limit == 0 {
 		// read one message
-		return h.readMessage(ctx, w, userID, messageID, publicOnly)
-	} else if threadID != -1 {
+		return h.readMessage(ctx, w, userID, messageID, "", publicOnly)
+	} else if name != "" && limit == 0 {
+		// read one message by name
+		return h.readMessage(ctx, w, userID, 0, name, publicOnly)
+	} else if threadID != -1 && messageID == 0 {
 		// read thread messages
 		return h.readThreadMessages(ctx, w, userID, threadID, int32(limit), int32(offset), ascending, publicOnly)
+	} else if messageID != 0 && limit > 0 && threadID != -1 {
+		// read (N-limit, N, limit+N) messages in a thread
+		return h.readMessagesAround(ctx, w, userID, threadID, messageID, int32(limit), publicOnly)
 	} else {
 		// read all messages
 		return h.readMessages(ctx, w, userID, int32(limit), int32(offset), ascending, publicOnly)
 	}
 }
 
-func (h *Handler) readMessage(ctx context.Context, w http.ResponseWriter, userID, messageID int64, publicOnly bool) (err error) {
-	message, err := h.controller.ReadMessage(ctx, messageID, []int64{userID, users.PublicUserID})
+func (h *Handler) readMessage(ctx context.Context, w http.ResponseWriter, userID, messageID int64, name string, publicOnly bool) (err error) {
+	message, err := h.controller.ReadMessage(ctx, messageID, name, []int64{userID, users.PublicUserID})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -367,7 +402,7 @@ func filterPublicMessages(list []*messages.Message) (filtered []*messages.Messag
 func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter, userID, threadID int64, limit, offset int32, ascending, publicOnly bool) (err error) {
 	// TODO: read if thread is public
 
-	list, isLastPage, err := h.controller.ReadThreadMessages(ctx, userID, threadID, limit, offset, ascending)
+	list, err := h.controller.ReadThreadMessages(ctx, userID, threadID, limit, offset, ascending)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -383,11 +418,11 @@ func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter,
 
 	// filter public messages only
 	if publicOnly {
-		list = filterPublicMessages(list)
+		list.Messages = filterPublicMessages(list.Messages)
 	}
 
 	fileIDs := make([]int64, 0)
-	for _, message := range list {
+	for _, message := range list.Messages {
 		if message.FileIDs != nil {
 			// TODO: fileIDs set
 			fileIDs = append(fileIDs, message.FileIDs...)
@@ -398,7 +433,7 @@ func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter,
 	if err != nil {
 		logger.Errorw("failed to read batch files", "user_id", userID, "error", err)
 	} else {
-		for _, message := range list {
+		for _, message := range list.Messages {
 			var list []*files.File
 			for _, id := range message.FileIDs {
 				file := filesRes[id]
@@ -418,9 +453,13 @@ func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter,
 	}
 
 	response, err := json.Marshal(messages.ReadResponse{
-		ThreadID:   &threadID,
-		Messages:   list,
-		IsLastPage: &isLastPage,
+		ThreadID:     &threadID,
+		Messages:     list.Messages,
+		IsLastPage:   &list.IsLastPage,
+		IsFirstPage:  &list.IsFirstPage,
+		Count:        &list.Count,
+		Offset:       &list.Offset,
+		Total:        &list.Total,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -436,7 +475,7 @@ func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter,
 }
 
 func (h *Handler) readMessages(ctx context.Context, w http.ResponseWriter, userID int64, limit, offset int32, ascending, publicOnly bool) (err error) {
-	list, isLastPage, err := h.controller.ReadMessages(ctx, userID, limit, offset, ascending)
+	list, err := h.controller.ReadMessages(ctx, userID, limit, offset, ascending)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -451,12 +490,12 @@ func (h *Handler) readMessages(ctx context.Context, w http.ResponseWriter, userI
 	}
 
 	if publicOnly {
-		list = filterPublicMessages(list)
+		list.Messages = filterPublicMessages(list.Messages)
 	}
 
 	// TODO: derive readBatchFiles to separate function
 	fileIDs := make([]int64, 0)
-	for _, message := range list {
+	for _, message := range list.Messages {
 		if message.FileIDs != nil {
 			// TODO: fileIDs set
 			fileIDs = append(fileIDs, message.FileIDs...)
@@ -467,7 +506,7 @@ func (h *Handler) readMessages(ctx context.Context, w http.ResponseWriter, userI
 	if err != nil {
 		logger.Errorw("failed to read batch files", "user_id", userID, "error", err)
 	} else {
-		for _, message := range list {
+		for _, message := range list.Messages {
 			var list []*files.File
 			for _, id := range message.FileIDs {
 				file := filesRes[id]
@@ -487,8 +526,84 @@ func (h *Handler) readMessages(ctx context.Context, w http.ResponseWriter, userI
 	}
 
 	response, err := json.Marshal(messages.ReadResponse{
-		Messages:   list,
-		IsLastPage: &isLastPage,
+		Messages:      list.Messages,
+		IsLastPage:    &list.IsLastPage,
+		IsFirstPage:   &list.IsFirstPage,
+		Count:         &list.Count,
+		Offset:        &list.Offset,
+		Total:         &list.Total,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return err
+	}
+
+	json.NewEncoder(w).Encode(server.ServerResponse{
+		Status:   "ok",
+		Response: json.RawMessage(response),
+	})
+
+	return
+}
+
+func (h *Handler) readMessagesAround(ctx context.Context, w http.ResponseWriter, userID, threadID, messageID int64, limit int32, publicOnly bool) (err error) {
+	list, err := h.controller.ReadMessagesAround(ctx, userID, threadID, messageID, limit)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status: "error",
+			Error:  &server.ErrorCode{
+				Code:    server.CodeWrongFormat,
+				Explain: "failed to read thread messages around",
+			},
+		})
+
+		return err
+	}
+
+	if publicOnly {
+		list.Messages = filterPublicMessages(list.Messages)
+	}
+
+	// TODO: derive readBatchFiles to separate function
+	fileIDs := make([]int64, 0)
+	for _, message := range list.Messages {
+		if message.FileIDs != nil {
+			// TODO: fileIDs set
+			fileIDs = append(fileIDs, message.FileIDs...)
+		}
+	}
+
+	filesRes, err := h.filesGateway.ReadBatchFiles(ctx, fileIDs, userID)
+	if err != nil {
+		logger.Errorw("failed to read batch files", "user_id", userID, "error", err)
+	} else {
+		for _, message := range list.Messages {
+			var list []*files.File
+			for _, id := range message.FileIDs {
+				file := filesRes[id]
+				if file != nil {
+					list = append(list, &files.File{
+						ID:   file.ID,
+						Name: file.Name,
+					})
+				}
+			}
+			message.Files = list
+
+			if message.UserID == users.PublicUserID {
+				message.UserID = 0
+			}
+		}
+	}
+
+	response, err := json.Marshal(messages.ReadResponse{
+		Messages:      list.Messages,
+		IsLastPage:    &list.IsLastPage,
+		IsFirstPage:   &list.IsFirstPage,
+		Count:         &list.Count,
+		Offset:        &list.Offset,
+		Total:         &list.Total,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

@@ -17,9 +17,15 @@ const i18n = {
 		private: "Revoke link",
 		update: "Save",
 		cancel: "Cancel",
+		noFiles: "No files, edit message to add files",
+		filesPlaceholder: "Files",
+		newMessageText: "Enter new note here ^",
+		noMessagesText: "No messages",
 		miniapp_only: "This page should be opened in Telegram only",
-		text_placeholder: "Content...",
-		title_placeholder: "Title..."
+		textPlaceholder: "Content...",
+		selectFiles: "Select",
+		titlePlaceholder: "Title...",
+		namePlaceholder: "Public link",
 	},
 	"ru": {
 		logout: "Выйти",
@@ -36,12 +42,18 @@ const i18n = {
 		delete: "Удалить",
 		edit: "Редактировать",
 		publish: "Опубликовать",
-		private: "Скрыть",
+		private: "Скрыть от всех",
 		update: "Сохранить",
+		selectFiles: "Выбрать",
 		cancel: "Отмена",
+		filesPlaceholder: "Файлы",
+		noFiles: "Файлов нет, нажмите \"редактировать\". чтобы добавить файлы",
+		newMessageText: "Введите первую заметку здесь ^",
+		noMessagesText: "Заметок нет",
 		miniapp_only: "Эта страница работает только из приложения Telegram",
-		text_placeholder: "Сообщение...",
-		title_placeholder: "Заголовок..."
+		textPlaceholder: "Сообщение...",
+		titlePlaceholder: "Заголовок...",
+		namePlaceholder: "имя ссылки",
 	}
 }
 

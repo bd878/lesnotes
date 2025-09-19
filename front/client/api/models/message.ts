@@ -52,7 +52,7 @@ export default function mapMessageFromProto(message?: any): Message {
 		updateUTCNano: updateUTCNano,
 		userID: message.user_id,
 		text: message.text,
-		name: "",
+		name: message.name,
 		title: message.title,
 		count: message.count,
 		private: Boolean(message.private),

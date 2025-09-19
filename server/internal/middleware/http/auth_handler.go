@@ -60,7 +60,7 @@ func (b *authBuilder) Handle(w http.ResponseWriter, req *http.Request) (err erro
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code: server.CodeWrongToken,
+				Code:    server.CodeWrongToken,
 				Explain: "bad cookie",
 			},
 		})
@@ -72,7 +72,7 @@ func (b *authBuilder) Handle(w http.ResponseWriter, req *http.Request) (err erro
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code: server.CodeNoToken,
+				Code:    server.CodeNoToken,
 				Explain: "token not found",
 			},
 		})

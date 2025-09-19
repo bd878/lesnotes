@@ -17,11 +17,11 @@ import (
 func (h *Handler) DownloadFile(w http.ResponseWriter, req *http.Request) (err error) {
 	var (
 		fileID int64
+		isPublic bool
 	)
 
-	values := req.URL.Query()
-	if values.Get("id") != "" {
-		fileid, err := strconv.Atoi(values.Get("id"))
+	if req.PathValue("id") != "" {
+		fileid, err := strconv.Atoi(req.PathValue("id"))
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(server.ServerResponse{
@@ -50,7 +50,11 @@ func (h *Handler) DownloadFile(w http.ResponseWriter, req *http.Request) (err er
 		return
 	}
 
-	file, stream, err := h.controller.ReadFileStream(req.Context(), fileID, user.ID, "", false)
+	if user.ID == users.PublicUserID {
+		isPublic = true
+	}
+
+	file, stream, err := h.controller.ReadFileStream(req.Context(), fileID, "", isPublic)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

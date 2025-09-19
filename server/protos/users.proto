@@ -7,6 +7,7 @@ option go_package = "github.com/bd878/gallery/server/api";
 service Users {
 	rpc GetUser(GetUserRequest) returns (User);
 	rpc FindUser(FindUserRequest) returns (User);
+	rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
 }
 
 message User {
@@ -15,6 +16,7 @@ message User {
 	string    token = 3;
 	int64     expires_utc_nano = 4;
 	string    hashed_password = 5;
+	string    theme = 6;
 }
 
 message GetUserRequest {
@@ -27,3 +29,11 @@ message FindUserRequest {
 		string token = 2;
 	}
 }
+
+message UpdateUserRequest {
+	int64   id = 1;
+	string  login = 2;
+	string  theme = 3;
+}
+
+message UpdateUserResponse {}

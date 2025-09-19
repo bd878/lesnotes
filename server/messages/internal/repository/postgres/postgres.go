@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 	"os"
+	"slices"
 	"time"
 	"context"
 	"encoding/json"
@@ -65,12 +66,12 @@ func (r *Repository) Create(ctx context.Context, id int64, text string, title st
  * newText == "" : left as is
  * newThreadID == -1 : left as is
  * newPrivate == -1 : left as is
- * @param  {[type]} r *Repository)  Update(ctx context.Context, userID, id int64, text string, threadID int64, fileIDs []int64, private int) (error [description]
+ * @param  {[type]} r *Repository)  Update(ctx context.Context, userID, id int64, text, title, name string, threadID int64, fileIDs []int64, private int) (error [description]
  * @return {error}   error
  */
-func (r *Repository) Update(ctx context.Context, userID, id int64, newText string, newTitle string, newThreadID int64, newFileIDs []int64, newPrivate int) (err error) {
-	const query = "UPDATE %s SET text = $3, thread_id = $4, file_ids = $5, private = $6, title = $7 WHERE user_id = $1 AND id = $2"
-	const selectQuery = "SELECT text, thread_id, file_ids, private, title FROM %s WHERE user_id = $1 AND id = $2"
+func (r *Repository) Update(ctx context.Context, userID, id int64, newText, newTitle, newName string, newThreadID int64, newFileIDs []int64, newPrivate int) (err error) {
+	const query = "UPDATE %s SET text = $3, thread_id = $4, file_ids = $5, private = $6, title = $7, name = $8 WHERE user_id = $1 AND id = $2"
+	const selectQuery = "SELECT text, thread_id, file_ids, private, title, name FROM %s WHERE user_id = $1 AND id = $2"
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
@@ -92,13 +93,13 @@ func (r *Repository) Update(ctx context.Context, userID, id int64, newText strin
 	}()
 
 	var (
-		text, title  string
+		text, title, name  string
 		threadID int64
 		fileIDs  []byte
 		private  bool
 	)
 
-	err = tx.QueryRow(ctx, r.table(selectQuery), userID, id).Scan(&text, &threadID, &fileIDs, &private, &title)
+	err = tx.QueryRow(ctx, r.table(selectQuery), userID, id).Scan(&text, &threadID, &fileIDs, &private, &title, &name)
 	if err != nil {
 		return
 	}
@@ -109,6 +110,10 @@ func (r *Repository) Update(ctx context.Context, userID, id int64, newText strin
 
 	if newTitle != "" {
 		title = newTitle
+	}
+
+	if newName != "" {
+		name = newName
 	}
 
 	if newThreadID != -1 {
@@ -130,7 +135,7 @@ func (r *Repository) Update(ctx context.Context, userID, id int64, newText strin
 		}
 	}
 
-	_, err = tx.Exec(ctx, r.table(query), userID, id, text, threadID, fileIDs, private, title)
+	_, err = tx.Exec(ctx, r.table(query), userID, id, text, threadID, fileIDs, private, title, name)
 	if err != nil {
 		return
 	}
@@ -239,7 +244,7 @@ func (r *Repository) Private(ctx context.Context, userID int64, ids []int64) (er
 	return
 }
 
-func (r *Repository) Read(ctx context.Context, userIDs []int64, id int64) (message *model.Message, err error) {
+func (r *Repository) Read(ctx context.Context, userIDs []int64, id int64, name string) (message *model.Message, err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -259,7 +264,7 @@ func (r *Repository) Read(ctx context.Context, userIDs []int64, id int64) (messa
 		}
 	}()
 
-	message = &model.Message{ID: id}
+	message = &model.Message{}
 
 	var (
 		fileIDs   []byte
@@ -276,9 +281,20 @@ func (r *Repository) Read(ctx context.Context, userIDs []int64, id int64) (messa
 		list[i] = id
 	}
 
-	err = tx.QueryRow(ctx, r.table(`
-SELECT user_id, thread_id, file_ids, created_at, updated_at, text, private, name, title FROM %s WHERE id = $1 AND (user_id IN (` + ids + `) OR private = false)
-`), append([]interface{}{id}, list...)...).Scan(&message.UserID, &message.ThreadID, &fileIDs, &createdAt, &updatedAt, &message.Text, &message.Private, &message.Name, &message.Title)
+	if id != 0 {
+
+		err = tx.QueryRow(ctx, r.table(`
+SELECT id, user_id, thread_id, file_ids, created_at, updated_at, text, private, name, title FROM %s WHERE id = $1 AND (user_id IN (` + ids + `) OR private = false)
+`), append([]interface{}{id}, list...)...).Scan(&message.ID, &message.UserID, &message.ThreadID, &fileIDs, &createdAt, &updatedAt, &message.Text, &message.Private, &message.Name, &message.Title)
+
+	} else if name != "" {
+
+		err = tx.QueryRow(ctx, r.table(`
+SELECT id, user_id, thread_id, file_ids, created_at, updated_at, text, private, name, title FROM %s WHERE name = $1 AND (user_id IN (` + ids + `) OR private = false)
+`), append([]interface{}{name}, list...)...).Scan(&message.ID, &message.UserID, &message.ThreadID, &fileIDs, &createdAt, &updatedAt, &message.Text, &message.Private, &message.Name, &message.Title)
+
+	}
+
 	if err != nil {
 		return
 	}
@@ -405,6 +421,16 @@ func (r *Repository) DeleteUserMessages(ctx context.Context, userID int64) (err 
 	return
 }
 
+func (r *Repository) Count(ctx context.Context, userID, threadID int64) (count int, err error) {
+	if threadID == -1 {
+		err = r.pool.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE user_id = $1"), userID).Scan(&count)
+	} else {
+		err = r.pool.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE user_id = $1 AND thread_id = $2"), userID, threadID).Scan(&count)
+	}
+
+	return
+}
+
 /**
  * @param  {[type]} r *Repository)  ReadThreadMessages(ctx context.Context, userID, threadID int64, limit, offset int32) (messages []*model.Message, isLastPage bool, err error [description]
  * @return {[type]}   [description]
@@ -489,6 +515,8 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID in
 			logger.Errorln(err)
 		}
 	}
+
+	slices.Reverse(messages)
 
 	return
 }
@@ -578,6 +606,154 @@ func (r *Repository) ReadMessages(ctx context.Context, userID int64, limit, offs
 		message.Count, err = r.countThreadMessages(ctx, tx, message.ID)
 		if err != nil {
 			logger.Errorln(err)
+		}
+	}
+
+	slices.Reverse(messages)
+
+	return
+}
+
+func (r *Repository) ReadMessagesAround(ctx context.Context, userID, threadID, id int64, limit int32) (messages []*model.Message, isLastPage bool, offset int, err error) {
+	const queryCreatedAt = "SELECT created_at FROM %s WHERE user_id = $1 AND id = $2"
+	const queryOlder = "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE created_at <= $3 AND user_id = $1 AND thread_id = $2 ORDER BY created_at DESC LIMIT $4"
+	const queryCountOlder = "SELECT COUNT(*) FROM %s WHERE created_at <= $3 AND user_id = $1 AND thread_id = $2 LIMIT $4"
+	const queryNewer = "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE created_at > $3 AND user_id = $1 AND thread_id = $2 ORDER BY created_at ASC LIMIT $4"
+	const queryOffset = "SELECT COUNT(*) FROM %s WHERE created_at > $3 AND user_id = $1 AND thread_id = $2"
+
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return nil, false, 0, err
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			err = tx.Rollback(ctx)
+		default:
+			err = tx.Commit(ctx)
+		}
+	}()
+
+	var (
+		createdAt time.Time
+		countOlder int32
+	)
+
+	err = tx.QueryRow(ctx, r.table(queryCreatedAt), userID, id).Scan(&createdAt)
+	if err != nil {
+		return
+	}
+
+	err = tx.QueryRow(ctx, r.table(queryCountOlder), userID, threadID, createdAt, limit).Scan(&countOlder)
+	if err != nil {
+		return
+	}
+
+	if countOlder < int32(limit) {
+		isLastPage = true
+	}
+
+	olderMessages := make([]*model.Message, 0, countOlder)
+
+	olderRows, err := tx.Query(ctx, r.table(queryOlder), userID, threadID, createdAt, limit)
+	defer olderRows.Close()
+	if err != nil {
+		return nil, false, 0, err
+	}
+
+	for olderRows.Next() {
+		message := &model.Message{}
+
+		var (
+			fileIDs []byte
+			createdAt, updatedAt time.Time
+		)
+
+		err = olderRows.Scan(&message.ID, &message.UserID, &message.ThreadID, &fileIDs, &message.Name, &message.Text, &message.Private, &createdAt, &updatedAt, &message.Title)
+		if err != nil {
+			return
+		}
+
+		if fileIDs != nil {
+			err = json.Unmarshal(fileIDs, &message.FileIDs)
+			if err != nil {
+				return
+			}
+		}
+
+		message.CreateUTCNano = createdAt.UnixNano()
+		message.UpdateUTCNano = updatedAt.UnixNano()
+
+		olderMessages = append(olderMessages, message)
+	}
+
+	if err = olderRows.Err(); err != nil {
+		return
+	}
+
+	olderRows.Close()
+
+	slices.Reverse(olderMessages)
+
+	newerMessages := make([]*model.Message, 0)
+
+	newerRows, err := tx.Query(ctx, r.table(queryNewer), userID, threadID, createdAt, limit)
+	defer newerRows.Close()
+	if err != nil {
+		return nil, false, 0, err
+	}
+
+	for newerRows.Next() {
+		message := &model.Message{}
+
+		var (
+			fileIDs []byte
+			createdAt, updatedAt time.Time
+		)
+
+		err = newerRows.Scan(&message.ID, &message.UserID, &message.ThreadID, &fileIDs, &message.Name, &message.Text, &message.Private, &createdAt, &updatedAt, &message.Title)
+		if err != nil {
+			return
+		}
+
+		if fileIDs != nil {
+			err = json.Unmarshal(fileIDs, &message.FileIDs)
+			if err != nil {
+				return
+			}
+		}
+
+		message.CreateUTCNano = createdAt.UnixNano()
+		message.UpdateUTCNano = updatedAt.UnixNano()
+
+		newerMessages = append(newerMessages, message)
+	}
+
+	if err = newerRows.Err(); err != nil {
+		return
+	}
+
+	messages = append(olderMessages, newerMessages...)
+
+	for _, message := range messages {
+		message.Count, err = r.countThreadMessages(ctx, tx, message.ID)
+		if err != nil {
+			logger.Errorln(err)
+		}
+	}
+
+	if len(messages) > 0 {
+		newestMessage := messages[len(messages)-1]
+
+		err = tx.QueryRow(ctx, r.table(queryOffset), userID, threadID, time.Unix(0, newestMessage.CreateUTCNano)).Scan(&offset)
+		if err != nil {
+			return
 		}
 	}
 

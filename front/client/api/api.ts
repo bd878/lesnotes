@@ -71,8 +71,6 @@ export default function api(url, props: any = {}): Promise<any> {
 	fullUrl = appendQueryParams(fullUrl, new URLSearchParams(queryParams));
 	const options = getOptions(props);
 
-	console.log(`[${url}]: api`, "fullUrl", fullUrl, "options", options)
-
 	return fetch(fullUrl, options)
 		.then(res => {
 			return res
@@ -82,8 +80,6 @@ export default function api(url, props: any = {}): Promise<any> {
 						const value = JSON.parse(text);
 
 						if (is.notEmpty(value.error)) {
-							console.error(`[${url}]: failed`, "props:", JSON.stringify(props), "res:", text)
-
 							return Promise.resolve([null, {
 								error:   true,
 								status:  res.status,
@@ -91,8 +87,6 @@ export default function api(url, props: any = {}): Promise<any> {
 								code:    value.error.code,
 							}])
 						} else {
-							console.log(`[${url}]: OK`, "request:", JSON.stringify(props), "response:", text)
-
 							return Promise.resolve([value.response, {
 								error:   false,
 								status:  res.status,
@@ -101,8 +95,6 @@ export default function api(url, props: any = {}): Promise<any> {
 							}])
 						}
 					} catch (e) {
-						console.error(`[${url}]: error:`, e.toString(), "props:", JSON.stringify(props))
-
 						return Promise.resolve([null, {
 							error:   true,
 							status:  res.status,
@@ -112,8 +104,6 @@ export default function api(url, props: any = {}): Promise<any> {
 					}
 				})
 				.catch(e => {
-					console.error(`[${url}]: deserialize response error:`, e.toString())
-
 					return Promise.reject([null, {
 						error:   true,
 						status:  500,
@@ -124,8 +114,6 @@ export default function api(url, props: any = {}): Promise<any> {
 			}
 		)
 		.catch(e => {
-			console.error(`[${url}]: request error`, e.toString())
-
 			return Promise.reject([null, {
 				error:   true,
 				status:  500,

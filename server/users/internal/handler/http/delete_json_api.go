@@ -11,46 +11,6 @@ import (
 )
 
 func (h *Handler) DeleteJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
-	body, ok := req.Context().Value(middleware.RequestContextKey{}).(json.RawMessage)
-	if !ok {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status:      "error",
-			Error: &server.ErrorCode{
-				Code: server.CodeNoBody,
-				Explain: "cannot find json request",
-			},
-		})
-
-		return nil
-	}
-
-	var request users.DeleteMeRequest
-	if err = json.Unmarshal(body, &request); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status: "error",
-			Error: &server.ErrorCode{
-				Code: server.CodeWrongFormat,
-				Explain: "failed to parse json request",
-			},
-		})
-
-		return err
-	}
-
-	if request.Login == "" {
-		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status: "error",
-			Error: &server.ErrorCode{
-				Code: users.CodeNoLogin,
-				Explain: "no login",
-			},
-		})
-
-		return errors.New("cannot get login from request")
-	}
-
 	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
@@ -65,13 +25,66 @@ func (h *Handler) DeleteJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 		return
 	}
 
+	if user.ID == users.PublicUserID {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status:   "error",
+			Error:    &server.ErrorCode{
+				Code:     server.CodeNoUser,
+				Explain:  "not authorized",
+			},
+		})
+
+		return
+	}
+
+	data, ok := req.Context().Value(middleware.RequestContextKey{}).(json.RawMessage)
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status:      "error",
+			Error: &server.ErrorCode{
+				Code:    server.CodeNoBody,
+				Explain: "cannot find json request",
+			},
+		})
+
+		return nil
+	}
+
+	var request users.DeleteMeRequest
+	if err = json.Unmarshal(data, &request); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status: "error",
+			Error: &server.ErrorCode{
+				Code:    server.CodeWrongFormat,
+				Explain: "failed to parse json request",
+			},
+		})
+
+		return err
+	}
+
+	if request.Login == "" {
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status: "error",
+			Error: &server.ErrorCode{
+				Code:    users.CodeNoLogin,
+				Explain: "no login",
+			},
+		})
+
+		return errors.New("cannot get login from request")
+	}
+
 	err = h.controller.DeleteUser(req.Context(), int64(user.ID))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code: users.CodeDeleteFailed,
+				Code:    users.CodeDeleteFailed,
 				Explain: "cannot delete user",
 			},
 		})
@@ -88,7 +101,7 @@ func (h *Handler) DeleteJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 	}
 
 	json.NewEncoder(w).Encode(server.ServerResponse{
-		Status: "ok",
+		Status:   "ok",
 		Response: json.RawMessage(response),
 	})
 

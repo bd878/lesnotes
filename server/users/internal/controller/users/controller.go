@@ -12,9 +12,10 @@ import (
 )
 
 type Repository interface {
-	Save(ctx context.Context, id int64, login, password string) error
-	Delete(ctx context.Context, id int64) error
+	Save(ctx context.Context, id int64, login, salt, theme string) (err error)
+	Delete(ctx context.Context, id int64) (err error)
 	Find(ctx context.Context, id int64, login string) (*model.User, error)
+	Update(ctx context.Context, id int64, newLogin, newTheme string) (err error)
 }
 
 type SessionsGateway interface {
@@ -52,7 +53,7 @@ func (c *Controller) CreateUser(ctx context.Context, id int64, login, password s
 		return nil, err
 	}
 
-	err = c.repo.Save(ctx, id, login, string(hashed))
+	err = c.repo.Save(ctx, id, login, string(hashed), "light")
 	if err != nil {
 		return
 	}
@@ -60,6 +61,7 @@ func (c *Controller) CreateUser(ctx context.Context, id int64, login, password s
 	user = &model.User{
 		ID:                id,
 		Login:             login,
+		Theme:             "light",
 		HashedPassword:    string(hashed),
 		Token:             session.Token,
 		ExpiresUTCNano:    session.ExpiresUTCNano,
@@ -163,6 +165,14 @@ func (c *Controller) GetUser(ctx context.Context, id int64) (user *model.User, e
 	if err != nil {
 		return nil, controller.ErrUserNotFound
 	}
+
+	return
+}
+
+func (c *Controller) UpdateUser(ctx context.Context, id int64, newLogin, newTheme string) (err error) {
+	logger.Debugw("update user", "login", newLogin, "theme", newTheme)
+
+	err = c.repo.Update(ctx, id, newLogin, newTheme)
 
 	return
 }

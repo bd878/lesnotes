@@ -8,8 +8,6 @@ import (
 	"path/filepath"
 	"encoding/json"
 
-	"github.com/google/uuid"
-
 	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/utils"
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
@@ -194,7 +192,7 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) (err err
 	}
 
 	id := utils.RandomID()
-	name := uuid.New().String()
+	name := utils.RandomString(8)
 
 	return h.saveMessage(w, req, int64(id), text, title, fileIDs, threadID, user.ID, private, name)
 }

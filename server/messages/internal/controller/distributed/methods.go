@@ -59,8 +59,8 @@ func (m *DistributedMessages) SaveMessage(ctx context.Context, id int64, text, t
 	return
 }
 
-func (m *DistributedMessages) UpdateMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private int32) (err error) {
-	logger.Debugw("update message", "id", id, "text", text, "title", title, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private)
+func (m *DistributedMessages) UpdateMessage(ctx context.Context, id int64, text, title, name string, fileIDs []int64, threadID int64, userID int64, private int32) (err error) {
+	logger.Debugw("update message", "id", id, "text", text, "title", title, "name", name, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private)
 
 	cmd, err := proto.Marshal(&UpdateCommand{
 		Id:       id,
@@ -68,6 +68,7 @@ func (m *DistributedMessages) UpdateMessage(ctx context.Context, id int64, text,
 		FileIds:  fileIDs,
 		ThreadId: threadID,
 		Text:     text,
+		Name:     name,
 		Title:    title,
 		Private:  private,
 	})
@@ -156,9 +157,9 @@ func (m *DistributedMessages) PrivateMessages(ctx context.Context, ids []int64, 
 	return
 }
 
-func (m *DistributedMessages) ReadMessage(ctx context.Context, id int64, userIDs []int64) (message *model.Message, err error) {
-	logger.Debugw("read message", "id", id, "user_ids", userIDs)
-	return m.repo.Read(ctx, userIDs, id)
+func (m *DistributedMessages) ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *model.Message, err error) {
+	logger.Debugw("read message", "id", id, "name", name, "user_ids", userIDs)
+	return m.repo.Read(ctx, userIDs, id, name)
 }
 
 func (m *DistributedMessages) ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool) (messages []*model.Message, isLastPage bool, err error) {
@@ -179,4 +180,14 @@ func (m *DistributedMessages) ReadBatchMessages(ctx context.Context, userID int6
 func (m *DistributedMessages) ReadPath(ctx context.Context, userID, id int64) (path []*model.Message, err error) {
 	logger.Debugw("read path", "user_id", userID, "id", id)
 	return m.repo.ReadPath(ctx, userID, id)
+}
+
+func (m *DistributedMessages) ReadMessagesAround(ctx context.Context, userID, threadID, id int64, limit int32) (messages []*model.Message, isLastPage bool, offset int, err error) {
+	logger.Debugw("read messages around", "user_id", userID, "thread_id", threadID, "id", id)
+	return m.repo.ReadMessagesAround(ctx, userID, threadID, id, limit)
+}
+
+func (m *DistributedMessages) CountMessages(ctx context.Context, userID, threadID int64) (count int, err error) {
+	logger.Debugw("count messages", "user_id", userID, "thread_id", threadID)
+	return m.repo.Count(ctx, userID, threadID)
 }

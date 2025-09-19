@@ -1,7 +1,8 @@
 import api from './api';
 import models from './models';
 
-async function readMessagePathJson(token: string, id: number) {
+// id = 0 : path = []
+async function readPathJson(token: string, id: number) {
 	let result = {
 		error:       models.error(),
 		path:        [],
@@ -21,8 +22,9 @@ async function readMessagePathJson(token: string, id: number) {
 		if (error)
 			result.error = models.error(error)
 
+		// do not .reverse() here; append NullThread and then reverse
 		if (response)
-			result.path = response.path.map(models.message)
+			result.path = response.path.map(models.thread)
 	} catch (e) {
 		result.error.error   = true
 		result.error.status  = 500
@@ -32,4 +34,4 @@ async function readMessagePathJson(token: string, id: number) {
 	return result;
 }
 
-export default readMessagePathJson;
+export default readPathJson;

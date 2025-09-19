@@ -78,21 +78,20 @@ func (r *Repository) SaveFile(ctx context.Context, reader io.Reader, id, userID 
 	return
 }
 
-func (r *Repository) GetMeta(ctx context.Context, ownerID, id int64, fileName string) (file *model.File, err error) {
-	query := "SELECT id, name, private, oid, mime, size, created_at FROM %s WHERE owner_id = $1"
+func (r *Repository) GetMeta(ctx context.Context, id int64, fileName string) (file *model.File, err error) {
+	query := "SELECT owner_id, id, name, private, oid, mime, size, created_at FROM %s WHERE"
 
 	file = &model.File{
-		UserID: ownerID,
 	}
 
 	var createdAt time.Time
 
 	if id != 0 {
-		query += " AND id = $2"
-		err = r.pool.QueryRow(ctx, r.table(query), ownerID, id).Scan(&file.ID, &file.Name, &file.Private, &file.OID, &file.Mime, &file.Size, &createdAt)
+		query += " id = $1"
+		err = r.pool.QueryRow(ctx, r.table(query), id).Scan(&file.UserID, &file.ID, &file.Name, &file.Private, &file.OID, &file.Mime, &file.Size, &createdAt)
 	} else if fileName != "" {
-		query += " AND name = $2"
-		err = r.pool.QueryRow(ctx, r.table(query), ownerID, fileName).Scan(&file.ID, &file.Name, &file.Private, &file.OID, &file.Mime, &file.Size, &createdAt)
+		query += " name = $1"
+		err = r.pool.QueryRow(ctx, r.table(query), fileName).Scan(&file.UserID, &file.ID, &file.Name, &file.Private, &file.OID, &file.Mime, &file.Size, &createdAt)
 	} else {
 		err = errors.New("id = 0 and fileName is empty")
 	}

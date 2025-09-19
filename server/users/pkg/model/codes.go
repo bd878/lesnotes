@@ -11,6 +11,7 @@ var (
 	CodeAuthFailed         int = 112
 	CodeLogoutFailed       int = 113
 	CodeDeleteFailed       int = 114
+	CodeUpdateFailed       int = 115
 
 	CodeNoLogin            int = 121
 	CodeNoPassword         int = 122

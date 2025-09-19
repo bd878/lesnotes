@@ -31,6 +31,31 @@ paths:
             application:
               schema:
                 $ref: '#/components/schemas/serverError'
+
+  /users/v2/me:
+    post:
+      summary: Get this user's data via json api
+      description: |
+        Returns authorized user's data via json api
+      operationId: getMeJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getMeJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/meOk'
+        "4XX":
+          description: error
+          content:
+            application:
+              schema:
+                $ref: '#/components/schemas/serverError'
 # END ME
 
 # AUTH
@@ -87,6 +112,65 @@ paths:
               schema:
                 $ref: '#/components/schemas/serverError'
 # END AUTH
+
+# UPDATE
+  /users/v1/update:
+    parameters:
+      - in: header
+        name: Cookie
+        schema:
+          type: string
+          example: token=AAAAAA
+    post:
+      summary: Update user info
+      description: |
+        Update user's information and settings
+      operationId: updateUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updateForm'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/updateOk'
+        "401":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+
+  /users/v2/update:
+    post:
+      summary: Update user info
+      description: |
+        Update user's info
+      operationId: updateUserJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updateUserJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/updateOk'
+        "401":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+
+# END UPDATE
 
 # SIGNUP
   /users/v1/signup:
@@ -379,12 +463,18 @@ components:
 # SIGNUP
     signupJson:
       type: object
-      login:
-        type: string
-        example: text
-      password:
-        type: string
-        example: "12345"
+      properties:
+        token:
+          type: string
+        request:
+          type: object
+          properties:
+            login:
+              type: string
+              example: text
+            password:
+              type: string
+              example: "12345"
 
     signupForm:
       type: object
@@ -414,6 +504,12 @@ components:
 # END SIGNUP
 
 # ME
+    getMeJson:
+      type: object
+      properties:
+        token:
+          type: string
+
     meOk:
       type: object
       status:
@@ -426,4 +522,46 @@ components:
             type: integer
           login:
             type: string
+          theme:
+            type: string
 # END ME
+
+# UPDATE
+    updateForm:
+      type: object
+      theme:
+        type: string
+        example: "dark"
+      login:
+        type: string
+        example: "new-login"
+
+    updateJson:
+      type: object
+      properties:
+        token:
+          type: string
+        req:
+          type: object
+          properties:
+            theme:
+              type: string
+              required: false
+              example: "dark"
+            login:
+              type: string
+              required: false
+              example: "abc"
+
+    updateOk:
+      type: object
+      status:
+        type: string
+        default: "ok"
+      response:
+        type: object
+        properties:
+          description:
+            type: string
+
+# END UPDATE

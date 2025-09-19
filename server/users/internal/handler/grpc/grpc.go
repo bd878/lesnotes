@@ -9,6 +9,7 @@ import (
 
 type Controller interface {
 	GetUser(ctx context.Context, id int64) (*model.User, error)
+	UpdateUser(ctx context.Context, id int64, newLogin, newTheme string) (err error)
 	FindUser(ctx context.Context, id int64, login, token string) (*model.User, error)
 }
 
@@ -46,4 +47,15 @@ func (h *Handler) FindUser(ctx context.Context, req *api.FindUserRequest) (*api.
 	}
 
 	return model.UserToProto(user), nil
+}
+
+func (h *Handler) UpdateUser(ctx context.Context, req *api.UpdateUserRequest) (resp *api.UpdateUserResponse, err error) {
+	err = h.controller.UpdateUser(ctx, req.Id, req.Login, req.Theme)
+	if err != nil {
+		return
+	}
+
+	resp = &api.UpdateUserResponse{}
+
+	return
 }

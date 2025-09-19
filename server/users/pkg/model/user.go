@@ -8,6 +8,7 @@ type (
 	User struct {
 		ID               int64            `json:"id"`
 		Login            string           `json:"login,omitempty"`
+		Theme            string           `json:"theme,omitempty"`
 		HashedPassword   string           `json:"salt,omitempty"`
 		Token            string           `json:"token,omitempty"`
 		ExpiresUTCNano   int64            `json:"expires_utc_nano,omitempty"` // TODO: ExpiresAt
@@ -54,5 +55,14 @@ type (
 
 	AuthResponse struct {
 		Expired          bool             `json:"expired"`
+	}
+
+	UpdateRequest struct {
+		Login            string           `json:"login,omitempty"`
+		Theme            string           `json:"theme,omitempty"`
+	}
+
+	UpdateResponse struct {
+		Description      string           `json:"description"`
 	}
 )

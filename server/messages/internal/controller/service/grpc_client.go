@@ -153,14 +153,14 @@ func (s *Messages) PrivateMessages(ctx context.Context, ids []int64, userID int6
 	return
 }
 
-func (s *Messages) UpdateMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private int32) (err error) {
+func (s *Messages) UpdateMessage(ctx context.Context, id int64, text, title, name string, fileIDs []int64, threadID int64, userID int64, private int32) (err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
 		}
 	}
 
-	logger.Debugw("update message", "id", id, "text", text, "title", title, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private)
+	logger.Debugw("update message", "id", id, "text", text, "title", title, "name", name, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private)
 
 	_, err = s.client.UpdateMessage(ctx, &api.UpdateMessageRequest{
 		Id:        id,
@@ -168,6 +168,7 @@ func (s *Messages) UpdateMessage(ctx context.Context, id int64, text, title stri
 		FileIds:   fileIDs,
 		Text:      text,
 		Title:     title,
+		Name:      name,
 		Private:   private,
 		ThreadId:  threadID,
 	})
@@ -175,7 +176,7 @@ func (s *Messages) UpdateMessage(ctx context.Context, id int64, text, title stri
 	return
 }
 
-func (s *Messages) ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool) (messages []*model.Message, isLastPage bool, err error) {
+func (s *Messages) ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool) (list *model.List, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -192,11 +193,25 @@ func (s *Messages) ReadThreadMessages(ctx context.Context, userID int64, threadI
 		Asc:      ascending,
 	})
 	if err != nil {
-		return nil, true, err
+		return nil, err
 	}
 
-	messages = model.MapMessagesFromProto(model.MessageFromProto, res.Messages)
-	isLastPage = res.IsLastPage
+	total, err := s.client.CountMessages(ctx, &api.CountMessagesRequest{
+		UserId:   userID,
+		ThreadId: threadID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	list = &model.List{
+		Messages:      model.MapMessagesFromProto(model.MessageFromProto, res.Messages),
+		IsLastPage:    res.IsLastPage,
+		IsFirstPage:   offset == 0,
+		Total:         total.Count,
+		Count:         int32(len(res.Messages)),
+		Offset:        offset,
+	}
 
 	return
 }
@@ -223,7 +238,7 @@ func (s *Messages) ReadBatchMessages(ctx context.Context, userID int64, ids []in
 	return
 }
 
-func (s *Messages) ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (messages []*model.Message, isLastPage bool, err error) {
+func (s *Messages) ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (list *model.List, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -239,27 +254,42 @@ func (s *Messages) ReadMessages(ctx context.Context, userID int64, limit, offset
 		Asc:      ascending,
 	})
 	if err != nil {
-		return nil, true, err
+		return nil, err
 	}
 
-	messages = model.MapMessagesFromProto(model.MessageFromProto, res.Messages)
-	isLastPage = res.IsLastPage
+	total, err := s.client.CountMessages(ctx, &api.CountMessagesRequest{
+		UserId:   userID,
+		ThreadId: -1,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	list = &model.List{
+		Messages:     model.MapMessagesFromProto(model.MessageFromProto, res.Messages),
+		IsLastPage:   res.IsLastPage,
+		IsFirstPage:  offset == 0,
+		Offset:       offset,
+		Total:        total.Count,
+		Count:        int32(len(res.Messages)),
+	}
 
 	return
 }
 
-func (s *Messages) ReadMessage(ctx context.Context, id int64, userIDs []int64) (message *model.Message, err error) {
+func (s *Messages) ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *model.Message, err error) {
 	if s.isConnFailed() {
 		if err := s.setupConnection(); err != nil {
 			return nil, err
 		}
 	}
 
-	logger.Debugw("read message", "id", id, "user_ids", userIDs)
+	logger.Debugw("read message", "id", id, "name", name, "user_ids", userIDs)
 
 	res, err := s.client.ReadMessage(ctx, &api.ReadMessageRequest{
 		Id:      id,
 		UserIds: userIDs,
+		Name:    name,
 	})
 	if err != nil {
 		return nil, err
@@ -288,6 +318,45 @@ func (s *Messages) ReadPath(ctx context.Context, userID, id int64) (path []*mode
 	}
 
 	path = model.MapMessagesFromProto(model.MessageFromProto, res.Path)
+
+	return
+}
+
+func (s *Messages) ReadMessagesAround(ctx context.Context, userID, threadID, id int64, limit int32) (list *model.List, err error) {
+	if s.isConnFailed() {
+		if err = s.setupConnection(); err != nil {
+			return
+		}
+	}
+
+	logger.Debugw("read messages around", "user_id", userID, "thread_id", threadID, "id", id, "limit", limit)
+
+	res, err := s.client.ReadMessagesAround(ctx, &api.ReadMessagesAroundRequest{
+		UserId:   userID,
+		ThreadId: threadID,
+		Limit:    limit,
+		Id:       id,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	total, err := s.client.CountMessages(ctx, &api.CountMessagesRequest{
+		UserId:   userID,
+		ThreadId: threadID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	list = &model.List{
+		Messages:    model.MapMessagesFromProto(model.MessageFromProto, res.Messages),
+		IsLastPage:  res.IsLastPage,
+		IsFirstPage: res.Offset == 0,
+		Offset:      res.Offset,
+		Count:       int32(len(res.Messages)),
+		Total:       total.Count,
+	}
 
 	return
 }

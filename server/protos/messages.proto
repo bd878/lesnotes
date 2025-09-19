@@ -15,8 +15,10 @@ service Messages {
 	rpc ReadMessage(ReadMessageRequest) returns (Message) {}
 	rpc ReadMessages(ReadMessagesRequest) returns (ReadMessagesResponse) {}
 	rpc ReadPath(ReadPathRequest) returns (ReadPathResponse) {}
+	rpc ReadMessagesAround(ReadMessagesAroundRequest) returns (ReadMessagesAroundResponse) {}
 	rpc ReadThreadMessages(ReadThreadMessagesRequest) returns (ReadThreadMessagesResponse) {}
 	rpc ReadBatchMessages(ReadBatchMessagesRequest) returns (ReadBatchMessagesResponse) {}
+	rpc CountMessages(CountMessagesRequest) returns (CountMessagesResponse) {}
 }
 
 message Message {
@@ -75,6 +77,7 @@ message UpdateMessageRequest {
 	int32    private = 5;
 	repeated int64 file_ids = 6;
 	string   title = 7;
+	string   name  = 8;
 }
 
 message UpdateMessageResponse {
@@ -141,6 +144,7 @@ message Server {
 message ReadMessageRequest {
 	int64  id = 1;
 	repeated int64  user_ids = 2;
+	string name = 3;
 }
 
 message ReadPathRequest {
@@ -150,4 +154,26 @@ message ReadPathRequest {
 
 message ReadPathResponse {
 	repeated Message path = 1;
+}
+
+message ReadMessagesAroundRequest {
+	int64  user_id = 1;
+	int64  id = 2;
+	int32  limit = 3;
+	int64  thread_id = 4;
+}
+
+message ReadMessagesAroundResponse {
+	repeated Message messages = 1;
+	bool             is_last_page = 2;
+	int32            offset = 3;
+}
+
+message CountMessagesRequest {
+	int64 user_id = 1;
+	int64 thread_id = 2;
+}
+
+message CountMessagesResponse {
+	int32 count = 1;
 }

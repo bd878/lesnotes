@@ -181,7 +181,7 @@ paths:
     put:
       summary: Update a message
       description: |
-        Update a message text or file
+        Update a message text, title, name or file
       operationId: updateMessage
       requestBody:
         content:
@@ -206,7 +206,7 @@ paths:
     put:
       summary: Update a message
       description: |
-        Update a message text or file
+        Update a message text, title, name or file
       operationId: updateMessageJson
       requestBody:
         content:
@@ -285,6 +285,7 @@ paths:
     parameters:
       - $ref: '#/components/parameters/token'
       - $ref: '#/components/parameters/message'
+      - $ref: '#/components/parameters/name'
       - $ref: '#/components/parameters/user'
       - $ref: '#/components/parameters/thread'
       - $ref: '#/components/parameters/limit'
@@ -295,7 +296,9 @@ paths:
       summary: Get user messages
       description: |
         Read messages for a given user, a single message, or a specific thread,
-        or public messages for a user
+        or public messages for a user by id or name.
+        If a message, thread_id, and limit given, it reads a message, limit messages before and
+        limit messages after it
       operationId: readMessages
       responses:
         "200":
@@ -304,7 +307,6 @@ paths:
             application/json:
               schema:
                 - $ref: '#/components/schemas/readOk'
-
         "4XX":
           description: error 
           content:
@@ -317,7 +319,9 @@ paths:
       summary: Get user messages or message
       description: |
         Read messages for a given user, a single message, or a specific thread,
-        or public messages for a user
+        or public messages for a user.
+        If a message, thread_id, and limit given, it reads a message, limit messages before and
+        limit messages after it
       operationId: readMessagesJson
       requestBody:
         content:
@@ -456,6 +460,13 @@ components:
       schema:
         type: integer
         example: 1
+    name:
+      name: name
+      in: query
+      required: false
+      schema:
+        type: string
+        example: "aaa-bbb-ccc"
     messages:
       name: ids
       in: query
@@ -606,6 +617,9 @@ components:
         req:
           type: object
           properties:
+            name:
+              type: string
+              required: false
             user:
               type: integer
               required: false
@@ -645,6 +659,18 @@ components:
               default: ""
             is_last_page:
               type: boolean
+            is_first_page:
+              type: boolean
+              required: false
+            offset:
+              type: integer
+              required: false
+            count:
+              type: integer
+              required: false
+            total:
+              type: integer
+              required: false
             messages:
               type: array
               items:
@@ -692,88 +718,56 @@ components:
           default: ""
           required: true
         req:
-          oneOf:
-            - type: object
-              properties:
-                id:
-                  type: integer
-                  example: 1
-                  required: true
-                public:
-                  type: integer
-                  example: 1
-                title:
-                  type: string
-                  required: false
-                text:
-                  type: string
-                  example: "test message"
-                file_ids:
-                  type: string
-                  example: ""
-                thread:
-                  type: integer
-                  required: false
-
-            - type: object
-              properties:
-                id:
-                  type: integer
-                  example: 1
-                  required: true
-                public:
-                  type: integer
-                  example: 1
-                title:
-                  type: string
-                  required: false
-                text:
-                  type: string
-                  example: "test message"
-                file:
-                  type: string
-                  format: binary
-                thread:
-                  type: integer
-                  required: false
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+              required: true
+            public:
+              type: integer
+              example: 1
+            title:
+              type: string
+              required: false
+            name:
+              type: string
+              required: false
+            text:
+              type: string
+              example: "test message"
+            file_ids:
+              type: string
+              example: ""
+            thread:
+              type: integer
+              required: false
 
     updateForm:
       oneOf:
-        - type: object
-          properties:
-            id:
-              type: integer
-              required: true
-            public:
-              type: integer
-              example: 1
-            title:
-              type: string
-              required: false
-            text:
-              type: string
-              example: "test message"
-            thread:
-              type: integer
-              required: false
-
-        - type: object
-          properties:
-            id:
-              type: integer
-              required: true
-            public:
-              type: integer
-              example: 1
-            title:
-              type: string
-              required: false
-            text:
-              type: string
-              example: "test message"
-            thread:
-              type: integer
-              required: false
+        type: object
+        properties:
+          id:
+            type: integer
+            required: true
+          public:
+            type: integer
+            example: 1
+          name:
+            type: string
+            required: false
+          title:
+            type: string
+            required: false
+          text:
+            type: string
+            example: "test message"
+          file_ids:
+            type: string
+            example: ""
+          thread:
+            type: integer
+            required: false
 
     updateOk:
       type: object
