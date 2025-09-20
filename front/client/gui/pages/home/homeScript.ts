@@ -341,9 +341,9 @@ function paginateMessages(threadID, direction, offsetStr, limitStr) {
 	}
 
 	if (direction == "prev") {
-		params.set(threadID, offset + limit)
+		params.set(threadID, `${offset + limit}`)
 	} else if (direction == "next") {
-		params.set(threadID, Math.max(0, offset - limit))
+		params.set(threadID, `${Math.max(0, offset - limit)}`)
 	} else {
 		console.error("[paginateMessages]: unknown direction:", direction)
 	}

@@ -10,6 +10,10 @@ import bodyParser from './handlers/bodyParser.js';
 import useragent from './handlers/useragent.js';
 import favicon from './handlers/favicon.js';
 import etag from './handlers/etag.js';
+import getMe from './handlers/getMe.js';
+import getToken from './handlers/getToken.js';
+import loadStack from './handlers/loadStack.js';
+import loadMessage from './handlers/loadMessage.js';
 
 import assets from './routes/assets';
 import main from './routes/main';
@@ -45,7 +49,7 @@ router
 	.get('/login', etag, login)
 	.get('/logout', etag, logout)
 	.get('/signup', etag, register)
-	.get('/home', etag, home)
+	.get('/home', etag, getToken, getMe, loadMessage, loadStack, home)
 	.get('/status', status)
 	.get("/tg_auth", authTelegram)
 	.get("/new", etag, createNewMessage)
