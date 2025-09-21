@@ -40,7 +40,7 @@ app.use(useragent);
 app.use(favicon);
 
 router
-	.get('/public/:filename', etag, assets)
+	.get('/public/:path*', etag, assets)
 	.get('/index', ctx => {
 		ctx.redirect('/')
 		ctx.status = 301

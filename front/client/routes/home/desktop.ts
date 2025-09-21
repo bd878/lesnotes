@@ -55,9 +55,9 @@ async function renderDesktop(ctx) {
 }
 
 async function renderError(err: string): Promise<string> {
-	const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles.css')), { encoding: 'utf-8' });
+	const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
 	const home = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/home.mustache')), { encoding: 'utf-8' });
-	const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/layout.mustache')), { encoding: 'utf-8' });
+	const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
 	const messageEditForm = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/message_edit_form.mustache')), { encoding: 'utf-8' });
 	const messageView = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/message_view.mustache')), { encoding: 'utf-8' });
 	const newMessageForm = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/new_message_form.mustache')), { encoding: 'utf-8' });
@@ -93,7 +93,7 @@ async function renderError(err: string): Promise<string> {
 	})
 
 	return mustache.render(layout, {
-		scripts:  ["/public/homeScript.js"],
+		scripts:  ["/public/pages/home/desktop.js"],
 		manifest: "/public/manifest.json",
 		styles:   styles,
 	}, {
@@ -102,9 +102,9 @@ async function renderError(err: string): Promise<string> {
 }
 
 async function renderBody(stack: Thread[], userID: number, message?: Message, editMessage?: boolean): Promise<string> {
-	const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles.css')), { encoding: 'utf-8' });
+	const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
 	const home = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/home.mustache')), { encoding: 'utf-8' });
-	const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/layout.mustache')), { encoding: 'utf-8' });
+	const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
 	const messageEditForm = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/message_edit_form.mustache')), { encoding: 'utf-8' });
 	const messageView = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/message_view.mustache')), { encoding: 'utf-8' });
 	const newMessageForm = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/new_message_form.mustache')), { encoding: 'utf-8' });
@@ -144,7 +144,7 @@ async function renderBody(stack: Thread[], userID: number, message?: Message, ed
 	})
 
 	return mustache.render(layout, {
-		scripts:  ["/public/homeScript.js"],
+		scripts:  ["/public/pages/home/desktop.js"],
 		manifest: "/public/manifest.json",
 		styles:   styles,
 	}, {
