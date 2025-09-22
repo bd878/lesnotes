@@ -32,7 +32,7 @@ async function authTelegram(ctx) {
 				error: resp.error.error,
 				explain: resp.error.explain,
 				styles: [
-					"/public/styles.css",
+					"/public/styles/styles.css",
 				],
 			});
 			ctx.status = 200;

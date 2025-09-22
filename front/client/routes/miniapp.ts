@@ -12,7 +12,7 @@ async function renderer(ctx) {
 		ctx.body = mustache.render(template, {
 			script: "/public/miniapp.js",
 			styles: [
-				"/public/styles.css",
+				"/public/styles/styles.css",
 			],
 		});
 		ctx.status = 200;
