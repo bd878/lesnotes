@@ -32,9 +32,9 @@ set +e
 echo "*** stopping gallery-front"
 systemd-run --user --scope -p "Delegate=yes" -- lxc-attach gallery-$ENV -- /srv/misc/scripts/stop_front.sh
 
-scp build/* gallery-$ENV:/srv/gallery/$ENV/front/build/
-scp templates/* gallery-$ENV:/srv/gallery/$ENV/front/templates/
-scp public/* gallery-$ENV:/srv/gallery/$ENV/front/public/
+scp -r build/* gallery-$ENV:/srv/gallery/$ENV/front/build/
+scp -r templates/* gallery-$ENV:/srv/gallery/$ENV/front/templates/
+scp -r public/* gallery-$ENV:/srv/gallery/$ENV/front/public/
 scp etag gallery-$ENV:/srv/gallery/$ENV/front/
 
 # start
