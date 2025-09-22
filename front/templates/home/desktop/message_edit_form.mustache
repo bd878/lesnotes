@@ -1,17 +1,30 @@
-<form data-message-id="{{ID}}" id="message-edit-form" name="message-edit-form" autocomplete="off" onsubmit="return false;" class="w-full flex flex-col grow">
-	<div class="flex flex-col grow">
-		{{^private}}
-			<div class="inline text-sm mr-1">/m/<input name="messageName" class="mb-2 placeholder:italic placeholder:text-gray-600 focus:outline-none resize-none text-sm" placeholder="{{namePlaceholder}}" value="{{name}}"></input></div>
-		{{/private}}
-		<input name="messageTitle" class="focus:outline-none w-full resize-none placeholder:italic placeholder:text-gray-600 text-lg" placeholder="{{titlePlaceholder}}" value="{{title}}"></input>
-		<textarea name="messageText" type="input" class="focus:outline-none w-full resize-none placeholder:italic placeholder:text-gray-600 text-sm h-full" placeholder="{{textPlaceholder}}">{{text}}</textarea>
-	</div>
+{{#ID}}
+	{{#private}}
+		<div class="italic text-sm text-gray-600 mb-2">#{{ID}}</div>
+	{{/private}}
+	{{^private}}
+		<div class="italic text-sm text-gray-600">#{{ID}}</div>
+		<a class="italic text-blue-600 text-sm" href="/m/{{userID}}/{{ID}}" target="_blank">https://{{domain}}/m/{{userID}}/{{ID}}</a>
+	{{/private}}
 
-	<div class="flex flex-col">
-		<div></div>
-		<div class="flex flex-row justify-between">
-			<button data-message-id="{{ID}}" type="submit" class="rounded-md border-1 px-4 border-solid text-left cursor-pointer">{{update}}</button>
-			<button id="message-cancel-edit" class="border-1 px-4 border-solid rounded-md text-left cursor-pointer">{{cancel}}</button>
+	<form data-message-id="{{ID}}" id="message-edit-form" name="message-edit-form" autocomplete="off" onsubmit="return false;" class="w-full flex flex-col grow">
+		<div class="flex flex-col grow">
+			{{^private}}
+				<div class="inline text-sm mr-1">/m/<input name="messageName" class="mb-2 placeholder:italic placeholder:text-gray-600 focus:outline-none resize-none text-sm" placeholder="{{namePlaceholder}}" value="{{name}}"></input></div>
+			{{/private}}
+			<input name="messageTitle" class="focus:outline-none w-full resize-none placeholder:italic placeholder:text-gray-600 text-lg" placeholder="{{titlePlaceholder}}" value="{{title}}"></input>
+			<textarea name="messageText" type="input" class="focus:outline-none w-full resize-none placeholder:italic placeholder:text-gray-600 text-sm h-full" placeholder="{{textPlaceholder}}">{{text}}</textarea>
 		</div>
-	</div>
-</form>
+
+		<div class="flex flex-col">
+			<div></div>
+			<div class="flex flex-row justify-between">
+				<button data-message-id="{{ID}}" type="submit" class="rounded-md border-1 px-4 border-solid text-left cursor-pointer">{{updateButton}}</button>
+				<button id="message-cancel-edit" class="border-1 px-4 border-solid rounded-md text-left cursor-pointer">{{cancelButton}}</button>
+			</div>
+		</div>
+	</form>
+{{/ID}}
+{{^ID}}
+	<div>No message</div>
+{{/ID}}

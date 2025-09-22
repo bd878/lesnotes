@@ -1,29 +1,15 @@
 <div id="content" class="h-full flex flex-col">
-	{{> homeSidebar}}
+	<div id="sidebar">
+		{{> homeSidebar}}
+	</div>
 
 	<div class="flex flex-row w-full grow-2 mb-4 max-w-5xl">
 		<div id="editor" class="mr-2 min-w-md flex flex-col grow p-2 border border-1 border-solid rounded-md">
 			{{#message}}
 				{{#editMessage}}
-					{{#private}}
-						<div class="italic text-sm text-gray-600 mb-2">#{{ID}}</div>
-					{{/private}}
-					{{^private}}
-						<div class="italic text-sm text-gray-600">#{{ID}}</div>
-						<a class="italic text-blue-600 text-sm" href="/m/{{userID}}/{{ID}}" target="_blank">https://{{domain}}/m/{{userID}}/{{ID}}</a>
-					{{/private}}
-
 					{{> messageEditForm}}
 				{{/editMessage}}
 				{{^editMessage}}
-					{{#private}}
-						<div class="italic text-sm text-gray-600 mb-2">#{{ID}}</div>
-					{{/private}}
-					{{^private}}
-						<div class="italic text-sm text-gray-600">#{{ID}}</div>
-						<a class="italic text-blue-600 text-sm mb-2" href="/m/{{userID}}/{{ID}}" target="_blank">https://{{domain}}/m/{{userID}}/{{ID}}</a>
-					{{/private}}
-
 					{{> messageView}}
 				{{/editMessage}}
 			{{/message}}
@@ -34,95 +20,26 @@
 
 		<div id="files" class="ml-2 min-w-sm w-sm flex flex-col bg-blue-100 justify-between p-2 rounded-md">
 			{{#message}}
-				<diV>
-					<p class="text-xl mb-2">{{filesPlaceholder}}</p>
-
-					<ul class="flex flex-col">
-						{{#files}}
-							<li class="grow-1 max-w-full flex flex-row justify-between whitespace-nowrap">
-								<a target="_blank" href="/files/v1/{{ID}}/download" class="flex flex-row justify-between overflow-hidden cursor-pointer">{{name}}</a>
-							</li>
-						{{/files}}
-						{{^files}}
-							{{^editMessage}}
-								<li class="text-gray-600 italic">{{noFiles}}</li>
-							{{/editMessage}}
-						{{/files}}
-					</ul>
-				</diV>
-
 				{{#editMessage}}
-					<form id="file-form" name="file-form" autocomplete="off" onsubmit="return false;" class="flex flex-row">
-						<input id="files-input" class="hidden" type="file" multiple></input>
-						<button id="select-files-button" type="button" class="rounded-md border-1 px-4 border-solid text-left cursor-pointer">{{selectFiles}}</button>
-					</form>
+					{{> filesForm}}
+				{{/editMessage}}
+				{{^editMessage}}
+					{{> filesList}}
 				{{/editMessage}}
 			{{/message}}
 			{{^message}}
-				<div>
-					<p class="text-xl mb-2">{{filesPlaceholder}}</p>
-					<div id="files-list" class="mb-2 mt-2 overflow-hidden whitespace-nowrap text-ellipsis"></div>
-				</div>
-
-				<form id="file-form" name="file-form" autocomplete="off" onsubmit="return false;" class="flex flex-row">
-					<input id="files-input" type="file" class="hidden" multiple></input>
-					<button id="select-files-button" type="button" class="rounded-md border-1 px-4 border-solid text-left cursor-pointer">{{selectFiles}}</button>
-				</form>
+				{{> filesForm}}
 			{{/message}}
 		</div>
 	</div>
 
 	<div id="messages" class="mr-2 mb-2 h-[400px] flex flex-col w-full">
 		<div id="messages-list" class="flex flex-row w-full grow overflow-x-scroll">
-			{{#error}}
-				<span>{{.}}</span>
-			{{/error}}
-			{{^error}}
-				{{#stack}}
-					<div class="flex flex-col w-md min-w-md max-w-md first:ml-0 ml-2">
-						{{#ID}}
-							<a target="_self" href="/home?cwd={{ID}}" class="mb-2 hover:text-blue-600 cursor-pointer underline">
-						{{/ID}}
-						{{^ID}}
-							<a target="_self" href="/home" class="mb-2 hover:text-blue-600 cursor-pointer underline">
-						{{/ID}}
-							{{#title}}
-								/{{title}}
-							{{/title}}
-							{{^title}}
-								{{#text}}
-									/{{text}}
-								{{/text}}
-								{{^text}}
-									/
-								{{/text}}
-							{{/title}}
-						</a>
-
-						<div class="overflow-y-scroll">
-							{{> messagesList}}
-						</div>
-
-						<div class="flex flex-row mt-2">
-							{{^isLastPage}}
-								<button type="button" data-offset="{{offset}}" data-limit="{{limit}}" data-thread-id="{{ID}}" data-direction="prev" class="grow cursor-pointer hover:bg-gray-300"><-</button>
-							{{/isLastPage}}
-
-							{{^isFirstPage}}
-								<button type="button" data-offset="{{offset}}" data-limit="{{limit}}" data-thread-id="{{ID}}" data-direction="next" class="grow cursor-pointer hover:bg-gray-300">-></button>
-							{{/isFirstPage}}
-						</div>
-					</div>
-				{{/stack}}
-				{{^stack}}
-					<div class="grow">
-					</div>
-				{{/stack}}
-			{{/error}}
+			{{> messagesList}}
 		</div>
 	</div>
 
 	<div id="search">
-		<input class="w-md placeholder:italic px-1 placeholder:text-gray-600 border border-black" type="text" id="search" name="search" placeholder="{{search}}"></input>
+		{{> searchPath}}
 	</div>
 </div>

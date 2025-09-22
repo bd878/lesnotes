@@ -22,7 +22,7 @@ async function renderDesktop(ctx) {
 	if (is.notEmpty(ctx.state.stack)) {
 		if (ctx.state.stack.error.error) {
 			console.error(ctx.state.stack.error)
-			ctx.body = await renderError("failed to load messages stack");
+			ctx.body = "error"
 			ctx.status = 400;
 			return;
 		}
@@ -38,7 +38,7 @@ async function renderDesktop(ctx) {
 	if (is.notEmpty(ctx.state.message)) {
 		if (ctx.state.message.error.error) {
 			console.error(ctx.state.message.error)
-			ctx.body = await renderError("failed to load message")
+			ctx.body = "error"
 			ctx.status = 400;
 			return;
 		}
@@ -48,108 +48,157 @@ async function renderDesktop(ctx) {
 
 	ctx.set({ "Cache-Control": "no-cache,max-age=0" })
 
-	ctx.body = await renderBody(stack, me.ID, message, ctx.query.edit)
+	const builder = new Builder()
+
+	if (is.notEmpty(message))
+		if (ctx.query.edit)
+			await builder.addMessageEditForm(undefined, me.ID, message)
+		else
+			await builder.addMessageView(undefined, me.ID, message)
+	else
+		await builder.addNewMessageForm()
+
+	await builder.addMessagesList(undefined, stack)
+	await builder.addFilesList(message, ctx.query.edit)
+	await builder.addFilesForm()
+	await builder.addSearchPath()
+	await builder.addSidebar()
+
+	ctx.body = await builder.build(message, ctx.query.edit)
 	ctx.status = 200;
 
 	return;
 }
 
-async function renderError(err: string): Promise<string> {
-	const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
-	const home = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/home.mustache')), { encoding: 'utf-8' });
-	const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
-	const messageEditForm = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/message_edit_form.mustache')), { encoding: 'utf-8' });
-	const messageView = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/message_view.mustache')), { encoding: 'utf-8' });
-	const newMessageForm = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/new_message_form.mustache')), { encoding: 'utf-8' });
-	const homeSidebar = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/home_sidebar.mustache')), { encoding: 'utf-8' });
-	const messagesList = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/messages_list.mustache')), { encoding: 'utf-8' });
+class Builder {
+	messagesList = undefined;
+	async addMessagesList(error: string | undefined, stack: Thread[]) {
+		const template = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/messages_list.mustache')), { encoding: 'utf-8' });
 
-	const content = mustache.render(home, {
-		error:    err,
-		domain:   Config.get("domain"),
-		send:     i18n("send"),
-		logout:   i18n("logout"),
-		filesPlaceholder: i18n("filesPlaceholder"),
-		newMessageText: i18n("newMessageText"),
-		noMessagesText: i18n("noMessagesText"),
-		selectFiles: i18n("selectFiles"),
-		search:   i18n("search"),
-		delete:   i18n("delete"),
-		edit:     i18n("edit"),
-		publish:  i18n("publish"),
-		privateText:  i18n("private"),
-		update:   i18n("update"),
-		cancel:        i18n("cancel"),
-		noFiles:        i18n("noFiles"),
-		namePlaceholder:  i18n("namePlaceholder"),
-		titlePlaceholder: i18n("titlePlaceholder"),
-		textPlaceholder:  i18n("textPlaceholder"),
-	}, {
-		messageEditForm,
-		messageView,
-		newMessageForm,
-		homeSidebar,
-		messagesList,
-	})
+		this.messagesList = mustache.render(template, {
+			stack:            stack,
+			limit:            14,
+			newMessageText:   i18n("newMessageText"),
+			noMessagesText:   i18n("noMessagesText"),
+		})
+	}
 
-	return mustache.render(layout, {
-		scripts:  ["/public/pages/home/desktop.js"],
-		manifest: "/public/manifest.json",
-		styles:   styles,
-	}, {
-		content,
-	});
-}
+	messageEditForm = undefined;
+	async addMessageEditForm(error: string | undefined, userID: number, message?: Message) {
+		if (is.empty(message))
+			return
 
-async function renderBody(stack: Thread[], userID: number, message?: Message, editMessage?: boolean): Promise<string> {
-	const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
-	const home = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/home.mustache')), { encoding: 'utf-8' });
-	const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
-	const messageEditForm = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/message_edit_form.mustache')), { encoding: 'utf-8' });
-	const messageView = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/message_view.mustache')), { encoding: 'utf-8' });
-	const newMessageForm = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/new_message_form.mustache')), { encoding: 'utf-8' });
-	const homeSidebar = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/home_sidebar.mustache')), { encoding: 'utf-8' });
-	const messagesList = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/messages_list.mustache')), { encoding: 'utf-8' });
+		const template = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/message_edit_form.mustache')), { encoding: 'utf-8' });
+		this.messageEditForm = mustache.render(template, {
+			ID:               message.ID,
+			private:          message.private,
+			name:             message.name,
+			title:            message.title,
+			text:             message.text,
+			namePlaceholder:  i18n("namePlaceholder"),
+			titlePlaceholder: i18n("titlePlaceholder"),
+			textPlaceholder:  i18n("textPlaceholder"),
+			updateButton:     i18n("updateButton"),
+			cancelButton:     i18n("cancelButton"),
+			userID:           userID,
+			domain:           Config.get("domain"),
+		})
+	}
 
-	const content = mustache.render(home, {
-		stack:    stack,
-		message:  message,
-		userID:   userID,
-		domain:   Config.get("domain"),
-		send:     i18n("send"),
-		logout:   i18n("logout"),
-		filesPlaceholder: i18n("filesPlaceholder"),
-		newMessageText: i18n("newMessageText"),
-		noMessagesText: i18n("noMessagesText"),
-		selectFiles: i18n("selectFiles"),
-		search:   i18n("search"),
-		delete:   i18n("delete"),
-		edit:     i18n("edit"),
-		editMessage: editMessage,
-		limit: 14,
-		publish:  i18n("publish"),
-		privateText:  i18n("private"),
-		update:   i18n("update"),
-		cancel:        i18n("cancel"),
-		noFiles:        i18n("noFiles"),
-		namePlaceholder:  i18n("namePlaceholder"),
-		titlePlaceholder: i18n("titlePlaceholder"),
-		textPlaceholder:  i18n("textPlaceholder"),
-	}, {
-		messageEditForm,
-		messageView,
-		newMessageForm,
-		messagesList,
-		homeSidebar,
-	})
+	messageView = undefined;
+	async addMessageView(error: string | undefined, userID: number, message?: Message) {
+		if (is.empty(message))
+			return
 
-	return mustache.render(layout, {
-		scripts:  ["/public/pages/home/desktop.js"],
-		manifest: "/public/manifest.json",
-		styles:   styles,
-	}, {
-		content,
-	});
+		const template = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/message_view.mustache')), { encoding: 'utf-8' });
+		this.messageView = mustache.render(template, {
+			ID:               message.ID,
+			title:            message.title,
+			text:             message.text,
+			private:          message.private,
+			cancelButton:     i18n("cancelButton"),
+			userID:           userID,
+			domain:           Config.get("domain"),
+		})
+	}
+
+	newMessageForm = undefined;
+	async addNewMessageForm() {
+		const template = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/new_message_form.mustache')), { encoding: 'utf-8' });
+		this.newMessageForm = mustache.render(template, {
+			titlePlaceholder: i18n("titlePlaceholder"),
+			textPlaceholder:  i18n("textPlaceholder"),
+			sendButton:       i18n("sendButton"),
+		})
+	}
+
+	filesList = undefined;
+	async addFilesList(message?: Message, editMessage?: boolean) {
+		const template = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/files_list.mustache')), { encoding: 'utf-8' });
+
+		const options = {
+			filesPlaceholder:   i18n("filesPlaceholder"),
+			noFiles:            i18n("noFiles"),
+			editMessage:        editMessage,
+			files:              undefined,
+		}
+
+		if (is.notEmpty(message))
+			options.files = message.files
+
+		this.filesList = mustache.render(template, options)
+	}
+
+	filesForm = undefined;
+	async addFilesForm() {
+		const template = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/files_form.mustache')), { encoding: 'utf-8' });
+		this.filesForm = mustache.render(template, {
+			filesPlaceholder:    i18n("filesPlaceholder"),
+			selectFiles:         i18n("selectFiles"),
+		})
+	}
+
+	searchPath = undefined;
+	async addSearchPath() {
+		const template = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/search.mustache')), { encoding: 'utf-8' });
+		this.searchPath = mustache.render(template, {
+			searchPlaceholder:   i18n("searchPlaceholder"),
+		})
+	}
+
+	homeSidebar = undefined;
+	async addSidebar() {
+		const template = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/home_sidebar.mustache')), { encoding: 'utf-8' });
+		this.homeSidebar = mustache.render(template, {
+			logout:           i18n("logout"),
+		})
+	}
+
+	async build(message?: Message, editMessage?: boolean) {
+		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
+		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
+		const home = await readFile(resolve(join(Config.get('basedir'), 'templates/home/desktop/home.mustache')), { encoding: 'utf-8' });
+
+		return mustache.render(layout, {
+			scripts:  ["/public/pages/home/desktop.js"],
+			manifest: "/public/manifest.json",
+			styles:   styles,
+		}, {
+			content: mustache.render(home, {
+				message:     message,
+				editMessage: editMessage,
+			}, {
+				messageEditForm: this.messageEditForm,
+				messageView:     this.messageView,
+				newMessageForm:  this.newMessageForm,
+				messagesList:    this.messagesList,
+				homeSidebar:     this.homeSidebar,
+				filesForm:       this.filesForm,
+				filesList:       this.filesList,
+				searchPath:      this.searchPath,
+			}),
+		});
+	}
 }
 
 export default renderDesktop;

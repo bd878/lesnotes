@@ -1,12 +1,7 @@
 import api from '../api';
 
 async function getMe(ctx, next) {
-	const resp = await api.authJson(ctx.state.token)
-	if (resp.error.error || resp.expired) {
-		ctx.redirect("/login")
-		ctx.status = 302
-		return
-	}
+	console.log("--> getMe")
 
 	ctx.state.me = await api.getMeJson(ctx.state.token)
 	if (ctx.state.me.error.error) {
@@ -16,6 +11,8 @@ async function getMe(ctx, next) {
 	}
 
 	await next()
+
+	console.log("<-- getMe")
 }
 
 export default getMe

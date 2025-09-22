@@ -1,6 +1,8 @@
 import api from '../api';
 
 async function loadStack(ctx, next) {
+	console.log("--> loadStack")
+
 	const id = parseInt(ctx.query.id) || 0
 	const threadID = parseInt(ctx.query.cwd) || 0
 	const limit = 14
@@ -15,6 +17,8 @@ async function loadStack(ctx, next) {
 	}
 
 	await next()
+
+	console.log("<-- loadStack")
 }
 
 function buildThreadOffsets(searchParams): Record<number, number> {
