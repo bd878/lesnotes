@@ -209,9 +209,10 @@ class Builder {
 		)), { encoding: 'utf-8' });
 
 		return mustache.render(layout, {
-			scripts:  ["/public/pages/home/desktop.js"],
+			scripts:  ["/public/pages/home/homeScript.js"],
 			manifest: "/public/manifest.json",
 			styles:   styles,
+			isMobile: this.isMobile ? "true" : "",
 		}, {
 			content: mustache.render(home, {
 				message:     message,

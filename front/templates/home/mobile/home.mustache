@@ -1,17 +1,43 @@
 <div id="content" class="flex flex-col">
 	{{> homeSidebar}}
 
-	<div id="search">
+	<div id="search" class="mb-4">
+		{{> searchPath}}
 	</div>
 
-	<div>
-		<div id="editor">
+	<div class="flex flex-col max-w-5xl w-full mb-4">
+		<div id="editor" class="mb-4 h-[300px] flex min-w-sm flex-col grow p-2 border border-1 border-solid rounded-md">
+			{{#message}}
+				{{#editMessage}}
+					{{> messageEditForm}}
+				{{/editMessage}}
+				{{^editMessage}}
+					{{> messageView}}
+				{{/editMessage}}
+			{{/message}}
+			{{^message}}
+				{{> newMessageForm}}
+			{{/message}}
 		</div>
 
-		<div id="files">
+		<div id="files" class="min-w-sm flex flex-col bg-blue-100 justify-between p-2 rounded-md">
+			{{#message}}
+				{{#editMessage}}
+					{{> filesForm}}
+				{{/editMessage}}
+				{{^editMessage}}
+					{{> filesList}}
+				{{/editMessage}}
+			{{/message}}
+			{{^message}}
+				{{> filesForm}}
+			{{/message}}
 		</div>
 	</div>
 
-	<div id="messages">
+	<div id="messages" class="max-w-5xl">
+		<div id="messages-list" class="flex flex-col">
+			{{> messagesList}}
+		</div>
 	</div>
 </div>

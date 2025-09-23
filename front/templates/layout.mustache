@@ -16,7 +16,12 @@
 		<title>Les notes</title>
 	</head>
 	<body>
-		<div class="p-8 pt-10 h-screen flex flex-col items-start relative">
+		{{#isMobile}}
+			<div data-is-mobile="{{isMobile}}" class="p-4 pt-5 h-screen flex flex-col items-start relative">
+		{{/isMobile}}
+		{{^isMobile}}
+			<div class="p-8 pt-10 h-screen flex flex-col items-start relative">
+		{{/isMobile}}
 			<div class="w-full grow">
 				{{> content}}
 			</div>
