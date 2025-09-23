@@ -1,10 +1,10 @@
 {{#stack}}
-	<div class="flex flex-col w-full max-w-md last:mb-0 mb-2 h-[400px]">
+	<div class="flex flex-col w-full first:pl-5 first:ml-0 ml-4 last:pr-5 max-w-md h-[500px]">
 		{{#ID}}
-			<a target="_self" href="/home?cwd={{ID}}" class="mb-2 hover:text-blue-600 cursor-pointer underline">
+			<a target="_self" href="/home?cwd={{ID}}" class="mb-2 bg-gray-300 cursor-pointer underline">
 		{{/ID}}
 		{{^ID}}
-			<a target="_self" href="/home" class="mb-2 hover:text-blue-600 cursor-pointer underline">
+			<a target="_self" href="/home" class="mb-2 bg-gray-300 cursor-pointer underline">
 		{{/ID}}
 			{{#title}}
 				/{{title}}
@@ -22,21 +22,21 @@
 		<div class="overflow-y-scroll">
 			<ul class="flex flex-col">
 				{{#messages}}
-					<li class="grow-1 max-w-full flex flex-row justify-between whitespace-nowrap">
+					<li class="grow-1 text-lg max-w-full flex flex-row justify-between whitespace-nowrap">
 						{{#isCenter}}
 							{{#isSelected}}
-								<button type="button" class="flex flex-row justify-between overflow-hidden bg-gray-300 hover:text-blue-600 cursor-pointer text-left px-2 w-full" data-message-id="{{ID}}">
+								<button type="button" class="flex flex-row justify-between overflow-hidden bg-gray-300 cursor-pointer text-left w-full" data-message-id="{{ID}}">
 							{{/isSelected}}
 							{{^isSelected}}
-								<button type="button" class="flex flex-row justify-between overflow-hidden bg-blue-100 hover:text-blue-600 cursor-pointer text-left px-2 w-full" data-message-id="{{ID}}">
+								<button type="button" class="flex flex-row justify-between overflow-hidden bg-blue-100 cursor-pointer text-left w-full" data-message-id="{{ID}}">
 							{{/isSelected}}
 						{{/isCenter}}
 						{{^isCenter}}
 							{{#isSelected}}
-								<button type="button" class="flex flex-row justify-between overflow-hidden bg-gray-300 cursor-pointer text-left px-2 w-full" data-message-id="{{ID}}">
+								<button type="button" class="flex flex-row justify-between overflow-hidden bg-gray-300 cursor-pointer text-left w-full" data-message-id="{{ID}}">
 							{{/isSelected}}
 							{{^isSelected}}
-								<button type="button" class="flex flex-row justify-between overflow-hidden hover:bg-gray-300 cursor-pointer text-left px-2 w-full" data-message-id="{{ID}}">
+								<button type="button" class="flex flex-row justify-between overflow-hidden cursor-pointer text-left w-full" data-message-id="{{ID}}">
 							{{/isSelected}}
 						{{/isCenter}}
 								<div class="overflow-hidden text-ellipsis mr-2" data-message-id="{{ID}}">
@@ -52,10 +52,10 @@
 						</button>
 
 						{{#isCenter}}
-							<button type="button" class="px-2 bg-blue-100 hover:text-blue-600 cursor-pointer text-end" data-thread-id="{{ID}}">{{count}} > </button>
+							<button type="button" class="pl-2 bg-blue-100 cursor-pointer text-end" data-thread-id="{{ID}}">{{count}} > </button>
 						{{/isCenter}}
 						{{^isCenter}}
-							<button type="button" class="px-2 hover:text-blue-600 cursor-pointer text-end" data-thread-id="{{ID}}">{{count}} > </button>
+							<button type="button" class="pl-2 cursor-pointer text-end" data-thread-id="{{ID}}">{{count}} > </button>
 						{{/isCenter}}
 					</li>
 				{{/messages}}
@@ -72,11 +72,11 @@
 
 		<div class="flex flex-row mt-2">
 			{{^isLastPage}}
-				<button type="button" data-offset="{{offset}}" data-limit="{{limit}}" data-thread-id="{{ID}}" data-direction="prev" class="grow cursor-pointer hover:bg-gray-300"><-</button>
+				<button type="button" data-offset="{{offset}}" data-limit="{{limit}}" data-thread-id="{{ID}}" data-direction="prev" class="bg-gray-300 grow mr-2 last:mr-0 cursor-pointer"><-</button>
 			{{/isLastPage}}
 
 			{{^isFirstPage}}
-				<button type="button" data-offset="{{offset}}" data-limit="{{limit}}" data-thread-id="{{ID}}" data-direction="next" class="grow cursor-pointer hover:bg-gray-300">-></button>
+				<button type="button" data-offset="{{offset}}" data-limit="{{limit}}" data-thread-id="{{ID}}" data-direction="next" class="bg-gray-300 grow cursor-pointer">-></button>
 			{{/isFirstPage}}
 		</div>
 	</div>
