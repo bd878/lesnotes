@@ -21,6 +21,12 @@ let ctx = await esbuild.context({
 	entryPoints: [
 		'client/gui/pages/home/desktop.ts',
 		'client/gui/pages/home/mobile.ts',
+		'client/gui/pages/login/loginScript.ts',
+		'client/gui/pages/logout/logoutScript.ts',
+		'client/gui/pages/main/mainScript.ts',
+		'client/gui/pages/new/newScript.ts',
+		'client/gui/pages/register/registerScript.ts',
+		'client/gui/pages/new/newScript.ts',
 		'client/gui/styles/styles.css'
 	],
 	entryNames: '[dir]/[name]',

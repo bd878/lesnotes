@@ -20,7 +20,7 @@ async function login(ctx) {
 			password: i18n("password"),
 			register: i18n("register"),
 			login:    i18n("login"),
-			scripts:  ["/public/loginScript.js"],
+			scripts:  ["/public/pages/login/loginScript.js"],
 			styles:   styles,
 		}, {
 			content: login,
