@@ -48,7 +48,7 @@ const i18n = {
 		cancelButton: "Отмена",
 		filesPlaceholder: "Файлы",
 		noFiles: "Файлов нет, нажмите \"редактировать\". чтобы добавить файлы",
-		newMessageText: "Введите первую заметку здесь ^",
+		newMessageText: "Напишите в этот тред первую заметку",
 		noMessagesText: "Заметок нет",
 		miniapp_only: "Эта страница работает только из приложения Telegram",
 		textPlaceholder: "Сообщение...",

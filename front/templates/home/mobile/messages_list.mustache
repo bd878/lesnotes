@@ -1,5 +1,5 @@
 {{#stack}}
-	<div class="flex flex-col w-full first:pl-5 first:ml-0 ml-4 last:pr-5 max-w-md h-[500px]">
+	<div class="flex flex-col mr-4 last:mr-0 min-w-full max-w-md h-[500px]">
 		{{#ID}}
 			<a target="_self" href="/home?cwd={{ID}}" class="mb-2 bg-gray-300 cursor-pointer underline">
 		{{/ID}}
@@ -19,10 +19,10 @@
 			{{/title}}
 		</a>
 
-		<div class="overflow-y-scroll">
+		<div class="overflow-y-auto">
 			<ul class="flex flex-col">
 				{{#messages}}
-					<li class="grow-1 text-lg max-w-full flex flex-row justify-between whitespace-nowrap">
+					<li class="grow-1 text-lg flex flex-row justify-between whitespace-nowrap">
 						{{#isCenter}}
 							{{#isSelected}}
 								<button type="button" class="flex flex-row justify-between overflow-hidden bg-gray-300 cursor-pointer text-left w-full" data-message-id="{{ID}}">

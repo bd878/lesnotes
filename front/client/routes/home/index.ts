@@ -85,6 +85,7 @@ class Builder {
 		this.messagesList = mustache.render(template, {
 			stack:            stack,
 			limit:            14,
+			isSingle:         () => stack.length == 1,
 			newMessageText:   i18n("newMessageText"),
 			noMessagesText:   i18n("noMessagesText"),
 		})
