@@ -129,6 +129,7 @@ class Builder {
 			ID:               message.ID,
 			title:            message.title,
 			text:             message.text,
+			name:             message.name,
 			private:          message.private,
 			cancelButton:     i18n("cancelButton"),
 			userID:           userID,

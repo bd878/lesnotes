@@ -24,6 +24,7 @@ let ctx = await esbuild.context({
 		'client/gui/pages/logout/logoutScript.ts',
 		'client/gui/pages/main/mainScript.ts',
 		'client/gui/pages/new/newScript.ts',
+		'client/gui/pages/message/messageScript.ts',
 		'client/gui/pages/register/registerScript.ts',
 		'client/gui/pages/new/newScript.ts',
 		'client/gui/styles/styles.css'

@@ -23,8 +23,7 @@ import home from './routes/home';
 import logout from './routes/logout';
 import status from './routes/status';
 import xxx from './routes/xxx';
-import readUserMessage from './routes/readUserMessage';
-import readPublicMessage from './routes/readPublicMessage';
+import message from './routes/message';
 import createNewMessage from './routes/createNewMessage';
 import miniapp from './routes/miniapp';
 import authTelegram from './routes/authTelegram';
@@ -53,8 +52,8 @@ router
 	.get('/status', status)
 	.get("/tg_auth", authTelegram)
 	.get("/new", etag, createNewMessage)
-	.get("/m/:user/:id", etag, readUserMessage)
-	.get("/m/:id", etag, readPublicMessage)
+	.get("/m/:user/:id", etag, getToken, loadMessage, message)
+	.get("/m/:name", etag, getToken, loadMessage, message)
 	.get("/miniapp", etag, miniapp)
 	.get('/:any*', xxx)
 

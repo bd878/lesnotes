@@ -1,8 +1,9 @@
 async function getToken(ctx, next) {
-	console.log("--> getToken")
-
 	const token = ctx.cookies.get("token")
 	ctx.state.token = token
+
+	console.log("--> getToken", "token", token)
+
 	await next()
 
 	console.log("<-- getToken")

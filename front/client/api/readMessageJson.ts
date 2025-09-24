@@ -1,7 +1,7 @@
 import api from './api';
 import models from './models';
 
-async function readMessageJson(token: string, user: number, id: number) {
+async function readMessageJson(token: string, user: number, id: number, name?: string) {
 	let result = {
 		error:     models.error(),
 		message:   models.message(),
@@ -15,6 +15,7 @@ async function readMessageJson(token: string, user: number, id: number) {
 				req:   {
 					user: user,
 					id:   id,
+					name: name,
 				},
 			},
 		});
