@@ -12,13 +12,15 @@ async function main(ctx) {
 	if (resp.error.error || resp.expired) {
 		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
 		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
-		const main = await readFile(resolve(join(Config.get("basedir"), 'templates/main.mustache')), { encoding: 'utf-8' });
+		const main = await readFile(resolve(join(Config.get("basedir"), 'templates/main/desktop/main.mustache')), { encoding: 'utf-8' });
 		const footer = await readFile(resolve(join(Config.get("basedir"), 'templates/footer.mustache')), { encoding: 'utf-8' });
 
+		const _i18n = i18n(ctx.state.lang)
+
 		ctx.body = mustache.render(layout, {
-			login:    i18n("login"),
-			register: i18n("register"),
-			scripts:  ["/public/mainScript.js"],
+			login:    _i18n("login"),
+			register: _i18n("register"),
+			scripts:  ["/public/pages/main/mainScript.js"],
 			styles:   styles,
 		}, {
 			content:  main,

@@ -10,6 +10,8 @@ async function logout(ctx) {
 
 	ctx.set({ "Cache-Control": "no-cache,max-age=0" })
 
+	const _i18n = i18n(ctx.state.lang)
+
 	const resp = await api.authJson(token)
 	if (resp.expired) {
 		ctx.redirect('/login')
@@ -21,7 +23,7 @@ async function logout(ctx) {
 	const logout = await readFile(resolve(join(Config.get('basedir'), 'templates/logout.mustache')), { encoding: 'utf-8' });
 
 	ctx.body = mustache.render(layout, {
-		logout:   i18n("loading"),
+		logout:   _i18n("loading"),
 		scripts:  ["/public/pages/logout/logoutScript.js"],
 	}, {
 		content: logout,

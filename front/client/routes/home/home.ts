@@ -58,6 +58,7 @@ async function home(ctx) {
 	else
 		await builder.addNewMessageForm()
 
+	await builder.addSettings(undefined, ctx.state.lang, me.theme)
 	await builder.addMessagesList(undefined, stack)
 	await builder.addFilesList(message, ctx.query.edit)
 	await builder.addFilesForm()
@@ -80,6 +81,28 @@ class Builder {
 
 	i18n(key: string): string {
 		return i18n(this.lang)(key)
+	}
+
+	settings = undefined;
+	async addSettings(error: string | undefined, lang: string, theme: string) {
+		const template = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/home/mobile/settings.mustache' : 'templates/home/desktop/settings.mustache'
+		)), { encoding: 'utf-8' });
+
+		this.settings = mustache.render(template, {
+			settingsHeader:  this.i18n("settingsHeader"),
+			updateButton:    this.i18n("updateButton"),
+			langHeader:      this.i18n("langHeader"),
+			themeHeader:     this.i18n("themeHeader"),
+			darkTheme: 	 this.i18n("darkTheme"),
+			lightTheme: 	 this.i18n("lightTheme"),
+			deLang: 	 this.i18n("deLang"),
+			enLang: 	 this.i18n("enLang"),
+			frLang: 	 this.i18n("frLang"),
+			ruLang: 	 this.i18n("ruLang"),
+			theme:           theme,
+			lang:            lang,
+		})
 	}
 
 	messagesList = undefined;
@@ -227,6 +250,7 @@ class Builder {
 				message:     message,
 				editMessage: editMessage,
 			}, {
+				settings:        this.settings,
 				messageEditForm: this.messageEditForm,
 				messageView:     this.messageView,
 				newMessageForm:  this.newMessageForm,
