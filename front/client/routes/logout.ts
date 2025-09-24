@@ -22,7 +22,7 @@ async function logout(ctx) {
 
 	ctx.body = mustache.render(layout, {
 		logout:   i18n("loading"),
-		scripts:  ["/public/logout/logoutScript.js"],
+		scripts:  ["/public/pages/logout/logoutScript.js"],
 	}, {
 		content: logout,
 	});

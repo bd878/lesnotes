@@ -6,16 +6,8 @@ import { resolve } from 'node:path';
 
 async function renderer(ctx) {
 	try {
-		const filePath = resolve(path.join(Config.get('basedir'), 'templates/miniapp.mustache'));
-		const template = await readFile(filePath, { encoding: 'utf-8' });
-
-		ctx.body = mustache.render(template, {
-			script: "/public/miniapp.js",
-			styles: [
-				"/public/styles/styles.css",
-			],
-		});
-		ctx.status = 200;
+		ctx.body = "not implemented"
+		ctx.status = 501;
 	} catch (err) {
 		ctx.body = "<html>Pas de template</html>";
 		ctx.status = 500;
