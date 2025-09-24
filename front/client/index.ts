@@ -14,6 +14,7 @@ import getMe from './handlers/getMe.js';
 import getToken from './handlers/getToken.js';
 import loadStack from './handlers/loadStack.js';
 import loadMessage from './handlers/loadMessage.js';
+import language from './handlers/language';
 
 import assets from './routes/assets/assets';
 import main from './routes/main/main';

@@ -48,7 +48,7 @@ async function home(ctx) {
 
 	ctx.set({ "Cache-Control": "no-cache,max-age=0" })
 
-	const builder = new Builder(ctx.userAgent.isMobile)
+	const builder = new Builder(ctx.userAgent.isMobile, ctx.state.lang)
 
 	if (is.notEmpty(message))
 		if (ctx.query.edit)
@@ -72,8 +72,14 @@ async function home(ctx) {
 
 class Builder {
 	isMobile: boolean = false;
-	constructor(isMobile: boolean) {
+	lang:     string  = "en";
+	constructor(isMobile: boolean, lang: string = "en") {
 		this.isMobile = isMobile
+		this.lang = lang
+	}
+
+	i18n(key: string): string {
+		return i18n(this.lang)(key)
 	}
 
 	messagesList = undefined;
@@ -86,8 +92,8 @@ class Builder {
 			stack:            stack,
 			limit:            14,
 			isSingle:         () => stack.length == 1,
-			newMessageText:   i18n("newMessageText"),
-			noMessagesText:   i18n("noMessagesText"),
+			newMessageText:   this.i18n("newMessageText"),
+			noMessagesText:   this.i18n("noMessagesText"),
 		})
 	}
 
@@ -106,11 +112,11 @@ class Builder {
 			name:             message.name,
 			title:            message.title,
 			text:             message.text,
-			namePlaceholder:  i18n("namePlaceholder"),
-			titlePlaceholder: i18n("titlePlaceholder"),
-			textPlaceholder:  i18n("textPlaceholder"),
-			updateButton:     i18n("updateButton"),
-			cancelButton:     i18n("cancelButton"),
+			namePlaceholder:  this.i18n("namePlaceholder"),
+			titlePlaceholder: this.i18n("titlePlaceholder"),
+			textPlaceholder:  this.i18n("textPlaceholder"),
+			updateButton:     this.i18n("updateButton"),
+			cancelButton:     this.i18n("cancelButton"),
 			userID:           userID,
 			domain:           Config.get("domain"),
 		})
@@ -131,7 +137,7 @@ class Builder {
 			text:             message.text,
 			name:             message.name,
 			private:          message.private,
-			cancelButton:     i18n("cancelButton"),
+			cancelButton:     this.i18n("cancelButton"),
 			userID:           userID,
 			domain:           Config.get("domain"),
 		})
@@ -144,9 +150,9 @@ class Builder {
 		)), { encoding: 'utf-8' });
 
 		this.newMessageForm = mustache.render(template, {
-			titlePlaceholder: i18n("titlePlaceholder"),
-			textPlaceholder:  i18n("textPlaceholder"),
-			sendButton:       i18n("sendButton"),
+			titlePlaceholder: this.i18n("titlePlaceholder"),
+			textPlaceholder:  this.i18n("textPlaceholder"),
+			sendButton:       this.i18n("sendButton"),
 		})
 	}
 
@@ -157,8 +163,8 @@ class Builder {
 		)), { encoding: 'utf-8' });
 
 		const options = {
-			filesPlaceholder:   i18n("filesPlaceholder"),
-			noFiles:            i18n("noFiles"),
+			filesPlaceholder:   this.i18n("filesPlaceholder"),
+			noFiles:            this.i18n("noFiles"),
 			editMessage:        editMessage,
 			files:              undefined,
 		}
@@ -176,8 +182,8 @@ class Builder {
 		)), { encoding: 'utf-8' });
 
 		this.filesForm = mustache.render(template, {
-			filesPlaceholder:    i18n("filesPlaceholder"),
-			selectFiles:         i18n("selectFiles"),
+			filesPlaceholder:    this.i18n("filesPlaceholder"),
+			selectFiles:         this.i18n("selectFiles"),
 		})
 	}
 
@@ -188,7 +194,7 @@ class Builder {
 		)), { encoding: 'utf-8' });
 
 		this.searchPath = mustache.render(template, {
-			searchPlaceholder:   i18n("searchPlaceholder"),
+			searchPlaceholder:   this.i18n("searchPlaceholder"),
 		})
 	}
 
@@ -199,7 +205,7 @@ class Builder {
 		)), { encoding: 'utf-8' });
 
 		this.homeSidebar = mustache.render(template, {
-			logout:           i18n("logout"),
+			logout:           this.i18n("logout"),
 		})
 	}
 
@@ -214,6 +220,7 @@ class Builder {
 			scripts:  ["/public/pages/home/homeScript.js"],
 			manifest: "/public/manifest.json",
 			styles:   styles,
+			lang:     this.lang,
 			isMobile: this.isMobile ? "true" : "",
 		}, {
 			content: mustache.render(home, {

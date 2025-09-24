@@ -23,6 +23,7 @@ import validateTgAuthData from './validateTgAuthData';
 import sendLog from './sendLog';
 import auth from './auth';
 import authJson from './authJson';
+import changeLanguageJson from './changeLanguageJson';
 import login from './login';
 import logout from './logout';
 import getMe from './getMe';
@@ -34,6 +35,7 @@ export {getFileDownloadUrl, getMessageLinkUrl}
 export default {
 	register,
 	login,
+	changeLanguageJson,
 	logout,
 	auth,
 	authJson,

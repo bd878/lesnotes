@@ -10,6 +10,10 @@ async function getMe(ctx, next) {
 		return
 	}
 
+	if (ctx.state.me.lang != "") {
+		ctx.state.language = ctx.state.me.lang
+	}
+
 	await next()
 
 	console.log("<-- getMe")

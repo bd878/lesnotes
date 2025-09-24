@@ -1,4 +1,4 @@
-const i18n = {
+const texts = {
 	"en": {
 		logout: "Logout",
 		login: "Login",
@@ -54,11 +54,13 @@ const i18n = {
 		textPlaceholder: "Сообщение...",
 		titlePlaceholder: "Заголовок...",
 		namePlaceholder: "имя ссылки",
-	}
+	},
+	"de": {},
+	"fr": {},
 }
 
-const locale = "ru";
-
-export default function(key) {
-	return i18n[locale][key]
+export default function i18n(lang: string): (key: string) => string {
+	return function mapLangToKey(key: string): string {
+		return texts[lang][key]
+	}
 }

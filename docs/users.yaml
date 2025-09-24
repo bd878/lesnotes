@@ -535,6 +535,10 @@ components:
       login:
         type: string
         example: "new-login"
+      language:
+        type: string
+        example: "de"
+        required: false
 
     updateJson:
       type: object
@@ -552,6 +556,10 @@ components:
               type: string
               required: false
               example: "abc"
+            language:
+              type: string
+              required: false
+              example: "de"
 
     updateOk:
       type: object
