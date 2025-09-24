@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS users.users
 	login       TEXT         UNIQUE NOT NULL,
 	salt        TEXT         NOT NULL,
 	theme       users.theme  NOT NULL DEFAULT 'light',
+	lang        VARCHAR(3)   NOT NULL,
 	created_at  timestamptz  NOT NULL DEFAULT NOW(),
 	updated_at  timestamptz  NOT NULL DEFAULT NOW(),
 	PRIMARY KEY(id)

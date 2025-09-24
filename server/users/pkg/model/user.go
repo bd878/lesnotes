@@ -11,6 +11,7 @@ type (
 		Theme            string           `json:"theme,omitempty"`
 		HashedPassword   string           `json:"salt,omitempty"`
 		Token            string           `json:"token,omitempty"`
+		Lang             string           `json:"language,omitempty"`
 		ExpiresUTCNano   int64            `json:"expires_utc_nano,omitempty"` // TODO: ExpiresAt
 	}
 
@@ -43,6 +44,8 @@ type (
 	GetMeResponse struct {
 		ID               int64            `json:"id"`
 		Login            string           `json:"login"`
+		Theme            string           `json:"theme"`
+		Lang             string           `json:"language"`
 	}
 
 	DeleteMeRequest struct {
@@ -60,6 +63,7 @@ type (
 	UpdateRequest struct {
 		Login            string           `json:"login,omitempty"`
 		Theme            string           `json:"theme,omitempty"`
+		Lang             string           `json:"language,omitempty"`
 	}
 
 	UpdateResponse struct {

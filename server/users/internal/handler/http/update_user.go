@@ -37,9 +37,9 @@ func (h *Handler) Update(w http.ResponseWriter, req *http.Request) (err error) {
 		return
 	}
 
-	newLogin, newTheme := req.PostFormValue("login"), req.PostFormValue("theme")
+	newLogin, newTheme, newLang := req.PostFormValue("login"), req.PostFormValue("theme"), req.PostFormValue("language")
 
-	err = h.controller.UpdateUser(req.Context(), user.ID, newLogin, newTheme)
+	err = h.controller.UpdateUser(req.Context(), user.ID, newLogin, newTheme, newLang)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

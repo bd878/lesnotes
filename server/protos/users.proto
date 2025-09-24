@@ -11,12 +11,13 @@ service Users {
 }
 
 message User {
-	int64     id = 1;
-	string    login = 2;
-	string    token = 3;
+	int64     id               = 1;
+	string    login            = 2;
+	string    token            = 3;
 	int64     expires_utc_nano = 4;
-	string    hashed_password = 5;
-	string    theme = 6;
+	string    hashed_password  = 5;
+	string    theme            = 6;
+	string    lang             = 7;
 }
 
 message GetUserRequest {
@@ -31,9 +32,10 @@ message FindUserRequest {
 }
 
 message UpdateUserRequest {
-	int64   id = 1;
+	int64   id    = 1;
 	string  login = 2;
 	string  theme = 3;
+	string  lang  = 4;
 }
 
 message UpdateUserResponse {}

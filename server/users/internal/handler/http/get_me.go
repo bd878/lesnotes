@@ -40,6 +40,8 @@ func (h *Handler) GetMe(w http.ResponseWriter, req *http.Request) (err error) {
 	response, err := json.Marshal(users.GetMeResponse{
 		ID:      user.ID,
 		Login:   user.Login,
+		Theme:   user.Theme,
+		Lang:    user.Lang,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

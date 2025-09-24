@@ -50,7 +50,7 @@ func (h *Handler) Logout(w http.ResponseWriter, req *http.Request) (err error) {
 	})
 
 	response, err := json.Marshal(users.LogoutResponse{
-		Description:    "logout ok",
+		Description:    "ok",
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
