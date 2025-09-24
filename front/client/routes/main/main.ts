@@ -1,7 +1,7 @@
 import Config from 'config';
 import mustache from 'mustache';
-import api from '../api';
-import i18n from '../i18n';
+import api from '../../api';
+import i18n from '../../i18n';
 import { readFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 

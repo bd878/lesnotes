@@ -1,7 +1,7 @@
 import Config from 'config';
 import mustache from 'mustache';
 import path from 'path';
-import api from '../api';
+import api from '../../api';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 

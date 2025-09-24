@@ -15,18 +15,18 @@ import getToken from './handlers/getToken.js';
 import loadStack from './handlers/loadStack.js';
 import loadMessage from './handlers/loadMessage.js';
 
-import assets from './routes/assets';
-import main from './routes/main';
-import login from './routes/login';
-import register from './routes/register';
-import home from './routes/home';
-import logout from './routes/logout';
-import status from './routes/status';
-import xxx from './routes/xxx';
-import message from './routes/message';
-import createNewMessage from './routes/createNewMessage';
-import miniapp from './routes/miniapp';
-import authTelegram from './routes/authTelegram';
+import assets from './routes/assets/assets';
+import main from './routes/main/main';
+import login from './routes/login/login';
+import register from './routes/register/register';
+import home from './routes/home/home';
+import logout from './routes/logout/logout';
+import xxx from './routes/xxx/xxx';
+import message from './routes/message/message';
+import newMessage from './routes/new_message/new_message';
+import miniapp from './routes/miniapp/miniapp';
+import authTelegram from './routes/auth_telegram/auth_telegram';
+import status from './routes/status/status';
 
 const app = new Koa();
 const router = new Router();
@@ -51,7 +51,7 @@ router
 	.get('/home', etag, getToken, getMe, loadMessage, loadStack, home)
 	.get('/status', status)
 	.get("/tg_auth", authTelegram)
-	.get("/new", etag, createNewMessage)
+	.get("/new", etag, newMessage)
 	.get("/m/:user/:id", etag, getToken, loadMessage, message)
 	.get("/m/:name", etag, getToken, loadMessage, message)
 	.get("/miniapp", etag, miniapp)
