@@ -1,5 +1,5 @@
-<div class="mt-2 max-w-md min-w-3xs w-full grow">
-	<a class="italic text-2xl inline-block cursor-pointer" href="/" target="_self">Les Notes</a>
+<div class="mt-2 max-w-md min-w-3xs w-full grow px-8">
+	<a class="italic text-2xl inline-block cursor-pointer hover:text-blue-600 mb-4" href="/" target="_self">Les Notes</a>
 
 	<form
 		id="login-form"
@@ -16,7 +16,7 @@
 				required
 				name="login"
 				type="text"
-				class="block w-full border-solid border-1"
+				class="block w-full border-solid rounded-md px-1 border-1"
 			/>
 		</div>
 		<div class="mt-2">
@@ -25,27 +25,27 @@
 				required
 				name="password"
 				type="password"
-				class="block w-full border-solid border-1"
+				class="block w-full border-solid rounded-md px-1 border-1"
 			/>
 		</div>
 
-		<div class="flex flex-row justify-between mt-3">
+		<div class="flex flex-row justify-between mt-4">
 			<a
 				el="a"
 				href="/signup"
 				target="_self"
-				class="underline italic text-blue-600 text-left cursor-pointer"
+				class="hover:underline italic hover:text-blue-600 text-left cursor-pointer"
 			>
 				{{register}}
 			</a>
 
 			<button
 				type="submit"
-				class="border-1 px-4 border-solid text-left cursor-pointer"
+				class="border-1 px-4 border-solid rounded-md px-1 text-left cursor-pointer"
 			>{{login}}</button>
 		</div>
 	</form>
 </div>
 
-<div class="mt-2" id="telegram-login-widget">
+<div class="mt-2 px-8" id="telegram-login-widget">
 </div>

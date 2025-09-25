@@ -24,7 +24,11 @@ async function main(ctx) {
 			styles:   styles,
 		}, {
 			content:  main,
-			footer:   footer,
+			footer:  mustache.render(footer, {
+				terms:    _i18n("terms"),
+				contact:  _i18n("contact"),
+				docs:     _i18n("docs"),
+			}),
 		});
 
 		ctx.status = 200;

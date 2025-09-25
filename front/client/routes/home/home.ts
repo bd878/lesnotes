@@ -64,6 +64,7 @@ async function home(ctx) {
 	await builder.addFilesForm()
 	await builder.addSearchPath()
 	await builder.addSidebar()
+	await builder.addFooter()
 
 	ctx.body = await builder.build(message, ctx.query.edit)
 	ctx.status = 200;
@@ -232,6 +233,17 @@ class Builder {
 		})
 	}
 
+	footer = undefined;
+	async addFooter() {
+		const template = await readFile(resolve(join(Config.get("basedir"), 'templates/footer.mustache')), { encoding: 'utf-8' });
+
+		this.footer = mustache.render(template, {
+			terms:            this.i18n("terms"),
+			contact:          this.i18n("contact"),
+			docs:             this.i18n("docs"),
+		})
+	}
+
 	async build(message?: Message, editMessage?: boolean) {
 		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
 		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
@@ -246,6 +258,7 @@ class Builder {
 			lang:     this.lang,
 			isMobile: this.isMobile ? "true" : "",
 		}, {
+			footer: this.footer,
 			content: mustache.render(home, {
 				message:     message,
 				editMessage: editMessage,

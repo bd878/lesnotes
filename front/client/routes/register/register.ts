@@ -22,11 +22,15 @@ async function register(ctx) {
 			password: _i18n("password"),
 			register: _i18n("register"),
 			login:    _i18n("login"),
-			scripts:  ["/public/registerScript.js"],
+			scripts:  ["/public/pages/register/registerScript.js"],
 			styles:   styles,
 		}, {
 			content: register,
-			footer:  footer,
+			footer:  mustache.render(footer, {
+				terms:    _i18n("terms"),
+				contact:  _i18n("contact"),
+				docs:     _i18n("docs"),
+			}),
 		});
 
 		ctx.status = 200;

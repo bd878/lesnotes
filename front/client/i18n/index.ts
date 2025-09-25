@@ -34,7 +34,11 @@ const texts = {
 		settingsHeader: "Settings",
 		selectFiles: "Select",
 		titlePlaceholder: "Title...",
-		namePlaceholder: "Public link"
+		namePlaceholder: "Public link",
+
+		terms: "Terms",
+		contact: "Contact",
+		docs: "Docs"
 	},
 	"ru": {
 		logout: "Выйти",
@@ -71,7 +75,11 @@ const texts = {
 		miniapp_only: "Эта страница работает только из приложения Telegram",
 		textPlaceholder: "Сообщение...",
 		titlePlaceholder: "Заголовок...",
-		namePlaceholder: "имя ссылки"
+		namePlaceholder: "имя ссылки",
+
+		terms: "Политика",
+		contact: "Контакты",
+		docs: "Справка"
 	},
 	"de": {
 		logout: "abmelden",
@@ -108,7 +116,11 @@ const texts = {
 		miniapp_only: "miniapp only",
 		textPlaceholder: "schreiben Sie etwas...",
 		titlePlaceholder: "Überschrift",
-		namePlaceholder: "Link"
+		namePlaceholder: "Link",
+
+		terms: "",
+		contact: "",
+		docs: ""
 	},
 	"fr": {
 		logout: "se déconnecter",
@@ -145,7 +157,11 @@ const texts = {
 		miniapp_only: "miniapp only",
 		textPlaceholder: "Votre texte...",
 		titlePlaceholder: "Tête",
-		namePlaceholder: "lien"
+		namePlaceholder: "lien",
+
+		terms: "",
+		contact: "",
+		docs: ""
 	}
 }
 
