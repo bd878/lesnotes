@@ -91,7 +91,7 @@ const texts = {
 		private: "verbergen",
 		updateButton: "Speichern",
 		selectFiles: "auswählen",
-		cancelButton: "abbrechen"
+		cancelButton: "abbrechen",
 		filesPlaceholder: "dateien",
 		noFiles: "keine dateien",
 		newMessageText: "neue Eintrag",
@@ -128,7 +128,7 @@ const texts = {
 		private: "cacher",
 		updateButton: "rénover",
 		selectFiles: "sélectionner",
-		cancelButton: "annuler"
+		cancelButton: "annuler",
 		filesPlaceholder: "Fichier",
 		noFiles: "pas de fichier",
 		newMessageText: "Votre texte...",
