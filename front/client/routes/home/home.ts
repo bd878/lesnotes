@@ -58,7 +58,7 @@ async function home(ctx) {
 	else
 		await builder.addNewMessageForm()
 
-	await builder.addSettings(undefined, ctx.state.lang, me.theme)
+	await builder.addSettings(undefined, ctx.state.lang, me.theme, me.fontSize)
 	await builder.addMessagesList(undefined, stack)
 	await builder.addFilesList(message, ctx.query.edit)
 	await builder.addFilesForm()
@@ -85,12 +85,13 @@ class Builder {
 	}
 
 	settings = undefined;
-	async addSettings(error: string | undefined, lang: string, theme: string) {
+	async addSettings(error: string | undefined, lang: string, theme: string, fontSize: number) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/home/mobile/settings.mustache' : 'templates/home/desktop/settings.mustache'
 		)), { encoding: 'utf-8' });
 
 		this.settings = mustache.render(template, {
+			fontSizeHeader:  this.i18n("fontSizeHeader"),
 			settingsHeader:  this.i18n("settingsHeader"),
 			updateButton:    this.i18n("updateButton"),
 			langHeader:      this.i18n("langHeader"),

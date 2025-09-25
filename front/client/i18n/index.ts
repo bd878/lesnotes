@@ -38,7 +38,8 @@ const texts = {
 
 		terms: "Terms",
 		contact: "Contact",
-		docs: "Docs"
+		docs: "Docs",
+		fontSizeHeader: "Font size"
 	},
 	"ru": {
 		logout: "Выйти",
@@ -79,7 +80,8 @@ const texts = {
 
 		terms: "Политика",
 		contact: "Контакты",
-		docs: "Справка"
+		docs: "Справка",
+		fontSizeHeader: "Размер шрифта"
 	},
 	"de": {
 		logout: "abmelden",
@@ -120,7 +122,8 @@ const texts = {
 
 		terms: "",
 		contact: "",
-		docs: ""
+		docs: "",
+		fontSizeHeader: ""
 	},
 	"fr": {
 		logout: "se déconnecter",
@@ -161,7 +164,8 @@ const texts = {
 
 		terms: "",
 		contact: "",
-		docs: ""
+		docs: "",
+		fontSizeHeader: ""
 	}
 }
 

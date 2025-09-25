@@ -24,6 +24,8 @@ import sendLog from './sendLog';
 import auth from './auth';
 import authJson from './authJson';
 import changeLanguageJson from './changeLanguageJson';
+import changeFontSizeJson from './changeFontSizeJson';
+import changeThemeJson from './changeThemeJson';
 import login from './login';
 import logout from './logout';
 import getMe from './getMe';
@@ -36,6 +38,8 @@ export default {
 	register,
 	login,
 	changeLanguageJson,
+	changeFontSizeJson,
+	changeThemeJson,
 	logout,
 	auth,
 	authJson,
