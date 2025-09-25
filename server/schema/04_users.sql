@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS users.users
 	salt        TEXT         NOT NULL,
 	theme       users.theme  NOT NULL DEFAULT 'light',
 	lang        VARCHAR(3)   NOT NULL,
+	font_size   int          NOT NULL,
 	created_at  timestamptz  NOT NULL DEFAULT NOW(),
 	updated_at  timestamptz  NOT NULL DEFAULT NOW(),
 	PRIMARY KEY(id)

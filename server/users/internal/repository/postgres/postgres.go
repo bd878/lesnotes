@@ -23,10 +23,10 @@ func New(pool *pgxpool.Pool) *Repository {
 	}
 }
 
-func (r *Repository) Save(ctx context.Context, id int64, login, salt, theme, lang string) (err error) {
-	const query = "INSERT INTO %s(id, login, salt, theme, lang) VALUES ($1, $2, $3, $4, $5)"
+func (r *Repository) Save(ctx context.Context, id int64, login, salt, theme, lang string, fontSize int32) (err error) {
+	const query = "INSERT INTO %s(id, login, salt, theme, lang, font_size) VALUES ($1, $2, $3, $4, $5, $6)"
 
-	_, err = r.pool.Exec(ctx, r.table(query), id, login, salt, theme, lang)
+	_, err = r.pool.Exec(ctx, r.table(query), id, login, salt, theme, lang, fontSize)
 
 	return err
 }
@@ -66,24 +66,24 @@ func (r *Repository) Delete(ctx context.Context, id int64) (err error) {
  * @return {[type]}   [description]
  */
 func (r *Repository) Find(ctx context.Context, id int64, login string) (user *model.User, err error) {
-	query := "SELECT id, login, salt, theme, lang FROM %s WHERE"
+	query := "SELECT id, login, salt, theme, lang, font_size FROM %s WHERE"
 
 	user = &model.User{}
 
 	if id == 0 {
 		query += " login = $1"
-		err = r.pool.QueryRow(ctx, r.table(query), login).Scan(&user.ID, &user.Login, &user.HashedPassword, &user.Theme, &user.Lang)
+		err = r.pool.QueryRow(ctx, r.table(query), login).Scan(&user.ID, &user.Login, &user.HashedPassword, &user.Theme, &user.Lang, &user.FontSize)
 	} else {
 		query += " id = $1"
-		err = r.pool.QueryRow(ctx, r.table(query), id).Scan(&user.ID, &user.Login, &user.HashedPassword, &user.Theme, &user.Lang)
+		err = r.pool.QueryRow(ctx, r.table(query), id).Scan(&user.ID, &user.Login, &user.HashedPassword, &user.Theme, &user.Lang, &user.FontSize)
 	}
 
 	return
 }
 
-func (r *Repository) Update(ctx context.Context, id int64, newLogin, newTheme, newLang string) (err error) {
-	const selectQuery = "SELECT login, theme, lang FROM %s WHERE id = $1"
-	const query = "UPDATE %s SET login = $2, theme = $3, lang = $4 WHERE id = $1"
+func (r *Repository) Update(ctx context.Context, id int64, newLogin, newTheme, newLang string, newFontSize int32) (err error) {
+	const selectQuery = "SELECT login, theme, lang, font_size FROM %s WHERE id = $1"
+	const query = "UPDATE %s SET login = $2, theme = $3, lang = $4, font_size = $5 WHERE id = $1"
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
@@ -106,9 +106,10 @@ func (r *Repository) Update(ctx context.Context, id int64, newLogin, newTheme, n
 
 	var (
 		login, theme, lang string
+		fontSize int32
 	)
 
-	err = tx.QueryRow(ctx, r.table(selectQuery), id).Scan(&login, &theme, &lang)
+	err = tx.QueryRow(ctx, r.table(selectQuery), id).Scan(&login, &theme, &lang, &fontSize)
 	if err != nil {
 		return
 	}
@@ -125,7 +126,11 @@ func (r *Repository) Update(ctx context.Context, id int64, newLogin, newTheme, n
 		lang = newLang
 	}
 
-	_, err = tx.Exec(ctx, r.table(query), id, login, theme, lang)
+	if newFontSize != 0 {
+		fontSize = newFontSize
+	}
+
+	_, err = tx.Exec(ctx, r.table(query), id, login, theme, lang, fontSize)
 
 	return
 }

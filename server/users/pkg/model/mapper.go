@@ -13,6 +13,7 @@ func UserToProto(u *User) *api.User {
 		Theme:            u.Theme,
 		ExpiresUtcNano:   u.ExpiresUTCNano,
 		Lang:             u.Lang,
+		FontSize:         u.FontSize,
 	}
 }
 
@@ -25,5 +26,6 @@ func UserFromProto(u *api.User) *User {
 		Lang:             u.Lang,
 		HashedPassword:   u.HashedPassword,
 		ExpiresUTCNano:   u.ExpiresUtcNano,
+		FontSize:         u.FontSize,
 	}
 }

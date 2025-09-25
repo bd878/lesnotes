@@ -524,6 +524,8 @@ components:
             type: string
           theme:
             type: string
+          font_size:
+            type: number
 # END ME
 
 # UPDATE
@@ -538,6 +540,9 @@ components:
       language:
         type: string
         example: "de"
+        required: false
+      font_size:
+        type: number
         required: false
 
     updateJson:
@@ -560,6 +565,10 @@ components:
               type: string
               required: false
               example: "de"
+            font_size:
+              type: number
+              required: false
+              example: 10
 
     updateOk:
       type: object
