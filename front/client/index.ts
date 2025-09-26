@@ -10,20 +10,24 @@ import bodyParser from './handlers/bodyParser.js';
 import useragent from './handlers/useragent.js';
 import favicon from './handlers/favicon.js';
 import etag from './handlers/etag.js';
+import getMe from './handlers/getMe.js';
+import getToken from './handlers/getToken.js';
+import loadStack from './handlers/loadStack.js';
+import loadMessage from './handlers/loadMessage.js';
+import language from './handlers/language';
 
-import assets from './routes/assets';
-import main from './routes/main';
-import login from './routes/login';
-import register from './routes/register';
-import home from './routes/home';
-import logout from './routes/logout';
-import status from './routes/status';
-import xxx from './routes/xxx';
-import readUserMessage from './routes/readUserMessage';
-import readPublicMessage from './routes/readPublicMessage';
-import createNewMessage from './routes/createNewMessage';
-import miniapp from './routes/miniapp';
-import authTelegram from './routes/authTelegram';
+import assets from './routes/assets/assets';
+import main from './routes/main/main';
+import login from './routes/login/login';
+import register from './routes/register/register';
+import home from './routes/home/home';
+import logout from './routes/logout/logout';
+import xxx from './routes/xxx/xxx';
+import message from './routes/message/message';
+import newMessage from './routes/new_message/new_message';
+import miniapp from './routes/miniapp/miniapp';
+import authTelegram from './routes/auth_telegram/auth_telegram';
+import status from './routes/status/status';
 
 const app = new Koa();
 const router = new Router();
@@ -36,23 +40,23 @@ app.use(useragent);
 app.use(favicon);
 
 router
-	.get('/public/:filename', etag, assets)
+	.get('/public/:path*', etag, assets)
 	.get('/index', ctx => {
 		ctx.redirect('/')
 		ctx.status = 301
 	})
-	.get('/', etag, main)
-	.get('/login', etag, login)
-	.get('/logout', etag, logout)
-	.get('/signup', etag, register)
-	.get('/home', etag, home)
-	.get('/status', status)
+	.get('/', etag, language, main)
+	.get('/login', etag, language, login)
+	.get('/logout', etag, language, logout)
+	.get('/signup', etag, language, register)
+	.get('/home', etag, language, getToken, getMe, loadMessage, loadStack, home)
+	.get('/status', status, language)
 	.get("/tg_auth", authTelegram)
-	.get("/new", etag, createNewMessage)
-	.get("/m/:user/:id", etag, readUserMessage)
-	.get("/m/:id", etag, readPublicMessage)
-	.get("/miniapp", etag, miniapp)
-	.get('/:any*', xxx)
+	.get("/new", etag, language, newMessage)
+	.get("/m/:user/:id", etag, language, getToken, loadMessage, message)
+	.get("/m/:name", etag, language, getToken, loadMessage, message)
+	.get("/miniapp", etag, language, miniapp)
+	.get('/:any*', language, xxx)
 
 app.use(router.routes());
 

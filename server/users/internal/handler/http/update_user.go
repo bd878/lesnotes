@@ -2,6 +2,7 @@ package http
 
 import (
 	"net/http"
+	"strconv"
 	"encoding/json"
 
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
@@ -37,9 +38,15 @@ func (h *Handler) Update(w http.ResponseWriter, req *http.Request) (err error) {
 		return
 	}
 
-	newLogin, newTheme := req.PostFormValue("login"), req.PostFormValue("theme")
+	newLogin, newTheme, newLang, newFontSize := req.PostFormValue("login"), req.PostFormValue("theme"), req.PostFormValue("language"), req.PostFormValue("font_size")
 
-	err = h.controller.UpdateUser(req.Context(), user.ID, newLogin, newTheme)
+	fontSize, err := strconv.Atoi(newFontSize)
+	if err != nil {
+		// TODO: log error
+		fontSize = 0
+	}
+
+	err = h.controller.UpdateUser(req.Context(), user.ID, newLogin, newTheme, newLang, fontSize)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

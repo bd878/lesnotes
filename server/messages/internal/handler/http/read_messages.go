@@ -162,7 +162,8 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) (err er
 		// read batch messages by given ids
 		return h.readBatchMessages(req.Context(), w, user.ID, ids)
 	} else {
-		// read both public and private messages, 
+		// read both public and private messages
+		// i.e. user with the token read his private message by name or id
 		return h.readMessageOrMessages(req.Context(), w, user.ID, limit, offset, messageID, threadID, name, order, false)
 	}
 }
@@ -234,7 +235,7 @@ func (h *Handler) readMessageOrMessages(ctx context.Context, w http.ResponseWrit
 ) (err error) {
 	var ascending bool
 
-	if userID == users.PublicUserID && (messageID == 0 || name == "") {
+	if userID == users.PublicUserID && messageID == 0 && name == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",

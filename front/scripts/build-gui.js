@@ -19,11 +19,17 @@ for (const file of files) {
 
 let ctx = await esbuild.context({
 	entryPoints: [
-		'client/gui/pages/**/*.tsx',
-		'client/gui/pages/**/*.ts',
-		'client/styles/styles.css'
+		'client/gui/pages/home/homeScript.ts',
+		'client/gui/pages/login/loginScript.ts',
+		'client/gui/pages/logout/logoutScript.ts',
+		'client/gui/pages/main/mainScript.ts',
+		'client/gui/pages/new/newScript.ts',
+		'client/gui/pages/message/messageScript.ts',
+		'client/gui/pages/register/registerScript.ts',
+		'client/gui/pages/new/newScript.ts',
+		'client/gui/styles/styles.css'
 	],
-	entryNames: '[name]',
+	entryNames: '[dir]/[name]',
 	define: {
 		BACKEND_URL: '"' + Config.get("domain") + '"',
 		BOT_USERNAME: '"' + Config.get("bot_username") + '"',

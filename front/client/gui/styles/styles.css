@@ -1,0 +1,21 @@
+@import 'tailwindcss';
+@source "../../../templates";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer components {
+	.btn {
+		@apply border-1 px-4 border-solid text-left cursor-pointer
+	}
+
+	.wrap {
+		@apply p-8 pt-10 h-screen flex flex-col items-start relative
+	}
+}
+
+@theme {
+	--color-body: #17212b;
+	--color-body-secondary: #232e3c;
+	--color-subtitle: #708499;
+	--color-main: #f5f5f5;
+}

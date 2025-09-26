@@ -524,6 +524,8 @@ components:
             type: string
           theme:
             type: string
+          font_size:
+            type: number
 # END ME
 
 # UPDATE
@@ -535,6 +537,13 @@ components:
       login:
         type: string
         example: "new-login"
+      language:
+        type: string
+        example: "de"
+        required: false
+      font_size:
+        type: number
+        required: false
 
     updateJson:
       type: object
@@ -552,6 +561,14 @@ components:
               type: string
               required: false
               example: "abc"
+            language:
+              type: string
+              required: false
+              example: "de"
+            font_size:
+              type: number
+              required: false
+              example: 10
 
     updateOk:
       type: object

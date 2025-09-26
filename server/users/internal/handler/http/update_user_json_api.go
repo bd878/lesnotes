@@ -65,7 +65,7 @@ func (h *Handler) UpdateJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 		return
 	}
 
-	err = h.controller.UpdateUser(req.Context(), user.ID, request.Login, request.Theme)
+	err = h.controller.UpdateUser(req.Context(), user.ID, request.Login, request.Theme, request.Lang, request.FontSize)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

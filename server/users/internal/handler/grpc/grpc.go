@@ -9,7 +9,7 @@ import (
 
 type Controller interface {
 	GetUser(ctx context.Context, id int64) (*model.User, error)
-	UpdateUser(ctx context.Context, id int64, newLogin, newTheme string) (err error)
+	UpdateUser(ctx context.Context, id int64, newLogin, newTheme, newLang string, newFontSize int32) (err error)
 	FindUser(ctx context.Context, id int64, login, token string) (*model.User, error)
 }
 
@@ -50,7 +50,7 @@ func (h *Handler) FindUser(ctx context.Context, req *api.FindUserRequest) (*api.
 }
 
 func (h *Handler) UpdateUser(ctx context.Context, req *api.UpdateUserRequest) (resp *api.UpdateUserResponse, err error) {
-	err = h.controller.UpdateUser(ctx, req.Id, req.Login, req.Theme)
+	err = h.controller.UpdateUser(ctx, req.Id, req.Login, req.Theme, req.Lang, req.FontSize)
 	if err != nil {
 		return
 	}

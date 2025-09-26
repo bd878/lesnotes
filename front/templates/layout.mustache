@@ -1,5 +1,10 @@
 <!DOCTYPE html>
-<html>
+{{#lang}}
+	<html lang="{{lang}}">
+{{/lang}}
+{{^lang}}
+	<html>
+{{/lang}}
 	<head>
 		<meta charset="UTF-8" />
 		<link rel="icon" href="/public/favicon.ico">
@@ -16,12 +21,24 @@
 		<title>Les notes</title>
 	</head>
 	<body>
-		<div class="p-8 pt-10 h-screen flex flex-col items-start relative">
+		{{#isMobile}}
+			<div data-is-mobile="{{isMobile}}" class="py-5 h-screen flex flex-col items-start relative">
+		{{/isMobile}}
+		{{^isMobile}}
+			<div class="pb-5 pt-10 h-screen flex flex-col items-start relative">
+		{{/isMobile}}
 			<div class="w-full grow">
 				{{> content}}
 			</div>
 
-			{{> footer}}
+		{{#isMobile}}
+			<div class="pt-5 w-full">
+		{{/isMobile}}
+		{{^isMobile}}
+			<div class="pt-8 w-full">
+		{{/isMobile}}
+				{{> footer}}
+			</div>
 		</div>
 
 		{{#scripts}}

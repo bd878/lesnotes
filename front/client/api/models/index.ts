@@ -1,4 +1,4 @@
-import message from './message'
+import message, { EmptyMessage } from './message'
 import thread, { EmptyThread } from './thread'
 import user from './user'
 import file, { EmptyFile } from './file'
@@ -12,6 +12,7 @@ export default {
 	error,
 	EmptyFile,
 	EmptyThread,
+	EmptyMessage,
 }
 
 export type { Thread } from './thread'

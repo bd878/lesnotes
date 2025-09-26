@@ -1,0 +1,49 @@
+<div id="content" class="h-full flex flex-col">
+	<div id="sidebar" class="w-full px-8 max-w-5xl mb-4">
+		{{> homeSidebar}}
+	</div>
+
+	<div id="settings" class="mb-4 max-w-5xl px-8">
+		{{> settings}}
+	</div>
+
+	<div class="flex flex-row w-full grow-2 mb-4 px-8 max-w-5xl">
+		<div id="editor" class="mr-2 min-w-md flex flex-col grow p-2 border border-1 border-solid rounded-md">
+			{{#message}}
+				{{#editMessage}}
+					{{> messageEditForm}}
+				{{/editMessage}}
+				{{^editMessage}}
+					{{> messageView}}
+				{{/editMessage}}
+			{{/message}}
+			{{^message}}
+				{{> newMessageForm}}
+			{{/message}}
+		</div>
+
+		<div id="files" class="ml-2 min-w-sm w-sm flex flex-col bg-blue-100 justify-between p-2 rounded-md">
+			{{#message}}
+				{{#editMessage}}
+					{{> filesForm}}
+				{{/editMessage}}
+				{{^editMessage}}
+					{{> filesList}}
+				{{/editMessage}}
+			{{/message}}
+			{{^message}}
+				{{> filesForm}}
+			{{/message}}
+		</div>
+	</div>
+
+	<div id="messages" class="mr-2 mb-2 h-[400px] flex flex-col w-full">
+		<div id="messages-list" class="flex flex-row w-full grow overflow-x-auto px-8">
+			{{> messagesList}}
+		</div>
+	</div>
+
+	<div id="search" class="px-8">
+		{{> searchPath}}
+	</div>
+</div>
