@@ -46,7 +46,7 @@ func (h *Handler) Update(w http.ResponseWriter, req *http.Request) (err error) {
 		fontSize = 0
 	}
 
-	err = h.controller.UpdateUser(req.Context(), user.ID, newLogin, newTheme, newLang, fontSize)
+	err = h.controller.UpdateUser(req.Context(), user.ID, newLogin, newTheme, newLang, int32(fontSize))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
