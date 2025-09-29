@@ -10,9 +10,11 @@ async function getMe(ctx, next) {
 		return
 	}
 
-	if (ctx.state.me.lang != "") {
-		ctx.state.language = ctx.state.me.lang
+	if (ctx.state.me.user.lang) {
+		ctx.state.lang = ctx.state.me.user.lang
 	}
+
+	console.log(ctx.state.me)
 
 	await next()
 

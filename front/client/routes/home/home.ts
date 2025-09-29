@@ -50,6 +50,8 @@ async function home(ctx) {
 
 	const builder = new Builder(ctx.userAgent.isMobile, ctx.state.lang)
 
+	console.log(ctx.state.lang)
+
 	if (is.notEmpty(message))
 		if (ctx.query.edit)
 			await builder.addMessageEditForm(undefined, me.ID, message)
@@ -96,12 +98,12 @@ class Builder {
 			updateButton:    this.i18n("updateButton"),
 			langHeader:      this.i18n("langHeader"),
 			themeHeader:     this.i18n("themeHeader"),
-			darkTheme: 	 this.i18n("darkTheme"),
-			lightTheme: 	 this.i18n("lightTheme"),
-			deLang: 	 this.i18n("deLang"),
-			enLang: 	 this.i18n("enLang"),
-			frLang: 	 this.i18n("frLang"),
-			ruLang: 	 this.i18n("ruLang"),
+			themes:          [{theme: "dark", label: this.i18n("darkTheme")}, {theme: "light", label: this.i18n("lightTheme")}],
+			fonts:           [{font: "10", label: "aA", css: "text-md"}, {font: "14", label: "aA", css: "text-lg"}, {font: "20", label: "aA", css: "text-xl"}],
+			langs:           [{lang: "de", label: this.i18n("deLang")}, {lang: "en", label: this.i18n("enLang")}, {lang: "fr", label: this.i18n("frLang")}, {lang: "ru", label: this.i18n("ruLang")}],
+			myTheme:         function() { return this.theme == theme },
+			myLang:          function() { return this.lang == lang },
+			myFontSize:      function() { return this.fontSize == fontSize },
 			theme:           theme,
 			lang:            lang,
 		})

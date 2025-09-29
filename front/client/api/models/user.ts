@@ -22,7 +22,7 @@ export default function mapUserFromProto(user?: any): User {
 		ID:        user.id,
 		login:     user.login,
 		theme:     user.theme,
-		lang:      user.lang,
+		lang:      user.language,
 		fontSize:  user.font_size,
 	}
 }
