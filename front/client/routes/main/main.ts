@@ -1,43 +1,64 @@
 import Config from 'config';
-import mustache from 'mustache';
-import api from '../../api';
 import i18n from '../../i18n';
+import mustache from 'mustache';
 import { readFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
+import Builder from '../builder';
 
 async function main(ctx) {
-	const token = ctx.cookies.get("token")
+	const builder = new MainBuilder(ctx.userAgent.isMobile, ctx.state.lang)
 
-	const resp = await api.authJson(token)
-	if (resp.error.error || resp.expired) {
-		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
-		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
-		const main = await readFile(resolve(join(Config.get("basedir"), 'templates/main/desktop/main.mustache')), { encoding: 'utf-8' });
-		const footer = await readFile(resolve(join(Config.get("basedir"), 'templates/footer.mustache')), { encoding: 'utf-8' });
+	await builder.addFooter()
+	await builder.addSidebar()
+	await builder.addAuthorization()
 
-		const _i18n = i18n(ctx.state.lang)
+	ctx.body = await builder.build()
+	ctx.status = 200;
+}
 
-		ctx.body = mustache.render(layout, {
-			login:    _i18n("login"),
-			register: _i18n("register"),
-			scripts:  ["/public/pages/main/mainScript.js"],
-			styles:   styles,
-		}, {
-			content:  main,
-			footer:  mustache.render(footer, {
-				terms:    _i18n("terms"),
-				contact:  _i18n("contact"),
-				docs:     _i18n("docs"),
-			}),
-		});
+class MainBuilder extends Builder {
+	sidebar = undefined;
+	async addSidebar() {
+		const template = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/main/mobile/sidebar.mustache' : 'templates/main/desktop/sidebar.mustache'
+		)), { encoding: 'utf-8' });
 
-		ctx.status = 200;
-
-		return
+		this.sidebar = mustache.render(template)
 	}
 
-	ctx.redirect('/home')
-	ctx.status = 302
+	authorization = undefined;
+	async addAuthorization() {
+		const template = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/main/mobile/authorization.mustache' : 'templates/main/desktop/authorization.mustache'
+		)), { encoding: 'utf-8' });
+
+		this.authorization = mustache.render(template, {
+			login:     this.i18n("login"),
+			register:  this.i18n("register"),
+		})
+	}
+
+	async build() {
+		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
+		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
+		const main = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/main/mobile/main.mustache' : 'templates/main/desktop/main.mustache'
+		)), { encoding: 'utf-8' });
+
+		return mustache.render(layout, {
+			scripts:  ["/public/pages/main/mainScript.js"],
+			manifest: "/public/manifest.json",
+			styles:   styles,
+			lang:     this.lang,
+			isMobile: this.isMobile ? "true" : "",
+		}, {
+			footer:  this.footer,
+			content: mustache.render(main, {}, {
+				sidebar:       this.sidebar,
+				authorization: this.authorization,
+			}),
+		});
+	}
 }
 
 export default main;

@@ -46,10 +46,10 @@ router
 		ctx.redirect('/')
 		ctx.status = 301
 	})
-	.get('/', etag, language, main)
+	.get('/', etag, language, getToken, notAuthed, main)
 	.get('/login', etag, language, getToken, notAuthed, login)
 	.get('/logout', etag, language, logout)
-	.get('/signup', etag, language, register)
+	.get('/signup', etag, language, getToken, notAuthed, register)
 	.get('/home', etag, language, getToken, getMe, loadMessage, loadStack, home)
 	.get('/status', status, language)
 	.get("/tg_auth", authTelegram)

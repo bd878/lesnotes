@@ -62,17 +62,6 @@ class LoginBuilder extends Builder {
 		this.sidebar = mustache.render(template)
 	}
 
-	footer = undefined;
-	async addFooter() {
-		const template = await readFile(resolve(join(Config.get("basedir"), 'templates/footer.mustache')), { encoding: 'utf-8' });
-
-		this.footer = mustache.render(template, {
-			terms:            this.i18n("terms"),
-			contact:          this.i18n("contact"),
-			docs:             this.i18n("docs"),
-		})
-	}
-
 	async build() {
 		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
 		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
