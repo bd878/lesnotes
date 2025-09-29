@@ -7,6 +7,7 @@ import * as is from '../../third_party/is';
 import i18n from '../../i18n';
 import { readFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
+import Builder from '../builder'
 
 async function home(ctx) {
 	let me;
@@ -48,7 +49,7 @@ async function home(ctx) {
 
 	ctx.set({ "Cache-Control": "no-cache,max-age=0" })
 
-	const builder = new Builder(ctx.userAgent.isMobile, ctx.state.lang)
+	const builder = new HomeBuilder(ctx.userAgent.isMobile, ctx.state.lang)
 
 	if (is.notEmpty(message))
 		if (ctx.query.edit)
@@ -72,18 +73,7 @@ async function home(ctx) {
 	return;
 }
 
-class Builder {
-	isMobile: boolean = false;
-	lang:     string  = "en";
-	constructor(isMobile: boolean, lang: string = "en") {
-		this.isMobile = isMobile
-		this.lang = lang
-	}
-
-	i18n(key: string): string {
-		return i18n(this.lang)(key)
-	}
-
+class HomeBuilder extends Builder {
 	settings = undefined;
 	async addSettings(error: string | undefined, lang: string, theme: string, fontSize: number) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
@@ -226,7 +216,7 @@ class Builder {
 	homeSidebar = undefined;
 	async addSidebar() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/home/mobile/home_sidebar.mustache' : 'templates/home/desktop/home_sidebar.mustache'
+			this.isMobile ? 'templates/home/mobile/sidebar.mustache' : 'templates/home/desktop/sidebar.mustache'
 		)), { encoding: 'utf-8' });
 
 		this.homeSidebar = mustache.render(template, {

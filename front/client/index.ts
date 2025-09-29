@@ -12,6 +12,7 @@ import favicon from './handlers/favicon.js';
 import etag from './handlers/etag.js';
 import getMe from './handlers/getMe.js';
 import getToken from './handlers/getToken.js';
+import notAuthed from './handlers/notAuthed';
 import loadStack from './handlers/loadStack.js';
 import loadMessage from './handlers/loadMessage.js';
 import language from './handlers/language';
@@ -46,7 +47,7 @@ router
 		ctx.status = 301
 	})
 	.get('/', etag, language, main)
-	.get('/login', etag, language, login)
+	.get('/login', etag, language, getToken, notAuthed, login)
 	.get('/logout', etag, language, logout)
 	.get('/signup', etag, language, register)
 	.get('/home', etag, language, getToken, getMe, loadMessage, loadStack, home)

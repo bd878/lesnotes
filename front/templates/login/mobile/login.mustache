@@ -1,5 +1,7 @@
 <div class="mt-2 max-w-md min-w-3xs w-full grow px-5">
-	<a class="italic text-2xl inline-block cursor-pointer mb-3" href="/" target="_self">Les Notes</a>
+	<div class="mb-3">>
+		{{> sidebar}}
+	</div>
 
 	<form
 		id="login-form"
@@ -11,38 +13,14 @@
 		class="flex flex-col"
 	>
 		<div>
-			<label htmlFor="login">{{username}}</label>
-			<input
-				required
-				name="login"
-				type="text"
-				class="block w-full border-solid border-1"
-			/>
+			{{> username}}
 		</div>
 		<div class="mt-2">
-			<div el="label" htmlFor="password">{{password}}</div>
-			<input
-				required
-				name="password"
-				type="password"
-				class="block w-full border-solid border-1"
-			/>
+			{{> password}}
 		</div>
 
-		<div class="flex flex-row justify-between mt-3">
-			<a
-				el="a"
-				href="/signup"
-				target="_self"
-				class="underline italic text-blue-600 text-left cursor-pointer"
-			>
-				{{register}}
-			</a>
-
-			<button
-				type="submit"
-				class="border-1 px-4 border-solid text-left cursor-pointer"
-			>{{login}}</button>
+		<div class="mt-3">
+			{{> submit}}
 		</div>
 	</form>
 </div>
