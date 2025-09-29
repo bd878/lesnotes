@@ -1,386 +1,64 @@
-import api from '../../../api';
-import models from '../../../api/models';
-import * as is from '../../../third_party/is';
+import onFormSubmit from './onFormSubmit';
+import onFileInputChange from './onFileInputChange';
+import onSelectFilesClick from './onSelectFilesClick';
+import onMessageCancelClick from './onMessageCancelClick';
+import onMessageUpdateFormSubmit from './onMessageUpdateFormSubmit';
+import onMessagesListClick from './onMessagesListClick';
+import onThreadsListClick from './onThreadsListClick';
+import onMessageDeleteClick from './onMessageDeleteClick';
+import onMessageEditClick from './onMessageEditClick';
+import onMessagePublishClick from './onMessagePublishClick';
+import onMessagePrivateClick from './onMessagePrivateClick';
+import onMessageCancelEditClick from './onMessageCancelEditClick';
+import onThemeSettingsClick from './onThemeSettingsClick';
+import onLangSettingsClick from './onLangSettingsClick';
+import onFontSizeSettingsClick from './onFontSizeSettingsClick';
+
+const getByID = (id: string, dflt: any): any => document.getElementById(id) ? document.getElementById(id) : dflt;
 
 const elems = {
-	get formElem(): HTMLFormElement {
-		const formElem = document.getElementById("message-form")
-		if (!formElem) {
-			return document.createElement("form")
-		}
+	form:   document.createElement("form"),
+	div:    document.createElement("div"),
+	button: document.createElement("button"),
+	input:  document.createElement("input"),
 
-		return formElem as HTMLFormElement
-	},
-
-	get filesButtonElem(): HTMLButtonElement {
-		const buttonElem = document.getElementById("select-files-button")
-		if (!buttonElem) {
-			return document.createElement("button")
-		}
-
-		return buttonElem as HTMLButtonElement
-	},
-
-	get filesListElem(): HTMLDivElement {
-		const divElem = document.getElementById("files-list")
-		if (!divElem) {
-			return document.createElement("div")
-		}
-
-		return divElem as HTMLDivElement
-	},
-
-	get filesInputElem(): HTMLInputElement {
-		const inputElem = document.getElementById("files-input")
-		if (!inputElem) {
-			return document.createElement("input")
-		}
-
-		return inputElem as HTMLInputElement
-	},
-
-	get editFormElem(): HTMLFormElement {
-		const formElem = document.getElementById("message-edit-form")
-		if (!formElem) {
-			return document.createElement("form")
-		}
-
-		return formElem as HTMLFormElement
-	},
-
-	get messagesListElem(): HTMLDivElement {
-		const divElem = document.getElementById("messages-list")
-		if (!divElem) {
-			return document.createElement("div")
-		}
-
-		return divElem as HTMLDivElement
-	},
-
-	get threadsListElem(): HTMLDivElement {
-		const divElem = document.getElementById("threads-list")
-		if (!divElem) {
-			return document.createElement("div")
-		}
-
-		return divElem as HTMLDivElement
-	},
-
-	get messageDeleteElem(): HTMLButtonElement {
-		const buttonElem = document.getElementById("message-delete")
-		if (!buttonElem) {
-			return document.createElement("button")
-		}
-
-		return buttonElem as HTMLButtonElement
-	},
-
-	get messageEditElem(): HTMLButtonElement {
-		const buttonElem = document.getElementById("message-edit")
-		if (!buttonElem) {
-			return document.createElement("button")
-		}
-
-		return buttonElem as HTMLButtonElement
-	},
-
-	get messagePublishElem(): HTMLButtonElement {
-		const buttonElem = document.getElementById("message-publish")
-		if (!buttonElem) {
-			return document.createElement("button")
-		}
-
-		return buttonElem as HTMLButtonElement
-	},
-
-	get messagePrivateElem(): HTMLButtonElement {
-		const buttonElem = document.getElementById("message-private")
-		if (!buttonElem) {
-			return document.createElement("button")
-		}
-
-		return buttonElem as HTMLButtonElement
-	},
-
-	get messageCancelEditElem(): HTMLButtonElement {
-		const buttonElem = document.getElementById("message-cancel-edit")
-		if (!buttonElem) {
-			return document.createElement("button")
-		}
-
-		return buttonElem as HTMLButtonElement
-	},
-
-	get messageCancelElem(): HTMLButtonElement {
-		const buttonElem = document.getElementById("message-cancel")
-		if (!buttonElem) {
-			return document.createElement("button")
-		}
-
-		return buttonElem as HTMLButtonElement
-	}
+	get messageFormElem():       HTMLFormElement     { return getByID("message-form",          this.form) as HTMLFormElement },
+	get filesButtonElem():       HTMLButtonElement   { return getByID("select-files-button",   this.button) as HTMLButtonElement },
+	get filesListElem():         HTMLDivElement      { return getByID("files-list",            this.button) as HTMLDivElement },
+	get filesInputElem():        HTMLInputElement    { return getByID("files-input",           this.input) as HTMLInputElement },
+	get editFormElem():          HTMLFormElement     { return getByID("message-edit-form",     this.form) as HTMLFormElement },
+	get messagesListElem():      HTMLDivElement      { return getByID("messages-list",         this.div) as HTMLDivElement },
+	get threadsListElem():       HTMLDivElement      { return getByID("threads-list",          this.div) as HTMLDivElement },
+	get messageDeleteElem():     HTMLButtonElement   { return getByID("message-delete",        this.button) as HTMLButtonElement },
+	get messageEditElem():       HTMLButtonElement   { return getByID("message-edit",          this.button) as HTMLButtonElement },
+	get messagePublishElem():    HTMLButtonElement   { return getByID("message-publish",       this.button) as HTMLButtonElement },
+	get messagePrivateElem():    HTMLButtonElement   { return getByID("message-private",       this.button) as HTMLButtonElement },
+	get messageCancelEditElem(): HTMLButtonElement   { return getByID("message-cancel-edit",   this.button) as HTMLButtonElement },
+	get messageCancelElem():     HTMLButtonElement   { return getByID("message-cancel",        this.button) as HTMLButtonElement },
+	get themeSettingsElem():     HTMLDivElement      { return getByID("theme-settings",        this.div) as HTMLDivElement },
+	get langSettingsElem():      HTMLDivElement      { return getByID("lang-settings",         this.div) as HTMLDivElement },
+	get fontSizeSettingsElem():  HTMLDivElement      { return getByID("font-size-settings",    this.div) as HTMLDivElement },
 }
 
 function init() {
-	elems.formElem.addEventListener("submit",             onFormSubmit)
-	elems.filesInputElem.addEventListener("change",       onFileInputChange)
-	elems.filesButtonElem.addEventListener("click",       onSelectFilesClick)
-	elems.messageCancelElem.addEventListener("click",     onMessageCancelClick)
-	elems.editFormElem.addEventListener("submit",         onMessageUpdateFormSubmit)
-	elems.messagesListElem.addEventListener("click",      onMessagesListClick)
-	elems.threadsListElem.addEventListener("click",       onThreadsListClick)
-	elems.messageDeleteElem.addEventListener("click",     onMessageDeleteClick)
-	elems.messageEditElem.addEventListener("click",       onMessageEditClick)
-	elems.messagePublishElem.addEventListener("click",    onMessagePublishClick)
-	elems.messagePrivateElem.addEventListener("click",    onMessagePrivateClick)
-	elems.messageCancelEditElem.addEventListener("click", onMessageCancelEditClick)
-}
-
-window.addEventListener("load", () => {
 	console.log("loaded")
-	init()
-})
 
-function onSelectFilesClick(e) {
-	if (is.notEmpty(elems.filesInputElem.id)) {
-		elems.filesInputElem.click()
-	}
+	// TODO: rewrite on event bus
+	elems.messageFormElem.addEventListener("submit",      e => onFormSubmit(elems, e))
+	elems.filesInputElem.addEventListener("change",       e => onFileInputChange(elems, e))
+	elems.filesButtonElem.addEventListener("click",       e => onSelectFilesClick(elems, e))
+	elems.messageCancelElem.addEventListener("click",     e => onMessageCancelClick(elems, e))
+	elems.editFormElem.addEventListener("submit",         e => onMessageUpdateFormSubmit(elems, e))
+	elems.messagesListElem.addEventListener("click",      e => onMessagesListClick(elems, e))
+	elems.threadsListElem.addEventListener("click",       e => onThreadsListClick(elems, e))
+	elems.messageDeleteElem.addEventListener("click",     e => onMessageDeleteClick(elems, e))
+	elems.messageEditElem.addEventListener("click",       e => onMessageEditClick(elems, e))
+	elems.messagePublishElem.addEventListener("click",    e => onMessagePublishClick(elems, e))
+	elems.messagePrivateElem.addEventListener("click",    e => onMessagePrivateClick(elems, e))
+	elems.messageCancelEditElem.addEventListener("click", e => onMessageCancelEditClick(elems, e))
+	elems.themeSettingsElem.addEventListener("click",     e => onThemeSettingsClick(elems, e))
+	elems.langSettingsElem.addEventListener("click",      e => onLangSettingsClick(elems, e))
+	elems.fontSizeSettingsElem.addEventListener("click",  e => onFontSizeSettingsClick(elems, e))
 }
 
-function onMessageCancelClick(e) {
-	e.stopPropagation()
-
-	const params = new URLSearchParams(location.search)
-	params.delete("id")
-
-	location.href = params.toString() ? ("/home?" + params.toString()) : "/home"
-}
-
-function createFilesListElement(fileName: string): HTMLDivElement {
-	const elem = document.createElement("div")
-
-	const textElem = document.createElement("span")
-	const removeButton = document.createElement("button")
-
-	removeButton.textContent = "X"
-	removeButton.classList.add(...("cursor-pointer underline hover:text-blue-600 mr-2").split(" "))
-
-	removeButton.onclick = () => { elem.remove() }
-
-	textElem.textContent = fileName
-	textElem.classList.add(...("overflow-hidden text-ellipsis").split(" "))
-
-	elem.classList.add(...("mb-2 overflow-hidden text-ellipsis".split(" ")))
-	elem.appendChild(removeButton)
-	elem.appendChild(textElem)
-
-	return elem
-}
-
-function onFileInputChange(e) {
-	for (const file of e.target.files) {
-		elems.filesListElem.appendChild(createFilesListElement(file.name))
-	}
-}
-
-function onMessagesListClick(e) {
-	if (is.notEmpty(e.target.dataset.messageId)) {
-		showMessage(e.target.dataset.messageId)
-	} else if (is.notEmpty(e.target.dataset.threadId) && is.notEmpty(e.target.dataset.direction)) {
-		paginateMessages(e.target.dataset.threadId, e.target.dataset.direction, e.target.dataset.offset, e.target.dataset.limit)
-	} else if (is.notEmpty(e.target.dataset.threadId)) {
-		openThread(e.target.dataset.threadId)
-	}
-}
-
-function onThreadsListClick(e) {
-	if (is.notUndef(e.target.dataset.threadId)) {
-		openThread(e.target.dataset.threadId)
-	} else if (is.notEmpty(e.target.dataset.messageId)) {
-		showMessage(e.target.dataset.messageId)
-	}
-}
-
-function onMessageEditClick(e) {
-	e.stopPropagation()
-	editMessage(parseInt(elems.messageEditElem.dataset.messageId))
-}
-
-async function onMessagePublishClick(e) {
-	e.stopPropagation()
-	const messageID = parseInt(elems.messagePublishElem.dataset.messageId) || 0
-
-	const response = await api.publishMessages([messageID])
-	if (response.error.error) {
-		console.error("[onMessagePublishClick]: cannot publish message:", response)
-		return
-	}
-
-	location.reload()
-}
-
-async function onMessagePrivateClick(e) {
-	e.stopPropagation()
-	const messageID = parseInt(elems.messagePrivateElem.dataset.messageId) || 0
-
-	const response = await api.privateMessages([messageID])
-	if (response.error.error) {
-		console.error("[onMessagePrivateClick]: cannot private message:", response)
-		return
-	}
-
-	location.reload()
-}
-
-function onMessageCancelEditClick(e) {
-	e.stopPropagation()
-
-	const params = new URLSearchParams(location.search)
-	params.delete("edit")
-
-	location.href = params.toString() ? ("/home?" + params.toString()) : "/home"
-}
-
-async function onMessageDeleteClick(e) {
-	e.stopPropagation()
-	const messageID = parseInt(elems.messageDeleteElem.dataset.messageId) || 0
-
-	const response = await api.deleteMessage(messageID)
-	if (response.error.error) {
-		console.error("[onMessageDeleteClick]: cannot delete message:", response)
-		return
-	}
-
-	const params = new URLSearchParams(location.search)
-	params.delete("id")
-
-	location.href = params.toString() ? ("/home?" + params.toString()) : "/home" 
-}
-
-async function onMessageUpdateFormSubmit(e) {
-	e.preventDefault()
-
-	if (is.notEmpty(e.target.dataset.messageId)) {
-		const messageID = e.target.dataset.messageId
-
-		const text = elems.editFormElem.messageText.value
-		const title = elems.editFormElem.messageTitle.value
-
-		let name = ""
-		if (is.notUndef(elems.editFormElem.messageName)) {
-			name = elems.editFormElem.messageName.value
-		}
-
-		const response = await api.updateMessage(messageID, text, title, name)
-		if (response.error.error) {
-			console.error("[onMessageUpdateFormSubmit]: cannot update message:", response)
-			return
-		}
-
-		elems.editFormElem.reset()
-
-		const params = new URL(location.toString()).searchParams
-		params.delete("edit")
-
-		location.href = params.toString() ? ("/home?" + params.toString()) : "/home"
-	} else {
-		console.error("[onMessageUpdateFormSubmit]: no data-message-id attribute on target")
-	}
-}
-
-async function onFormSubmit(e) {
-	e.preventDefault()
-
-	if (either(elems.formElem.messageText, elems.filesInputElem.files.length > 0)) {
-		console.error("[onFormSubmit]: either text of file must be present")
-		return
-	}
-	const user = await api.getMe()
-
-	let fileID = 0;
-
-	const params = new URL(location.toString()).searchParams
-	const threadID = parseInt(params.get("cwd")) || 0
-
-	const fileIDs = []
-
-	if (elems.filesInputElem.files && is.notUndef(elems.filesInputElem.files[0])) {
-		for (const file of elems.filesInputElem.files) {
-			const response = await api.uploadFile(file)
-			if (response.error.error) {
-				console.error("[onFormSubmit]: cannot upload file:", response)
-				return
-			}
-
-			fileIDs.push(response.ID)
-		}
-	}
-
-	if (elems.formElem.messageText) {
-		const response = await api.sendMessage(elems.formElem.messageText.value, elems.formElem.messageTitle.value, fileIDs, threadID)
-		if (response.error.error) {
-			console.log("[onFormSubmit]: cannod send message:", response)
-			return
-		}
-	}
-
-	elems.formElem.reset()
-
-	location.href = params.toString() ? ("/home?" + params.toString()) : "/home"
-}
-
-function paginateMessages(threadID, direction, offsetStr, limitStr) {
-	const params = new URLSearchParams(location.search)
-
-	const offset = parseInt(offsetStr)
-	const limit = parseInt(limitStr)
-
-	if (isNaN(offset) || isNaN(limit)) {
-		console.error("[paginateMessages]: offset or limit are nan")
-		return
-	}
-
-	if (direction == "prev") {
-		params.set(threadID, `${offset + limit}`)
-	} else if (direction == "next") {
-		params.set(threadID, `${Math.max(0, offset - limit)}`)
-	} else {
-		console.error("[paginateMessages]: unknown direction:", direction)
-	}
-
-	location.href = params.toString() ? ("/home?" + params.toString()) : "/home"
-}
-
-function editMessage(messageID) {
-	const params = new URLSearchParams(location.search)
-	params.set("edit", "1")
-	params.set("id", messageID)
-
-	location.href = "/home?" + params.toString()
-}
-
-function showMessage(messageID) {
-	const params = new URLSearchParams(location.search)
-	params.set("id", messageID)
-	params.delete("edit")
-
-	location.href = params.toString() ? ("/home?" + params.toString()) : "/home"
-}
-
-function openThread(threadID) {
-	const params = new URLSearchParams(location.search)
-	if (threadID == 0 || threadID == "0" || threadID == "") {
-		params.delete("cwd")
-	} else {
-		params.set("cwd", threadID)
-	}
-
-	params.delete("id")
-	params.delete("edit")
-
-	location.href = params.toString() ? ("/home?" + params.toString()) : "/home"
-}
-
-function either(st1: boolean, st2: boolean): boolean {
-	return (!st1 && !st2)
-}
+window.addEventListener("load", init)
