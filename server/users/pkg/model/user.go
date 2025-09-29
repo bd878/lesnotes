@@ -47,6 +47,7 @@ type (
 		Login            string           `json:"login"`
 		Theme            string           `json:"theme"`
 		Lang             string           `json:"language"`
+		FontSize         int32            `json:"font_size"`
 	}
 
 	DeleteMeRequest struct {

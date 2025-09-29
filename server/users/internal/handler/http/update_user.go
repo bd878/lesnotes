@@ -42,7 +42,7 @@ func (h *Handler) Update(w http.ResponseWriter, req *http.Request) (err error) {
 
 	fontSize, err := strconv.Atoi(newFontSize)
 	if err != nil {
-		// TODO: log error
+		// left font size as is
 		fontSize = 0
 	}
 
