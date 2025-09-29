@@ -13,8 +13,7 @@ import onMessageCancelEditClick from './onMessageCancelEditClick';
 import onThemeSettingsClick from './onThemeSettingsClick';
 import onLangSettingsClick from './onLangSettingsClick';
 import onFontSizeSettingsClick from './onFontSizeSettingsClick';
-
-const getByID = (id: string, dflt: any): any => document.getElementById(id) ? document.getElementById(id) : dflt;
+import {getByID} from '../../../utils'
 
 const elems = {
 	form:   document.createElement("form"),

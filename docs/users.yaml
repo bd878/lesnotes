@@ -359,6 +359,9 @@ components:
             type: integer
           explain:
             type: string
+          human:
+            type: string
+            default: ""
 # END ERROR
 
 # LOGIN

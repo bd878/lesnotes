@@ -3,6 +3,7 @@ export interface Error {
 	status:  number;
 	explain: string;
 	code:    number;
+	human:   string;
 }
 
 const empty: Error = {
@@ -10,6 +11,7 @@ const empty: Error = {
 	status:  200,
 	explain: "",
 	code:    0,
+	human:   "",
 }
 
 export default function mapErrorFromProto(error?: Error): Error {
