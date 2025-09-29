@@ -15,7 +15,7 @@ async function home(ctx) {
 		ctx.status = 500
 		return
 	} else {
-		me = ctx.state.me.user
+		me = ctx.state.me
 	}
 
 	let stack;
@@ -49,8 +49,6 @@ async function home(ctx) {
 	ctx.set({ "Cache-Control": "no-cache,max-age=0" })
 
 	const builder = new Builder(ctx.userAgent.isMobile, ctx.state.lang)
-
-	console.log(ctx.state.lang)
 
 	if (is.notEmpty(message))
 		if (ctx.query.edit)
@@ -103,7 +101,7 @@ class Builder {
 			langs:           [{lang: "de", label: this.i18n("deLang")}, {lang: "en", label: this.i18n("enLang")}, {lang: "fr", label: this.i18n("frLang")}, {lang: "ru", label: this.i18n("ruLang")}],
 			myTheme:         function() { return this.theme == theme },
 			myLang:          function() { return this.lang == lang },
-			myFontSize:      function() { return this.fontSize == fontSize },
+			myFont:          function() { return is.notEmpty(fontSize) ? this.font == fontSize.toString() : false },
 			theme:           theme,
 			lang:            lang,
 		})

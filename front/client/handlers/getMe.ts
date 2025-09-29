@@ -10,8 +10,10 @@ async function getMe(ctx, next) {
 		return
 	}
 
-	if (ctx.state.me.user.lang) {
-		ctx.state.lang = ctx.state.me.user.lang
+	ctx.state.me = ctx.state.me.user
+
+	if (ctx.state.me.lang) {
+		ctx.state.lang = ctx.state.me.lang
 	}
 
 	console.log(ctx.state.me)
