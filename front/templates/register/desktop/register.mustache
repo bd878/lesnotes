@@ -3,21 +3,31 @@
 		{{> sidebar}}
 	</div>
 
-	<div>
-		<form id="register-form" autoComplete="off" name="register-form" class="flex flex-col">
-			<div>
-				{{> username}}
-			</div>
+	<form
+		id="register-form"
+		name="register-form"
+		class="flex flex-col"
+		action=""
+		onsubmit="return false;"
+		type="multipart/form-data"
+		autocomplete="off"
+	>
+		<div>
+			{{> username}}
+		</div>
 
-			<div class="mt-2">
-				{{> password}}
-			</div>
-		</form>
+		<div class="mt-2">
+			{{> password}}
+		</div>
+
+		<div id="register-error" class="mt-2 hidden text-sm italic text-red-600">
+		</div>
 
 		<div class="mt-4">
 			{{> submit}}
 		</div>
-	</div>
+	</form>
+
 </div>
 
 <div class="mt-2 px-8" id="telegram-login-widget">

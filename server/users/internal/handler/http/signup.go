@@ -134,6 +134,7 @@ func (h *Handler) Signup(w http.ResponseWriter, req *http.Request) (err error) {
 
 	var user *users.User
 	user, err = h.controller.CreateUser(req.Context(), int64(id), login, password)
+	// TODO: postgre returns error duplicate key value violates unique constraint "users_login_key" for login
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

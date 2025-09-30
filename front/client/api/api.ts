@@ -85,6 +85,7 @@ export default function api(url, props: any = {}): Promise<any> {
 								status:  res.status,
 								explain: text,
 								code:    value.error.code,
+								human:   value.error.human,
 							}])
 						} else {
 							return Promise.resolve([value.response, {
@@ -92,6 +93,7 @@ export default function api(url, props: any = {}): Promise<any> {
 								status:  res.status,
 								explain: "",
 								code:    994,
+								human:   "",
 							}])
 						}
 					} catch (e) {
@@ -100,6 +102,7 @@ export default function api(url, props: any = {}): Promise<any> {
 							status:  res.status,
 							explain: text,
 							code:    993,
+							human:   text,
 						}])
 					}
 				})

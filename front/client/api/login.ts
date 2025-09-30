@@ -17,7 +17,7 @@ async function login(login: string, password: string) {
 	try {
 		const [_1, error] = await api("/users/v1/login", {
 			method: "POST",
-			body: form,
+			body:   form,
 		});
 
 		if (error)

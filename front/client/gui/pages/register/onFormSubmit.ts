@@ -5,12 +5,12 @@ async function onFormSubmit(elems, e) {
 	e.preventDefault()
 
 	if (!elems.formElem.login) {
-		console.error("[onFormSubmit]: form \"login-form\" has no field \"login\"")
+		console.error("[onFormSubmit]: form \"register-form\" has no field \"login\"")
 		return
 	}
 
 	if (!elems.formElem.password) {
-		console.error("[onFormSubmit]: form \"login-form\" has no field \"password\"")
+		console.error("[onFormSubmit]: form \"register-form\" has no field \"password\"")
 		return
 	}
 
@@ -19,8 +19,8 @@ async function onFormSubmit(elems, e) {
 
 	console.log("[onFormSubmit]: submitting", "login:", login, "password:", password)
 
-	let response = await api.login(login, password)
-	console.log("[onFormSubmit]: login:", response)
+	let response = await api.register(login, password)
+	console.log("[onFormSubmit]: register:", response)
 	if (response.error.error) {
 		showError(elems, response.error)
 		return
