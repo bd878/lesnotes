@@ -144,7 +144,7 @@ const (
 	LangUnknown LangCode = ""
 )
 
-var AcceptedLangs = []string{LangEn.String(), LangRu.String(), LangDe.String(), LangFr.String()}
+var AcceptedLangs = []string{"ru", "en", "de", "fr"}
 
 func LangFromString(code string) LangCode {
 	switch code {

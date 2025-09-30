@@ -18,7 +18,8 @@ func (h *Handler) Login(w http.ResponseWriter, req *http.Request) (err error) {
 	var login, password string
 	var lang i18n.LangCode
 
-	preferredLang, err := accept.Negotiate(req.Header.Get("Accept-Language"), i18n.AcceptedLangs...)
+	languages := req.Header.Get("Accept-Language")
+	preferredLang, err := accept.Negotiate(languages, i18n.AcceptedLangs...)
 	if err != nil {
 		logger.Errorw("login", "error", err)
 		lang = i18n.LangEn
