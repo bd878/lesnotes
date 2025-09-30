@@ -11,11 +11,15 @@ import (
 type translations struct {
 	En map[string]string  `json:"en,omitempty"`
 	Ru map[string]string  `json:"ru,omitempty"`
+	De map[string]string  `json:"de,omitempty"`
+	Fr map[string]string  `json:"fr,omitempty"`
 }
 
 type declinations struct {
 	En map[string][]string `json:"en,omitempty"`
 	Ru map[string][]string `json:"ru,omitempty"`
+	De map[string][]string `json:"de,omitempty"`
+	Fr map[string][]string `json:"fr,omitempty"`
 }
 
 var emptyDecl []string = make([]string, 3)
@@ -109,16 +113,19 @@ type Decl interface {
 type Translation struct {
 	Ru string `json:"ru,omitempty"`
 	En string `json:"en,omitempty"`
+	De string `json:"de,omitempty"`
+	Fr string `json:"fr,omitempty"`
 }
 func (t Translation) Language(code Translator) string {
 	switch code.Code() {
 	case LangRu:
 		return t.Ru
 	case LangEn:
-		if t.En == "" {
-			return t.Ru
-		}
 		return t.En
+	case LangFr:
+		return t.Fr
+	case LangDe:
+		return t.De
 	default:
 		return t.En
 	}
@@ -132,8 +139,12 @@ var _ Translator = (LangCode)("")
 const (
 	LangRu LangCode = "Ru"
 	LangEn LangCode = "En"
+	LangDe LangCode = "De"
+	LangFr LangCode = "Fr"
 	LangUnknown LangCode = ""
 )
+
+var AcceptedLangs = []string{LangEn.String(), LangRu.String(), LangDe.String(), LangFr.String()}
 
 func LangFromString(code string) LangCode {
 	switch code {
@@ -141,8 +152,12 @@ func LangFromString(code string) LangCode {
 		return LangRu
 	case LangEn.String(), strings.ToLower(LangEn.String()):
 		return LangEn
+	case LangDe.String(), strings.ToLower(LangDe.String()):
+		return LangDe
+	case LangFr.String(), strings.ToLower(LangFr.String()):
+		return LangFr
 	default:
-		return LangRu
+		return LangEn
 	}
 }
 

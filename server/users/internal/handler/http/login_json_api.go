@@ -85,7 +85,7 @@ func (h *Handler) LoginJsonAPI(w http.ResponseWriter, req *http.Request) (err er
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
 			Error:   &server.ErrorCode{
-				Code: users.CodeBadPassword,
+				Code:    server.CodeWrongPassword,
 				Explain: "wrong password",
 			},
 		})

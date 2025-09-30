@@ -2,24 +2,28 @@ package http
 
 import (
 	"time"
+	"fmt"
 	"net/http"
-	"errors"
 	"encoding/json"
 
 	"github.com/bd878/gallery/server/users/internal/controller"
+	"github.com/bd878/gallery/server/third_party/accept"
+	"github.com/bd878/gallery/server/i18n"
+	"github.com/bd878/gallery/server/logger"
 	users "github.com/bd878/gallery/server/users/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
 )
 
 func (h *Handler) Login(w http.ResponseWriter, req *http.Request) (err error) {
 	var login, password string
+	var lang i18n.LangCode
 
 	err = req.ParseMultipartForm(1024 /* 1 KB */)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error: &server.ErrorCode{
+			Error:  &server.ErrorCode{
 				Code:    server.CodeNoForm,
 				Explain: "failed to parse form",
 			},
@@ -30,6 +34,14 @@ func (h *Handler) Login(w http.ResponseWriter, req *http.Request) (err error) {
 
 	login, password = req.PostFormValue("login"), req.PostFormValue("password")
 
+	preferredLang, err := accept.Negotiate(req.Header.Get("Accept-Language"), i18n.AcceptedLangs...)
+	if err != nil {
+		logger.Errorw("login", "error", err)
+		lang = i18n.LangEn
+	} else {
+		lang = i18n.LangFromString(preferredLang)
+	}
+
 	if login == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -37,10 +49,11 @@ func (h *Handler) Login(w http.ResponseWriter, req *http.Request) (err error) {
 			Error: &server.ErrorCode{
 				Code:    users.CodeNoLogin,
 				Explain: "login required",
+				Human:   lang.Text(fmt.Sprintf("%d", users.CodeNoLogin)),
 			},
 		})
 
-		return errors.New("login required")
+		return
 	}
 
 	if password == "" {
@@ -50,10 +63,11 @@ func (h *Handler) Login(w http.ResponseWriter, req *http.Request) (err error) {
 			Error: &server.ErrorCode{
 				Code:    users.CodeNoPassword,
 				Explain: "password required",
+				Human:   lang.Text(fmt.Sprintf("%d", users.CodeNoPassword)),
 			},
 		})
 
-		return errors.New("password required")
+		return
 	}
 
 	session, err := h.controller.LoginUser(req.Context(), login, password)
@@ -63,8 +77,9 @@ func (h *Handler) Login(w http.ResponseWriter, req *http.Request) (err error) {
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status:      "error",
 			Error: &server.ErrorCode{
-				Code:     users.CodeAuthFailed,
+				Code:     server.CodeNoUser,
 				Explain: "no login,password pair",
+				Human:   lang.Text(fmt.Sprintf("%d", server.CodeNoUser)),
 			},
 		})
 
@@ -77,6 +92,7 @@ func (h *Handler) Login(w http.ResponseWriter, req *http.Request) (err error) {
 			Error: &server.ErrorCode{
 				Code:    server.CodeWrongPassword,
 				Explain: "wrong password",
+				Human:   lang.Text(fmt.Sprintf("%d", server.CodeWrongPassword)),
 			},
 		})
 
@@ -100,6 +116,7 @@ func (h *Handler) Login(w http.ResponseWriter, req *http.Request) (err error) {
 			Error: &server.ErrorCode{
 				Code:    server.CodeNoUser,
 				Explain: "cannot get user",
+				Human:   lang.Text(fmt.Sprintf("%d", server.CodeNoUser)),
 			},
 		})
 

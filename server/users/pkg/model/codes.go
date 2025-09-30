@@ -8,7 +8,7 @@ var (
 	CodeLoginTooShort      int = 105
 
 	CodeRegisterFailed     int = 111
-	CodeAuthFailed         int = 112
+	// 112 - free to use 
 	CodeLogoutFailed       int = 113
 	CodeDeleteFailed       int = 114
 	CodeUpdateFailed       int = 115
@@ -16,5 +16,4 @@ var (
 	CodeNoLogin            int = 121
 	CodeNoPassword         int = 122
 	CodeBadCookie          int = 124
-	CodeBadPassword        int = 125
 )
