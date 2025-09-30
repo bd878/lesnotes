@@ -1,6 +1,42 @@
 {
-	"ru": {},
-	"en": {},
-	"fr": {},
-	"de": {}
+	"ru": {
+		"101": "Пароль слишком короткий",
+		"102": "Пароль должен содержать хотя бы одну заглавную букву",
+		"103": "Пароль должен содержать хотя бы одну цифру",
+		"104": "Пароль должен содержать хотя бы один специальный знак",
+		"105": "Логин слишком короткий",
+		"121": "Пользователь с таким логином не найден",
+		"122": "Неверный пароль",
+		"125": "Неверный пароль"
+	},
+	"en": {
+		"101": "Password is too short",
+		"102": "Password must contain at least one capital letter",
+		"103": "Password must contain at least one number",
+		"104": "Password must contain at least one special character",
+		"105": "Login is too short",
+		"121": "User not found",
+		"122": "Incorrect password",
+		"125": "Incorrect password"
+	},
+	"fr": {
+		"101": "Mot de passe est trop court",
+		"102": "Mot de passe doit contenir au moins une letter majuscule",
+		"103": "Mot de passe doit contenir au moins une caractères numériques",
+		"104": "Mot de passe doit contenir au moins une caractère spécial",
+		"105": "Surnom est trop court",
+		"121": "Ce nom d'utilisateur existe déjà",
+		"122": "Mot de passe est incorrect",
+		"125": "Mot de passe est incorrect"
+	},
+	"de": {
+		"101": "Passwort ist zu kurz",
+		"102": "Passwort hat keine Großbuchstaben",
+		"103": "Passwort hat keine Zahlen",
+		"104": "Passwort hat keine Sonderzeichen",
+		"105": "Nickname ist zu kurz",
+		"121": "Benutzer ist nicht vorhanden",
+		"122": "Passwort ist falsch",
+		"125": "Passwort ist falsch"
+	}
 }

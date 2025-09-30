@@ -6,6 +6,7 @@ type (
 	ErrorCode struct {
 		Code                int              `json:"code"`
 		Explain             string           `json:"explain"`
+		Human               string           `json:"human"`
 	}
 
 	ServerResponse struct {
