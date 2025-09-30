@@ -18,6 +18,14 @@ func (h *Handler) Login(w http.ResponseWriter, req *http.Request) (err error) {
 	var login, password string
 	var lang i18n.LangCode
 
+	preferredLang, err := accept.Negotiate(req.Header.Get("Accept-Language"), i18n.AcceptedLangs...)
+	if err != nil {
+		logger.Errorw("login", "error", err)
+		lang = i18n.LangEn
+	} else {
+		lang = i18n.LangFromString(preferredLang)
+	}
+
 	err = req.ParseMultipartForm(1024 /* 1 KB */)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -26,6 +34,7 @@ func (h *Handler) Login(w http.ResponseWriter, req *http.Request) (err error) {
 			Error:  &server.ErrorCode{
 				Code:    server.CodeNoForm,
 				Explain: "failed to parse form",
+				Human:   lang.Text(fmt.Sprintf("%d", server.CodeNoForm)),
 			},
 		})
 
@@ -33,14 +42,6 @@ func (h *Handler) Login(w http.ResponseWriter, req *http.Request) (err error) {
 	}
 
 	login, password = req.PostFormValue("login"), req.PostFormValue("password")
-
-	preferredLang, err := accept.Negotiate(req.Header.Get("Accept-Language"), i18n.AcceptedLangs...)
-	if err != nil {
-		logger.Errorw("login", "error", err)
-		lang = i18n.LangEn
-	} else {
-		lang = i18n.LangFromString(preferredLang)
-	}
 
 	if login == "" {
 		w.WriteHeader(http.StatusBadRequest)

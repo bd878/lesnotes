@@ -8,7 +8,9 @@
 		"12": "Пользователь не найден",
 		"121": "Необходимо ввести логин",
 		"122": "Необходимо ввести пароль",
-		"13": "Неверный пароль"
+		"13": "Неверный пароль",
+		"16": "Неверный формат запроса",
+		"15": "Неверный формат запроса"
 	},
 	"en": {
 		"101": "Password is too short",
@@ -19,7 +21,9 @@
 		"12": "User is not found",
 		"121": "Login required",
 		"122": "Password required",
-		"13": "Incorrect password"
+		"13": "Incorrect password",
+		"16": "Request is incorrect",
+		"15": "Request is incorrect"
 	},
 	"fr": {
 		"101": "Mot de passe est trop court",
@@ -30,7 +34,9 @@
 		"12": "Cet utilisateur n'existe pas",
 		"121": "Nom d'utilisateur est obligatoire",
 		"122": "Mot de passe est obligatoire",
-		"13": "Mot de passe est incorrect"
+		"13": "Mot de passe est incorrect",
+		"16": "Le corps de la requête est incorrect",
+		"15": "Le corps de la requête est incorrect"
 	},
 	"de": {
 		"101": "Passwort ist zu kurz",
@@ -41,6 +47,8 @@
 		"12": "Benutzer ist nicht vorhanden",
 		"121": "Benutzername ist leer",
 		"122": "Passwort ist leer",
-		"13": "Passwort ist falsch"
+		"13": "Passwort ist falsch",
+		"16": "Die Anfrage ist hinfällig",
+		"15": "Die Anfrage ist hinfällig"
 	}
 }
