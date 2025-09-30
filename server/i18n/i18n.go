@@ -2,6 +2,7 @@ package i18n
 
 import (
 	_ "embed"
+	"fmt"
 	"strings"
 	"reflect"
 	"encoding/json"
@@ -161,8 +162,9 @@ func LangFromString(code string) LangCode {
 	}
 }
 
-func (code LangCode) String() string { return string(code) }
+func (lang LangCode) String() string { return string(lang) }
 
-func (code LangCode) Code() LangCode { return code }
-func (code LangCode) Text(key string) string { return texts.Get(code, key) }
-func (code LangCode) Decl(key string) []string { return decls.Get(code, key) }
+func (lang LangCode) Code() LangCode { return lang }
+func (lang LangCode) Text(key string) string { return texts.Get(lang, key) }
+func (lang LangCode) Error(code int) string { return texts.Get(lang, fmt.Sprintf("%d", code)) }
+func (lang LangCode) Decl(key string) []string { return decls.Get(lang, key) }

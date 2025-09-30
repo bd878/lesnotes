@@ -61,6 +61,7 @@ func New(cfg Config) (server *Server) {
 
 	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log)
 
+	// TODO: middleware.Build(handler, ...middlewares)
 	middleware.WithAuth(httpmiddleware.AuthBuilder(logger.Default(), control, sessionsGateway, users.PublicUserID))
 	mux.Handle("/users/v1/me",     middleware.Build(handler.GetMe))
 	mux.Handle("/users/v1/logout", middleware.Build(handler.Logout))

@@ -10,7 +10,8 @@
 		"122": "Необходимо ввести пароль",
 		"13": "Неверный пароль",
 		"16": "Неверный формат запроса",
-		"15": "Неверный формат запроса"
+		"15": "Неверный формат запроса",
+		"111": "Неизвестная ошибка регистрации"
 	},
 	"en": {
 		"101": "Password is too short",
@@ -23,7 +24,8 @@
 		"122": "Password required",
 		"13": "Incorrect password",
 		"16": "Request is incorrect",
-		"15": "Request is incorrect"
+		"15": "Request is incorrect",
+		"111": "Failed to register"
 	},
 	"fr": {
 		"101": "Mot de passe est trop court",
@@ -36,7 +38,8 @@
 		"122": "Mot de passe est obligatoire",
 		"13": "Mot de passe est incorrect",
 		"16": "Le corps de la requête est incorrect",
-		"15": "Le corps de la requête est incorrect"
+		"15": "Le corps de la requête est incorrect",
+		"111": "Une erreur s’est produite lors de l’envoi de commandes"
 	},
 	"de": {
 		"101": "Passwort ist zu kurz",
@@ -49,6 +52,7 @@
 		"122": "Passwort ist leer",
 		"13": "Passwort ist falsch",
 		"16": "Die Anfrage ist hinfällig",
-		"15": "Die Anfrage ist hinfällig"
+		"15": "Die Anfrage ist hinfällig",
+		"111": "Die Anfrage ist fehlgeschlagen"
 	}
 }

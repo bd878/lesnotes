@@ -2,7 +2,6 @@ package http
 
 import (
 	"time"
-	"fmt"
 	"net/http"
 	"encoding/json"
 
@@ -35,7 +34,7 @@ func (h *Handler) Login(w http.ResponseWriter, req *http.Request) (err error) {
 			Error:  &server.ErrorCode{
 				Code:    server.CodeNoForm,
 				Explain: "failed to parse form",
-				Human:   lang.Text(fmt.Sprintf("%d", server.CodeNoForm)),
+				Human:   lang.Error(server.CodeNoForm),
 			},
 		})
 
@@ -51,7 +50,7 @@ func (h *Handler) Login(w http.ResponseWriter, req *http.Request) (err error) {
 			Error: &server.ErrorCode{
 				Code:    users.CodeNoLogin,
 				Explain: "login required",
-				Human:   lang.Text(fmt.Sprintf("%d", users.CodeNoLogin)),
+				Human:   lang.Error(users.CodeNoLogin),
 			},
 		})
 
@@ -65,7 +64,7 @@ func (h *Handler) Login(w http.ResponseWriter, req *http.Request) (err error) {
 			Error: &server.ErrorCode{
 				Code:    users.CodeNoPassword,
 				Explain: "password required",
-				Human:   lang.Text(fmt.Sprintf("%d", users.CodeNoPassword)),
+				Human:   lang.Error(users.CodeNoPassword),
 			},
 		})
 
@@ -81,7 +80,7 @@ func (h *Handler) Login(w http.ResponseWriter, req *http.Request) (err error) {
 			Error: &server.ErrorCode{
 				Code:     server.CodeNoUser,
 				Explain: "no login,password pair",
-				Human:   lang.Text(fmt.Sprintf("%d", server.CodeNoUser)),
+				Human:   lang.Error(server.CodeNoUser),
 			},
 		})
 
@@ -94,7 +93,7 @@ func (h *Handler) Login(w http.ResponseWriter, req *http.Request) (err error) {
 			Error: &server.ErrorCode{
 				Code:    server.CodeWrongPassword,
 				Explain: "wrong password",
-				Human:   lang.Text(fmt.Sprintf("%d", server.CodeWrongPassword)),
+				Human:   lang.Error(server.CodeWrongPassword),
 			},
 		})
 
@@ -118,7 +117,7 @@ func (h *Handler) Login(w http.ResponseWriter, req *http.Request) (err error) {
 			Error: &server.ErrorCode{
 				Code:    server.CodeNoUser,
 				Explain: "cannot get user",
-				Human:   lang.Text(fmt.Sprintf("%d", server.CodeNoUser)),
+				Human:   lang.Error(server.CodeNoUser),
 			},
 		})
 

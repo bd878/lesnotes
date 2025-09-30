@@ -5,6 +5,9 @@ import (
 	"io"
 	"encoding/json"
 
+	"github.com/bd878/gallery/server/third_party/accept"
+	"github.com/bd878/gallery/server/i18n"
+	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/utils"
 	users "github.com/bd878/gallery/server/users/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
@@ -12,6 +15,16 @@ import (
 
 func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
 	var data []byte
+	var lang i18n.LangCode
+
+	languages := req.Header.Get("Accept-Language")
+	preferredLang, err := accept.Negotiate(languages, i18n.AcceptedLangs...)
+	if err != nil {
+		logger.Errorw("login", "error", err)
+		lang = i18n.LangEn
+	} else {
+		lang = i18n.LangFromString(preferredLang)
+	}
 
 	data, err = io.ReadAll(req.Body)
 	defer req.Body.Close()
@@ -22,6 +35,7 @@ func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 			Error:  &server.ErrorCode{
 				Code:    server.CodeWrongFormat,
 				Explain: "failed to parse request",
+				Human:   lang.Error(server.CodeWrongFormat),
 			},
 		})
 
@@ -36,6 +50,7 @@ func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 			Error:   &server.ErrorCode {
 				Code:     server.CodeWrongFormat,
 				Explain: "failed to parse signup request",
+				Human:   lang.Error(server.CodeWrongFormat),
 			},
 		})
 
@@ -48,6 +63,7 @@ func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 			Error:   &server.ErrorCode{
 				Code:    users.CodeNoLogin,
 				Explain: "no login",
+				Human:   lang.Error(users.CodeNoLogin),
 			},
 		})
 
@@ -60,6 +76,7 @@ func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 			Error:   &server.ErrorCode{
 				Code:    users.CodeNoPassword,
 				Explain: "no password",
+				Human:   lang.Error(users.CodeNoPassword),
 			},
 		})
 
@@ -74,6 +91,7 @@ func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 			Error: &server.ErrorCode{
 				Code:    users.CodePasswordTooShort,
 				Explain: "password is less than 5 symbols",
+				Human:   lang.Error(users.CodePasswordTooShort),
 			},
 		})
 		return
@@ -89,6 +107,7 @@ func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 			Error:   &server.ErrorCode{
 				Code:    users.CodeRegisterFailed,
 				Explain: "cannot signup user",
+				Human:  lang.Error(users.CodeRegisterFailed),
 			},
 		})
 

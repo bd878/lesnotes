@@ -6,6 +6,9 @@ import (
 	"encoding/json"
 	"unicode"
 
+	"github.com/bd878/gallery/server/third_party/accept"
+	"github.com/bd878/gallery/server/i18n"
+	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/utils"
 	users "github.com/bd878/gallery/server/users/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
@@ -41,8 +44,18 @@ func verifyLogin(login string) (fiveOrMore bool) {
 	return
 }
 
-func (h *Handler) Signup( w http.ResponseWriter, req *http.Request) (err error) {
+func (h *Handler) Signup(w http.ResponseWriter, req *http.Request) (err error) {
 	var login, password string
+	var lang i18n.LangCode
+
+	languages := req.Header.Get("Accept-Language")
+	preferredLang, err := accept.Negotiate(languages, i18n.AcceptedLangs...)
+	if err != nil {
+		logger.Errorw("login", "error", err)
+		lang = i18n.LangEn
+	} else {
+		lang = i18n.LangFromString(preferredLang)
+	}
 
 	err = req.ParseMultipartForm(1024 /* 1 KB */)
 	if err != nil {
@@ -50,8 +63,9 @@ func (h *Handler) Signup( w http.ResponseWriter, req *http.Request) (err error) 
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code:  server.CodeNoForm,
+				Code:    server.CodeNoForm,
 				Explain: "failed to parse form",
+				Human:   lang.Error(server.CodeNoForm),
 			},
 		})
 
@@ -65,8 +79,9 @@ func (h *Handler) Signup( w http.ResponseWriter, req *http.Request) (err error) 
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code:  users.CodeNoLogin,
+				Code:    users.CodeNoLogin,
 				Explain: "login required",
+				Human:   lang.Error(users.CodeNoLogin),
 			},
 		})
 
@@ -78,8 +93,9 @@ func (h *Handler) Signup( w http.ResponseWriter, req *http.Request) (err error) 
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code:  users.CodeNoPassword,
+				Code:    users.CodeNoPassword,
 				Explain: "password required",
+				Human:   lang.Error(users.CodeNoPassword),
 			},
 		})
 
@@ -94,6 +110,7 @@ func (h *Handler) Signup( w http.ResponseWriter, req *http.Request) (err error) 
 			Error: &server.ErrorCode{
 				Code:    users.CodePasswordTooShort,
 				Explain: "password is less than 5 symbols",
+				Human:   lang.Error(users.CodePasswordTooShort),
 			},
 		})
 		return
@@ -107,6 +124,7 @@ func (h *Handler) Signup( w http.ResponseWriter, req *http.Request) (err error) 
 			Error: &server.ErrorCode{
 				Code:    users.CodeLoginTooShort,
 				Explain: "login is less than 5 symbols",
+				Human:   lang.Error(users.CodeLoginTooShort),
 			},
 		})
 		return
@@ -121,12 +139,13 @@ func (h *Handler) Signup( w http.ResponseWriter, req *http.Request) (err error) 
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code:  users.CodeRegisterFailed,
+				Code:    users.CodeRegisterFailed,
 				Explain: "cannot signup user",
+				Human:   lang.Error(users.CodeRegisterFailed),
 			},
 		})
 
-		return err
+		return
 	}
 
 	http.SetCookie(w, &http.Cookie{

@@ -3,7 +3,6 @@ package http
 import (
 	"net/http"
 	"io"
-	"fmt"
 	"encoding/json"
 
 	"github.com/bd878/gallery/server/third_party/accept"
@@ -34,7 +33,7 @@ func (h *Handler) LoginJsonAPI(w http.ResponseWriter, req *http.Request) (err er
 			Error: &server.ErrorCode{
 				Code:    server.CodeWrongFormat,
 				Explain: "failed to parse request",
-				Human:   lang.Text(fmt.Sprintf("%d", server.CodeWrongFormat)),
+				Human:   lang.Error(server.CodeWrongFormat),
 			},
 		})
 
@@ -49,7 +48,7 @@ func (h *Handler) LoginJsonAPI(w http.ResponseWriter, req *http.Request) (err er
 			Error: &server.ErrorCode{
 				Code:    server.CodeWrongFormat,
 				Explain: "failed to parse login request",
-				Human:   lang.Text(fmt.Sprintf("%d", server.CodeWrongFormat)),
+				Human:   lang.Error(server.CodeWrongFormat),
 			},
 		})
 
@@ -62,7 +61,7 @@ func (h *Handler) LoginJsonAPI(w http.ResponseWriter, req *http.Request) (err er
 			Error: &server.ErrorCode{
 				Code:    users.CodeNoLogin,
 				Explain: "no login",
-				Human:   lang.Text(fmt.Sprintf("%d", users.CodeNoLogin)),
+				Human:   lang.Error(users.CodeNoLogin),
 			},
 		})
 
@@ -75,7 +74,7 @@ func (h *Handler) LoginJsonAPI(w http.ResponseWriter, req *http.Request) (err er
 			Error: &server.ErrorCode{
 				Code:    users.CodeNoPassword,
 				Explain: "no password",
-				Human:   lang.Text(fmt.Sprintf("%d", users.CodeNoPassword)),
+				Human:   lang.Error(users.CodeNoPassword),
 			},
 		})
 
@@ -92,7 +91,7 @@ func (h *Handler) LoginJsonAPI(w http.ResponseWriter, req *http.Request) (err er
 			Error: &server.ErrorCode{
 				Code:    server.CodeNoUser,
 				Explain: "no user,password pair",
-				Human:   lang.Text(fmt.Sprintf("%d", server.CodeNoUser)),
+				Human:   lang.Error(server.CodeNoUser),
 			},
 		})
 
@@ -105,7 +104,7 @@ func (h *Handler) LoginJsonAPI(w http.ResponseWriter, req *http.Request) (err er
 			Error:   &server.ErrorCode{
 				Code:    server.CodeWrongPassword,
 				Explain: "wrong password",
-				Human:   lang.Text(fmt.Sprintf("%d", server.CodeWrongPassword)),
+				Human:   lang.Error(server.CodeWrongPassword),
 			},
 		})
 
@@ -135,7 +134,7 @@ func (h *Handler) LoginJsonAPI(w http.ResponseWriter, req *http.Request) (err er
 			Error: &server.ErrorCode{
 				Code:    server.CodeNoUser,
 				Explain: "cannot get user",
-				Human:   lang.Text(fmt.Sprintf("%d", server.CodeNoUser)),
+				Human:   lang.Error(server.CodeNoUser),
 			},
 		})
 
