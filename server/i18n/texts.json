@@ -11,7 +11,8 @@
 		"13": "Неверный пароль",
 		"16": "Неверный формат запроса",
 		"15": "Неверный формат запроса",
-		"111": "Неизвестная ошибка регистрации"
+		"111": "Неизвестная ошибка регистрации",
+		"112": "Пользователь существует"
 	},
 	"en": {
 		"101": "Password is too short",
@@ -25,7 +26,8 @@
 		"13": "Incorrect password",
 		"16": "Request is incorrect",
 		"15": "Request is incorrect",
-		"111": "Failed to register"
+		"111": "Failed to register",
+		"112": "User exists"
 	},
 	"fr": {
 		"101": "Mot de passe est trop court",
@@ -39,7 +41,8 @@
 		"13": "Mot de passe est incorrect",
 		"16": "Le corps de la requête est incorrect",
 		"15": "Le corps de la requête est incorrect",
-		"111": "Une erreur s’est produite lors de l’envoi de commandes"
+		"111": "Une erreur s’est produite lors de l’envoi de commandes",
+		"112": "Ce nom 'd'utilisateur existe déjà"
 	},
 	"de": {
 		"101": "Passwort ist zu kurz",
@@ -53,6 +56,7 @@
 		"13": "Passwort ist falsch",
 		"16": "Die Anfrage ist hinfällig",
 		"15": "Die Anfrage ist hinfällig",
-		"111": "Die Anfrage ist fehlgeschlagen"
+		"111": "Die Anfrage ist fehlgeschlagen",
+		"112": "Nickname ist vorhanden"
 	}
 }

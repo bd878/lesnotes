@@ -8,6 +8,7 @@ import (
 	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/users/pkg/model"
 	"github.com/bd878/gallery/server/users/internal/controller"
+	"github.com/bd878/gallery/server/users/internal/repository"
 	sessions "github.com/bd878/gallery/server/sessions/pkg/model"
 )
 
@@ -55,6 +56,11 @@ func (c *Controller) CreateUser(ctx context.Context, id int64, login, password s
 
 	err = c.repo.Save(ctx, id, login, string(hashed), "light", "", 0)
 	if err != nil {
+		switch err {
+		case repository.ErrUserExists:
+			err = controller.ErrUserExists
+		}
+
 		return
 	}
 

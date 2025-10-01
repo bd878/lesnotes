@@ -9,6 +9,7 @@ import (
 	"github.com/bd878/gallery/server/i18n"
 	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/utils"
+	"github.com/bd878/gallery/server/users/internal/controller"
 	users "github.com/bd878/gallery/server/users/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
 )
@@ -99,19 +100,33 @@ func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 
 	id := utils.RandomID()
 
-	user, err := h.controller.CreateUser(req.Context(), int64(id), request.Login, request.Password)
+	var user *users.User
+	user, err = h.controller.CreateUser(req.Context(), int64(id), request.Login, request.Password)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status: "error",
-			Error:   &server.ErrorCode{
-				Code:    users.CodeRegisterFailed,
-				Explain: "cannot signup user",
-				Human:  lang.Error(users.CodeRegisterFailed),
-			},
-		})
+		switch err {
+		case controller.ErrUserExists:
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(server.ServerResponse{
+				Status: "error",
+				Error:  &server.ErrorCode{
+					Code:    users.CodeUserExists,
+					Explain: "user exists",
+					Human:   lang.Error(users.CodeUserExists),
+				},
+			})
+		default:
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(server.ServerResponse{
+				Status: "error",
+				Error:   &server.ErrorCode{
+					Code:    users.CodeRegisterFailed,
+					Explain: "cannot signup user",
+					Human:   lang.Error(users.CodeRegisterFailed),
+				},
+			})
+		}
 
-		return err
+		return
 	}
 
 	response, err := json.Marshal(users.SignupResponse{

@@ -8,7 +8,7 @@ var (
 	CodeLoginTooShort      int = 105
 
 	CodeRegisterFailed     int = 111
-	// 112 - free to use 
+	CodeUserExists         int = 112
 	CodeLogoutFailed       int = 113
 	CodeDeleteFailed       int = 114
 	CodeUpdateFailed       int = 115

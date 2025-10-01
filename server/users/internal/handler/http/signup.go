@@ -10,6 +10,7 @@ import (
 	"github.com/bd878/gallery/server/i18n"
 	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/utils"
+	"github.com/bd878/gallery/server/users/internal/controller"
 	users "github.com/bd878/gallery/server/users/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
 )
@@ -134,17 +135,29 @@ func (h *Handler) Signup(w http.ResponseWriter, req *http.Request) (err error) {
 
 	var user *users.User
 	user, err = h.controller.CreateUser(req.Context(), int64(id), login, password)
-	// TODO: postgre returns error duplicate key value violates unique constraint "users_login_key" for login
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status: "error",
-			Error: &server.ErrorCode{
-				Code:    users.CodeRegisterFailed,
-				Explain: "cannot signup user",
-				Human:   lang.Error(users.CodeRegisterFailed),
-			},
-		})
+		switch err {
+		case controller.ErrUserExists:
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(server.ServerResponse{
+				Status: "error",
+				Error:  &server.ErrorCode{
+					Code:    users.CodeUserExists,
+					Explain: "user exists",
+					Human:   lang.Error(users.CodeUserExists),
+				},
+			})
+		default:
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(server.ServerResponse{
+				Status: "error",
+				Error:  &server.ErrorCode{
+					Code:    users.CodeRegisterFailed,
+					Explain: "cannot signup user",
+					Human:   lang.Error(users.CodeRegisterFailed),
+				},
+			})
+		}
 
 		return
 	}

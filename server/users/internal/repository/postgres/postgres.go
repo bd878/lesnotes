@@ -8,7 +8,9 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/users/pkg/model"
+	"github.com/bd878/gallery/server/users/internal/repository"
 )
 
 type Repository struct {
@@ -27,6 +29,10 @@ func (r *Repository) Save(ctx context.Context, id int64, login, salt, theme, lan
 	const query = "INSERT INTO %s(id, login, salt, theme, lang, font_size) VALUES ($1, $2, $3, $4, $5, $6)"
 
 	_, err = r.pool.Exec(ctx, r.table(query), id, login, salt, theme, lang, fontSize)
+	if err != nil {
+		logger.Error(err)
+		return repository.ErrUserExists
+	}
 
 	return err
 }
