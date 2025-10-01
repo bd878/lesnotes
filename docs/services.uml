@@ -14,6 +14,7 @@ together {
 	package telemetry
 	package sessions
 	package front
+	package search
 }
 
 package Front as front {
@@ -101,5 +102,17 @@ package Threads as threads {
 	threads_http - threads_grpc
 }
 
-footer 07.09.25
+package Search as search {
+	component http as search_http
+	component grpc as search_grpc
+	database PostgreSQL as search_db
+
+	search_http -- "192.168.10.3:8190"
+	search_grpc -- "192.168.10.3:8191"
+
+	search_http - search_db
+	search_grpc - search_db
+}
+
+footer 01.10.25
 @enduml

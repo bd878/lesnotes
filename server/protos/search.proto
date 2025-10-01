@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package search.v1;
+
+option go_package = "github.com/bd878/gallery/server/api";
+
+service Search {
+	rpc SearchMessages(SearchMessagesRequest) returns (SearchMessagesResponse) {}
+	rpc SearchFiles(SearchFilesRequest) returns (SearchFilesResponse) {}
+}
+
+message Message {
+	int64   id      = 1;
+	int64   user_id = 2;
+	string  title   = 3;
+	string  name    = 4;
+	string  text    = 5;
+}
+
+message File {
+	int64   id      = 1;
+	int64   user_id = 2;
+	string  name    = 3;
+}
+
+message SearchMessagesRequest {
+	string    substr  = 1;
+	int64     user_id = 2;
+}
+
+message SearchMessagesResponse {
+	repeated  Message  list   = 1;
+	int32     count           = 2;
+}
+
+message SearchFilesRequest {
+	string    substr  = 1;
+	int64     user_id = 2;
+}
+
+message SearchFilesResponse {
+	repeated  Message  list   = 1;
+	int32     count           = 2;
+}

@@ -1,0 +1,138 @@
+openapi: "3.0.0"
+info:
+  title: API Specification for search service
+  description: |
+    This API allows searching through various messages and files
+  version: 1.0.0
+paths:
+# SEARCH MESSAGES
+  /search/v1/messages:
+    parameters:
+      - $ref: '#/components/parameters/token'
+      - $ref: '#/components/parameters/user'
+    get:
+      summary: Search messages by text
+      description: |
+        It searches in a user's messages, both public and private,
+        for a substring of a given string.
+        Search is case insensitive
+      operationId: searchMessages
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/searchOk'
+        "4XX":
+          description: error 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+
+# END SEARCH MESSAGES
+
+# SEARCH FILES
+  /search/v1/files:
+    parameters:
+      - $ref: '#/components/parameters/token'
+      - $ref: '#/components/parameters/user'
+    get:
+      summary: Search files by text
+      description: |
+        Searches user files, both public and private,
+        by given substring in file name
+      operationId: searchFiles
+      response:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: "#/components/schemas/searchOk"
+        "4XX":
+          description: error 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+# END SEARCH FILES
+
+components:
+  parameters:
+    token:
+      name: Cookie
+      in: header
+      schema:
+        type: string
+        example: token=AAAAAA
+    user:
+      name: user
+      in: query
+      required: false
+      schema:
+        type: integer
+        example: 1
+
+  schemas:
+# ERROR
+    serverError:
+      type: object
+      status:
+        type: string
+        default: "error"
+      error:
+        type: object
+        properties:
+          code:
+            type: integer
+          explain:
+            type: string
+          human:
+            type: string
+# END ERROR
+
+# SEARCH MESSAGES
+    searchOk:
+      type: object
+      status:
+        type: string
+      response:
+        type: object
+        properties:
+          count:
+            type: integer
+            required: false
+          list:
+            type: array
+            items:
+              oneOf:
+                - $ref: '#/components/schemas/message'
+                - $ref: '#/components/schemas/file'
+
+# END SEARCH MESSAGES
+
+    message:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        name:
+          type: string
+        title:
+          type: string
+        text:
+          type: string
+
+    file:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        name:
+          type: string
