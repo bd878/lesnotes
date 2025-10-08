@@ -9,5 +9,6 @@
   "raft_log_level": "debug",
   "log_path": "../../logs",
   "log_level": "debug",
-  "data_path": "../../data@2"
+  "data_path": "../../data@2",
+  "nats_addr": "0.0.0.0:4222"
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/raft"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/ddd"
 	"github.com/bd878/gallery/server/logger"
 )
 
@@ -25,15 +26,17 @@ type Config struct {
 }
 
 type DistributedMessages struct {
-	conf     Config
-	raft    *raft.Raft
-	repo     Repository
+	conf         Config
+	raft         *raft.Raft
+	repo         Repository
+	publisher    ddd.EventPublisher[ddd.Event]
 }
 
-func New(repo Repository, cfg Config) (*DistributedMessages, error) {
+func New(cfg Config, repo Repository, publisher ddd.EventPublisher[ddd.Event]) (*DistributedMessages, error) {
 	m := &DistributedMessages{
-		repo: repo,
-		conf: cfg,
+		repo:      repo,
+		conf:      cfg,
+		publisher: publisher,
 	}
 	if err := m.setupRaft(logger.Default()); err != nil {
 		return nil, err

@@ -11,6 +11,7 @@ import (
 	"google.golang.org/grpc"
 	"github.com/hashicorp/raft"
 	"github.com/soheilhy/cmux"
+	"github.com/nats-io/nats.go"
 
 	"golang.org/x/sync/errgroup"
 	"github.com/bd878/gallery/server/api"
@@ -19,11 +20,14 @@ import (
 	hclog "github.com/hashicorp/go-hclog"
 
 	"github.com/bd878/gallery/server/waiter"
+	"github.com/bd878/gallery/server/ddd"
+	broker "github.com/bd878/gallery/server/nats"
 	grpcmiddleware "github.com/bd878/gallery/server/internal/middleware/grpc"
 	grpclogger "github.com/bd878/gallery/server/messages/internal/logger/grpc"
 	membership "github.com/bd878/gallery/server/messages/internal/discovery/serf"
 	repository "github.com/bd878/gallery/server/messages/internal/repository/postgres"
 	controller "github.com/bd878/gallery/server/messages/internal/controller/distributed"
+	eventshandler "github.com/bd878/gallery/server/messages/internal/handler/events"
 	grpchandler "github.com/bd878/gallery/server/messages/internal/handler/grpc"
 )
 
@@ -39,17 +43,19 @@ type Config struct {
 	SerfAddr            string
 	SerfJoinAddrs       []string
 	SessionsServiceAddr string
+	NatsAddr            string
 }
 
 type Server struct {
 	*grpc.Server
 	conf             Config
+	nc               *nats.Conn
 	mux              cmux.CMux
 	pool             *pgxpool.Pool
 	listener         net.Listener
 	grpcListener     net.Listener
-	controller      *controller.DistributedMessages
-	membership      *membership.Membership
+	controller       *controller.DistributedMessages
+	membership       *membership.Membership
 }
 
 func New(cfg Config) *Server {
@@ -66,22 +72,35 @@ func New(cfg Config) *Server {
 		listener:      listener,
 	}
 
-	server.setupDB()
-	server.setupRaft(logger.Default())
+	if err := server.setupDB(); err != nil {
+		panic(err)
+	}
+
+	if err := server.setupNats(); err != nil {
+		panic(err)
+	}
+
+	if err := server.setupRaft(logger.Default()); err != nil {
+		panic(err)
+	}
+
 	server.setupGRPC(logger.Default())
 
 	return server
 }
 
-func (s *Server) setupDB() {
-	var err error
+func (s *Server) setupDB() (err error) {
 	s.pool, err = pgxpool.New(context.Background(), s.conf.PGConn)
-	if err != nil {
-		panic(err)
-	}
+	return
 }
 
-func (s *Server) setupRaft(log *logger.Logger) {
+func (s *Server) setupNats() (err error) {
+	s.nc, err = nats.Connect(s.conf.NatsAddr)
+
+	return
+}
+
+func (s *Server) setupRaft(log *logger.Logger) error {
 	repo := repository.New(s.conf.TableName, s.pool)
 
 	raftLogLevel := hclog.Error.String()
@@ -104,7 +123,12 @@ func (s *Server) setupRaft(log *logger.Logger) {
 		return bytes.Compare(b, []byte{byte(controller.RaftRPC)}) == 0
 	})
 
-	control, err := controller.New(repo, controller.Config{
+
+	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
+	stream := broker.NewStream(s.nc)
+	eventshandler.RegisterDomainEventHandlers(dispatcher, eventshandler.NewDomainEventHandlers(stream))
+
+	control, err := controller.New(controller.Config{
 		Raft: raft.Config{
 			LocalID: raft.ServerID(s.conf.NodeName),
 			LogLevel: raftLogLevel,
@@ -113,12 +137,14 @@ func (s *Server) setupRaft(log *logger.Logger) {
 		Bootstrap:   s.conf.RaftBootstrap,
 		DataDir:     s.conf.DataPath,
 		Servers:     s.conf.RaftServers,
-	})
+	}, repo, dispatcher)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	s.controller = control
+
+	return nil
 }
 
 func (s *Server) setupGRPC(log *logger.Logger) {
@@ -156,7 +182,7 @@ func (s *Server) setupGRPC(log *logger.Logger) {
 func (s *Server) Run(ctx context.Context) (err error) {
 	waiter := waiter.New(waiter.CatchSignals())
 
-	waiter.Add(s.WaitForRPC, s.WaitForPool)
+	waiter.Add(s.WaitForRPC, s.WaitForPool, s.WaitForStream)
 
 	return waiter.Wait()
 }
@@ -214,6 +240,25 @@ func (s *Server) WaitForPool(ctx context.Context) (err error) {
 		return nil
 	})
 
+	return group.Wait()
+}
+
+func (s *Server) WaitForStream(ctx context.Context) error {
+	closed := make(chan struct{})
+	s.nc.SetClosedHandler(func (*nats.Conn) {
+		close(closed)
+	})
+	group, gCtx := errgroup.WithContext(ctx)
+	group.Go(func() error {
+		fmt.Fprintln(os.Stdout, "messsage stream started")
+		defer fmt.Fprintln(os.Stdout, "message stream stopped")
+		<-closed
+		return nil
+	})
+	group.Go(func() error {
+		<-gCtx.Done()
+		return s.nc.Drain()
+	})
 	return group.Wait()
 }
 

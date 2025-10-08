@@ -45,6 +45,7 @@ func main() {
 		SerfAddr:              cfg.SerfAddr,
 		SerfJoinAddrs:         cfg.SerfJoinAddrs,
 		SessionsServiceAddr:   cfg.SessionsServiceAddr,
+		NatsAddr:              cfg.NatsAddr,
 	})
 
 	if err := server.Run(context.Background()); err != nil {
