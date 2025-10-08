@@ -114,5 +114,11 @@ package Search as search {
 	search_grpc - search_db
 }
 
+package Nats as nats {
+	component tcp as nats_tcp
+
+	nats_tcp -- "0.0.0.0:4222"
+}
+
 footer 01.10.25
 @enduml
