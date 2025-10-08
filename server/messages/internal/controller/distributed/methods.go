@@ -119,6 +119,11 @@ func (m *DistributedMessages) DeleteMessages(ctx context.Context, ids []int64, u
 	logger.Debugw("delete messages", "ids", ids, "user_id", userID)
 
 	for _, id := range ids {
+		event, err := domain.DeleteMessage(id)
+		if err != nil {
+			return err
+		}
+
 		cmd, err := proto.Marshal(&DeleteCommand{
 			Id:     id,
 			UserId: userID,
@@ -128,6 +133,11 @@ func (m *DistributedMessages) DeleteMessages(ctx context.Context, ids []int64, u
 		}
 
 		_, err = m.apply(ctx, DeleteRequest, cmd)
+		if err != nil {
+			return err
+		}
+
+		err = m.publisher.Publish(ctx, event)
 		if err != nil {
 			return err
 		}

@@ -6,13 +6,16 @@ const (
 )
 
 type MessageCreated struct {
-	Message *Message
+	ID        int64
+	Text      string
+	Title     string
+	Name      string
 }
 
 func (MessageCreated) Key() string { return MessageCreatedEvent }
 
 type MessageDeleted struct {
-	Message *Message
+	ID        int64
 }
 
 func (MessageDeleted) Key() string { return MessageDeletedEvent }

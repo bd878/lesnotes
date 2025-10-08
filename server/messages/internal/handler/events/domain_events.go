@@ -5,6 +5,7 @@ import (
 
 	"github.com/bd878/gallery/server/ddd"
 	"github.com/bd878/gallery/server/am"
+	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/messages/internal/domain"
 )
 
@@ -33,9 +34,11 @@ func (h domainHandler[T]) HandleEvent(ctx context.Context, event T) error {
 }
 
 func (h domainHandler[T]) onMessageCreated(ctx context.Context, event ddd.Event) error {
+	logger.Debugw("message created event", "name", event.EventName())
 	return nil
 }
 
 func (h domainHandler[T]) onMessageDeleted(ctx context.Context, event ddd.Event) error {
+	logger.Debugw("message deleted event", "name", event.EventName())
 	return nil
 }
