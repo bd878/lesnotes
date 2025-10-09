@@ -1,31 +1,24 @@
 package am
 
 type (
-	RawMessageStream = MessageStream[RawMessage, IncomingRawMessage]
+	RawMessageHandler = MessageHandler[IncomingMessage]
 
-	RawMessage interface {
-		Message
-		Data() []byte
-	}
+	RawMessageStream = MessageStream[Message, IncomingMessage]
 
-	IncomingRawMessage interface {
-		IncomingMessage
-		Data() []byte
-	}
-
-	RawMessageHandler = MessageHandler[IncomingRawMessage]
-
-	rawMessage struct {
-		id      string
-		name    string
-		subject string
-		data    []byte
+	RawMessage struct {
+		id    string
+		name  string
+		data  []byte
 	}
 )
 
-var _ RawMessage = (*rawMessage)(nil)
+var _ Message = (*RawMessage)(nil)
 
-func (m rawMessage) ID() string { return m.id }
-func (m rawMessage) MessageName() string { return m.name }
-func (m rawMessage) Data() []byte { return m.data }
-func (m rawMessage) Subject() string { return m.subject }
+func NewRawMessage(id, name string, data []byte) *RawMessage {
+	return &RawMessage{id, name, data}
+}
+
+func (m RawMessage) ID() string { return m.id }
+func (m RawMessage) MessageName() string { return m.id }
+func (m RawMessage) Data() []byte { return m.data }
+

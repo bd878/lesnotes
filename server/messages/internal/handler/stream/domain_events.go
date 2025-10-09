@@ -2,20 +2,23 @@ package stream
 
 import (
 	"context"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/bd878/gallery/server/ddd"
 	"github.com/bd878/gallery/server/am"
 	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/messages/internal/domain"
+	"github.com/bd878/gallery/server/messages/pkg/events"
 )
 
 type domainHandler[T ddd.Event] struct {
-	publisher am.MessagePublisher[am.RawMessage]
+	publisher am.MessagePublisher[am.Message]
 }
 
 var _ ddd.EventHandler[ddd.Event] = (*domainHandler[ddd.Event])(nil)
 
-func NewDomainEventHandlers(publisher am.MessagePublisher[am.RawMessage]) *domainHandler[ddd.Event] {
+func NewDomainEventHandlers(publisher am.MessagePublisher[am.Message]) *domainHandler[ddd.Event] {
 	return &domainHandler[ddd.Event]{publisher}
 }
 
@@ -34,8 +37,19 @@ func (h domainHandler[T]) HandleEvent(ctx context.Context, event T) error {
 }
 
 func (h domainHandler[T]) onMessageCreated(ctx context.Context, event ddd.Event) error {
-	logger.Debugw("message created event", "name", event.EventName())
-	return nil
+	payload := event.Payload().(*domain.MessageCreated)
+	data, err := proto.Marshal(&api.MessageCreated{
+		Id:       payload.ID,
+		UserId:   payload.UserID,
+		Text:     payload.Text,
+		Title:    payload.Title,
+		Name:     payload.Name,
+	})
+	if err != nil {
+		return err
+	}
+
+	return h.publisher.Publish(ctx, events.MessageCreatedEvent, am.NewRawMessage(event.ID(), events.MessageCreatedEvent, data))
 }
 
 func (h domainHandler[T]) onMessageDeleted(ctx context.Context, event ddd.Event) error {

@@ -7,8 +7,8 @@ import (
 type (
 	Message interface {
 		ID()          string
-		Subject()     string
 		MessageName() string
+		Data()        []byte
 	}
 
 	IncomingMessage interface {

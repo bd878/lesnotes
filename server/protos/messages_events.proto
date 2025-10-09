@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package messages_events.v1;
+
+option go_package = "github.com/bd878/gallery/server/api";
+
+message MessageCreated {
+	int64   id = 1;
+	int64   user_id = 2;
+	string  text = 3;
+	string  title = 4;
+	string  name = 5;
+}
+
+message MessageDeleted {
+	int64   id = 1;
+}

@@ -15,7 +15,7 @@ type (
 	}
 )
 
-var _ am.IncomingRawMessage = (*rawMessage)(nil)
+var _ am.IncomingMessage = (*rawMessage)(nil)
 
 func (m rawMessage) ID() string { return m.id }
 func (m rawMessage) Data() []byte { return m.data }
