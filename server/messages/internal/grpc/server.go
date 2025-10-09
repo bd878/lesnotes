@@ -27,7 +27,7 @@ import (
 	membership "github.com/bd878/gallery/server/messages/internal/discovery/serf"
 	repository "github.com/bd878/gallery/server/messages/internal/repository/postgres"
 	controller "github.com/bd878/gallery/server/messages/internal/controller/distributed"
-	eventshandler "github.com/bd878/gallery/server/messages/internal/handler/events"
+	streamhandler "github.com/bd878/gallery/server/messages/internal/handler/stream"
 	grpchandler "github.com/bd878/gallery/server/messages/internal/handler/grpc"
 )
 
@@ -126,7 +126,7 @@ func (s *Server) setupRaft(log *logger.Logger) error {
 
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
 	stream := broker.NewStream(s.nc)
-	eventshandler.RegisterDomainEventHandlers(dispatcher, eventshandler.NewDomainEventHandlers(stream))
+	streamhandler.RegisterDomainEventHandlers(dispatcher, streamhandler.NewDomainEventHandlers(stream))
 
 	control, err := controller.New(controller.Config{
 		Raft: raft.Config{

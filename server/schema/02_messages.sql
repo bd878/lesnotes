@@ -17,8 +17,6 @@ CREATE TABLE IF NOT EXISTS messages.messages1
 	PRIMARY KEY(id)
 );
 
-CREATE INDEX IF NOT EXISTS messages1_text ON messages.messages1(text);
-
 CREATE TRIGGER created_at_messages1_trgr BEFORE UPDATE ON messages.messages1 FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
 CREATE TRIGGER updated_at_messages1_trgr BEFORE UPDATE ON messages.messages1 FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 
@@ -38,8 +36,6 @@ CREATE TABLE IF NOT EXISTS messages.messages2
 	PRIMARY KEY(id)
 );
 
-CREATE INDEX IF NOT EXISTS messages2_text ON messages.messages2(text);
-
 CREATE TRIGGER created_at_messages2_trgr BEFORE UPDATE ON messages.messages2 FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
 CREATE TRIGGER updated_at_messages2_trgr BEFORE UPDATE ON messages.messages2 FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 
@@ -58,8 +54,6 @@ CREATE TABLE IF NOT EXISTS messages.messages3
 	updated_at   timestamptz   NOT NULL DEFAULT NOW(),
 	PRIMARY KEY(id)
 );
-
-CREATE INDEX IF NOT EXISTS messages3_text ON messages.messages3(text);
 
 CREATE TRIGGER created_at_messages3_trgr BEFORE UPDATE ON messages.messages3 FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
 CREATE TRIGGER updated_at_messages3_trgr BEFORE UPDATE ON messages.messages3 FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();

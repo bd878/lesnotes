@@ -31,6 +31,32 @@ paths:
               schema:
                 $ref: '#/components/schemas/serverError'
 
+  /search/v2/messages:
+    post:
+      summary: Search messages by text
+      description: |
+        It searches in a user's messages, both public and private,
+        for a substring of a given string.
+        Search is case insensitive. Searches via json api
+      operationId: searchMessagesJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/searchMessagesJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/searchOk'
+        "4XX":
+          description: error 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
 # END SEARCH MESSAGES
 
 # SEARCH FILES
@@ -44,6 +70,32 @@ paths:
         Searches user files, both public and private,
         by given substring in file name
       operationId: searchFiles
+      response:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: "#/components/schemas/searchOk"
+        "4XX":
+          description: error 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+
+  /search/v2/files:
+    post:
+      summary: Search files by text
+      description: |
+        Searches user files, both public and private,
+        by given substring in file name. Searches via json api
+      operationId: searchFilesJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/searchFilesJson'
       response:
         "200":
           description: OK
@@ -94,6 +146,18 @@ components:
 # END ERROR
 
 # SEARCH MESSAGES
+    searchMessagesJson:
+      type: object
+      token:
+        type: string
+        example: "AAAAAA"
+      request:
+        type: object
+        properties:
+          user:
+            type: integer
+            required: false
+
     searchOk:
       type: object
       status:
@@ -113,6 +177,20 @@ components:
 
 # END SEARCH MESSAGES
 
+# SEARCH FILES
+    searchFilesJson:
+      type: object
+      token:
+        type: string
+        example: "AAAAAA"
+      request:
+        type: object
+        properties:
+          user:
+            type: integer
+            required: false
+
+# END SEARCH FILES
     message:
       type: object
       properties:
