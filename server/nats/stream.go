@@ -21,7 +21,7 @@ func NewStream(nc *nats.Conn) *Stream {
 	return &Stream{nc: nc}
 }
 
-func (s *Stream) Publish(ctx context.Context, topicName string, message am.RawMessage) error {
+func (s *Stream) Publish(ctx context.Context, topicName string, message am.Message) error {
 	data, err := proto.Marshal(&api.StreamMessage{
 		Id:   message.ID(),
 		Name: message.MessageName(),

@@ -11,11 +11,13 @@ import (
 
 	"github.com/bd878/gallery/server/waiter"
 	"github.com/bd878/gallery/server/logger"
+	broker "github.com/bd878/gallery/server/nats"
 	usermodel "github.com/bd878/gallery/server/users/pkg/model"
 	httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
 	usersgateway "github.com/bd878/gallery/server/internal/gateway/users"
 	sessionsgateway "github.com/bd878/gallery/server/internal/gateway/sessions"
 	httphandler "github.com/bd878/gallery/server/search/internal/handler/http"
+	streamhandler "github.com/bd878/gallery/server/search/internal/handler/stream"
 	controller "github.com/bd878/gallery/server/search/internal/controller/search"
 )
 
@@ -52,6 +54,8 @@ func New(conf Config) *Server {
 
 	usersGateway := usersgateway.New(conf.UsersServiceAddr)
 	sessionsGateway := sessionsgateway.New(conf.SessionsServiceAddr)
+
+	streamhandler.RegisterIntegrationEventHandlers(broker.NewStream(server.nc), streamhandler.NewIntegrationEventHandlers())
 
 	grpcCtrl := controller.New(controller.Config{})
 	handler := httphandler.New(grpcCtrl)

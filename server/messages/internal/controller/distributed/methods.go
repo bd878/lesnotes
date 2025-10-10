@@ -119,7 +119,7 @@ func (m *DistributedMessages) DeleteMessages(ctx context.Context, ids []int64, u
 	logger.Debugw("delete messages", "ids", ids, "user_id", userID)
 
 	for _, id := range ids {
-		event, err := domain.DeleteMessage(id)
+		event, err := domain.DeleteMessage(id, userID)
 		if err != nil {
 			return err
 		}
