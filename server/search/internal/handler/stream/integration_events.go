@@ -3,38 +3,40 @@ package stream
 import (
 	"context"
 
-	"github.com/bd878/gallery/server/ddd"
 	"github.com/bd878/gallery/server/am"
-	"github.com/bd878/gallery/server/messages/"
+	"github.com/bd878/gallery/server/logger"
+	messageevents "github.com/bd878/gallery/server/messages/pkg/events"
 )
 
-type integrationHandlers[T ddd.Event] struct {
+type integrationHandlers struct {
 }
 
-var _ ddd.EventHandler[ddd.Event] = (*integrationHandlers[ddd.Event])(nil)
+var _ am.RawMessageHandler = (*integrationHandlers)(nil)
 
-func NewIntegrationEventHandlers() ddd.EventHandler[ddd.Event] {
-	return integrationHandlers[ddd.Event]{}
+func NewIntegrationEventHandlers() am.RawMessageHandler {
+	return integrationHandlers{}
 }
 
-func RegisterIntegrationEventHandlers(subscriber am.EventSubscriber, handlers ddd.EventHandler[ddd.Event]) (err error) {
-	if err = subscriber.Subscribe(); err != nil {
-		return
+func RegisterIntegrationEventHandlers(subscriber am.RawMessageSubscriber, handlers am.RawMessageHandler) (err error) {
+	return subscriber.Subscribe(messageevents.MessagesChannel, handlers)
+}
+
+func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingMessage) error {
+	switch msg.MessageName() {
+	case messageevents.MessageCreatedEvent:
+		return h.handleMessageCreated(ctx, msg)
+	case messageevents.MessageDeletedEvent:
+		return h.handleMessageDeleted(ctx, msg)
 	}
-
 	return nil
 }
 
-func (h integrationHandlers[T]) HandleEvent(ctx context.Context, event T) error {
-	switch event.EventName() {
-	case 
-	}
+func (h integrationHandlers) handleMessageCreated(ctx context.Context, msg am.IncomingMessage) error {
+	logger.Debugw("handle message created", "name", msg.MessageName())
+	return msg.Ack()
 }
 
-func (h integrationHandlers[T]) handleMessageCreated(ctx context.Context, event T) error {
-	return nil
-}
-
-func (h integrationHandlers[T]) handleMessageDeleted(ctx context.Context, event T) error {
-	return nil
+func (h integrationHandlers) handleMessageDeleted(ctx context.Context, msg am.IncomingMessage) error {
+	logger.Debugw("handle message deleted", "name", msg.MessageName())
+	return msg.Ack()
 }

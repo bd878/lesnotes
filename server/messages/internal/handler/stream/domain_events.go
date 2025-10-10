@@ -6,7 +6,6 @@ import (
 
 	"github.com/bd878/gallery/server/ddd"
 	"github.com/bd878/gallery/server/am"
-	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/messages/internal/domain"
 	"github.com/bd878/gallery/server/messages/pkg/events"
@@ -53,6 +52,14 @@ func (h domainHandler[T]) onMessageCreated(ctx context.Context, event ddd.Event)
 }
 
 func (h domainHandler[T]) onMessageDeleted(ctx context.Context, event ddd.Event) error {
-	logger.Debugw("message deleted event", "name", event.EventName())
-	return nil
+	payload := event.Payload().(*domain.MessageDeleted)
+	data, err := proto.Marshal(&api.MessageDeleted{
+		Id:     payload.ID,
+		UserId: payload.UserID, 
+	})
+	if err != nil {
+		return err
+	}
+
+	return h.publisher.Publish(ctx, events.MessageDeletedEvent, am.NewRawMessage(event.ID(), events.MessageDeletedEvent, data))
 }

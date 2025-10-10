@@ -46,8 +46,9 @@ type MessageDeleted struct {
 
 func (MessageDeleted) Key() string { return MessageDeletedEvent }
 
-func DeleteMessage(id int64) (ddd.Event, error) {
+func DeleteMessage(id, userID int64) (ddd.Event, error) {
 	return ddd.NewEvent(MessageDeletedEvent, &MessageDeleted{
 		ID:     id,
+		UserID: userID,
 	}), nil
 }

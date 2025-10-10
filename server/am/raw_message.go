@@ -3,6 +3,8 @@ package am
 type (
 	RawMessageHandler = MessageHandler[IncomingMessage]
 
+	RawMessageSubscriber = MessageSubscriber[IncomingMessage]
+
 	RawMessageStream = MessageStream[Message, IncomingMessage]
 
 	RawMessage struct {
