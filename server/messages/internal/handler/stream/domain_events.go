@@ -48,7 +48,7 @@ func (h domainHandler[T]) onMessageCreated(ctx context.Context, event ddd.Event)
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.MessageCreatedEvent, am.NewRawMessage(event.ID(), events.MessageCreatedEvent, data))
+	return h.publisher.Publish(ctx, events.MessagesChannel, am.NewRawMessage(event.ID(), events.MessageCreatedEvent, data))
 }
 
 func (h domainHandler[T]) onMessageDeleted(ctx context.Context, event ddd.Event) error {
@@ -61,5 +61,5 @@ func (h domainHandler[T]) onMessageDeleted(ctx context.Context, event ddd.Event)
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.MessageDeletedEvent, am.NewRawMessage(event.ID(), events.MessageDeletedEvent, data))
+	return h.publisher.Publish(ctx, events.MessagesChannel, am.NewRawMessage(event.ID(), events.MessageDeletedEvent, data))
 }

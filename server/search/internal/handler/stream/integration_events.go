@@ -22,6 +22,7 @@ func RegisterIntegrationEventHandlers(subscriber am.RawMessageSubscriber, handle
 }
 
 func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingMessage) error {
+	logger.Debugw("handle message", "name", msg.MessageName(), "subject", msg.Subject())
 	switch msg.MessageName() {
 	case messageevents.MessageCreatedEvent:
 		return h.handleMessageCreated(ctx, msg)
