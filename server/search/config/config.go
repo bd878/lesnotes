@@ -10,5 +10,6 @@ type Config struct {
 	NatsAddr             string      `json:"nats_addr"`
 
 	PGConn               string      `json:"pg_conn"`
-	TableName            string      `json:"table_name"`
+	MessagesTableName    string      `json:"messages_table_name"`
+	FilesTableName       string      `json:"files_table_name"`
 }

@@ -2,10 +2,14 @@ package http
 
 import (
 	"io"
+	"context"
 	"net/http"
+
+	searchmodel "github.com/bd878/gallery/server/search/pkg/model"
 )
 
 type Controller interface {
+	SearchMessages(ctx context.Context, userID int64, query string) (list []*searchmodel.Message, err error)
 }
 
 type Handler struct {

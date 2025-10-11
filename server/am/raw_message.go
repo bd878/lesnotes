@@ -21,6 +21,6 @@ func NewRawMessage(id, name string, data []byte) *RawMessage {
 }
 
 func (m RawMessage) ID() string { return m.id }
-func (m RawMessage) MessageName() string { return m.id }
+func (m RawMessage) MessageName() string { return m.name }
 func (m RawMessage) Data() []byte { return m.data }
 
