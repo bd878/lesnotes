@@ -32,6 +32,7 @@ func CreateMessage(id int64, text, title string, fileIDs []int64, threadID int64
 
 	return ddd.NewEvent(MessageCreatedEvent, &MessageCreated{
 		ID:     id,
+		UserID: userID,
 		Text:   text,
 		Title:  title,
 		Name:   name,
