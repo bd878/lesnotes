@@ -4,11 +4,13 @@ import (
 	"context"
 
 	"github.com/bd878/gallery/server/logger"
+	searchmodel "github.com/bd878/gallery/server/search/pkg/model"
 )
 
 type MessagesRepository interface {
 	SaveMessage(ctx context.Context, id, userID int64, name, title, text string) error
 	DeleteMessage(ctx context.Context, id, userID int64) error
+	SearchMessages(ctx context.Context, userID int64, substr string) (list []*searchmodel.Message, err error)
 }
 
 type FilesRepository interface {}
@@ -35,4 +37,10 @@ func (c *Controller) DeleteMessage(ctx context.Context, id, userID int64) (err e
 	logger.Debugw("delete search message", "id", id, "user_id", userID)
 
 	return c.messagesRepo.DeleteMessage(ctx, id, userID)
+}
+
+func (c *Controller) SearchMessages(ctx context.Context, userID int64, substr string) (list []*searchmodel.Message, err error) {
+	logger.Debugw("search messages", "user_id", userID, "substr", substr)
+
+	return c.messagesRepo.SearchMessages(ctx, userID, substr)
 }

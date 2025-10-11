@@ -1,0 +1,1 @@
+url = https://%STAGE%lesnotes.space/search/v1/messages?query=%QUERY%

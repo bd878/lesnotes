@@ -1,0 +1,124 @@
+@startuml
+
+skinparam packageStyle rectangle
+
+top to bottom direction
+
+header LesNotes
+title Production environment
+
+together {
+	package users
+	package files
+	package messages
+	package telemetry
+	package sessions
+	package front
+	package search
+}
+
+package Front as front {
+	component http as front_http
+	front_http -- "192.168.10.2:8081"
+}
+
+package Telemetry as telemetry {
+	component http as telemetry_http
+	front_http -- "192.168.10.2:8079"
+}
+
+package Users as users {
+	component http as users_http
+	component grpc as users_grpc
+	database PostgreSQL as users_db
+
+	users_http -- "192.168.10.2:8084"
+	users_grpc -- "192.168.10.2:8085"
+
+	users_grpc - users_db
+	users_http - users_grpc
+}
+
+package Files as files {
+	component http as files_http
+	component grpc as files_grpc
+	database PostgreSQL as files_db
+
+	files_http -- "192.168.10.2:8082"
+	files_grpc -- "192.168.10.2:8086"
+
+	files_grpc - files_db 
+	files_http - files_grpc
+}
+
+package Messages as messages {
+	component http as messages_http
+
+	messages_http -- "192.168.10.2:8083"
+
+	package "messages@9001" as 9101 {
+		component grpc as 9001_grpc
+		database PostgreSQL as 9001_db
+
+		9001_grpc -- "192.168.10.2:9001"
+		9001_grpc - 9001_db
+	}
+
+	package "messages@9002" as 9002 {
+		component grpc as 9002_grpc
+		database PostgreSQL as 9002_db
+
+		9002_grpc -- "192.168.10.2:9002"
+		9002_grpc - 9002_db
+	}
+
+	package "messages@9003" as 9003 {
+		component grpc as 9003_grpc
+		database PostgreSQL as 9003_db
+
+		9003_grpc -- "192.168.10.2:9003"
+		9003_grpc - 9003_db
+	}
+}
+
+package Sessions as sessions {
+	component grpc as sessions_grpc
+	database PostgreSQL as sessions_db
+
+	sessions_grpc -- "192.168.10.2:8087"
+
+	sessions_grpc - sessions_db
+}
+
+package Threads as threads {
+	component grpc as threads_grpc
+	component http as threads_http
+	database PostgreSQL as threads_db
+
+	threads_http -- "192.168.10.2:8088"
+	threads_grpc -- "192.168.10.2:8089"
+
+	threads_grpc - threads_db
+	threads_http - threads_grpc
+}
+
+package Search as search {
+	component http as search_http
+	component grpc as search_grpc
+	database PostgreSQL as search_db
+
+	search_http -- "192.168.10.2:8090"
+	search_grpc -- "192.168.10.2:8091"
+
+	search_http - search_db
+	search_grpc - search_db
+}
+
+package Nats as nats {
+	component tcp as nats_tcp
+
+	nats_tcp -- "127.0.0.1:4222"
+}
+
+footer 11.10.25
+@enduml
