@@ -34,10 +34,10 @@ func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingM
 
 func (h integrationHandlers) handleMessageCreated(ctx context.Context, msg am.IncomingMessage) error {
 	logger.Debugw("handle message created", "name", msg.MessageName())
-	return msg.Ack()
+	return nil
 }
 
 func (h integrationHandlers) handleMessageDeleted(ctx context.Context, msg am.IncomingMessage) error {
 	logger.Debugw("handle message deleted", "name", msg.MessageName())
-	return msg.Ack()
+	return nil
 }

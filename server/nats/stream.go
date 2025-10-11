@@ -55,8 +55,6 @@ func (s *Stream) handleMsg(topicName string, handler am.RawMessageHandler) func(
 			name:    m.GetName(),
 			data:    m.GetData(),
 			subject: topicName,
-			ackFn:   func() error { return natsMsg.Ack() },
-			nakFn:   func() error { return natsMsg.Nak() },
 		}
 
 		wCtx, cancel := context.WithCancel(context.Background())
@@ -69,15 +67,8 @@ func (s *Stream) handleMsg(topicName string, handler am.RawMessageHandler) func(
 
 		select {
 		case err = <-errc:
-			if err == nil {
-				if ackErr := msg.Ack(); ackErr != nil {
-					logger.Errorw("failed to ack message", "error", ackErr)
-				}
-				return
-			}
-			logger.Errorw("error while handling message", "error", err)
-			if nakErr := msg.Nak(); nakErr != nil {
-				logger.Errorw("failed to nak message", "error", nakErr)
+			if err != nil {
+				logger.Errorw("error while handling message", "error", err)
 			}
 			return
 		case <-wCtx.Done():

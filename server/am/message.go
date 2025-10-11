@@ -14,8 +14,6 @@ type (
 	IncomingMessage interface {
 		Message
 		Subject() string
-		Ack()     error
-		Nak()     error
 	}
 
 	MessageHandler[I IncomingMessage] interface {
