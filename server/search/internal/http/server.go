@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"golang.org/x/sync/errgroup"
 	"github.com/nats-io/nats.go"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/bd878/gallery/server/waiter"
 	"github.com/bd878/gallery/server/logger"
@@ -18,6 +19,7 @@ import (
 	sessionsgateway "github.com/bd878/gallery/server/internal/gateway/sessions"
 	httphandler "github.com/bd878/gallery/server/search/internal/handler/http"
 	streamhandler "github.com/bd878/gallery/server/search/internal/handler/stream"
+	repository "github.com/bd878/gallery/server/search/internal/repository/postgres"
 	controller "github.com/bd878/gallery/server/search/internal/controller/search"
 )
 
@@ -27,11 +29,15 @@ type Config struct {
 	SessionsServiceAddr string
 	NatsAddr            string
 	PGConn              string
+	MessagesTableName   string
+	FilesTableName      string
 }
 
 type Server struct {
 	*http.Server
 	conf   Config
+
+	pool   *pgxpool.Pool
 	nc     *nats.Conn
 }
 
@@ -52,13 +58,19 @@ func New(conf Config) *Server {
 		panic(err)
 	}
 
+	if err := server.setupDB(); err != nil {
+		panic(err)
+	}
+
 	usersGateway := usersgateway.New(conf.UsersServiceAddr)
 	sessionsGateway := sessionsgateway.New(conf.SessionsServiceAddr)
 
-	streamhandler.RegisterIntegrationEventHandlers(broker.NewStream(server.nc), streamhandler.NewIntegrationEventHandlers())
+	repo := repository.New(server.pool, conf.MessagesTableName, conf.FilesTableName)
+	ctrl := controller.New(controller.Config{}, repo, repo)
 
-	grpcCtrl := controller.New(controller.Config{})
-	handler := httphandler.New(grpcCtrl)
+	streamhandler.RegisterIntegrationEventHandlers(broker.NewStream(server.nc), streamhandler.NewIntegrationEventHandlers(ctrl))
+
+	handler := httphandler.New(ctrl)
 
 	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
 	mux.Handle("/search/v1/messages", middleware.Build(handler.SearchMessages))
@@ -83,9 +95,14 @@ func (s *Server) setupNats() (err error) {
 func (s *Server) Run(ctx context.Context) (err error) {
 	waiter := waiter.New(waiter.CatchSignals())
 
-	waiter.Add(s.WaitForServer, s.WaitForStream)
+	waiter.Add(s.WaitForPool, s.WaitForServer, s.WaitForStream)
 
 	return waiter.Wait()
+}
+
+func (s *Server) setupDB() (err error) {
+	s.pool, err = pgxpool.New(context.Background(), s.conf.PGConn)
+	return
 }
 
 func (s *Server) WaitForServer(ctx context.Context) (err error) {
@@ -130,5 +147,18 @@ func (s *Server) WaitForStream(ctx context.Context) error {
 		<-gCtx.Done()
 		return s.nc.Drain()
 	})
+	return group.Wait()
+}
+
+func (s *Server) WaitForPool(ctx context.Context) (err error) {
+	group, gCtx := errgroup.WithContext(ctx)
+
+	group.Go(func() error {
+		<-gCtx.Done()
+		fmt.Fprintln(os.Stdout, "closing pgpool connections")
+		s.pool.Close()
+		return nil
+	})
+
 	return group.Wait()
 }

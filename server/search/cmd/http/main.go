@@ -38,6 +38,8 @@ func main() {
 		SessionsServiceAddr:   cfg.SessionsServiceAddr,
 		NatsAddr:              cfg.NatsAddr,
 		PGConn:                cfg.PGConn,
+		MessagesTableName:     cfg.MessagesTableName,
+		FilesTableName:        cfg.FilesTableName,
 	})
 
 	if err := server.Run(context.Background()); err != nil {
