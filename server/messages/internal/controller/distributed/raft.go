@@ -18,11 +18,14 @@ import (
 var ErrMsgExist = errors.New("message exists")
 
 type Config struct {
-	Raft         raft.Config
-	StreamLayer *StreamLayer
-	Bootstrap    bool
-	DataDir      string
-	Servers      []string
+	Raft                 raft.Config
+	StreamLayer          *StreamLayer
+	Bootstrap            bool
+	DataDir              string
+	Servers              []string
+	RetainSnapshots      int
+	MaxConnectionsPool   int
+	NetworkTimeout       time.Duration
 }
 
 type DistributedMessages struct {
@@ -32,10 +35,22 @@ type DistributedMessages struct {
 	publisher    ddd.EventPublisher[ddd.Event]
 }
 
-func New(cfg Config, repo Repository, publisher ddd.EventPublisher[ddd.Event]) (*DistributedMessages, error) {
+func New(conf Config, repo Repository, publisher ddd.EventPublisher[ddd.Event]) (*DistributedMessages, error) {
+	if conf.RetainSnapshots == 0 {
+		conf.RetainSnapshots = 1
+	}
+
+	if conf.MaxConnectionsPool == 0 {
+		conf.MaxConnectionsPool = 5
+	}
+
+	if conf.NetworkTimeout == 0 {
+		conf.NetworkTimeout = 10 * time.Second
+	}
+
 	m := &DistributedMessages{
 		repo:      repo,
-		conf:      cfg,
+		conf:      conf,
 		publisher: publisher,
 	}
 	if err := m.setupRaft(logger.Default()); err != nil {
@@ -60,13 +75,13 @@ func (m *DistributedMessages) setupRaft(log *logger.Logger) error {
 	if err != nil {
 		return err
 	}
-	// TODO: rewrite on SqliteSnapshotStore from sqlite_snapshot branch
-	snapshotStore := raft.NewDiscardSnapshotStore()
 
-	maxPool := 5
-	timeout := 10*time.Second
-	transport := raft.NewNetworkTransport(m.conf.StreamLayer, maxPool, timeout,
-		os.Stderr)
+	snapshotStore, err := raft.NewFileSnapshotStore(filepath.Join(raftPath, "snapshot"), m.conf.RetainSnapshots, os.Stderr)
+	if err != nil {
+		return err
+	}
+
+	transport := raft.NewNetworkTransport(m.conf.StreamLayer, m.conf.MaxConnectionsPool, m.conf.NetworkTimeout, os.Stderr)
 
 	config := raft.DefaultConfig()
 	config.LocalID = m.conf.Raft.LocalID
