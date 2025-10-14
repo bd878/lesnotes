@@ -26,6 +26,7 @@ func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {
 }
 
 func (f *fsm) Restore(reader io.ReadCloser) (err error) {
+	logger.Debugln("restoring fsm from snapshot")
 	err = f.repo.Truncate(context.Background())
 	if err != nil {
 		logger.Errorw("truncate returned error", "error", err)

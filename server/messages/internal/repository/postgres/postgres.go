@@ -824,6 +824,7 @@ func (r *Repository) ReadPath(ctx context.Context, userID, id int64) (path []*mo
 }
 
 func (r *Repository) Truncate(ctx context.Context) (err error) {
+	logger.Debugln("truncating table")
 	_, err = r.pool.Exec(ctx, r.table("TRUNCATE TABLE %s"))
 	return
 }
@@ -850,9 +851,9 @@ func (r *Repository) Dump(ctx context.Context) (reader io.ReadCloser, err error)
 		return
 	}
 
-	go func(ctx context.Context, query string, conn *pgxpool.Conn, w io.WriteCloser) {
-		_, err := conn.Conn().PgConn().CopyTo(ctx, w, query)
-		defer w.Close()
+	go func(ctx context.Context, query string, conn *pgxpool.Conn, writer io.WriteCloser) {
+		_, err := conn.Conn().PgConn().CopyTo(ctx, writer, query)
+		defer writer.Close()
 		defer conn.Release()
 		if err != nil {
 			logger.Errorw("failed to dump", "error", err)
@@ -873,14 +874,8 @@ func (r *Repository) Restore(ctx context.Context, reader io.ReadCloser) (err err
 		return
 	}
 
-	go func(ctx context.Context, query string, conn *pgxpool.Conn, r io.ReadCloser) {
-		_, err := conn.Conn().PgConn().CopyFrom(ctx, r, query)
-		defer r.Close()
-		defer conn.Release()
-		if err != nil {
-			logger.Errorw("failed to restore", "error", err)
-		}
-	}(ctx, query, conn, reader)
+	_, err = conn.Conn().PgConn().CopyFrom(ctx, reader, query)
+	defer conn.Release()
 
 	return
 }

@@ -29,10 +29,11 @@ type Config struct {
 }
 
 type DistributedMessages struct {
-	conf         Config
-	raft         *raft.Raft
-	repo         Repository
-	publisher    ddd.EventPublisher[ddd.Event]
+	conf            Config
+	raft            *raft.Raft
+	repo            Repository
+	snapshotStore   raft.SnapshotStore
+	publisher       ddd.EventPublisher[ddd.Event]
 }
 
 func New(conf Config, repo Repository, publisher ddd.EventPublisher[ddd.Event]) (*DistributedMessages, error) {
@@ -76,7 +77,7 @@ func (m *DistributedMessages) setupRaft(log *logger.Logger) error {
 		return err
 	}
 
-	snapshotStore, err := raft.NewFileSnapshotStore(filepath.Join(raftPath, "snapshot"), m.conf.RetainSnapshots, os.Stderr)
+	m.snapshotStore, err = raft.NewFileSnapshotStore(filepath.Join(raftPath, "snapshot"), m.conf.RetainSnapshots, os.Stderr)
 	if err != nil {
 		return err
 	}
@@ -103,13 +104,13 @@ func (m *DistributedMessages) setupRaft(log *logger.Logger) error {
 	}
 
 	m.raft, err = raft.NewRaft(config, fsm, logStore,
-		stableStore, snapshotStore, transport)
+		stableStore, m.snapshotStore, transport)
 	if err != nil {
 		return err
 	}
 
 	var hasState bool
-	hasState, err = raft.HasExistingState(logStore, stableStore, snapshotStore)
+	hasState, err = raft.HasExistingState(logStore, stableStore, m.snapshotStore)
 	if err != nil {
 		return err
 	}
@@ -216,13 +217,33 @@ func (m *DistributedMessages) Leave(id string) error {
 }
 
 func (m *DistributedMessages) Snapshot() error {
-	leaderFuture := m.raft.VerifyLeader()
-	if err := leaderFuture.Error(); err != nil {
-		return errors.New("cannot snapshot: not a leader")
-	}
-
 	logger.Debugln("snapshot this machine")
 
 	snapshotFuture := m.raft.Snapshot()
 	return snapshotFuture.Error()
+}
+
+func (m *DistributedMessages) Restore() error {
+	leaderFuture := m.raft.VerifyLeader()
+	if err := leaderFuture.Error(); err != nil {
+		return errors.New("cannot restore from snapshot: not a leader")
+	}
+
+	logger.Debugln("restoring from last snapshot")
+	list, err := m.snapshotStore.List()
+	if err != nil {
+		return err
+	}
+
+	if len(list) == 0 {
+		return errors.New("cannot restore from snapshot: no snapshots")
+	}
+
+	snapshot, reader, err := m.snapshotStore.Open(list[0].ID)
+	defer reader.Close()
+	if err != nil {
+		return err
+	}
+
+	return m.raft.Restore(snapshot, reader, 20 * time.Second)
 }
