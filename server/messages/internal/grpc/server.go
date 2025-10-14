@@ -84,7 +84,9 @@ func New(cfg Config) *Server {
 		panic(err)
 	}
 
-	server.setupGRPC(logger.Default())
+	if err := server.setupGRPC(logger.Default()); err != nil {
+		panic(err)
+	}
 
 	return server
 }
@@ -147,7 +149,7 @@ func (s *Server) setupRaft(log *logger.Logger) error {
 	return nil
 }
 
-func (s *Server) setupGRPC(log *logger.Logger) {
+func (s *Server) setupGRPC(log *logger.Logger) error {
 	handler := grpchandler.New(s.controller)
 	member, err := membership.New(
 		membership.Config{
@@ -162,7 +164,7 @@ func (s *Server) setupGRPC(log *logger.Logger) {
 	)
 	if err != nil {
 		log.Errorw("failed to establish membership connection", "error", err)
-		panic(err)
+		return err
 	}
 
 	s.membership = member
@@ -177,6 +179,8 @@ func (s *Server) setupGRPC(log *logger.Logger) {
 
 	grpcListener := s.mux.Match(cmux.Any())
 	s.grpcListener = grpcListener
+
+	return nil
 }
 
 func (s *Server) Run(ctx context.Context) (err error) {

@@ -31,6 +31,8 @@ func (r *Resolver) Build(
 ) (resolver.Resolver, error) {
 	var err error
 
+	logger.Debugw("build resolver", "endpoing", t.Endpoint())
+
 	r.clientConn = cc
 	r.resolverConn, err = grpc.NewClient(
 		t.Endpoint(),
@@ -64,12 +66,16 @@ func (r *Resolver) ResolveNow(resolver.ResolveNowOptions) {
 
 	client := api.NewMessagesClient(r.resolverConn)
 
+	logger.Debugw("resolver resolve now servers", "client", r.resolverConn.Target())
+
 	ctx := context.Background()
 	res, err := client.GetServers(ctx, &api.GetServersRequest{})
 	if err != nil {
 		logger.Errorw("failed to get servers", "error", err)
 		return
 	}
+
+	logger.Debugw("resolver received new servers", "servers", res.Servers)
 
 	var addrs []resolver.Address
 	for _, server := range res.Servers {
