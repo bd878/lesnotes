@@ -65,6 +65,7 @@ func (m *Membership) setupSerf() error {
 type Handler interface {
 	Join(name, addr string) error
 	Leave(name string) error
+	Snapshot() error
 }
 
 func (m *Membership) runHandler() {
@@ -84,6 +85,13 @@ func (m *Membership) runHandler() {
 				}
 				m.handleLeave(member)
 			}
+		case serf.EventQuery:
+			logger.Debugln("performing snapshot")
+			err := m.handler.Snapshot()
+			if err != nil {
+				logger.Debugw("snapshot returned error", "error", err)
+			}
+			logger.Debugln("snapshot finished")
 		default:
 			logger.Warnf("Unknown event: %s\n", e.String())
 		}

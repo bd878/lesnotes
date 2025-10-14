@@ -214,3 +214,15 @@ func (m *DistributedMessages) Leave(id string) error {
 	removeFuture := m.raft.RemoveServer(raft.ServerID(id), 0, 0)
 	return removeFuture.Error()
 }
+
+func (m *DistributedMessages) Snapshot() error {
+	leaderFuture := m.raft.VerifyLeader()
+	if err := leaderFuture.Error(); err != nil {
+		return errors.New("cannot snapshot: not a leader")
+	}
+
+	logger.Debugln("snapshot this machine")
+
+	snapshotFuture := m.raft.Snapshot()
+	return snapshotFuture.Error()
+}
