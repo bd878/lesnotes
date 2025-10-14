@@ -18,24 +18,40 @@ import (
 var ErrMsgExist = errors.New("message exists")
 
 type Config struct {
-	Raft         raft.Config
-	StreamLayer *StreamLayer
-	Bootstrap    bool
-	DataDir      string
-	Servers      []string
+	Raft                 raft.Config
+	StreamLayer          *StreamLayer
+	Bootstrap            bool
+	DataDir              string
+	Servers              []string
+	RetainSnapshots      int
+	MaxConnectionsPool   int
+	NetworkTimeout       time.Duration
 }
 
 type DistributedMessages struct {
-	conf         Config
-	raft         *raft.Raft
-	repo         Repository
-	publisher    ddd.EventPublisher[ddd.Event]
+	conf            Config
+	raft            *raft.Raft
+	repo            Repository
+	snapshotStore   raft.SnapshotStore
+	publisher       ddd.EventPublisher[ddd.Event]
 }
 
-func New(cfg Config, repo Repository, publisher ddd.EventPublisher[ddd.Event]) (*DistributedMessages, error) {
+func New(conf Config, repo Repository, publisher ddd.EventPublisher[ddd.Event]) (*DistributedMessages, error) {
+	if conf.RetainSnapshots == 0 {
+		conf.RetainSnapshots = 1
+	}
+
+	if conf.MaxConnectionsPool == 0 {
+		conf.MaxConnectionsPool = 5
+	}
+
+	if conf.NetworkTimeout == 0 {
+		conf.NetworkTimeout = 10 * time.Second
+	}
+
 	m := &DistributedMessages{
 		repo:      repo,
-		conf:      cfg,
+		conf:      conf,
 		publisher: publisher,
 	}
 	if err := m.setupRaft(logger.Default()); err != nil {
@@ -60,13 +76,13 @@ func (m *DistributedMessages) setupRaft(log *logger.Logger) error {
 	if err != nil {
 		return err
 	}
-	// TODO: rewrite on SqliteSnapshotStore from sqlite_snapshot branch
-	snapshotStore := raft.NewDiscardSnapshotStore()
 
-	maxPool := 5
-	timeout := 10*time.Second
-	transport := raft.NewNetworkTransport(m.conf.StreamLayer, maxPool, timeout,
-		os.Stderr)
+	m.snapshotStore, err = raft.NewFileSnapshotStore(filepath.Join(raftPath, "snapshot"), m.conf.RetainSnapshots, os.Stderr)
+	if err != nil {
+		return err
+	}
+
+	transport := raft.NewNetworkTransport(m.conf.StreamLayer, m.conf.MaxConnectionsPool, m.conf.NetworkTimeout, os.Stderr)
 
 	config := raft.DefaultConfig()
 	config.LocalID = m.conf.Raft.LocalID
@@ -88,13 +104,13 @@ func (m *DistributedMessages) setupRaft(log *logger.Logger) error {
 	}
 
 	m.raft, err = raft.NewRaft(config, fsm, logStore,
-		stableStore, snapshotStore, transport)
+		stableStore, m.snapshotStore, transport)
 	if err != nil {
 		return err
 	}
 
 	var hasState bool
-	hasState, err = raft.HasExistingState(logStore, stableStore, snapshotStore)
+	hasState, err = raft.HasExistingState(logStore, stableStore, m.snapshotStore)
 	if err != nil {
 		return err
 	}
@@ -198,4 +214,36 @@ func (m *DistributedMessages) Leave(id string) error {
 	logger.Info("remove from cluster serve with id", id)
 	removeFuture := m.raft.RemoveServer(raft.ServerID(id), 0, 0)
 	return removeFuture.Error()
+}
+
+func (m *DistributedMessages) Snapshot() error {
+	logger.Debugln("snapshot this machine")
+
+	snapshotFuture := m.raft.Snapshot()
+	return snapshotFuture.Error()
+}
+
+func (m *DistributedMessages) Restore() error {
+	leaderFuture := m.raft.VerifyLeader()
+	if err := leaderFuture.Error(); err != nil {
+		return errors.New("cannot restore from snapshot: not a leader")
+	}
+
+	logger.Debugln("restoring from last snapshot")
+	list, err := m.snapshotStore.List()
+	if err != nil {
+		return err
+	}
+
+	if len(list) == 0 {
+		return errors.New("cannot restore from snapshot: no snapshots")
+	}
+
+	snapshot, reader, err := m.snapshotStore.Open(list[0].ID)
+	defer reader.Close()
+	if err != nil {
+		return err
+	}
+
+	return m.raft.Restore(snapshot, reader, 20 * time.Second)
 }

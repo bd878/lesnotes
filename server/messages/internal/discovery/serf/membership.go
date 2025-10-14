@@ -65,6 +65,8 @@ func (m *Membership) setupSerf() error {
 type Handler interface {
 	Join(name, addr string) error
 	Leave(name string) error
+	Snapshot() error
+	Restore() error
 }
 
 func (m *Membership) runHandler() {
@@ -77,6 +79,7 @@ func (m *Membership) runHandler() {
 				}
 				m.handleJoin(member)
 			}
+
 		case serf.EventMemberLeave, serf.EventMemberFailed:
 			for _, member := range e.(serf.MemberEvent).Members {
 				if m.isLocal(member) {
@@ -84,6 +87,29 @@ func (m *Membership) runHandler() {
 				}
 				m.handleLeave(member)
 			}
+
+		case serf.EventQuery:
+			switch e.String() {
+			case "query: snapshot":
+				logger.Debugln("performing snapshot")
+				err := m.handler.Snapshot()
+				if err != nil {
+					logger.Debugw("snapshot returned error", "error", err)
+				}
+				logger.Debugln("snapshot finished")
+
+			case "query: restore":
+				logger.Debugln("performing restore")
+				err := m.handler.Restore()
+				if err != nil {
+					logger.Debugw("restore returned error", "error", err)
+				}
+				logger.Debugln("restore finished")
+
+			default:
+				logger.Errorw("unknown event payload", "payload", e.String())
+			}
+
 		default:
 			logger.Warnf("Unknown event: %s\n", e.String())
 		}

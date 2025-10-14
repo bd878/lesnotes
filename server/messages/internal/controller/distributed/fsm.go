@@ -10,6 +10,10 @@ import (
 	"github.com/bd878/gallery/server/logger"
 )
 
+type RepoConnection interface {
+	Release()
+}
+
 type Repository interface {
 	Create(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID, userID int64, private bool, name string) (err error)
 	Update(ctx context.Context, userID, id int64, newText, newTitle, newName string, newThreadID int64, newFileIDs []int64, newPrivate int) (err error)
@@ -25,6 +29,8 @@ type Repository interface {
 	ReadMessages(ctx context.Context, userID int64, limit, offset int32) (messages []*model.Message, isLastPage bool, err error)
 	ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*model.Message, err error)
 	Truncate(ctx context.Context) error
+	Dump(ctx context.Context) (reader io.ReadCloser, err error)
+	Restore(ctx context.Context, reader io.ReadCloser) (err error)
 }
 
 var _ raft.FSM = (*fsm)(nil)
@@ -132,13 +138,5 @@ func (f *fsm) applyPrivate(raw []byte) interface{} {
 		return err
 	}
 
-	return nil
-}
-
-func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {
-	return &snapshot{}, nil
-}
-
-func (f *fsm) Restore(_ io.ReadCloser) error {
 	return nil
 }

@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"io"
 	"fmt"
 	"os"
 	"slices"
@@ -823,12 +824,58 @@ func (r *Repository) ReadPath(ctx context.Context, userID, id int64) (path []*mo
 }
 
 func (r *Repository) Truncate(ctx context.Context) (err error) {
-	_, err = r.pool.Exec(ctx, r.table("DELETE FROM %s"))
+	logger.Debugln("truncating table")
+	_, err = r.pool.Exec(ctx, r.table("TRUNCATE TABLE %s"))
 	return
 }
 
 func (r *Repository) countThreadMessages(ctx context.Context, tx pgx.Tx, threadID int64) (count int32, err error) {
 	err = tx.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE thread_id = $1"), threadID).Scan(&count)
+
+	return
+}
+
+func (r *Repository) Dump(ctx context.Context) (reader io.ReadCloser, err error) {
+	var (
+		writer io.WriteCloser
+		conn   *pgxpool.Conn
+	)
+
+	query := r.table("COPY %s TO STDOUT BINARY")
+
+	reader, writer = io.Pipe()
+
+	conn, err = r.pool.Acquire(ctx)
+	if err != nil {
+		conn.Release()
+		return
+	}
+
+	go func(ctx context.Context, query string, conn *pgxpool.Conn, writer io.WriteCloser) {
+		_, err := conn.Conn().PgConn().CopyTo(ctx, writer, query)
+		defer writer.Close()
+		defer conn.Release()
+		if err != nil {
+			logger.Errorw("failed to dump", "error", err)
+		}
+	}(ctx, query, conn, writer)
+
+	return
+}
+
+func (r *Repository) Restore(ctx context.Context, reader io.ReadCloser) (err error) {
+	var conn *pgxpool.Conn
+
+	query := r.table("COPY %s FROM STDIN BINARY")
+
+	conn, err = r.pool.Acquire(ctx) 
+	if err != nil {
+		conn.Release()
+		return
+	}
+
+	_, err = conn.Conn().PgConn().CopyFrom(ctx, reader, query)
+	defer conn.Release()
 
 	return
 }

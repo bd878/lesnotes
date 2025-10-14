@@ -60,4 +60,4 @@ CREATE TRIGGER updated_at_messages3_trgr BEFORE UPDATE ON messages.messages3 FOR
 
 
 GRANT USAGE ON SCHEMA messages TO lesnotes_admin;
-GRANT INSERT, UPDATE, DELETE, SELECT ON ALL TABLES IN SCHEMA messages TO lesnotes_admin;
+GRANT INSERT, UPDATE, DELETE, SELECT, TRUNCATE ON ALL TABLES IN SCHEMA messages TO lesnotes_admin;
