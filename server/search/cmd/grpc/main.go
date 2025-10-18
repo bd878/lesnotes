@@ -3,11 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
-	"context"
 	"os"
+	"context"
 
+	"github.com/bd878/gallery/server/search/internal/grpc"
 	"github.com/bd878/gallery/server/search/config"
-	"github.com/bd878/gallery/server/search/internal/http"
 	"github.com/bd878/gallery/server/logger"
 )
 
@@ -32,11 +32,20 @@ func main() {
 		SkipCaller: 0,
 	}))
 
-	server := http.New(http.Config{
-		Addr:                  cfg.HttpAddr,
-		RpcAddr:               cfg.RpcAddr,
-		UsersServiceAddr:      cfg.UsersServiceAddr,
+	server := grpc.New(grpc.Config{
+		Addr:                  cfg.RpcAddr,
+		PGConn:                cfg.PGConn,
+		NodeName:              cfg.NodeName,
+		RaftLogLevel:          cfg.RaftLogLevel,
+		RaftBootstrap:         cfg.RaftBootstrap,
+		DataPath:              cfg.DataPath,
+		MessagesTableName:     cfg.MessagesTableName,
+		FilesTableName:        cfg.FilesTableName,
+		RaftServers:           cfg.RaftServers,
+		SerfAddr:              cfg.SerfAddr,
+		SerfJoinAddrs:         cfg.SerfJoinAddrs,
 		SessionsServiceAddr:   cfg.SessionsServiceAddr,
+		NatsAddr:              cfg.NatsAddr,
 	})
 
 	if err := server.Run(context.Background()); err != nil {

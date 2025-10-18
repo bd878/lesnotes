@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"io"
 	"os"
 	"fmt"
 	"context"
@@ -8,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/bd878/gallery/server/logger"
 	searchmodel "github.com/bd878/gallery/server/search/pkg/model"
 )
 
@@ -118,6 +120,57 @@ func (r *Repository) SearchMessages(ctx context.Context, userID int64, substr st
 
 		list = append(list, message)
 	}
+
+	return
+}
+
+func (r *Repository) Truncate(ctx context.Context) (err error) {
+	logger.Debugln("truncating table")
+	_, err = r.pool.Exec(ctx, r.messagesTable("TRUNCATE TABLE %s"))
+	return
+}
+
+func (r *Repository) Dump(ctx context.Context) (reader io.ReadCloser, err error) {
+	var (
+		writer io.WriteCloser
+		conn   *pgxpool.Conn
+	)
+
+	query := r.messagesTable("COPY %s TO STDOUT BINARY")
+
+	reader, writer = io.Pipe()
+
+	conn, err = r.pool.Acquire(ctx)
+	if err != nil {
+		conn.Release()
+		return
+	}
+
+	go func(ctx context.Context, query string, conn *pgxpool.Conn, writer io.WriteCloser) {
+		_, err := conn.Conn().PgConn().CopyTo(ctx, writer, query)
+		defer writer.Close()
+		defer conn.Release()
+		if err != nil {
+			logger.Errorw("failed to dump", "error", err)
+		}
+	}(ctx, query, conn, writer)
+
+	return
+}
+
+func (r *Repository) Restore(ctx context.Context, reader io.ReadCloser) (err error) {
+	var conn *pgxpool.Conn
+
+	query := r.messagesTable("COPY %s FROM STDIN BINARY")
+
+	conn, err = r.pool.Acquire(ctx) 
+	if err != nil {
+		conn.Release()
+		return
+	}
+
+	_, err = conn.Conn().PgConn().CopyFrom(ctx, reader, query)
+	defer conn.Release()
 
 	return
 }

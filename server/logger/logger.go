@@ -14,7 +14,6 @@ const (
 )
 
 type Config struct {
-	LogPath    string
 	NodeName   string
 	SkipCaller int
 	LogLevel   string
