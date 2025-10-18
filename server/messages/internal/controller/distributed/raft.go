@@ -247,3 +247,9 @@ func (m *DistributedMessages) Restore() error {
 
 	return m.raft.Restore(snapshot, reader, 20 * time.Second)
 }
+
+func (m *DistributedMessages) ShowLeader() error {
+	state := m.raft.State()
+	logger.Infow("my state", "addr", m.conf.StreamLayer.Addr(), "state", state.String())
+	return nil
+}

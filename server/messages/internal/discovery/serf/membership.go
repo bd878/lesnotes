@@ -67,6 +67,7 @@ type Handler interface {
 	Leave(name string) error
 	Snapshot() error
 	Restore() error
+	ShowLeader() error
 }
 
 func (m *Membership) runHandler() {
@@ -105,6 +106,14 @@ func (m *Membership) runHandler() {
 					logger.Debugw("restore returned error", "error", err)
 				}
 				logger.Debugln("restore finished")
+
+			case "query: leader":
+				logger.Debugln("who is leader")
+				err := m.handler.ShowLeader()
+				if err != nil {
+					logger.Debugw("failed to show roles", "error", err)
+				}
+				logger.Debugln("show leader finished")
 
 			default:
 				logger.Errorw("unknown event payload", "payload", e.String())
