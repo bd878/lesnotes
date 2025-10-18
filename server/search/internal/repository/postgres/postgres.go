@@ -21,8 +21,8 @@ func New(pool *pgxpool.Pool, messagesTableName, filesTableName string) *Reposito
 	return &Repository{messagesTableName, filesTableName, pool}
 }
 
-func (r *Repository) SaveMessage(ctx context.Context, id, userID int64, name, title, text string) (err error) {
-	const query = "INSERT INTO %s(id, user_id, name, title, text) VALUES ($1, $2, $3, $4, $5)"
+func (r *Repository) SaveMessage(ctx context.Context, id, userID int64, name, title, text string, private bool) (err error) {
+	const query = "INSERT INTO %s(id, user_id, name, title, text, private) VALUES ($1, $2, $3, $4, $5, $6)"
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
@@ -43,7 +43,7 @@ func (r *Repository) SaveMessage(ctx context.Context, id, userID int64, name, ti
 		}
 	}()
 
-	_, err = tx.Exec(ctx, r.messagesTable(query), id, userID, name, title, text)
+	_, err = tx.Exec(ctx, r.messagesTable(query), id, userID, name, title, text, private)
 
 	return nil
 }
@@ -76,7 +76,7 @@ func (r *Repository) DeleteMessage(ctx context.Context, id, userID int64) (err e
 }
 
 func (r *Repository) SearchMessages(ctx context.Context, userID int64, substr string) (list []*searchmodel.Message, err error) {
-	const query = "SELECT id, name, title, text FROM %s WHERE user_id = $1 AND name || ' ' || title || ' ' || text @@ $2"
+	const query = "SELECT id, name, title, text, private FROM %s WHERE user_id = $1 AND name || ' ' || title || ' ' || text @@ $2"
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
@@ -111,7 +111,7 @@ func (r *Repository) SearchMessages(ctx context.Context, userID int64, substr st
 			UserID: userID,
 		}
 
-		err = rows.Scan(&message.ID, &message.Name, &message.Title, &message.Text)
+		err = rows.Scan(&message.ID, &message.Name, &message.Title, &message.Text, &message.Private)
 		if err != nil {
 			return
 		}

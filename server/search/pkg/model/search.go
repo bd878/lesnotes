@@ -2,17 +2,18 @@ package model
 
 type (
 	Message struct {
-		ID      int64             `json:"id"`
-		UserID  int64             `json:"user_id"`
-		Text    string            `json:"text"`
-		Title   string            `json:"title"`
-		Name    string            `json:"name"`
+		ID          int64         `json:"id"`
+		UserID      int64         `json:"user_id"`
+		Text        string        `json:"text"`
+		Title       string        `json:"title"`
+		Name        string        `json:"name"`
+		Private     bool          `json:"private"`
 	}
 
 	File struct {
-		ID      int64
-		UserID  int64
-		Name    string
+		ID          int64
+		UserID      int64
+		Name        string
 	}
 
 	SearchMessagesRequest struct {

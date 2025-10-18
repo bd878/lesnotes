@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS search.messages
 	name       VARCHAR(256) UNIQUE NOT NULL,
 	text       TEXT         NOT NULL DEFAULT '',
 	title      TEXT         NOT NULL DEFAULT '',
+	private    bool         NOT NULL DEFAULT true,
 	created_at timestamptz  NOT NULL DEFAULT NOW(),
 	updated_at timestamptz  NOT NULL DEFAULT NOW(),
 	PRIMARY KEY(id)

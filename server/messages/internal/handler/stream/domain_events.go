@@ -43,6 +43,7 @@ func (h domainHandler[T]) onMessageCreated(ctx context.Context, event ddd.Event)
 		Text:     payload.Text,
 		Title:    payload.Title,
 		Name:     payload.Name,
+		Private:  payload.Private,
 	})
 	if err != nil {
 		return err
