@@ -27,7 +27,6 @@ func main() {
 
 	cfg := config.Load(flag.Arg(0))
 	logger.SetDefault(logger.New(logger.Config{
-		LogPath:    cfg.LogPath,
 		NodeName:   cfg.NodeName,
 		LogLevel:   cfg.LogLevel,
 		SkipCaller: 0,
@@ -36,7 +35,6 @@ func main() {
 	server := http.New(http.Config{
 		Addr:                  cfg.HttpAddr,
 		RpcAddr:               cfg.RpcAddr,
-		DataPath:              cfg.DataPath,
 		UsersServiceAddr:      cfg.UsersServiceAddr,
 		FilesServiceAddr:      cfg.FilesServiceAddr,
 		SessionsServiceAddr:   cfg.SessionsServiceAddr,

@@ -22,9 +22,8 @@ import (
 	"github.com/bd878/gallery/server/waiter"
 	"github.com/bd878/gallery/server/ddd"
 	broker "github.com/bd878/gallery/server/nats"
+	membership "github.com/bd878/gallery/server/discovery/serf"
 	grpcmiddleware "github.com/bd878/gallery/server/internal/middleware/grpc"
-	grpclogger "github.com/bd878/gallery/server/messages/internal/logger/grpc"
-	membership "github.com/bd878/gallery/server/messages/internal/discovery/serf"
 	repository "github.com/bd878/gallery/server/messages/internal/repository/postgres"
 	controller "github.com/bd878/gallery/server/messages/internal/controller/distributed"
 	streamhandler "github.com/bd878/gallery/server/messages/internal/handler/stream"
@@ -171,7 +170,7 @@ func (s *Server) setupGRPC(log *logger.Logger) error {
 
 	s.Server = grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
-			grpcmiddleware.UnaryServerInterceptor(grpclogger.NewBuilder()),
+			grpcmiddleware.UnaryServerInterceptor(grpcmiddleware.LogBuilder()),
 		),
 	)
 

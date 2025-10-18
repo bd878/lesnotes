@@ -13,7 +13,6 @@ import (
 	usermodel "github.com/bd878/gallery/server/users/pkg/model"
 	httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
 	httphandler "github.com/bd878/gallery/server/messages/internal/handler/http"
-	httplogger "github.com/bd878/gallery/server/messages/internal/logger/http"
 	usersgateway "github.com/bd878/gallery/server/internal/gateway/users"
 	sessionsgateway "github.com/bd878/gallery/server/internal/gateway/sessions"
 	filesgateway "github.com/bd878/gallery/server/messages/internal/gateway/files/grpc"
@@ -26,7 +25,6 @@ type Config struct {
 	UsersServiceAddr    string
 	FilesServiceAddr    string
 	SessionsServiceAddr string
-	DataPath            string
 }
 
 type Server struct {
@@ -37,7 +35,7 @@ type Server struct {
 func New(cfg Config) *Server {
 	mux := http.NewServeMux()
 
-	middleware := httpmiddleware.NewBuilder().WithLog(httplogger.LogBuilder())
+	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log)
 
 	usersGateway := usersgateway.New(cfg.UsersServiceAddr)
 	filesGateway := filesgateway.New(cfg.FilesServiceAddr)
