@@ -250,3 +250,7 @@ func (m *Distributed) ShowLeader() error {
 	logger.Infow("my state", "addr", m.conf.StreamLayer.Addr(), "state", state.String())
 	return nil
 }
+
+func (m *Distributed) isLeader() bool {
+	return m.raft.State() == raft.Leader
+}

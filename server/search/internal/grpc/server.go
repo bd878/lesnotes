@@ -19,11 +19,13 @@ import (
 	hclog "github.com/hashicorp/go-hclog"
 
 	"github.com/bd878/gallery/server/waiter"
+	broker "github.com/bd878/gallery/server/nats"
 	membership "github.com/bd878/gallery/server/discovery/serf"
 	grpcmiddleware "github.com/bd878/gallery/server/internal/middleware/grpc"
 	repository "github.com/bd878/gallery/server/search/internal/repository/postgres"
 	controller "github.com/bd878/gallery/server/search/internal/controller/distributed"
 	grpchandler "github.com/bd878/gallery/server/search/internal/handler/grpc"
+	streamhandler "github.com/bd878/gallery/server/search/internal/handler/stream"
 )
 
 type Config struct {
@@ -80,6 +82,10 @@ func New(cfg Config) *Server {
 		panic(err)
 	}
 
+	if err := server.setupStream(); err != nil {
+		panic(err)
+	}
+
 	if err := server.setupGRPC(); err != nil {
 		panic(err)
 	}
@@ -120,7 +126,6 @@ func (s *Server) setupRaft() error {
 		return bytes.Compare(b, []byte{byte(controller.RaftRPC)}) == 0
 	})
 
-
 	control, err := controller.New(controller.Config{
 		Raft: raft.Config{
 			LocalID: raft.ServerID(s.conf.NodeName),
@@ -138,6 +143,11 @@ func (s *Server) setupRaft() error {
 	s.controller = control
 
 	return nil
+}
+
+func (s *Server) setupStream() error {
+	return streamhandler.RegisterIntegrationEventHandlers(broker.NewStream(s.nc),
+		streamhandler.NewIntegrationEventHandlers(s.controller))
 }
 
 func (s *Server) setupGRPC() error {
