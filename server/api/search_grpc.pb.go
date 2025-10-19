@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 type SearchClient interface {
 	SearchMessages(ctx context.Context, in *SearchMessagesRequest, opts ...grpc.CallOption) (*SearchMessagesResponse, error)
 	SearchFiles(ctx context.Context, in *SearchFilesRequest, opts ...grpc.CallOption) (*SearchFilesResponse, error)
+	GetServers(ctx context.Context, in *GetServersRequest, opts ...grpc.CallOption) (*GetServersResponse, error)
 }
 
 type searchClient struct {
@@ -47,12 +48,22 @@ func (c *searchClient) SearchFiles(ctx context.Context, in *SearchFilesRequest, 
 	return out, nil
 }
 
+func (c *searchClient) GetServers(ctx context.Context, in *GetServersRequest, opts ...grpc.CallOption) (*GetServersResponse, error) {
+	out := new(GetServersResponse)
+	err := c.cc.Invoke(ctx, "/search.v1.Search/GetServers", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SearchServer is the server API for Search service.
 // All implementations must embed UnimplementedSearchServer
 // for forward compatibility
 type SearchServer interface {
 	SearchMessages(context.Context, *SearchMessagesRequest) (*SearchMessagesResponse, error)
 	SearchFiles(context.Context, *SearchFilesRequest) (*SearchFilesResponse, error)
+	GetServers(context.Context, *GetServersRequest) (*GetServersResponse, error)
 	mustEmbedUnimplementedSearchServer()
 }
 
@@ -65,6 +76,9 @@ func (UnimplementedSearchServer) SearchMessages(context.Context, *SearchMessages
 }
 func (UnimplementedSearchServer) SearchFiles(context.Context, *SearchFilesRequest) (*SearchFilesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SearchFiles not implemented")
+}
+func (UnimplementedSearchServer) GetServers(context.Context, *GetServersRequest) (*GetServersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetServers not implemented")
 }
 func (UnimplementedSearchServer) mustEmbedUnimplementedSearchServer() {}
 
@@ -115,6 +129,24 @@ func _Search_SearchFiles_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Search_GetServers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetServersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SearchServer).GetServers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/search.v1.Search/GetServers",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SearchServer).GetServers(ctx, req.(*GetServersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Search_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "search.v1.Search",
 	HandlerType: (*SearchServer)(nil),
@@ -126,6 +158,10 @@ var _Search_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SearchFiles",
 			Handler:    _Search_SearchFiles_Handler,
+		},
+		{
+			MethodName: "GetServers",
+			Handler:    _Search_GetServers_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

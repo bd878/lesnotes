@@ -2,11 +2,14 @@ syntax = "proto3";
 
 package search.v1;
 
+import "protos/distributed.proto";
+
 option go_package = "github.com/bd878/gallery/server/api";
 
 service Search {
 	rpc SearchMessages(SearchMessagesRequest) returns (SearchMessagesResponse) {}
 	rpc SearchFiles(SearchFilesRequest) returns (SearchFilesResponse) {}
+	rpc GetServers(GetServersRequest) returns (GetServersResponse) {}
 }
 
 message SearchMessage {
@@ -15,6 +18,7 @@ message SearchMessage {
 	string  title   = 3;
 	string  name    = 4;
 	string  text    = 5;
+	bool    private = 6;
 }
 
 message SearchFile {

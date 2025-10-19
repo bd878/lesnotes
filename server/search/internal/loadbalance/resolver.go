@@ -16,10 +16,10 @@ import (
 )
 
 type Resolver struct {
-	mu sync.Mutex
-	clientConn resolver.ClientConn
-	resolverConn *grpc.ClientConn
-	serviceConfig *serviceconfig.ParseResult
+	mu             sync.Mutex
+	clientConn     resolver.ClientConn
+	resolverConn   *grpc.ClientConn
+	serviceConfig  *serviceconfig.ParseResult
 }
 
 var _ resolver.Builder = (*Resolver)(nil)
@@ -48,7 +48,7 @@ func (r *Resolver) Build(
 	return r, nil
 }
 
-const Name = "messages"
+const Name = "search"
 
 func (r *Resolver) Scheme() string {
 	return Name
@@ -64,7 +64,7 @@ func (r *Resolver) ResolveNow(resolver.ResolveNowOptions) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	client := api.NewMessagesClient(r.resolverConn)
+	client := api.NewSearchClient(r.resolverConn)
 
 	logger.Debugw("resolver resolve now servers", "client", r.resolverConn.Target())
 

@@ -34,12 +34,9 @@ func main() {
 
 	server := http.New(http.Config{
 		Addr:                  cfg.HttpAddr,
+		RpcAddr:               cfg.RpcAddr,
 		UsersServiceAddr:      cfg.UsersServiceAddr,
 		SessionsServiceAddr:   cfg.SessionsServiceAddr,
-		NatsAddr:              cfg.NatsAddr,
-		PGConn:                cfg.PGConn,
-		MessagesTableName:     cfg.MessagesTableName,
-		FilesTableName:        cfg.FilesTableName,
 	})
 
 	if err := server.Run(context.Background()); err != nil {

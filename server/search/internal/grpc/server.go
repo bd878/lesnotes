@@ -15,25 +15,24 @@ import (
 
 	"golang.org/x/sync/errgroup"
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/logger"
 	"github.com/jackc/pgx/v5/pgxpool"
 	hclog "github.com/hashicorp/go-hclog"
 
 	"github.com/bd878/gallery/server/waiter"
-	"github.com/bd878/gallery/server/ddd"
 	broker "github.com/bd878/gallery/server/nats"
 	membership "github.com/bd878/gallery/server/discovery/serf"
 	grpcmiddleware "github.com/bd878/gallery/server/internal/middleware/grpc"
-	repository "github.com/bd878/gallery/server/messages/internal/repository/postgres"
-	controller "github.com/bd878/gallery/server/messages/internal/controller/distributed"
-	streamhandler "github.com/bd878/gallery/server/messages/internal/handler/stream"
-	grpchandler "github.com/bd878/gallery/server/messages/internal/handler/grpc"
+	repository "github.com/bd878/gallery/server/search/internal/repository/postgres"
+	controller "github.com/bd878/gallery/server/search/internal/controller/distributed"
+	grpchandler "github.com/bd878/gallery/server/search/internal/handler/grpc"
+	streamhandler "github.com/bd878/gallery/server/search/internal/handler/stream"
 )
 
 type Config struct {
 	Addr                string
 	PGConn              string
-	TableName           string
+	MessagesTableName   string
+	FilesTableName      string
 	NodeName            string
 	RaftLogLevel        string
 	RaftBootstrap       bool
@@ -53,7 +52,7 @@ type Server struct {
 	pool             *pgxpool.Pool
 	listener         net.Listener
 	grpcListener     net.Listener
-	controller       *controller.DistributedMessages
+	controller       *controller.Distributed
 	membership       *membership.Membership
 }
 
@@ -66,9 +65,9 @@ func New(cfg Config) *Server {
 	mux := cmux.New(listener)
 
 	server := &Server{
-		conf:          cfg,
-		mux:           mux,
-		listener:      listener,
+		conf:        cfg,
+		mux:         mux,
+		listener:    listener,
 	}
 
 	if err := server.setupDB(); err != nil {
@@ -79,11 +78,15 @@ func New(cfg Config) *Server {
 		panic(err)
 	}
 
-	if err := server.setupRaft(logger.Default()); err != nil {
+	if err := server.setupRaft(); err != nil {
 		panic(err)
 	}
 
-	if err := server.setupGRPC(logger.Default()); err != nil {
+	if err := server.setupStream(); err != nil {
+		panic(err)
+	}
+
+	if err := server.setupGRPC(); err != nil {
 		panic(err)
 	}
 
@@ -97,12 +100,11 @@ func (s *Server) setupDB() (err error) {
 
 func (s *Server) setupNats() (err error) {
 	s.nc, err = nats.Connect(s.conf.NatsAddr)
-
 	return
 }
 
-func (s *Server) setupRaft(log *logger.Logger) error {
-	repo := repository.New(s.conf.TableName, s.pool)
+func (s *Server) setupRaft() error {
+	repo := repository.New(s.pool, s.conf.MessagesTableName, s.conf.FilesTableName)
 
 	raftLogLevel := hclog.Error.String()
 	switch s.conf.RaftLogLevel {
@@ -124,11 +126,6 @@ func (s *Server) setupRaft(log *logger.Logger) error {
 		return bytes.Compare(b, []byte{byte(controller.RaftRPC)}) == 0
 	})
 
-
-	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
-	stream := broker.NewStream(s.nc)
-	streamhandler.RegisterDomainEventHandlers(dispatcher, streamhandler.NewDomainEventHandlers(stream))
-
 	control, err := controller.New(controller.Config{
 		Raft: raft.Config{
 			LocalID: raft.ServerID(s.conf.NodeName),
@@ -138,7 +135,7 @@ func (s *Server) setupRaft(log *logger.Logger) error {
 		Bootstrap:   s.conf.RaftBootstrap,
 		DataDir:     s.conf.DataPath,
 		Servers:     s.conf.RaftServers,
-	}, repo, dispatcher)
+	}, repo)
 	if err != nil {
 		return err
 	}
@@ -148,7 +145,12 @@ func (s *Server) setupRaft(log *logger.Logger) error {
 	return nil
 }
 
-func (s *Server) setupGRPC(log *logger.Logger) error {
+func (s *Server) setupStream() error {
+	return streamhandler.RegisterIntegrationEventHandlers(broker.NewStream(s.nc),
+		streamhandler.NewIntegrationEventHandlers(s.controller))
+}
+
+func (s *Server) setupGRPC() error {
 	handler := grpchandler.New(s.controller)
 	member, err := membership.New(
 		membership.Config{
@@ -162,7 +164,6 @@ func (s *Server) setupGRPC(log *logger.Logger) error {
 		s.controller,
 	)
 	if err != nil {
-		log.Errorw("failed to establish membership connection", "error", err)
 		return err
 	}
 
@@ -174,7 +175,7 @@ func (s *Server) setupGRPC(log *logger.Logger) error {
 		),
 	)
 
-	api.RegisterMessagesServer(s.Server, handler)
+	api.RegisterSearchServer(s.Server, handler)
 
 	grpcListener := s.mux.Match(cmux.Any())
 	s.grpcListener = grpcListener

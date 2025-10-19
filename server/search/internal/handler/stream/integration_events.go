@@ -11,7 +11,7 @@ import (
 )
 
 type Controller interface {
-	SaveMessage(ctx context.Context, id, userID int64, name, title, text string) error
+	SaveMessage(ctx context.Context, id, userID int64, name, title, text string, private bool) error
 	DeleteMessage(ctx context.Context, id, userID int64) error
 }
 
@@ -48,7 +48,7 @@ func (h integrationHandlers) handleMessageCreated(ctx context.Context, msg am.In
 		return err
 	}
 
-	return h.controller.SaveMessage(ctx, m.GetId(), m.GetUserId(), m.GetName(), m.GetTitle(), m.GetText())
+	return h.controller.SaveMessage(ctx, m.GetId(), m.GetUserId(), m.GetName(), m.GetTitle(), m.GetText(), m.GetPrivate())
 }
 
 func (h integrationHandlers) handleMessageDeleted(ctx context.Context, msg am.IncomingMessage) error {

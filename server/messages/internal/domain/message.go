@@ -8,6 +8,9 @@ import (
 const (
 	MessageCreatedEvent = "messages.MessageCreated"
 	MessageDeletedEvent = "messages.MessageDeleted"
+	MessageUpdatedEvent = "messages.MessageUpdated"
+	MessagePublishEvent = "messages.MessagePublished"
+	MessagePrivateEvent = "messages.MessagePrivated"
 )
 
 var (
@@ -20,6 +23,7 @@ type MessageCreated struct {
 	Text      string
 	Title     string
 	Name      string
+	Private   bool
 }
 
 func (MessageCreated) Key() string { return MessageCreatedEvent }
@@ -31,11 +35,12 @@ func CreateMessage(id int64, text, title string, fileIDs []int64, threadID int64
 	/*TODO: other errors*/
 
 	return ddd.NewEvent(MessageCreatedEvent, &MessageCreated{
-		ID:     id,
-		UserID: userID,
-		Text:   text,
-		Title:  title,
-		Name:   name,
+		ID:      id,
+		UserID:  userID,
+		Text:    text,
+		Title:   title,
+		Name:    name,
+		Private: private,
 	}), nil
 }
 

@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package messages.v1;
 
+import "protos/distributed.proto";
+
 option go_package = "github.com/bd878/gallery/server/api";
 
 service Messages {
@@ -127,18 +129,6 @@ message PrivateMessagesResponse {
 }
 
 message DeleteMessagesResponse {
-}
-
-message GetServersRequest {}
-
-message GetServersResponse {
-	repeated Server servers = 3;
-}
-
-message Server {
-	string id = 1;
-	string raft_addr = 2;
-	bool   is_leader = 3;
 }
 
 message ReadMessageRequest {

@@ -6,8 +6,8 @@ import (
 	"os"
 	"context"
 
-	"github.com/bd878/gallery/server/messages/internal/grpc"
-	"github.com/bd878/gallery/server/messages/config"
+	"github.com/bd878/gallery/server/search/internal/grpc"
+	"github.com/bd878/gallery/server/search/config"
 	"github.com/bd878/gallery/server/logger"
 )
 
@@ -39,7 +39,8 @@ func main() {
 		RaftLogLevel:          cfg.RaftLogLevel,
 		RaftBootstrap:         cfg.RaftBootstrap,
 		DataPath:              cfg.DataPath,
-		TableName:             cfg.TableName,
+		MessagesTableName:     cfg.MessagesTableName,
+		FilesTableName:        cfg.FilesTableName,
 		RaftServers:           cfg.RaftServers,
 		SerfAddr:              cfg.SerfAddr,
 		SerfJoinAddrs:         cfg.SerfJoinAddrs,
