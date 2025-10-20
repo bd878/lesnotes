@@ -50,6 +50,18 @@ func (r *Repository) SaveMessage(ctx context.Context, id, userID int64, name, ti
 	return nil
 }
 
+func (r *Repository) UpdateMessage(ctx context.Context, id, userID int64, name, title, text string, private int32) (err error) {
+	return nil
+}
+
+func (r *Repository) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+	return nil
+}
+
+func (r *Repository) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+	return nil
+}
+
 func (r *Repository) DeleteMessage(ctx context.Context, id, userID int64) (err error) {
 	const query = "DELETE FROM %s WHERE id = $1 AND user_id = $2"
 
