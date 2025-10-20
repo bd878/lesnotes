@@ -17,3 +17,22 @@ message MessageDeleted {
 	int64   id = 1;
 	int64   user_id = 2;
 }
+
+message MessageUpdated {
+	int64   id = 1;
+	int64   user_id = 2;
+	string  text = 3;
+	string  title = 4;
+	string  name = 5;
+	int32   private = 6;
+}
+
+message MessagesPublished {
+	repeated int64 ids = 1;
+	int64   user_id = 2;
+}
+
+message MessagesPrivated {
+	repeated int64 ids = 1;
+	int64   user_id = 2;
+}

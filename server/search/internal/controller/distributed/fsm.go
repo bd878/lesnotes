@@ -53,8 +53,6 @@ func (f *fsm) applyAppend(raw []byte) interface{} {
 	var cmd AppendCommand
 	proto.Unmarshal(raw, &cmd)
 
-	logger.Debugw("apply append", "id", cmd.Id)
-
 	err := f.repo.SaveMessage(context.Background(), cmd.Id, cmd.UserId, cmd.Name, cmd.Title, cmd.Text, cmd.Private)
 	if err != nil {
 		return err
@@ -71,8 +69,6 @@ func (f *fsm) applyUpdate(raw []byte) interface{} {
 func (f *fsm) applyDelete(raw []byte) interface{} {
 	var cmd DeleteCommand
 	proto.Unmarshal(raw, &cmd)
-
-	logger.Debugw("apply delete", "id", cmd.Id)
 
 	err := f.repo.DeleteMessage(context.Background(), cmd.Id, cmd.UserId)
 	if err != nil {

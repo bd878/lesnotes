@@ -98,7 +98,12 @@ func (f *fsm) applyUpdate(raw []byte) interface{} {
 		return err
 	}
 
-	return nil
+	event, err := domain.UpdateMessage(cmd.Id, cmd.Text, cmd.Title, cmd.FileIds, cmd.ThreadId, cmd.UserId, cmd.Private, cmd.Name)
+	if err != nil {
+		return err
+	}
+
+	return f.publisher.Publish(context.Background(), event)
 }
 
 func (f *fsm) applyDeleteUserMessages(raw []byte) interface{} {
@@ -139,7 +144,12 @@ func (f *fsm) applyPublish(raw []byte) interface{} {
 		return err
 	}
 
-	return nil
+	event, err := domain.PublishMessages(cmd.UserId, cmd.Ids)
+	if err != nil {
+		return err
+	}
+
+	return f.publisher.Publish(context.Background(), event)
 }
 
 func (f *fsm) applyPrivate(raw []byte) interface{} {
@@ -151,5 +161,10 @@ func (f *fsm) applyPrivate(raw []byte) interface{} {
 		return err
 	}
 
-	return nil
+	event, err := domain.PrivateMessages(cmd.UserId, cmd.Ids)
+	if err != nil {
+		return err
+	}
+
+	return f.publisher.Publish(context.Background(), event)
 }

@@ -38,6 +38,11 @@ func (m *Distributed) apply(ctx context.Context, reqType RequestType, cmd []byte
 }
 
 func (m *Distributed) SaveMessage(ctx context.Context, id, userID int64, name, title, text string, private bool) (err error) {
+	// for integration events; though raft will not allow .apply for not a leader, anyway
+	if !m.isLeader() {
+		return
+	}
+
 	logger.Debugw("save search message", "id", id, "user_id", userID, "name", name, "title", title, "text", text, "private", private)
 
 	cmd, err := proto.Marshal(&AppendCommand{
@@ -61,6 +66,10 @@ func (m *Distributed) SaveMessage(ctx context.Context, id, userID int64, name, t
 }
 
 func (m *Distributed) DeleteMessage(ctx context.Context, id, userID int64) (err error) {
+	if !m.isLeader() {
+		return
+	}
+
 	logger.Debugw("delete search message", "id", id, "user_id", userID)
 
 	cmd, err := proto.Marshal(&DeleteCommand{
