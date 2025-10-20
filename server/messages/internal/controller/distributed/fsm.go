@@ -8,6 +8,8 @@ import (
 	"google.golang.org/protobuf/proto"
 	"github.com/bd878/gallery/server/messages/pkg/model"
 	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/ddd"
+	"github.com/bd878/gallery/server/messages/internal/domain"
 )
 
 type RepoConnection interface {
@@ -37,6 +39,7 @@ var _ raft.FSM = (*fsm)(nil)
 
 type fsm struct {
 	repo Repository
+	publisher ddd.EventPublisher[ddd.Event]
 }
 
 /**
@@ -78,7 +81,12 @@ func (f *fsm) applyAppend(raw []byte) interface{} {
 		return err
 	}
 
-	return nil
+	event, err := domain.CreateMessage(cmd.Id, cmd.Text, cmd.Title, cmd.FileIds, cmd.ThreadId, cmd.UserId, cmd.Private, cmd.Name)
+	if err != nil {
+		return err
+	}
+
+	return f.publisher.Publish(context.Background(), event)
 }
 
 func (f *fsm) applyUpdate(raw []byte) interface{} {
@@ -114,7 +122,12 @@ func (f *fsm) applyDelete(raw []byte) interface{} {
 		return err
 	}
 
-	return nil
+	event, err := domain.DeleteMessage(cmd.Id, cmd.UserId)
+	if err != nil {
+		return err
+	}
+
+	return f.publisher.Publish(context.Background(), event)
 }
 
 func (f *fsm) applyPublish(raw []byte) interface{} {
