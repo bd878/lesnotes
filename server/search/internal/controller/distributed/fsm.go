@@ -16,6 +16,9 @@ type RepoConnection interface {
 
 type Repository interface {
 	SaveMessage(ctx context.Context, id, userID int64, name, title, text string, private bool) error
+	UpdateMessage(ctx context.Context, id, userID int64, name, title, text string, private int32) error
+	PrivateMessages(ctx context.Context, ids []int64, userID int64) error
+	PublishMessages(ctx context.Context, ids []int64, userID int64) error
 	DeleteMessage(ctx context.Context, id, userID int64) error
 	SearchMessages(ctx context.Context, userID int64, substr string) (list []*searchmodel.Message, err error)
 	Truncate(ctx context.Context) error
@@ -53,8 +56,6 @@ func (f *fsm) applyAppend(raw []byte) interface{} {
 	var cmd AppendCommand
 	proto.Unmarshal(raw, &cmd)
 
-	logger.Debugw("apply append", "id", cmd.Id)
-
 	err := f.repo.SaveMessage(context.Background(), cmd.Id, cmd.UserId, cmd.Name, cmd.Title, cmd.Text, cmd.Private)
 	if err != nil {
 		return err
@@ -64,15 +65,20 @@ func (f *fsm) applyAppend(raw []byte) interface{} {
 }
 
 func (f *fsm) applyUpdate(raw []byte) interface{} {
-	// not implemented
+	var cmd UpdateCommand
+	proto.Unmarshal(raw, &cmd)
+
+	err := f.repo.UpdateMessage(context.Background(), cmd.Id, cmd.UserId, cmd.Name, cmd.Title, cmd.Text, cmd.Private)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (f *fsm) applyDelete(raw []byte) interface{} {
 	var cmd DeleteCommand
 	proto.Unmarshal(raw, &cmd)
-
-	logger.Debugw("apply delete", "id", cmd.Id)
 
 	err := f.repo.DeleteMessage(context.Background(), cmd.Id, cmd.UserId)
 	if err != nil {
@@ -83,11 +89,25 @@ func (f *fsm) applyDelete(raw []byte) interface{} {
 }
 
 func (f *fsm) applyPublish(raw []byte) interface{} {
-	// not implemented
+	var cmd PublishCommand
+	proto.Unmarshal(raw, &cmd)
+
+	err := f.repo.PublishMessages(context.Background(), cmd.Ids, cmd.UserId)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (f *fsm) applyPrivate(raw []byte) interface{} {
-	// not implemented
+	var cmd PrivateCommand
+	proto.Unmarshal(raw, &cmd)
+
+	err := f.repo.PrivateMessages(context.Background(), cmd.Ids, cmd.UserId)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

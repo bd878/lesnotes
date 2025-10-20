@@ -50,6 +50,127 @@ func (r *Repository) SaveMessage(ctx context.Context, id, userID int64, name, ti
 	return nil
 }
 
+func (r *Repository) UpdateMessage(ctx context.Context, id, userID int64, newName, newTitle, newText string, newPrivate int32) (err error) {
+	const query = "UPDATE %s SET text = $3, private = $4, title = $5, name = $6 WHERE user_id = $1 AND id = $2"
+	const selectQuery = "SELECT text, private, title, name FROM %s WHERE user_id = $1 AND id = $2"
+
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			err = tx.Rollback(ctx)
+		default:
+			err = tx.Commit(ctx)
+		}
+	}()
+
+	var (
+		text, title, name string
+		private  bool
+	)
+
+	err = tx.QueryRow(ctx, r.messagesTable(selectQuery), userID, id).Scan(&text, &private, &title, &name)
+	if err != nil {
+		return
+	}
+
+	if newText != "" {
+		text = newText
+	}
+
+	if newTitle != "" {
+		title = newTitle
+	}
+
+	if newName != "" {
+		name = newName
+	}
+
+	if newPrivate != -1 {
+		if newPrivate == 0 {
+			private = false
+		} else if newPrivate == 1 {
+			private = true
+		}
+	}
+
+	_, err = tx.Exec(ctx, r.messagesTable(query), userID, id, text, private, title, name)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func (r *Repository) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			err = tx.Rollback(ctx)
+		default:
+			err = tx.Commit(ctx)
+		}
+	}()
+
+	for _, id := range ids {
+		_, err = tx.Exec(ctx, r.messagesTable("UPDATE %s SET private = false WHERE user_id = $1 AND id = $2"), userID, id)
+		if err != nil {
+			return
+		}
+	}
+
+	return
+}
+
+func (r *Repository) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			err = tx.Rollback(ctx)
+		default:
+			err = tx.Commit(ctx)
+		}
+	}()
+
+	for _, id := range ids {
+		_, err = r.pool.Exec(ctx, r.messagesTable("UPDATE %s SET private = true WHERE user_id = $1 AND id = $2"), userID, id)
+		if err != nil {
+			return
+		}
+	}
+
+	return
+}
+
 func (r *Repository) DeleteMessage(ctx context.Context, id, userID int64) (err error) {
 	const query = "DELETE FROM %s WHERE id = $1 AND user_id = $2"
 

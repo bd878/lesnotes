@@ -8,9 +8,10 @@ import (
 const (
 	MessageCreatedEvent = "messages.MessageCreated"
 	MessageDeletedEvent = "messages.MessageDeleted"
+	// TODO: user deleted: delete all messages
 	MessageUpdatedEvent = "messages.MessageUpdated"
-	MessagePublishEvent = "messages.MessagePublished"
-	MessagePrivateEvent = "messages.MessagePrivated"
+	MessagesPublishEvent = "messages.MessagesPublished"
+	MessagesPrivateEvent = "messages.MessagesPrivated"
 )
 
 var (
@@ -57,4 +58,60 @@ func DeleteMessage(id, userID int64) (ddd.Event, error) {
 		ID:     id,
 		UserID: userID,
 	}), nil
+}
+
+type MessageUpdated struct {
+	ID        int64
+	UserID    int64
+	Text      string
+	Title     string
+	Name      string
+	Private   int32
+}
+
+func (MessageUpdated) Key() string { return MessageUpdatedEvent }
+
+func UpdateMessage(id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private int32, name string) (ddd.Event, error) {
+	if id == 0 {
+		return nil, ErrIDRequired
+	}
+
+	return ddd.NewEvent(MessageUpdatedEvent, &MessageUpdated{
+		ID:      id,
+		UserID:  userID,
+		Text:    text,
+		Title:   title,
+		Name:    name,
+		Private: private,
+	}), nil
+}
+
+type MessagesPublished struct {
+	IDs      []int64
+	UserID   int64
+}
+
+func (MessagesPublished) Key() string { return MessagesPublishEvent }
+
+func PublishMessages(userID int64, ids []int64) (ddd.Event, error) {
+	if ids == nil {
+		return nil, ErrIDRequired
+	}
+
+	return ddd.NewEvent(MessagesPublishEvent, &MessagesPublished{IDs: ids, UserID: userID}), nil
+}
+
+type MessagesPrivated struct {
+	IDs      []int64
+	UserID   int64
+}
+
+func (MessagesPrivated) Key() string { return MessagesPrivateEvent }
+
+func PrivateMessages(userID int64, ids []int64) (ddd.Event, error) {
+	if ids == nil {
+		return nil, ErrIDRequired
+	}
+
+	return ddd.NewEvent(MessagesPrivateEvent, &MessagesPrivated{IDs: ids, UserID: userID}), nil
 }

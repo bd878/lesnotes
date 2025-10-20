@@ -33,7 +33,6 @@ type DistributedMessages struct {
 	raft            *raft.Raft
 	repo            Repository
 	snapshotStore   raft.SnapshotStore
-	publisher       ddd.EventPublisher[ddd.Event]
 }
 
 func New(conf Config, repo Repository, publisher ddd.EventPublisher[ddd.Event]) (*DistributedMessages, error) {
@@ -52,16 +51,15 @@ func New(conf Config, repo Repository, publisher ddd.EventPublisher[ddd.Event]) 
 	m := &DistributedMessages{
 		repo:      repo,
 		conf:      conf,
-		publisher: publisher,
 	}
-	if err := m.setupRaft(logger.Default()); err != nil {
+	if err := m.setupRaft(logger.Default(), publisher); err != nil {
 		return nil, err
 	}
 	return m, nil
 }
 
-func (m *DistributedMessages) setupRaft(log *logger.Logger) error {
-	fsm := &fsm{repo: m.repo}
+func (m *DistributedMessages) setupRaft(log *logger.Logger, publisher ddd.EventPublisher[ddd.Event]) error {
+	fsm := &fsm{repo: m.repo, publisher: publisher}
 
 	raftPath := filepath.Join(m.conf.DataDir, "raft")
 	if err := os.MkdirAll(raftPath, 0755); err != nil {
