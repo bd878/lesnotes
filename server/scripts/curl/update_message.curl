@@ -1,3 +1,4 @@
-url = https://%STAGE%lesnotes.space/messages/v1/update?id=%ID%
+url = https://%STAGE%lesnotes.space/messages/v1/update
+-d "id=%ID%"
 -d "text=%TEXT%"
 -d "public=%PUBLIC%"

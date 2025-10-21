@@ -18,7 +18,7 @@ sed -e "s/%STAGE%/$stage/g" \
 -e "s/%ID%/$id/g" \
 -e "s/%TEXT%/$text/g" \
 -e "s/%PUBLIC%/$public/g" ./curl/update_message.curl |
-curl  --trace-ascii /dev/stdout -b $cookie -K -
+curl -v -b $cookie -K -
 HERE`
 result=`eval "$cmd"`
 echo $result
