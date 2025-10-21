@@ -8,6 +8,7 @@ import (
 	"google.golang.org/protobuf/proto"
 	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/messages/pkg/model"
+	"github.com/bd878/gallery/server/messages/internal/domain"
 )
 
 func (m *DistributedMessages) apply(ctx context.Context, reqType RequestType, cmd []byte) (res interface{}, err error) {
@@ -40,6 +41,11 @@ func (m *DistributedMessages) apply(ctx context.Context, reqType RequestType, cm
 func (m *DistributedMessages) SaveMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (err error) {
 	logger.Debugw("save message", "id", id, "text", text, "title", title, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private, "name", name)
 
+	event, err := domain.CreateMessage(id, text, title, fileIDs, threadID, userID, private, name)
+	if err != nil {
+		return err
+	}
+
 	cmd, err := proto.Marshal(&AppendCommand{
 		Id:       id,
 		Text:     text,
@@ -59,11 +65,16 @@ func (m *DistributedMessages) SaveMessage(ctx context.Context, id int64, text, t
 		return
 	}
 
-	return
+	return m.publisher.Publish(context.Background(), event)
 }
 
 func (m *DistributedMessages) UpdateMessage(ctx context.Context, id int64, text, title, name string, fileIDs []int64, threadID int64, userID int64, private int32) (err error) {
 	logger.Debugw("update message", "id", id, "text", text, "title", title, "name", name, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private)
+
+	event, err := domain.UpdateMessage(id, text, title, fileIDs, threadID, userID, private, name)
+	if err != nil {
+		return err
+	}
 
 	cmd, err := proto.Marshal(&UpdateCommand{
 		Id:       id,
@@ -88,7 +99,7 @@ func (m *DistributedMessages) UpdateMessage(ctx context.Context, id int64, text,
 	case error:
 		return updatedAt
 	default:
-		return nil
+		return m.publisher.Publish(context.Background(), event)
 	}
 }
 
@@ -111,6 +122,12 @@ func (m *DistributedMessages) DeleteMessages(ctx context.Context, ids []int64, u
 	logger.Debugw("delete messages", "ids", ids, "user_id", userID)
 
 	for _, id := range ids {
+
+		event, err := domain.DeleteMessage(id, userID)
+		if err != nil {
+			return err
+		}
+
 		cmd, err := proto.Marshal(&DeleteCommand{
 			Id:     id,
 			UserId: userID,
@@ -123,6 +140,9 @@ func (m *DistributedMessages) DeleteMessages(ctx context.Context, ids []int64, u
 		if err != nil {
 			return err
 		}
+
+		m.publisher.Publish(context.Background(), event)
+
 	}
 
 	return
@@ -140,8 +160,16 @@ func (m *DistributedMessages) PublishMessages(ctx context.Context, ids []int64, 
 	}
 
 	_, err = m.apply(ctx, PublishRequest, cmd)
+	if err != nil {
+		return
+	}
 
-	return
+	event, err := domain.PublishMessages(userID, ids)
+	if err != nil {
+		return err
+	}
+
+	return m.publisher.Publish(context.Background(), event)
 }
 
 func (m *DistributedMessages) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
@@ -156,8 +184,16 @@ func (m *DistributedMessages) PrivateMessages(ctx context.Context, ids []int64, 
 	}
 
 	_, err = m.apply(ctx, PrivateRequest, cmd)
+	if err != nil {
+		return
+	}
 
-	return
+	event, err := domain.PrivateMessages(userID, ids)
+	if err != nil {
+		return err
+	}
+
+	return m.publisher.Publish(context.Background(), event)
 }
 
 func (m *DistributedMessages) ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *model.Message, err error) {

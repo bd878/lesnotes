@@ -31,7 +31,7 @@ func (r *Resolver) Build(
 ) (resolver.Resolver, error) {
 	var err error
 
-	logger.Debugw("build resolver", "endpoing", t.Endpoint())
+	logger.Debugw("build resolver", "endpoint", t.Endpoint())
 
 	r.clientConn = cc
 	r.resolverConn, err = grpc.NewClient(

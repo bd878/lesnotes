@@ -199,7 +199,7 @@ func (r *Repository) DeleteMessage(ctx context.Context, id, userID int64) (err e
 }
 
 func (r *Repository) SearchMessages(ctx context.Context, userID int64, substr string) (list []*searchmodel.Message, err error) {
-	const query = "SELECT id, name, title, text, private FROM %s WHERE user_id = $1 AND name || ' ' || title || ' ' || text @@ $2"
+	const query = "SELECT id, name, title, text, private FROM %s WHERE user_id = $1 AND name || ' ' || title || ' ' || text ILIKE $2"
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
@@ -222,7 +222,7 @@ func (r *Repository) SearchMessages(ctx context.Context, userID int64, substr st
 
 	var rows pgx.Rows
 
-	rows, err = tx.Query(ctx, r.messagesTable(query), userID, substr)
+	rows, err = tx.Query(ctx, r.messagesTable(query), userID, "%" + substr + "%")
 	defer rows.Close()
 	if err != nil {
 		return

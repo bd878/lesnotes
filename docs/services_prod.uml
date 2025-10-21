@@ -56,27 +56,33 @@ package Messages as messages {
 
 	messages_http -- "192.168.10.2:8083"
 
-	package "messages@9001" as 9101 {
+	package "messages@9001" as 9001 {
 		component grpc as 9001_grpc
+		component serf as 9001_serf
 		database PostgreSQL as 9001_db
 
 		9001_grpc -- "192.168.10.2:9001"
+		9001_serf -- "127.0.0.1:8171"
 		9001_grpc - 9001_db
 	}
 
 	package "messages@9002" as 9002 {
 		component grpc as 9002_grpc
+		component serf as 9002_serf
 		database PostgreSQL as 9002_db
 
 		9002_grpc -- "192.168.10.2:9002"
+		9002_serf -- "127.0.0.1:8172"
 		9002_grpc - 9002_db
 	}
 
 	package "messages@9003" as 9003 {
 		component grpc as 9003_grpc
+		component serf as 9003_serf
 		database PostgreSQL as 9003_db
 
 		9003_grpc -- "192.168.10.2:9003"
+		9003_serf -- "127.0.0.1:8173"
 		9003_grpc - 9003_db
 	}
 }
@@ -104,14 +110,38 @@ package Threads as threads {
 
 package Search as search {
 	component http as search_http
-	component grpc as search_grpc
-	database PostgreSQL as search_db
 
 	search_http -- "192.168.10.2:8090"
-	search_grpc -- "192.168.10.2:8091"
 
-	search_http - search_db
-	search_grpc - search_db
+	package "search@9011" as 9011 {
+		component grpc as 9011_grpc
+		component serf as 9011_serf
+		database PostgreSQL as 9011_db
+
+		9011_grpc -- "192.168.10.2:9011"
+		9011_serf -- "127.0.0.1:8271"
+		9011_grpc -- 9011_db
+	}
+
+	package "search@9012" as 9012 {
+		component grpc as 9012_grpc
+		component serf as 9012_serf
+		database PostgreSQL as 9012_db
+
+		9012_grpc -- "192.168.10.2:9012"
+		9012_serf -- "127.0.0.1:8272"
+		9012_grpc -- 9012_db
+	}
+
+	package "search@9013" as 9013 {
+		component grpc as 9013_grpc
+		component serf as 9013_serf
+		database PostgreSQL as 9013_db
+
+		9013_grpc -- "192.168.10.2:9013"
+		9013_serf -- "127.0.0.1:8273"
+		9013_grpc -- 9013_db
+	}
 }
 
 package Nats as nats {
@@ -120,5 +150,5 @@ package Nats as nats {
 	nats_tcp -- "127.0.0.1:4222"
 }
 
-footer 11.10.25
+footer 21.10.25
 @enduml
