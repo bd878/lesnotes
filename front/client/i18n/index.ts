@@ -35,6 +35,7 @@ const texts = {
 		selectFiles: "Select",
 		titlePlaceholder: "Title...",
 		namePlaceholder: "Public link",
+		search: "Search",
 
 		terms: "Terms",
 		contact: "Contact",
@@ -77,6 +78,7 @@ const texts = {
 		textPlaceholder: "Сообщение...",
 		titlePlaceholder: "Заголовок...",
 		namePlaceholder: "имя ссылки",
+		search: "Поиск",
 
 		terms: "Политика",
 		contact: "Контакты",
@@ -119,6 +121,7 @@ const texts = {
 		textPlaceholder: "schreiben Sie etwas...",
 		titlePlaceholder: "Überschrift",
 		namePlaceholder: "Link",
+		search: "Suchen",
 
 		terms: "",
 		contact: "",
@@ -161,6 +164,7 @@ const texts = {
 		textPlaceholder: "Votre texte...",
 		titlePlaceholder: "Tête",
 		namePlaceholder: "lien",
+		search: "Chercher",
 
 		terms: "",
 		contact: "",

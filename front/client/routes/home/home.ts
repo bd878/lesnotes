@@ -205,11 +205,12 @@ class HomeBuilder extends Builder {
 	searchPath = undefined;
 	async addSearchPath() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/home/mobile/search.mustache' : 'templates/home/desktop/search.mustache'
+			this.isMobile ? 'templates/home/mobile/search_form.mustache' : 'templates/home/desktop/search_form.mustache'
 		)), { encoding: 'utf-8' });
 
 		this.searchPath = mustache.render(template, {
 			searchPlaceholder:   this.i18n("searchPlaceholder"),
+			searchMessages:      this.i18n("search"),
 		})
 	}
 

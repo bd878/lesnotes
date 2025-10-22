@@ -163,9 +163,12 @@ components:
       request:
         type: object
         properties:
-          user:
+          user_id:
             type: integer
             required: false
+          query:
+            type: string
+            required: true
 
     searchOk:
       type: object
