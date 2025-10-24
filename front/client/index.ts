@@ -15,6 +15,7 @@ import getToken from './handlers/getToken.js';
 import notAuthed from './handlers/notAuthed';
 import loadStack from './handlers/loadStack.js';
 import loadMessage from './handlers/loadMessage.js';
+import loadSearch from './handlers/loadSearch.js';
 import language from './handlers/language';
 
 import assets from './routes/assets/assets';
@@ -22,6 +23,7 @@ import main from './routes/main/main';
 import login from './routes/login/login';
 import register from './routes/register/register';
 import home from './routes/home/home';
+import search from './routes/search/search';
 import logout from './routes/logout/logout';
 import xxx from './routes/xxx/xxx';
 import message from './routes/message/message';
@@ -51,6 +53,7 @@ router
 	.get('/logout', etag, language, logout)
 	.get('/signup', etag, language, getToken, notAuthed, register)
 	.get('/home', etag, language, getToken, getMe, loadMessage, loadStack, home)
+	.get('/search', etag, language, getToken, getMe, loadSearch, search)
 	.get('/status', status, language)
 	.get("/tg_auth", authTelegram)
 	.get("/new", etag, language, newMessage)

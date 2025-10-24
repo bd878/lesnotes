@@ -6,7 +6,7 @@ async function onSearchFormSubmit(elems, e) {
 	if (is.notEmpty(elems.searchFormElem.search.value)) {
 		const query = elems.searchFormElem.search.value
 
-		location.href = "/home?search=" + query
+		location.href = "/search?query=" + query
 	} else {
 		console.error("[onSearchFormSubmit]: search value is empty")
 	}

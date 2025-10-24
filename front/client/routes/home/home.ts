@@ -74,29 +74,6 @@ async function home(ctx) {
 }
 
 class HomeBuilder extends Builder {
-	settings = undefined;
-	async addSettings(error: string | undefined, lang: string, theme: string, fontSize: number) {
-		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/home/mobile/settings.mustache' : 'templates/home/desktop/settings.mustache'
-		)), { encoding: 'utf-8' });
-
-		this.settings = mustache.render(template, {
-			fontSizeHeader:  this.i18n("fontSizeHeader"),
-			settingsHeader:  this.i18n("settingsHeader"),
-			updateButton:    this.i18n("updateButton"),
-			langHeader:      this.i18n("langHeader"),
-			themeHeader:     this.i18n("themeHeader"),
-			themes:          [{theme: "dark", label: this.i18n("darkTheme")}, {theme: "light", label: this.i18n("lightTheme")}],
-			fonts:           [{font: "10", label: "aA", css: "text-md"}, {font: "14", label: "aA", css: "text-lg"}, {font: "20", label: "aA", css: "text-xl"}],
-			langs:           [{lang: "de", label: this.i18n("deLang")}, {lang: "en", label: this.i18n("enLang")}, {lang: "fr", label: this.i18n("frLang")}, {lang: "ru", label: this.i18n("ruLang")}],
-			myTheme:         function() { return this.theme == theme },
-			myLang:          function() { return this.lang == lang },
-			myFont:          function() { return is.notEmpty(fontSize) ? this.font == fontSize.toString() : false },
-			theme:           theme,
-			lang:            lang,
-		})
-	}
-
 	messagesList = undefined;
 	async addMessagesList(error: string | undefined, stack: Thread[]) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
@@ -214,17 +191,6 @@ class HomeBuilder extends Builder {
 		})
 	}
 
-	homeSidebar = undefined;
-	async addSidebar() {
-		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/home/mobile/sidebar.mustache' : 'templates/home/desktop/sidebar.mustache'
-		)), { encoding: 'utf-8' });
-
-		this.homeSidebar = mustache.render(template, {
-			logout:           this.i18n("logout"),
-		})
-	}
-
 	async build(message?: Message, editMessage?: boolean) {
 		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
 		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
@@ -249,7 +215,7 @@ class HomeBuilder extends Builder {
 				messageView:     this.messageView,
 				newMessageForm:  this.newMessageForm,
 				messagesList:    this.messagesList,
-				homeSidebar:     this.homeSidebar,
+				sidebar:         this.sidebar,
 				filesForm:       this.filesForm,
 				filesList:       this.filesList,
 				searchPath:      this.searchPath,

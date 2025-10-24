@@ -2,7 +2,6 @@ function editMessage(messageID) {
 	const params = new URLSearchParams(location.search)
 	params.set("edit", "1")
 	params.set("id", messageID)
-	params.delete("search")
 
 	location.href = "/home?" + params.toString()
 }
@@ -11,7 +10,6 @@ function showMessage(messageID) {
 	const params = new URLSearchParams(location.search)
 	params.set("id", messageID)
 	params.delete("edit")
-	params.delete("search")
 
 	location.href = params.toString() ? ("/home?" + params.toString()) : "/home"
 }
@@ -26,7 +24,6 @@ function openThread(threadID) {
 
 	params.delete("id")
 	params.delete("edit")
-	params.delete("search")
 
 	location.href = params.toString() ? ("/home?" + params.toString()) : "/home"
 }
@@ -50,7 +47,6 @@ function paginateMessages(threadID, direction, offsetStr, limitStr) {
 		console.error("[paginateMessages]: unknown direction:", direction)
 	}
 
-	params.delete("search")
 
 	location.href = params.toString() ? ("/home?" + params.toString()) : "/home"
 }

@@ -1,0 +1,43 @@
+<details>
+	<summary class="hover:text-blue-600 cursor-pointer">{{settingsHeader}}</summary>
+	<div class="flex flex-col items-start">
+		<div id="theme-settings" class="flex flex-row mb-1">
+			<span class="mr-4">{{themeHeader}}: </span>
+
+			{{#themes}}
+				{{#myTheme}}
+					<button type="button" data-theme="{{theme}}" class="hover:text-blue-600 underline cursor-pointer mr-2">{{label}}</button>
+				{{/myTheme}}
+				{{^myTheme}}
+					<button type="button" data-theme="{{theme}}" class="hover:text-blue-600 cursor-pointer mr-2">{{label}}</button>
+				{{/myTheme}}
+			{{/themes}}
+		</div>
+
+		<div id="lang-settings" class="flex flex-row mb-1">
+			<span class="mr-4">{{langHeader}}: </span>
+
+			{{#langs}}
+				{{#myLang}}
+					<button type="button" data-lang="{{lang}}" class="hover:text-blue-600 underline cursor-pointer mr-2">{{label}}</button>
+				{{/myLang}}
+				{{^myLang}}
+					<button type="button" data-lang="{{lang}}" class="hover:text-blue-600 cursor-pointer mr-2">{{label}}</button>
+				{{/myLang}}
+			{{/langs}}
+		</div>
+
+		<div id="font-size-settings" class="flex flex-row">
+			<span class="mr-4">{{fontSizeHeader}}: </span>
+
+			{{#fonts}}
+				{{#myFont}}
+					<button type="button" data-font-size="{{font}}" class="{{css}} hover:text-blue-600 underline cursor-pointer mr-2">{{label}}</button>
+				{{/myFont}}
+				{{^myFont}}
+					<button type="button" data-font-size="{{font}}" class="{{css}} hover:text-blue-600 cursor-pointer mr-2">{{label}}</button>
+				{{/myFont}}
+			{{/fonts}}
+		</div>
+	</div>
+</details>
