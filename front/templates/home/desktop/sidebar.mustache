@@ -1,0 +1,19 @@
+<div class="h-full flex flex-col justify-between">
+	<div class="flex flex-col">
+		<div class="flex flex-row mb-4">
+			<a class="italic text-2xl mr-4 inline-block cursor-pointer hover:text-blue-600" href="/home" target="_self">Les Notes</a>
+		</div>
+
+		<div id="search" class="mb-4">
+			{{> search}}
+		</div>
+
+		<div id="settings">
+			{{> settings}}
+		</div>
+	</div>
+
+	<div class="flex flex-row">
+		<a href="/logout" target="_self" class="hover:underline hover:text-blue-600 visited:text-purple-600">{{logout}}</a>
+	</div>
+</div>

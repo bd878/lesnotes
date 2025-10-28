@@ -84,6 +84,32 @@ class SearchBuilder extends Builder {
 		this.filesList = mustache.render(template, options)
 	}
 
+	search = undefined;
+	async addSearch() {
+		const template = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/search/mobile/search_form.mustache' : 'templates/search/desktop/search_form.mustache'
+		)), { encoding: 'utf-8' });
+
+		this.search = mustache.render(template, {
+			searchPlaceholder:   this.i18n("searchPlaceholder"),
+			searchMessages:      this.i18n("search"),
+		})
+	}
+
+	sidebar = undefined;
+	async addSidebar() {
+		const template = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/search/mobile/sidebar.mustache' : 'templates/search/desktop/sidebar.mustache'
+		)), { encoding: 'utf-8' });
+
+		this.sidebar = mustache.render(template, {
+			logout:           this.i18n("logout"),
+		}, {
+			settings:         this.settings,
+			search:           this.search,
+		})
+	}
+
 	async build() {
 		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
 		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });

@@ -31,17 +31,6 @@ abstract class Builder {
 		})
 	}
 
-	sidebar = undefined;
-	async addSidebar() {
-		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/sidebar/mobile/sidebar.mustache' : 'templates/sidebar/desktop/sidebar.mustache'
-		)), { encoding: 'utf-8' });
-
-		this.sidebar = mustache.render(template, {
-			logout:           this.i18n("logout"),
-		})
-	}
-
 	settings = undefined;
 	async addSettings(error: string | undefined, lang: string, theme: string, fontSize: number) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
@@ -50,7 +39,6 @@ abstract class Builder {
 
 		this.settings = mustache.render(template, {
 			fontSizeHeader:  this.i18n("fontSizeHeader"),
-			settingsHeader:  this.i18n("settingsHeader"),
 			updateButton:    this.i18n("updateButton"),
 			langHeader:      this.i18n("langHeader"),
 			themeHeader:     this.i18n("themeHeader"),

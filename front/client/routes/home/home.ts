@@ -62,8 +62,7 @@ async function home(ctx) {
 	await builder.addSettings(undefined, ctx.state.lang, me.theme, me.fontSize)
 	await builder.addMessagesList(undefined, stack)
 	await builder.addFilesList(message, ctx.query.edit)
-	await builder.addFilesForm()
-	await builder.addSearchPath()
+	await builder.addSearch()
 	await builder.addSidebar()
 	await builder.addFooter()
 
@@ -167,27 +166,29 @@ class HomeBuilder extends Builder {
 		this.filesList = mustache.render(template, options)
 	}
 
-	filesForm = undefined;
-	async addFilesForm() {
-		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/home/mobile/files_form.mustache' : 'templates/home/desktop/files_form.mustache'
-		)), { encoding: 'utf-8' });
-
-		this.filesForm = mustache.render(template, {
-			filesPlaceholder:    this.i18n("filesPlaceholder"),
-			selectFiles:         this.i18n("selectFiles"),
-		})
-	}
-
-	searchPath = undefined;
-	async addSearchPath() {
+	search = undefined;
+	async addSearch() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/home/mobile/search_form.mustache' : 'templates/home/desktop/search_form.mustache'
 		)), { encoding: 'utf-8' });
 
-		this.searchPath = mustache.render(template, {
+		this.search = mustache.render(template, {
 			searchPlaceholder:   this.i18n("searchPlaceholder"),
 			searchMessages:      this.i18n("search"),
+		})
+	}
+
+	sidebar = undefined;
+	async addSidebar() {
+		const template = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/home/mobile/sidebar.mustache' : 'templates/home/desktop/sidebar.mustache'
+		)), { encoding: 'utf-8' });
+
+		this.sidebar = mustache.render(template, {
+			logout:           this.i18n("logout"),
+		}, {
+			settings:         this.settings,
+			search:           this.search,
 		})
 	}
 
@@ -216,9 +217,8 @@ class HomeBuilder extends Builder {
 				newMessageForm:  this.newMessageForm,
 				messagesList:    this.messagesList,
 				sidebar:         this.sidebar,
-				filesForm:       this.filesForm,
 				filesList:       this.filesList,
-				searchPath:      this.searchPath,
+				search:          this.search,
 			}),
 		});
 	}
