@@ -36,6 +36,7 @@ const texts = {
 		titlePlaceholder: "Title...",
 		namePlaceholder: "Public link",
 		search: "Search",
+		emptyListText: "List is empty",
 
 		terms: "Terms",
 		contact: "Contact",
@@ -79,6 +80,7 @@ const texts = {
 		titlePlaceholder: "Заголовок...",
 		namePlaceholder: "имя ссылки",
 		search: "Поиск",
+		emptyListText: "Ничего не найдено",
 
 		terms: "Политика",
 		contact: "Контакты",
@@ -122,6 +124,7 @@ const texts = {
 		titlePlaceholder: "Überschrift",
 		namePlaceholder: "Link",
 		search: "Suchen",
+		emptyListText: "Nichts gefunden",
 
 		terms: "",
 		contact: "",
@@ -165,6 +168,7 @@ const texts = {
 		titlePlaceholder: "Tête",
 		namePlaceholder: "lien",
 		search: "Chercher",
+		emptyListText: "Le liste est vide",
 
 		terms: "",
 		contact: "",

@@ -1,0 +1,24 @@
+{{#isEmpty}}
+	<div class="grow">{{emptyListText}}</div>
+{{/isEmpty}}
+{{^isEmpty}}
+	<div>
+		<ul class="flex flex-col">
+			{{#list}}
+				<li class="grow-1">
+					<div data-message-id="{{ID}}">
+						{{#title}}
+							{{title}}
+						{{/title}}
+						{{^title}}
+							{{text}}
+						{{/title}}
+					</div>
+				</li>
+			{{/list}}
+			{{^list}}
+				<li>{{emptyListText}}</li>
+			{{/list}}
+		</ul>
+	</div>
+{{/isEmpty}}

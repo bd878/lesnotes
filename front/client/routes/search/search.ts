@@ -28,7 +28,7 @@ async function search(ctx) {
 			return;
 		}
 
-		messages = ctx.state.search
+		messages = ctx.state.search.messages
 	} else {
 		console.error("search is empty")
 		ctx.status = 500
@@ -60,8 +60,9 @@ class SearchBuilder extends Builder {
 
 		this.messagesList = mustache.render(template, {
 			list:             list,
+			isEmpty:          () => list.length == 0,
 			isSingle:         () => list.length == 1,
-			noMessagesText:   this.i18n("noMessagesText"),
+			emptyListText:    this.i18n("emptyListText"),
 		})
 	}
 
