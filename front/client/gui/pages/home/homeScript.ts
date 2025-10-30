@@ -25,6 +25,7 @@ const elems = {
 	get messageFormElem():       HTMLFormElement     { return getByID("message-form",          this.form) as HTMLFormElement },
 	get filesButtonElem():       HTMLButtonElement   { return getByID("select-files-button",   this.button) as HTMLButtonElement },
 	get filesListElem():         HTMLDivElement      { return getByID("files-list",            this.button) as HTMLDivElement },
+	get noFilesElem():           HTMLDivElement      { return getByID("no-files",              this.div) as HTMLDivElement },
 	get filesInputElem():        HTMLInputElement    { return getByID("files-input",           this.input) as HTMLInputElement },
 	get editFormElem():          HTMLFormElement     { return getByID("message-edit-form",     this.form) as HTMLFormElement },
 	get searchFormElem():        HTMLFormElement     { return getByID("messages-search-form",  this.form) as HTMLFormElement },

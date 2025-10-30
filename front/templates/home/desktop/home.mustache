@@ -4,8 +4,8 @@
 	</div>
 
 	<div class="flex flex-row pl-8">
-		<div class="flex flex-col w-full grow-2 max-w-5xl">
-			<div id="editor" class="min-w-md flex flex-col grow p-2 border border-1 border-solid rounded-md">
+		<div class="flex flex-col grow-2 max-w-5xl min-w-xl max-w-xl">
+			<div id="editor" class="flex flex-col grow p-2 mb-4 border border-1 border-solid rounded-md">
 				{{#message}}
 					{{#editMessage}}
 						{{> messageEditForm}}
@@ -16,6 +16,20 @@
 				{{/message}}
 				{{^message}}
 					{{> newMessageForm}}
+				{{/message}}
+			</div>
+
+			<div id="files">
+				{{#message}}
+					{{#editMessage}}
+						{{> filesForm}}
+					{{/editMessage}}
+					{{^editMessage}}
+						{{> filesList}}
+					{{/editMessage}}
+				{{/message}}
+				{{^message}}
+					{{> filesForm}}
 				{{/message}}
 			</div>
 		</div>

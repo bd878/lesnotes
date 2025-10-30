@@ -62,6 +62,7 @@ async function home(ctx) {
 	await builder.addSettings(undefined, ctx.state.lang, me.theme, me.fontSize)
 	await builder.addMessagesList(undefined, stack)
 	await builder.addFilesList(message, ctx.query.edit)
+	await builder.addFilesForm(message, ctx.query.edit)
 	await builder.addSearch()
 	await builder.addSidebar()
 	await builder.addFooter()
@@ -154,7 +155,6 @@ class HomeBuilder extends Builder {
 		)), { encoding: 'utf-8' });
 
 		const options = {
-			filesPlaceholder:   this.i18n("filesPlaceholder"),
 			noFiles:            this.i18n("noFiles"),
 			editMessage:        editMessage,
 			files:              undefined,
@@ -164,6 +164,24 @@ class HomeBuilder extends Builder {
 			options.files = message.files
 
 		this.filesList = mustache.render(template, options)
+	}
+
+	filesForm = undefined;
+	async addFilesForm(message?: Message, editMessage?: boolean) {
+		const template = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/home/mobile/files_form.mustache' : 'templates/home/desktop/files_form.mustache'
+		)), { encoding: 'utf-8' });
+
+		const options = {
+			noFiles:            this.i18n("noFiles"),
+			editMessage:        editMessage,
+			files:              undefined,
+		}
+
+		if (is.notEmpty(message))
+			options.files = message.files
+
+		this.filesForm = mustache.render(template, options)
 	}
 
 	search = undefined;
@@ -218,6 +236,7 @@ class HomeBuilder extends Builder {
 				messagesList:    this.messagesList,
 				sidebar:         this.sidebar,
 				filesList:       this.filesList,
+				filesForm:       this.filesForm,
 				search:          this.search,
 			}),
 		});
