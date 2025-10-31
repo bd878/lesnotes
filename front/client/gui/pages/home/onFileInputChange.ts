@@ -1,10 +1,20 @@
 function onFileInputChange(elems, e) {
+	hideNoFilesListElem(elems)
+
 	for (const file of e.target.files) {
-		elems.filesListElem.appendChild(createFilesListElement(file.name))
+		elems.filesListElem.appendChild(createFilesListElement(elems, file.name))
 	}
 }
 
-function createFilesListElement(fileName: string): HTMLDivElement {
+function hideNoFilesListElem(elems) {
+	elems.noFilesElem.classList.add(["hidden"])
+}
+
+function showNoFilesListElem(elems) {
+	elems.noFilesElem.classList.remove("hidden")
+}
+
+function createFilesListElement(elems, fileName: string): HTMLDivElement {
 	const elem = document.createElement("div")
 
 	const textElem = document.createElement("span")
@@ -13,7 +23,13 @@ function createFilesListElement(fileName: string): HTMLDivElement {
 	removeButton.textContent = "X"
 	removeButton.classList.add(...("cursor-pointer underline hover:text-blue-600 mr-2").split(" "))
 
-	removeButton.onclick = () => { elem.remove() }
+	removeButton.onclick = () => {
+		elem.remove();
+
+		if (elems.filesListElem.childElementCount == 0) {
+			showNoFilesListElem(elems);
+		}
+	}
 
 	textElem.textContent = fileName
 	textElem.classList.add(...("overflow-hidden text-ellipsis").split(" "))

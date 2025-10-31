@@ -1,19 +1,16 @@
 {{#ID}}
-	{{#private}}
-		<div class="italic text-sm text-gray-600 mb-2">#{{ID}}</div>
-	{{/private}}
 	{{^private}}
-		<div class="italic text-sm text-gray-600">#{{ID}}</div>
-		<a class="italic text-blue-600 text-sm" href="/m/{{userID}}/{{ID}}" target="_blank">https://{{domain}}/m/{{userID}}/{{ID}}</a>
 		<a class="italic text-blue-600 text-sm mb-2" href="/m/{{name}}" target="_blank">https://{{domain}}/m/{{name}}</a>
 	{{/private}}
 
 	<div id="message" class="flex flex-col justify-between grow">
-		<div>
+		<div class="flex flex-col h-full">
 			{{#title}}
 				<div class="text-lg">{{title}}</div>
 			{{/title}}
-			<p>{{text}}</p>
+			<textarea readonly class="w-full mb-1 resize-none whitespace-pre-line h-full">
+				{{text}}
+			</textarea>
 		</div>
 
 		<div class="flex flex-row justify-between items-end">

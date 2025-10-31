@@ -50,7 +50,7 @@ export default function mapMessageFromProto(message?: any): Message {
 		ID: message.id,
 		createUTCNano: createUTCNano,
 		updateUTCNano: updateUTCNano,
-		userID: message.user_id,
+		userID: message.user_id, // TODO: rename on user
 		text: message.text,
 		name: message.name,
 		title: message.title,

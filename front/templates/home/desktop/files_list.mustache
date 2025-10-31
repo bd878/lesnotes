@@ -1,16 +1,17 @@
-<div>
-	<p class="text-xl mb-2">{{filesPlaceholder}}</p>
-	{{^files}}
-		{{^editMessage}}
-			<div class="text-gray-600 italic">{{noFiles}}</div>
-		{{/editMessage}}
-	{{/files}}
-</div>
+<div class="bg-blue-100 justify-between p-2 rounded-md min-h-[40px]">
+	<div>
+		{{^files}}
+			{{^editMessage}}
+				<div class="text-gray-600 italic text-sm">{{noFiles}}</div>
+			{{/editMessage}}
+		{{/files}}
+	</div>
 
-<ul class="flex flex-col">
-	{{#files}}
-		<li class="grow-1 max-w-full flex flex-row justify-between whitespace-nowrap">
-			<a target="_blank" href="/files/v1/{{ID}}/download" class="flex flex-row justify-between overflow-hidden cursor-pointer">{{name}}</a>
-		</li>
-	{{/files}}
-</ul>
+	<ul class="flex flex-col">
+		{{#files}}
+			<li class="grow-1 max-w-full flex flex-row justify-between whitespace-nowrap">
+				<a target="_blank" href="/files/v1/{{ID}}/download" class="flex flex-row justify-between overflow-hidden cursor-pointer">{{name}}</a>
+			</li>
+		{{/files}}
+	</ul>
+</div>

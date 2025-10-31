@@ -1,11 +1,12 @@
 import api from '../api';
 
+const limit = parseInt(LIMIT)
+
 async function loadStack(ctx, next) {
 	console.log("--> loadStack")
 
 	const id = parseInt(ctx.query.id) || 0
 	const threadID = parseInt(ctx.query.cwd) || 0
-	const limit = 14
 
 	const offsets = buildThreadOffsets(new URLSearchParams(ctx.request.search))
 

@@ -62,8 +62,8 @@ async function home(ctx) {
 	await builder.addSettings(undefined, ctx.state.lang, me.theme, me.fontSize)
 	await builder.addMessagesList(undefined, stack)
 	await builder.addFilesList(message, ctx.query.edit)
-	await builder.addFilesForm()
-	await builder.addSearchPath()
+	await builder.addFilesForm(message, ctx.query.edit)
+	await builder.addSearch()
 	await builder.addSidebar()
 	await builder.addFooter()
 
@@ -74,29 +74,6 @@ async function home(ctx) {
 }
 
 class HomeBuilder extends Builder {
-	settings = undefined;
-	async addSettings(error: string | undefined, lang: string, theme: string, fontSize: number) {
-		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/home/mobile/settings.mustache' : 'templates/home/desktop/settings.mustache'
-		)), { encoding: 'utf-8' });
-
-		this.settings = mustache.render(template, {
-			fontSizeHeader:  this.i18n("fontSizeHeader"),
-			settingsHeader:  this.i18n("settingsHeader"),
-			updateButton:    this.i18n("updateButton"),
-			langHeader:      this.i18n("langHeader"),
-			themeHeader:     this.i18n("themeHeader"),
-			themes:          [{theme: "dark", label: this.i18n("darkTheme")}, {theme: "light", label: this.i18n("lightTheme")}],
-			fonts:           [{font: "10", label: "aA", css: "text-md"}, {font: "14", label: "aA", css: "text-lg"}, {font: "20", label: "aA", css: "text-xl"}],
-			langs:           [{lang: "de", label: this.i18n("deLang")}, {lang: "en", label: this.i18n("enLang")}, {lang: "fr", label: this.i18n("frLang")}, {lang: "ru", label: this.i18n("ruLang")}],
-			myTheme:         function() { return this.theme == theme },
-			myLang:          function() { return this.lang == lang },
-			myFont:          function() { return is.notEmpty(fontSize) ? this.font == fontSize.toString() : false },
-			theme:           theme,
-			lang:            lang,
-		})
-	}
-
 	messagesList = undefined;
 	async addMessagesList(error: string | undefined, stack: Thread[]) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
@@ -105,7 +82,7 @@ class HomeBuilder extends Builder {
 
 		this.messagesList = mustache.render(template, {
 			stack:            stack,
-			limit:            14,
+			limit:            LIMIT,
 			isSingle:         () => stack.length == 1,
 			newMessageText:   this.i18n("newMessageText"),
 			noMessagesText:   this.i18n("noMessagesText"),
@@ -178,7 +155,6 @@ class HomeBuilder extends Builder {
 		)), { encoding: 'utf-8' });
 
 		const options = {
-			filesPlaceholder:   this.i18n("filesPlaceholder"),
 			noFiles:            this.i18n("noFiles"),
 			editMessage:        editMessage,
 			files:              undefined,
@@ -191,36 +167,46 @@ class HomeBuilder extends Builder {
 	}
 
 	filesForm = undefined;
-	async addFilesForm() {
+	async addFilesForm(message?: Message, editMessage?: boolean) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/home/mobile/files_form.mustache' : 'templates/home/desktop/files_form.mustache'
 		)), { encoding: 'utf-8' });
 
-		this.filesForm = mustache.render(template, {
-			filesPlaceholder:    this.i18n("filesPlaceholder"),
-			selectFiles:         this.i18n("selectFiles"),
-		})
+		const options = {
+			noFiles:            this.i18n("noFiles"),
+			editMessage:        editMessage,
+			files:              undefined,
+		}
+
+		if (is.notEmpty(message))
+			options.files = message.files
+
+		this.filesForm = mustache.render(template, options)
 	}
 
-	searchPath = undefined;
-	async addSearchPath() {
+	search = undefined;
+	async addSearch() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/home/mobile/search.mustache' : 'templates/home/desktop/search.mustache'
+			this.isMobile ? 'templates/home/mobile/search_form.mustache' : 'templates/home/desktop/search_form.mustache'
 		)), { encoding: 'utf-8' });
 
-		this.searchPath = mustache.render(template, {
+		this.search = mustache.render(template, {
 			searchPlaceholder:   this.i18n("searchPlaceholder"),
+			searchMessages:      this.i18n("search"),
 		})
 	}
 
-	homeSidebar = undefined;
+	sidebar = undefined;
 	async addSidebar() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/home/mobile/sidebar.mustache' : 'templates/home/desktop/sidebar.mustache'
 		)), { encoding: 'utf-8' });
 
-		this.homeSidebar = mustache.render(template, {
+		this.sidebar = mustache.render(template, {
 			logout:           this.i18n("logout"),
+		}, {
+			settings:         this.settings,
+			search:           this.search,
 		})
 	}
 
@@ -248,10 +234,10 @@ class HomeBuilder extends Builder {
 				messageView:     this.messageView,
 				newMessageForm:  this.newMessageForm,
 				messagesList:    this.messagesList,
-				homeSidebar:     this.homeSidebar,
-				filesForm:       this.filesForm,
+				sidebar:         this.sidebar,
 				filesList:       this.filesList,
-				searchPath:      this.searchPath,
+				filesForm:       this.filesForm,
+				search:          this.search,
 			}),
 		});
 	}
