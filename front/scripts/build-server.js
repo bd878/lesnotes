@@ -13,6 +13,7 @@ let ctx = await esbuild.context({
 		BOT_VALIDATE_URL: '"' + Config.get("bot_validate_url") + '"',
 		BOT_VALIDATE_AUTH_URL: '"' + Config.get("bot_validate_auth_url") + '"',
 		HTTPS: '"' + Config.get("https") + '"',
+		LIMIT: "24"
 	},
 	bundle: true,
 	platform: 'node',

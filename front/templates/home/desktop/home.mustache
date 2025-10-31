@@ -5,7 +5,7 @@
 
 	<div class="flex flex-row pl-8">
 		<div class="flex flex-col grow-2 max-w-5xl min-w-xl max-w-xl">
-			<div id="editor" class="flex flex-col grow p-2 mb-4 border border-1 border-solid rounded-md">
+			<div id="editor" class="flex flex-col grow p-2 mb-2 border border-1 border-solid rounded-md">
 				{{#message}}
 					{{#editMessage}}
 						{{> messageEditForm}}
@@ -35,7 +35,7 @@
 		</div>
 
 		<div class="flex flex-col pl-8">
-			<div id="messages" class="mr-2 h-[400px] flex flex-col w-full">
+			<div id="messages" class="mr-2 flex flex-col w-full">
 				<div id="messages-list" class="flex flex-row w-full grow overflow-x-auto">
 					{{> messagesList}}
 				</div>

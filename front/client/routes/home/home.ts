@@ -82,7 +82,7 @@ class HomeBuilder extends Builder {
 
 		this.messagesList = mustache.render(template, {
 			stack:            stack,
-			limit:            14,
+			limit:            LIMIT,
 			isSingle:         () => stack.length == 1,
 			newMessageText:   this.i18n("newMessageText"),
 			noMessagesText:   this.i18n("noMessagesText"),

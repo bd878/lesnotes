@@ -1,13 +1,13 @@
-<div class="bg-blue-100 justify-between p-2 rounded-md">
-	<form id="file-form" name="file-form" autocomplete="off" onsubmit="return false;" class="h-full flex flex-row justify-between max-h-32 overflow-hidden">
+<div class="bg-blue-100 justify-between p-2 rounded-md min-h-[40px]">
+	<form id="file-form" name="file-form" autocomplete="off" onsubmit="return false;" class="h-full max-h-40 flex flex-row justify-between overflow-hidden">
 		{{^files}}
-			<div id="no-files" class="flex items-center italic text-gray-600 text-sm">
+			<div id="no-files" class="flex items-start italic text-gray-600 text-sm">
 				{{noFiles}}
 			</div>
 		{{/files}}
 		<div id="files-list" class="w-full overflow-y-auto whitespace-nowrap text-ellipsis"></div>
 
-		<div class="flex flex-row">
+		<div class="flex flex-row items-end">
 			<input id="files-input" class="hidden" type="file" multiple></input>
 			<button id="select-files-button" type="button" class="cursor-pointer">
 				<svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
