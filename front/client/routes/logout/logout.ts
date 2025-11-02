@@ -23,6 +23,7 @@ async function logout(ctx) {
 	const logout = await readFile(resolve(join(Config.get('basedir'), 'templates/logout.mustache')), { encoding: 'utf-8' });
 
 	ctx.body = mustache.render(layout, {
+		html:     () => (text, render) => "<html>" + render(text) + "</html>",
 		logout:   _i18n("loading"),
 		scripts:  ["/public/pages/logout/logoutScript.js"],
 	}, {

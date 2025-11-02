@@ -70,6 +70,7 @@ class LoginBuilder extends Builder {
 		)), { encoding: 'utf-8' });
 
 		return mustache.render(layout, {
+			html:     () => (text, render) => "<html>" + render(text) + "</html>",
 			scripts:  ["/public/pages/login/loginScript.js"],
 			manifest: "/public/manifest.json",
 			styles:   styles,

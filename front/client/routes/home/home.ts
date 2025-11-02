@@ -67,7 +67,7 @@ async function home(ctx) {
 	await builder.addSidebar()
 	await builder.addFooter()
 
-	ctx.body = await builder.build(message, ctx.query.edit)
+	ctx.body = await builder.build(message, ctx.query.edit, me.theme)
 	ctx.status = 200;
 
 	return;
@@ -129,7 +129,7 @@ class HomeBuilder extends Builder {
 			text:             message.text,
 			name:             message.name,
 			private:          message.private,
-			cancelButton:     this.i18n("cancelButton"),
+			newNoteButton:    this.i18n("newNote"),
 			userID:           userID,
 			domain:           Config.get("domain"),
 		})
@@ -210,7 +210,7 @@ class HomeBuilder extends Builder {
 		})
 	}
 
-	async build(message?: Message, editMessage?: boolean) {
+	async build(message?: Message, editMessage?: boolean, theme?: string) {
 		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
 		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
 		const home = await readFile(resolve(join(Config.get('basedir'),
@@ -218,10 +218,20 @@ class HomeBuilder extends Builder {
 		)), { encoding: 'utf-8' });
 
 		return mustache.render(layout, {
+			html:   () => (text, render) => {
+				let html = "<html"
+
+				if (theme) html += ` class="${theme}"`;
+				if (this.lang) html += ` lang="${this.lang}"`;
+				html += ">"
+
+				return html + render(text) + "</html>"
+			},
 			scripts:  ["/public/pages/home/homeScript.js"],
 			manifest: "/public/manifest.json",
 			styles:   styles,
 			lang:     this.lang,
+			theme:    theme,
 			isMobile: this.isMobile ? "true" : "",
 		}, {
 			footer: this.footer,

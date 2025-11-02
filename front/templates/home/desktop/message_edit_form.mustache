@@ -1,22 +1,18 @@
 {{#ID}}
-	{{#private}}
-		<a class="italic text-blue-600 text-sm" href="/m/{{userID}}/{{ID}}" target="_blank">https://{{domain}}/m/{{userID}}/{{ID}}</a>
-	{{/private}}
-
 	<form data-message-id="{{ID}}" id="message-edit-form" name="message-edit-form" autocomplete="off" onsubmit="return false;" class="w-full flex flex-col grow">
 		<div class="flex flex-col grow">
 			{{^private}}
-				<div class="px-1 mb-2"><a class="italic text-blue-600 text-sm" href="/m/{{name}}" target="_blank">https://{{domain}}/m/</a><input name="messageName" class="ml-1 border-1 rounded-md placeholder:italic placeholder:text-gray-600 resize-none text-sm" placeholder="{{namePlaceholder}}" value="{{name}}"></input></div>
+				<div class="flex flex-row mb-2"><a class="hover:underline dark:text-blue-600 dark:hover:text-white italic text-blue-600 text-sm" href="/m/{{name}}" target="_blank">https://{{domain}}/m/</a><input name="messageName" class="grow-1 ml-1 px-1 border-1 border-gray-600 rounded-md placeholder:italic placeholder:text-gray-600 resize-none text-sm" placeholder="{{namePlaceholder}}" value="{{name}}"></input></div>
 			{{/private}}
-			<input name="messageTitle" class="mb-2 w-full resize-none px-1 placeholder:italic placeholder:text-gray-600 rounded-md text-lg" placeholder="{{titlePlaceholder}}" value="{{title}}"></input>
-			<textarea name="messageText" type="input" class="w-full px-1 resize-none whitespace-pre-line placeholder:italic placeholder:text-gray-600 mb-2 rounded-md text-sm h-full" placeholder="{{textPlaceholder}}">{{text}}</textarea>
+			<input name="messageTitle" class="mb-2 w-full resize-none px-1 border-1 border-gray-600 rounded-md placeholder:italic placeholder:text-gray-600 rounded-md text-lg" placeholder="{{titlePlaceholder}}" value="{{title}}"></input>
+			<textarea name="messageText" type="input" class="w-full h-full px-1 mb-2 border-1 rounded-md border-gray-600 resize-none overflow-hidden wrap-break-word text-start placeholder:italic placeholder:text-gray-600 rounded-md" placeholder="{{textPlaceholder}}">{{text}}</textarea>
 		</div>
 
 		<div class="flex flex-col">
 			<div></div>
 			<div class="flex flex-row justify-between">
-				<button data-message-id="{{ID}}" type="submit" class="rounded-md border-1 px-4 border-solid text-left cursor-pointer">{{updateButton}}</button>
-				<button id="message-cancel-edit" class="border-1 px-4 border-solid rounded-md text-left cursor-pointer">{{cancelButton}}</button>
+				<button data-message-id="{{ID}}" type="submit" class="rounded-md border-1 px-4 border-solid dark:hover:text-white text-left cursor-pointer">{{updateButton}}</button>
+				<button id="message-cancel-edit" class="border-1 px-4 border-solid rounded-md dark:hover:text-white text-left cursor-pointer">{{cancelButton}}</button>
 			</div>
 		</div>
 	</form>

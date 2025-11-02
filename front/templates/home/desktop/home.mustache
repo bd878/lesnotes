@@ -1,11 +1,11 @@
-<div id="content" class="h-full flex flex-row">
-	<div id="sidebar" class="min-w-3xs pl-8">
+<div id="content" class="h-full max-w-full flex flex-row">
+	<div id="sidebar" class="min-w-3xs max-w-3xs ml-8">
 		{{> sidebar}}
 	</div>
 
-	<div class="flex flex-row pl-8">
-		<div class="flex flex-col grow-2 max-w-5xl min-w-xl max-w-xl">
-			<div id="editor" class="flex flex-col grow p-2 mb-2 border border-1 border-solid rounded-md">
+	<div id="editor" class="min-w-lg max-w-lg flex flex-row ml-8">
+		<div class="flex flex-col grow-2 w-full">
+			<div id="message-editor" class="flex flex-col grow p-2 mb-2 border border-1 border-solid rounded-md">
 				{{#message}}
 					{{#editMessage}}
 						{{> messageEditForm}}
@@ -19,7 +19,7 @@
 				{{/message}}
 			</div>
 
-			<div id="files">
+			<div id="files-editor">
 				{{#message}}
 					{{#editMessage}}
 						{{> filesForm}}
@@ -33,12 +33,12 @@
 				{{/message}}
 			</div>
 		</div>
+	</div>
 
-		<div class="flex flex-col pl-8">
-			<div id="messages" class="mr-2 flex flex-col w-full">
-				<div id="messages-list" class="flex flex-row w-full grow overflow-x-auto">
-					{{> messagesList}}
-				</div>
+	<div id="threads" class="flex flex-col w-full max-w-full overflow-x-hidden ml-8">
+		<div id="messages" class="flex flex-col w-full max-w-full overflow-x-hidden h-full">
+			<div id="messages-list" class="flex flex-row max-w-full overflow-x-auto h-full grow">
+				{{> messagesList}}
 			</div>
 		</div>
 	</div>

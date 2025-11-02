@@ -1,10 +1,5 @@
 <!DOCTYPE html>
-{{#lang}}
-	<html lang="{{lang}}">
-{{/lang}}
-{{^lang}}
-	<html>
-{{/lang}}
+{{#html}}
 	<head>
 		<meta charset="UTF-8" />
 		<link rel="icon" href="/public/favicon.ico">
@@ -20,7 +15,7 @@
 
 		<title>Les notes</title>
 	</head>
-	<body>
+	<body class="dark:bg-gray-900 dark:text-gray-400 text-gray-950">
 		{{#isMobile}}
 			<div data-is-mobile="{{isMobile}}" class="py-5 h-screen flex flex-col items-start relative">
 		{{/isMobile}}
@@ -45,4 +40,4 @@
 			<script type="module" src="{{{.}}}"></script>
 		{{/scripts}}
 	</body>
-</html>
+{{/html}}
