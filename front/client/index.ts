@@ -50,7 +50,7 @@ router
 		ctx.redirect('/')
 		ctx.status = 301
 	})
-	.get('/', etag, getLanguage, getFontSize, getToken, notAuthed, main)
+	.get('/', etag, getLanguage, getTheme, getFontSize, getToken, notAuthed, main)
 	.get('/login', etag, getLanguage, getFontSize, getToken, getTheme, notAuthed, login)
 	.get('/logout', etag, getLanguage, getFontSize, getTheme, logout)
 	.get('/signup', etag, getLanguage, getFontSize, getToken, getTheme, notAuthed, register)
