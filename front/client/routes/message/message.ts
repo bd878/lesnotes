@@ -59,6 +59,7 @@ class Builder {
 		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
 
 		return mustache.render(layout, {
+			html:     () => (text, render) => "<html>" + render(text) + "</html>",
 			scripts:   ["/public/pages/message/messageScript.js"],
 			manifest:  "/public/manifest.json",
 			styles:    styles,

@@ -81,6 +81,7 @@ class RegisterBuilder extends Builder {
 		)), { encoding: 'utf-8' });
 
 		return mustache.render(layout, {
+			html:     () => (text, render) => "<html>" + render(text) + "</html>",
 			scripts:  ["/public/pages/register/registerScript.js"],
 			manifest: "/public/manifest.json",
 			styles:   styles,
