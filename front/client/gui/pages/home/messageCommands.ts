@@ -47,7 +47,6 @@ function paginateMessages(threadID, direction, offsetStr, limitStr) {
 		console.error("[paginateMessages]: unknown direction:", direction)
 	}
 
-
 	location.href = params.toString() ? ("/home?" + params.toString()) : "/home"
 }
 

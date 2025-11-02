@@ -32,7 +32,7 @@ abstract class Builder {
 	}
 
 	settings = undefined;
-	async addSettings(error: string | undefined, lang: string, theme: string, fontSize: number) {
+	async addSettings(error: string | undefined, lang: string, theme: string, fontSize?: number) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/settings/mobile/settings.mustache' : 'templates/settings/desktop/settings.mustache'
 		)), { encoding: 'utf-8' });
