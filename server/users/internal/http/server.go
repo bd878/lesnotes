@@ -59,7 +59,7 @@ func New(cfg Config) (server *Server) {
 		CookieDomain:    cfg.CookieDomain,
 	})
 
-	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log)
+	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log).WithLang(httpmiddleware.Language)
 
 	// TODO: middleware.Build(handler, ...middlewares)
 	middleware.WithAuth(httpmiddleware.AuthBuilder(logger.Default(), control, sessionsGateway, users.PublicUserID))

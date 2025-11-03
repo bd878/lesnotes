@@ -7,6 +7,5 @@ type Config struct {
 	UsersServiceAddr     string      `json:"users_service_addr"`
 	SessionsServiceAddr  string      `json:"sessions_service_addr"`
 
-	LogPath              string      `json:"log_path"`
 	PGConn               string      `json:"pg_conn"`
 }

@@ -66,6 +66,10 @@ paths:
         schema:
           type: string
           example: token=AAAAAA
+      - in: header
+        name: X-Locale
+        schema:
+          type: string
     get:
       summary: Check if token is still valid
       description: |
@@ -98,6 +102,11 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/authJson'
+      parameters:
+        - in: header
+          name: X-Locale
+          schema:
+            type: string
       responses:
         "200":
           description: OK
@@ -184,6 +193,11 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/signupForm'
+      parameters:
+        - in: header
+          name: X-Locale
+          schema:
+            type: string
       responses:
         "200":
           description: OK
@@ -204,6 +218,11 @@ paths:
       description: |
         Records user & password in database
       operationId: signupUserJson
+      parameters:
+        - in: header
+          name: X-Locale
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
@@ -236,6 +255,11 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/loginForm'
+      parameters:
+        - in: header
+          name: X-Locale
+          schema:
+            type: string
       responses:
         "200":
           description: OK
@@ -261,6 +285,11 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/loginJson'
+      parameters:
+        - in: header
+          name: X-Locale
+          schema:
+            type: string
       responses:
         "200":
           description: OK
