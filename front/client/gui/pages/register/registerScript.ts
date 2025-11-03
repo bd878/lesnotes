@@ -3,6 +3,7 @@ import onFormSubmit from './onFormSubmit';
 import onThemeSettingsClick from './onThemeSettingsClick';
 import onLangSettingsClick from './onLangSettingsClick';
 import onFontSizeSettingsClick from './onFontSizeSettingsClick';
+import onEnterPress from '../onEnterPress';
 import {getByID} from '../../../utils'
 
 const elems = {
@@ -26,6 +27,10 @@ function init() {
 	elems.themeSettingsElem.addEventListener("click",     e => onThemeSettingsClick(elems, e))
 	elems.langSettingsElem.addEventListener("click",      e => onLangSettingsClick(elems, e))
 	elems.fontSizeSettingsElem.addEventListener("click",  e => onFontSizeSettingsClick(elems, e))
+
+	elems.themeSettingsElem.addEventListener("keypress",     onEnterPress(e => onThemeSettingsClick(elems, e)))
+	elems.langSettingsElem.addEventListener("keypress",      onEnterPress(e => onLangSettingsClick(elems, e)))
+	elems.fontSizeSettingsElem.addEventListener("keypress",  onEnterPress(e => onFontSizeSettingsClick(elems, e)))
 }
 
 window.addEventListener("load", init)
