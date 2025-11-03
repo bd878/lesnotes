@@ -1,12 +1,13 @@
 import api from './api';
 import models from './models';
 
-async function login(login: string, password: string) {
+async function login(login: string, password: string, lang?: string) {
 	let result = {
 		error:   models.error(),
 	}
 
 	const form = new FormData()
+	const headers = {}
 
 	if (login)
 		form.append("login", login);
@@ -14,10 +15,14 @@ async function login(login: string, password: string) {
 	if (password)
 		form.append("password", password);
 
+	if (lang)
+		headers["X-Language"] = lang;
+
 	try {
 		const [_1, error] = await api("/users/v1/login", {
-			method: "POST",
-			body:   form,
+			method:  "POST",
+			body:    form,
+			headers: headers,
 		});
 
 		if (error)
