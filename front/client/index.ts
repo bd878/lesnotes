@@ -19,6 +19,7 @@ import loadMessage from './handlers/loadMessage.js';
 import loadSearch from './handlers/loadSearch.js';
 import getLanguage from './handlers/getLanguage';
 import getFontSize from './handlers/getFontSize';
+import getQuery from './handlers/getQuery';
 
 import assets from './routes/assets/assets';
 import main from './routes/main/main';
@@ -50,10 +51,10 @@ router
 		ctx.redirect('/')
 		ctx.status = 301
 	})
-	.get('/', etag, getLanguage, getTheme, getFontSize, getToken, notAuthed, main)
-	.get('/login', etag, getLanguage, getFontSize, getToken, getTheme, notAuthed, login)
-	.get('/logout', etag, getLanguage, getFontSize, getTheme, logout)
-	.get('/signup', etag, getLanguage, getFontSize, getToken, getTheme, notAuthed, register)
+	.get('/', etag, getLanguage, getTheme, getFontSize, getToken, getQuery, notAuthed, main)
+	.get('/login', etag, getLanguage, getFontSize, getTheme, getQuery, getToken, notAuthed, login)
+	.get('/logout', etag, getLanguage, getFontSize, getTheme, getQuery, logout)
+	.get('/signup', etag, getLanguage, getFontSize, getToken, getTheme, getQuery, notAuthed, register)
 	.get('/home', etag, getLanguage, getToken, getMe, loadMessage, loadStack, home)
 	.get('/search', etag, getLanguage, getToken, getMe, loadSearch, search)
 	.get('/status', status, getLanguage)

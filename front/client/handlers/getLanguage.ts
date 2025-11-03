@@ -1,6 +1,7 @@
 async function getLanguage(ctx, next) {
 	// may be mutated by getMe
 	console.log("--> getLanguage")
+
 	switch (ctx.query.lang) {
 	case "ru":
 	case "en":
@@ -14,6 +15,7 @@ async function getLanguage(ctx, next) {
 			ctx.state.lang = "en"
 		}
 	}
+
 	await next()
 	console.log("<-- getLanguage")
 }

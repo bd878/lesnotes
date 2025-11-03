@@ -10,36 +10,37 @@ async function main(ctx) {
 
 	await builder.addSettings(undefined, ctx.state.lang, ctx.state.theme, ctx.state.fontSize)
 	await builder.addFooter()
-	await builder.addSidebar()
-	await builder.addAuthorization()
+	await builder.addSidebar(ctx.state.query)
+	await builder.addAuthorization(ctx.state.query)
 
-	ctx.body = await builder.build(ctx.state.theme)
+	ctx.body = await builder.build(ctx.state.theme, ctx.state.fontSize)
 	ctx.status = 200;
 }
 
 class MainBuilder extends Builder {
 	sidebar = undefined;
-	async addSidebar() {
+	async addSidebar(query?: string) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/main/mobile/sidebar.mustache' : 'templates/main/desktop/sidebar.mustache'
 		)), { encoding: 'utf-8' });
 
-		this.sidebar = mustache.render(template)
+		this.sidebar = mustache.render(template, {query: query})
 	}
 
 	authorization = undefined;
-	async addAuthorization() {
+	async addAuthorization(query?: string) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/main/mobile/authorization.mustache' : 'templates/main/desktop/authorization.mustache'
 		)), { encoding: 'utf-8' });
 
 		this.authorization = mustache.render(template, {
+			query:     query,
 			login:     this.i18n("login"),
 			register:  this.i18n("register"),
 		})
 	}
 
-	async build(theme?: string) {
+	async build(theme?: string, fontSize?: string) {
 		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
 		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
 		const main = await readFile(resolve(join(Config.get('basedir'),
@@ -52,6 +53,7 @@ class MainBuilder extends Builder {
 
 				if (theme) html += ` class="${theme}"`;
 				if (this.lang) html += ` lang="${this.lang}"`;
+				if (fontSize) html += ` data-size="${fontSize}"`
 				html += ">"
 
 				return html + render(text) + "</html>"
@@ -66,7 +68,7 @@ class MainBuilder extends Builder {
 			content: mustache.render(main, {
 				settingsHeader: this.i18n("settingsHeader"),
 			}, {
-				settings:  this.settings,
+				settings:      this.settings,
 				sidebar:       this.sidebar,
 				authorization: this.authorization,
 			}),

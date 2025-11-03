@@ -1,9 +1,22 @@
 import api from './api';
 import models from './models';
 
-async function changeFontSizeJson(token: string, fontSize: number) {
+async function changeFontSizeJson(token: string, fontSize: string) {
 	let result = {
 		error:     models.error(),
+	}
+
+	let size: number = 10
+	switch (fontSize) {
+	case "small":
+		size = 8;
+		break;
+	case "medium":
+		size = 10;
+		break;
+	case "large":
+		size = 16;
+		break;
 	}
 
 	try {
@@ -12,7 +25,7 @@ async function changeFontSizeJson(token: string, fontSize: number) {
 			body: {
 				token:    token,
 				req: {
-					font_size: fontSize,
+					font_size: size,
 				},
 			},
 		});

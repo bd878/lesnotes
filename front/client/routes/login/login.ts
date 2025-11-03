@@ -11,11 +11,11 @@ async function login(ctx) {
 	await builder.addSettings(undefined, ctx.state.lang, ctx.state.theme, ctx.state.fontSize)
 	await builder.addUsername()
 	await builder.addPassword()
-	await builder.addSubmit()
+	await builder.addSubmit(ctx.state.query)
 	await builder.addFooter()
-	await builder.addSidebar()
+	await builder.addSidebar(ctx.state.query)
 
-	ctx.body = await builder.build(ctx.state.theme)
+	ctx.body = await builder.build(ctx.state.theme, ctx.state.fontSize)
 	ctx.status = 200;
 }
 
@@ -43,27 +43,28 @@ class LoginBuilder extends Builder {
 	}
 
 	submit = undefined;
-	async addSubmit() {
+	async addSubmit(query?: string) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/login/mobile/submit.mustache' : 'templates/login/desktop/submit.mustache'
 		)), { encoding: 'utf-8' });
 
 		this.submit = mustache.render(template, {
+			query:    query,
 			register: this.i18n("register"),
 			login:    this.i18n("login"),
 		})
 	}
 
 	sidebar = undefined;
-	async addSidebar() {
+	async addSidebar(query?: string) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/login/mobile/sidebar.mustache' : 'templates/login/desktop/sidebar.mustache'
 		)), { encoding: 'utf-8' });
 
-		this.sidebar = mustache.render(template)
+		this.sidebar = mustache.render(template, {query: query})
 	}
 
-	async build(theme?: string) {
+	async build(theme?: string, fontSize?: string) {
 		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
 		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
 		const login = await readFile(resolve(join(Config.get('basedir'),
@@ -76,6 +77,7 @@ class LoginBuilder extends Builder {
 
 				if (theme) html += ` class="${theme}"`;
 				if (this.lang) html += ` lang="${this.lang}"`;
+				if (fontSize) html += ` data-size="${fontSize}"`
 				html += ">"
 
 				return html + render(text) + "</html>"
