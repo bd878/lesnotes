@@ -15,7 +15,6 @@ type Config struct {
 	NatsAddr             string      `json:"nats_addr"`
 
 	RaftBootstrap        bool        `json:"raft_bootstrap"`
-	LogPath              string      `json:"log_path"`
 	PGConn               string      `json:"pg_conn"`
 	// TODO ShutdownTimeout string     `json:"shutdown_timeout"`
 	TableName            string      `json:"table_name"`

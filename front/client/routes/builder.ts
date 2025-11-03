@@ -32,7 +32,7 @@ abstract class Builder {
 	}
 
 	settings = undefined;
-	async addSettings(error: string | undefined, lang: string, theme: string, fontSize: number) {
+	async addSettings(error: string | undefined, lang: string, theme: string, fontSize?: string) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/settings/mobile/settings.mustache' : 'templates/settings/desktop/settings.mustache'
 		)), { encoding: 'utf-8' });
@@ -43,11 +43,11 @@ abstract class Builder {
 			langHeader:      this.i18n("langHeader"),
 			themeHeader:     this.i18n("themeHeader"),
 			themes:          [{theme: "dark", label: this.i18n("darkTheme")}, {theme: "light", label: this.i18n("lightTheme")}],
-			fonts:           [{font: "10", label: "aA", css: "text-md"}, {font: "14", label: "aA", css: "text-lg"}, {font: "20", label: "aA", css: "text-xl"}],
+			fonts:           [{font: "small", label: "aA", css: "text-sm"}, {font: "medium", label: "aA", css: "text-lg"}, {font: "large", label: "aA", css: "text-xl"}],
 			langs:           [{lang: "de", label: this.i18n("deLang")}, {lang: "en", label: this.i18n("enLang")}, {lang: "fr", label: this.i18n("frLang")}, {lang: "ru", label: this.i18n("ruLang")}],
 			myTheme:         function() { return this.theme == theme },
 			myLang:          function() { return this.lang == lang },
-			myFont:          function() { return is.notEmpty(fontSize) ? this.font == fontSize.toString() : false },
+			myFont:          function() { return is.notEmpty(fontSize) ? this.font == fontSize : false },
 			theme:           theme,
 			lang:            lang,
 		})

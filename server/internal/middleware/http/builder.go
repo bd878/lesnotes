@@ -72,6 +72,15 @@ func (b builder) WithLog(f MiddlewareFunc) builder {
 	return b
 }
 
+func (b builder) WithLang(f MiddlewareFunc) builder {
+	b.funcs.Append(&node{
+		name: "lang",
+		f: f,
+	})
+
+	return b
+}
+
 func (b builder) WithAuth(f MiddlewareFunc) builder {
 	b.funcs.Append(&node{
 		name: "auth",

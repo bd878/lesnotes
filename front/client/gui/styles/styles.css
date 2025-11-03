@@ -3,6 +3,18 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@custom-variant small {
+	&:where([data-size="small"] *) {
+		@slot;
+	}
+}
+
+@custom-variant large {
+	&:where([data-size="large"] *) {
+		@slot;
+	}
+}
+
 @layer components {
 	.btn {
 		@apply border-1 px-4 border-solid text-left cursor-pointer

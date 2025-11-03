@@ -3,6 +3,13 @@
 		{{> sidebar}}
 	</div>
 
+	<div class="mb-4">
+		<details>
+			<summary class="cursor-pointer mb-2">{{settingsHeader}}</summary>
+			{{> settings}}
+		</details>
+	</div>
+
 	<form
 		id="login-form"
 		action=""
@@ -20,7 +27,7 @@
 			{{> password}}
 		</div>
 
-		<div id="login-error" class="mt-2 hidden text-sm italic text-red-600">
+		<div id="login-error" class="mt-2 hidden text-sm italic text-red-600 dark:text-red-400">
 		</div>
 
 		<div class="mt-4">

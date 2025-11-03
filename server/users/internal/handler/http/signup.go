@@ -6,11 +6,10 @@ import (
 	"encoding/json"
 	"unicode"
 
-	"github.com/bd878/gallery/server/third_party/accept"
 	"github.com/bd878/gallery/server/i18n"
-	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/utils"
 	"github.com/bd878/gallery/server/users/internal/controller"
+	middleware "github.com/bd878/gallery/server/internal/middleware/http"
 	users "github.com/bd878/gallery/server/users/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
 )
@@ -47,15 +46,10 @@ func verifyLogin(login string) (fiveOrMore bool) {
 
 func (h *Handler) Signup(w http.ResponseWriter, req *http.Request) (err error) {
 	var login, password string
-	var lang i18n.LangCode
 
-	languages := req.Header.Get("Accept-Language")
-	preferredLang, err := accept.Negotiate(languages, i18n.AcceptedLangs...)
-	if err != nil {
-		logger.Errorw("login", "error", err)
+	lang, ok := req.Context().Value(middleware.LangContextKey{}).(i18n.LangCode)
+	if !ok {
 		lang = i18n.LangEn
-	} else {
-		lang = i18n.LangFromString(preferredLang)
 	}
 
 	err = req.ParseMultipartForm(1024 /* 1 KB */)

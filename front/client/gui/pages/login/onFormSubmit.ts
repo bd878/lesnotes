@@ -19,7 +19,9 @@ async function onFormSubmit(elems, e) {
 
 	console.log("[onFormSubmit]: submitting", "login:", login, "password:", password)
 
-	let response = await api.login(login, password)
+	const params = new URLSearchParams(location.search)
+
+	let response = await api.login(login, password, params.get("lang"))
 	console.log("[onFormSubmit]: login:", response)
 	if (response.error.error) {
 		showError(elems, response.error)

@@ -1,8 +1,17 @@
-<div class="mt-2 max-w-md min-w-3xs w-full flex flex-row justify-between px-8">
-	{{> sidebar}}
+<div class="mt-2 max-w-md min-w-3xs w-full px-8">
+	<div class="flex flex-row justify-between mb-4">
+		{{> sidebar}}
 
-	<div class="py-1">
-		{{> authorization}}
+		<div class="py-1">
+			{{> authorization}}
+		</div>
+	</div>
+
+	<div class="mb-4">
+		<details>
+			<summary class="cursor-pointer mb-2">{{settingsHeader}}</summary>
+			{{> settings}}
+		</details>
 	</div>
 </div>
 

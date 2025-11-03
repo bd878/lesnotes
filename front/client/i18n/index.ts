@@ -37,6 +37,7 @@ const texts = {
 		search: "Search",
 		emptyListText: "List is empty",
 		newNote: "New note",
+		settingsHeader: "Settings",
 
 		terms: "Terms",
 		contact: "Contact",
@@ -81,6 +82,7 @@ const texts = {
 		search: "Поиск",
 		emptyListText: "Ничего не найдено",
 		newNote: "Новая заметка",
+		settingsHeader: "Настройки",
 
 		terms: "Политика",
 		contact: "Контакты",
@@ -125,6 +127,7 @@ const texts = {
 		search: "Suchen",
 		emptyListText: "Nichts gefunden",
 		newNote: "Neue Notiz",
+		settingsHeader: "Einstellung",
 
 		terms: "",
 		contact: "",
@@ -169,6 +172,7 @@ const texts = {
 		search: "Chercher",
 		emptyListText: "Le liste est vide",
 		newNote: "Nouvelle note",
+		settingsHeader: "Réglages",
 
 		terms: "",
 		contact: "",

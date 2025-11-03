@@ -1,15 +1,15 @@
 <div class="flex flex-row justify-between">
 	<a
 		el="a"
-		href="/signup"
+		href="/signup{{query}}"
 		target="_self"
-		class="underline italic text-blue-600 text-left cursor-pointer"
+		class="underline italic text-blue-600 dark:text-gray-400 text-left"
 	>
 		{{register}}
 	</a>
 
 	<button
 		type="submit"
-		class="border-1 px-4 border-solid text-left cursor-pointer"
+		class="border-1 px-4 border-solid rounded-md px-1 text-left"
 	>{{login}}</button>
 </div>

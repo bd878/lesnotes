@@ -162,6 +162,15 @@ func LangFromString(code string) LangCode {
 	}
 }
 
+func Accepts(code string) bool {
+	for _, lang := range AcceptedLangs {
+		if strings.ToLower(code) == lang {
+			return true
+		}
+	}
+	return false
+}
+
 func (lang LangCode) String() string { return string(lang) }
 
 func (lang LangCode) Code() LangCode { return lang }

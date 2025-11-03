@@ -12,11 +12,14 @@ import favicon from './handlers/favicon.js';
 import etag from './handlers/etag.js';
 import getMe from './handlers/getMe.js';
 import getToken from './handlers/getToken.js';
+import getTheme from './handlers/getTheme.js';
 import notAuthed from './handlers/notAuthed';
 import loadStack from './handlers/loadStack.js';
 import loadMessage from './handlers/loadMessage.js';
 import loadSearch from './handlers/loadSearch.js';
-import language from './handlers/language';
+import getLanguage from './handlers/getLanguage';
+import getFontSize from './handlers/getFontSize';
+import getQuery from './handlers/getQuery';
 
 import assets from './routes/assets/assets';
 import main from './routes/main/main';
@@ -48,19 +51,19 @@ router
 		ctx.redirect('/')
 		ctx.status = 301
 	})
-	.get('/', etag, language, getToken, notAuthed, main)
-	.get('/login', etag, language, getToken, notAuthed, login)
-	.get('/logout', etag, language, logout)
-	.get('/signup', etag, language, getToken, notAuthed, register)
-	.get('/home', etag, language, getToken, getMe, loadMessage, loadStack, home)
-	.get('/search', etag, language, getToken, getMe, loadSearch, search)
-	.get('/status', status, language)
+	.get('/', etag, getLanguage, getTheme, getFontSize, getToken, getQuery, notAuthed, main)
+	.get('/login', etag, getLanguage, getFontSize, getTheme, getQuery, getToken, notAuthed, login)
+	.get('/logout', etag, getLanguage, getFontSize, getTheme, getQuery, logout)
+	.get('/signup', etag, getLanguage, getFontSize, getToken, getTheme, getQuery, notAuthed, register)
+	.get('/home', etag, getLanguage, getToken, getMe, loadMessage, loadStack, home)
+	.get('/search', etag, getLanguage, getToken, getMe, loadSearch, search)
+	.get('/status', status, getLanguage)
 	.get("/tg_auth", authTelegram)
-	.get("/new", etag, language, newMessage)
-	.get("/m/:user/:id", etag, language, getToken, loadMessage, message)
-	.get("/m/:name", etag, language, getToken, loadMessage, message)
-	.get("/miniapp", etag, language, miniapp)
-	.get('/:any*', language, xxx)
+	.get("/new", etag, getLanguage, newMessage)
+	.get("/m/:user/:id", etag, getLanguage, getToken, loadMessage, message)
+	.get("/m/:name", etag, getLanguage, getToken, loadMessage, message)
+	.get("/miniapp", etag, getLanguage, miniapp)
+	.get('/:any*', getLanguage, xxx)
 
 app.use(router.routes());
 

@@ -5,23 +5,17 @@ import (
 	"io"
 	"encoding/json"
 
-	"github.com/bd878/gallery/server/third_party/accept"
 	"github.com/bd878/gallery/server/i18n"
-	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/users/internal/controller"
+	middleware "github.com/bd878/gallery/server/internal/middleware/http"
 	users "github.com/bd878/gallery/server/users/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
 )
 
 func (h *Handler) LoginJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
-	var lang i18n.LangCode
-
-	preferredLang, err := accept.Negotiate(req.Header.Get("Accept-Language"), i18n.AcceptedLangs...)
-	if err != nil {
-		logger.Errorw("login", "error", err)
+	lang, ok := req.Context().Value(middleware.LangContextKey{}).(i18n.LangCode)
+	if !ok {
 		lang = i18n.LangEn
-	} else {
-		lang = i18n.LangFromString(preferredLang)
 	}
 
 	data, err := io.ReadAll(req.Body)
