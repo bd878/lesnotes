@@ -16,8 +16,8 @@ CREATE TABLE IF NOT EXISTS search.messages
 
 CREATE INDEX IF NOT EXISTS search_messages_text ON search.messages(text);
 
-CREATE TRIGGER created_at_search_messages_trgr BEFORE UPDATE ON search.messages1 FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
-CREATE TRIGGER updated_at_search_messages_trgr BEFORE UPDATE ON search.messages1 FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
+CREATE TRIGGER created_at_search_messages_trgr BEFORE UPDATE ON search.messages FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
+CREATE TRIGGER updated_at_search_messages_trgr BEFORE UPDATE ON search.messages FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 
 CREATE TABLE IF NOT EXISTS search.files
 (

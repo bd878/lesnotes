@@ -1,11 +1,11 @@
 \c lesnotes
 CREATE SCHEMA IF NOT EXISTS messages;
 
+-- ORDER IS IMPORTANT!!! FOR SNAPSHOTS
 CREATE TABLE IF NOT EXISTS messages.messages
 (
 	id           bigint        UNIQUE NOT NULL,         -- thread id for child messages
 	text         TEXT          NOT NULL,
-	title        TEXT          NOT NULL DEFAULT '',
 	file_ids     jsonb         DEFAULT NULL,
 	private      bool          NOT NULL DEFAULT true,
 	name         VARCHAR(256)  UNIQUE NOT NULL,
@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS messages.messages
 	thread_id    bigint        NOT NULL,                -- parent message id
 	created_at   timestamptz   NOT NULL DEFAULT NOW(),
 	updated_at   timestamptz   NOT NULL DEFAULT NOW(),
+	title        TEXT          NOT NULL DEFAULT '',
 	PRIMARY KEY(id)
 );
 
