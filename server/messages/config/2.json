@@ -1,14 +1,13 @@
 {
-  "node_name": "messages.9002",
-  "rpc_addr": "0.0.0.0:9002",
-  "serf_addr": "127.0.0.2:8072",
-  "users_service_addr": "0.0.0.0:8085",
-  "serf_join_addrs": ["127.0.0.1:8071"],
+	"node_name": "messages.9002",
+	"rpc_addr": "0.0.0.0:9002",
+	"serf_addr": "127.0.0.2:8072",
+	"users_service_addr": "0.0.0.0:8085",
+	"serf_join_addrs": ["127.0.0.1:8071"],
 
-  "raft_bootstrap": false,
-  "raft_log_level": "debug",
-  "log_path": "../../logs",
-  "log_level": "debug",
-  "data_path": "../../data@2",
-  "nats_addr": "0.0.0.0:4222"
+	"raft_bootstrap": false,
+	"raft_log_level": "debug",
+	"log_level": "debug",
+	"data_path": "../../data@2",
+	"nats_addr": "0.0.0.0:4222"
 }

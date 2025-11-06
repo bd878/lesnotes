@@ -43,7 +43,7 @@ func (r *Repository) Create(ctx context.Context, id int64, text string, title st
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "[Create]: rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)
@@ -86,7 +86,7 @@ func (r *Repository) Update(ctx context.Context, userID, id int64, newText, newT
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "[Update]: rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)
@@ -162,7 +162,7 @@ func (r *Repository) DeleteMessage(ctx context.Context, userID, id int64) (err e
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "[DeleteMessage]: rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)
@@ -198,7 +198,7 @@ func (r *Repository) Publish(ctx context.Context, userID int64, ids []int64) (er
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "[Publish]: rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)
@@ -228,7 +228,7 @@ func (r *Repository) Private(ctx context.Context, userID int64, ids []int64) (er
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "[Private]: rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)
@@ -258,7 +258,7 @@ func (r *Repository) Read(ctx context.Context, userIDs []int64, id int64, name s
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "[Read]: rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)
@@ -331,7 +331,7 @@ func (r *Repository) ReadBatchMessages(ctx context.Context, userID int64, messag
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "[ReadBatchMessages]: rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)
@@ -411,7 +411,7 @@ func (r *Repository) DeleteUserMessages(ctx context.Context, userID int64) (err 
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "[DeleteUserMessages]: rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)
@@ -449,7 +449,7 @@ func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID in
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "[ReadThreadMessages]: rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)
@@ -540,7 +540,7 @@ func (r *Repository) ReadMessages(ctx context.Context, userID int64, limit, offs
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "[ReadMessages]: rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)
@@ -634,7 +634,7 @@ func (r *Repository) ReadMessagesAround(ctx context.Context, userID, threadID, i
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "[ReadMessagesAround]: rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)
@@ -776,7 +776,7 @@ func (r *Repository) ReadPath(ctx context.Context, userID, id int64) (path []*mo
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "[ReadPath]: rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)

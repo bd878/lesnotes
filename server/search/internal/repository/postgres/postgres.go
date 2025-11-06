@@ -38,7 +38,7 @@ func (r *Repository) SaveMessage(ctx context.Context, id, userID int64, name, ti
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "[SaveMessage]: rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)
@@ -66,7 +66,7 @@ func (r *Repository) UpdateMessage(ctx context.Context, id, userID int64, newNam
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "[UpdateMessage]: rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)
@@ -124,7 +124,7 @@ func (r *Repository) PublishMessages(ctx context.Context, ids []int64, userID in
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "[PublishMessages]: rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)
@@ -154,7 +154,7 @@ func (r *Repository) PrivateMessages(ctx context.Context, ids []int64, userID in
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "[PrivateMessages]: rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)
@@ -186,7 +186,7 @@ func (r *Repository) DeleteMessage(ctx context.Context, id, userID int64) (err e
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "[DeleteMessage]: rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)
@@ -213,7 +213,7 @@ func (r *Repository) SearchMessages(ctx context.Context, userID int64, substr st
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "[SearchMessages]: rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)

@@ -43,7 +43,7 @@ func (r *Repository) SaveFile(ctx context.Context, reader io.Reader, id, userID 
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "[SaveFile]: rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)
@@ -117,7 +117,7 @@ func (r *Repository) ReadFile(ctx context.Context, oid int32, writer io.Writer) 
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "[ReadFile]: rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)
@@ -158,7 +158,7 @@ func (r *Repository) DeleteFile(ctx context.Context, ownerID, id int64) (err err
 			if errors.Is(err, pgx.ErrNoRows) {
 				return
 			} else {
-				fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
+				fmt.Fprintf(os.Stderr, "[DeleteFile]: rollback with error: %v\n", err)
 				err = tx.Rollback(ctx)
 			}
 		default:
