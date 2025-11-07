@@ -3,22 +3,25 @@ package grpc
 import (
 	"net"
 	"os"
+	"io"
+	"bytes"
 	"fmt"
 	"time"
 	"context"
 	"google.golang.org/grpc"
 	"github.com/soheilhy/cmux"
+	"github.com/hashicorp/raft"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/sync/errgroup"
 
+	hclog "github.com/hashicorp/go-hclog"
+
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/logger"
 
 	"github.com/bd878/gallery/server/waiter"
+	membership "github.com/bd878/gallery/server/discovery/serf"
 	grpcmiddleware "github.com/bd878/gallery/server/internal/middleware/grpc"
-	sessionsgateway "github.com/bd878/gallery/server/users/internal/gateway/sessions/grpc"
-	messagesgateway "github.com/bd878/gallery/server/users/internal/gateway/messages/grpc"
-	controller "github.com/bd878/gallery/server/users/internal/controller/users"
+	controller "github.com/bd878/gallery/server/users/internal/controller/distributed"
 	repository "github.com/bd878/gallery/server/users/internal/repository/postgres"
 	grpchandler "github.com/bd878/gallery/server/users/internal/handler/grpc"
 )
@@ -26,10 +29,14 @@ import (
 type Config struct {
 	Addr                   string
 	PGConn                 string
+	TableName              string
+	RaftLogLevel           string
+	RaftBootstrap          bool
+	RaftServers            []string
+	SerfAddr               string
+	SerfJoinAddrs          []string
 	NodeName               string
 	DataPath               string
-	SessionsServiceAddr    string
-	MessagesServiceAddr    string
 }
 
 type Server struct {
@@ -39,6 +46,8 @@ type Server struct {
 	pool             *pgxpool.Pool
 	listener         net.Listener
 	grpcListener     net.Listener
+	controller       *controller.DistributedUsers
+	membership       *membership.Membership
 }
 
 func New(cfg Config) *Server {
@@ -55,20 +64,36 @@ func New(cfg Config) *Server {
 		listener:      listener,
 	}
 
-	server.setupDB()
-	server.setupGRPC(logger.Default())
+	if err := server.setupDB(); err != nil {
+		panic(err)
+	}
+
+	if err := server.setupRaft(); err != nil {
+		panic(err)
+	}
+
+	if err := server.setupGRPC(); err != nil {
+		panic(err)
+	}
 
 	return server
 }
 
-func (s *Server) setupGRPC(log *logger.Logger) {
-	repo := repository.New(s.pool)
-
-	sessionsGateway := sessionsgateway.New(s.conf.SessionsServiceAddr)
-	messagesGateway := messagesgateway.New(s.conf.MessagesServiceAddr)
-
-	control := controller.New(repo, messagesGateway, sessionsGateway)
-	handler := grpchandler.New(control)
+func (s *Server) setupGRPC() (err error) {
+	s.membership, err = membership.New(
+		membership.Config{
+			NodeName: s.conf.NodeName,
+			BindAddr: s.conf.SerfAddr,
+			Tags: map[string]string{
+				"raft_addr": s.conf.Addr,
+			},
+			SerfJoinAddrs: s.conf.SerfJoinAddrs,
+		},
+		s.controller,
+	)
+	if err != nil {
+		return err
+	}
 
 	s.Server = grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
@@ -76,17 +101,53 @@ func (s *Server) setupGRPC(log *logger.Logger) {
 		),
 	)
 
-	api.RegisterUsersServer(s.Server, handler)
+	api.RegisterUsersServer(s.Server, grpchandler.New(s.controller))
 
 	s.grpcListener = s.mux.Match(cmux.Any())
+
+	return nil
 }
 
-func (s *Server) setupDB() {
-	var err error
+func (s *Server) setupDB() (err error) {
 	s.pool, err = pgxpool.New(context.Background(), s.conf.PGConn)
-	if err != nil {
-		panic(err)
+	return
+}
+
+func (s *Server) setupRaft() (err error) {
+	repo := repository.New(s.pool, s.conf.TableName)
+
+	raftLogLevel := hclog.Error.String()
+	switch s.conf.RaftLogLevel {
+	case "debug":
+		raftLogLevel = hclog.Debug.String()
+	case "error":
+		raftLogLevel = hclog.Error.String()
+	case "info":
+		raftLogLevel = hclog.Info.String()
+	default:
+		raftLogLevel = hclog.Info.String()
 	}
+
+	raftListener := s.mux.Match(func(r io.Reader) bool {
+		b := make([]byte, 1)
+		if _, err := r.Read(b); err != nil {
+			return false
+		}
+		return bytes.Compare(b, []byte{byte(controller.RaftRPC)}) == 0
+	})
+
+	s.controller, err = controller.New(controller.Config{
+		Raft: raft.Config{
+			LocalID:  raft.ServerID(s.conf.NodeName),
+			LogLevel: raftLogLevel,
+		},
+		StreamLayer: controller.NewStreamLayer(raftListener),
+		Bootstrap:   s.conf.RaftBootstrap,
+		DataDir:     s.conf.DataPath,
+		Servers:     s.conf.RaftServers,
+	}, repo)
+
+	return
 }
 
 func (s *Server) Run(ctx context.Context) (err error) {

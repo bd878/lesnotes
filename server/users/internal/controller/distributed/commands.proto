@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option go_package = "github.com/bd878/gallery/server/users/internal/controller/distributed";
+
+message AppendCommand {
+	int64   id  = 1;
+	string  login = 2;
+	string  hashed_password = 3;
+	string  theme = 4;
+	string  lang = 5;
+	int32   font_size = 6;
+}
+
+message UpdateCommand {
+	int64   id = 1;
+	string  login = 2;
+	string  theme = 3;
+	string  lang = 4;
+	int32   font_size = 5;
+}
+
+message DeleteCommand {
+	int64   id = 1;
+}

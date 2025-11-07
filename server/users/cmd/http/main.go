@@ -28,14 +28,13 @@ func main() {
 	cfg := config.Load(flag.Arg(0))
 	logger.SetDefault(logger.New(logger.Config{
 		NodeName:         cfg.NodeName,
+		LogLevel:         cfg.LogLevel,
 		SkipCaller:       0,
 	}))
 
 	server := http.New(http.Config{
 		Addr:                cfg.HttpAddr,
 		RpcAddr:             cfg.RpcAddr,
-		DataPath:            cfg.DataPath,
-		PGConn:              cfg.PGConn,
 		CookieDomain:        cfg.CookieDomain,
 		MessagesServiceAddr: cfg.MessagesServiceAddr,
 		SessionsServiceAddr: cfg.SessionsServiceAddr,

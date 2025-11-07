@@ -41,7 +41,6 @@ type Config struct {
 	RaftServers         []string
 	SerfAddr            string
 	SerfJoinAddrs       []string
-	SessionsServiceAddr string
 	NatsAddr            string
 }
 

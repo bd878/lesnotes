@@ -40,7 +40,6 @@ type Config struct {
 	RaftServers         []string
 	SerfAddr            string
 	SerfJoinAddrs       []string
-	SessionsServiceAddr string
 	NatsAddr            string
 }
 
@@ -177,8 +176,7 @@ func (s *Server) setupGRPC() error {
 
 	api.RegisterSearchServer(s.Server, handler)
 
-	grpcListener := s.mux.Match(cmux.Any())
-	s.grpcListener = grpcListener
+	s.grpcListener = s.mux.Match(cmux.Any())
 
 	return nil
 }
