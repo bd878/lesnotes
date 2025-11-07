@@ -208,7 +208,7 @@ func (m *Distributed) Leave(id string) error {
 		return errors.New("cannot remove node from cluster: not a leader")
 	}
 
-	logger.Info("remove from cluster serve with id", id)
+	logger.Infow("remove from cluster server", "id", id)
 	removeFuture := m.raft.RemoveServer(raft.ServerID(id), 0, 0)
 	return removeFuture.Error()
 }
