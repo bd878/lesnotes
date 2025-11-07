@@ -2,35 +2,53 @@ syntax = "proto3";
 
 package users.v1;
 
+import "protos/distributed.proto";
+
 option go_package = "github.com/bd878/gallery/server/api";
 
 service Users {
-	rpc GetUser(GetUserRequest) returns (User);
+	rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
 	rpc FindUser(FindUserRequest) returns (User);
+	rpc GetUser(GetUserRequest) returns (User);
 	rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+	rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+	rpc GetServers(GetServersRequest) returns (GetServersResponse) {}
 }
 
 message User {
 	int64     id               = 1;
 	string    login            = 2;
-	string    token            = 3;
-	int64     expires_utc_nano = 4;
-	string    hashed_password  = 5;
-	string    theme            = 6;
-	string    lang             = 7;
-	int32     font_size        = 8;
+	string    theme            = 5;
+	string    lang             = 6;
+	int32     font_size        = 7;
+	string    hashed_password  = 8;
 }
 
 message GetUserRequest {
-	int64 id = 1;
+	int64     id = 1;
 }
 
 message FindUserRequest {
-	oneof search_key {
-		string login = 1;
-		string token = 2;
-	}
+	string login = 1;
 }
+
+message CreateUserRequest {
+	int64     id      = 1;
+	string    login   = 2;
+	string    password = 3;
+	string    theme   = 4;
+	string    lang    = 5;
+	int32     font_size = 6;
+}
+
+message CreateUserResponse {
+}
+
+message DeleteUserRequest {
+	int64   id  = 1;
+}
+
+message DeleteUserResponse {}
 
 message UpdateUserRequest {
 	int64   id    = 1;

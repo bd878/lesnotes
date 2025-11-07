@@ -11,11 +11,10 @@ import (
 	"github.com/hashicorp/raft"
 
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/ddd"
 	"github.com/bd878/gallery/server/logger"
 )
 
-var ErrMsgExist = errors.New("message exists")
+var UserExist = errors.New("user exists")
 
 type Config struct {
 	Raft                 raft.Config
@@ -28,15 +27,14 @@ type Config struct {
 	NetworkTimeout       time.Duration
 }
 
-type DistributedMessages struct {
+type DistributedUsers struct {
 	conf            Config
 	raft            *raft.Raft
 	repo            Repository
 	snapshotStore   raft.SnapshotStore
-	publisher       ddd.EventPublisher[ddd.Event]
 }
 
-func New(conf Config, repo Repository, publisher ddd.EventPublisher[ddd.Event]) (*DistributedMessages, error) {
+func New(conf Config, repo Repository) (*DistributedUsers, error) {
 	if conf.RetainSnapshots == 0 {
 		conf.RetainSnapshots = 1
 	}
@@ -49,18 +47,17 @@ func New(conf Config, repo Repository, publisher ddd.EventPublisher[ddd.Event]) 
 		conf.NetworkTimeout = 10 * time.Second
 	}
 
-	m := &DistributedMessages{
+	m := &DistributedUsers{
 		repo:      repo,
 		conf:      conf,
-		publisher: publisher,
 	}
-	if err := m.setupRaft(logger.Default()); err != nil {
+	if err := m.setupRaft(); err != nil {
 		return nil, err
 	}
 	return m, nil
 }
 
-func (m *DistributedMessages) setupRaft(log *logger.Logger) error {
+func (m *DistributedUsers) setupRaft() error {
 	fsm := &fsm{repo: m.repo}
 
 	raftPath := filepath.Join(m.conf.DataDir, "raft")
@@ -135,7 +132,7 @@ func (m *DistributedMessages) setupRaft(log *logger.Logger) error {
 	return err
 }
 
-func (m *DistributedMessages) WaitForLeader(timeout time.Duration) error {
+func (m *DistributedUsers) WaitForLeader(timeout time.Duration) error {
 	timeoutc := time.After(timeout)
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
@@ -152,7 +149,7 @@ func (m *DistributedMessages) WaitForLeader(timeout time.Duration) error {
 	}
 }
 
-func (m *DistributedMessages) GetServers(_ context.Context) ([](*api.Server), error) {
+func (m *DistributedUsers) GetServers(_ context.Context) ([](*api.Server), error) {
 	future := m.raft.GetConfiguration()
 	if err := future.Error(); err != nil {
 		logger.Error("message", "failed to get servers configuration")
@@ -170,7 +167,7 @@ func (m *DistributedMessages) GetServers(_ context.Context) ([](*api.Server), er
 	return servers, nil
 }
 
-func (m *DistributedMessages) Join(id, addr string) error {
+func (m *DistributedUsers) Join(id, addr string) error {
 	leaderFuture := m.raft.VerifyLeader()
 	if err := leaderFuture.Error(); err != nil {
 		return errors.New("cannot join node to cluster: not a leader")
@@ -205,7 +202,7 @@ func (m *DistributedMessages) Join(id, addr string) error {
 	return nil
 }
 
-func (m *DistributedMessages) Leave(id string) error {
+func (m *DistributedUsers) Leave(id string) error {
 	leaderFuture := m.raft.VerifyLeader()
 	if err := leaderFuture.Error(); err != nil {
 		return errors.New("cannot remove node from cluster: not a leader")
@@ -216,14 +213,14 @@ func (m *DistributedMessages) Leave(id string) error {
 	return removeFuture.Error()
 }
 
-func (m *DistributedMessages) Snapshot() error {
+func (m *DistributedUsers) Snapshot() error {
 	logger.Debugln("snapshot this machine")
 
 	snapshotFuture := m.raft.Snapshot()
 	return snapshotFuture.Error()
 }
 
-func (m *DistributedMessages) Restore() error {
+func (m *DistributedUsers) Restore() error {
 	leaderFuture := m.raft.VerifyLeader()
 	if err := leaderFuture.Error(); err != nil {
 		return errors.New("cannot restore from snapshot: not a leader")
@@ -248,7 +245,7 @@ func (m *DistributedMessages) Restore() error {
 	return m.raft.Restore(snapshot, reader, 20 * time.Second)
 }
 
-func (m *DistributedMessages) ShowLeader() error {
+func (m *DistributedUsers) ShowLeader() error {
 	state := m.raft.State()
 	logger.Infow("my state", "addr", m.conf.StreamLayer.Addr(), "state", state.String())
 	return nil

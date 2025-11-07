@@ -8,66 +8,59 @@ import (
 	"net/http"
 
 	"golang.org/x/sync/errgroup"
-	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/waiter"
 	users "github.com/bd878/gallery/server/users/pkg/model"
 	httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
-	repository "github.com/bd878/gallery/server/users/internal/repository/postgres"
 	httphandler "github.com/bd878/gallery/server/users/internal/handler/http"
-	messagesgateway "github.com/bd878/gallery/server/users/internal/gateway/messages/grpc"
 	sessionsgateway "github.com/bd878/gallery/server/users/internal/gateway/sessions/grpc"
-	controller "github.com/bd878/gallery/server/users/internal/controller/users"
+	messagesgateway "github.com/bd878/gallery/server/users/internal/gateway/messages/grpc"
+	controller "github.com/bd878/gallery/server/users/internal/controller/service"
 )
 
 type Config struct {
 	Addr                string
 	RpcAddr             string
-	MessagesServiceAddr string
 	SessionsServiceAddr string
-	DataPath            string
+	MessagesServiceAddr string
 	CookieDomain        string
-	PGConn              string
 }
 
 type Server struct {
 	*http.Server
-	conf             Config
-	pool             *pgxpool.Pool
+	conf  Config
 }
 
 func New(cfg Config) (server *Server) {
 	mux := http.NewServeMux()
 
+	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log).WithLang(httpmiddleware.Language)
+
 	server = &Server{
 		Server: &http.Server{
-			Addr: cfg.Addr,
+			Addr:    cfg.Addr,
 			Handler: mux,
 		},
 		conf: cfg,
 	}
 
-	server.setupDB()
-
-	messagesGateway := messagesgateway.New(cfg.MessagesServiceAddr)
 	sessionsGateway := sessionsgateway.New(cfg.SessionsServiceAddr)
+	messagesGateway := messagesgateway.New(cfg.MessagesServiceAddr)
 
-	repo := repository.New(server.pool)
-	control := controller.New(repo, messagesGateway, sessionsGateway)
-	handler := httphandler.New(control, httphandler.Config{
+	ctrl := controller.New(controller.Config{RpcAddr: cfg.RpcAddr}, messagesGateway, sessionsGateway)
+
+	handler := httphandler.New(ctrl, httphandler.Config{
 		CookieDomain:    cfg.CookieDomain,
 	})
 
-	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log).WithLang(httpmiddleware.Language)
-
 	// TODO: middleware.Build(handler, ...middlewares)
-	middleware.WithAuth(httpmiddleware.AuthBuilder(logger.Default(), control, sessionsGateway, users.PublicUserID))
+	middleware.WithAuth(httpmiddleware.AuthBuilder(logger.Default(), ctrl, sessionsGateway, users.PublicUserID))
 	mux.Handle("/users/v1/me",     middleware.Build(handler.GetMe))
 	mux.Handle("/users/v1/logout", middleware.Build(handler.Logout))
 	mux.Handle("/users/v1/update", middleware.Build(handler.Update))
 
-	middleware.NoAuth().WithAuth(httpmiddleware.TokenAuthBuilder(logger.Default(), control, sessionsGateway, users.PublicUserID))
+	middleware.NoAuth().WithAuth(httpmiddleware.TokenAuthBuilder(logger.Default(), ctrl, sessionsGateway, users.PublicUserID))
 	mux.Handle("/users/v2/delete", middleware.Build(handler.DeleteJsonAPI))
 	mux.Handle("/users/v2/me",     middleware.Build(handler.GetMe))
 	mux.Handle("/users/v2/update", middleware.Build(handler.UpdateJsonAPI))
@@ -84,35 +77,13 @@ func New(cfg Config) (server *Server) {
 	return
 }
 
-func (s *Server) setupDB() {
-	var err error
-	s.pool, err = pgxpool.New(context.Background(), s.conf.PGConn)
-	if err != nil {
-		panic(err)
-	}
-}
-
 func (s *Server) Run(ctx context.Context) (err error) {
 	waiter := waiter.New(waiter.CatchSignals())
 
-	waiter.Add(s.WaitForServer, s.WaitForPool)
+	waiter.Add(s.WaitForServer)
 
 	return waiter.Wait()
 }
-
-func (s *Server) WaitForPool(ctx context.Context) (err error) {
-	group, gCtx := errgroup.WithContext(ctx)
-
-	group.Go(func() error {
-		<-gCtx.Done()
-		fmt.Fprintln(os.Stdout, "closing pgpool connections")
-		s.pool.Close()
-		return nil
-	})
-
-	return group.Wait()
-}
-
 
 func (s *Server) WaitForServer(ctx context.Context) (err error) {
 	group, gCtx := errgroup.WithContext(ctx)

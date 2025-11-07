@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"context"
 
@@ -18,9 +19,9 @@ type Repository struct {
 	pool      *pgxpool.Pool
 }
 
-func New(pool *pgxpool.Pool) *Repository {
+func New(pool *pgxpool.Pool, tableName string) *Repository {
 	return &Repository{
-		tableName: "users.users",
+		tableName: tableName,
 		pool:      pool,
 	}
 }
@@ -137,6 +138,57 @@ func (r *Repository) Update(ctx context.Context, id int64, newLogin, newTheme, n
 	}
 
 	_, err = tx.Exec(ctx, r.table(query), id, login, theme, lang, fontSize)
+
+	return
+}
+
+func (r *Repository) Truncate(ctx context.Context) (err error) {
+	logger.Debugln("truncating table")
+	_, err = r.pool.Exec(ctx, r.table("TRUNCATE TABLE %s"))
+	return
+}
+
+func (r *Repository) Dump(ctx context.Context) (reader io.ReadCloser, err error) {
+	var (
+		writer io.WriteCloser
+		conn   *pgxpool.Conn
+	)
+
+	query := r.table("COPY %s TO STDOUT BINARY")
+
+	reader, writer = io.Pipe()
+
+	conn, err = r.pool.Acquire(ctx)
+	if err != nil {
+		conn.Release()
+		return
+	}
+
+	go func(ctx context.Context, query string, conn *pgxpool.Conn, writer io.WriteCloser) {
+		_, err := conn.Conn().PgConn().CopyTo(ctx, writer, query)
+		defer writer.Close()
+		defer conn.Release()
+		if err != nil {
+			logger.Errorw("failed to dump", "error", err)
+		}
+	}(ctx, query, conn, writer)
+
+	return
+}
+
+func (r *Repository) Restore(ctx context.Context, reader io.ReadCloser) (err error) {
+	var conn *pgxpool.Conn
+
+	query := r.table("COPY %s FROM STDIN BINARY")
+
+	conn, err = r.pool.Acquire(ctx) 
+	if err != nil {
+		conn.Release()
+		return
+	}
+
+	_, err = conn.Conn().PgConn().CopyFrom(ctx, reader, query)
+	defer conn.Release()
 
 	return
 }

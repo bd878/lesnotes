@@ -5,7 +5,5 @@
 	"users_service_addr":    "0.0.0.0:8085",
 	"files_service_addr":    "0.0.0.0:8086",
 
-	"log_path":              "../../logs",
-	"log_level":             "debug",
-	"data_path":             "../../data"
+	"log_level":             "debug"
 }

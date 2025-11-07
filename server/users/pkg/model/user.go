@@ -9,9 +9,9 @@ type (
 		ID               int64            `json:"id"`
 		Login            string           `json:"login,omitempty"`
 		Theme            string           `json:"theme,omitempty"`
-		HashedPassword   string           `json:"salt,omitempty"`
 		Token            string           `json:"token,omitempty"`
 		Lang             string           `json:"language,omitempty"`
+		HashedPassword   string           `json:"-"`
 		ExpiresUTCNano   int64            `json:"expires_utc_nano,omitempty"` // TODO: ExpiresAt
 		FontSize         int32            `json:"font_size,omitempty"`
 	}

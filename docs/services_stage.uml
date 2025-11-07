@@ -22,21 +22,40 @@ package Front as front {
 	front_http -- "192.168.10.3:8181"
 }
 
-package Telemetry as telemetry {
-	component http as telemetry_http
-	front_http -- "192.168.10.3:8179"
-}
-
 package Users as users {
 	component http as users_http
-	component grpc as users_grpc
-	database PostgreSQL as users_db
 
 	users_http -- "192.168.10.3:8184"
-	users_grpc -- "192.168.10.3:8185"
 
-	users_grpc - users_db
-	users_http - users_grpc
+	package "users@9121" as 9121 {
+		component grpc as 9121_grpc
+		component serf as 9121_serf
+		database PostgreSQL as 9121_db
+
+		9121_grpc -- "192.168.10.3:9121"
+		9121_serf -- "192.168.10.3:8121"
+		9121_grpc -- 9121_db
+	}
+
+	package "users@9122" as 9122 {
+		component grpc as 9122_grpc
+		component serf as 9122_serf
+		database PostgreSQL as 9122_db
+
+		9122_grpc -- "192.168.10.120:9122"
+		9122_serf -- "192.168.10.120:8122"
+		9122_grpc -- 9122_db
+	}
+
+	package "users@9123" as 9123 {
+		component grpc as 9123_grpc
+		component serf as 9123_serf
+		database PostgreSQL as 9123_db
+
+		9123_grpc -- "192.168.10.130:9123"
+		9123_serf -- "192.168.10.130:8123"
+		9123_grpc -- 9123_db
+	}
 }
 
 package Files as files {
@@ -62,7 +81,7 @@ package Messages as messages {
 		database PostgreSQL as 9101_db
 
 		9101_grpc -- "192.168.10.3:9101"
-		9101_serf -- "127.0.0.1:8171"
+		9101_serf -- "192.168.10.3:8101"
 		9101_grpc - 9101_db
 	}
 
@@ -71,8 +90,8 @@ package Messages as messages {
 		component serf as 9102_serf
 		database PostgreSQL as 9102_db
 
-		9102_grpc -- "192.168.10.3:9102"
-		9102_serf -- "127.0.0.1:8172"
+		9102_grpc -- "192.168.10.120:9102"
+		9102_serf -- "192.168.10.120:8102"
 		9102_grpc - 9102_db
 	}
 
@@ -81,8 +100,8 @@ package Messages as messages {
 		component serf as 9103_serf
 		database PostgreSQL as 9103_db
 
-		9103_grpc -- "192.168.10.3:9103"
-		9103_serf -- "127.0.0.1:8173"
+		9103_grpc -- "192.168.10.130:9103"
+		9103_serf -- "192.168.10.130:8103"
 		9103_grpc - 9103_db
 	}
 }
@@ -119,7 +138,7 @@ package Search as search {
 		database PostgreSQL as 9111_db
 
 		9111_grpc -- "192.168.10.3:9111"
-		9111_serf -- "127.0.0.1:8271"
+		9111_serf -- "192.168.10.3:8111"
 		9111_grpc -- 9111_db
 	}
 
@@ -128,8 +147,8 @@ package Search as search {
 		component serf as 9112_serf
 		database PostgreSQL as 9112_db
 
-		9112_grpc -- "192.168.10.3:9112"
-		9112_serf -- "127.0.0.1:8272"
+		9112_grpc -- "192.168.10.120:9112"
+		9112_serf -- "192.168.10.120:8112"
 		9112_grpc -- 9112_db
 	}
 
@@ -138,8 +157,8 @@ package Search as search {
 		component serf as 9113_serf
 		database PostgreSQL as 9113_db
 
-		9113_grpc -- "192.168.10.3:9113"
-		9113_serf -- "127.0.0.1:8273"
+		9113_grpc -- "192.168.10.130:9113"
+		9113_serf -- "192.168.10.130:8113"
 		9113_grpc -- 9113_db
 	}
 }
@@ -147,7 +166,7 @@ package Search as search {
 package Nats as nats {
 	component tcp as nats_tcp
 
-	nats_tcp -- "0.0.0.0:4222"
+	nats_tcp -- "192.168.10.3:4222"
 }
 
 footer 21.10.25
