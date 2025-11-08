@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option go_package = "github.com/bd878/gallery/server/sessions/internal/controller/distributed";
+
+message AppendCommand {
+	int64    user_id = 1;
+	string   token = 2;
+	int64    expires_utc_nano = 3;
+}
+
+message DeleteCommand {
+	string   token = 1;
+}
+
+message DeleteUserSessionsCommand {
+	int64    user_id = 1;
+}
