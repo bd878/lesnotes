@@ -11,7 +11,6 @@ together {
 	package users
 	package files
 	package messages
-	package telemetry
 	package sessions
 	package front
 	package search
@@ -22,78 +21,16 @@ package Front as front {
 	front_http -- "192.168.10.2:8081"
 }
 
-package Telemetry as telemetry {
-	component http as telemetry_http
-	front_http -- "192.168.10.2:8079"
-}
-
-package Users as users {
-	component http as users_http
-	component grpc as users_grpc
-	database PostgreSQL as users_db
-
-	users_http -- "192.168.10.2:8084"
-	users_grpc -- "192.168.10.2:8085"
-
-	users_grpc - users_db
-	users_http - users_grpc
-}
-
 package Files as files {
 	component http as files_http
 	component grpc as files_grpc
 	database PostgreSQL as files_db
 
-	files_http -- "192.168.10.2:8082"
-	files_grpc -- "192.168.10.2:8086"
+	files_http -- "192.168.10.5:8082"
+	files_grpc -- "192.168.10.5:8086"
 
 	files_grpc - files_db 
 	files_http - files_grpc
-}
-
-package Messages as messages {
-	component http as messages_http
-
-	messages_http -- "192.168.10.2:8083"
-
-	package "messages@9001" as 9001 {
-		component grpc as 9001_grpc
-		component serf as 9001_serf
-		database PostgreSQL as 9001_db
-
-		9001_grpc -- "192.168.10.2:9001"
-		9001_serf -- "127.0.0.1:8171"
-		9001_grpc - 9001_db
-	}
-
-	package "messages@9002" as 9002 {
-		component grpc as 9002_grpc
-		component serf as 9002_serf
-		database PostgreSQL as 9002_db
-
-		9002_grpc -- "192.168.10.2:9002"
-		9002_serf -- "127.0.0.1:8172"
-		9002_grpc - 9002_db
-	}
-
-	package "messages@9003" as 9003 {
-		component grpc as 9003_grpc
-		component serf as 9003_serf
-		database PostgreSQL as 9003_db
-
-		9003_grpc -- "192.168.10.2:9003"
-		9003_serf -- "127.0.0.1:8173"
-		9003_grpc - 9003_db
-	}
-}
-
-package Sessions as sessions {
-	component grpc as sessions_grpc
-	database PostgreSQL as sessions_db
-
-	sessions_grpc -- "192.168.10.2:8087"
-
-	sessions_grpc - sessions_db
 }
 
 package Threads as threads {
@@ -108,6 +45,48 @@ package Threads as threads {
 	threads_http - threads_grpc
 }
 
+package Messages as messages {
+	component http as messages_http
+
+	messages_http -- "192.168.10.2:8083"
+
+	package "messages@9001" as 9001 {
+		component grpc as 9001_grpc
+		component raft as 9001_raft
+		component serf as 8001_serf
+		database PostgreSQL as 9001_db
+
+		9001_grpc -- "192.168.10.2:9001"
+		9001_raft -- "192.168.10.2:9001"
+		8001_serf -- "192.168.10.2:8001"
+		9001_grpc - 9001_db
+	}
+
+	package "messages@9002" as 9002 {
+		component grpc as 9002_grpc
+		component raft as 9002_raft
+		component serf as 8002_serf
+		database PostgreSQL as 9002_db
+
+		9002_grpc -- "192.168.10.20:9002"
+		9002_raft -- "192.168.10.20:9002"
+		8002_serf -- "192.168.10.20:9002"
+		9002_grpc - 9002_db
+	}
+
+	package "messages@9003" as 9003 {
+		component grpc as 9003_grpc
+		component raft as 9003_raft
+		component serf as 8003_serf
+		database PostgreSQL as 9003_db
+
+		9003_grpc -- "192.168.10.30:9003"
+		9003_raft -- "192.168.10.30:9003"
+		8003_serf -- "192.168.10.30:8003"
+		9003_grpc - 9003_db
+	}
+}
+
 package Search as search {
 	component http as search_http
 
@@ -115,40 +94,126 @@ package Search as search {
 
 	package "search@9011" as 9011 {
 		component grpc as 9011_grpc
-		component serf as 9011_serf
+		component raft as 9011_raft
+		component serf as 8011_serf
 		database PostgreSQL as 9011_db
 
 		9011_grpc -- "192.168.10.2:9011"
-		9011_serf -- "127.0.0.1:8271"
+		9011_raft -- "192.168.10.2:9011"
+		8011_serf -- "192.168.10.2:8011"
 		9011_grpc -- 9011_db
 	}
 
 	package "search@9012" as 9012 {
 		component grpc as 9012_grpc
-		component serf as 9012_serf
+		component raft as 9012_raft
+		component serf as 8012_serf
 		database PostgreSQL as 9012_db
 
-		9012_grpc -- "192.168.10.2:9012"
-		9012_serf -- "127.0.0.1:8272"
+		9012_grpc -- "192.168.10.20:9012"
+		9012_raft -- "192.168.10.20:9012"
+		8012_serf -- "192.168.10.20:8012"
 		9012_grpc -- 9012_db
 	}
 
 	package "search@9013" as 9013 {
 		component grpc as 9013_grpc
-		component serf as 9013_serf
+		component raft as 9013_raft
+		component serf as 8013_serf
 		database PostgreSQL as 9013_db
 
-		9013_grpc -- "192.168.10.2:9013"
-		9013_serf -- "127.0.0.1:8273"
+		9013_grpc -- "192.168.10.30:9013"
+		9013_raft -- "192.168.10.30:9013"
+		8013_serf -- "192.168.10.30:8013"
 		9013_grpc -- 9013_db
+	}
+}
+
+package Users as users {
+	component http as users_http
+
+	users_http -- "192.168.10.2:8084"
+
+	package "users@9021" as 9021 {
+		component grpc as 9021_grpc
+		component raft as 9021_raft
+		component serf as 8021_serf
+		database PostgreSQL as 9021_db
+
+		9021_grpc -- "192.168.10.2:9021"
+		9021_raft -- "192.168.10.2:9021"
+		8021_serf -- "192.168.10.2:8021"
+		9021_grpc -- 9021_db
+	}
+
+	package "users@9022" as 9022 {
+		component grpc as 9022_grpc
+		component raft as 9022_raft
+		component serf as 8022_serf
+		database PostgreSQL as 9022_db
+
+		9022_grpc -- "192.168.10.20:9022"
+		9022_raft -- "192.168.10.20:9022"
+		8022_serf -- "192.168.10.20:8022"
+		9022_grpc -- 9022_db
+	}
+
+	package "users@9023" as 9023 {
+		component grpc as 9023_grpc
+		component raft as 9023_raft
+		component serf as 8023_serf
+		database PostgreSQL as 9023_db
+
+		9023_grpc -- "192.168.10.30:9023"
+		9023_raft -- "192.168.10.30:9023"
+		8023_serf -- "192.168.10.30:8023"
+		9023_grpc -- 9023_db
+	}
+}
+
+package Sessions as sessions {
+	package "sessions@9031" as 9031 {
+		component grpc as 9031_grpc
+		component raft as 9031_raft
+		component serf as 8031_serf
+		database PostgreSQL as 9031_db
+
+		9031_grpc -- "192.168.10.2:9031"
+		9031_raft -- "192.168.10.2:9031"
+		8031_serf -- "192.168.10.2:8031"
+		9031_grpc - 9031_db
+	}
+
+	package "sessions@9032" as 9032 {
+		component grpc as 9032_grpc
+		component raft as 9032_raft
+		component serf as 8032_serf
+		database PostgreSQL as 9032_db
+
+		9032_grpc -- "192.168.10.20:9032"
+		9032_raft -- "192.168.10.20:9032"
+		8032_serf -- "192.168.10.20:8032"
+		9032_grpc - 9032_db
+	}
+
+	package "sessions@9133" as 9033 {
+		component grpc as 9033_grpc
+		component raft as 9033_raft
+		component serf as 8033_serf
+		database PostgreSQL as 9033_db
+
+		9033_grpc -- "192.168.10.30:9033"
+		9033_raft -- "192.168.10.30:9033"
+		8033_serf -- "192.168.10.30:8033"
+		9033_grpc - 9033_db
 	}
 }
 
 package Nats as nats {
 	component tcp as nats_tcp
 
-	nats_tcp -- "127.0.0.1:4222"
+	nats_tcp -- "192.168.10.2:4222"
 }
 
-footer 21.10.25
+footer 08.11.25
 @enduml

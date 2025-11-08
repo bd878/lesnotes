@@ -44,7 +44,6 @@ func main() {
 		RaftServers:           cfg.RaftServers,
 		SerfAddr:              cfg.SerfAddr,
 		SerfJoinAddrs:         cfg.SerfJoinAddrs,
-		SessionsServiceAddr:   cfg.SessionsServiceAddr,
 		NatsAddr:              cfg.NatsAddr,
 	})
 
