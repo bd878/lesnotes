@@ -63,8 +63,8 @@ package Files as files {
 	component grpc as files_grpc
 	database PostgreSQL as files_db
 
-	files_http -- "192.168.10.3:8182"
-	files_grpc -- "192.168.10.3:8186"
+	files_http -- "192.168.10.5:8182"
+	files_grpc -- "192.168.10.6:8186"
 
 	files_grpc - files_db 
 	files_http - files_grpc
@@ -107,12 +107,35 @@ package Messages as messages {
 }
 
 package Sessions as sessions {
-	component grpc as sessions_grpc
-	database PostgreSQL as sessions_db
+	package "sessions@9131" as 9131 {
+		component grpc as 9131_grpc
+		component serf as 9131_serf
+		database PostgreSQL as 9131_db
 
-	sessions_grpc -- "192.168.10.3:8187"
+		9131_grpc -- "192.168.10.3:9131"
+		9131_serf -- "192.168.10.3:8131"
+		9131_grpc - 9131_db
+	}
 
-	sessions_grpc - sessions_db
+	package "sessions@9132" as 9132 {
+		component grpc as 9132_grpc
+		component serf as 9132_serf
+		database PostgreSQL as 9132_db
+
+		9132_grpc -- "192.168.10.3:9132"
+		9132_serf -- "192.168.10.3:8132"
+		9132_grpc - 9132_db
+	}
+
+	package "sessions@9133" as 9133 {
+		component grpc as 9133_grpc
+		component serf as 9133_serf
+		database PostgreSQL as 9133_db
+
+		9133_grpc -- "192.168.10.3:9133"
+		9133_serf -- "192.168.10.3:8133"
+		9133_grpc - 9133_db
+	}
 }
 
 package Threads as threads {
