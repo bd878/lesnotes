@@ -67,7 +67,7 @@ async function home(ctx) {
 	await builder.addSidebar()
 	await builder.addFooter()
 
-	ctx.body = await builder.build(message, ctx.query.edit, me.theme)
+	ctx.body = await builder.build(message, ctx.query.edit, me.theme, me.fontSize)
 	ctx.status = 200;
 
 	return;
@@ -210,7 +210,7 @@ class HomeBuilder extends Builder {
 		})
 	}
 
-	async build(message?: Message, editMessage?: boolean, theme?: string) {
+	async build(message?: Message, editMessage?: boolean, theme?: string, fontSize?: string) {
 		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
 		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
 		const home = await readFile(resolve(join(Config.get('basedir'),
@@ -223,6 +223,7 @@ class HomeBuilder extends Builder {
 
 				if (theme) html += ` class="${theme}"`;
 				if (this.lang) html += ` lang="${this.lang}"`;
+				if (fontSize) html += ` data-size="${fontSize}"`
 				html += ">"
 
 				return html + render(text) + "</html>"
@@ -238,6 +239,7 @@ class HomeBuilder extends Builder {
 			content: mustache.render(home, {
 				message:     message,
 				editMessage: editMessage,
+				settingsHeader: this.i18n("settingsHeader"),
 			}, {
 				settings:        this.settings,
 				messageEditForm: this.messageEditForm,

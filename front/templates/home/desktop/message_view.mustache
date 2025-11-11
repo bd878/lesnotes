@@ -1,14 +1,14 @@
 {{#ID}}
 	{{^private}}
-		<a class="italic hover:underline dark:hover:text-white text-blue-600 text-sm mb-2 px-1" href="/m/{{name}}" target="_blank">https://{{domain}}/m/{{name}}</a>
+		<a class="italic hover:underline dark:hover:text-white text-blue-600 text-sm small:text-xs large:text-base mb-2 px-1" href="/m/{{name}}" target="_blank">https://{{domain}}/m/{{name}}</a>
 	{{/private}}
 
 	<div id="message" class="flex flex-col justify-between grow">
 		<div class="flex flex-col h-full">
 			{{#title}}
-				<div class="text-lg mb-2 px-1">{{title}}</div>
+				<div class="text-lg small:text-base large:text-xl mb-2 px-1">{{title}}</div>
 			{{/title}}
-			<p class="w-full mb-1 px-1 resize-none overflow-hidden text-start h-full">
+			<p class="w-full small:text-sm large:text-lg mb-1 px-1 resize-none overflow-hidden text-start h-full">
 				{{text}}
 			</p>
 		</div>

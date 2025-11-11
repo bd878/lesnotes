@@ -1,10 +1,13 @@
 <div id="content" class="flex flex-col">
-	<div id="sidebar" class="w-full max-w-5xl mb-4 px-5">
+	<div id="sidebar" class="w-full max-w-5xl mb-3 px-5">
 		{{> sidebar}}
 	</div>
 
-	<div id="search" class="mb-4 max-w-5xl px-5">
-		{{> searchPath}}
+	<div class="mb-3 px-5">
+		<details>
+			<summary class="cursor-pointer mb-2">{{settingsHeader}}</summary>
+			{{> settings}}
+		</details>
 	</div>
 
 	<div class="flex flex-col max-w-5xl w-full mb-4 px-5">

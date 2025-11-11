@@ -1,7 +1,13 @@
-<div class="flex flex-row justify-between">
-	<div class="flex flex-row">
-		<a class="italic text-2xl mr-4 inline-block cursor-pointer underline hover:text-blue-600" href="/home" target="_self">Les Notes</a>
+<div class="flex flex-col">
+	<div class="flex flex-row justify-between mb-3">
+		<div class="flex flex-row">
+			<a class="italic text-2xl small:text-lg large:text-3xl mr-4 inline-block dark:hover:text-white hover:text-blue-600" href="/home" target="_self">Les Notes</a>
+		</div>
+
+		<a href="/logout" target="_self" class="underline dark:text-gray-400 dark:visited:text-gray-400 text-blue-600 visited:text-purple-600">{{logout}}</a>
 	</div>
 
-	<a href="/logout" target="_self" class="underline text-blue-600 visited:text-purple-600">{{logout}}</a>
+	<div id="search">
+		{{> search}}
+	</div>
 </div>
