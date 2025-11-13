@@ -1,7 +1,6 @@
 import '../../scripts/sidebar';
 
 import onFormSubmit from './onFormSubmit';
-import onSearchFormSubmit from './onSearchFormSubmit';
 import onFileInputChange from './onFileInputChange';
 import onSelectFilesClick from './onSelectFilesClick';
 import onMessageCancelClick from './onMessageCancelClick';
@@ -27,7 +26,6 @@ const elems = {
 	get noFilesElem():           HTMLDivElement      { return getByID("no-files",              this.div) as HTMLDivElement },
 	get filesInputElem():        HTMLInputElement    { return getByID("files-input",           this.input) as HTMLInputElement },
 	get editFormElem():          HTMLFormElement     { return getByID("message-edit-form",     this.form) as HTMLFormElement },
-	get searchFormElem():        HTMLFormElement     { return getByID("messages-search-form",  this.form) as HTMLFormElement },
 	get messagesListElem():      HTMLDivElement      { return getByID("messages-list",         this.div) as HTMLDivElement },
 	get threadsListElem():       HTMLDivElement      { return getByID("threads-list",          this.div) as HTMLDivElement },
 	get messageDeleteElem():     HTMLButtonElement   { return getByID("message-delete",        this.button) as HTMLButtonElement },
@@ -43,7 +41,6 @@ function init() {
 
 	// TODO: rewrite on event bus
 	elems.messageFormElem.addEventListener("submit",      e => onFormSubmit(elems, e))
-	elems.searchFormElem.addEventListener("submit",       e => onSearchFormSubmit(elems, e))
 	elems.filesInputElem.addEventListener("change",       e => onFileInputChange(elems, e))
 	elems.filesButtonElem.addEventListener("click",       e => onSelectFilesClick(elems, e))
 	elems.messageCancelElem.addEventListener("click",     e => onMessageCancelClick(elems, e))
