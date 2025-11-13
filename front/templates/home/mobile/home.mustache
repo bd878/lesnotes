@@ -1,48 +1,52 @@
 <div id="content" class="flex flex-col">
-	<div id="sidebar" class="w-full max-w-5xl mb-3 px-5">
+	<div id="sidebar" class="w-full max-w-5xl mb-3 px-5 small:px-3">
 		{{> sidebar}}
 	</div>
 
-	<div class="mb-3 px-5">
+	<div class="mb-3 small:mb-2 px-5 small:px-3">
 		<details>
 			<summary class="cursor-pointer mb-2">{{settingsHeader}}</summary>
 			{{> settings}}
 		</details>
 	</div>
 
-	<div class="flex flex-col max-w-5xl w-full mb-4 px-5">
-		<div id="editor" class="mb-4 h-[300px] flex flex-col grow small:p-1 p-2 border border-1 border-solid rounded-md">
-			{{#message}}
-				{{#editMessage}}
-					{{> messageEditForm}}
-				{{/editMessage}}
-				{{^editMessage}}
-					{{> messageView}}
-				{{/editMessage}}
-			{{/message}}
-			{{^message}}
-				{{> newMessageForm}}
-			{{/message}}
-		</div>
+	<div id="editor" class="px-5 small:px-3 mb-4 small:mb-2 max-w-5xl w-full flex flex-row">
+		<div class="flex flex-col w-full">
+			<div id="message-editor" class="mb-4 small:mb-2 h-[300px] flex flex-col grow small:p-1 p-2 border border-1 border-solid rounded-md">
+				{{#message}}
+					{{#editMessage}}
+						{{> messageEditForm}}
+					{{/editMessage}}
+					{{^editMessage}}
+						{{> messageView}}
+					{{/editMessage}}
+				{{/message}}
+				{{^message}}
+					{{> newMessageForm}}
+				{{/message}}
+			</div>
 
-		<div id="files" class="flex flex-col bg-blue-100 justify-between small:p-1 p-2 rounded-md">
-			{{#message}}
-				{{#editMessage}}
+			<div id="files-editor" class="flex flex-col bg-blue-100 justify-between rounded-md">
+				{{#message}}
+					{{#editMessage}}
+						{{> filesForm}}
+					{{/editMessage}}
+					{{^editMessage}}
+						{{> filesList}}
+					{{/editMessage}}
+				{{/message}}
+				{{^message}}
 					{{> filesForm}}
-				{{/editMessage}}
-				{{^editMessage}}
-					{{> filesList}}
-				{{/editMessage}}
-			{{/message}}
-			{{^message}}
-				{{> filesForm}}
-			{{/message}}
+				{{/message}}
+			</div>
 		</div>
 	</div>
 
-	<div id="messages">
-		<div id="messages-list" class="flex flex-row overflow-x-auto px-5">
-			{{> messagesList}}
+	<div id="threads" class="px-5 small:px-3">
+		<div id="messages" class="w-full h-full">
+			<div id="messages-list" class="flex flex-col">
+				{{> messagesList}}
+			</div>
 		</div>
 	</div>
 </div>
