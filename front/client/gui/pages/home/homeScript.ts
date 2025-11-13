@@ -1,3 +1,5 @@
+import '../../scripts/sidebar';
+
 import onFormSubmit from './onFormSubmit';
 import onSearchFormSubmit from './onSearchFormSubmit';
 import onFileInputChange from './onFileInputChange';
@@ -11,10 +13,7 @@ import onMessageEditClick from './onMessageEditClick';
 import onMessagePublishClick from './onMessagePublishClick';
 import onMessagePrivateClick from './onMessagePrivateClick';
 import onMessageCancelEditClick from './onMessageCancelEditClick';
-import onThemeSettingsClick from './onThemeSettingsClick';
-import onLangSettingsClick from './onLangSettingsClick';
-import onFontSizeSettingsClick from './onFontSizeSettingsClick';
-import {getByID} from '../../../utils'
+import getByID from '../../scripts/getByID'
 
 const elems = {
 	form:   document.createElement("form"),
@@ -36,10 +35,7 @@ const elems = {
 	get messagePublishElem():    HTMLButtonElement   { return getByID("message-publish",       this.button) as HTMLButtonElement },
 	get messagePrivateElem():    HTMLButtonElement   { return getByID("message-private",       this.button) as HTMLButtonElement },
 	get messageCancelEditElem(): HTMLButtonElement   { return getByID("message-cancel-edit",   this.button) as HTMLButtonElement },
-	get messageCancelElem():     HTMLButtonElement   { return getByID("message-cancel",        this.button) as HTMLButtonElement },
-	get themeSettingsElem():     HTMLDivElement      { return getByID("theme-settings",        this.div) as HTMLDivElement },
-	get langSettingsElem():      HTMLDivElement      { return getByID("lang-settings",         this.div) as HTMLDivElement },
-	get fontSizeSettingsElem():  HTMLDivElement      { return getByID("font-size-settings",    this.div) as HTMLDivElement },
+	get messageCancelElem():     HTMLButtonElement   { return getByID("message-cancel",        this.button) as HTMLButtonElement }
 }
 
 function init() {
@@ -59,9 +55,6 @@ function init() {
 	elems.messagePublishElem.addEventListener("click",    e => onMessagePublishClick(elems, e))
 	elems.messagePrivateElem.addEventListener("click",    e => onMessagePrivateClick(elems, e))
 	elems.messageCancelEditElem.addEventListener("click", e => onMessageCancelEditClick(elems, e))
-	elems.themeSettingsElem.addEventListener("click",     e => onThemeSettingsClick(elems, e))
-	elems.langSettingsElem.addEventListener("click",      e => onLangSettingsClick(elems, e))
-	elems.fontSizeSettingsElem.addEventListener("click",  e => onFontSizeSettingsClick(elems, e))
 }
 
 window.addEventListener("load", init)
