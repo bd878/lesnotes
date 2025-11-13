@@ -7,7 +7,14 @@
 		<a href="/logout" target="_self" class="underline dark:text-gray-400 dark:visited:text-gray-400 text-blue-600 visited:text-purple-600">{{logout}}</a>
 	</div>
 
-	<div id="search">
-		{{> search}}
+	<div id="search" class="mb-3">
+		{{> searchForm}}
+	</div>
+
+	<div>
+		<details>
+			<summary class="cursor-pointer mb-2">{{settingsHeader}}</summary>
+			{{> settings}}
+		</details>
 	</div>
 </div>

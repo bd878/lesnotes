@@ -58,10 +58,12 @@ class LoginBuilder extends Builder {
 	sidebar = undefined;
 	async addSidebar(query?: string) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/login/mobile/sidebar.mustache' : 'templates/login/desktop/sidebar.mustache'
+			this.isMobile ? 'templates/sidebar_horizontal/mobile/sidebar_horizontal.mustache' : 'templates/sidebar_horizontal/desktop/sidebar_horizontal.mustache'
 		)), { encoding: 'utf-8' });
 
-		this.sidebar = mustache.render(template, {query: query})
+		this.sidebar = mustache.render(template, {query: query, settingsHeader: this.i18n("settingsHeader")}, {
+			settings:       this.settings,
+		})
 	}
 
 	async build(theme?: string, fontSize?: string) {
@@ -89,10 +91,7 @@ class LoginBuilder extends Builder {
 			isMobile: this.isMobile ? "true" : "",
 		}, {
 			footer:  this.footer,
-			content: mustache.render(login, {
-				settingsHeader: this.i18n("settingsHeader"),
-			}, {
-				settings:  this.settings,
+			content: mustache.render(login, {}, {
 				username:  this.username,
 				password:  this.password,
 				submit:    this.submit,

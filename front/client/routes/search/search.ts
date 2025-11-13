@@ -42,6 +42,7 @@ async function search(ctx) {
 	await builder.addSettings(undefined, ctx.state.lang, me.theme, me.fontSize)
 	await builder.addMessagesList(undefined, messages)
 	await builder.addFilesList(undefined, undefined)
+	await builder.addSearch()
 	await builder.addSidebar()
 	await builder.addFooter()
 
@@ -84,13 +85,13 @@ class SearchBuilder extends Builder {
 		this.filesList = mustache.render(template, options)
 	}
 
-	search = undefined;
+	searchForm = undefined;
 	async addSearch() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/search/mobile/search_form.mustache' : 'templates/search/desktop/search_form.mustache'
 		)), { encoding: 'utf-8' });
 
-		this.search = mustache.render(template, {
+		this.searchForm = mustache.render(template, {
 			searchPlaceholder:   this.i18n("searchPlaceholder"),
 			searchMessages:      this.i18n("search"),
 		})
@@ -99,14 +100,15 @@ class SearchBuilder extends Builder {
 	sidebar = undefined;
 	async addSidebar() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/search/mobile/sidebar.mustache' : 'templates/search/desktop/sidebar.mustache'
+			this.isMobile ? 'templates/sidebar_vertical/mobile/sidebar_vertical.mustache' : 'templates/sidebar_vertical/desktop/sidebar_vertical.mustache'
 		)), { encoding: 'utf-8' });
 
 		this.sidebar = mustache.render(template, {
 			logout:           this.i18n("logout"),
+			settingsHeader:   this.i18n("settingsHeader"),
 		}, {
 			settings:         this.settings,
-			search:           this.search,
+			searchForm:       this.searchForm,
 		})
 	}
 
@@ -136,7 +138,6 @@ class SearchBuilder extends Builder {
 		}, {
 			footer: this.footer,
 			content: mustache.render(search, {}, {
-				settings:        this.settings,
 				messagesList:    this.messagesList,
 				filesList:       this.filesList,
 				sidebar:         this.sidebar,

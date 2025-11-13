@@ -21,10 +21,10 @@ class MainBuilder extends Builder {
 	sidebar = undefined;
 	async addSidebar(query?: string) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/main/mobile/sidebar.mustache' : 'templates/main/desktop/sidebar.mustache'
+			this.isMobile ? 'templates/sidebar_horizontal/mobile/sidebar_horizontal.mustache' : 'templates/sidebar_horizontal/desktop/sidebar_horizontal.mustache'
 		)), { encoding: 'utf-8' });
 
-		this.sidebar = mustache.render(template, {query: query})
+		this.sidebar = mustache.render(template, {query: query, settingsHeader: this.i18n("settingsHeader")}, {settings: this.settings})
 	}
 
 	authorization = undefined;
@@ -68,7 +68,6 @@ class MainBuilder extends Builder {
 			content: mustache.render(main, {
 				settingsHeader: this.i18n("settingsHeader"),
 			}, {
-				settings:      this.settings,
 				sidebar:       this.sidebar,
 				authorization: this.authorization,
 			}),
