@@ -14,6 +14,7 @@ together {
 	package sessions
 	package front
 	package search
+	package threads
 }
 
 package Front as front {
@@ -31,18 +32,6 @@ package Files as files {
 
 	files_grpc - files_db 
 	files_http - files_grpc
-}
-
-package Threads as threads {
-	component grpc as threads_grpc
-	component http as threads_http
-	database PostgreSQL as threads_db
-
-	threads_http -- "192.168.10.3:8188"
-	threads_grpc -- "192.168.10.3:8189"
-
-	threads_grpc - threads_db
-	threads_http - threads_grpc
 }
 
 package Messages as messages {
@@ -209,11 +198,53 @@ package Sessions as sessions {
 	}
 }
 
+package Threads as threads {
+	component http as threads_http
+
+	threads_http -- "192.168.10.3:8185"
+
+	package "threads@9141" as 9141 {
+		component grpc as 9141_grpc
+		component raft as 9141_raft
+		component serf as 8141_serf
+		database PostgreSQL as 9141_db
+
+		9141_grpc -- "192.168.10.3:9141"
+		9141_raft -- "192.168.10.3:9141"
+		8141_raft -- "192.168.10.3:8141"
+		9141_grpc -- 9141_db
+	}
+
+	package "threads@9142" as 9142 {
+		component grpc as 9142_grpc
+		component raft as 9142_raft
+		component serf as 8142_serf
+		database PostgreSQL as 9142_db
+
+		9142_grpc -- "192.168.10.3:9142"
+		9142_raft -- "192.168.10.3:9142"
+		8142_raft -- "192.168.10.3:8142"
+		9142_grpc -- 9142_db
+	}
+
+	package "threads@9143" as 9143 {
+		component grpc as 9143_grpc
+		component raft as 9143_raft
+		component serf as 8143_serf
+		database PostgreSQL as 9143_db
+
+		9143_grpc -- "192.168.10.3:9143"
+		9143_raft -- "192.168.10.3:9143"
+		8143_raft -- "192.168.10.3:8143"
+		9143_grpc -- 9143_db
+	}
+}
+
 package Nats as nats {
 	component tcp as nats_tcp
 
 	nats_tcp -- "192.168.10.3:4222"
 }
 
-footer 08.11.25
+footer 13.11.25
 @enduml

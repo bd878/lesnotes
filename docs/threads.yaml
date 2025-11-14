@@ -2,10 +2,39 @@ openapi: "3.0.0"
 info:
   title: API Specification for threads service
   description: |
-    This API allows publishing or making private
-    threads with related messages
+    This API allows publishing, making private
+    threads, resolving paths with related messages
   version: 1.0.0
 paths:
+# RESOLVE
+  /threads/v2/resolve:
+    post:
+      summary: Resolve thread path by given id
+      description: |
+        It searches this thread id and returns array
+        of ids, that is a path
+      operationId: resolveThreadJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/resolveThreadJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/resolveOK'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/serverError'
+
+# END RESOLVE
+
 # PUBLISH
   /threads/v1/publish:
     parameters:
@@ -102,6 +131,32 @@ components:
           explain:
             type: string
 # END ERROR
+
+# RESOLVE
+    resolveThreadJson:
+      type: object
+      token:
+        type: string
+        example: "AAAAAA"
+      request:
+        type: object
+        properties:
+          thread:
+            type: integer
+            required: true
+
+    resolveOk:
+      type: object
+      status:
+        type: string
+      response:
+        type: object
+        properties:
+          ids:
+            type: array
+            items:
+              type: integer
+# END RESOLVE
 
 # PUBLISH
     publishOk:

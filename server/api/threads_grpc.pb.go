@@ -17,10 +17,13 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ThreadsClient interface {
+	Resolve(ctx context.Context, in *ResolveRequest, opts ...grpc.CallOption) (*ResolveResponse, error)
 	Publish(ctx context.Context, in *PublishRequest, opts ...grpc.CallOption) (*PublishResponse, error)
 	Private(ctx context.Context, in *PrivateRequest, opts ...grpc.CallOption) (*PrivateResponse, error)
+	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error)
 	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
+	GetServers(ctx context.Context, in *GetServersRequest, opts ...grpc.CallOption) (*GetServersResponse, error)
 }
 
 type threadsClient struct {
@@ -29,6 +32,15 @@ type threadsClient struct {
 
 func NewThreadsClient(cc grpc.ClientConnInterface) ThreadsClient {
 	return &threadsClient{cc}
+}
+
+func (c *threadsClient) Resolve(ctx context.Context, in *ResolveRequest, opts ...grpc.CallOption) (*ResolveResponse, error) {
+	out := new(ResolveResponse)
+	err := c.cc.Invoke(ctx, "/threads.v1.Threads/Resolve", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *threadsClient) Publish(ctx context.Context, in *PublishRequest, opts ...grpc.CallOption) (*PublishResponse, error) {
@@ -43,6 +55,15 @@ func (c *threadsClient) Publish(ctx context.Context, in *PublishRequest, opts ..
 func (c *threadsClient) Private(ctx context.Context, in *PrivateRequest, opts ...grpc.CallOption) (*PrivateResponse, error) {
 	out := new(PrivateResponse)
 	err := c.cc.Invoke(ctx, "/threads.v1.Threads/Private", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *threadsClient) Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error) {
+	out := new(UpdateResponse)
+	err := c.cc.Invoke(ctx, "/threads.v1.Threads/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -67,14 +88,26 @@ func (c *threadsClient) Delete(ctx context.Context, in *DeleteRequest, opts ...g
 	return out, nil
 }
 
+func (c *threadsClient) GetServers(ctx context.Context, in *GetServersRequest, opts ...grpc.CallOption) (*GetServersResponse, error) {
+	out := new(GetServersResponse)
+	err := c.cc.Invoke(ctx, "/threads.v1.Threads/GetServers", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ThreadsServer is the server API for Threads service.
 // All implementations must embed UnimplementedThreadsServer
 // for forward compatibility
 type ThreadsServer interface {
+	Resolve(context.Context, *ResolveRequest) (*ResolveResponse, error)
 	Publish(context.Context, *PublishRequest) (*PublishResponse, error)
 	Private(context.Context, *PrivateRequest) (*PrivateResponse, error)
+	Update(context.Context, *UpdateRequest) (*UpdateResponse, error)
 	Create(context.Context, *CreateRequest) (*CreateResponse, error)
 	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
+	GetServers(context.Context, *GetServersRequest) (*GetServersResponse, error)
 	mustEmbedUnimplementedThreadsServer()
 }
 
@@ -82,17 +115,26 @@ type ThreadsServer interface {
 type UnimplementedThreadsServer struct {
 }
 
+func (UnimplementedThreadsServer) Resolve(context.Context, *ResolveRequest) (*ResolveResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Resolve not implemented")
+}
 func (UnimplementedThreadsServer) Publish(context.Context, *PublishRequest) (*PublishResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Publish not implemented")
 }
 func (UnimplementedThreadsServer) Private(context.Context, *PrivateRequest) (*PrivateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Private not implemented")
 }
+func (UnimplementedThreadsServer) Update(context.Context, *UpdateRequest) (*UpdateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
+}
 func (UnimplementedThreadsServer) Create(context.Context, *CreateRequest) (*CreateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
 func (UnimplementedThreadsServer) Delete(context.Context, *DeleteRequest) (*DeleteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedThreadsServer) GetServers(context.Context, *GetServersRequest) (*GetServersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetServers not implemented")
 }
 func (UnimplementedThreadsServer) mustEmbedUnimplementedThreadsServer() {}
 
@@ -105,6 +147,24 @@ type UnsafeThreadsServer interface {
 
 func RegisterThreadsServer(s *grpc.Server, srv ThreadsServer) {
 	s.RegisterService(&_Threads_serviceDesc, srv)
+}
+
+func _Threads_Resolve_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ResolveRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ThreadsServer).Resolve(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/threads.v1.Threads/Resolve",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ThreadsServer).Resolve(ctx, req.(*ResolveRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Threads_Publish_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -139,6 +199,24 @@ func _Threads_Private_Handler(srv interface{}, ctx context.Context, dec func(int
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ThreadsServer).Private(ctx, req.(*PrivateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Threads_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ThreadsServer).Update(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/threads.v1.Threads/Update",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ThreadsServer).Update(ctx, req.(*UpdateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -179,10 +257,32 @@ func _Threads_Delete_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Threads_GetServers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetServersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ThreadsServer).GetServers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/threads.v1.Threads/GetServers",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ThreadsServer).GetServers(ctx, req.(*GetServersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Threads_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "threads.v1.Threads",
 	HandlerType: (*ThreadsServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Resolve",
+			Handler:    _Threads_Resolve_Handler,
+		},
 		{
 			MethodName: "Publish",
 			Handler:    _Threads_Publish_Handler,
@@ -192,12 +292,20 @@ var _Threads_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Threads_Private_Handler,
 		},
 		{
+			MethodName: "Update",
+			Handler:    _Threads_Update_Handler,
+		},
+		{
 			MethodName: "Create",
 			Handler:    _Threads_Create_Handler,
 		},
 		{
 			MethodName: "Delete",
 			Handler:    _Threads_Delete_Handler,
+		},
+		{
+			MethodName: "GetServers",
+			Handler:    _Threads_GetServers_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

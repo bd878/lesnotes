@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS threads.threads
 	name         VARCHAR(256)  UNIQUE NOT NULL,
 	private      bool          NOT NULL DEFAULT true,
 	user_id      bigint        NOT NULL,
+	parent_id    bigint        NOT NULL,          -- parent thread id (aka parent message id)
 	created_at   timestamptz   NOT NULL DEFAULT NOW(),
 	updated_at   timestamptz   NOT NULL DEFAULT NOW(),
 	PRIMARY KEY(id)

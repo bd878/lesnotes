@@ -1,0 +1,134 @@
+package distributed
+
+import (
+	"time"
+	"context"
+	"bytes"
+
+	"google.golang.org/protobuf/proto"
+	"github.com/bd878/gallery/server/logger"
+)
+
+func (m *Distributed) apply(ctx context.Context, reqType RequestType, cmd []byte) (res interface{}, err error) {
+	var buf bytes.Buffer
+	_, err = buf.Write([]byte{byte(reqType)})
+	if err != nil {
+		return
+	}
+
+	_, err = buf.Write(cmd)
+	if err != nil {
+		return
+	}
+
+	timeout := 10*time.Second
+	/* fsm.Apply() */
+	future := m.raft.Apply(buf.Bytes(), timeout)
+	if future.Error() != nil {
+		return nil, future.Error()
+	}
+
+	res = future.Response()
+	if err, ok := res.(error); ok {
+		return nil, err
+	}
+
+	return
+}
+
+func (m *Distributed) CreateThread(ctx context.Context, id, userID int64, parentID int64, name string, private bool) (err error) {
+	logger.Debugw("create thread", "id", id, "user_id", userID, "parent_id", parentID, "name", name, "private", private)
+
+	cmd, err := proto.Marshal(&AppendCommand{
+		Id:       id,
+		UserId:   userID,
+		ParentId: parentID,
+		Name:     name,
+		Private:  private,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = m.apply(ctx, AppendRequest, cmd)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func (m *Distributed) UpdateThread(ctx context.Context, id, userID int64, parentID int64, name string, private int32) (err error) {
+	logger.Debugw("update thread", "id", id, "user_id", userID, "parent_id", parentID, "name", name, "private", private)
+
+	cmd, err := proto.Marshal(&UpdateCommand{
+		Id:       id,
+		UserId:   userID,
+		ParentId: parentID,
+		Name:     name,
+		Private:  private,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = m.apply(ctx, UpdateRequest, cmd)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func (m *Distributed) PrivateThread(ctx context.Context, id, userID int64) error {
+	logger.Debugw("private thread", "id", id, "user_id", userID)
+
+	cmd, err := proto.Marshal(&PrivateCommand{
+		Id:      id,
+		UserId:  userID,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = m.apply(ctx, PrivateRequest, cmd)
+
+	return nil
+}
+
+func (m *Distributed) PublishThread(ctx context.Context, id int64, userID int64) error {
+	logger.Debugw("publich thread", "id", id, "user_id", userID)
+
+	cmd, err := proto.Marshal(&PublishCommand{
+		Id:      id,
+		UserId:  userID,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = m.apply(ctx, PublishRequest, cmd)
+
+	return nil
+}
+
+func (m *Distributed) DeleteThread(ctx context.Context, id, userID int64) error {
+	logger.Debugw("delete thread", "id", id, "user_id", userID)
+
+	cmd, err := proto.Marshal(&DeleteCommand{
+		UserId:   userID,
+		Id:       id,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = m.apply(ctx, DeleteRequest, cmd)
+
+	return nil
+}
+
+func (m *Distributed) ResolveThread(ctx context.Context, id, userID int64) (ids []int64, err error) {
+	logger.Debugw("resolve thread", "id", id, "user_id", userID)
+	return m.repo.ResolveThread(ctx, id, userID)
+}
