@@ -16,6 +16,7 @@ import (
 	usersgateway "github.com/bd878/gallery/server/internal/gateway/users"
 	sessionsgateway "github.com/bd878/gallery/server/internal/gateway/sessions"
 	filesgateway "github.com/bd878/gallery/server/messages/internal/gateway/files/grpc"
+	threadsgateway "github.com/bd878/gallery/server/messages/internal/gateway/threads/grpc"
 	controller "github.com/bd878/gallery/server/messages/internal/controller/service"
 )
 
@@ -25,6 +26,7 @@ type Config struct {
 	UsersServiceAddr    string
 	FilesServiceAddr    string
 	SessionsServiceAddr string
+	ThreadsServiceAddr  string
 }
 
 type Server struct {
@@ -40,12 +42,13 @@ func New(cfg Config) *Server {
 	usersGateway := usersgateway.New(cfg.UsersServiceAddr)
 	filesGateway := filesgateway.New(cfg.FilesServiceAddr)
 	sessionsGateway := sessionsgateway.New(cfg.SessionsServiceAddr)
+	threadsGateway := threadsgateway.New(cfg.ThreadsServiceAddr)
 	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
 
-	grpcCtrl := controller.New(controller.Config{
+	ctrl := controller.New(controller.Config{
 		RpcAddr: cfg.RpcAddr,
-	})
-	handler := httphandler.New(grpcCtrl, filesGateway)
+	}, threadsGateway)
+	handler := httphandler.New(ctrl, filesGateway)
 
 	mux.Handle("/messages/v1/send",     middleware.Build(handler.SendMessage))
 	mux.Handle("/messages/v1/read_path", middleware.Build(handler.ReadPath))

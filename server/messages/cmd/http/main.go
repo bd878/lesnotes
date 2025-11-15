@@ -38,6 +38,7 @@ func main() {
 		UsersServiceAddr:      cfg.UsersServiceAddr,
 		FilesServiceAddr:      cfg.FilesServiceAddr,
 		SessionsServiceAddr:   cfg.SessionsServiceAddr,
+		ThreadsServiceAddr:    cfg.ThreadsServiceAddr,
 	})
 
 	if err := server.Run(context.Background()); err != nil {

@@ -18,27 +18,34 @@ type Config struct {
 	RpcAddr string
 }
 
-type Messages struct {
-	conf    Config
-	client  api.MessagesClient
-	conn   *grpc.ClientConn
+type ThreadsGateway interface {
+	CreateThread(ctx context.Context, id, userID, parentID int64, name string, private bool) (err error)
+	DeleteThread(ctx context.Context, id, userID int64) (err error)
+	UpdateThread(ctx context.Context, id, userID, parentID int64) (err error)
 }
 
-func New(cfg Config) (messages *Messages) {
-	messages = &Messages{conf: cfg}
-
-	messages.setupConnection()
-
-	return messages
+type Controller struct {
+	conf       Config
+	client     api.MessagesClient
+	conn       *grpc.ClientConn
+	threads    ThreadsGateway
 }
 
-func (s *Messages) Close() {
+func New(conf Config, threads ThreadsGateway) *Controller {
+	controller := &Controller{conf: conf, threads: threads}
+
+	controller.setupConnection()
+
+	return controller
+}
+
+func (s *Controller) Close() {
 	if s.conn != nil {
 		s.conn.Close()
 	}
 }
 
-func (s *Messages) setupConnection() (err error) {
+func (s *Controller) setupConnection() (err error) {
 	conn, err := grpc.NewClient(
 		fmt.Sprintf(
 			"%s:///%s",
@@ -59,7 +66,7 @@ func (s *Messages) setupConnection() (err error) {
 	return
 }
 
-func (s *Messages) isConnFailed() bool {
+func (s *Controller) isConnFailed() bool {
 	state := s.conn.GetState()
 	if state == connectivity.Shutdown || state == connectivity.TransientFailure {
 		logger.Debugln("connection failed")
@@ -68,7 +75,7 @@ func (s *Messages) isConnFailed() bool {
 	return false
 }
 
-func (s *Messages) SaveMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (message *model.Message, err error) {
+func (s *Controller) SaveMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (message *model.Message, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -77,15 +84,9 @@ func (s *Messages) SaveMessage(ctx context.Context, id int64, text, title string
 
 	logger.Debugw("save message", "id", id, "text", text, "title", title, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private, "name", name)
 
-	message = &model.Message{
-		ID:       id,
-		Text:     text,
-		Title:    title,
-		Name:     name,
-		FileIDs:  fileIDs,
-		ThreadID: threadID,
-		UserID:   userID,
-		Private:  private,
+	err = s.threads.CreateThread(ctx, id, userID, threadID, name, private)
+	if err != nil {
+		return
 	}
 
 	_, err = s.client.SaveMessage(ctx, &api.SaveMessageRequest{
@@ -98,11 +99,25 @@ func (s *Messages) SaveMessage(ctx context.Context, id int64, text, title string
 		Private:  private,
 		Name:     name,
 	})
+	if err != nil {
+		return
+	}
+
+	message = &model.Message{
+		ID:       id,
+		Text:     text,
+		Title:    title,
+		Name:     name,
+		FileIDs:  fileIDs,
+		ThreadID: threadID,
+		UserID:   userID,
+		Private:  private,
+	}
 
 	return
 }
 
-func (s *Messages) DeleteMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+func (s *Controller) DeleteMessages(ctx context.Context, ids []int64, userID int64) (err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -110,6 +125,14 @@ func (s *Messages) DeleteMessages(ctx context.Context, ids []int64, userID int64
 	}
 
 	logger.Debugw("delete messages", "ids", ids, "user_id", userID)
+
+	// TODO: DeleteThreads
+	for _, id := range ids {
+		err = s.threads.DeleteThread(ctx, id, userID)
+		if err != nil {
+			return
+		}
+	}
 
 	_, err = s.client.DeleteMessages(ctx, &api.DeleteMessagesRequest{
 		Ids:    ids,
@@ -119,7 +142,7 @@ func (s *Messages) DeleteMessages(ctx context.Context, ids []int64, userID int64
 	return
 }
 
-func (s *Messages) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+func (s *Controller) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -136,7 +159,7 @@ func (s *Messages) PublishMessages(ctx context.Context, ids []int64, userID int6
 	return
 }
 
-func (s *Messages) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+func (s *Controller) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -153,7 +176,7 @@ func (s *Messages) PrivateMessages(ctx context.Context, ids []int64, userID int6
 	return
 }
 
-func (s *Messages) UpdateMessage(ctx context.Context, id int64, text, title, name string, fileIDs []int64, threadID int64, userID int64, private int32) (err error) {
+func (s *Controller) UpdateMessage(ctx context.Context, id int64, text, title, name string, fileIDs []int64, threadID int64, userID int64, private int32) (err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -161,6 +184,11 @@ func (s *Messages) UpdateMessage(ctx context.Context, id int64, text, title, nam
 	}
 
 	logger.Debugw("update message", "id", id, "text", text, "title", title, "name", name, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private)
+
+	err = s.threads.UpdateThread(ctx, id, userID, threadID)
+	if err != nil {
+		return
+	}
 
 	_, err = s.client.UpdateMessage(ctx, &api.UpdateMessageRequest{
 		Id:        id,
@@ -176,7 +204,7 @@ func (s *Messages) UpdateMessage(ctx context.Context, id int64, text, title, nam
 	return
 }
 
-func (s *Messages) ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool) (list *model.List, err error) {
+func (s *Controller) ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool) (list *model.List, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -216,7 +244,7 @@ func (s *Messages) ReadThreadMessages(ctx context.Context, userID int64, threadI
 	return
 }
 
-func (s *Messages) ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*model.Message, err error) {
+func (s *Controller) ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*model.Message, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -238,7 +266,7 @@ func (s *Messages) ReadBatchMessages(ctx context.Context, userID int64, ids []in
 	return
 }
 
-func (s *Messages) ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (list *model.List, err error) {
+func (s *Controller) ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (list *model.List, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -277,7 +305,7 @@ func (s *Messages) ReadMessages(ctx context.Context, userID int64, limit, offset
 	return
 }
 
-func (s *Messages) ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *model.Message, err error) {
+func (s *Controller) ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *model.Message, err error) {
 	if s.isConnFailed() {
 		if err := s.setupConnection(); err != nil {
 			return nil, err
@@ -300,7 +328,7 @@ func (s *Messages) ReadMessage(ctx context.Context, id int64, name string, userI
 	return
 }
 
-func (s *Messages) ReadPath(ctx context.Context, userID, id int64) (path []*model.Message, err error) {
+func (s *Controller) ReadPath(ctx context.Context, userID, id int64) (path []*model.Message, err error) {
 	if s.isConnFailed() {
 		if err := s.setupConnection(); err != nil {
 			return nil, err
@@ -322,7 +350,7 @@ func (s *Messages) ReadPath(ctx context.Context, userID, id int64) (path []*mode
 	return
 }
 
-func (s *Messages) ReadMessagesAround(ctx context.Context, userID, threadID, id int64, limit int32) (list *model.List, err error) {
+func (s *Controller) ReadMessagesAround(ctx context.Context, userID, threadID, id int64, limit int32) (list *model.List, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return

@@ -41,6 +41,8 @@ func (h *Handler) Resolve(ctx context.Context, req *api.ResolveRequest) (resp *a
 }
 
 func (h *Handler) Create(ctx context.Context, req *api.CreateRequest) (resp *api.CreateResponse, err error) {
+	// TODO: validate that parent thread exists
+
 	err = h.controller.CreateThread(ctx, req.Id, req.UserId, req.ParentId, req.Name, req.Private)
 	if err != nil {
 		return

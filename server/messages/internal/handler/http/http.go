@@ -23,6 +23,7 @@ type Controller interface {
 	ReadPath(ctx context.Context, userID int64, id int64) (messages []*messages.Message, err error)
 }
 
+// TODO: think to move on controller/service level
 type FilesGateway interface {
 	ReadBatchFiles(ctx context.Context, fileIDs []int64, userID int64) (files map[int64]*files.File, err error)
 	ReadFile(ctx context.Context, userID, fileID int64) (file *files.File, err error)
