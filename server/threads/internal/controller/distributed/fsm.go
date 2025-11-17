@@ -14,7 +14,7 @@ type RepoConnection interface {
 }
 
 type Repository interface {
-	CreateThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name string, private bool) error
+	AppendThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name string, private bool) error
 	UpdateThread(ctx context.Context, id, userID int64, name string, private int32) error
 	PrivateThread(ctx context.Context, id, userID int64) error
 	PublishThread(ctx context.Context, id, userID int64) error
@@ -58,7 +58,7 @@ func (f *fsm) applyAppend(raw []byte) interface{} {
 	var cmd AppendCommand
 	proto.Unmarshal(raw, &cmd)
 
-	err := f.repo.CreateThread(context.Background(), cmd.Id, cmd.UserId, cmd.ParentId, cmd.NextId, cmd.PrevId, cmd.Name, cmd.Private)
+	err := f.repo.AppendThread(context.Background(), cmd.Id, cmd.UserId, cmd.ParentId, cmd.NextId, cmd.PrevId, cmd.Name, cmd.Private)
 
 	return err
 }

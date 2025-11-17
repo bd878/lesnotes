@@ -40,27 +40,27 @@ func (r *Repository) ReorderThread(ctx context.Context, id, userID, parentID, ne
 		}
 	}()
 
-	const selectThread = "SELECT parent_id, next_id, prev_id FROM %s WHERE user_id = $1 AND id = $2"
-	const updateNextThread = "UPDATE %s SET prev_id = $3 WHERE user_id = $1 AND id = $2"
-	const updatePrevThread = "UPDATE %s SET next_id = $3 WHERE user_id = $1 AND id = $2"
-	const updateMe = "UPDATE %s SET parent_id = $3, next_id = $4, prev_id = $5 WHERE user_id = $1 AND id = $2"
+	const selectThread = "SELECT parent_id, next_id, prev_id FROM %s WHERE user_id = $1 AND id = $2 AND parent_id = $3"
+	const updateNextThread = "UPDATE %s SET prev_id = $4 WHERE user_id = $1 AND id = $2 AND parent_id = $3"
+	const updatePrevThread = "UPDATE %s SET next_id = $4 WHERE user_id = $1 AND id = $2 AND parent_id = $3"
+	const updateMe = "UPDATE %s SET parent_id = $4, next_id = $5, prev_id = $6 WHERE user_id = $1 AND id = $2 AND parent_id = $3"
 
 	// Unlink
 	var currentParentID, currentNextID, currentPrevID int64
-	err = tx.QueryRow(ctx, r.table(selectThread), userID, id).Scan(&currentParentID, &currentNextID, &currentPrevID)
+	err = tx.QueryRow(ctx, r.table(selectThread), userID, id, parentID).Scan(&currentParentID, &currentNextID, &currentPrevID)
 	if err != nil {
 		return
 	}
 
 	if currentPrevID != 0 {
-		_, err = tx.Exec(ctx, r.table(updatePrevThread), userID, id, currentNextID)
+		_, err = tx.Exec(ctx, r.table(updatePrevThread), userID, id, parentID, currentNextID)
 		if err != nil {
 			return
 		}
 	}
 
 	if currentNextID != 0 {
-		_, err = tx.Exec(ctx, r.table(updateNextThread), userID, id, currentPrevID)
+		_, err = tx.Exec(ctx, r.table(updateNextThread), userID, id, parentID, currentPrevID)
 		if err != nil {
 			return
 		}
@@ -84,14 +84,12 @@ func (r *Repository) ReorderThread(ctx context.Context, id, userID, parentID, ne
 		parentID = currentParentID
 	}
 
-	_, err = tx.Exec(ctx, r.table(updateMe), userID, id, parentID, nextID, prevID)
+	_, err = tx.Exec(ctx, r.table(updateMe), userID, id, currentParentID, parentID, nextID, prevID)
 
 	return
 }
 
-func (r *Repository) CreateThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name string, private bool) (err error) {
-	const query = "INSERT INTO %s(id, user_id, parent_id, name, private) VALUES ($1, $2, $3, $4, $5)"
-
+func (r *Repository) AppendThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name string, private bool) (err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -111,9 +109,31 @@ func (r *Repository) CreateThread(ctx context.Context, id, userID, parentID, nex
 		}
 	}()
 
-	_, err = tx.Exec(ctx, r.table(query), id, userID, parentID, name, private)
+	const insert = "INSERT INTO %s(id, user_id, parent_id, name, private, next_id, prev_id) VALUES ($1, $2, $3, $4, $5, $6, $7)"
+	const selectLastThread = "SELECT id FROM %s WHERE user_id = $1 AND parent_id = $2 AND next_id = 0"
+	const updateLastThread = "UPDATE %s SET next_id = $4 WHERE user_id = $1 AND id = $2 AND parent_id = $3"
 
-	return nil
+	var lastThreadID int64
+	row := tx.QueryRow(ctx, r.table(selectLastThread), userID, parentID)
+	err = row.Scan(&lastThreadID)
+	if err != nil && err != pgx.ErrNoRows {
+		return
+	}
+
+	if err == pgx.ErrNoRows {
+		// new thread
+		_, err = tx.Exec(ctx, r.table(insert), id, userID, parentID, name, private, 0, 0)
+		return
+	}
+
+	_, err = tx.Exec(ctx, r.table(updateLastThread), userID, lastThreadID, parentID, id)
+	if err != nil {
+		return
+	}
+
+	_, err = tx.Exec(ctx, r.table(insert), id, userID, parentID, name, private, 0 /* next_id */, lastThreadID)
+
+	return
 }
 
 func (r *Repository) UpdateThread(ctx context.Context, id, userID int64, newName string, newPrivate int32) (err error) {
@@ -239,18 +259,71 @@ func (r *Repository) DeleteThread(ctx context.Context, id, userID int64) (err er
 		}
 	}()
 
-	var parentID int64
-	err = tx.QueryRow(ctx, r.table("SELECT parent_id FROM %s WHERE id = $1 AND user_id = $2"), id, userID).Scan(&parentID)
+	// Unlink
+	const selectThread = "SELECT parent_id, next_id, prev_id FROM %s WHERE user_id = $1 AND id = $2"
+	const updateNextThread = "UPDATE %s SET prev_id = $4 WHERE user_id = $1 AND id = $2 AND parent_id = $3"
+	const updatePrevThread = "UPDATE %s SET next_id = $4 WHERE user_id = $1 AND id = $2 AND parent_id = $3"
+
+	var parentID, nextID, prevID int64
+	err = tx.QueryRow(ctx, r.table(selectThread), userID, id).Scan(&parentID, &nextID, &prevID)
 	if err != nil {
 		return
 	}
 
-	_, err = tx.Exec(ctx, r.table("UPDATE %s SET parent_id = $3 WHERE user_id = $1 AND parent_id = $2"), userID, id, parentID)
+	_, err = tx.Exec(ctx, r.table(updateNextThread), userID, nextID, parentID, prevID)
 	if err != nil {
 		return
 	}
 
-	_, err = tx.Exec(ctx, r.table("DELETE FROM %s WHERE id = $1 AND user_id = $2"), id, userID)
+	_, err = tx.Exec(ctx, r.table(updatePrevThread), userID, prevID, parentID, nextID)
+	if err != nil {
+		return
+	}
+
+	// End unlink
+	// Delete
+	const deleteThread = "DELETE FROM %s WHERE user_id = $1 AND id = $2"
+
+	_, err = tx.Exec(ctx, r.table(deleteThread), userID, id)
+	if err != nil {
+		return
+	}
+
+	// End delete
+	// Link children
+	const selectLastParentThread = "SELECT id FROM %s WHERE user_id = $1 AND parent_id = $2 AND next_id = 0"
+	const selectFirstThread = "SELECT id FROM %s WHERE user_id = $1 AND parent_id = $2 AND prev_id = 0"
+	const updateFirstThread = "UPDATE %s SET prev_id = $3 WHERE user_id = $1 AND parent_id = $2 AND prev_id = 0"
+	const updateLastParentThread = "UPDATE %s SET next_id = $3 WHERE user_id = $1 AND parent_id = $2 AND next_id = 0"
+	const moveChildren = "UPDATE %s SET parent_id = $3 WHERE user_id = $1 AND parent_id = $2"
+
+	var lastThreadID, firstThreadID int64
+	err = tx.QueryRow(ctx, r.table(selectLastParentThread), userID, id).Scan(&lastThreadID)
+	if err != nil {
+		return
+	}
+
+	err = tx.QueryRow(ctx, r.table(selectFirstThread), userID, id).Scan(&firstThreadID)
+	if err != nil {
+		return
+	}
+
+	_, err = tx.Exec(ctx, r.table(updateFirstThread), userID, id, lastThreadID)
+	if err != nil {
+		return
+	}
+
+	_, err = tx.Exec(ctx, r.table(updateLastParentThread), userID, parentID, firstThreadID)
+	if err != nil {
+		return
+	}
+
+	_, err = tx.Exec(ctx, r.table(moveChildren), userID, id, parentID)
+	if err != nil {
+		return
+	}
+
+	// End link children
 
 	return
 }
