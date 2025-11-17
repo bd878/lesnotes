@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS threads.threads
 	private      bool          NOT NULL DEFAULT true,
 	user_id      bigint        NOT NULL,
 	parent_id    bigint        NOT NULL,          -- parent thread id (aka parent message id)
+	next_id      bigint        NOT NULL,          -- next message id in a list
+	prev_id      bigint        NOT NULL,          -- prev message id in a list
 	created_at   timestamptz   NOT NULL DEFAULT NOW(),
 	updated_at   timestamptz   NOT NULL DEFAULT NOW(),
 	PRIMARY KEY(id)

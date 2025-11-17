@@ -21,8 +21,75 @@ func New(pool *pgxpool.Pool, tableName string) *Repository {
 	return &Repository{tableName, pool}
 }
 
+func (r *Repository) ReorderThread(ctx context.Context, id, userID, parentID, nextID, prevID int64) (err error) {
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			tx.Rollback(ctx)
+		default:
+			tx.Commit(ctx)
+		}
+	}()
 
-func (r *Repository) CreateThread(ctx context.Context, id, userID int64, parentID int64, name string, private bool) (err error) {
+	const selectThread = "SELECT parent_id, next_id, prev_id FROM %s WHERE user_id = $1 AND id = $2"
+	const updateNextThread = "UPDATE %s SET prev_id = $3 WHERE user_id = $1 AND id = $2"
+	const updatePrevThread = "UPDATE %s SET next_id = $3 WHERE user_id = $1 AND id = $2"
+	const updateMe = "UPDATE %s SET parent_id = $3, next_id = $4, prev_id = $5 WHERE user_id = $1 AND id = $2"
+
+	// Unlink
+	var currentParentID, currentNextID, currentPrevID int64
+	err = tx.QueryRow(ctx, r.table(selectThread), userID, id).Scan(&currentParentID, &currentNextID, &currentPrevID)
+	if err != nil {
+		return
+	}
+
+	if currentPrevID != 0 {
+		_, err = tx.Exec(ctx, r.table(updatePrevThread), userID, id, currentNextID)
+		if err != nil {
+			return
+		}
+	}
+
+	if currentNextID != 0 {
+		_, err = tx.Exec(ctx, r.table(updateNextThread), userID, id, currentPrevID)
+		if err != nil {
+			return
+		}
+	}
+
+	// End unlink
+	// Link
+
+	_, err = tx.Exec(ctx, r.table(updatePrevThread), userID, id, id)
+	if err != nil {
+		return
+	}
+
+	_, err = tx.Exec(ctx, r.table(updateNextThread), userID, id, id)
+	if err != nil {
+		return
+	}
+
+	// Update me
+	if parentID == -1 { // 0 is root
+		parentID = currentParentID
+	}
+
+	_, err = tx.Exec(ctx, r.table(updateMe), userID, id, parentID, nextID, prevID)
+
+	return
+}
+
+func (r *Repository) CreateThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name string, private bool) (err error) {
 	const query = "INSERT INTO %s(id, user_id, parent_id, name, private) VALUES ($1, $2, $3, $4, $5)"
 
 	var tx pgx.Tx
@@ -49,9 +116,9 @@ func (r *Repository) CreateThread(ctx context.Context, id, userID int64, parentI
 	return nil
 }
 
-func (r *Repository) UpdateThread(ctx context.Context, id, userID, newParentID int64, newName string, newPrivate int32) (err error) {
-	const query = "UPDATE %s SET parent_id = $3, private = $4, name = $5 WHERE user_id = $1 AND id = $2"
-	const selectQuery = "SELECT parent_id, private, name FROM %s WHERE user_id = $1 AND id = $2"
+func (r *Repository) UpdateThread(ctx context.Context, id, userID int64, newName string, newPrivate int32) (err error) {
+	const query = "UPDATE %s SET private = $3, name = $4 WHERE user_id = $1 AND id = $2"
+	const selectQuery = "SELECT private, name FROM %s WHERE user_id = $1 AND id = $2"
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
@@ -74,21 +141,16 @@ func (r *Repository) UpdateThread(ctx context.Context, id, userID, newParentID i
 
 	var (
 		name  string
-		parentID int64
 		private  bool
 	)
 
-	err = tx.QueryRow(ctx, r.table(selectQuery), userID, id).Scan(&parentID, &private, &name)
+	err = tx.QueryRow(ctx, r.table(selectQuery), userID, id).Scan(&private, &name)
 	if err != nil {
 		return
 	}
 
 	if newName != "" {
 		name = newName
-	}
-
-	if newParentID != -1 {
-		parentID = newParentID
 	}
 
 	if newPrivate != -1 {
@@ -99,7 +161,7 @@ func (r *Repository) UpdateThread(ctx context.Context, id, userID, newParentID i
 		}
 	}
 
-	_, err = tx.Exec(ctx, r.table(query), userID, parentID, private, name)
+	_, err = tx.Exec(ctx, r.table(query), userID, private, name)
 	if err != nil {
 		return
 	}

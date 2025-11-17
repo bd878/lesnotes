@@ -14,12 +14,13 @@ type RepoConnection interface {
 }
 
 type Repository interface {
-	CreateThread(ctx context.Context, id, userID int64, parentID int64, name string, private bool) error
-	UpdateThread(ctx context.Context, id, userID int64, parentID int64, name string, private int32) error
+	CreateThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name string, private bool) error
+	UpdateThread(ctx context.Context, id, userID int64, name string, private int32) error
 	PrivateThread(ctx context.Context, id, userID int64) error
-	PublishThread(ctx context.Context, id int64, userID int64) error
+	PublishThread(ctx context.Context, id, userID int64) error
 	DeleteThread(ctx context.Context, id, userID int64) error
 	ResolveThread(ctx context.Context, id, userID int64) (ids []int64, err error)
+	ReorderThread(ctx context.Context, id, userID, parentID, nextID, prevID int64) (err error)
 	Truncate(ctx context.Context) error
 	Dump(ctx context.Context) (reader io.ReadCloser, err error)
 	Restore(ctx context.Context, reader io.ReadCloser) (err error)
@@ -45,6 +46,8 @@ func (f *fsm) Apply(record *raft.Log) interface{} {
 		return f.applyPublish(buf[1:])
 	case PrivateRequest:
 		return f.applyPrivate(buf[1:])
+	case ReorderRequest:
+		return f.applyReorder(buf[1:])
 	default:
 		logger.Errorw("unknown request type", "type", reqType)
 	}
@@ -55,24 +58,27 @@ func (f *fsm) applyAppend(raw []byte) interface{} {
 	var cmd AppendCommand
 	proto.Unmarshal(raw, &cmd)
 
-	err := f.repo.CreateThread(context.Background(), cmd.Id, cmd.UserId, cmd.ParentId, cmd.Name, cmd.Private)
-	if err != nil {
-		return err
-	}
+	err := f.repo.CreateThread(context.Background(), cmd.Id, cmd.UserId, cmd.ParentId, cmd.NextId, cmd.PrevId, cmd.Name, cmd.Private)
 
-	return nil
+	return err
+}
+
+func (f *fsm) applyReorder(raw []byte) interface{} {
+	var cmd ReorderCommand
+	proto.Unmarshal(raw, &cmd)
+
+	err := f.repo.ReorderThread(context.Background(), cmd.Id, cmd.UserId, cmd.ParentId, cmd.NextId, cmd.PrevId)
+
+	return err
 }
 
 func (f *fsm) applyUpdate(raw []byte) interface{} {
 	var cmd UpdateCommand
 	proto.Unmarshal(raw, &cmd)
 
-	err := f.repo.UpdateThread(context.Background(), cmd.Id, cmd.UserId, cmd.ParentId, cmd.Name, cmd.Private)
-	if err != nil {
-		return err
-	}
+	err := f.repo.UpdateThread(context.Background(), cmd.Id, cmd.UserId, cmd.Name, cmd.Private)
 
-	return nil
+	return err
 }
 
 func (f *fsm) applyDelete(raw []byte) interface{} {
@@ -80,11 +86,8 @@ func (f *fsm) applyDelete(raw []byte) interface{} {
 	proto.Unmarshal(raw, &cmd)
 
 	err := f.repo.DeleteThread(context.Background(), cmd.Id, cmd.UserId)
-	if err != nil {
-		return err
-	}
 
-	return nil
+	return err
 }
 
 func (f *fsm) applyPublish(raw []byte) interface{} {
@@ -92,11 +95,8 @@ func (f *fsm) applyPublish(raw []byte) interface{} {
 	proto.Unmarshal(raw, &cmd)
 
 	err := f.repo.PublishThread(context.Background(), cmd.Id, cmd.UserId)
-	if err != nil {
-		return err
-	}
 
-	return nil
+	return err
 }
 
 func (f *fsm) applyPrivate(raw []byte) interface{} {
@@ -104,9 +104,6 @@ func (f *fsm) applyPrivate(raw []byte) interface{} {
 	proto.Unmarshal(raw, &cmd)
 
 	err := f.repo.PrivateThread(context.Background(), cmd.Id, cmd.UserId)
-	if err != nil {
-		return err
-	}
 
-	return nil
+	return err
 }

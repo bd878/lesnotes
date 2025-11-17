@@ -36,13 +36,15 @@ func (m *Distributed) apply(ctx context.Context, reqType RequestType, cmd []byte
 	return
 }
 
-func (m *Distributed) CreateThread(ctx context.Context, id, userID int64, parentID int64, name string, private bool) (err error) {
-	logger.Debugw("create thread", "id", id, "user_id", userID, "parent_id", parentID, "name", name, "private", private)
+func (m *Distributed) CreateThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name string, private bool) (err error) {
+	logger.Debugw("create thread", "id", id, "user_id", userID, "parent_id", parentID, "next_id", nextID, "prev_id", prevID, "name", name, "private", private)
 
 	cmd, err := proto.Marshal(&AppendCommand{
 		Id:       id,
 		UserId:   userID,
 		ParentId: parentID,
+		NextId:   nextID,
+		PrevId:   prevID,
 		Name:     name,
 		Private:  private,
 	})
@@ -51,20 +53,16 @@ func (m *Distributed) CreateThread(ctx context.Context, id, userID int64, parent
 	}
 
 	_, err = m.apply(ctx, AppendRequest, cmd)
-	if err != nil {
-		return
-	}
 
 	return
 }
 
-func (m *Distributed) UpdateThread(ctx context.Context, id, userID int64, parentID int64, name string, private int32) (err error) {
-	logger.Debugw("update thread", "id", id, "user_id", userID, "parent_id", parentID, "name", name, "private", private)
+func (m *Distributed) UpdateThread(ctx context.Context, id, userID int64, name string, private int32) (err error) {
+	logger.Debugw("update thread", "id", id, "user_id", userID, "name", name, "private", private)
 
 	cmd, err := proto.Marshal(&UpdateCommand{
 		Id:       id,
 		UserId:   userID,
-		ParentId: parentID,
 		Name:     name,
 		Private:  private,
 	})
@@ -73,9 +71,25 @@ func (m *Distributed) UpdateThread(ctx context.Context, id, userID int64, parent
 	}
 
 	_, err = m.apply(ctx, UpdateRequest, cmd)
+
+	return
+}
+
+func (m *Distributed) ReorderThread(ctx context.Context, id, userID, parentID, nextID, prevID int64) (err error) {
+	logger.Debugw("reorder thread", "id", id, "user_id", userID, "parent_id", parentID, "next_id", nextID, "prev_id", prevID)
+
+	cmd, err := proto.Marshal(&ReorderCommand{
+		Id:        id,
+		UserId:    userID,
+		ParentId:  parentID,
+		NextId:    nextID,
+		PrevId:    prevID,
+	})
 	if err != nil {
-		return
+		return err
 	}
+
+	_, err = m.apply(ctx, ReorderRequest, cmd)
 
 	return
 }
@@ -93,7 +107,7 @@ func (m *Distributed) PrivateThread(ctx context.Context, id, userID int64) error
 
 	_, err = m.apply(ctx, PrivateRequest, cmd)
 
-	return nil
+	return err
 }
 
 func (m *Distributed) PublishThread(ctx context.Context, id int64, userID int64) error {
@@ -109,7 +123,7 @@ func (m *Distributed) PublishThread(ctx context.Context, id int64, userID int64)
 
 	_, err = m.apply(ctx, PublishRequest, cmd)
 
-	return nil
+	return err
 }
 
 func (m *Distributed) DeleteThread(ctx context.Context, id, userID int64) error {
@@ -125,7 +139,7 @@ func (m *Distributed) DeleteThread(ctx context.Context, id, userID int64) error 
 
 	_, err = m.apply(ctx, DeleteRequest, cmd)
 
-	return nil
+	return err
 }
 
 func (m *Distributed) ResolveThread(ctx context.Context, id, userID int64) (ids []int64, err error) {

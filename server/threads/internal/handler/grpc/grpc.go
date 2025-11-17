@@ -8,8 +8,9 @@ import (
 
 type Controller interface {
 	ResolveThread(ctx context.Context, id, userID int64) (ids []int64, err error)
-	CreateThread(ctx context.Context, id, userID int64, parentID int64, name string, private bool) (err error)
-	UpdateThread(ctx context.Context, id, userID int64, parentID int64, name string, private int32) (err error)
+	CreateThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name string, private bool) (err error)
+	UpdateThread(ctx context.Context, id, userID int64, name string, private int32) (err error)
+	ReorderThread(ctx context.Context, id, userID, parentID, nextID, prevID int64) (err error)
 	DeleteThread(ctx context.Context, id, userID int64) (err error)
 	PublishThread(ctx context.Context, id, userID int64) (err error)
 	PrivateThread(ctx context.Context, id, userID int64) (err error)
@@ -43,7 +44,7 @@ func (h *Handler) Resolve(ctx context.Context, req *api.ResolveRequest) (resp *a
 func (h *Handler) Create(ctx context.Context, req *api.CreateRequest) (resp *api.CreateResponse, err error) {
 	// TODO: validate that parent thread exists
 
-	err = h.controller.CreateThread(ctx, req.Id, req.UserId, req.ParentId, req.Name, req.Private)
+	err = h.controller.CreateThread(ctx, req.Id, req.UserId, req.ParentId, req.NextId, req.PrevId, req.Name, req.Private)
 	if err != nil {
 		return
 	}
@@ -54,12 +55,23 @@ func (h *Handler) Create(ctx context.Context, req *api.CreateRequest) (resp *api
 }
 
 func (h *Handler) Update(ctx context.Context, req *api.UpdateRequest) (resp *api.UpdateResponse, err error) {
-	err = h.controller.UpdateThread(ctx, req.Id, req.UserId, req.ParentId, req.Name, req.Private)
+	err = h.controller.UpdateThread(ctx, req.Id, req.UserId, req.Name, req.Private)
 	if err != nil {
 		return
 	}
 
 	resp = &api.UpdateResponse{}
+
+	return
+}
+
+func (h *Handler) Reorder(ctx context.Context, req *api.ReorderRequest) (resp *api.ReorderResponse, err error) {
+	err = h.controller.ReorderThread(ctx, req.Id, req.UserId, req.ParentId, req.NextId, req.PrevId)
+	if err != nil {
+		return
+	}
+
+	resp = &api.ReorderResponse{}
 
 	return
 }

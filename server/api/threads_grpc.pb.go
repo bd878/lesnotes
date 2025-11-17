@@ -20,6 +20,7 @@ type ThreadsClient interface {
 	Resolve(ctx context.Context, in *ResolveRequest, opts ...grpc.CallOption) (*ResolveResponse, error)
 	Publish(ctx context.Context, in *PublishRequest, opts ...grpc.CallOption) (*PublishResponse, error)
 	Private(ctx context.Context, in *PrivateRequest, opts ...grpc.CallOption) (*PrivateResponse, error)
+	Reorder(ctx context.Context, in *ReorderRequest, opts ...grpc.CallOption) (*ReorderResponse, error)
 	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error)
 	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
@@ -55,6 +56,15 @@ func (c *threadsClient) Publish(ctx context.Context, in *PublishRequest, opts ..
 func (c *threadsClient) Private(ctx context.Context, in *PrivateRequest, opts ...grpc.CallOption) (*PrivateResponse, error) {
 	out := new(PrivateResponse)
 	err := c.cc.Invoke(ctx, "/threads.v1.Threads/Private", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *threadsClient) Reorder(ctx context.Context, in *ReorderRequest, opts ...grpc.CallOption) (*ReorderResponse, error) {
+	out := new(ReorderResponse)
+	err := c.cc.Invoke(ctx, "/threads.v1.Threads/Reorder", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -104,6 +114,7 @@ type ThreadsServer interface {
 	Resolve(context.Context, *ResolveRequest) (*ResolveResponse, error)
 	Publish(context.Context, *PublishRequest) (*PublishResponse, error)
 	Private(context.Context, *PrivateRequest) (*PrivateResponse, error)
+	Reorder(context.Context, *ReorderRequest) (*ReorderResponse, error)
 	Update(context.Context, *UpdateRequest) (*UpdateResponse, error)
 	Create(context.Context, *CreateRequest) (*CreateResponse, error)
 	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
@@ -123,6 +134,9 @@ func (UnimplementedThreadsServer) Publish(context.Context, *PublishRequest) (*Pu
 }
 func (UnimplementedThreadsServer) Private(context.Context, *PrivateRequest) (*PrivateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Private not implemented")
+}
+func (UnimplementedThreadsServer) Reorder(context.Context, *ReorderRequest) (*ReorderResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Reorder not implemented")
 }
 func (UnimplementedThreadsServer) Update(context.Context, *UpdateRequest) (*UpdateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
@@ -199,6 +213,24 @@ func _Threads_Private_Handler(srv interface{}, ctx context.Context, dec func(int
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ThreadsServer).Private(ctx, req.(*PrivateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Threads_Reorder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReorderRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ThreadsServer).Reorder(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/threads.v1.Threads/Reorder",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ThreadsServer).Reorder(ctx, req.(*ReorderRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -290,6 +322,10 @@ var _Threads_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Private",
 			Handler:    _Threads_Private_Handler,
+		},
+		{
+			MethodName: "Reorder",
+			Handler:    _Threads_Reorder_Handler,
 		},
 		{
 			MethodName: "Update",

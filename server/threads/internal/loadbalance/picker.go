@@ -53,6 +53,7 @@ func (p *Picker) Pick(info balancer.PickInfo) (
 		 strings.Contains(info.FullMethodName, "Publish") ||
 		 strings.Contains(info.FullMethodName, "Private") ||
 		 strings.Contains(info.FullMethodName, "Update") ||
+		 strings.Contains(info.FullMethodName, "Reorder") ||
 		len(p.followers) == 0 {
 			result.SubConn = p.leader
 	} else if strings.Contains(info.FullMethodName, "Resolve") {
