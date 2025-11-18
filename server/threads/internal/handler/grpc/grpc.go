@@ -4,9 +4,11 @@ import (
 	"context"
 
 	"github.com/bd878/gallery/server/api"
+	threads "github.com/bd878/gallery/server/threads/pkg/model"
 )
 
 type Controller interface {
+	ReadThread(ctx context.Context, id, userID int64) (thread *threads.Thread, err error)
 	ResolveThread(ctx context.Context, id, userID int64) (ids []int64, err error)
 	CreateThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name string, private bool) (err error)
 	UpdateThread(ctx context.Context, id, userID int64, name string, private int32) (err error)
@@ -26,6 +28,17 @@ func New(ctrl Controller) *Handler {
 	handler := &Handler{controller: ctrl}
 
 	return handler
+}
+
+func (h *Handler) Read(ctx context.Context, req *api.ReadRequest) (resp *api.Thread, err error) {
+	thread, err := h.controller.ReadThread(ctx, req.Id, req.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	resp = threads.ThreadToProto(thread)
+
+	return resp, nil
 }
 
 func (h *Handler) Resolve(ctx context.Context, req *api.ResolveRequest) (resp *api.ResolveResponse, err error) {

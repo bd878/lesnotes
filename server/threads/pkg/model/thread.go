@@ -27,6 +27,11 @@ type (
 		Private     bool    `json:"private"`
 	}
 
+	ReadThreadRequest struct {
+		ID          int64   `json:"id"`
+		UserID      int64   `json:"user_id"`
+	}
+
 	DeleteThreadRequest struct {
 		ID          int64   `json:"id"`
 		ParentID    int64   `json:"parent"`
@@ -35,6 +40,16 @@ type (
 	ResolveThreadRequest struct {
 		ID          int64   `json:"id"`
 		UserID      int64   `json:"user_id"`
+	}
+
+	ReadThreadResponse struct {
+		ID          int64   `json:"id"`
+		UserID      int64   `json:"user_id"`
+		ParentID    int64   `json:"parent_id"`
+		NextID      int64   `json:"next_id"`
+		PrevID      int64   `json:"prev_id"`
+		Name        string  `json:"name"`
+		Private     bool    `json:"private"`
 	}
 
 	ResolveThreadResponse struct {

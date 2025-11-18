@@ -11,6 +11,7 @@ import (
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/threads/pkg/loadbalance"
+	threads "github.com/bd878/gallery/server/threads/pkg/model"
 )
 
 type Config struct {
@@ -65,6 +66,25 @@ func (s *Controller) isConnFailed() bool {
 		return true
 	}
 	return false
+}
+
+func (s *Controller) ReadThread(ctx context.Context, id, userID int64) (thread *threads.Thread, err error) {
+	if s.isConnFailed() {
+		if err = s.setupConnection(); err != nil {
+			return
+		}
+	}
+
+	logger.Debugw("read thread", "id", id, "user_id", userID)
+
+	resp, err := s.client.Read(ctx, &api.ReadRequest{Id: id, UserId: userID})
+	if err != nil {
+		return nil, err
+	}
+
+	thread = threads.ThreadFromProto(resp)
+
+	return
 }
 
 func (s *Controller) ResolveThread(ctx context.Context, id, userID int64) (path []int64, err error) {

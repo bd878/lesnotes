@@ -4,9 +4,11 @@ import (
 	"io"
 	"context"
 	"net/http"
+	threads "github.com/bd878/gallery/server/threads/pkg/model"
 )
 
 type Controller interface {
+	ReadThread(ctx context.Context, id, userID int64) (thread *threads.Thread, err error)
 	ResolveThread(ctx context.Context, id, userID int64) (ids []int64, err error)
 	PublishThread(ctx context.Context, id, userID int64) (err error)
 	PrivateThread(ctx context.Context, id, userID int64) (err error)

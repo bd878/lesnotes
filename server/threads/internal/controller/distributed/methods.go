@@ -7,6 +7,7 @@ import (
 
 	"google.golang.org/protobuf/proto"
 	"github.com/bd878/gallery/server/logger"
+	threads "github.com/bd878/gallery/server/threads/pkg/model"
 )
 
 func (m *Distributed) apply(ctx context.Context, reqType RequestType, cmd []byte) (res interface{}, err error) {
@@ -145,4 +146,9 @@ func (m *Distributed) DeleteThread(ctx context.Context, id, userID int64) error 
 func (m *Distributed) ResolveThread(ctx context.Context, id, userID int64) (ids []int64, err error) {
 	logger.Debugw("resolve thread", "id", id, "user_id", userID)
 	return m.repo.ResolveThread(ctx, id, userID)
+}
+
+func (m *Distributed) ReadThread(ctx context.Context, id, userID int64) (thread *threads.Thread, err error) {
+	logger.Debugw("read thread", "id", id, "user_id", userID)
+	return m.repo.ReadThread(ctx, id, userID)
 }

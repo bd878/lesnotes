@@ -1,0 +1,3 @@
+url = https://%STAGE%lesnotes.space/threads/v2/create
+-H "Content-Type: application/json"
+--data-binary %JSON%

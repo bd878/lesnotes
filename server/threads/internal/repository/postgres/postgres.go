@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/bd878/gallery/server/logger"
+	threads "github.com/bd878/gallery/server/threads/pkg/model"
 )
 
 type Repository struct {
@@ -19,6 +20,19 @@ type Repository struct {
 
 func New(pool *pgxpool.Pool, tableName string) *Repository {
 	return &Repository{tableName, pool}
+}
+
+func (r *Repository) ReadThread(ctx context.Context, id, userID int64) (thread *threads.Thread, err error) {
+	const query = "SELECT parent_id, next_id, prev_id, name, private FROM %s WHERE user_id = $1 AND id = $2"
+
+	thread = &threads.Thread{
+		ID: id,
+		UserID: userID,
+	}
+
+	err = r.pool.QueryRow(ctx, r.table(query), userID, id).Scan(&thread.ParentID, &thread.NextID, &thread.PrevID, &thread.Name, &thread.Private)
+
+	return
 }
 
 func (r *Repository) ReorderThread(ctx context.Context, id, userID, parentID, nextID, prevID int64) (err error) {

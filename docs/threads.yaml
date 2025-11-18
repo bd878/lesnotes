@@ -6,6 +6,34 @@ info:
     threads, resolving paths with related messages
   version: 1.0.0
 paths:
+# READ
+  /threads/v2/read:
+    post:
+      summary: Get thread
+      description: |
+        Reads single thread
+      operationId: readThreadJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/readThreadJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/readOK'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/serverError'
+
+# END READ
+
 # RESOLVE
   /threads/v2/resolve:
     post:
@@ -217,6 +245,41 @@ components:
           explain:
             type: string
 # END ERROR
+
+# READ
+    readThreadJson:
+      type: object
+      token:
+        type: string
+        example: "AAAAAA"
+      request:
+        type: object
+        properties:
+          thread:
+            type: integer
+            required: true
+
+    readOk:
+      type: object
+      status:
+        type: string
+      response:
+        type: object
+        properties:
+          id:
+            type: integer
+          parent:
+            type: integer
+          prev:
+            type: integer
+          next:
+            type: integer
+          name:
+            type: string
+          private:
+            type: boolean
+
+# END READ
 
 # RESOLVE
     resolveThreadJson:

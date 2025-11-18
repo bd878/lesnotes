@@ -10,8 +10,8 @@ import (
 	server "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) CreateThreadJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
-	user, ok := req.Context().Value(middleware.UserContextKey{}).(*usersmodel.User)
+func (h *Handler) ReadThreadJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
+	_, ok := req.Context().Value(middleware.UserContextKey{}).(*usersmodel.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -39,38 +39,42 @@ func (h *Handler) CreateThreadJsonAPI(w http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	var request threadsmodel.CreateThreadRequest
+	var request threadsmodel.ReadThreadRequest
 	if err := json.Unmarshal(data, &request); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
 				Code:    threadsmodel.CodeNoRequest,
-				Explain: "failed to parse create thread request",
+				Explain: "failed to parse read thread request",
 			},
 		})
 
 		return err
 	}
 
-	err = h.controller.CreateThread(req.Context(), request.ID, user.ID, request.ParentID,
-		request.NextID, request.PrevID, request.Name, request.Private)
+	thread, err := h.controller.ReadThread(req.Context(), request.ID, request.UserID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:  &server.ErrorCode{
 				Code:    server.CodeWrongFormat,
-				Explain: "failed to create thread",
+				Explain: "failed to read thread",
 			},
 		})
 
 		return err
 	}
 
-	response, err := json.Marshal(threadsmodel.CreateThreadResponse{
-		ID:          request.ID,
-		Description: "created",
+	response, err := json.Marshal(threadsmodel.ReadThreadResponse{
+		ID:       thread.ID,
+		ParentID: thread.ParentID,
+		UserID:   thread.UserID,
+		NextID:   thread.NextID,
+		PrevID:   thread.PrevID,
+		Name:     thread.Name,
+		Private:  thread.Private,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

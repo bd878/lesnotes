@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
 	"github.com/bd878/gallery/server/logger"
+	threads "github.com/bd878/gallery/server/threads/pkg/model"
 )
 
 type RepoConnection interface {
@@ -14,6 +15,7 @@ type RepoConnection interface {
 }
 
 type Repository interface {
+	ReadThread(ctx context.Context, id, userID int64) (thread *threads.Thread, err error)
 	AppendThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name string, private bool) error
 	UpdateThread(ctx context.Context, id, userID int64, name string, private int32) error
 	PrivateThread(ctx context.Context, id, userID int64) error
