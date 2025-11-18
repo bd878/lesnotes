@@ -29,7 +29,7 @@ func main() {
 	logger.SetDefault(logger.New(logger.Config{
 		NodeName:   cfg.NodeName,
 		LogLevel:   cfg.LogLevel,
-		SkipCaller: 0,
+		SkipCaller: 1,
 	}))
 
 	server := grpc.New(grpc.Config{

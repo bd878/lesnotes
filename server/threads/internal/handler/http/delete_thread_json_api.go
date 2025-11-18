@@ -69,7 +69,7 @@ func (h *Handler) DeleteThreadJsonAPI(w http.ResponseWriter, req *http.Request) 
 
 	response, err := json.Marshal(threadsmodel.DeleteThreadResponse{
 		ID:          request.ID,
-		Description: "deleteed",
+		Description: "deleted",
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

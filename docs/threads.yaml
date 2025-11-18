@@ -395,10 +395,7 @@ components:
       request:
         type: object
         properties:
-          thread:
-            type: integer
-            required: true
-          parent:
+          id:
             type: integer
             required: true
 

@@ -281,17 +281,24 @@ func (r *Repository) DeleteThread(ctx context.Context, id, userID int64) (err er
 	var parentID, nextID, prevID int64
 	err = tx.QueryRow(ctx, r.table(selectThread), userID, id).Scan(&parentID, &nextID, &prevID)
 	if err != nil {
+		logger.Debugln("cannot select thread")
 		return
 	}
 
-	_, err = tx.Exec(ctx, r.table(updateNextThread), userID, nextID, parentID, prevID)
-	if err != nil {
-		return
+	if nextID != 0 {
+		_, err = tx.Exec(ctx, r.table(updateNextThread), userID, nextID, parentID, prevID)
+		if err != nil {
+			logger.Debugln("cannot update next thread")
+			return
+		}
 	}
 
-	_, err = tx.Exec(ctx, r.table(updatePrevThread), userID, prevID, parentID, nextID)
-	if err != nil {
-		return
+	if prevID != 0 {
+		_, err = tx.Exec(ctx, r.table(updatePrevThread), userID, prevID, parentID, nextID)
+		if err != nil {
+			logger.Debugln("cannot update prev thread")
+			return
+		}
 	}
 
 	// End unlink
@@ -300,40 +307,66 @@ func (r *Repository) DeleteThread(ctx context.Context, id, userID int64) (err er
 
 	_, err = tx.Exec(ctx, r.table(deleteThread), userID, id)
 	if err != nil {
+		logger.Debugln("cannot delete thread")
 		return
 	}
 
 	// End delete
 	// Link children
+	const countChildren = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2"
 	const selectLastParentThread = "SELECT id FROM %s WHERE user_id = $1 AND parent_id = $2 AND next_id = 0"
 	const selectFirstThread = "SELECT id FROM %s WHERE user_id = $1 AND parent_id = $2 AND prev_id = 0"
 	const updateFirstThread = "UPDATE %s SET prev_id = $3 WHERE user_id = $1 AND parent_id = $2 AND prev_id = 0"
 	const updateLastParentThread = "UPDATE %s SET next_id = $3 WHERE user_id = $1 AND parent_id = $2 AND next_id = 0"
 	const moveChildren = "UPDATE %s SET parent_id = $3 WHERE user_id = $1 AND parent_id = $2"
 
-	var lastThreadID, firstThreadID int64
-	err = tx.QueryRow(ctx, r.table(selectLastParentThread), userID, id).Scan(&lastThreadID)
+	var count int32
+	err = tx.QueryRow(ctx, r.table(countChildren), userID, id).Scan(&count)
 	if err != nil {
+		logger.Debugln("cannot count children")
+		if err == pgx.ErrNoRows {
+			return nil
+		}
 		return
 	}
 
+	// nothing to move, exit
+	if count == 0 {
+		return nil
+	}
+
+	var lastParentThreadID, firstThreadID int64
+	err = tx.QueryRow(ctx, r.table(selectLastParentThread), userID, parentID).Scan(&lastParentThreadID)
+	if err != nil && err != pgx.ErrNoRows {
+		logger.Debugln("cannot select last parent thread")
+		return
+	}
+
+	// it must have children, since count > 0
 	err = tx.QueryRow(ctx, r.table(selectFirstThread), userID, id).Scan(&firstThreadID)
 	if err != nil {
+		logger.Debugln("cannot select first thread")
 		return
 	}
 
-	_, err = tx.Exec(ctx, r.table(updateFirstThread), userID, id, lastThreadID)
+	_, err = tx.Exec(ctx, r.table(updateFirstThread), userID, id, lastParentThreadID)
 	if err != nil {
+		logger.Debugln("cannot update first thread")
 		return
 	}
 
-	_, err = tx.Exec(ctx, r.table(updateLastParentThread), userID, parentID, firstThreadID)
-	if err != nil {
-		return
+	if lastParentThreadID != 0 {
+		// move to non-empty thread
+		_, err = tx.Exec(ctx, r.table(updateLastParentThread), userID, parentID, firstThreadID)
+		if err != nil {
+			logger.Debugln("cannot update last parent thread")
+			return
+		}
 	}
 
 	_, err = tx.Exec(ctx, r.table(moveChildren), userID, id, parentID)
 	if err != nil {
+		logger.Debugln("cannot move children")
 		return
 	}
 
