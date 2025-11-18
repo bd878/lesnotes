@@ -35,6 +35,92 @@ paths:
 
 # END RESOLVE
 
+# REORDER
+  /threads/v2/reorder:
+    post:
+      summary: Reorder thread to other parent or between children
+      description: |
+        Reorders thread between parents or between
+        its siblings in a list
+      operationId: reorderThreadJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              - $ref: '#/components/schemas/reorderThreadJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/reorderOK'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/serverError'
+
+# END REORDER
+
+# CREATE
+  /threads/v2/create:
+    post:
+      summary: Create thread
+      description: |
+        Create thread ant append it in a list of threads
+      operationId: createThreadJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              - $ref: '#/components/schemas/createThreadJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/createOK'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/serverError'
+
+# END CREATE
+
+# DELETE
+  /threads/v2/delete:
+    post:
+      summary: Delete thread
+      description: |
+        Delete thread from parent thread and move all its children
+        on top list of parent thread
+      operationId: deleteThreadJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              - $ref: '#/components/schemas/deleteThreadJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/deleteOK'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/serverError'
+
+# END DELETE
+
 # PUBLISH
   /threads/v1/publish:
     parameters:
@@ -144,6 +230,9 @@ components:
           thread:
             type: integer
             required: true
+          user_id: # Thread may be public
+            type: integer
+            required: true
 
     resolveOk:
       type: object
@@ -157,6 +246,113 @@ components:
             items:
               type: integer
 # END RESOLVE
+
+# REORDER
+    reorderThreadJson:
+      type: object
+      token:
+        type: string
+        example: "AAAAAA"
+      request:
+        type: object
+        properties:
+          thread:
+            type: integer
+            required: true
+          parent:
+            type: integer
+            required: true
+          next:
+            type: integer
+            requried: false
+          prev:
+            type: integer
+            required: false
+
+    reorderOK:
+      type: object
+      status:
+        type: string
+      response:
+        type: object
+        properties:
+          description:
+            type: string
+          id:
+            type: integer
+
+# END REORDER
+
+# CREATE
+    createThreadJson:
+      type: object
+      token:
+        type: string
+        example: "AAAAAA"
+      request:
+        type: object
+        properties:
+          thread:
+            type: integer
+            required: true
+          parent:
+            type: integer
+            required: true
+          next:
+            type: integer
+            requried: false
+          prev:
+            type: integer
+            required: false
+          name:
+            type: string
+            required: false
+          private:
+            type: string
+            required: false
+
+    createOK:
+      type: object
+      status:
+        type: string
+      response:
+        type: object
+        properties:
+          description:
+            type: string
+          id:
+            type: integer
+
+# END CREATE
+    deleteThreadJson:
+      type: object
+      token:
+        type: string
+        example: "AAAAAA"
+      request:
+        type: object
+        properties:
+          thread:
+            type: integer
+            required: true
+          parent:
+            type: integer
+            required: true
+
+    deleteOK:
+      type: object
+      status:
+        type: string
+      response:
+        type: object
+        properties:
+          description:
+            type: string
+          id:
+            type: integer
+# DELETE
+
+# END DELETE 
 
 # PUBLISH
     publishOk:

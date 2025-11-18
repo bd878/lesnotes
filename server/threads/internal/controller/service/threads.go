@@ -113,3 +113,62 @@ func (s *Controller) PrivateThread(ctx context.Context, id, userID int64) (err e
 
 	return
 }
+
+
+func (s *Controller) CreateThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name string, private bool) (err error) {
+	if s.isConnFailed() {
+		if err = s.setupConnection(); err != nil {
+			return
+		}
+	}
+
+	logger.Debugw("create thread", "id", id, "user_id", userID, "parent_id", parentID, "next_id", nextID, "prev_id", prevID, "name", name, "private", private)
+
+	_, err = s.client.Create(ctx, &api.CreateRequest{
+		Id:       id,
+		UserId:   userID,
+		ParentId: parentID,
+		NextId:   nextID,
+		PrevId:   prevID,
+		Name:     name,
+		Private:  private,
+	})
+
+	return
+}
+
+
+func (s *Controller) ReorderThread(ctx context.Context, id, userID, parentID, nextID, prevID int64) (err error) {
+	if s.isConnFailed() {
+		if err = s.setupConnection(); err != nil {
+			return
+		}
+	}
+
+	logger.Debugw("reorder thread", "id", id, "user_id", userID, "parent_id", parentID, "next_id", nextID, "prev_id", prevID)
+
+	_, err = s.client.Reorder(ctx, &api.ReorderRequest{
+		Id:       id,
+		UserId:   userID,
+		ParentId: parentID,
+		NextId:   nextID,
+		PrevId:   prevID,
+	})
+
+	return
+}
+
+
+func (s *Controller) DeleteThread(ctx context.Context, id, userID int64) (err error) {
+	if s.isConnFailed() {
+		if err = s.setupConnection(); err != nil {
+			return
+		}
+	}
+
+	logger.Debugw("delete thread", "id", id, "user_id", userID)
+
+	_, err = s.client.Delete(ctx, &api.DeleteRequest{Id: id, UserId: userID})
+
+	return
+}
