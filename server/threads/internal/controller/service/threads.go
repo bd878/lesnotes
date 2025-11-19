@@ -94,7 +94,7 @@ func (s *Controller) ListThreads(ctx context.Context, userID, parentID int64, li
 		}
 	}
 
-	logger.Debugw("liast threads", "user_id", userID, "parent_id", parentID, "limit", limit, "offset", offset, "asc", asc)
+	logger.Debugw("list threads", "user_id", userID, "parent_id", parentID, "limit", limit, "offset", offset, "asc", asc)
 
 	resp, err := s.client.List(ctx, &api.ListRequest{
 		UserId:   userID,

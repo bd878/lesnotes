@@ -71,22 +71,33 @@ func (r *Repository) ListThreads(ctx context.Context, userID, parentID int64, li
 		if err != nil {
 			return
 		}
+
+		list = append(list, thread)
 	}
 
 	var prevID int64
 	ids = make([]int64, len(list))
 	for range list {
-		for _, thread := range list {
+		for i, thread := range list {
 			if thread.PrevID == prevID {
-				ids = append(ids, thread.ID)
+				ids[i] = thread.ID
 				prevID = thread.ID
+				break
 			}
 		}
 	}
 
+	if err = rows.Err(); err != nil {
+		return
+	}
+
+	if int32(len(ids)) <= offset+limit {
+		isLastPage = true
+	}
+
 	slices.Reverse(ids)
 
-	end := max(int32(len(ids)), offset+limit)
+	end := min(int32(len(ids)), offset+limit)
 
 	ids = ids[offset:end]
 

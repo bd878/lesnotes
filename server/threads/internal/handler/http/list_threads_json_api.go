@@ -61,7 +61,7 @@ func (h *Handler) ListThreadsJsonAPI(w http.ResponseWriter, req *http.Request) (
 			Status: "error",
 			Error:  &server.ErrorCode{
 				Code:    server.CodeWrongFormat,
-				Explain: "failed to read thread",
+				Explain: "failed to list threads",
 			},
 		})
 
