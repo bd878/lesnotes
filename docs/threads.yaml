@@ -34,6 +34,34 @@ paths:
 
 # END READ
 
+# LIST
+  /threads/v2/list:
+    post:
+      summary: List threads
+      description: |
+        List and paginate threads in a given thread
+      operationId: listThreadsJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/listThreadsJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/listOK'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/serverError'
+
+# END LIST
+
 # RESOLVE
   /threads/v2/resolve:
     post:
@@ -281,6 +309,46 @@ components:
 
 # END READ
 
+# LIST
+    listThreadsJson:
+      type: object
+      token:
+        type: string
+        example: "AAAAAA"
+      request:
+        type: object
+        properties:
+          parent:
+            type: integer
+            required: true
+          user_id:
+            type: integer
+            required: false
+          limit:
+            type: integer
+            required: false
+          offset:
+            type: integer
+            required: false
+
+    listOK:
+      type: object
+      status:
+        type: string
+      response:
+        type: object
+        properties:
+          ids:
+            type: array
+            items:
+              type: integer
+          count:
+            type: integer
+          isLastPage:
+            type: boolean
+
+# END LIST
+
 # RESOLVE
     resolveThreadJson:
       type: object
@@ -304,7 +372,7 @@ components:
       response:
         type: object
         properties:
-          ids:
+          path:
             type: array
             items:
               type: integer

@@ -11,6 +11,14 @@ type (
 		Private     bool    `json:"private"`
 	}
 
+	ListThreadsRequest struct {
+		UserID      int64   `json:"user_id"`
+		ParentID    int64   `json:"parent"`
+		Limit       int32   `json:"limit"`
+		Offset      int32   `json:"offset"`
+		Asc         bool    `json:"asc"`
+	}
+
 	ReorderThreadRequest struct {
 		ID          int64   `json:"id"`
 		ParentID    int64   `json:"parent"`
@@ -50,6 +58,12 @@ type (
 		PrevID      int64   `json:"prev_id"`
 		Name        string  `json:"name"`
 		Private     bool    `json:"private"`
+	}
+
+	ListThreadsResponse struct {
+		Count       int32   `json:"count"`
+		IsLastPage  bool    `json:"is_last_page"`
+		IDs         []int64 `json:"ids"`
 	}
 
 	ResolveThreadResponse struct {

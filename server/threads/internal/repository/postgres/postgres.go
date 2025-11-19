@@ -35,6 +35,10 @@ func (r *Repository) ReadThread(ctx context.Context, id, userID int64) (thread *
 	return
 }
 
+func (r *Repository) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (ids []int64, isLastPage bool, err error) {
+	return
+}
+
 func (r *Repository) ReorderThread(ctx context.Context, id, userID, parentID, nextID, prevID int64) (err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})

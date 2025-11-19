@@ -59,6 +59,7 @@ func New(conf Config) *Server {
 
 	middleware.WithAuth(httpmiddleware.TokenAuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
 	mux.Handle("/threads/v2/read", middleware.Build(handler.ReadThreadJsonAPI))
+	mux.Handle("/threads/v2/list", middleware.Build(handler.ListThreadsJsonAPI))
 	mux.Handle("/threads/v2/resolve", middleware.Build(handler.ResolveThreadJsonAPI))
 	mux.Handle("/threads/v2/create", middleware.Build(handler.CreateThreadJsonAPI))
 	mux.Handle("/threads/v2/delete", middleware.Build(handler.DeleteThreadJsonAPI))

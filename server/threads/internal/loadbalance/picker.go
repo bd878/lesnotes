@@ -57,7 +57,8 @@ func (p *Picker) Pick(info balancer.PickInfo) (
 		len(p.followers) == 0 {
 			result.SubConn = p.leader
 	} else if strings.Contains(info.FullMethodName, "Resolve") ||
-		strings.Contains(info.FullMethodName, "Read") {
+		strings.Contains(info.FullMethodName, "Read") ||
+		strings.Contains(info.FullMethodName, "List") {
 		result.SubConn = p.nextFollower()
 	}
 	if result.SubConn == nil {

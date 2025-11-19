@@ -17,6 +17,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ThreadsClient interface {
+	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
 	Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*Thread, error)
 	Resolve(ctx context.Context, in *ResolveRequest, opts ...grpc.CallOption) (*ResolveResponse, error)
 	Publish(ctx context.Context, in *PublishRequest, opts ...grpc.CallOption) (*PublishResponse, error)
@@ -34,6 +35,15 @@ type threadsClient struct {
 
 func NewThreadsClient(cc grpc.ClientConnInterface) ThreadsClient {
 	return &threadsClient{cc}
+}
+
+func (c *threadsClient) List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error) {
+	out := new(ListResponse)
+	err := c.cc.Invoke(ctx, "/threads.v1.Threads/List", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *threadsClient) Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*Thread, error) {
@@ -121,6 +131,7 @@ func (c *threadsClient) GetServers(ctx context.Context, in *GetServersRequest, o
 // All implementations must embed UnimplementedThreadsServer
 // for forward compatibility
 type ThreadsServer interface {
+	List(context.Context, *ListRequest) (*ListResponse, error)
 	Read(context.Context, *ReadRequest) (*Thread, error)
 	Resolve(context.Context, *ResolveRequest) (*ResolveResponse, error)
 	Publish(context.Context, *PublishRequest) (*PublishResponse, error)
@@ -137,6 +148,9 @@ type ThreadsServer interface {
 type UnimplementedThreadsServer struct {
 }
 
+func (UnimplementedThreadsServer) List(context.Context, *ListRequest) (*ListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
+}
 func (UnimplementedThreadsServer) Read(context.Context, *ReadRequest) (*Thread, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Read not implemented")
 }
@@ -175,6 +189,24 @@ type UnsafeThreadsServer interface {
 
 func RegisterThreadsServer(s *grpc.Server, srv ThreadsServer) {
 	s.RegisterService(&_Threads_serviceDesc, srv)
+}
+
+func _Threads_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ThreadsServer).List(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/threads.v1.Threads/List",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ThreadsServer).List(ctx, req.(*ListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Threads_Read_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -343,6 +375,10 @@ var _Threads_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "threads.v1.Threads",
 	HandlerType: (*ThreadsServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "List",
+			Handler:    _Threads_List_Handler,
+		},
 		{
 			MethodName: "Read",
 			Handler:    _Threads_Read_Handler,

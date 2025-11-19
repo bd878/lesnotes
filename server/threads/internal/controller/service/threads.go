@@ -87,6 +87,29 @@ func (s *Controller) ReadThread(ctx context.Context, id, userID int64) (thread *
 	return
 }
 
+func (s *Controller) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (ids []int64, isLastPage bool, err error) {
+	if s.isConnFailed() {
+		if err = s.setupConnection(); err != nil {
+			return
+		}
+	}
+
+	logger.Debugw("liast threads", "user_id", userID, "parent_id", parentID, "limit", limit, "offset", offset, "asc", asc)
+
+	resp, err := s.client.List(ctx, &api.ListRequest{
+		UserId:   userID,
+		ParentId: parentID,
+		Limit:    limit,
+		Offset:   offset,
+		Asc:      asc,
+	})
+	if err != nil {
+		return nil, false, err
+	}
+
+	return resp.Ids, resp.IsLastPage, err
+}
+
 func (s *Controller) ResolveThread(ctx context.Context, id, userID int64) (path []int64, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {

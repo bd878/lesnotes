@@ -152,3 +152,8 @@ func (m *Distributed) ReadThread(ctx context.Context, id, userID int64) (thread 
 	logger.Debugw("read thread", "id", id, "user_id", userID)
 	return m.repo.ReadThread(ctx, id, userID)
 }
+
+func (m *Distributed) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (ids []int64, isLastPage bool, err error) {
+	logger.Debugw("liast threads", "user_id", userID, "parent_id", parentID, "limit", limit, "offset", offset, "asc", asc)
+	return m.repo.ListThreads(ctx, userID, parentID, limit, offset, asc)
+}

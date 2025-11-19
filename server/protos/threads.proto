@@ -7,6 +7,7 @@ import "protos/distributed.proto";
 option go_package = "github.com/bd878/gallery/server/api";
 
 service Threads {
+	rpc List(ListRequest) returns (ListResponse) {}
 	rpc Read(ReadRequest) returns (Thread) {}
 	rpc Resolve(ResolveRequest) returns (ResolveResponse) {}
 	rpc Publish(PublishRequest) returns (PublishResponse) {}
@@ -26,6 +27,20 @@ message Thread {
 	int64    parent_id = 5;
 	int64    next_id = 6;
 	int64    prev_id = 7;
+}
+
+message ListRequest {
+	int64 user_id = 1;
+	int64 parent_id = 2;
+	int32 limit = 3;
+	int32 offset = 4;
+	bool  asc = 5;
+}
+
+message ListResponse {
+	repeated int64 ids = 1;
+	bool  is_last_page = 2;
+	int32 count = 3;
 }
 
 message ReadRequest {

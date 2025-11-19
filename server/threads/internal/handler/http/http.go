@@ -8,6 +8,7 @@ import (
 )
 
 type Controller interface {
+	ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (ids []int64, isLastPage bool, err error)
 	ReadThread(ctx context.Context, id, userID int64) (thread *threads.Thread, err error)
 	ResolveThread(ctx context.Context, id, userID int64) (ids []int64, err error)
 	PublishThread(ctx context.Context, id, userID int64) (err error)
