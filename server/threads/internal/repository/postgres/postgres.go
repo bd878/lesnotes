@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 	"fmt"
+	"slices"
 	"context"
 
 	"github.com/jackc/pgx/v5"
@@ -36,6 +37,59 @@ func (r *Repository) ReadThread(ctx context.Context, id, userID int64) (thread *
 }
 
 func (r *Repository) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (ids []int64, isLastPage bool, err error) {
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			tx.Rollback(ctx)
+		default:
+			tx.Commit(ctx)
+		}
+	}()
+
+	const selectThreads = "SELECT id, next_id, prev_id FROM %s WHERE user_id = $1 AND parent_id = $2"
+
+	var rows pgx.Rows
+	rows, err = tx.Query(ctx, r.table(selectThreads), userID, parentID)
+	if err != nil {
+		return
+	}
+
+	list := make([]*threads.Thread, 0)
+	for rows.Next() {
+		thread := &threads.Thread{}
+
+		err = rows.Scan(&thread.ID, &thread.NextID, &thread.PrevID)
+		if err != nil {
+			return
+		}
+	}
+
+	var prevID int64
+	ids = make([]int64, len(list))
+	for range list {
+		for _, thread := range list {
+			if thread.PrevID == prevID {
+				ids = append(ids, thread.ID)
+				prevID = thread.ID
+			}
+		}
+	}
+
+	slices.Reverse(ids)
+
+	end := max(int32(len(ids)), offset+limit)
+
+	ids = ids[offset:end]
+
 	return
 }
 
