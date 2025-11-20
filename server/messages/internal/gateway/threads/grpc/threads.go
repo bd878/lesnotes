@@ -83,7 +83,7 @@ func (g *Gateway) DeleteThread(ctx context.Context, id, userID int64) (err error
 	return
 }
 
-func (g *Gateway) UpdateThread(ctx context.Context, id, userID, parentID int64) (err error) {
+func (g *Gateway) UpdateThread(ctx context.Context, id, userID int64) (err error) {
 	if g.isConnFailed() {
 		if err = g.setupConnection(); err != nil {
 			return
@@ -93,9 +93,31 @@ func (g *Gateway) UpdateThread(ctx context.Context, id, userID, parentID int64) 
 	_, err = g.client.Update(ctx, &api.UpdateRequest{
 		Id:        id,
 		UserId:    userID,
-		ParentId:  parentID,
 		Private:   -1,
 	})
+
+	return
+}
+
+func (g *Gateway) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32) (ids []int64, isLastPage bool, err error) {
+	if g.isConnFailed() {
+		if err = g.setupConnection(); err != nil {
+			return
+		}
+	}
+
+	resp, err := g.client.List(ctx, &api.ListRequest{
+		UserId:   userID,
+		ParentId: parentID,
+		Limit:    limit,
+		Offset:   offset,
+	})
+	if err != nil {
+		return nil, false, err
+	}
+
+	isLastPage = resp.IsLastPage
+	ids = resp.Ids
 
 	return
 }

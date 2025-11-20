@@ -19,9 +19,10 @@ type Config struct {
 }
 
 type ThreadsGateway interface {
+	ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32) (ids []int64, isLastPage bool, err error)
 	CreateThread(ctx context.Context, id, userID, parentID int64, name string, private bool) (err error)
 	DeleteThread(ctx context.Context, id, userID int64) (err error)
-	UpdateThread(ctx context.Context, id, userID, parentID int64) (err error)
+	UpdateThread(ctx context.Context, id, userID int64) (err error)
 }
 
 type Controller struct {
@@ -185,7 +186,7 @@ func (s *Controller) UpdateMessage(ctx context.Context, id int64, text, title, n
 
 	logger.Debugw("update message", "id", id, "text", text, "title", title, "name", name, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private)
 
-	err = s.threads.UpdateThread(ctx, id, userID, threadID)
+	err = s.threads.UpdateThread(ctx, id, userID)
 	if err != nil {
 		return
 	}
@@ -204,6 +205,7 @@ func (s *Controller) UpdateMessage(ctx context.Context, id int64, text, title, n
 	return
 }
 
+// Get messages in order
 func (s *Controller) ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool) (list *model.List, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
@@ -213,37 +215,47 @@ func (s *Controller) ReadThreadMessages(ctx context.Context, userID int64, threa
 
 	logger.Debugw("read thread messages", "user_id", userID, "thread_id", threadID, "limit", limit, "offset", offset, "ascending", ascending)
 
-	res, err := s.client.ReadThreadMessages(ctx, &api.ReadThreadMessagesRequest{
-		UserId:   userID,
-		ThreadId: threadID,
-		Limit:    limit,
-		Offset:   offset,
-		Asc:      ascending,
-	})
+	ids, isLastPage, err := s.threads.ListThreads(ctx, userID, threadID, limit, offset)
 	if err != nil {
+		logger.Debugw("failed to list threads", "error", err)
 		return nil, err
 	}
+
+	logger.Debugw("list threads", "ids", ids)
+
+	res, err := s.client.ReadBatchMessages(ctx, &api.ReadBatchMessagesRequest{
+		UserId:   userID,
+		Ids:      ids,
+	})
+	if err != nil {
+		logger.Debugw("failed to read batch messages", "error", err)
+		return nil, err
+	}
+
+	logger.Debugw("read batch messages", "messages", res.Messages)
 
 	total, err := s.client.CountMessages(ctx, &api.CountMessagesRequest{
 		UserId:   userID,
 		ThreadId: threadID,
 	})
 	if err != nil {
+		logger.Debugw("failed to count messages", "error", err)
 		return nil, err
 	}
 
 	list = &model.List{
 		Messages:      model.MapMessagesFromProto(model.MessageFromProto, res.Messages),
-		IsLastPage:    res.IsLastPage,
+		IsLastPage:    isLastPage,
 		IsFirstPage:   offset == 0,
 		Total:         total.Count,
-		Count:         int32(len(res.Messages)),
+		Count:         int32(len(ids)),
 		Offset:        offset,
 	}
 
 	return
 }
 
+// Read messages by given ids
 func (s *Controller) ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*model.Message, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
@@ -266,6 +278,7 @@ func (s *Controller) ReadBatchMessages(ctx context.Context, userID int64, ids []
 	return
 }
 
+// read all messages not concerning thread
 func (s *Controller) ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (list *model.List, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
@@ -328,6 +341,7 @@ func (s *Controller) ReadMessage(ctx context.Context, id int64, name string, use
 	return
 }
 
+// TODO: resolve path in thread, read messages here
 func (s *Controller) ReadPath(ctx context.Context, userID, id int64) (path []*model.Message, err error) {
 	if s.isConnFailed() {
 		if err := s.setupConnection(); err != nil {
