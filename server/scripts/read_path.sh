@@ -9,7 +9,7 @@ id=${1:?"Usage: ./read_path.sh message_id"}
 cmd=`cat <<HERE
 sed -e "s/%STAGE%/$stage/g" \
 -e "s/%ID%/$id/g" ./curl/read_path.curl |
-curl -b $cookie -v -K -
+curl -b $cookie -K -
 HERE`
 result=`eval "$cmd"`
 echo $result

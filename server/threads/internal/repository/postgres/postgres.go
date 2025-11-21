@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 	"fmt"
+	"slices"
 	"context"
 
 	"github.com/jackc/pgx/v5"
@@ -484,6 +485,8 @@ func (r *Repository) ResolveThread(ctx context.Context, id, userID int64) (ids [
 
 		threadID = parentID
 	}
+
+	slices.Reverse(ids)
 
 	return
 }
