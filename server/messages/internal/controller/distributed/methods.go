@@ -216,11 +216,6 @@ func (m *DistributedMessages) ReadBatchMessages(ctx context.Context, userID int6
 	return m.repo.ReadBatchMessages(ctx, userID, ids)
 }
 
-func (m *DistributedMessages) ReadPath(ctx context.Context, userID, id int64) (path []*model.Message, err error) {
-	logger.Debugw("read path", "user_id", userID, "id", id)
-	return m.repo.ReadPath(ctx, userID, id)
-}
-
 func (m *DistributedMessages) ReadMessagesAround(ctx context.Context, userID, threadID, id int64, limit int32) (messages []*model.Message, isLastPage bool, offset int, err error) {
 	logger.Debugw("read messages around", "user_id", userID, "thread_id", threadID, "id", id)
 	return m.repo.ReadMessagesAround(ctx, userID, threadID, id, limit)

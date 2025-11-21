@@ -16,7 +16,6 @@ service Messages {
 	rpc UpdateMessage(UpdateMessageRequest) returns (UpdateMessageResponse) {}
 	rpc ReadMessage(ReadMessageRequest) returns (Message) {}
 	rpc ReadMessages(ReadMessagesRequest) returns (ReadMessagesResponse) {}
-	rpc ReadPath(ReadPathRequest) returns (ReadPathResponse) {}
 	rpc ReadMessagesAround(ReadMessagesAroundRequest) returns (ReadMessagesAroundResponse) {}
 	rpc ReadThreadMessages(ReadThreadMessagesRequest) returns (ReadThreadMessagesResponse) {}
 	rpc ReadBatchMessages(ReadBatchMessagesRequest) returns (ReadBatchMessagesResponse) {}
@@ -135,15 +134,6 @@ message ReadMessageRequest {
 	int64  id = 1;
 	repeated int64  user_ids = 2;
 	string name = 3;
-}
-
-message ReadPathRequest {
-	int64  user_id = 1;
-	int64  id = 2;
-}
-
-message ReadPathResponse {
-	repeated Message path = 1;
 }
 
 message ReadMessagesAroundRequest {

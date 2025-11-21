@@ -26,7 +26,6 @@ type MessagesClient interface {
 	UpdateMessage(ctx context.Context, in *UpdateMessageRequest, opts ...grpc.CallOption) (*UpdateMessageResponse, error)
 	ReadMessage(ctx context.Context, in *ReadMessageRequest, opts ...grpc.CallOption) (*Message, error)
 	ReadMessages(ctx context.Context, in *ReadMessagesRequest, opts ...grpc.CallOption) (*ReadMessagesResponse, error)
-	ReadPath(ctx context.Context, in *ReadPathRequest, opts ...grpc.CallOption) (*ReadPathResponse, error)
 	ReadMessagesAround(ctx context.Context, in *ReadMessagesAroundRequest, opts ...grpc.CallOption) (*ReadMessagesAroundResponse, error)
 	ReadThreadMessages(ctx context.Context, in *ReadThreadMessagesRequest, opts ...grpc.CallOption) (*ReadThreadMessagesResponse, error)
 	ReadBatchMessages(ctx context.Context, in *ReadBatchMessagesRequest, opts ...grpc.CallOption) (*ReadBatchMessagesResponse, error)
@@ -122,15 +121,6 @@ func (c *messagesClient) ReadMessages(ctx context.Context, in *ReadMessagesReque
 	return out, nil
 }
 
-func (c *messagesClient) ReadPath(ctx context.Context, in *ReadPathRequest, opts ...grpc.CallOption) (*ReadPathResponse, error) {
-	out := new(ReadPathResponse)
-	err := c.cc.Invoke(ctx, "/messages.v1.Messages/ReadPath", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *messagesClient) ReadMessagesAround(ctx context.Context, in *ReadMessagesAroundRequest, opts ...grpc.CallOption) (*ReadMessagesAroundResponse, error) {
 	out := new(ReadMessagesAroundResponse)
 	err := c.cc.Invoke(ctx, "/messages.v1.Messages/ReadMessagesAround", in, out, opts...)
@@ -180,7 +170,6 @@ type MessagesServer interface {
 	UpdateMessage(context.Context, *UpdateMessageRequest) (*UpdateMessageResponse, error)
 	ReadMessage(context.Context, *ReadMessageRequest) (*Message, error)
 	ReadMessages(context.Context, *ReadMessagesRequest) (*ReadMessagesResponse, error)
-	ReadPath(context.Context, *ReadPathRequest) (*ReadPathResponse, error)
 	ReadMessagesAround(context.Context, *ReadMessagesAroundRequest) (*ReadMessagesAroundResponse, error)
 	ReadThreadMessages(context.Context, *ReadThreadMessagesRequest) (*ReadThreadMessagesResponse, error)
 	ReadBatchMessages(context.Context, *ReadBatchMessagesRequest) (*ReadBatchMessagesResponse, error)
@@ -218,9 +207,6 @@ func (UnimplementedMessagesServer) ReadMessage(context.Context, *ReadMessageRequ
 }
 func (UnimplementedMessagesServer) ReadMessages(context.Context, *ReadMessagesRequest) (*ReadMessagesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadMessages not implemented")
-}
-func (UnimplementedMessagesServer) ReadPath(context.Context, *ReadPathRequest) (*ReadPathResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ReadPath not implemented")
 }
 func (UnimplementedMessagesServer) ReadMessagesAround(context.Context, *ReadMessagesAroundRequest) (*ReadMessagesAroundResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadMessagesAround not implemented")
@@ -409,24 +395,6 @@ func _Messages_ReadMessages_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Messages_ReadPath_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReadPathRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MessagesServer).ReadPath(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/messages.v1.Messages/ReadPath",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MessagesServer).ReadPath(ctx, req.(*ReadPathRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Messages_ReadMessagesAround_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ReadMessagesAroundRequest)
 	if err := dec(in); err != nil {
@@ -538,10 +506,6 @@ var _Messages_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReadMessages",
 			Handler:    _Messages_ReadMessages_Handler,
-		},
-		{
-			MethodName: "ReadPath",
-			Handler:    _Messages_ReadPath_Handler,
 		},
 		{
 			MethodName: "ReadMessagesAround",

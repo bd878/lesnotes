@@ -23,6 +23,7 @@ type ThreadsGateway interface {
 	CreateThread(ctx context.Context, id, userID, parentID int64, name string, private bool) (err error)
 	DeleteThread(ctx context.Context, id, userID int64) (err error)
 	UpdateThread(ctx context.Context, id, userID int64) (err error)
+	ResolvePath(ctx context.Context, userID, id int64) (path []int64, err error)
 }
 
 type Controller struct {
@@ -221,8 +222,6 @@ func (s *Controller) ReadThreadMessages(ctx context.Context, userID int64, threa
 		return nil, err
 	}
 
-	logger.Debugw("list threads", "ids", ids)
-
 	res, err := s.client.ReadBatchMessages(ctx, &api.ReadBatchMessagesRequest{
 		UserId:   userID,
 		Ids:      ids,
@@ -231,8 +230,6 @@ func (s *Controller) ReadThreadMessages(ctx context.Context, userID int64, threa
 		logger.Debugw("failed to read batch messages", "error", err)
 		return nil, err
 	}
-
-	logger.Debugw("read batch messages", "messages", res.Messages)
 
 	total, err := s.client.CountMessages(ctx, &api.CountMessagesRequest{
 		UserId:   userID,
@@ -351,15 +348,20 @@ func (s *Controller) ReadPath(ctx context.Context, userID, id int64) (path []*mo
 
 	logger.Debugw("read path", "user_id", userID, "id", id)
 
-	res, err := s.client.ReadPath(ctx, &api.ReadPathRequest{
-		Id:     id,
+	ids, err := s.threads.ResolvePath(ctx, userID, id)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := s.client.ReadBatchMessages(ctx, &api.ReadBatchMessagesRequest{
 		UserId: userID,
+		Ids:    ids,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	path = model.MapMessagesFromProto(model.MessageFromProto, res.Path)
+	path = model.MapMessagesFromProto(model.MessageFromProto, res.Messages)
 
 	return
 }

@@ -121,3 +121,23 @@ func (g *Gateway) ListThreads(ctx context.Context, userID, parentID int64, limit
 
 	return
 }
+
+func (g *Gateway) ResolvePath(ctx context.Context, userID, id int64) (path []int64, err error) {
+	if g.isConnFailed() {
+		if err = g.setupConnection(); err != nil {
+			return
+		}
+	}
+
+	resp, err := g.client.Resolve(ctx, &api.ResolveRequest{
+		UserId:  userID,
+		Id:      id,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	path = resp.Path
+
+	return
+}

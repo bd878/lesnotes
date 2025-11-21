@@ -59,7 +59,6 @@ func (p *Picker) Pick(info balancer.PickInfo) (
 	} else if strings.Contains(info.FullMethodName, "ReadMessages") ||
 						strings.Contains(info.FullMethodName, "ReadThreadMessages") ||
 						strings.Contains(info.FullMethodName, "ReadMessage") ||
-						strings.Contains(info.FullMethodName, "ReadPath") ||
 						strings.Contains(info.FullMethodName, "ReadMessagesAround") ||
 						strings.Contains(info.FullMethodName, "CountMessages") ||
 						strings.Contains(info.FullMethodName, "ReadBatchMessages") {
