@@ -283,7 +283,7 @@ components:
       request:
         type: object
         properties:
-          thread:
+          id:
             type: integer
             required: true
 
@@ -358,7 +358,7 @@ components:
       request:
         type: object
         properties:
-          thread:
+          id:
             type: integer
             required: true
           user_id: # Thread may be public
@@ -387,7 +387,7 @@ components:
       request:
         type: object
         properties:
-          thread:
+          id:
             type: integer
             required: true
           parent:
@@ -423,7 +423,7 @@ components:
       request:
         type: object
         properties:
-          thread:
+          id:
             type: integer
             required: true
           parent:

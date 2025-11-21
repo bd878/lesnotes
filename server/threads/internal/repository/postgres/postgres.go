@@ -4,7 +4,6 @@ import (
 	"io"
 	"os"
 	"fmt"
-	"slices"
 	"context"
 
 	"github.com/jackc/pgx/v5"
@@ -75,13 +74,13 @@ func (r *Repository) ListThreads(ctx context.Context, userID, parentID int64, li
 		list = append(list, thread)
 	}
 
-	var prevID int64
-	ids = make([]int64, len(list))
+	var nextID int64
+	ids = make([]int64, 0)
 	for range list {
-		for i, thread := range list {
-			if thread.PrevID == prevID {
-				ids[i] = thread.ID
-				prevID = thread.ID
+		for _, thread := range list {
+			if thread.NextID == nextID {
+				ids = append(ids, thread.ID)
+				nextID = thread.ID
 				break
 			}
 		}
@@ -94,8 +93,6 @@ func (r *Repository) ListThreads(ctx context.Context, userID, parentID int64, li
 	if int32(len(ids)) <= offset+limit {
 		isLastPage = true
 	}
-
-	slices.Reverse(ids)
 
 	end := min(int32(len(ids)), offset+limit)
 
@@ -123,28 +120,31 @@ func (r *Repository) ReorderThread(ctx context.Context, id, userID, parentID, ne
 		}
 	}()
 
-	const selectThread = "SELECT parent_id, next_id, prev_id FROM %s WHERE user_id = $1 AND id = $2 AND parent_id = $3"
-	const updateNextThread = "UPDATE %s SET prev_id = $4 WHERE user_id = $1 AND id = $2 AND parent_id = $3"
-	const updatePrevThread = "UPDATE %s SET next_id = $4 WHERE user_id = $1 AND id = $2 AND parent_id = $3"
+	const selectThread = "SELECT parent_id, next_id, prev_id FROM %s WHERE user_id = $1 AND id = $2"
+	const updateNextThread = "UPDATE %s SET prev_id = $3 WHERE user_id = $1 AND id = $2"
+	const updatePrevThread = "UPDATE %s SET next_id = $3 WHERE user_id = $1 AND id = $2"
 	const updateMe = "UPDATE %s SET parent_id = $4, next_id = $5, prev_id = $6 WHERE user_id = $1 AND id = $2 AND parent_id = $3"
 
 	// Unlink
 	var currentParentID, currentNextID, currentPrevID int64
-	err = tx.QueryRow(ctx, r.table(selectThread), userID, id, parentID).Scan(&currentParentID, &currentNextID, &currentPrevID)
+	err = tx.QueryRow(ctx, r.table(selectThread), userID, id).Scan(&currentParentID, &currentNextID, &currentPrevID)
 	if err != nil {
+		logger.Debugw("failed to select thread", "error", err)
 		return
 	}
 
 	if currentPrevID != 0 {
-		_, err = tx.Exec(ctx, r.table(updatePrevThread), userID, id, parentID, currentNextID)
+		_, err = tx.Exec(ctx, r.table(updatePrevThread), userID, currentPrevID, currentNextID)
 		if err != nil {
+			logger.Debugw("failed to update prev thread", "error", err)
 			return
 		}
 	}
 
 	if currentNextID != 0 {
-		_, err = tx.Exec(ctx, r.table(updateNextThread), userID, id, parentID, currentPrevID)
+		_, err = tx.Exec(ctx, r.table(updateNextThread), userID, currentNextID, currentPrevID)
 		if err != nil {
+			logger.Debugw("failed to update next thread", "error", err)
 			return
 		}
 	}
@@ -152,19 +152,22 @@ func (r *Repository) ReorderThread(ctx context.Context, id, userID, parentID, ne
 	// End unlink
 	// Link
 
-	_, err = tx.Exec(ctx, r.table(updatePrevThread), userID, id, id)
-	if err != nil {
-		return
-	}
-
-	_, err = tx.Exec(ctx, r.table(updateNextThread), userID, id, id)
-	if err != nil {
-		return
-	}
-
-	// Update me
 	if parentID == -1 { // 0 is root
 		parentID = currentParentID
+	}
+
+	if prevID != 0 {
+		_, err = tx.Exec(ctx, r.table(updatePrevThread), userID, prevID, id)
+		if err != nil {
+			return
+		}
+	}
+
+	if nextID != 0 {
+		_, err = tx.Exec(ctx, r.table(updateNextThread), userID, nextID, id)
+		if err != nil {
+			return
+		}
 	}
 
 	_, err = tx.Exec(ctx, r.table(updateMe), userID, id, currentParentID, parentID, nextID, prevID)
@@ -197,8 +200,7 @@ func (r *Repository) AppendThread(ctx context.Context, id, userID, parentID, nex
 	const updateLastThread = "UPDATE %s SET next_id = $4 WHERE user_id = $1 AND id = $2 AND parent_id = $3"
 
 	var lastThreadID int64
-	row := tx.QueryRow(ctx, r.table(selectLastThread), userID, parentID)
-	err = row.Scan(&lastThreadID)
+	err = tx.QueryRow(ctx, r.table(selectLastThread), userID, parentID).Scan(&lastThreadID)
 	if err != nil && err != pgx.ErrNoRows {
 		return
 	}

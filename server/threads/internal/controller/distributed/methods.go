@@ -87,8 +87,11 @@ func (m *Distributed) ReorderThread(ctx context.Context, id, userID, parentID, n
 		PrevId:    prevID,
 	})
 	if err != nil {
+		logger.Debugw("failed to marshal", "error", err)
 		return err
 	}
+
+	logger.Debugln("ready to apply reorder")
 
 	_, err = m.apply(ctx, ReorderRequest, cmd)
 

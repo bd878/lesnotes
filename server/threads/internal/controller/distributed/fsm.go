@@ -70,7 +70,11 @@ func (f *fsm) applyReorder(raw []byte) interface{} {
 	var cmd ReorderCommand
 	proto.Unmarshal(raw, &cmd)
 
+	logger.Debugln("apply reorder")
+
 	err := f.repo.ReorderThread(context.Background(), cmd.Id, cmd.UserId, cmd.ParentId, cmd.NextId, cmd.PrevId)
+
+	logger.Debugw("repo reorder thread error", "error", err)
 
 	return err
 }

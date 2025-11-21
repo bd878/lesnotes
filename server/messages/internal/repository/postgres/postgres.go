@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"slices"
+	"strings"
 	"time"
 	"context"
 	"encoding/json"
@@ -340,19 +341,17 @@ func (r *Repository) ReadBatchMessages(ctx context.Context, userID int64, messag
 
 	var rows pgx.Rows
 
-	ids := "$2"
-	for i := 1; i < len(messageIDs); i++ {
-		ids += fmt.Sprintf(",$%d", i+2)
+	var order string
+	pairs := make([]string, len(messageIDs))
+	for i, messageID := range messageIDs {
+		pairs[i] = fmt.Sprintf("(%d, %d)", messageID, i)
 	}
+	order = strings.Join(pairs, ",")
 
-	list := make([]interface{}, len(messageIDs))
-	for i, id := range messageIDs {
-		list[i] = id
-	}
+	query := r.table(`SELECT m.id, m.user_id, m.thread_id, m.file_ids, m.name, m.text, m.private, m.created_at, m.updated_at, m.title FROM %s m `) +
+		fmt.Sprintf(` JOIN (VALUES %s) AS x(id, ordering) ON m.id = x.id WHERE m.user_id = $1 ORDER BY x.ordering DESC`, order)
 
-	rows, err = tx.Query(ctx, r.table(`
-SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE user_id = $1 AND (id IN (` + ids + `))
-`), append([]interface{}{userID}, list...)...)
+	rows, err = tx.Query(ctx, query, userID)
 	if err != nil {
 		return
 	}
