@@ -12,6 +12,9 @@ import onMessageEditClick from './onMessageEditClick';
 import onMessagePublishClick from './onMessagePublishClick';
 import onMessagePrivateClick from './onMessagePrivateClick';
 import onMessageCancelEditClick from './onMessageCancelEditClick';
+import onMessagesListDragStart from './onMessagesListDragStart';
+import onMessagesListDragOver from './onMessagesListDragOver';
+import onMessagesListDrop from './onMessagesListDrop';
 import getByID from '../../scripts/getByID'
 
 const elems = {
@@ -46,6 +49,9 @@ function init() {
 	elems.messageCancelElem.addEventListener("click",     e => onMessageCancelClick(elems, e))
 	elems.editFormElem.addEventListener("submit",         e => onMessageUpdateFormSubmit(elems, e))
 	elems.messagesListElem.addEventListener("click",      e => onMessagesListClick(elems, e))
+	elems.messagesListElem.addEventListener('dragstart',  e => onMessagesListDragStart(elems, e))
+	elems.messagesListElem.addEventListener('dragover',   e => onMessagesListDragOver(elems, e))
+	elems.messagesListElem.addEventListener('drop',       e => onMessagesListDrop(elems, e))
 	elems.threadsListElem.addEventListener("click",       e => onThreadsListClick(elems, e))
 	elems.messageDeleteElem.addEventListener("click",     e => onMessageDeleteClick(elems, e))
 	elems.messageEditElem.addEventListener("click",       e => onMessageEditClick(elems, e))

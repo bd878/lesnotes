@@ -27,18 +27,18 @@
 					<li class="grow-1 flex flex-row justify-between whitespace-nowrap">
 						{{#isCenter}}
 							{{#isSelected}}
-								<button type="button" class="flex flex-row justify-between overflow-hidden bg-gray-300 dark:bg-cyan-500 dark:text-white cursor-pointer text-left w-full" data-message-id="{{ID}}">
+								<button draggable="true" type="button" class="flex flex-row justify-between overflow-hidden bg-gray-300 dark:bg-cyan-500 dark:text-white cursor-pointer text-left w-full" data-message-id="{{ID}}">
 							{{/isSelected}}
 							{{^isSelected}}
-								<button type="button" class="dark:bg-cyan-700 dark:text-white bg-blue-100  flex flex-row justify-between overflow-hidden bg-blue-100 cursor-pointer text-left w-full" data-message-id="{{ID}}">
+								<button draggable="true" type="button" class="dark:bg-cyan-700 dark:text-white bg-blue-100  flex flex-row justify-between overflow-hidden bg-blue-100 cursor-pointer text-left w-full" data-message-id="{{ID}}">
 							{{/isSelected}}
 						{{/isCenter}}
 						{{^isCenter}}
 							{{#isSelected}}
-								<button type="button" class="flex flex-row justify-between overflow-hidden dark:bg-slate-600 dark:text-white bg-gray-300 cursor-pointer text-left w-full" data-message-id="{{ID}}">
+								<button draggable="true" type="button" class="flex flex-row justify-between overflow-hidden dark:bg-slate-600 dark:text-white bg-gray-300 cursor-pointer text-left w-full" data-message-id="{{ID}}">
 							{{/isSelected}}
 							{{^isSelected}}
-								<button type="button" class="flex flex-row justify-between overflow-hidden  cursor-pointer text-left w-full" data-message-id="{{ID}}">
+								<button draggable="true" type="button" class="flex flex-row justify-between overflow-hidden  cursor-pointer text-left w-full" data-message-id="{{ID}}">
 							{{/isSelected}}
 						{{/isCenter}}
 								<div class="overflow-hidden text-ellipsis mr-2" data-message-id="{{ID}}">
@@ -52,10 +52,10 @@
 						</button>
 
 						{{#isCenter}}
-							<button type="button" class="pl-2 dark:bg-blue-100 dark:bg-cyan-700 dark:text-white bg-blue-100 cursor-pointer text-end" data-thread-id="{{ID}}">{{count}} > </button>
+							<button draggable="true" type="button" class="pl-2 dark:bg-blue-100 dark:bg-cyan-700 dark:text-white bg-blue-100 cursor-pointer text-end" data-thread-id="{{ID}}">{{count}} > </button>
 						{{/isCenter}}
 						{{^isCenter}}
-							<button type="button" class="pl-2 cursor-pointer text-end" data-thread-id="{{ID}}">{{count}} > </button>
+							<button draggable="true" type="button" class="pl-2 cursor-pointer text-end" data-thread-id="{{ID}}">{{count}} > </button>
 						{{/isCenter}}
 					</li>
 				{{/messages}}

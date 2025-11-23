@@ -11,5 +11,4 @@ function onMessagesListClick(elems, e) {
 	}
 }
 
-
 export default onMessagesListClick

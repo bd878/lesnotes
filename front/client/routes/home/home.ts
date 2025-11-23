@@ -80,6 +80,8 @@ class HomeBuilder extends Builder {
 			this.isMobile ? 'templates/home/mobile/messages_list.mustache' : 'templates/home/desktop/messages_list.mustache'
 		)), { encoding: 'utf-8' });
 
+		// TODO: make messages a link, not a button
+		// generate hrefs here
 		this.messagesList = mustache.render(template, {
 			stack:            stack,
 			limit:            LIMIT,
