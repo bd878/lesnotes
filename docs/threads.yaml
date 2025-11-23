@@ -118,6 +118,33 @@ paths:
               schema:
                 - $ref: '#/components/schemas/serverError'
 
+  /threads/v1/reorder:
+    parameters:
+      - $ref: "#/components/parameters/token"
+    post:
+      summary: Reorder thread to other parent or between children
+      description: |
+        Reorder thread via form api
+      operationId: reorderThread
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/reorderThreadForm'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/reorderOK'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/serverError'
+
 # END REORDER
 
 # CREATE
@@ -399,6 +426,22 @@ components:
           prev:
             type: integer
             required: false
+
+    reorderThreadForm:
+      type: object
+      properties:
+        id:
+          type: integer
+          default: 0
+        parent:
+          type: integer
+          default: 0
+        next:
+          type: integer
+          default: 0
+        prev:
+          type: integer
+          default: 0
 
     reorderOK:
       type: object

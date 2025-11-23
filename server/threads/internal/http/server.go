@@ -53,6 +53,7 @@ func New(conf Config) *Server {
 	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
 	mux.Handle("/threads/v1/publish", middleware.Build(handler.PublishThread))
 	mux.Handle("/threads/v1/private", middleware.Build(handler.PrivateThread))
+	mux.Handle("/threads/v1/reorder", middleware.Build(handler.ReorderThread))
 
 	middleware.NoAuth()
 	mux.Handle("/threads/v1/status", middleware.Build(handler.GetStatus))

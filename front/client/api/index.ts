@@ -24,7 +24,7 @@ import validateTgAuthData from './validateTgAuthData';
 import sendLog from './sendLog';
 import auth from './auth';
 import authJson from './authJson';
-import reorderThreadJson from './reorderThreadJson';
+import reorderThread from './reorderThread';
 import changeLanguageJson from './changeLanguageJson';
 import changeLanguage from './changeLanguage';
 import changeFontSizeJson from './changeFontSizeJson';
@@ -78,6 +78,6 @@ export default {
 	validateMiniappData,
 	validateTgAuthData,
 	searchMessagesJson,
-	reorderThreadJson,
+	reorderThread,
 	sendLog,
 }

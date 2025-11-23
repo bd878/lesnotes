@@ -1,6 +1,7 @@
 import * as is from '../../../third_party/is';
+import api from '../../../api';
 
-function onMessagesListDrop(elems, e) {
+async function onMessagesListDrop(elems, e) {
 	e.preventDefault()
 	if (is.empty(e.target.dataset) || is.empty(e.target.dataset.messageId)) {
 		console.log("[onMessagesListDrop]: no data-message-id")
@@ -24,6 +25,12 @@ function onMessagesListDrop(elems, e) {
 	const sourceElem = document.getElementById("list-" + sourceId)
 	if (is.undef(sourceElem)) {
 		console.log("[onMessagesListDrop]: cannot find source element by id", "list-" + sourceId)
+		return
+	}
+
+	const response = await api.reorderThread()
+	if (response.error.error) {
+		console.error('[onMessagesListDrop]: cannot reorder thread:', response)
 		return
 	}
 
