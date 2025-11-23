@@ -10,16 +10,16 @@ async function reorderThread(id: number, parent: number, next: number, prev: num
 	const form = new FormData()
 
 	if (id)
-		form.append("id", id)
+		form.append("id", `${id}`)
 
 	if (parent)
-		form.append("parent", parent)
+		form.append("parent", `${parent}`)
 
 	if (next)
-		form.append("next", next)
+		form.append("next", `${next}`)
 
 	if (prev)
-		form.append("prev", prev)
+		form.append("prev", `${prev}`)
 
 	try {
 		const [response, error] = await api("/threads/v1/reorder", {

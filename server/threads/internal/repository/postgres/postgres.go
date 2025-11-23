@@ -121,13 +121,16 @@ func (r *Repository) ReorderThread(ctx context.Context, id, userID, parentID, ne
 		}
 	}()
 
+	const selectParentID = "SELECT parent_id FROM %s WHERE user_id = $1 AND id = $2"
+	const selectNextID = "SELECT next_id FROM %s WHERE user_id = $1 AND id = $2"
+	const selectPrevID = "SELECT prev_id FROM %s WHERE user_id = $1 AND id = $2"
 	const selectThread = "SELECT parent_id, next_id, prev_id FROM %s WHERE user_id = $1 AND id = $2"
 	const updateNextThread = "UPDATE %s SET prev_id = $3 WHERE user_id = $1 AND id = $2"
 	const updatePrevThread = "UPDATE %s SET next_id = $3 WHERE user_id = $1 AND id = $2"
-	const updateMe = "UPDATE %s SET parent_id = $4, next_id = $5, prev_id = $6 WHERE user_id = $1 AND id = $2 AND parent_id = $3"
+	const updateMe = "UPDATE %s SET parent_id = $3, next_id = $4, prev_id = $5 WHERE user_id = $1 AND id = $2"
 
 	// Unlink
-	var currentParentID, currentNextID, currentPrevID int64
+	var currentParentID, currentNextID, currentPrevID, prevIDParent, nextIDParent int64
 	err = tx.QueryRow(ctx, r.table(selectThread), userID, id).Scan(&currentParentID, &currentNextID, &currentPrevID)
 	if err != nil {
 		logger.Debugw("failed to select thread", "error", err)
@@ -153,27 +156,176 @@ func (r *Repository) ReorderThread(ctx context.Context, id, userID, parentID, ne
 	// End unlink
 	// Link
 
-	if parentID == -1 { // 0 is root
-		parentID = currentParentID
-	}
-
 	if prevID != 0 {
-		_, err = tx.Exec(ctx, r.table(updatePrevThread), userID, prevID, id)
+		err = tx.QueryRow(ctx, r.table(selectParentID), userID, prevID).Scan(&prevIDParent)
 		if err != nil {
+			logger.Debugw("failed to get prev id parent", "error", err)
 			return
 		}
 	}
 
 	if nextID != 0 {
-		_, err = tx.Exec(ctx, r.table(updateNextThread), userID, nextID, id)
+		err = tx.QueryRow(ctx, r.table(selectParentID), userID, nextID).Scan(&nextIDParent)
 		if err != nil {
+			logger.Debugw("failed to get next id parent", "error", err)
 			return
 		}
 	}
 
-	_, err = tx.Exec(ctx, r.table(updateMe), userID, id, currentParentID, parentID, nextID, prevID)
+	// TODO: refactor, split on functions
+	if parentID == -1 {
+		parentID = currentParentID
 
-	return
+		if prevID != 0 {
+			// reorder before in same parent
+			
+			var nextID int64
+
+			if prevIDParent != currentParentID {
+				// move on new parent any way
+				parentID = prevIDParent
+			}
+
+			err = tx.QueryRow(ctx, r.table(selectNextID), userID, prevID).Scan(&nextID)
+			if err != nil {
+				logger.Debugw("failed to get next id of prev id", "prev_id", prevID, "error", err)
+				return
+			}
+
+			_, err = tx.Exec(ctx, r.table(updatePrevThread), userID, prevID, id)
+			if err != nil {
+				return
+			}
+
+			_, err = tx.Exec(ctx, r.table(updateNextThread), userID, nextID, id)
+			if err != nil {
+				return
+			}
+
+			_, err = tx.Exec(ctx, r.table(updateMe), userID, id, parentID, nextID, prevID)
+
+			return
+
+		} else if nextID != 0 {
+			// reorder after in same parent
+
+			var prevID int64
+
+			if nextIDParent != currentParentID {
+				// move on new parent any way
+				parentID = nextIDParent
+			}
+
+			err = tx.QueryRow(ctx, r.table(selectPrevID), userID, nextID).Scan(&prevID)
+			if err != nil {
+				logger.Debugw("failed to get prev id of next id", "next_id", nextID, "error", err)
+				return
+			}
+
+			_, err = tx.Exec(ctx, r.table(updatePrevThread), userID, prevID, id)
+			if err != nil {
+				return
+			}
+
+			_, err = tx.Exec(ctx, r.table(updateNextThread), userID, nextID, id)
+			if err != nil {
+				return
+			}
+
+			_, err = tx.Exec(ctx, r.table(updateMe), userID, id, parentID, nextID, prevID)
+
+			return
+
+		} else {
+			return fmt.Errorf("either prev or next must be set, not both: %d, %d", prevID, nextID)
+		}
+	} else {
+		// reorder on new parent thread
+
+		// check that new parent is not a sibling of this parent
+		threadID := parentID
+		for threadID != 0 {
+			var nextParentID int64
+
+			err = tx.QueryRow(ctx, r.table("SELECT parent_id FROM %s WHERE user_id = $1 AND id = $2"),
+				userID, threadID).Scan(&nextParentID)
+			if err != nil {
+				return
+			}
+
+			if id == nextParentID {
+				return fmt.Errorf("new parent %s is a relative of thread %s", parentID, id)
+			}
+
+			threadID = nextParentID
+		}
+
+		if prevID != 0 {
+			// reorder before in new parent
+
+			var nextID int64
+
+			if prevIDParent != parentID {
+				// conflict
+				return fmt.Errorf("prev id parent != new parent id: %d != %d", prevIDParent, parentID)
+			}
+
+			err = tx.QueryRow(ctx, r.table(selectNextID), userID, prevID).Scan(&nextID)
+			if err != nil {
+				logger.Debugw("failed to get next id of prev id", "prev_id", prevID, "error", err)
+				return
+			}
+
+			_, err = tx.Exec(ctx, r.table(updatePrevThread), userID, prevID, id)
+			if err != nil {
+				return
+			}
+
+			_, err = tx.Exec(ctx, r.table(updateNextThread), userID, nextID, id)
+			if err != nil {
+				return
+			}
+
+			_, err = tx.Exec(ctx, r.table(updateMe), userID, id, currentParentID, nextID, prevID)
+
+			return
+
+		} else if nextID != 0 {
+			// reorder after in new parent
+
+			var prevID int64
+
+			if nextIDParent != parentID {
+				// conflict
+				return fmt.Errorf("next id parent != new parent id: %d != %d", nextIDParent, parentID)
+			}
+
+			err = tx.QueryRow(ctx, r.table(selectPrevID), userID, nextID).Scan(&prevID)
+			if err != nil {
+				logger.Debugw("failed to get prev id of next id", "next_id", nextID, "error", err)
+				return
+			}
+
+			_, err = tx.Exec(ctx, r.table(updatePrevThread), userID, prevID, id)
+			if err != nil {
+				return
+			}
+
+			_, err = tx.Exec(ctx, r.table(updateNextThread), userID, nextID, id)
+			if err != nil {
+				return
+			}
+
+			_, err = tx.Exec(ctx, r.table(updateMe), userID, id, currentParentID, nextID, prevID)
+
+			return
+
+		} else {
+			return fmt.Errorf("either prev or next must be set, not both: %s, %s", prevID, nextID)
+		}
+	}
+
+	// End link
 }
 
 func (r *Repository) AppendThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name string, private bool) (err error) {

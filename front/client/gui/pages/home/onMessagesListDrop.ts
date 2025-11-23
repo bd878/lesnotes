@@ -28,7 +28,7 @@ async function onMessagesListDrop(elems, e) {
 		return
 	}
 
-	const response = await api.reorderThread()
+	const response = await api.reorderThread(sourceId, -1 /* no parent */, targetId, 0 /* no prev */)
 	if (response.error.error) {
 		console.error('[onMessagesListDrop]: cannot reorder thread:', response)
 		return
