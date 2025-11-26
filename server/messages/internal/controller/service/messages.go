@@ -12,6 +12,7 @@ import (
 	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/messages/pkg/loadbalance"
 	"github.com/bd878/gallery/server/messages/pkg/model"
+	threads "github.com/bd878/gallery/server/threads/pkg/model"
 )
 
 type Config struct {
@@ -19,7 +20,8 @@ type Config struct {
 }
 
 type ThreadsGateway interface {
-	ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32) (ids []int64, isLastPage bool, err error)
+	ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32) (list []*threads.Thread, isLastPage bool, err error)
+	CountThreads(ctx context.Context, id, userID int64) (total int32, err error)
 	CreateThread(ctx context.Context, id, userID, parentID int64, name string, private bool) (err error)
 	DeleteThread(ctx context.Context, id, userID int64) (err error)
 	UpdateThread(ctx context.Context, id, userID int64) (err error)
@@ -214,10 +216,20 @@ func (s *Controller) ReadThreadMessages(ctx context.Context, userID int64, threa
 
 	logger.Debugw("read thread messages", "user_id", userID, "thread_id", threadID, "limit", limit, "offset", offset, "ascending", ascending)
 
-	ids, isLastPage, err := s.threads.ListThreads(ctx, userID, threadID, limit, offset)
+	total, err := s.threads.CountThreads(ctx, threadID, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	threadsList, isLastPage, err := s.threads.ListThreads(ctx, userID, threadID, limit, offset)
 	if err != nil {
 		logger.Debugw("failed to list threads", "error", err)
 		return nil, err
+	}
+
+	ids := make([]int64, 0)
+	for _, thread := range threadsList {
+		ids = append(ids, thread.ID)
 	}
 
 	res, err := s.client.ReadBatchMessages(ctx, &api.ReadBatchMessagesRequest{
@@ -229,11 +241,16 @@ func (s *Controller) ReadThreadMessages(ctx context.Context, userID int64, threa
 		return nil, err
 	}
 
+	messages := model.MapMessagesFromProto(model.MessageFromProto, res.Messages)
+	for i, message := range messages {
+		message.Count = threadsList[i].Count
+	}
+
 	list = &model.List{
-		Messages:      model.MapMessagesFromProto(model.MessageFromProto, res.Messages),
+		Messages:      messages,
 		IsLastPage:    isLastPage,
 		IsFirstPage:   offset == 0,
-		// TODO: Total:       threads.CountThreads,
+		Total:         total,
 		Count:         int32(len(ids)),
 		Offset:        offset,
 	}

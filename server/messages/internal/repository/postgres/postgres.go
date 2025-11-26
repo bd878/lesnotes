@@ -4,7 +4,6 @@ import (
 	"io"
 	"fmt"
 	"os"
-	"slices"
 	"strings"
 	"time"
 	"context"
@@ -316,7 +315,7 @@ func (r *Repository) ReadBatchMessages(ctx context.Context, userID int64, messag
 	order = strings.Join(pairs, ",")
 
 	query := r.table(`SELECT m.id, m.user_id, m.file_ids, m.name, m.text, m.private, m.created_at, m.updated_at, m.title FROM %s m `) +
-		fmt.Sprintf(` JOIN (VALUES %s) AS x(id, ordering) ON m.id = x.id WHERE m.user_id = $1 ORDER BY x.ordering DESC`, order)
+		fmt.Sprintf(` JOIN (VALUES %s) AS x(id, ordering) ON m.id = x.id WHERE m.user_id = $1 ORDER BY x.ordering ASC`, order)
 
 	rows, err = tx.Query(ctx, query, userID)
 	if err != nil {
@@ -456,8 +455,6 @@ func (r *Repository) ReadMessages(ctx context.Context, userID int64, limit, offs
 			isLastPage = true
 		}
 	}
-
-	slices.Reverse(messages)
 
 	return
 }

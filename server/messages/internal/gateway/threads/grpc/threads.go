@@ -10,6 +10,7 @@ import (
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/threads/pkg/loadbalance"
+	threads "github.com/bd878/gallery/server/threads/pkg/model"
 )
 
 type Gateway struct {
@@ -99,7 +100,7 @@ func (g *Gateway) UpdateThread(ctx context.Context, id, userID int64) (err error
 	return
 }
 
-func (g *Gateway) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32) (ids []int64, isLastPage bool, err error) {
+func (g *Gateway) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32) (list []*threads.Thread, isLastPage bool, err error) {
 	if g.isConnFailed() {
 		if err = g.setupConnection(); err != nil {
 			return
@@ -117,7 +118,27 @@ func (g *Gateway) ListThreads(ctx context.Context, userID, parentID int64, limit
 	}
 
 	isLastPage = resp.IsLastPage
-	ids = resp.Ids
+	list = threads.MapThreadsFromProto(threads.ThreadFromProto, resp.List)
+
+	return
+}
+
+func (g *Gateway) CountThreads(ctx context.Context, id, userID int64) (total int32, err error) {
+	if g.isConnFailed() {
+		if err = g.setupConnection(); err != nil {
+			return
+		}
+	}
+
+	resp, err := g.client.Count(ctx, &api.CountRequest{
+		UserId: userID,
+		Id:     id,
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	total = resp.Total
 
 	return
 }

@@ -4,7 +4,6 @@ import (
 	"io"
 	"os"
 	"fmt"
-	"slices"
 	"context"
 
 	"github.com/jackc/pgx/v5"
@@ -36,9 +35,10 @@ func (r *Repository) ReadThread(ctx context.Context, id, userID int64) (thread *
 		return
 	}
 
-	total, err := r.CountThreads(ctx, id, userID)
+	var total int32
+	err = r.pool.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2"), userID, id).Scan(&total)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	thread.Count = total
@@ -85,7 +85,7 @@ func (r *Repository) ListThreads(ctx context.Context, userID, parentID int64, li
 			return
 		}
 
-		thread.Count, err = r.CountThreads(ctx, thread.ID, userID)
+		err = tx.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2"), userID, thread.ID).Scan(&thread.Count)
 		if err != nil {
 			return
 		}
@@ -663,8 +663,6 @@ func (r *Repository) ResolveThread(ctx context.Context, id, userID int64) (ids [
 
 		threadID = parentID
 	}
-
-	slices.Reverse(ids)
 
 	return
 }

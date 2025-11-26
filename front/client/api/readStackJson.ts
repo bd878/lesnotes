@@ -50,6 +50,8 @@ async function readStackJson(token: string, threadID: number/*, lastMessageID: n
 			return result;
 		}
 
+		messages.messages.reverse()
+
 		thread.isLastPage  = messages.isLastPage
 		thread.isFirstPage = messages.isFirstPage
 		thread.messages    = messages.messages
