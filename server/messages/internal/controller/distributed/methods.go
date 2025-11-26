@@ -208,8 +208,3 @@ func (m *DistributedMessages) ReadBatchMessages(ctx context.Context, userID int6
 	logger.Debugw("read batch messages", "user_id", userID, "ids", ids)
 	return m.repo.ReadBatchMessages(ctx, userID, ids)
 }
-
-func (m *DistributedMessages) CountMessages(ctx context.Context, userID int64) (count int, err error) {
-	logger.Debugw("count messages", "user_id", userID)
-	return m.repo.Count(ctx, userID)
-}

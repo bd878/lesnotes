@@ -96,7 +96,6 @@ func (s *Controller) SaveMessage(ctx context.Context, id int64, text, title stri
 		Text:     text,
 		Title:    title,
 		FileIds:  fileIDs,
-		ThreadId: threadID,
 		UserId:   userID,
 		Private:  private,
 		Name:     name,
@@ -178,14 +177,14 @@ func (s *Controller) PrivateMessages(ctx context.Context, ids []int64, userID in
 	return
 }
 
-func (s *Controller) UpdateMessage(ctx context.Context, id int64, text, title, name string, fileIDs []int64, threadID int64, userID int64, private int32) (err error) {
+func (s *Controller) UpdateMessage(ctx context.Context, id int64, text, title, name string, fileIDs []int64, userID int64, private int32) (err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
 		}
 	}
 
-	logger.Debugw("update message", "id", id, "text", text, "title", title, "name", name, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private)
+	logger.Debugw("update message", "id", id, "text", text, "title", title, "name", name, "file_ids", fileIDs, "user_id", userID, "private", private)
 
 	err = s.threads.UpdateThread(ctx, id, userID)
 	if err != nil {
@@ -200,7 +199,6 @@ func (s *Controller) UpdateMessage(ctx context.Context, id int64, text, title, n
 		Title:     title,
 		Name:      name,
 		Private:   private,
-		ThreadId:  threadID,
 	})
 
 	return
@@ -231,20 +229,11 @@ func (s *Controller) ReadThreadMessages(ctx context.Context, userID int64, threa
 		return nil, err
 	}
 
-	total, err := s.client.CountMessages(ctx, &api.CountMessagesRequest{
-		UserId:   userID,
-		ThreadId: threadID,
-	})
-	if err != nil {
-		logger.Debugw("failed to count messages", "error", err)
-		return nil, err
-	}
-
 	list = &model.List{
 		Messages:      model.MapMessagesFromProto(model.MessageFromProto, res.Messages),
 		IsLastPage:    isLastPage,
 		IsFirstPage:   offset == 0,
-		Total:         total.Count,
+		// TODO: Total:       threads.CountThreads,
 		Count:         int32(len(ids)),
 		Offset:        offset,
 	}
@@ -295,20 +284,12 @@ func (s *Controller) ReadMessages(ctx context.Context, userID int64, limit, offs
 		return nil, err
 	}
 
-	total, err := s.client.CountMessages(ctx, &api.CountMessagesRequest{
-		UserId:   userID,
-		ThreadId: -1,
-	})
-	if err != nil {
-		return nil, err
-	}
-
 	list = &model.List{
 		Messages:     model.MapMessagesFromProto(model.MessageFromProto, res.Messages),
 		IsLastPage:   res.IsLastPage,
 		IsFirstPage:  offset == 0,
 		Offset:       offset,
-		Total:        total.Count,
+		// TODO: Total:        total.Count threads.CountThreads,
 		Count:        int32(len(res.Messages)),
 	}
 

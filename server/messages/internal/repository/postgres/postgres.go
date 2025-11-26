@@ -381,12 +381,6 @@ func (r *Repository) DeleteUserMessages(ctx context.Context, userID int64) (err 
 	return
 }
 
-func (r *Repository) Count(ctx context.Context, userID int64) (count int, err error) {
-	err = r.pool.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE user_id = $1"), userID).Scan(&count)
-
-	return
-}
-
 func (r *Repository) ReadMessages(ctx context.Context, userID int64, limit, offset int32) (messages []*model.Message, isLastPage bool, err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})

@@ -67,16 +67,9 @@ func (h *Handler) UpdateMessageJsonAPI(w http.ResponseWriter, req *http.Request)
 	}
 
 	var (
-		threadID int64
 		public   int
 		text, title, name string
 	)
-
-	if request.ThreadID != nil {
-		threadID = *request.ThreadID
-	} else {
-		threadID = -1
-	}
 
 	if request.Public != nil {
 		public = *request.Public
@@ -96,5 +89,5 @@ func (h *Handler) UpdateMessageJsonAPI(w http.ResponseWriter, req *http.Request)
 		name = *request.Name
 	}
 
-	return h.updateMessage(req.Context(), w, request.MessageID, user, text, title, name, threadID, request.FileIDs, public)
+	return h.updateMessage(req.Context(), w, request.MessageID, user, text, title, name, request.FileIDs, public)
 }

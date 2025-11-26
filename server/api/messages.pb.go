@@ -1070,100 +1070,6 @@ func (x *ReadMessageRequest) GetName() string {
 	return ""
 }
 
-type CountMessagesRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	UserId int64 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-}
-
-func (x *CountMessagesRequest) Reset() {
-	*x = CountMessagesRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_protos_messages_proto_msgTypes[18]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *CountMessagesRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CountMessagesRequest) ProtoMessage() {}
-
-func (x *CountMessagesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_proto_msgTypes[18]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CountMessagesRequest.ProtoReflect.Descriptor instead.
-func (*CountMessagesRequest) Descriptor() ([]byte, []int) {
-	return file_protos_messages_proto_rawDescGZIP(), []int{18}
-}
-
-func (x *CountMessagesRequest) GetUserId() int64 {
-	if x != nil {
-		return x.UserId
-	}
-	return 0
-}
-
-type CountMessagesResponse struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Count int32 `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
-}
-
-func (x *CountMessagesResponse) Reset() {
-	*x = CountMessagesResponse{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_protos_messages_proto_msgTypes[19]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *CountMessagesResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CountMessagesResponse) ProtoMessage() {}
-
-func (x *CountMessagesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_proto_msgTypes[19]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CountMessagesResponse.ProtoReflect.Descriptor instead.
-func (*CountMessagesResponse) Descriptor() ([]byte, []int) {
-	return file_protos_messages_proto_rawDescGZIP(), []int{19}
-}
-
-func (x *CountMessagesResponse) GetCount() int32 {
-	if x != nil {
-		return x.Count
-	}
-	return 0
-}
-
 var File_protos_messages_proto protoreflect.FileDescriptor
 
 var file_protos_messages_proto_rawDesc = []byte{
@@ -1268,13 +1174,7 @@ var file_protos_messages_proto_rawDesc = []byte{
 	0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x12, 0x19, 0x0a, 0x08, 0x75, 0x73, 0x65, 0x72,
 	0x5f, 0x69, 0x64, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x03, 0x52, 0x07, 0x75, 0x73, 0x65, 0x72,
 	0x49, 0x64, 0x73, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x22, 0x2f, 0x0a, 0x14, 0x43, 0x6f, 0x75, 0x6e, 0x74,
-	0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
-	0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03,
-	0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x22, 0x2d, 0x0a, 0x15, 0x43, 0x6f, 0x75, 0x6e,
-	0x74, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
-	0x65, 0x12, 0x14, 0x0a, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05,
-	0x52, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x32, 0xd6, 0x07, 0x0a, 0x08, 0x4d, 0x65, 0x73, 0x73,
+	0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x32, 0xfc, 0x06, 0x0a, 0x08, 0x4d, 0x65, 0x73, 0x73,
 	0x61, 0x67, 0x65, 0x73, 0x12, 0x37, 0x0a, 0x0a, 0x47, 0x65, 0x74, 0x53, 0x65, 0x72, 0x76, 0x65,
 	0x72, 0x73, 0x12, 0x12, 0x2e, 0x47, 0x65, 0x74, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x73, 0x52,
 	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x13, 0x2e, 0x47, 0x65, 0x74, 0x53, 0x65, 0x72, 0x76,
@@ -1330,15 +1230,10 @@ var file_protos_messages_proto_rawDesc = []byte{
 	0x73, 0x61, 0x67, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x26, 0x2e, 0x6d,
 	0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x2e, 0x76, 0x31, 0x2e, 0x52, 0x65, 0x61, 0x64, 0x42,
 	0x61, 0x74, 0x63, 0x68, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x58, 0x0a, 0x0d, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x4d,
-	0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x12, 0x21, 0x2e, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67,
-	0x65, 0x73, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x4d, 0x65, 0x73, 0x73, 0x61,
-	0x67, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x22, 0x2e, 0x6d, 0x65, 0x73,
-	0x73, 0x61, 0x67, 0x65, 0x73, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x4d, 0x65,
-	0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00,
-	0x42, 0x25, 0x5a, 0x23, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x62,
-	0x64, 0x38, 0x37, 0x38, 0x2f, 0x67, 0x61, 0x6c, 0x6c, 0x65, 0x72, 0x79, 0x2f, 0x73, 0x65, 0x72,
-	0x76, 0x65, 0x72, 0x2f, 0x61, 0x70, 0x69, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x25, 0x5a, 0x23, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62,
+	0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x62, 0x64, 0x38, 0x37, 0x38, 0x2f, 0x67, 0x61, 0x6c, 0x6c, 0x65,
+	0x72, 0x79, 0x2f, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2f, 0x61, 0x70, 0x69, 0x62, 0x06, 0x70,
+	0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1353,7 +1248,7 @@ func file_protos_messages_proto_rawDescGZIP() []byte {
 	return file_protos_messages_proto_rawDescData
 }
 
-var file_protos_messages_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
+var file_protos_messages_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
 var file_protos_messages_proto_goTypes = []interface{}{
 	(*Message)(nil),                    // 0: messages.v1.Message
 	(*ReadMessagesRequest)(nil),        // 1: messages.v1.ReadMessagesRequest
@@ -1373,15 +1268,13 @@ var file_protos_messages_proto_goTypes = []interface{}{
 	(*PrivateMessagesResponse)(nil),    // 15: messages.v1.PrivateMessagesResponse
 	(*DeleteMessagesResponse)(nil),     // 16: messages.v1.DeleteMessagesResponse
 	(*ReadMessageRequest)(nil),         // 17: messages.v1.ReadMessageRequest
-	(*CountMessagesRequest)(nil),       // 18: messages.v1.CountMessagesRequest
-	(*CountMessagesResponse)(nil),      // 19: messages.v1.CountMessagesResponse
-	(*GetServersRequest)(nil),          // 20: GetServersRequest
-	(*GetServersResponse)(nil),         // 21: GetServersResponse
+	(*GetServersRequest)(nil),          // 18: GetServersRequest
+	(*GetServersResponse)(nil),         // 19: GetServersResponse
 }
 var file_protos_messages_proto_depIdxs = []int32{
 	0,  // 0: messages.v1.ReadBatchMessagesResponse.messages:type_name -> messages.v1.Message
 	0,  // 1: messages.v1.ReadMessagesResponse.messages:type_name -> messages.v1.Message
-	20, // 2: messages.v1.Messages.GetServers:input_type -> GetServersRequest
+	18, // 2: messages.v1.Messages.GetServers:input_type -> GetServersRequest
 	7,  // 3: messages.v1.Messages.SaveMessage:input_type -> messages.v1.SaveMessageRequest
 	11, // 4: messages.v1.Messages.DeleteMessages:input_type -> messages.v1.DeleteMessagesRequest
 	9,  // 5: messages.v1.Messages.DeleteUserMessages:input_type -> messages.v1.DeleteUserMessagesRequest
@@ -1391,20 +1284,18 @@ var file_protos_messages_proto_depIdxs = []int32{
 	17, // 9: messages.v1.Messages.ReadMessage:input_type -> messages.v1.ReadMessageRequest
 	1,  // 10: messages.v1.Messages.ReadMessages:input_type -> messages.v1.ReadMessagesRequest
 	2,  // 11: messages.v1.Messages.ReadBatchMessages:input_type -> messages.v1.ReadBatchMessagesRequest
-	18, // 12: messages.v1.Messages.CountMessages:input_type -> messages.v1.CountMessagesRequest
-	21, // 13: messages.v1.Messages.GetServers:output_type -> GetServersResponse
-	8,  // 14: messages.v1.Messages.SaveMessage:output_type -> messages.v1.SaveMessageResponse
-	16, // 15: messages.v1.Messages.DeleteMessages:output_type -> messages.v1.DeleteMessagesResponse
-	10, // 16: messages.v1.Messages.DeleteUserMessages:output_type -> messages.v1.DeleteUserMessagesResponse
-	13, // 17: messages.v1.Messages.PublishMessages:output_type -> messages.v1.PublishMessagesResponse
-	15, // 18: messages.v1.Messages.PrivateMessages:output_type -> messages.v1.PrivateMessagesResponse
-	6,  // 19: messages.v1.Messages.UpdateMessage:output_type -> messages.v1.UpdateMessageResponse
-	0,  // 20: messages.v1.Messages.ReadMessage:output_type -> messages.v1.Message
-	4,  // 21: messages.v1.Messages.ReadMessages:output_type -> messages.v1.ReadMessagesResponse
-	3,  // 22: messages.v1.Messages.ReadBatchMessages:output_type -> messages.v1.ReadBatchMessagesResponse
-	19, // 23: messages.v1.Messages.CountMessages:output_type -> messages.v1.CountMessagesResponse
-	13, // [13:24] is the sub-list for method output_type
-	2,  // [2:13] is the sub-list for method input_type
+	19, // 12: messages.v1.Messages.GetServers:output_type -> GetServersResponse
+	8,  // 13: messages.v1.Messages.SaveMessage:output_type -> messages.v1.SaveMessageResponse
+	16, // 14: messages.v1.Messages.DeleteMessages:output_type -> messages.v1.DeleteMessagesResponse
+	10, // 15: messages.v1.Messages.DeleteUserMessages:output_type -> messages.v1.DeleteUserMessagesResponse
+	13, // 16: messages.v1.Messages.PublishMessages:output_type -> messages.v1.PublishMessagesResponse
+	15, // 17: messages.v1.Messages.PrivateMessages:output_type -> messages.v1.PrivateMessagesResponse
+	6,  // 18: messages.v1.Messages.UpdateMessage:output_type -> messages.v1.UpdateMessageResponse
+	0,  // 19: messages.v1.Messages.ReadMessage:output_type -> messages.v1.Message
+	4,  // 20: messages.v1.Messages.ReadMessages:output_type -> messages.v1.ReadMessagesResponse
+	3,  // 21: messages.v1.Messages.ReadBatchMessages:output_type -> messages.v1.ReadBatchMessagesResponse
+	12, // [12:22] is the sub-list for method output_type
+	2,  // [2:12] is the sub-list for method input_type
 	2,  // [2:2] is the sub-list for extension type_name
 	2,  // [2:2] is the sub-list for extension extendee
 	0,  // [0:2] is the sub-list for field type_name
@@ -1633,30 +1524,6 @@ func file_protos_messages_proto_init() {
 				return nil
 			}
 		}
-		file_protos_messages_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CountMessagesRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_protos_messages_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CountMessagesResponse); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -1664,7 +1531,7 @@ func file_protos_messages_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_protos_messages_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   20,
+			NumMessages:   18,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -29,7 +29,7 @@ type MessageCreated struct {
 
 func (MessageCreated) Key() string { return MessageCreatedEvent }
 
-func CreateMessage(id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (ddd.Event, error) {
+func CreateMessage(id int64, text, title string, fileIDs []int64, userID int64, private bool, name string) (ddd.Event, error) {
 	if id == 0 {
 		return nil, ErrIDRequired
 	}
@@ -71,7 +71,7 @@ type MessageUpdated struct {
 
 func (MessageUpdated) Key() string { return MessageUpdatedEvent }
 
-func UpdateMessage(id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private int32, name string) (ddd.Event, error) {
+func UpdateMessage(id int64, text, title string, fileIDs []int64, userID int64, private int32, name string) (ddd.Event, error) {
 	if id == 0 {
 		return nil, ErrIDRequired
 	}

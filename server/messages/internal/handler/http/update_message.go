@@ -14,7 +14,7 @@ import (
 
 func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) (err error) {
 	var (
-		id, thread int64
+		id int64
 		public int
 		fileIDs []int64
 	)
@@ -66,26 +66,6 @@ func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) (err e
 	title := req.PostFormValue("title")
 	name := req.PostFormValue("name")
 
-	if req.PostFormValue("thread") != "" {
-		id, err := strconv.Atoi(req.PostFormValue("thread"))
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(server.ServerResponse{
-				Status: "error",
-				Error: &server.ErrorCode{
-					Code:    server.CodeNoID,
-					Explain: "invalid thread",
-				},
-			})
-
-			return err
-		}
-
-		thread = int64(id)
-	} else {
-		thread = -1
-	}
-
 	if req.PostFormValue("file_ids") != "" {
 		if err = json.Unmarshal([]byte(req.PostFormValue("file_ids")), &fileIDs); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -119,11 +99,11 @@ func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) (err e
 		public = -1
 	}
 
-	return h.updateMessage(req.Context(), w, id, user, text, title, name, thread, fileIDs, public)
+	return h.updateMessage(req.Context(), w, id, user, text, title, name, fileIDs, public)
 }
 
 func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, messageID int64, user *users.User,
-	text, title, name string, threadID int64, fileIDs []int64, public int,
+	text, title, name string, fileIDs []int64, public int,
 ) (err error) {
 	var private int32
 
@@ -135,7 +115,7 @@ func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, mess
 		private = -1
 	}
 
-	if user.ID == users.PublicUserID && threadID != -1 {
+	if user.ID == users.PublicUserID {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
@@ -175,13 +155,13 @@ func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, mess
 		return err		
 	}
 
-	if text == "" && threadID == -1 {
+	if text == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
 				Code:    server.CodeWrongFormat,
-				Explain: "text or thread_id or both must be provided",
+				Explain: "text must be provided",
 			},
 		})
 
@@ -204,7 +184,7 @@ func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, mess
 		fileIDs = msg.FileIDs
 	}
 
-	err = h.controller.UpdateMessage(ctx, messageID, text, title, name, fileIDs, threadID, user.ID, private)
+	err = h.controller.UpdateMessage(ctx, messageID, text, title, name, fileIDs, user.ID, private)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

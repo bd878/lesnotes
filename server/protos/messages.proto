@@ -17,7 +17,6 @@ service Messages {
 	rpc ReadMessage(ReadMessageRequest) returns (Message) {}
 	rpc ReadMessages(ReadMessagesRequest) returns (ReadMessagesResponse) {}
 	rpc ReadBatchMessages(ReadBatchMessagesRequest) returns (ReadBatchMessagesResponse) {}
-	rpc CountMessages(CountMessagesRequest) returns (CountMessagesResponse) {}
 }
 
 message Message {
@@ -115,12 +114,4 @@ message ReadMessageRequest {
 	int64  id = 1;
 	repeated int64  user_ids = 2;
 	string name = 3;
-}
-
-message CountMessagesRequest {
-	int64 user_id = 1;
-}
-
-message CountMessagesResponse {
-	int32 count = 1;
 }

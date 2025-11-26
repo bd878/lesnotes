@@ -100,7 +100,6 @@ type (
 
 	UpdateRequest struct {
 		MessageID           int64               `json:"id"`
-		ThreadID            *int64              `json:"thread,omitempty"`
 		Text                *string             `json:"text,omitempty"`
 		Public              *int                `json:"public,omitempty"`
 		Title               *string             `json:"title,omitempty"`

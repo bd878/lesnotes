@@ -58,7 +58,6 @@ func (p *Picker) Pick(info balancer.PickInfo) (
 			result.SubConn = p.leader
 	} else if strings.Contains(info.FullMethodName, "ReadMessages") ||
 						strings.Contains(info.FullMethodName, "ReadMessage") ||
-						strings.Contains(info.FullMethodName, "CountMessages") ||
 						strings.Contains(info.FullMethodName, "ReadBatchMessages") {
 		result.SubConn = p.nextFollower()
 	}

@@ -27,7 +27,6 @@ type MessagesClient interface {
 	ReadMessage(ctx context.Context, in *ReadMessageRequest, opts ...grpc.CallOption) (*Message, error)
 	ReadMessages(ctx context.Context, in *ReadMessagesRequest, opts ...grpc.CallOption) (*ReadMessagesResponse, error)
 	ReadBatchMessages(ctx context.Context, in *ReadBatchMessagesRequest, opts ...grpc.CallOption) (*ReadBatchMessagesResponse, error)
-	CountMessages(ctx context.Context, in *CountMessagesRequest, opts ...grpc.CallOption) (*CountMessagesResponse, error)
 }
 
 type messagesClient struct {
@@ -128,15 +127,6 @@ func (c *messagesClient) ReadBatchMessages(ctx context.Context, in *ReadBatchMes
 	return out, nil
 }
 
-func (c *messagesClient) CountMessages(ctx context.Context, in *CountMessagesRequest, opts ...grpc.CallOption) (*CountMessagesResponse, error) {
-	out := new(CountMessagesResponse)
-	err := c.cc.Invoke(ctx, "/messages.v1.Messages/CountMessages", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // MessagesServer is the server API for Messages service.
 // All implementations must embed UnimplementedMessagesServer
 // for forward compatibility
@@ -151,7 +141,6 @@ type MessagesServer interface {
 	ReadMessage(context.Context, *ReadMessageRequest) (*Message, error)
 	ReadMessages(context.Context, *ReadMessagesRequest) (*ReadMessagesResponse, error)
 	ReadBatchMessages(context.Context, *ReadBatchMessagesRequest) (*ReadBatchMessagesResponse, error)
-	CountMessages(context.Context, *CountMessagesRequest) (*CountMessagesResponse, error)
 	mustEmbedUnimplementedMessagesServer()
 }
 
@@ -188,9 +177,6 @@ func (UnimplementedMessagesServer) ReadMessages(context.Context, *ReadMessagesRe
 }
 func (UnimplementedMessagesServer) ReadBatchMessages(context.Context, *ReadBatchMessagesRequest) (*ReadBatchMessagesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadBatchMessages not implemented")
-}
-func (UnimplementedMessagesServer) CountMessages(context.Context, *CountMessagesRequest) (*CountMessagesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CountMessages not implemented")
 }
 func (UnimplementedMessagesServer) mustEmbedUnimplementedMessagesServer() {}
 
@@ -385,24 +371,6 @@ func _Messages_ReadBatchMessages_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Messages_CountMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CountMessagesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MessagesServer).CountMessages(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/messages.v1.Messages/CountMessages",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MessagesServer).CountMessages(ctx, req.(*CountMessagesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 var _Messages_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "messages.v1.Messages",
 	HandlerType: (*MessagesServer)(nil),
@@ -446,10 +414,6 @@ var _Messages_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReadBatchMessages",
 			Handler:    _Messages_ReadBatchMessages_Handler,
-		},
-		{
-			MethodName: "CountMessages",
-			Handler:    _Messages_CountMessages_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
