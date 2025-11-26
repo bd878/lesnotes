@@ -2,27 +2,28 @@ import type {SearchMessage} from './searchMessage'
 import type {Message} from './message'
 
 export interface SearchMessagePath {
-	ID:      number;
-	userID:  number;
-	text:    string;
-	title:   string;
-	name:    string;
-	private: boolean;
-	path:    string[];
+	ID:       number;
+	userID:   number;
+	text:     string;
+	title:    string;
+	name:     string;
+	private:  boolean;
+	threadID: number;
+	path:     string[]; // thread paths, empty for root
 }
-// thread paths, empty for root
 
 const EmptySearchMessagePath: SearchMessagePath = Object.freeze({
-	ID:      0,
-	userID:  0,
-	text:    "",
-	title:   "",
-	name:    "",
-	private: true,
-	path:    [],
+	ID:       0,
+	userID:   0,
+	threadID: 0,
+	text:     "",
+	title:    "",
+	name:     "",
+	private:  true,
+	path:     [],
 })
 
-export default function mapMessageFromProto(message?: SearchMessage, path: Message[] = []): SearchMessagePath {
+export default function mapMessageFromProto(message?: SearchMessage, threadID: number, path: Message[] = []): SearchMessagePath {
 	if (!message)
 		return EmptySearchMessagePath
 
@@ -33,6 +34,7 @@ export default function mapMessageFromProto(message?: SearchMessage, path: Messa
 		name:      message.name,
 		title:     message.title,
 		private:   message.private,
+		threadID:  threadID,
 		path:      path.map(thread => thread.title), // TODO: title or text
 	}
 

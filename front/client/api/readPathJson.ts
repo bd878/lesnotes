@@ -22,9 +22,10 @@ async function readPathJson(token: string, id: number) {
 		if (error)
 			result.error = models.error(error)
 
-		// do not .reverse() here; append NullThread and then reverse
-		if (response)
+		// do not .reverse() here; client may append NullThread and then reverse
+		if (response) {
 			result.path = response.path.map(models.message)
+		}
 	} catch (e) {
 		result.error.error   = true
 		result.error.status  = 500

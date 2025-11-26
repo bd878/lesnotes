@@ -64,13 +64,7 @@ func (r *Repository) Create(ctx context.Context, id int64, text string, title st
 	return
 }
 
-/**
- * newText == "" : left as is
- * newThreadID == -1 : left as is
- * newPrivate == -1 : left as is
- * @param  {[type]} r *Repository)  Update(ctx context.Context, userID, id int64, text, title, name string, threadID int64, fileIDs []int64, private int) (error [description]
- * @return {error}   error
- */
+// TODO: remove thread_id from messages, take from threads service
 func (r *Repository) Update(ctx context.Context, userID, id int64, newText, newTitle, newName string, newThreadID int64, newFileIDs []int64, newPrivate int) (err error) {
 	const query = "UPDATE %s SET text = $3, thread_id = $4, file_ids = $5, private = $6, title = $7, name = $8 WHERE user_id = $1 AND id = $2"
 	const selectQuery = "SELECT text, thread_id, file_ids, private, title, name FROM %s WHERE user_id = $1 AND id = $2"

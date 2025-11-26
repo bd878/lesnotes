@@ -13,7 +13,8 @@ async function searchMessagesPathJson(token: string, messages: SearchMessage[]) 
 		for (const message of messages) {
 			const path = await readPathJson(token, message.ID)
 
-			result.messages.push(path.path.map(models.message))
+			path.path.reverse()
+			result.messages.push(models.searchMessagePath(message, path.threadID, path.path))
 		}
 	} catch (e) {
 		result.error.error    = true

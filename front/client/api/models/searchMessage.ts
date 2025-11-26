@@ -1,3 +1,5 @@
+// threadID is not in /search scope, we can't receive it here
+
 export interface SearchMessage {
 	ID:      number;
 	userID:  number;
