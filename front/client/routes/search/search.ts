@@ -20,7 +20,7 @@ async function search(ctx) {
 	}
 
 	let messages;
-	if (is.notEmpty(ctx.state.search)) {
+	if (is.notEmpty(ctx.state.searchPath)) {
 		if (ctx.state.search.error.error) {
 			console.error(ctx.state.search.error)
 			ctx.body = "error"
@@ -28,7 +28,14 @@ async function search(ctx) {
 			return;
 		}
 
-		messages = ctx.state.search.messages
+		if (ctx.state.searchPath.error.error) {
+			console.error(ctx.state.searchPath.error)
+			ctx.body = "error"
+			ctx.status = 400
+			return;
+		}
+
+		messages = ctx.state.searchPath.messages
 	} else {
 		console.error("search is empty")
 		ctx.status = 500

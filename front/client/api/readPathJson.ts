@@ -24,7 +24,7 @@ async function readPathJson(token: string, id: number) {
 
 		// do not .reverse() here; append NullThread and then reverse
 		if (response)
-			result.path = response.path.map(models.thread)
+			result.path = response.path.map(models.message)
 	} catch (e) {
 		result.error.error   = true
 		result.error.status  = 500

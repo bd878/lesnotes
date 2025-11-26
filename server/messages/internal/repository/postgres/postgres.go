@@ -311,6 +311,7 @@ SELECT id, user_id, thread_id, file_ids, created_at, updated_at, text, private, 
 	message.CreateUTCNano = createdAt.UnixNano()
 	message.UpdateUTCNano = updatedAt.UnixNano()
 
+	// TODO: move count from messages to threads, because threads may be reordered
 	message.Count, err = r.countThreadMessages(ctx, tx, message.ID)
 	if err != nil {
 		logger.Errorln(err)

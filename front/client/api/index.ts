@@ -10,6 +10,7 @@ import readMessageJson from './readMessageJson';
 import sendMessage from './sendMessage';
 import sendMessageJson from './sendMessageJson';
 import searchMessagesJson from './searchMessagesJson';
+import searchMessagesPathJson from './searchMessagesPathJson';
 import updateMessage from './updateMessage';
 import privateThread from './privateThread';
 import publishThread from './publishThread';
@@ -78,6 +79,7 @@ export default {
 	validateMiniappData,
 	validateTgAuthData,
 	searchMessagesJson,
+	searchMessagesPathJson,
 	reorderThread,
 	sendLog,
 }

@@ -7,6 +7,10 @@
 			{{#list}}
 				<li class="grow-1 max-w-full flex flex-row justify-between whitespace-nowrap first:mt-[2px] last:mb-[2px] mx-[2px]">
 					<button type="button" class="flex flex-row justify-between overflow-hidden dark:hover:bg-slate-600 dark:hover:text-white hover:bg-gray-300 cursor-pointer text-left px-2 w-full z-1" data-message-id="{{ID}}">
+						{{#path}}
+							<span>{{.}}</span>/
+						{{/path}}
+
 						<div class="overflow-hidden text-ellipsis mr-2" data-message-id="{{ID}}">
 							{{#title}}
 								{{title}}
@@ -16,8 +20,6 @@
 							{{/title}}
 						</div>
 					</button>
-
-					<button type="button" class="px-2 dark:hover:text-white hover:text-blue-600 cursor-pointer text-end" data-thread-id="{{ID}}">{{count}} > </button>
 				</li>
 			{{/list}}
 			{{^list}}

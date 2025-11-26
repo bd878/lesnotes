@@ -80,6 +80,9 @@ func (g *Gateway) CreateSession(ctx context.Context, userID int64) (session *ses
 	resp, err := g.client.Create(ctx, &api.CreateSessionRequest{
 		UserId:         userID,
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	session = sessionsmodel.SessionFromProto(resp)
 

@@ -16,7 +16,8 @@ import getTheme from './handlers/getTheme.js';
 import notAuthed from './handlers/notAuthed';
 import loadStack from './handlers/loadStack.js';
 import loadMessage from './handlers/loadMessage.js';
-import loadSearch from './handlers/loadSearch.js';
+import loadSearch from './handlers/loadSearch';
+import loadSearchPath from './handlers/loadSearchPath';
 import getLanguage from './handlers/getLanguage';
 import getFontSize from './handlers/getFontSize';
 import getQuery from './handlers/getQuery';
@@ -56,7 +57,7 @@ router
 	.get('/logout', etag, getLanguage, getFontSize, getTheme, getQuery, logout)
 	.get('/signup', etag, getLanguage, getFontSize, getToken, getTheme, getQuery, notAuthed, register)
 	.get('/home', etag, getLanguage, getToken, getMe, loadMessage, loadStack, home)
-	.get('/search', etag, getLanguage, getToken, getMe, loadSearch, search)
+	.get('/search', etag, getLanguage, getToken, getMe, loadSearch, loadSearchPath, search)
 	.get('/status', status, getLanguage)
 	.get("/tg_auth", authTelegram)
 	.get("/new", etag, getLanguage, newMessage)

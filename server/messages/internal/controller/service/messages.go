@@ -338,7 +338,6 @@ func (s *Controller) ReadMessage(ctx context.Context, id int64, name string, use
 	return
 }
 
-// TODO: resolve path in thread, read messages here
 func (s *Controller) ReadPath(ctx context.Context, userID, id int64) (path []*model.Message, err error) {
 	if s.isConnFailed() {
 		if err := s.setupConnection(); err != nil {
