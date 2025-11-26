@@ -1,7 +1,5 @@
 import readMessages from './readMessages';
 import readStackJson from './readStackJson';
-import readMessagesAround from './readMessagesAround';
-import readMessagesAroundJson from './readMessagesAroundJson';
 import readMessagesJson from './readMessagesJson';
 import readPathJson from './readPathJson';
 import readBatchMessagesJson from './readBatchMessagesJson';
@@ -56,8 +54,6 @@ export default {
 	getMeJson,
 	readMessages,
 	readStackJson,
-	readMessagesAround,
-	readMessagesAroundJson,
 	readMessagesJson,
 	readBatchMessagesJson,
 	readPathJson,

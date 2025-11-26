@@ -29,8 +29,8 @@ func New(tableName string, pool *pgxpool.Pool) *Repository {
 	}
 }
 
-func (r *Repository) Create(ctx context.Context, id int64, text string, title string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (err error) {
-	const query = "INSERT INTO %s(id, text, file_ids, private, name, user_id, thread_id, title) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"
+func (r *Repository) Create(ctx context.Context, id int64, text string, title string, fileIDs []int64, userID int64, private bool, name string) (err error) {
+	const query = "INSERT INTO %s(id, text, file_ids, private, name, user_id, title) VALUES ($1, $2, $3, $4, $5, $6, $7)"
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
@@ -59,15 +59,14 @@ func (r *Repository) Create(ctx context.Context, id int64, text string, title st
 		}
 	}
 
-	_, err = tx.Exec(ctx, r.table(query), id, text, files, private, name, userID, threadID, title)
+	_, err = tx.Exec(ctx, r.table(query), id, text, files, private, name, userID, title)
 
 	return
 }
 
-// TODO: remove thread_id from messages, take from threads service
-func (r *Repository) Update(ctx context.Context, userID, id int64, newText, newTitle, newName string, newThreadID int64, newFileIDs []int64, newPrivate int) (err error) {
-	const query = "UPDATE %s SET text = $3, thread_id = $4, file_ids = $5, private = $6, title = $7, name = $8 WHERE user_id = $1 AND id = $2"
-	const selectQuery = "SELECT text, thread_id, file_ids, private, title, name FROM %s WHERE user_id = $1 AND id = $2"
+func (r *Repository) Update(ctx context.Context, userID, id int64, newText, newTitle, newName string, newFileIDs []int64, newPrivate int) (err error) {
+	const query = "UPDATE %s SET text = $3, file_ids = $4, private = $5, title = $6, name = $7 WHERE user_id = $1 AND id = $2"
+	const selectQuery = "SELECT text, file_ids, private, title, name FROM %s WHERE user_id = $1 AND id = $2"
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
@@ -90,12 +89,11 @@ func (r *Repository) Update(ctx context.Context, userID, id int64, newText, newT
 
 	var (
 		text, title, name  string
-		threadID int64
 		fileIDs  []byte
 		private  bool
 	)
 
-	err = tx.QueryRow(ctx, r.table(selectQuery), userID, id).Scan(&text, &threadID, &fileIDs, &private, &title, &name)
+	err = tx.QueryRow(ctx, r.table(selectQuery), userID, id).Scan(&text, &fileIDs, &private, &title, &name)
 	if err != nil {
 		return
 	}
@@ -110,10 +108,6 @@ func (r *Repository) Update(ctx context.Context, userID, id int64, newText, newT
 
 	if newName != "" {
 		name = newName
-	}
-
-	if newThreadID != -1 {
-		threadID = newThreadID
 	}
 
 	if newFileIDs != nil {
@@ -131,7 +125,7 @@ func (r *Repository) Update(ctx context.Context, userID, id int64, newText, newT
 		}
 	}
 
-	_, err = tx.Exec(ctx, r.table(query), userID, id, text, threadID, fileIDs, private, title, name)
+	_, err = tx.Exec(ctx, r.table(query), userID, id, text, fileIDs, private, title, name)
 	if err != nil {
 		return
 	}
@@ -139,11 +133,6 @@ func (r *Repository) Update(ctx context.Context, userID, id int64, newText, newT
 	return
 }
 
-/**
- * Delete message and move ancestor messages on current thread
- * @param  {[type]} r *Repository)  DeleteMessage(ctx context.Context, userID, id, parentThreadID int64) (err error [description]
- * @return {error}   error
- */
 func (r *Repository) DeleteMessage(ctx context.Context, userID, id int64) (err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
@@ -163,17 +152,6 @@ func (r *Repository) DeleteMessage(ctx context.Context, userID, id int64) (err e
 			err = tx.Commit(ctx)
 		}
 	}()
-
-	var threadID int64
-	err = tx.QueryRow(ctx, r.table("SELECT thread_id FROM %s WHERE id = $1 AND user_id = $2"), id, userID).Scan(&threadID)
-	if err != nil {
-		return
-	}
-
-	_, err = tx.Exec(ctx, r.table("UPDATE %s SET thread_id = $3 WHERE user_id = $1 AND thread_id = $2"), userID, id, threadID)
-	if err != nil {
-		return
-	}
 
 	_, err = tx.Exec(ctx, r.table("DELETE FROM %s WHERE id = $1 AND user_id = $2"), id, userID)
 
@@ -280,14 +258,14 @@ func (r *Repository) Read(ctx context.Context, userIDs []int64, id int64, name s
 	if id != 0 {
 
 		err = tx.QueryRow(ctx, r.table(`
-SELECT id, user_id, thread_id, file_ids, created_at, updated_at, text, private, name, title FROM %s WHERE id = $1 AND (user_id IN (` + ids + `) OR private = false)
-`), append([]interface{}{id}, list...)...).Scan(&message.ID, &message.UserID, &message.ThreadID, &fileIDs, &createdAt, &updatedAt, &message.Text, &message.Private, &message.Name, &message.Title)
+SELECT id, user_id, file_ids, created_at, updated_at, text, private, name, title FROM %s WHERE id = $1 AND (user_id IN (` + ids + `) OR private = false)
+`), append([]interface{}{id}, list...)...).Scan(&message.ID, &message.UserID, &fileIDs, &createdAt, &updatedAt, &message.Text, &message.Private, &message.Name, &message.Title)
 
 	} else if name != "" {
 
 		err = tx.QueryRow(ctx, r.table(`
-SELECT id, user_id, thread_id, file_ids, created_at, updated_at, text, private, name, title FROM %s WHERE name = $1 AND (user_id IN (` + ids + `) OR private = false)
-`), append([]interface{}{name}, list...)...).Scan(&message.ID, &message.UserID, &message.ThreadID, &fileIDs, &createdAt, &updatedAt, &message.Text, &message.Private, &message.Name, &message.Title)
+SELECT id, user_id, file_ids, created_at, updated_at, text, private, name, title FROM %s WHERE name = $1 AND (user_id IN (` + ids + `) OR private = false)
+`), append([]interface{}{name}, list...)...).Scan(&message.ID, &message.UserID, &fileIDs, &createdAt, &updatedAt, &message.Text, &message.Private, &message.Name, &message.Title)
 
 	}
 
@@ -304,12 +282,6 @@ SELECT id, user_id, thread_id, file_ids, created_at, updated_at, text, private, 
 
 	message.CreateUTCNano = createdAt.UnixNano()
 	message.UpdateUTCNano = updatedAt.UnixNano()
-
-	// TODO: move count from messages to threads, because threads may be reordered
-	message.Count, err = r.countThreadMessages(ctx, tx, message.ID)
-	if err != nil {
-		logger.Errorln(err)
-	}
 
 	return
 }
@@ -343,7 +315,7 @@ func (r *Repository) ReadBatchMessages(ctx context.Context, userID int64, messag
 	}
 	order = strings.Join(pairs, ",")
 
-	query := r.table(`SELECT m.id, m.user_id, m.thread_id, m.file_ids, m.name, m.text, m.private, m.created_at, m.updated_at, m.title FROM %s m `) +
+	query := r.table(`SELECT m.id, m.user_id, m.file_ids, m.name, m.text, m.private, m.created_at, m.updated_at, m.title FROM %s m `) +
 		fmt.Sprintf(` JOIN (VALUES %s) AS x(id, ordering) ON m.id = x.id WHERE m.user_id = $1 ORDER BY x.ordering DESC`, order)
 
 	rows, err = tx.Query(ctx, query, userID)
@@ -360,7 +332,7 @@ func (r *Repository) ReadBatchMessages(ctx context.Context, userID int64, messag
 			createdAt, updatedAt time.Time
 		)
 
-		err = rows.Scan(&message.ID, &message.UserID, &message.ThreadID, &fileIDs, &message.Name, &message.Text, &message.Private, &createdAt, &updatedAt, &message.Title)
+		err = rows.Scan(&message.ID, &message.UserID, &fileIDs, &message.Name, &message.Text, &message.Private, &createdAt, &updatedAt, &message.Title)
 		if err != nil {
 			return
 		}
@@ -380,13 +352,6 @@ func (r *Repository) ReadBatchMessages(ctx context.Context, userID int64, messag
 
 	if err = rows.Err(); err != nil {
 		return
-	}
-
-	for _, message := range messages {
-		message.Count, err = r.countThreadMessages(ctx, tx, message.ID)
-		if err != nil {
-			logger.Errorln(err)
-		}
 	}
 
 	return
@@ -416,111 +381,12 @@ func (r *Repository) DeleteUserMessages(ctx context.Context, userID int64) (err 
 	return
 }
 
-func (r *Repository) Count(ctx context.Context, userID, threadID int64) (count int, err error) {
-	if threadID == -1 {
-		err = r.pool.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE user_id = $1"), userID).Scan(&count)
-	} else {
-		err = r.pool.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE user_id = $1 AND thread_id = $2"), userID, threadID).Scan(&count)
-	}
+func (r *Repository) Count(ctx context.Context, userID int64) (count int, err error) {
+	err = r.pool.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE user_id = $1"), userID).Scan(&count)
 
 	return
 }
 
-/**
- * @param  {[type]} r *Repository)  ReadThreadMessages(ctx context.Context, userID, threadID int64, limit, offset int32) (messages []*model.Message, isLastPage bool, err error [description]
- * @return {[type]}   [description]
- */
-func (r *Repository) ReadThreadMessages(ctx context.Context, userID, threadID int64, limit, offset int32) (messages []*model.Message, isLastPage bool, err error) {
-	var tx pgx.Tx
-	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
-	if err != nil {
-		return
-	}
-	defer func() {
-		p := recover()
-		switch {
-		case p != nil:
-			_ = tx.Rollback(ctx)
-			panic(p)
-		case err != nil:
-			fmt.Fprintf(os.Stderr, "[ReadThreadMessages]: rollback with error: %v\n", err)
-			err = tx.Rollback(ctx)
-		default:
-			err = tx.Commit(ctx)
-		}
-	}()
-
-	var rows pgx.Rows
-
-	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE user_id = $1 AND thread_id = $2 ORDER BY created_at DESC LIMIT $3 OFFSET $4"
-
-	rows, err = tx.Query(ctx, r.table(query), userID, threadID, limit, offset)
-	defer rows.Close()
-	if err != nil {
-		return
-	}
-
-	messages = make([]*model.Message, 0)
-	for rows.Next() {
-		message := &model.Message{}
-
-		var (
-			fileIDs []byte
-			createdAt, updatedAt time.Time
-		)
-
-		err = rows.Scan(&message.ID, &message.UserID, &message.ThreadID, &fileIDs, &message.Name, &message.Text, &message.Private, &createdAt, &updatedAt, &message.Title)
-		if err != nil {
-			return
-		}
-
-		if fileIDs != nil {
-			err = json.Unmarshal(fileIDs, &message.FileIDs)
-			if err != nil {
-				return
-			}
-		}
-
-		message.CreateUTCNano = createdAt.UnixNano()
-		message.UpdateUTCNano = updatedAt.UnixNano()
-		messages = append(messages, message)
-	}
-
-	if err = rows.Err(); err != nil {
-		return
-	}
-
-	if int32(len(messages)) < limit {
-		isLastPage = true
-	} else {
-		var count int32
-		err = tx.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE user_id = $1 AND thread_id = $2"), userID, threadID).Scan(&count)
-		if err != nil {
-			return
-		}
-
-		if count <= offset + limit {
-			isLastPage = true
-		}
-	}
-
-	for _, message := range messages {
-		message.Count, err = r.countThreadMessages(ctx, tx, message.ID)
-		if err != nil {
-			logger.Errorln(err)
-		}
-	}
-
-	slices.Reverse(messages)
-
-	return
-}
-
-/**
- * Read all user messages from all threads
- * @param  {[type]} r *Repository)  ReadMessages(ctx context.Context, userID int64, limit, offset int32) (messages []*model.Message, isLastPage bool, err error [description]
- * @return {[type]}   [description]
- */
 func (r *Repository) ReadMessages(ctx context.Context, userID int64, limit, offset int32) (messages []*model.Message, isLastPage bool, err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
@@ -543,7 +409,7 @@ func (r *Repository) ReadMessages(ctx context.Context, userID int64, limit, offs
 
 	var rows pgx.Rows
 
-	query := "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3"
+	query := "SELECT id, user_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3"
 
 	rows, err = tx.Query(ctx, r.table(query), userID, limit, offset)
 	if err != nil {
@@ -561,7 +427,7 @@ func (r *Repository) ReadMessages(ctx context.Context, userID int64, limit, offs
 			createdAt, updatedAt time.Time
 		)
 
-		err = rows.Scan(&message.ID, &message.UserID, &message.ThreadID, &fileIDs, &message.Name, &message.Text, &message.Private, &createdAt, &updatedAt, &message.Title)
+		err = rows.Scan(&message.ID, &message.UserID, &fileIDs, &message.Name, &message.Text, &message.Private, &createdAt, &updatedAt, &message.Title)
 		if err != nil {
 			return
 		}
@@ -597,160 +463,7 @@ func (r *Repository) ReadMessages(ctx context.Context, userID int64, limit, offs
 		}
 	}
 
-	for _, message := range messages {
-		message.Count, err = r.countThreadMessages(ctx, tx, message.ID)
-		if err != nil {
-			logger.Errorln(err)
-		}
-	}
-
 	slices.Reverse(messages)
-
-	return
-}
-
-func (r *Repository) ReadMessagesAround(ctx context.Context, userID, threadID, id int64, limit int32) (messages []*model.Message, isLastPage bool, offset int, err error) {
-	const queryCreatedAt = "SELECT created_at FROM %s WHERE user_id = $1 AND id = $2"
-	const queryOlder = "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE created_at <= $3 AND user_id = $1 AND thread_id = $2 ORDER BY created_at DESC LIMIT $4"
-	const queryCountOlder = "SELECT COUNT(*) FROM %s WHERE created_at <= $3 AND user_id = $1 AND thread_id = $2 LIMIT $4"
-	const queryNewer = "SELECT id, user_id, thread_id, file_ids, name, text, private, created_at, updated_at, title FROM %s WHERE created_at > $3 AND user_id = $1 AND thread_id = $2 ORDER BY created_at ASC LIMIT $4"
-	const queryOffset = "SELECT COUNT(*) FROM %s WHERE created_at > $3 AND user_id = $1 AND thread_id = $2"
-
-	var tx pgx.Tx
-	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
-	if err != nil {
-		return nil, false, 0, err
-	}
-	defer func() {
-		p := recover()
-		switch {
-		case p != nil:
-			_ = tx.Rollback(ctx)
-			panic(p)
-		case err != nil:
-			fmt.Fprintf(os.Stderr, "[ReadMessagesAround]: rollback with error: %v\n", err)
-			err = tx.Rollback(ctx)
-		default:
-			err = tx.Commit(ctx)
-		}
-	}()
-
-	var (
-		createdAt time.Time
-		countOlder int32
-	)
-
-	err = tx.QueryRow(ctx, r.table(queryCreatedAt), userID, id).Scan(&createdAt)
-	if err != nil {
-		return
-	}
-
-	err = tx.QueryRow(ctx, r.table(queryCountOlder), userID, threadID, createdAt, limit).Scan(&countOlder)
-	if err != nil {
-		return
-	}
-
-	if countOlder < int32(limit) {
-		isLastPage = true
-	}
-
-	olderMessages := make([]*model.Message, 0, countOlder)
-
-	olderRows, err := tx.Query(ctx, r.table(queryOlder), userID, threadID, createdAt, limit)
-	defer olderRows.Close()
-	if err != nil {
-		return nil, false, 0, err
-	}
-
-	for olderRows.Next() {
-		message := &model.Message{}
-
-		var (
-			fileIDs []byte
-			createdAt, updatedAt time.Time
-		)
-
-		err = olderRows.Scan(&message.ID, &message.UserID, &message.ThreadID, &fileIDs, &message.Name, &message.Text, &message.Private, &createdAt, &updatedAt, &message.Title)
-		if err != nil {
-			return
-		}
-
-		if fileIDs != nil {
-			err = json.Unmarshal(fileIDs, &message.FileIDs)
-			if err != nil {
-				return
-			}
-		}
-
-		message.CreateUTCNano = createdAt.UnixNano()
-		message.UpdateUTCNano = updatedAt.UnixNano()
-
-		olderMessages = append(olderMessages, message)
-	}
-
-	if err = olderRows.Err(); err != nil {
-		return
-	}
-
-	olderRows.Close()
-
-	slices.Reverse(olderMessages)
-
-	newerMessages := make([]*model.Message, 0)
-
-	newerRows, err := tx.Query(ctx, r.table(queryNewer), userID, threadID, createdAt, limit)
-	defer newerRows.Close()
-	if err != nil {
-		return nil, false, 0, err
-	}
-
-	for newerRows.Next() {
-		message := &model.Message{}
-
-		var (
-			fileIDs []byte
-			createdAt, updatedAt time.Time
-		)
-
-		err = newerRows.Scan(&message.ID, &message.UserID, &message.ThreadID, &fileIDs, &message.Name, &message.Text, &message.Private, &createdAt, &updatedAt, &message.Title)
-		if err != nil {
-			return
-		}
-
-		if fileIDs != nil {
-			err = json.Unmarshal(fileIDs, &message.FileIDs)
-			if err != nil {
-				return
-			}
-		}
-
-		message.CreateUTCNano = createdAt.UnixNano()
-		message.UpdateUTCNano = updatedAt.UnixNano()
-
-		newerMessages = append(newerMessages, message)
-	}
-
-	if err = newerRows.Err(); err != nil {
-		return
-	}
-
-	messages = append(olderMessages, newerMessages...)
-
-	for _, message := range messages {
-		message.Count, err = r.countThreadMessages(ctx, tx, message.ID)
-		if err != nil {
-			logger.Errorln(err)
-		}
-	}
-
-	if len(messages) > 0 {
-		newestMessage := messages[len(messages)-1]
-
-		err = tx.QueryRow(ctx, r.table(queryOffset), userID, threadID, time.Unix(0, newestMessage.CreateUTCNano)).Scan(&offset)
-		if err != nil {
-			return
-		}
-	}
 
 	return
 }
@@ -758,12 +471,6 @@ func (r *Repository) ReadMessagesAround(ctx context.Context, userID, threadID, i
 func (r *Repository) Truncate(ctx context.Context) (err error) {
 	logger.Debugln("truncating table")
 	_, err = r.pool.Exec(ctx, r.table("TRUNCATE TABLE %s"))
-	return
-}
-
-func (r *Repository) countThreadMessages(ctx context.Context, tx pgx.Tx, threadID int64) (count int32, err error) {
-	err = tx.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE thread_id = $1"), threadID).Scan(&count)
-
 	return
 }
 

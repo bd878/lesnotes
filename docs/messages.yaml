@@ -741,9 +741,6 @@ components:
             file_ids:
               type: string
               example: ""
-            thread:
-              type: integer
-              required: false
 
     updateForm:
       oneOf:
@@ -767,9 +764,6 @@ components:
           file_ids:
             type: string
             example: ""
-          thread:
-            type: integer
-            required: false
 
     updateOk:
       type: object

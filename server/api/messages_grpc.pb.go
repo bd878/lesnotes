@@ -26,8 +26,6 @@ type MessagesClient interface {
 	UpdateMessage(ctx context.Context, in *UpdateMessageRequest, opts ...grpc.CallOption) (*UpdateMessageResponse, error)
 	ReadMessage(ctx context.Context, in *ReadMessageRequest, opts ...grpc.CallOption) (*Message, error)
 	ReadMessages(ctx context.Context, in *ReadMessagesRequest, opts ...grpc.CallOption) (*ReadMessagesResponse, error)
-	ReadMessagesAround(ctx context.Context, in *ReadMessagesAroundRequest, opts ...grpc.CallOption) (*ReadMessagesAroundResponse, error)
-	ReadThreadMessages(ctx context.Context, in *ReadThreadMessagesRequest, opts ...grpc.CallOption) (*ReadThreadMessagesResponse, error)
 	ReadBatchMessages(ctx context.Context, in *ReadBatchMessagesRequest, opts ...grpc.CallOption) (*ReadBatchMessagesResponse, error)
 	CountMessages(ctx context.Context, in *CountMessagesRequest, opts ...grpc.CallOption) (*CountMessagesResponse, error)
 }
@@ -121,24 +119,6 @@ func (c *messagesClient) ReadMessages(ctx context.Context, in *ReadMessagesReque
 	return out, nil
 }
 
-func (c *messagesClient) ReadMessagesAround(ctx context.Context, in *ReadMessagesAroundRequest, opts ...grpc.CallOption) (*ReadMessagesAroundResponse, error) {
-	out := new(ReadMessagesAroundResponse)
-	err := c.cc.Invoke(ctx, "/messages.v1.Messages/ReadMessagesAround", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *messagesClient) ReadThreadMessages(ctx context.Context, in *ReadThreadMessagesRequest, opts ...grpc.CallOption) (*ReadThreadMessagesResponse, error) {
-	out := new(ReadThreadMessagesResponse)
-	err := c.cc.Invoke(ctx, "/messages.v1.Messages/ReadThreadMessages", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *messagesClient) ReadBatchMessages(ctx context.Context, in *ReadBatchMessagesRequest, opts ...grpc.CallOption) (*ReadBatchMessagesResponse, error) {
 	out := new(ReadBatchMessagesResponse)
 	err := c.cc.Invoke(ctx, "/messages.v1.Messages/ReadBatchMessages", in, out, opts...)
@@ -170,8 +150,6 @@ type MessagesServer interface {
 	UpdateMessage(context.Context, *UpdateMessageRequest) (*UpdateMessageResponse, error)
 	ReadMessage(context.Context, *ReadMessageRequest) (*Message, error)
 	ReadMessages(context.Context, *ReadMessagesRequest) (*ReadMessagesResponse, error)
-	ReadMessagesAround(context.Context, *ReadMessagesAroundRequest) (*ReadMessagesAroundResponse, error)
-	ReadThreadMessages(context.Context, *ReadThreadMessagesRequest) (*ReadThreadMessagesResponse, error)
 	ReadBatchMessages(context.Context, *ReadBatchMessagesRequest) (*ReadBatchMessagesResponse, error)
 	CountMessages(context.Context, *CountMessagesRequest) (*CountMessagesResponse, error)
 	mustEmbedUnimplementedMessagesServer()
@@ -207,12 +185,6 @@ func (UnimplementedMessagesServer) ReadMessage(context.Context, *ReadMessageRequ
 }
 func (UnimplementedMessagesServer) ReadMessages(context.Context, *ReadMessagesRequest) (*ReadMessagesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadMessages not implemented")
-}
-func (UnimplementedMessagesServer) ReadMessagesAround(context.Context, *ReadMessagesAroundRequest) (*ReadMessagesAroundResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ReadMessagesAround not implemented")
-}
-func (UnimplementedMessagesServer) ReadThreadMessages(context.Context, *ReadThreadMessagesRequest) (*ReadThreadMessagesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ReadThreadMessages not implemented")
 }
 func (UnimplementedMessagesServer) ReadBatchMessages(context.Context, *ReadBatchMessagesRequest) (*ReadBatchMessagesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadBatchMessages not implemented")
@@ -395,42 +367,6 @@ func _Messages_ReadMessages_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Messages_ReadMessagesAround_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReadMessagesAroundRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MessagesServer).ReadMessagesAround(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/messages.v1.Messages/ReadMessagesAround",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MessagesServer).ReadMessagesAround(ctx, req.(*ReadMessagesAroundRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Messages_ReadThreadMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReadThreadMessagesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MessagesServer).ReadThreadMessages(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/messages.v1.Messages/ReadThreadMessages",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MessagesServer).ReadThreadMessages(ctx, req.(*ReadThreadMessagesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Messages_ReadBatchMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ReadBatchMessagesRequest)
 	if err := dec(in); err != nil {
@@ -506,14 +442,6 @@ var _Messages_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReadMessages",
 			Handler:    _Messages_ReadMessages_Handler,
-		},
-		{
-			MethodName: "ReadMessagesAround",
-			Handler:    _Messages_ReadMessagesAround_Handler,
-		},
-		{
-			MethodName: "ReadThreadMessages",
-			Handler:    _Messages_ReadThreadMessages_Handler,
 		},
 		{
 			MethodName: "ReadBatchMessages",

@@ -8,17 +8,15 @@ import (
 )
 
 type Controller interface {
-	SaveMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (err error)
-	UpdateMessage(ctx context.Context, id int64, text, title, name string, fileIDs []int64, threadID int64, userID int64, private int32) (err error)
+	SaveMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, userID int64, private bool, name string) (err error)
+	UpdateMessage(ctx context.Context, id int64, text, title, name string, fileIDs []int64, userID int64, private int32) (err error)
 	DeleteMessages(ctx context.Context, ids []int64, userID int64) (err error)
 	DeleteUserMessages(ctx context.Context, userID int64) (err error)
 	PublishMessages(ctx context.Context, ids []int64, userID int64) (err error)
 	PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error)
-	CountMessages(ctx context.Context, userID, threadID int64) (count int, err error)
-	ReadMessagesAround(ctx context.Context, userID, threadID, id int64, limit int32) (messages []*messages.Message, isLastPage bool, offset int, err error)
+	CountMessages(ctx context.Context, userID int64) (count int, err error)
 	ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *messages.Message, err error)
 	ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (messages []*messages.Message, isLastPage bool, err error)
-	ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool) (messages []*messages.Message, isLastPage bool, err error)
 	ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*messages.Message, err error)
 	GetServers(ctx context.Context) (servers []*api.Server, err error)
 }
@@ -35,7 +33,7 @@ func New(ctrl Controller) *Handler {
 }
 
 func (h *Handler) SaveMessage(ctx context.Context, req *api.SaveMessageRequest) (resp *api.SaveMessageResponse, err error) {
-	err = h.controller.SaveMessage(ctx, req.Id, req.Text, req.Title, req.FileIds, req.ThreadId, req.UserId, req.Private, req.Name)
+	err = h.controller.SaveMessage(ctx, req.Id, req.Text, req.Title, req.FileIds, req.UserId, req.Private, req.Name)
 
 	resp = &api.SaveMessageResponse{}
 
@@ -51,7 +49,7 @@ func (h *Handler) DeleteUserMessages(ctx context.Context, req *api.DeleteUserMes
 }
 
 func (h *Handler) UpdateMessage(ctx context.Context, req *api.UpdateMessageRequest) (resp *api.UpdateMessageResponse, err error) {
-	err = h.controller.UpdateMessage(ctx, req.Id, req.Text, req.Title, req.Name, req.FileIds, req.ThreadId, req.UserId, req.Private)
+	err = h.controller.UpdateMessage(ctx, req.Id, req.Text, req.Title, req.Name, req.FileIds, req.UserId, req.Private)
 
 	resp = &api.UpdateMessageResponse{}
 
@@ -78,20 +76,6 @@ func (h *Handler) PrivateMessages(ctx context.Context, req *api.PrivateMessagesR
 	err = h.controller.PrivateMessages(ctx, req.Ids, req.UserId)
 
 	resp = &api.PrivateMessagesResponse{}
-
-	return
-}
-
-func (h *Handler) ReadThreadMessages(ctx context.Context, req *api.ReadThreadMessagesRequest) (resp *api.ReadThreadMessagesResponse, err error) {
-	list, isLastPage, err := h.controller.ReadThreadMessages(ctx, req.UserId, req.ThreadId, req.Limit, req.Offset, req.Asc)
-	if err != nil {
-		return nil, err
-	}
-
-	resp = &api.ReadThreadMessagesResponse{
-		Messages:   messages.MapMessagesToProto(messages.MessageToProto, list),
-		IsLastPage: isLastPage,
-	}
 
 	return
 }
@@ -147,23 +131,8 @@ func (h *Handler) ReadMessage(ctx context.Context, req *api.ReadMessageRequest) 
 	return
 }
 
-func (h *Handler) ReadMessagesAround(ctx context.Context, req *api.ReadMessagesAroundRequest) (resp *api.ReadMessagesAroundResponse, err error) {
-	list, isLastPage, offset, err := h.controller.ReadMessagesAround(ctx, req.UserId, req.ThreadId, req.Id, req.Limit)
-	if err != nil {
-		return nil, err
-	}
-
-	resp = &api.ReadMessagesAroundResponse{
-		Messages:    messages.MapMessagesToProto(messages.MessageToProto, list),
-		IsLastPage:  isLastPage,
-		Offset:      int32(offset),
-	}
-
-	return
-}
-
 func (h *Handler) CountMessages(ctx context.Context, req *api.CountMessagesRequest) (resp *api.CountMessagesResponse, err error) {
-	count, err := h.controller.CountMessages(ctx, req.UserId, req.ThreadId)
+	count, err := h.controller.CountMessages(ctx, req.UserId)
 	if err != nil {
 		return nil, err
 	}

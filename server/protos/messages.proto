@@ -16,8 +16,6 @@ service Messages {
 	rpc UpdateMessage(UpdateMessageRequest) returns (UpdateMessageResponse) {}
 	rpc ReadMessage(ReadMessageRequest) returns (Message) {}
 	rpc ReadMessages(ReadMessagesRequest) returns (ReadMessagesResponse) {}
-	rpc ReadMessagesAround(ReadMessagesAroundRequest) returns (ReadMessagesAroundResponse) {}
-	rpc ReadThreadMessages(ReadThreadMessagesRequest) returns (ReadThreadMessagesResponse) {}
 	rpc ReadBatchMessages(ReadBatchMessagesRequest) returns (ReadBatchMessagesResponse) {}
 	rpc CountMessages(CountMessagesRequest) returns (CountMessagesResponse) {}
 }
@@ -28,25 +26,10 @@ message Message {
 	int64    create_utc_nano = 3;
 	int64    update_utc_nano = 4;
 	string   text = 5;
-	int64    thread_id = 6;
-	bool     private = 7;
-	string   name = 8;
-	repeated int64 file_ids = 9;
-	string   title = 10;
-	int32    count = 11;
-}
-
-message ReadThreadMessagesRequest {
-	int64    user_id = 1;
-	int64    thread_id = 2;
-	int32    offset = 3;
-	int32    limit = 4;
-	bool     asc = 5;
-}
-
-message ReadThreadMessagesResponse {
-	repeated Message messages = 1;
-	bool             is_last_page = 2;
+	bool     private = 6;
+	string   name = 7;
+	repeated int64 file_ids = 8;
+	string   title = 9;
 }
 
 message ReadMessagesRequest {
@@ -73,12 +56,11 @@ message ReadMessagesResponse {
 message UpdateMessageRequest {
 	int64    id = 1;
 	int64    user_id = 2;
-	int64    thread_id = 3;
-	string   text = 4;
-	int32    private = 5;
-	repeated int64 file_ids = 6;
-	string   title = 7;
-	string   name  = 8;
+	string   text = 3;
+	int32    private = 4;
+	repeated int64 file_ids = 5;
+	string   title = 6;
+	string   name  = 7;
 }
 
 message UpdateMessageResponse {
@@ -88,11 +70,10 @@ message SaveMessageRequest {
 	int64    id = 1;
 	int64    user_id = 2;
 	string   text = 3;
-	int64    thread_id = 4;
-	bool     private = 5;
-	string   name = 6;
-	repeated int64 file_ids = 7;
-	string   title = 8;
+	bool     private = 4;
+	string   name = 5;
+	repeated int64 file_ids = 6;
+	string   title = 7;
 }
 
 message SaveMessageResponse {
@@ -136,22 +117,8 @@ message ReadMessageRequest {
 	string name = 3;
 }
 
-message ReadMessagesAroundRequest {
-	int64  user_id = 1;
-	int64  id = 2;
-	int32  limit = 3;
-	int64  thread_id = 4;
-}
-
-message ReadMessagesAroundResponse {
-	repeated Message messages = 1;
-	bool             is_last_page = 2;
-	int32            offset = 3;
-}
-
 message CountMessagesRequest {
 	int64 user_id = 1;
-	int64 thread_id = 2;
 }
 
 message CountMessagesResponse {

@@ -1,1 +1,0 @@
-url = https://%STAGE%lesnotes.space/messages/v1/read?thread=%THREAD_ID%&limit=%LIMIT%&id=%ID%

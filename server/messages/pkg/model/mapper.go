@@ -11,7 +11,6 @@ func MessageFromProto(proto *api.Message) *Message {
 		UpdateUTCNano:  proto.UpdateUtcNano,
 		UserID:         proto.UserId,
 		Count:          proto.Count,
-		ThreadID:       proto.ThreadId,
 		Text:           proto.Text,
 		Title:          proto.Title,
 		FileIDs:        proto.FileIds,
@@ -24,7 +23,6 @@ func MessageToProto(msg *Message) *api.Message {
 	return &api.Message{
 		Id:             msg.ID,
 		UserId:         msg.UserID,
-		ThreadId:       msg.ThreadID,
 		CreateUtcNano:  msg.CreateUTCNano,
 		UpdateUtcNano:  msg.UpdateUTCNano,
 		Text:           msg.Text,

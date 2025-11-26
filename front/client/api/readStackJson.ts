@@ -36,7 +36,6 @@ async function readStackJson(token: string, threadID: number/*, lastMessageID: n
 		if (is.notUndef(offset))
 			messages = await api.readMessagesJson(token, threadID, 1 /* order */, limit, offset)
 		else if (is.notEmpty(centerID))
-			// TODO: it was readMessagesAroundJson(token, threadID, centerID, Math.floor(limit/2)), delete old (around) method
 			messages = await api.readMessagesJson(token, threadID, 1 /* order */, limit, 0)
 		else
 			messages = await api.readMessagesJson(token, threadID, 1 /* order */, limit, 0)

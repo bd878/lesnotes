@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS messages.messages
 	private      bool          NOT NULL DEFAULT true,
 	name         VARCHAR(256)  UNIQUE NOT NULL,
 	user_id      bigint        NOT NULL,
-	thread_id    bigint        NOT NULL,                -- parent thread id
+	-- DELETED: thread_id    bigint        NOT NULL,                -- parent thread id
 	created_at   timestamptz   NOT NULL DEFAULT NOW(),
 	updated_at   timestamptz   NOT NULL DEFAULT NOW(),
 	title        TEXT          NOT NULL DEFAULT '',

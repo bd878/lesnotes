@@ -38,10 +38,10 @@ func (m *DistributedMessages) apply(ctx context.Context, reqType RequestType, cm
 	return
 }
 
-func (m *DistributedMessages) SaveMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (err error) {
-	logger.Debugw("save message", "id", id, "text", text, "title", title, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private, "name", name)
+func (m *DistributedMessages) SaveMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, userID int64, private bool, name string) (err error) {
+	logger.Debugw("save message", "id", id, "text", text, "title", title, "file_ids", fileIDs, "user_id", userID, "private", private, "name", name)
 
-	event, err := domain.CreateMessage(id, text, title, fileIDs, threadID, userID, private, name)
+	event, err := domain.CreateMessage(id, text, title, fileIDs, userID, private, name)
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,6 @@ func (m *DistributedMessages) SaveMessage(ctx context.Context, id int64, text, t
 		Text:     text,
 		Title:    title,
 		FileIds:  fileIDs,
-		ThreadId: threadID,
 		UserId:   userID,
 		Private:  private,
 		Name:     name,
@@ -68,10 +67,10 @@ func (m *DistributedMessages) SaveMessage(ctx context.Context, id int64, text, t
 	return m.publisher.Publish(context.Background(), event)
 }
 
-func (m *DistributedMessages) UpdateMessage(ctx context.Context, id int64, text, title, name string, fileIDs []int64, threadID int64, userID int64, private int32) (err error) {
-	logger.Debugw("update message", "id", id, "text", text, "title", title, "name", name, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private)
+func (m *DistributedMessages) UpdateMessage(ctx context.Context, id int64, text, title, name string, fileIDs []int64, userID int64, private int32) (err error) {
+	logger.Debugw("update message", "id", id, "text", text, "title", title, "name", name, "file_ids", fileIDs, "user_id", userID, "private", private)
 
-	event, err := domain.UpdateMessage(id, text, title, fileIDs, threadID, userID, private, name)
+	event, err := domain.UpdateMessage(id, text, title, fileIDs, userID, private, name)
 	if err != nil {
 		return err
 	}
@@ -80,7 +79,6 @@ func (m *DistributedMessages) UpdateMessage(ctx context.Context, id int64, text,
 		Id:       id,
 		UserId:   userID,
 		FileIds:  fileIDs,
-		ThreadId: threadID,
 		Text:     text,
 		Name:     name,
 		Title:    title,
@@ -201,11 +199,6 @@ func (m *DistributedMessages) ReadMessage(ctx context.Context, id int64, name st
 	return m.repo.Read(ctx, userIDs, id, name)
 }
 
-func (m *DistributedMessages) ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool) (messages []*model.Message, isLastPage bool, err error) {
-	logger.Debugw("read thread messages", "user_id", userID, "thread_id", threadID, "limit", limit, "offset", offset, "ascending", ascending)
-	return m.repo.ReadThreadMessages(ctx, userID, threadID, limit, offset)
-}
-
 func (m *DistributedMessages) ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (messages []*model.Message, isLastPage bool, err error) {
 	logger.Debugw("read messages", "user_id", userID, "limit", limit, "offset", offset, "ascending", ascending)
 	return m.repo.ReadMessages(ctx, userID, limit, offset)
@@ -216,12 +209,7 @@ func (m *DistributedMessages) ReadBatchMessages(ctx context.Context, userID int6
 	return m.repo.ReadBatchMessages(ctx, userID, ids)
 }
 
-func (m *DistributedMessages) ReadMessagesAround(ctx context.Context, userID, threadID, id int64, limit int32) (messages []*model.Message, isLastPage bool, offset int, err error) {
-	logger.Debugw("read messages around", "user_id", userID, "thread_id", threadID, "id", id)
-	return m.repo.ReadMessagesAround(ctx, userID, threadID, id, limit)
-}
-
-func (m *DistributedMessages) CountMessages(ctx context.Context, userID, threadID int64) (count int, err error) {
-	logger.Debugw("count messages", "user_id", userID, "thread_id", threadID)
-	return m.repo.Count(ctx, userID, threadID)
+func (m *DistributedMessages) CountMessages(ctx context.Context, userID int64) (count int, err error) {
+	logger.Debugw("count messages", "user_id", userID)
+	return m.repo.Count(ctx, userID)
 }
