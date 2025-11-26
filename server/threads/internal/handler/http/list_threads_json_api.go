@@ -53,7 +53,7 @@ func (h *Handler) ListThreadsJsonAPI(w http.ResponseWriter, req *http.Request) (
 		return err
 	}
 
-	ids, isLastPage, err := h.controller.ListThreads(req.Context(), request.UserID, request.ParentID,
+	list, isLastPage, err := h.controller.ListThreads(req.Context(), request.UserID, request.ParentID,
 		request.Limit, request.Offset, request.Asc)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -69,9 +69,9 @@ func (h *Handler) ListThreadsJsonAPI(w http.ResponseWriter, req *http.Request) (
 	}
 
 	response, err := json.Marshal(threadsmodel.ListThreadsResponse{
-		IDs:        ids,
+		List:       list,
 		IsLastPage: isLastPage,
-		Count:      int32(len(ids)),
+		Count:      int32(len(list)),
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

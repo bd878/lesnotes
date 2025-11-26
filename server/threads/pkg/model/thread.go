@@ -8,6 +8,7 @@ type (
 		NextID      int64   `json:"next_id"`
 		PrevID      int64   `json:"prev_id"`
 		Name        string  `json:"name"`
+		Count       int32   `json:"count"`
 		Private     bool    `json:"private"`
 	}
 
@@ -58,12 +59,13 @@ type (
 		PrevID      int64   `json:"prev_id"`
 		Name        string  `json:"name"`
 		Private     bool    `json:"private"`
+		Count       int32   `json:"count"`
 	}
 
 	ListThreadsResponse struct {
-		Count       int32   `json:"count"`
-		IsLastPage  bool    `json:"is_last_page"`
-		IDs         []int64 `json:"ids"`
+		Count       int32     `json:"count"`
+		IsLastPage  bool      `json:"is_last_page"`
+		List        []*Thread `json:"list"`
 	}
 
 	ResolveThreadResponse struct {

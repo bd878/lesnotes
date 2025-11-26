@@ -87,7 +87,7 @@ func (s *Controller) ReadThread(ctx context.Context, id, userID int64) (thread *
 	return
 }
 
-func (s *Controller) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (ids []int64, isLastPage bool, err error) {
+func (s *Controller) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (list []*threads.Thread, isLastPage bool, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -107,7 +107,7 @@ func (s *Controller) ListThreads(ctx context.Context, userID, parentID int64, li
 		return nil, false, err
 	}
 
-	return resp.Ids, resp.IsLastPage, err
+	return threads.MapThreadsFromProto(threads.ThreadFromProto, resp.List), resp.IsLastPage, err
 }
 
 func (s *Controller) ResolveThread(ctx context.Context, id, userID int64) (path []int64, err error) {

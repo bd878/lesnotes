@@ -26,6 +26,7 @@ type ThreadsClient interface {
 	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error)
 	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
+	Count(ctx context.Context, in *CountRequest, opts ...grpc.CallOption) (*CountResponse, error)
 	GetServers(ctx context.Context, in *GetServersRequest, opts ...grpc.CallOption) (*GetServersResponse, error)
 }
 
@@ -118,6 +119,15 @@ func (c *threadsClient) Delete(ctx context.Context, in *DeleteRequest, opts ...g
 	return out, nil
 }
 
+func (c *threadsClient) Count(ctx context.Context, in *CountRequest, opts ...grpc.CallOption) (*CountResponse, error) {
+	out := new(CountResponse)
+	err := c.cc.Invoke(ctx, "/threads.v1.Threads/Count", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *threadsClient) GetServers(ctx context.Context, in *GetServersRequest, opts ...grpc.CallOption) (*GetServersResponse, error) {
 	out := new(GetServersResponse)
 	err := c.cc.Invoke(ctx, "/threads.v1.Threads/GetServers", in, out, opts...)
@@ -140,6 +150,7 @@ type ThreadsServer interface {
 	Update(context.Context, *UpdateRequest) (*UpdateResponse, error)
 	Create(context.Context, *CreateRequest) (*CreateResponse, error)
 	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
+	Count(context.Context, *CountRequest) (*CountResponse, error)
 	GetServers(context.Context, *GetServersRequest) (*GetServersResponse, error)
 	mustEmbedUnimplementedThreadsServer()
 }
@@ -174,6 +185,9 @@ func (UnimplementedThreadsServer) Create(context.Context, *CreateRequest) (*Crea
 }
 func (UnimplementedThreadsServer) Delete(context.Context, *DeleteRequest) (*DeleteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedThreadsServer) Count(context.Context, *CountRequest) (*CountResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Count not implemented")
 }
 func (UnimplementedThreadsServer) GetServers(context.Context, *GetServersRequest) (*GetServersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetServers not implemented")
@@ -353,6 +367,24 @@ func _Threads_Delete_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Threads_Count_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CountRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ThreadsServer).Count(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/threads.v1.Threads/Count",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ThreadsServer).Count(ctx, req.(*CountRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Threads_GetServers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetServersRequest)
 	if err := dec(in); err != nil {
@@ -410,6 +442,10 @@ var _Threads_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Delete",
 			Handler:    _Threads_Delete_Handler,
+		},
+		{
+			MethodName: "Count",
+			Handler:    _Threads_Count_Handler,
 		},
 		{
 			MethodName: "GetServers",

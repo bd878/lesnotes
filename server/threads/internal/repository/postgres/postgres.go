@@ -32,11 +32,21 @@ func (r *Repository) ReadThread(ctx context.Context, id, userID int64) (thread *
 	}
 
 	err = r.pool.QueryRow(ctx, r.table(query), userID, id).Scan(&thread.ParentID, &thread.NextID, &thread.PrevID, &thread.Name, &thread.Private)
+	if err != nil {
+		return
+	}
+
+	total, err := r.CountThreads(ctx, id, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	thread.Count = total
 
 	return
 }
 
-func (r *Repository) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (ids []int64, isLastPage bool, err error) {
+func (r *Repository) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (list []*threads.Thread, isLastPage bool, err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -55,7 +65,7 @@ func (r *Repository) ListThreads(ctx context.Context, userID, parentID int64, li
 		}
 	}()
 
-	const selectThreads = "SELECT id, next_id, prev_id FROM %s WHERE user_id = $1 AND parent_id = $2"
+	const selectThreads = "SELECT id, name, private, next_id, prev_id FROM %s WHERE user_id = $1 AND parent_id = $2"
 
 	var rows pgx.Rows
 	rows, err = tx.Query(ctx, r.table(selectThreads), userID, parentID)
@@ -63,24 +73,32 @@ func (r *Repository) ListThreads(ctx context.Context, userID, parentID int64, li
 		return
 	}
 
-	list := make([]*threads.Thread, 0)
+	unordered := make([]*threads.Thread, 0)
 	for rows.Next() {
-		thread := &threads.Thread{}
+		thread := &threads.Thread{
+			ParentID: parentID,
+			UserID:   userID,
+		}
 
-		err = rows.Scan(&thread.ID, &thread.NextID, &thread.PrevID)
+		err = rows.Scan(&thread.ID, &thread.Name, &thread.Private, &thread.NextID, &thread.PrevID)
 		if err != nil {
 			return
 		}
 
-		list = append(list, thread)
+		thread.Count, err = r.CountThreads(ctx, thread.ID, userID)
+		if err != nil {
+			return
+		}
+
+		unordered = append(unordered, thread)
 	}
 
 	var nextID int64
-	ids = make([]int64, 0)
-	for range list {
-		for _, thread := range list {
+	list = make([]*threads.Thread, 0)
+	for range unordered {
+		for _, thread := range unordered {
 			if thread.NextID == nextID {
-				ids = append(ids, thread.ID)
+				list = append(list, thread)
 				nextID = thread.ID
 				break
 			}
@@ -91,13 +109,21 @@ func (r *Repository) ListThreads(ctx context.Context, userID, parentID int64, li
 		return
 	}
 
-	if int32(len(ids)) <= offset+limit {
+	if int32(len(list)) <= offset+limit {
 		isLastPage = true
 	}
 
-	end := min(int32(len(ids)), offset+limit)
+	end := min(int32(len(list)), offset+limit)
 
-	ids = ids[offset:end]
+	list = list[offset:end]
+
+	return
+}
+
+func (r *Repository) CountThreads(ctx context.Context, id, userID int64) (total int32, err error) {
+	const query = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2"
+
+	err = r.pool.QueryRow(ctx, r.table(query), userID, id).Scan(&total)
 
 	return
 }

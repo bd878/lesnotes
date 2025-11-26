@@ -8,7 +8,7 @@ import (
 )
 
 type Controller interface {
-	ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (ids []int64, isLastPage bool, err error)
+	ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (ids []*threads.Thread, isLastPage bool, err error)
 	ReadThread(ctx context.Context, id, userID int64) (thread *threads.Thread, err error)
 	ResolveThread(ctx context.Context, id, userID int64) (ids []int64, err error)
 	CreateThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name string, private bool) (err error)
@@ -17,6 +17,7 @@ type Controller interface {
 	DeleteThread(ctx context.Context, id, userID int64) (err error)
 	PublishThread(ctx context.Context, id, userID int64) (err error)
 	PrivateThread(ctx context.Context, id, userID int64) (err error)
+	CountThreads(ctx context.Context, id, userID int64) (total int32, err error)
 	GetServers(ctx context.Context) (servers []*api.Server, err error)
 }
 
@@ -43,15 +44,15 @@ func (h *Handler) Read(ctx context.Context, req *api.ReadRequest) (resp *api.Thr
 }
 
 func (h *Handler) List(ctx context.Context, req *api.ListRequest) (resp *api.ListResponse, err error) {
-	ids, isLastPage, err := h.controller.ListThreads(ctx, req.UserId, req.ParentId, req.Limit, req.Offset, req.Asc)
+	list, isLastPage, err := h.controller.ListThreads(ctx, req.UserId, req.ParentId, req.Limit, req.Offset, req.Asc)
 	if err != nil {
 		return nil, err
 	}
 
 	resp = &api.ListResponse{
-		Ids:        ids,
+		List:       threads.MapThreadsToProto(threads.ThreadToProto, list),
 		IsLastPage: isLastPage,
-		Count:      int32(len(ids)),
+		Count:      int32(len(list)),
 	}
 
 	return
@@ -134,6 +135,19 @@ func (h *Handler) Private(ctx context.Context, req *api.PrivateRequest) (resp *a
 	}
 
 	resp = &api.PrivateResponse{}
+
+	return
+}
+
+func (h *Handler) Count(ctx context.Context, req *api.CountRequest) (resp *api.CountResponse, err error) {
+	total, err := h.controller.CountThreads(ctx, req.Id, req.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	resp = &api.CountResponse{
+		Total: total,
+	}
 
 	return
 }
