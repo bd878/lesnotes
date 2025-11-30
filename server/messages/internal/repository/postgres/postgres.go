@@ -305,6 +305,11 @@ func (r *Repository) ReadBatchMessages(ctx context.Context, userID int64, messag
 		}
 	}()
 
+	messages = make([]*model.Message, 0)
+	if len(messageIDs) == 0 {
+		return
+	}
+
 	var rows pgx.Rows
 
 	var order string
@@ -322,7 +327,6 @@ func (r *Repository) ReadBatchMessages(ctx context.Context, userID int64, messag
 		return
 	}
 
-	messages = make([]*model.Message, 0)
 	for rows.Next() {
 		message := &model.Message{}
 

@@ -51,7 +51,7 @@ func main() {
 		panic(err)
 	}
 
-	const query = "SELECT id, user_id, thread_id, name, private FROM messages.messages"
+	const query = "SELECT id, user_id, name, private FROM messages.messages"
 
 	tx, err := pool.BeginTx(context.Background(), pgx.TxOptions{})
 	if err != nil {
@@ -81,12 +81,12 @@ func main() {
 
 	for rows.Next() {
 		var (
-			id, userID, threadID int64
+			id, userID int64
 			name string
 			private bool
 		)
 
-		err = rows.Scan(&id, &userID, &threadID, &name, &private)
+		err = rows.Scan(&id, &userID, &name, &private)
 		if err != nil {
 			panic(err)
 		}
@@ -94,7 +94,6 @@ func main() {
 		_, err = client.Create(context.Background(), &api.CreateRequest{
 			Id:       id,
 			UserId:   userID,
-			ParentId: threadID,
 			Name:     name,
 			Private:  private,
 		})
