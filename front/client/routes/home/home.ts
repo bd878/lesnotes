@@ -10,54 +10,27 @@ import { resolve, join } from 'node:path';
 import Builder from '../builder'
 
 async function home(ctx) {
-	let me;
-	if (is.empty(ctx.state.me)) {
-		console.error("no me")
-		ctx.status = 500
-		return
-	} else {
-		me = ctx.state.me
-	}
-
-	let stack;
-	if (is.notEmpty(ctx.state.stack)) {
-		if (ctx.state.stack.error.error) {
-			console.error(ctx.state.stack.error)
-			ctx.body = "error"
-			ctx.status = 400;
-			return;
-		}
-
-		stack = ctx.state.stack.stack
-	} else {
-		console.error("stack is empty")
-		ctx.status = 500
-		return
-	}
-
-	let message;
-	if (is.notEmpty(ctx.state.message)) {
-		if (ctx.state.message.error.error) {
-			console.error(ctx.state.message.error)
-			ctx.body = "error"
-			ctx.status = 400;
-			return;
-		}
-
-		message = ctx.state.message.message
-	}
+	const { me, stack, message } = ctx.state
 
 	ctx.set({ "Cache-Control": "no-cache,max-age=0" })
 
 	const builder = new HomeBuilder(ctx.userAgent.isMobile, ctx.state.lang)
 
-	if (is.notEmpty(message))
-		if (ctx.query.edit)
-			await builder.addMessageEditForm(undefined, me.ID, message)
-		else
-			await builder.addMessageView(undefined, me.ID, message)
-	else
+	switch (ctx.state.editorMode) {
+	case "view":
+		await builder.addMessageView(undefined, me.ID, message)
+		break;
+	case "edit":
+		await builder.addMessageEditForm(undefined, me.ID, message)
+		break;
+	case "new-message":
 		await builder.addNewMessageForm()
+		break
+	default:
+		console.error("unknown editor mode")
+		ctx.status = 500
+		return
+	}
 
 	await builder.addSettings(undefined, ctx.state.lang, me.theme, me.fontSize)
 	await builder.addMessagesList(undefined, stack)

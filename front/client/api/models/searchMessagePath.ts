@@ -23,7 +23,7 @@ const EmptySearchMessagePath: SearchMessagePath = Object.freeze({
 	path:     [],
 })
 
-export default function mapMessageFromProto(message?: SearchMessage, threadID: number, path: Message[] = []): SearchMessagePath {
+export default function mapMessageFromProto(message?: SearchMessage, threadID: number = 0, path: Message[] = []): SearchMessagePath {
 	if (!message)
 		return EmptySearchMessagePath
 

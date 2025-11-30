@@ -1,4 +1,5 @@
 import api from '../api';
+import * as is from '../third_party/is';
 
 const limit = parseInt(LIMIT)
 
@@ -15,6 +16,18 @@ async function loadStack(ctx, next) {
 	for (const thread of ctx.state.stack.stack) {
 		thread.isCenter = function() { return this.ID == thread.centerID }
 		thread.isSelected = function() { return this.ID == id }
+	}
+
+	if (is.notEmpty(ctx.state.stack)) {
+		if (ctx.state.stack.error.error) {
+			console.error(ctx.state.stack.error)
+			ctx.body = "error"
+			ctx.status = 400;
+			return;
+		}
+		ctx.state.stack = ctx.state.stack.stack
+	} else {
+		ctx.state.stack = []
 	}
 
 	await next()

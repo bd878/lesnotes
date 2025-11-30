@@ -6,6 +6,7 @@ async function readPathJson(token: string, id: number) {
 	let result = {
 		error:       models.error(),
 		path:        [],
+		threadID:    0,
 	}
 
 	try {
@@ -26,6 +27,8 @@ async function readPathJson(token: string, id: number) {
 		if (response) {
 			result.path = response.path.map(models.message)
 		}
+
+		// TODO: add threadID
 	} catch (e) {
 		result.error.error   = true
 		result.error.status  = 500

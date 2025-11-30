@@ -23,6 +23,19 @@ async function loadMessage(ctx, next) {
 		ctx.state.message = await api.readMessageJson("", 0 /* me */, 0, name /* public name */)
 	}
 
+	if (is.notEmpty(ctx.state.message)) {
+		if (ctx.state.message.error.error) {
+			console.error(ctx.state.message.error)
+			ctx.body = "error"
+			ctx.status = 400;
+			return;
+		}
+
+		ctx.state.message = ctx.state.message.message
+	} else {
+		ctx.state.message = undefined
+	}
+
 	await next()
 
 	console.log("<-- loadMessage")

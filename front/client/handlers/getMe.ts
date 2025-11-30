@@ -1,4 +1,5 @@
 import api from '../api';
+import * as is from '../third_party/is';
 
 async function getMe(ctx, next) {
 	console.log("--> getMe")
@@ -17,6 +18,12 @@ async function getMe(ctx, next) {
 	}
 
 	console.log(ctx.state.me)
+
+	if (is.empty(ctx.state.me)) {
+		console.error("no me")
+		ctx.status = 500
+		return
+	}
 
 	await next()
 

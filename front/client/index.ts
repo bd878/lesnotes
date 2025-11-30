@@ -17,6 +17,7 @@ import notAuthed from './handlers/notAuthed';
 import loadStack from './handlers/loadStack.js';
 import loadMessage from './handlers/loadMessage.js';
 import loadSearch from './handlers/loadSearch';
+import getEditorMode from './handlers/getEditorMode';
 import loadSearchPath from './handlers/loadSearchPath';
 import getLanguage from './handlers/getLanguage';
 import getFontSize from './handlers/getFontSize';
@@ -56,7 +57,7 @@ router
 	.get('/login', etag, getLanguage, getFontSize, getTheme, getQuery, getToken, notAuthed, login)
 	.get('/logout', etag, getLanguage, getFontSize, getTheme, getQuery, logout)
 	.get('/signup', etag, getLanguage, getFontSize, getToken, getTheme, getQuery, notAuthed, register)
-	.get('/home', etag, getLanguage, getToken, getMe, loadMessage, loadStack, home)
+	.get('/home', etag, getLanguage, getToken, getMe, loadMessage, loadStack, getEditorMode, home)
 	.get('/search', etag, getLanguage, getToken, getMe, loadSearch, loadSearchPath, search)
 	.get('/status', status, getLanguage)
 	.get("/tg_auth", authTelegram)
