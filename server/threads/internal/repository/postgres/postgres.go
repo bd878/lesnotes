@@ -168,6 +168,16 @@ func (r *Repository) ReorderThread(ctx context.Context, id, userID, parentID, ne
 		return fmt.Errorf("either prevID or nextID must be given, not both; next_id = %d, prev_id = %d", prevID, nextID)
 	}
 
+	if prevID == id {
+		return fmt.Errorf("prevID == id: %d, %d", prevID, id)
+	}
+	if nextID == id {
+		return fmt.Errorf("nextID == id: %d, %d", nextID, id)
+	}
+	if parentID == id {
+		return fmt.Errorf("parentID == id: %d, %d", parentID, id)
+	}
+
 	if prevID != 0 {
 		err = tx.QueryRow(ctx, r.table(selectParentID), userID, prevID).Scan(&prevIDParent)
 		if err != nil {
