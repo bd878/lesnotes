@@ -11,7 +11,7 @@ cmd=`cat <<HERE
 sed -e "s/%STAGE%/$stage/g" \
 -e "s/%LOGIN%/$login/g" \
 -e "s/%PASSWORD%/$password/g" ./curl/login.curl |
-curl -c $cookie -v -K -
+curl -c $cookie -K -
 HERE`
 result=`eval "$cmd"`
 echo $result

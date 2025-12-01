@@ -55,7 +55,7 @@ func (h *Handler) ReadPathJsonAPI(w http.ResponseWriter, req *http.Request) (err
 		return err
 	}
 
-	list, err := h.controller.ReadPath(req.Context(), user.ID, request.ID)
+	list, parentID, err := h.controller.ReadPath(req.Context(), user.ID, request.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -102,6 +102,7 @@ func (h *Handler) ReadPathJsonAPI(w http.ResponseWriter, req *http.Request) (err
 
 	response, err := json.Marshal(messages.ReadPathResponse{
 		Messages:   list,
+		ThreadID:   parentID,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

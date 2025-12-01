@@ -703,6 +703,8 @@ components:
         response:
           type: object
           properties:
+            thread:
+              type: integer
             path:
               type: array
               items:

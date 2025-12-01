@@ -50,7 +50,7 @@ func (h *Handler) ReadPath(w http.ResponseWriter, req *http.Request) (err error)
 		messageID = int64(id)
 	}
 
-	list, err := h.controller.ReadPath(req.Context(), user.ID, messageID)
+	list, parentID, err := h.controller.ReadPath(req.Context(), user.ID, messageID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -72,6 +72,7 @@ func (h *Handler) ReadPath(w http.ResponseWriter, req *http.Request) (err error)
 		}
 	}
 
+	// TODO: move on controller level
 	filesRes, err := h.filesGateway.ReadBatchFiles(req.Context(), fileIDs, user.ID)
 	if err != nil {
 		logger.Errorw("failed to read batch files", "user_id", user.ID, "error", err)
@@ -97,6 +98,7 @@ func (h *Handler) ReadPath(w http.ResponseWriter, req *http.Request) (err error)
 
 	response, err := json.Marshal(messages.ReadPathResponse{
 		Messages:   list,
+		ThreadID:   parentID,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

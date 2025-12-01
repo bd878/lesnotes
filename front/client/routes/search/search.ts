@@ -10,14 +10,7 @@ import { resolve, join } from 'node:path';
 import Builder from '../builder'
 
 async function search(ctx) {
-	let me;
-	if (is.empty(ctx.state.me)) {
-		console.error("no me")
-		ctx.status = 500
-		return
-	} else {
-		me = ctx.state.me
-	}
+	const { me } = ctx.state
 
 	let messages;
 	if (is.notEmpty(ctx.state.searchPath)) {

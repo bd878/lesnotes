@@ -162,3 +162,23 @@ func (g *Gateway) ResolvePath(ctx context.Context, userID, id int64) (path []int
 
 	return
 }
+
+func (g *Gateway) ReadThread(ctx context.Context, userID, id int64) (thread *threads.Thread, err error) {
+	if g.isConnFailed() {
+		if err = g.setupConnection(); err != nil {
+			return
+		}
+	}
+
+	resp, err := g.client.Read(ctx, &api.ReadRequest{
+		Id:     id,
+		UserId: userID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	thread = threads.ThreadFromProto(resp)
+
+	return
+}

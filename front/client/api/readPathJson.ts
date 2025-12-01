@@ -26,9 +26,8 @@ async function readPathJson(token: string, id: number) {
 		// do not .reverse() here; client may append NullThread and then reverse
 		if (response) {
 			result.path = response.path.map(models.message)
+			result.threadID = response.thread
 		}
-
-		// TODO: add threadID
 	} catch (e) {
 		result.error.error   = true
 		result.error.status  = 500

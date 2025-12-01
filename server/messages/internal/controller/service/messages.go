@@ -21,11 +21,13 @@ type Config struct {
 
 type ThreadsGateway interface {
 	ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32) (list []*threads.Thread, isLastPage bool, err error)
+	// TODO: fix params order
 	CountThreads(ctx context.Context, id, userID int64) (total int32, err error)
 	CreateThread(ctx context.Context, id, userID, parentID int64, name string, private bool) (err error)
 	DeleteThread(ctx context.Context, id, userID int64) (err error)
 	UpdateThread(ctx context.Context, id, userID int64) (err error)
 	ResolvePath(ctx context.Context, userID, id int64) (path []int64, err error)
+	ReadThread(ctx context.Context, userID, id int64) (thread *threads.Thread, err error)
 }
 
 type Controller struct {
@@ -336,10 +338,10 @@ func (s *Controller) ReadMessage(ctx context.Context, id int64, name string, use
 	return
 }
 
-func (s *Controller) ReadPath(ctx context.Context, userID, id int64) (path []*model.Message, err error) {
+func (s *Controller) ReadPath(ctx context.Context, userID, id int64) (path []*model.Message, parentID int64, err error) {
 	if s.isConnFailed() {
 		if err := s.setupConnection(); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 	}
 
@@ -347,7 +349,13 @@ func (s *Controller) ReadPath(ctx context.Context, userID, id int64) (path []*mo
 
 	ids, err := s.threads.ResolvePath(ctx, userID, id)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
+	}
+
+	// TODO: log error, falls if error 0
+	thread, _ := s.threads.ReadThread(ctx, userID, id)
+	if thread != nil {
+		parentID = thread.ParentID
 	}
 
 	res, err := s.client.ReadBatchMessages(ctx, &api.ReadBatchMessagesRequest{
@@ -355,7 +363,7 @@ func (s *Controller) ReadPath(ctx context.Context, userID, id int64) (path []*mo
 		Ids:    ids,
 	})
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	path = model.MapMessagesFromProto(model.MessageFromProto, res.Messages)

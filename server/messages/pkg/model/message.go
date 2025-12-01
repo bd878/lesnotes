@@ -87,6 +87,7 @@ type (
 
 	ReadPathResponse struct {
 		Messages            []*Message          `json:"path"`
+		ThreadID            int64               `json:"thread"`
 	}
 
 	DeleteRequest struct {
