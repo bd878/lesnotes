@@ -15,6 +15,7 @@ together {
 	package front
 	package search
 	package threads
+	package billing
 }
 
 package Front as front {
@@ -237,6 +238,48 @@ package Threads as threads {
 		9143_raft -- "192.168.10.3:9143"
 		8143_raft -- "192.168.10.3:8143"
 		9143_grpc -- 9143_db
+	}
+}
+
+package Billing as billing {
+	component http as billing_http
+
+	billing_http -- "192.168.10.3:8188"
+
+	package "billing@9151" as 9151 {
+		component grpc as 9151_grpc
+		component raft as 9151_raft
+		component serf as 8151_serf
+		database PostgreSQL as 9151_db
+
+		9151_grpc -- "192.168.10.3:9151"
+		9151_raft -- "192.168.10.3:9151"
+		8151_raft -- "192.168.10.3:8151"
+		9151_grpc -- 9151_db
+	}
+
+	package "billing@9152" as 9152 {
+		component grpc as 9152_grpc
+		component raft as 9152_raft
+		component serf as 8152_serf
+		database PostgreSQL as 9152_db
+
+		9152_grpc -- "192.168.10.3:9152"
+		9152_raft -- "192.168.10.3:9152"
+		8152_raft -- "192.168.10.3:8152"
+		9152_grpc -- 9152_db
+	}
+
+	package "billing@9153" as 9153 {
+		component grpc as 9153_grpc
+		component raft as 9153_raft
+		component serf as 8153_serf
+		database PostgreSQL as 9153_db
+
+		9153_grpc -- "192.168.10.3:9153"
+		9153_raft -- "192.168.10.3:9153"
+		8153_raft -- "192.168.10.3:8153"
+		9153_grpc -- 9153_db
 	}
 }
 

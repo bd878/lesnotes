@@ -1,0 +1,31 @@
+openapi: 3.0.0
+info:
+  title: API Specification for billing service
+  description: |
+    This API keeps payments and invoices
+  version: 1.0.0
+paths:
+# INVOICE
+  /billing/v2/invoice:
+    post:
+      summary: Create invoice via json api
+      description: |
+        Creates invoice and returns its id
+      operationId: createInvoice
+
+# END INVOICE
+  /billing/v2/cancel:
+# CANCEL INVOICE
+
+# END CANCEL INVOICE
+
+# FULFILL INVOICE
+  /billing/v2/fulfill:
+
+# END FULFILL INVOICE
+
+# PAYMENT
+  /billing/v2/payment:
+    post:
+      summary: Process payment
+# END PAYMENT
