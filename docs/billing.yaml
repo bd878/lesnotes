@@ -6,26 +6,41 @@ info:
   version: 1.0.0
 paths:
 # INVOICE
-  /billing/v2/invoice:
+  /billing/v2/invoices:
     post:
       summary: Create invoice via json api
       description: |
         Creates invoice and returns its id
       operationId: createInvoice
 
+    get:
+      summary: Get invoice by id
+      description: |
+        Get invoice by id
+      operationId: getInvoice
+
 # END INVOICE
+
+# CANCEL PAYMENT
   /billing/v2/cancel:
-# CANCEL INVOICE
 
-# END CANCEL INVOICE
+# END CANCEL PAYMENT
 
-# FULFILL INVOICE
+# FULFILL PAYMENT
   /billing/v2/fulfill:
 
-# END FULFILL INVOICE
+# END FULFILL PAYMENT
 
 # PAYMENT
-  /billing/v2/payment:
+  /billing/v2/payments:
     post:
-      summary: Process payment
+      summary: Start payment
+      description: |
+        Start payment with given invoice
+
+    get:
+      summary: Get payment
+      description: |
+        Get payment with given invoice
+
 # END PAYMENT

@@ -1,0 +1,8 @@
+{
+	"node_name":             "search.http",
+	"rpc_addr":              "0.0.0.0:8086",
+	"http_addr":             "0.0.0.0:8082",
+	"users_service_addr":    "0.0.0.0:8085",
+	"sessions_service_addr": "0.0.0.0:8085",
+	"nats_addr":             "0.0.0.0:4222"
+}
