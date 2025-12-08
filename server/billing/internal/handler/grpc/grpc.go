@@ -14,7 +14,7 @@ type Controller interface {
 	ProceedPayment(ctx context.Context, id, userID int64) (err error)
 	CancelPayment(ctx context.Context, id, userID int64) (err error)
 	RefundPayment(ctx context.Context, id, userID int64) (err error)
-	GetInvoice(ctx context.Context, id, userID int64) (invoice *model.Invoice, err error)
+	GetInvoice(ctx context.Context, id string, userID int64) (invoice *model.Invoice, err error)
 	GetPayment(ctx context.Context, id, userID int64) (payment *model.Payment, err error)
 }
 
@@ -30,7 +30,7 @@ func New(ctrl Controller) *Handler {
 }
 
 func (h *Handler) CreateInvoice(ctx context.Context, req *api.CreateInvoiceRequest) (resp *api.CreateInvoiceResponse, err error) {
-	err := h.controller.CreateInvoice(ctx, req.Id, req.UserId, req.Currency, req.Total, req.Metadata)
+	err = h.controller.CreateInvoice(ctx, req.Id, req.UserId, req.Currency, req.Total, req.Metadata)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func (h *Handler) CreateInvoice(ctx context.Context, req *api.CreateInvoiceReque
 }
 
 func (h *Handler) StartPayment(ctx context.Context, req *api.StartPaymentRequest) (resp *api.StartPaymentResponse, err error) {
-	err := h.controller.StartPayment(ctx, req.Id, req.UserId, req.InvoiceId, req.Currency, req.Total, req.Metadata)
+	err = h.controller.StartPayment(ctx, req.Id, req.UserId, req.InvoiceId, req.Currency, req.Total, req.Metadata)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (h *Handler) StartPayment(ctx context.Context, req *api.StartPaymentRequest
 }
 
 func (h *Handler) ProceedPayment(ctx context.Context, req *api.ProceedPaymentRequest) (resp *api.ProceedPaymentResponse, err error) {
-	err := h.controller.ProceedPayment(ctx, req.Id, req.UserId)
+	err = h.controller.ProceedPayment(ctx, req.Id, req.UserId)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (h *Handler) ProceedPayment(ctx context.Context, req *api.ProceedPaymentReq
 }
 
 func (h *Handler) CancelPayment(ctx context.Context, req *api.CancelPaymentRequest) (resp *api.CancelPaymentResponse, err error) {
-	err := h.controller.CancelPayment(ctx, req.Id, req.UserId)
+	err = h.controller.CancelPayment(ctx, req.Id, req.UserId)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func (h *Handler) CancelPayment(ctx context.Context, req *api.CancelPaymentReque
 }
 
 func (h *Handler) RefundPayment(ctx context.Context, req *api.RefundPaymentRequest) (resp *api.RefundPaymentResponse, err error) {
-	err := h.controller.RefundPayment(ctx, req.Id, req.UserId)
+	err = h.controller.RefundPayment(ctx, req.Id, req.UserId)
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +109,7 @@ func (h *Handler) GetPayment(ctx context.Context, req *api.GetPaymentRequest) (r
 	}
 
 	resp = &api.GetPaymentResponse{
-		Invoice: model.PaymentToProto(payment),
+		Payment: model.PaymentToProto(payment),
 	}
 
 	return

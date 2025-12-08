@@ -28,6 +28,7 @@ type snapshot struct {
 	invoicesFile *os.File
 }
 
+// TODO: test
 func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {
 	// remove file after Persist failure
 	err := cleanup()

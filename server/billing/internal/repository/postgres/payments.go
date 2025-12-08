@@ -2,11 +2,9 @@ package postgres
 
 import (
 	"io"
-	"os"
 	"fmt"
 	"context"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/bd878/gallery/server/logger"
@@ -22,23 +20,49 @@ func NewPaymentsRepository(pool *pgxpool.Pool, tableName string) *PaymentsReposi
 	return &PaymentsRepository{tableName, pool}
 }
 
-func (m *PaymentsRepository) SavePayment(ctx context.Context, id, userID int64, invoiceID string, currency, status string, total int64, metadata []byte) (err error) {
+func (r *PaymentsRepository) SavePayment(ctx context.Context, id, userID int64, invoiceID string, currency, status string, total int64, metadata []byte) (err error) {
+	const insert = "INSERT INTO %s(id, invoice_id, user_id, status, currency, total, metadata) VALUES ($1, $2, $3, $4, $5, $6, $7)"
+
+	_, err = r.pool.Exec(ctx, r.table(insert), id, invoiceID, userID, status, currency, total, metadata)
+
 	return
 }
 
-func (m *PaymentsRepository) ProceedPayment(ctx context.Context, id, userID int64) (err error) {
+func (r *PaymentsRepository) ProceedPayment(ctx context.Context, id, userID int64) (err error) {
+	const update = "UPDATE %s SET status = 'processed' WHERE user_id = $1 AND id = $2"
+
+	_, err = r.pool.Exec(ctx, r.table(update), userID, id)
+
 	return
 }
 
-func (m *PaymentsRepository) CancelPayment(ctx context.Context, id, userID int64) (err error) {
+func (r *PaymentsRepository) CancelPayment(ctx context.Context, id, userID int64) (err error) {
+	const update = "UPDATE %s SET status = 'cancelled' WHERE user_id = $1 AND id = $2"
+
+	_, err = r.pool.Exec(ctx, r.table(update), userID, id)
+
 	return
 }
 
-func (m *PaymentsRepository) RefundPayment(ctx context.Context, id, userID int64) (err error) {
+func (r *PaymentsRepository) RefundPayment(ctx context.Context, id, userID int64) (err error) {
+	const update = "UPDATE %s SET status = 'refunded' WHERE user_id = $1 AND id = $2"
+
+	_, err = r.pool.Exec(ctx, r.table(update), userID, id)
+
 	return
 }
 
-func (m *PaymentsRepository) GetPayment(ctx context.Context, id, userID int64) (payment *billing.Payment, err error) {
+func (r *PaymentsRepository) GetPayment(ctx context.Context, id, userID int64) (payment *billing.Payment, err error) {
+	const query = "SELECT invoice_id, status, currency, total, metadata FROM %s WHERE user_id = $1 AND id = $2"
+
+	payment = &billing.Payment{
+		ID:     id,
+		UserID: userID,
+	}
+
+	err = r.pool.QueryRow(ctx, r.table(query), userID, id).Scan(&payment.InvoiceID, &payment.Status,
+		&payment.Currency, &payment.Total, &payment.Metadata)
+
 	return
 }
 
@@ -48,7 +72,7 @@ func (r *PaymentsRepository) Truncate(ctx context.Context) (err error) {
 	return
 }
 
-func (r *InvoicesRepository) Dump(ctx context.Context, writer io.Writer) (err error) {
+func (r *PaymentsRepository) Dump(ctx context.Context, writer io.Writer) (err error) {
 	var conn *pgxpool.Conn
 
 	conn, err = r.pool.Acquire(ctx)

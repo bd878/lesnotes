@@ -2,11 +2,9 @@ package postgres
 
 import (
 	"io"
-	"os"
 	"fmt"
 	"context"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/bd878/gallery/server/logger"
@@ -22,19 +20,41 @@ func NewInvoicesRepository(pool *pgxpool.Pool, tableName string) *InvoicesReposi
 	return &InvoicesRepository{tableName, pool}
 }
 
-func (m *InvoicesRepository) SaveInvoice(ctx context.Context, id string, userID int64, currency, status string, metadata []byte) (err error) {
+func (r *InvoicesRepository) SaveInvoice(ctx context.Context, id string, userID int64, currency, status string, total int64, metadata []byte) (err error) {
+	const insert = "INSERT INTO %s(id, user_id, currency, status, total, metadata) VALUES ($1, $2, $3, $4, $5, $6)"
+
+	_, err = r.pool.Exec(ctx, r.table(insert), id, userID, currency, status, total, metadata)
+
 	return
 }
 
-func (m *InvoicesRepository) PayInvoice(ctx context.Context, id string, userID int64) (err error) {
+func (r *InvoicesRepository) PayInvoice(ctx context.Context, id string, userID int64) (err error) {
+	const update = "UPDATE %s SET status = 'paid' WHERE user_id = $1 AND id = $2"
+
+	_, err = r.pool.Exec(ctx, r.table(update), userID, id)
+
 	return
 }
 
-func (m *InvoicesRepository) CancelInvoice(ctx context.Context, id string, userID int64) (err error) {
+func (r *InvoicesRepository) CancelInvoice(ctx context.Context, id string, userID int64) (err error) {
+	const update = "UPDATE %s SET status = 'cancel' WHERE user_id = $1 AND id = $2"
+
+	_, err = r.pool.Exec(ctx, r.table(update), userID, id)
+
 	return
 }
 
-func (m *InvoicesRepository) GetInvoice(ctx context.Context, id string, userID int64) (invoice *billing.Invoice, err error) {
+func (r *InvoicesRepository) GetInvoice(ctx context.Context, id string, userID int64) (invoice *billing.Invoice, err error) {
+	const query = "SELECT status, currency, total, metadata FROM %s WHERE user_id = $1 AND id = $2"
+
+	invoice = &billing.Invoice{
+		ID:      id,
+		UserID:  userID,
+	}
+
+	err = r.pool.QueryRow(ctx, r.table(query), userID, id).Scan(&invoice.Status, &invoice.Currency,
+		&invoice.Total, &invoice.Metadata)
+
 	return
 }
 

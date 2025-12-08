@@ -19,13 +19,11 @@ import (
 	hclog "github.com/hashicorp/go-hclog"
 
 	"github.com/bd878/gallery/server/waiter"
-	broker "github.com/bd878/gallery/server/nats"
 	membership "github.com/bd878/gallery/server/discovery/serf"
 	grpcmiddleware "github.com/bd878/gallery/server/internal/middleware/grpc"
 	repository "github.com/bd878/gallery/server/billing/internal/repository/postgres"
 	controller "github.com/bd878/gallery/server/billing/internal/controller/distributed"
 	grpchandler "github.com/bd878/gallery/server/billing/internal/handler/grpc"
-	streamhandler "github.com/bd878/gallery/server/billing/internal/handler/stream"
 )
 
 type Config struct {
@@ -78,10 +76,6 @@ func New(cfg Config) *Server {
 	}
 
 	if err := server.setupRaft(); err != nil {
-		panic(err)
-	}
-
-	if err := server.setupStream(); err != nil {
 		panic(err)
 	}
 
@@ -143,11 +137,6 @@ func (s *Server) setupRaft() error {
 	s.controller = control
 
 	return nil
-}
-
-func (s *Server) setupStream() error {
-	return streamhandler.RegisterIntegrationEventHandlers(broker.NewStream(s.nc),
-		streamhandler.NewIntegrationEventHandlers(s.controller))
 }
 
 func (s *Server) setupGRPC() error {
