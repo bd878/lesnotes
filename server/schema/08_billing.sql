@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS billing.payments
 	status         billing.payment_status        NOT NULL DEFAULT 'pending',
 	currency       billing.currency  NOT NULL DEFAULT 'rub',
 	total          bigint            NOT NULL,
+	metadata       jsonb             DEFAULT NULL,
 	created_at     timestamptz       NOT NULL DEFAULT NOW(),
 	updated_at     timestamptz       NOT NULL DEFAULT NOW(),
 	PRIMARY KEY(id)
@@ -21,24 +22,6 @@ CREATE TABLE IF NOT EXISTS billing.payments
 CREATE TRIGGER created_at_billing_payments_trgr BEFORE UPDATE ON billing.payments FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
 CREATE TRIGGER updated_at_billing_payments_trgr BEFORE UPDATE ON billing.payments FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 
-CREATE TABLE IF NOT EXISTS billing.telegram
-(
-	id             bigint            NOT NULL,
-	user_id        bigint            NOT NULL,
-	invoice_id     VARCHAR(256)      NOT NULL,
-	status         billing.payment_status        NOT NULL DEFAULT 'pending',
-	telegram_payment_charge_id     text          NOT NULL,
-	provider_payment_charge_id     text          NOT NULL,
-	currency       billing.currency  NOT NULL,
-	total_amount   integer           NOT NULL,
-	created_at     timestamptz       NOT NULL DEFAULT NOW(),
-	updated_at     timestamptz       NOT NULL DEFAULT NOW(),
-	PRIMARY KEY(id)
-);
-
-CREATE TRIGGER created_at_billing_telegram_trgr BEFORE UPDATE ON billing.telegram FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
-CREATE TRIGGER updated_at_billing_telegram_trgr BEFORE UPDATE ON billing.telegram FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
-
 CREATE TABLE IF NOT EXISTS billing.invoices
 (
 	id             VARCHAR(256)            UNIQUE NOT NULL,
@@ -46,6 +29,7 @@ CREATE TABLE IF NOT EXISTS billing.invoices
 	status         billing.invoice_status  NOT NULL DEFAULT 'unpaid',
 	currency       billing.currency        NOT NULL DEFAULT 'rub',
 	total          bigint                  NOT NULL,
+	metadata       jsonb                   DEFAULT NULL,
 	created_at     timestamptz             NOT NULL DEFAULT NOW(),
 	updated_at     timestamptz             NOT NULL DEFAULT NOW(),
 	PRIMARY KEY(id)

@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+option go_package = "github.com/bd878/gallery/server/billing/internal/controller/distributed";
+
+message AppendInvoiceCommand {
+	string  id = 1;
+	int64   user_id = 2;
+	string  currency = 3;
+	string  status = 4;
+	int64   total = 5;
+	optional bytes metadata = 6;
+}
+
+message AppendPaymentCommand {
+	int64   id = 1;
+	int64   user_id = 2;
+	string  invoice_id = 3;
+	string  status = 4;
+	string  currency = 5;
+	int64   total = 6;
+	optional bytes metadata = 7;
+}
+
+message ProceedPaymentCommand {
+	int64   id = 1;
+	int64   user_id = 2;
+}
+
+message PayInvoiceCommand {
+	string  id = 1;
+	int64   user_id = 2;
+}
+
+message CancelPaymentCommand {
+	int64   id = 1;
+	int64   user_id = 2;
+}
+
+message CancelInvoiceCommand {
+	string  id = 1;
+	int64   user_id = 2;
+}
+
+message RefundPaymentCommand {
+	int64   id = 1;
+	int64   user_id = 2;
+}

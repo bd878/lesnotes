@@ -17,5 +17,6 @@ type Config struct {
 	RaftBootstrap        bool        `json:"raft_bootstrap"`
 	DataPath             string      `json:"data_path"`
 	PGConn               string      `json:"pg_conn"`
-	TableName            string      `json:"table_name"`
+	PaymentsTableName    string      `json:"payments_table_name"`
+	InvoicesTableName    string      `json:"invoices_table_name`
 }

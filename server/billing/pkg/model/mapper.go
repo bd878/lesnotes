@@ -13,6 +13,7 @@ func InvoiceFromProto(proto *api.Invoice) *Invoice {
 		Total:          proto.Total,
 		CreatedAt:      proto.CreatedAt,
 		UpdatedAt:      proto.UpdatedAt,
+		Metadata:       proto.Metadata,
 	}
 }
 
@@ -25,6 +26,7 @@ func InvoiceToProto(invoice *Invoice) *api.Invoice {
 		Status:         invoice.Status,
 		CreatedAt:      invoice.CreatedAt,
 		UpdatedAt:      invoice.UpdatedAt,
+		Metadata:       invoice.Metadata,
 	}
 }
 
@@ -38,6 +40,7 @@ func PaymentFromProto(proto *api.Payment) *Payment {
 		Total:          proto.Total,
 		CreatedAt:      proto.CreatedAt,
 		UpdatedAt:      proto.UpdatedAt,
+		Metadata:       proto.Metadata,
 	}
 }
 
@@ -51,6 +54,7 @@ func PaymentToProto(payment *Payment) *api.Payment {
 		Status:         payment.Status,
 		CreatedAt:      payment.CreatedAt,
 		UpdatedAt:      payment.UpdatedAt,
+		Metadata:       payment.Metadata,
 	}
 }
 

@@ -59,7 +59,7 @@ func New(conf Config) *Server {
 	mux.Handle("POST  /billing/v2/payments", middleware.Build(handler.StartPaymentJsonAPI))
 	mux.Handle("GET   /billing/v2/payments", middleware.Build(handler.GetPaymentJsonAPI))
 	mux.Handle("POST  /billing/v2/cancel",   middleware.Build(handler.CancelPaymentJsonAPI))
-	mux.Handle("POST  /billing/v2/fulfill",  middleware.Build(handler.FulfillPaymentJsonAPI))
+	mux.Handle("POST  /billing/v2/refund",   middleware.Build(handler.RefundPaymentJsonAPI))
 
 	return server
 }
