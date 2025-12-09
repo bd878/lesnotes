@@ -50,15 +50,18 @@ func New(conf Config) *Server {
 
 	handler := httphandler.New(ctrl)
 
+	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
+	mux.Handle("GET   /billing/v1/invoices", middleware.Build(handler.GetInvoice))
+	mux.Handle("GET   /billing/v1/payments", middleware.Build(handler.GetPayment))
+
 	middleware.NoAuth()
 	mux.Handle("GET   /billing/v1/status", middleware.Build(handler.GetStatus))
 
 	middleware.WithAuth(httpmiddleware.TokenAuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
 	mux.Handle("POST  /billing/v2/invoices", middleware.Build(handler.CreateInvoiceJsonAPI))
-	mux.Handle("GET   /billing/v2/invoices", middleware.Build(handler.GetInvoiceJsonAPI))
 	mux.Handle("POST  /billing/v2/payments", middleware.Build(handler.StartPaymentJsonAPI))
-	mux.Handle("GET   /billing/v2/payments", middleware.Build(handler.GetPaymentJsonAPI))
 	mux.Handle("POST  /billing/v2/cancel",   middleware.Build(handler.CancelPaymentJsonAPI))
+	mux.Handle("POST  /billing/v2/proceed",  middleware.Build(handler.ProceedPaymentJsonAPI))
 	mux.Handle("POST  /billing/v2/refund",   middleware.Build(handler.RefundPaymentJsonAPI))
 
 	return server

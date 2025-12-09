@@ -49,16 +49,8 @@ type (
 		Description string        `json:"description"`
 	}
 
-	GetInvoiceRequest struct {
-		ID          string        `json:"id"`
-	}
-
 	GetInvoiceResponse struct {
 		Invoice     *Invoice      `json:"invoice"`
-	}
-
-	GetPaymentRequest struct {
-		ID          int64         `json:"id"`
 	}
 
 	GetPaymentResponse struct {
@@ -73,11 +65,11 @@ type (
 		Description string        `json:"description"`
 	}
 
-	FulfillPaymentRequest struct {
-		ID          string        `json:"id"`
+	ProceedPaymentRequest struct {
+		ID          int64         `json:"id"`
 	}
 
-	FulfillPaymentResponse struct {
+	ProceedPaymentResponse struct {
 		Description string        `json:"description"`
 	}
 

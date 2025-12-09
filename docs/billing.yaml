@@ -12,35 +12,394 @@ paths:
       description: |
         Creates invoice and returns its id
       operationId: createInvoice
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createInvoiceJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/createInvoiceOK'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/serverError'
 
+  /billing/v1/invoices:
+    parameters:
+      - $ref: '#/components/parameters/token'
+      - name: id
+        description: Invoice id
+        in: query
+        required: true
     get:
       summary: Get invoice by id
       description: |
         Get invoice by id
       operationId: getInvoice
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: "#/components/schemas/getInvoiceOK"
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/serverError'
 
 # END INVOICE
 
 # CANCEL PAYMENT
   /billing/v2/cancel:
+    post:
+      summary: Cancel payment
+      description: |
+        Cancel payment with given id. Cancels invoice also
+      operationId: cancelPayment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/cancelPaymentJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/cancelPaymentOK'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/serverError'
 
 # END CANCEL PAYMENT
 
-# FULFILL PAYMENT
-  /billing/v2/fulfill:
+# PROCEED PAYMENT
+  /billing/v2/proceed:
+    post:
+      summary: Proceed payment
+      description: |
+        Proceed payment with given id. Proceedes invoice also
+      operationId: proceedPayment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/proceedPaymentJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/proceedPaymentOK'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/serverError'
 
-# END FULFILL PAYMENT
+# END PROCEED PAYMENT
+
+# REFUND PAYMENT
+  /billing/v2/proceed:
+    post:
+      summary: Refund payment
+      description: |
+        Refund payment with given id
+      operationId: refundPayment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/refundPaymentJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/refundPaymentOK'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/serverError'
+
+# END REFUND PAYMENT
 
 # PAYMENT
   /billing/v2/payments:
     post:
       summary: Start payment
       description: |
-        Start payment with given invoice
+        Start payment with given invoice. Creates new payment
+      operationId: startPayment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/startPaymentJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/startPaymentOK'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/serverError'
 
+  /billing/v1/payments:
+    parameters:
+      - $ref: '#/components/parameters/token'
+      - name: id
+        description: Payment id
+        in: query
+        required: true
     get:
       summary: Get payment
       description: |
-        Get payment with given invoice
+        Get payment with given payment id
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: "#/components/schemas/getPaymentOK"
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/serverError'
 
 # END PAYMENT
+components:
+  parameters:
+    token:
+      name: Cookie
+      in: header
+      schema:
+        type: string
+        example: token=AAAAAA
+
+  schemas:
+# ERROR
+    serverError:
+      type: object
+      status:
+        type: string
+        default: "error"
+      error:
+        type: object
+        properties:
+          code:
+            type: integer
+          explain:
+            type: string
+# END ERROR
+
+# INVOICE
+    createInvoiceJson:
+      type: object
+      token:
+        type: string
+        example: "AAAAAA"
+      request:
+        type: object
+        properties:
+          id:
+            type: string
+            required: true
+          currency:
+            type: string
+            required: true
+          total:
+            type: integer
+            required: true
+          metadata:
+            type: string
+            format: binary
+
+    createInvoiceOK:
+      type: object
+      status:
+        type: string
+      response:
+        type: object
+        properties:
+          description:
+            type: string
+
+    getInvoiceOK:
+      type: object
+      properties:
+        invoice:
+          schema:
+            $ref: '#/components/schemas/invoice'
+
+# END INVOICE
+
+# PAYMENT
+    startPaymentJson:
+      type: object
+      token:
+        type: string
+        example: "AAAAAA"
+      request:
+        type: object
+        properties:
+          id:
+            type: string
+            required: true
+          invoice_id:
+            type: string
+            required: true
+          total:
+            type: integer
+            required: true
+          currency:
+            type: string
+            required: true
+          meetadata:
+            type: string
+            format: binary
+
+    getPaymentOK:
+      type: object
+      properties:
+        payment:
+          schema:
+            $ref: '#/components/schemas/payment'
+
+    cancelPaymentJson:
+      type: object
+      token:
+        type: string
+        example: "AAAAAA"
+      request:
+        type: object
+        properties:
+          id:
+            type: integer
+            required: true
+
+    cancelPaymentOK:
+      type: object
+      status:
+        type: string
+      response:
+        type: object
+        properties:
+          description:
+            type: string
+
+    refundPaymentJson:
+      type: object
+      token:
+        type: string
+        example: "AAAAAA"
+      request:
+        type: object
+        properties:
+          id:
+            type: integer
+            required: true
+
+    refundPaymentOK:
+      type: object
+      status:
+        type: string
+      response:
+        type: object
+        properties:
+          description:
+            type: string
+
+    proceedPaymentJson:
+      type: object
+      token:
+        type: string
+        example: "AAAAAA"
+      request:
+        type: object
+        properties:
+          id:
+            type: integer
+            required: true
+
+    proceedPaymentOK:
+      type: object
+      status:
+        type: string
+      response:
+        type: object
+        properties:
+          description:
+            type: string
+# END PAYMENT
+
+    invoice:
+      type: object
+      properties:
+        id:
+          type: string
+        user_id:
+          type: integer
+        status:
+          type: string
+        currency:
+          type: string
+        total:
+          type: integer
+        created_at:
+          type: string
+        updated_at:
+          type: string
+        metadata:
+          type: string
+          format: binary
+
+    payment:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        invoice_id:
+          type: string
+        status:
+          type: string
+        currency:
+          type: string
+        total:
+          type: integer
+        created_at:
+          type: string
+        updated_at:
+          type: string
+        metadata:
+          type: string
+          format: binary

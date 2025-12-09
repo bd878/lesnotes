@@ -43,6 +43,8 @@ func AuthBuilder(log *logger.Logger, users UsersGateway, sessions SessionsGatewa
 	}
 }
 
+// TODO: add Authorization: bearer <token> auth handler method
+// now we have Cookie method and post
 func (b *authBuilder) Handle(w http.ResponseWriter, req *http.Request) (err error) {
 	var (
 		user   *users.User

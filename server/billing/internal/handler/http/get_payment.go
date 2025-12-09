@@ -1,7 +1,9 @@
 package http
 
 import (
+	"fmt"
 	"net/http"
+	"strconv"
 	"encoding/json"
 
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
@@ -10,7 +12,9 @@ import (
 	server "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) GetInvoiceJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
+func (h *Handler) GetPayment(w http.ResponseWriter, req *http.Request) (err error) {
+	var paymentID int64
+
 	user, ok := req.Context().Value(middleware.UserContextKey{}).(*usersmodel.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
@@ -25,50 +29,53 @@ func (h *Handler) GetInvoiceJsonAPI(w http.ResponseWriter, req *http.Request) (e
 		return
 	}
 
-	data, ok := req.Context().Value(middleware.RequestContextKey{}).(json.RawMessage)
-	if !ok {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status: "error",
-			Error:  &server.ErrorCode{
-				Code:    server.CodeNoBody,
-				Explain: "request required",
-			},
-		})
+	values := req.URL.Query()
 
-		return
-	}
+	if values.Has("id") {
+		id, err := strconv.Atoi(values.Get("id"))
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(server.ServerResponse{
+				Status: "error",
+				Error: &server.ErrorCode{
+					Code:    server.CodeWrongQuery,
+					Explain: fmt.Sprintf("wrong \"%s\" query param", "id"),
+				},
+			})
 
-	var request billingmodel.GetInvoiceRequest
-	if err := json.Unmarshal(data, &request); err != nil {
+			return err
+		}
+
+		paymentID = int64(id)
+	} else {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code:    billingmodel.CodeNoRequest,
-				Explain: "failed to get invoice request",
+				Code:    server.CodeNoID,
+				Explain: "no payment id",
 			},
 		})
 
 		return err
 	}
 
-	invoice, err := h.controller.GetInvoice(req.Context(), request.ID, user.ID)
+	payment, err := h.controller.GetPayment(req.Context(), paymentID, user.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:  &server.ErrorCode{
 				Code:    server.CodeWrongFormat,
-				Explain: "failed to get invoice",
+				Explain: "failed to get payment",
 			},
 		})
 
 		return err
 	}
 
-	response, err := json.Marshal(billingmodel.GetInvoiceResponse{
-		Invoice:     invoice,
+	response, err := json.Marshal(billingmodel.GetPaymentResponse{
+		Payment: payment,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

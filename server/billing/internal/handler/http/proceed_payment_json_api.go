@@ -10,7 +10,7 @@ import (
 	server "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) GetPaymentJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
+func (h *Handler) ProceedPaymentJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
 	user, ok := req.Context().Value(middleware.UserContextKey{}).(*usersmodel.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
@@ -39,36 +39,36 @@ func (h *Handler) GetPaymentJsonAPI(w http.ResponseWriter, req *http.Request) (e
 		return
 	}
 
-	var request billingmodel.GetPaymentRequest
+	var request billingmodel.ProceedPaymentRequest
 	if err := json.Unmarshal(data, &request); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
 				Code:    billingmodel.CodeNoRequest,
-				Explain: "failed to get payment request",
+				Explain: "failed to parse proceed payment request",
 			},
 		})
 
 		return err
 	}
 
-	payment, err := h.controller.GetPayment(req.Context(), request.ID, user.ID)
+	err = h.controller.ProceedPayment(req.Context(), request.ID, user.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:  &server.ErrorCode{
 				Code:    server.CodeWrongFormat,
-				Explain: "failed to get payment",
+				Explain: "failed to proceed payment",
 			},
 		})
 
 		return err
 	}
 
-	response, err := json.Marshal(billingmodel.GetPaymentResponse{
-		Payment: payment,
+	response, err := json.Marshal(billingmodel.ProceedPaymentResponse{
+		Description: "proceeded",
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
