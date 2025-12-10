@@ -27,7 +27,7 @@ type (
 	}
 
 	CreateInvoiceRequest struct {
-		ID          string            `json:"string"`
+		ID          string            `json:"id"`
 		Currency    string            `json:"currency"`
 		Total       int64             `json:"total"`
 		Metadata    json.RawMessage   `json:"metadata"`

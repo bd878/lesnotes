@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS billing.payments
 	status         billing.payment_status        NOT NULL DEFAULT 'pending',
 	currency       billing.currency  NOT NULL DEFAULT 'rub',
 	total          bigint            NOT NULL,
-	metadata       jsonb             DEFAULT NULL,
+	metadata       bytea             DEFAULT NULL,
 	created_at     timestamptz       NOT NULL DEFAULT NOW(),
 	updated_at     timestamptz       NOT NULL DEFAULT NOW(),
 	PRIMARY KEY(id)
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS billing.invoices
 	status         billing.invoice_status  NOT NULL DEFAULT 'unpaid',
 	currency       billing.currency        NOT NULL DEFAULT 'rub',
 	total          bigint                  NOT NULL,
-	metadata       jsonb                   DEFAULT NULL,
+	metadata       bytea                   DEFAULT NULL,
 	created_at     timestamptz             NOT NULL DEFAULT NOW(),
 	updated_at     timestamptz             NOT NULL DEFAULT NOW(),
 	PRIMARY KEY(id)

@@ -18,5 +18,5 @@ type Config struct {
 	DataPath             string      `json:"data_path"`
 	PGConn               string      `json:"pg_conn"`
 	PaymentsTableName    string      `json:"payments_table_name"`
-	InvoicesTableName    string      `json:"invoices_table_name`
+	InvoicesTableName    string      `json:"invoices_table_name"`
 }

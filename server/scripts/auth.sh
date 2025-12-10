@@ -8,7 +8,7 @@ stage=${STAGE:-"stage."}
 
 cmd=`cat <<HERE
 sed -e "s/%STAGE%/$stage/g" ./curl/auth.curl |
-curl -b $cookie -v -K -
+curl -b $cookie -K -
 HERE`
 result=`eval "$cmd"`
 echo $result

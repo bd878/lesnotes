@@ -17,7 +17,7 @@ type InvoicesRepository struct {
 }
 
 func NewInvoicesRepository(pool *pgxpool.Pool, tableName string) *InvoicesRepository {
-	return &InvoicesRepository{tableName, pool}
+	return &InvoicesRepository{tableName: tableName, pool: pool}
 }
 
 func (r *InvoicesRepository) SaveInvoice(ctx context.Context, id string, userID int64, currency, status string, total int64, metadata []byte) (err error) {
