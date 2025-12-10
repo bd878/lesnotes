@@ -1,0 +1,3 @@
+url = https://%STAGE%lesnotes.space/billing/v2/cancel
+-H "Content-Type: application/json"
+--data-binary %JSON%

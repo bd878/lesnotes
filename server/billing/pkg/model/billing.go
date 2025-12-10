@@ -11,7 +11,7 @@ type (
 		Total       int64             `json:"total"`
 		CreatedAt   string            `json:"created_at"`
 		UpdatedAt   string            `json:"updated_at"`
-		Metadata    json.RawMessage   `json:"metadata"`
+		Metadata    json.RawMessage   `json:"metadata,omitempty"`
 	}
 
 	Payment struct {
@@ -23,7 +23,7 @@ type (
 		Total       int64             `json:"total"`
 		CreatedAt   string            `json:"created_at"`
 		UpdatedAt   string            `json:"updated_at"`
-		Metadata    json.RawMessage   `json:"metadata"`
+		Metadata    json.RawMessage   `json:"metadata,omitempty"`
 	}
 
 	CreateInvoiceRequest struct {

@@ -282,7 +282,7 @@ components:
           currency:
             type: string
             required: true
-          meetadata:
+          metadata:
             type: string
             format: binary
 
