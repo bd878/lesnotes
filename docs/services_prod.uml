@@ -15,6 +15,7 @@ together {
 	package front
 	package search
 	package threads
+	package billing
 }
 
 package Front as front {
@@ -221,9 +222,9 @@ package Threads as threads {
 		component serf as 8041_serf
 		database PostgreSQL as 9041_db
 
-		9041_grpc -- "192.168.10.3:9041"
-		9041_raft -- "192.168.10.3:9041"
-		8041_raft -- "192.168.10.3:8041"
+		9041_grpc -- "192.168.10.2:9041"
+		9041_raft -- "192.168.10.2:9041"
+		8041_raft -- "192.168.10.2:8041"
 		9041_grpc -- 9041_db
 	}
 
@@ -233,9 +234,9 @@ package Threads as threads {
 		component serf as 8042_serf
 		database PostgreSQL as 9042_db
 
-		9042_grpc -- "192.168.10.3:9042"
-		9042_raft -- "192.168.10.3:9042"
-		8042_raft -- "192.168.10.3:8042"
+		9042_grpc -- "192.168.10.2:9042"
+		9042_raft -- "192.168.10.2:9042"
+		8042_raft -- "192.168.10.2:8042"
 		9042_grpc -- 9042_db
 	}
 
@@ -245,10 +246,52 @@ package Threads as threads {
 		component serf as 8043_serf
 		database PostgreSQL as 9043_db
 
-		9043_grpc -- "192.168.10.3:9043"
-		9043_raft -- "192.168.10.3:9043"
-		8043_raft -- "192.168.10.3:8043"
+		9043_grpc -- "192.168.10.2:9043"
+		9043_raft -- "192.168.10.2:9043"
+		8043_raft -- "192.168.10.2:8043"
 		9043_grpc -- 9043_db
+	}
+}
+
+package Billing as billing {
+	component http as billing_http
+
+	billing_http -- "192.168.10.2:8088"
+
+	package "billing@9051" as 9051 {
+		component grpc as 9051_grpc
+		component raft as 9051_raft
+		component serf as 8051_serf
+		database PostgreSQL as 9051_db
+
+		9051_grpc -- "192.168.10.2:9051"
+		9051_raft -- "192.168.10.2:9051"
+		8051_raft -- "192.168.10.2:8051"
+		9051_grpc -- 9051_db
+	}
+
+	package "billing@9052" as 9052 {
+		component grpc as 9052_grpc
+		component raft as 9052_raft
+		component serf as 8052_serf
+		database PostgreSQL as 9052_db
+
+		9052_grpc -- "192.168.10.20:9052"
+		9052_raft -- "192.168.10.20:9052"
+		8052_raft -- "192.168.10.20:8052"
+		9052_grpc -- 9052_db
+	}
+
+	package "billing@9053" as 9053 {
+		component grpc as 9053_grpc
+		component raft as 9053_raft
+		component serf as 8053_serf
+		database PostgreSQL as 9053_db
+
+		9053_grpc -- "192.168.10.30:9053"
+		9053_raft -- "192.168.10.30:9053"
+		8053_raft -- "192.168.10.30:8053"
+		9053_grpc -- 9053_db
 	}
 }
 
