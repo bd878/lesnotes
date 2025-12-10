@@ -4,9 +4,9 @@ import (
 	"io"
 	"os"
 	"bufio"
+	"strings"
 	"context"
 	"archive/tar"
-	"path/filepath"
 
 	"github.com/hashicorp/raft"
 	"github.com/bd878/gallery/server/logger"
@@ -16,12 +16,6 @@ import (
  * Merge two dumps into tar archive
  */
 
-var (
-	invoicesFileName = "invoices.bin"
-	paymentsFileName = "payments.bin"
-	tarFileName      = "billing_snapshot.tar"
-)
-
 type snapshot struct {
 	tarFile      *os.File
 	paymentsFile *os.File
@@ -30,20 +24,21 @@ type snapshot struct {
 
 // TODO: test
 func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {
-	// remove file after Persist failure
-	err := cleanup()
-	if err != nil {
-		return nil, err
-	}
+	var err error
 
 	s := &snapshot{}
 
-	s.invoicesFile, err = os.CreateTemp("", invoicesFileName)
+	s.invoicesFile, err = os.CreateTemp("", "invoices_*.bin")
 	if err != nil {
 		return nil, err
 	}
 
-	s.paymentsFile, err = os.CreateTemp("", paymentsFileName)
+	s.paymentsFile, err = os.CreateTemp("", "payments_*.bin")
+	if err != nil {
+		return nil, err
+	}
+
+	s.tarFile, err = os.CreateTemp("", "billing_*.tar")
 	if err != nil {
 		return nil, err
 	}
@@ -83,12 +78,24 @@ func (f *fsm) Restore(reader io.ReadCloser) (err error) {
 			return err
 		}
 
-		if hdr.Name == invoicesFileName {
+		if strings.Contains(hdr.Name, "invoices") {
+			err = f.invoicesRepo.Truncate(context.Background())
+			if err != nil {
+				logger.Errorw("truncate returned error", "error", err)
+				return err
+			}
+
 			err = f.invoicesRepo.Restore(context.Background(), tr)
 			if err != nil {
 				return err
 			}
-		} else if hdr.Name == paymentsFileName {
+		} else if strings.Contains(hdr.Name, "payments") {
+			err = f.paymentsRepo.Truncate(context.Background())
+			if err != nil {
+				logger.Errorw("truncate returned error", "error", err)
+				return err
+			}
+
 			err = f.paymentsRepo.Restore(context.Background(), tr)
 			if err != nil {
 				return err
@@ -102,18 +109,21 @@ func (f *fsm) Restore(reader io.ReadCloser) (err error) {
 }
 
 func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
-	// create tar file
-	s.tarFile, err = os.CreateTemp("", tarFileName)
-	if err != nil {
-		return err
-	}
-
 	tarBuf := bufio.NewWriter(s.tarFile)
-
 	tw := tar.NewWriter(tarBuf)
 
 	// seek files
+	err = s.paymentsFile.Sync()
+	if err != nil {
+		return
+	}
+
 	_, err = s.paymentsFile.Seek(0, os.SEEK_SET)
+	if err != nil {
+		return
+	}
+
+	err = s.invoicesFile.Sync()
 	if err != nil {
 		return
 	}
@@ -129,6 +139,8 @@ func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
 		return err
 	}
 
+	logger.Debugw("persisting", "payments size", paymentsSize)
+
 	paymentsHdr := &tar.Header{
 		Name: s.paymentsFile.Name(),
 		Mode: 0600,
@@ -140,16 +152,24 @@ func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
 		return
 	}
 
-	_, err = io.Copy(tw, s.paymentsFile)
+	n, err := io.Copy(tw, s.paymentsFile)
 	if err != nil {
 		return
 	}
+
+	if err = tw.Flush(); err != nil {
+		return
+	}
+
+	logger.Debugw("copied payments bytes to tar writer", "bytes", n)
 
 	// write invoices to tar
 	invoicesSize, err := fileSize(s.invoicesFile)
 	if err != nil {
 		return err
 	}
+
+	logger.Debugw("persisting", "invoices size", invoicesSize)
 
 	invoicesHdr := &tar.Header{
 		Name: s.invoicesFile.Name(),
@@ -162,17 +182,28 @@ func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
 		return
 	}
 
-	_, err = io.Copy(tw, s.invoicesFile)
+	n, err = io.Copy(tw, s.invoicesFile)
 	if err != nil {
 		return
 	}
 
+	if err = tw.Flush(); err != nil {
+		return
+	}
+
+	logger.Debugw("copied invoices bytes to tar writer", "bytes", n)
+
 	// dump tar to sink
+	if err = tw.Close(); err != nil {
+		return
+	}
+
 	if err = tarBuf.Flush(); err != nil {
 		return
 	}
 
-	if err = tw.Close(); err != nil {
+	err = s.tarFile.Sync()
+	if err != nil {
 		return
 	}
 
@@ -181,39 +212,34 @@ func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
 		return
 	}
 
-	tr := tar.NewReader(s.tarFile)
+	tarSize, err := fileSize(s.tarFile)
+	if err != nil {
+		return err
+	}
 
-	_, err = io.Copy(sink, tr)
+	logger.Debugw("tar size", "bytes", tarSize)
+
+	n, err = io.Copy(sink, s.tarFile)
 	defer sink.Cancel()
 	if err != nil {
-		return
+		return err
 	}
+
+	logger.Debugw("persisting", "copied bytes", n)
 
 	return sink.Close()
 }
 
 func (s *snapshot) Release() {
-	if err := s.tarFile.Close(); err != nil {
-		logger.Errorw("failed to close tar file", "error", err)
-	}
-
-	if err := s.paymentsFile.Close(); err != nil {
-		logger.Errorw("failed to close payments file", "error", err)
-	}
-
-	if err := s.invoicesFile.Close(); err != nil {
-		logger.Errorw("failed to close invoices file", "error", err)
-	}
-
-	if err := os.Remove(filepath.Join(os.TempDir(), s.tarFile.Name())); err != nil {
+	if err := os.Remove(s.tarFile.Name()); err != nil {
 		logger.Errorw("cannot remove tar file", "error", err)
 	}
 
-	if err := os.Remove(filepath.Join(os.TempDir(), s.paymentsFile.Name())); err != nil {
+	if err := os.Remove(s.paymentsFile.Name()); err != nil {
 		logger.Errorw("cannot remove payments file", "error", err)
 	}
 
-	if err := os.Remove(filepath.Join(os.TempDir(), s.invoicesFile.Name())); err != nil {
+	if err := os.Remove(s.invoicesFile.Name()); err != nil {
 		logger.Errorw("cannot remove invoices file", "error", err)
 	}
 }
@@ -221,33 +247,6 @@ func (s *snapshot) Release() {
 /**
  * Utils
  */
-func cleanup() (err error) {
-	_, err = os.Stat(tarFileName)
-	if err == nil || err != os.ErrNotExist {
-		err = os.Remove(filepath.Join(os.TempDir(), tarFileName))
-		if err != nil {
-			return
-		}
-	}
-
-	_, err = os.Stat(invoicesFileName)
-	if err == nil || err != os.ErrNotExist {
-		err = os.Remove(filepath.Join(os.TempDir(), invoicesFileName))
-		if err != nil {
-			return
-		}
-	}
-
-	_, err = os.Stat(paymentsFileName)
-	if err == nil || err != os.ErrNotExist {
-		err = os.Remove(filepath.Join(os.TempDir(), paymentsFileName))
-		if err != nil {
-			return
-		}
-	}
-
-	return
-}
 
 func fileSize(f *os.File) (size int64, err error) {
 	info, err := f.Stat()

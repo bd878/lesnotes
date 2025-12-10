@@ -36,4 +36,4 @@ CREATE TRIGGER created_at_search_files_trgr BEFORE UPDATE ON search.files FOR EA
 CREATE TRIGGER updated_at_search_files_trgr BEFORE UPDATE ON search.files FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 
 GRANT USAGE ON SCHEMA search TO lesnotes_admin;
-GRANT INSERT, UPDATE, DELETE, SELECT ON ALL TABLES IN SCHEMA search TO lesnotes_admin;
+GRANT INSERT, UPDATE, DELETE, SELECT, TRUNCATE ON ALL TABLES IN SCHEMA search TO lesnotes_admin;

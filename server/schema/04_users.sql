@@ -22,4 +22,4 @@ CREATE TRIGGER created_at_users_trgr BEFORE UPDATE ON users.users FOR EACH ROW E
 CREATE TRIGGER updated_at_users_trgr BEFORE UPDATE ON users.users FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 
 GRANT USAGE ON SCHEMA users TO lesnotes_admin;
-GRANT INSERT, UPDATE, DELETE, SELECT ON ALL TABLES IN SCHEMA users TO lesnotes_admin;
+GRANT INSERT, UPDATE, DELETE, SELECT, TRUNCATE ON ALL TABLES IN SCHEMA users TO lesnotes_admin;

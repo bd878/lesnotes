@@ -19,4 +19,4 @@ CREATE TRIGGER created_at_threads_trgr BEFORE UPDATE ON threads.threads FOR EACH
 CREATE TRIGGER updated_at_threads_trgr BEFORE UPDATE ON threads.threads FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 
 GRANT USAGE ON SCHEMA threads TO lesnotes_admin;
-GRANT INSERT, UPDATE, DELETE, SELECT ON ALL TABLES IN SCHEMA threads TO lesnotes_admin;
+GRANT INSERT, UPDATE, DELETE, SELECT, TRUNCATE ON ALL TABLES IN SCHEMA threads TO lesnotes_admin;

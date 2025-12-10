@@ -12,4 +12,4 @@ CREATE TABLE IF NOT EXISTS sessions.sessions
 CREATE TRIGGER created_at_sessions_trgr BEFORE UPDATE ON sessions.sessions FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
 
 GRANT USAGE ON SCHEMA sessions TO lesnotes_admin;
-GRANT INSERT, UPDATE, DELETE, SELECT ON ALL TABLES IN SCHEMA sessions TO lesnotes_admin;
+GRANT INSERT, UPDATE, DELETE, SELECT, TRUNCATE ON ALL TABLES IN SCHEMA sessions TO lesnotes_admin;

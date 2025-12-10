@@ -39,7 +39,7 @@ CREATE TRIGGER created_at_billing_invoices_trgr BEFORE UPDATE ON billing.invoice
 CREATE TRIGGER updated_at_billing_invoices_trgr BEFORE UPDATE ON billing.invoices FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 
 GRANT USAGE ON SCHEMA billing TO lesnotes_admin;
-GRANT INSERT, UPDATE, DELETE, SELECT ON ALL TABLES IN SCHEMA billing TO lesnotes_admin;
+GRANT INSERT, UPDATE, DELETE, SELECT, TRUNCATE ON ALL TABLES IN SCHEMA billing TO lesnotes_admin;
 
 GRANT USAGE ON TYPE billing.currency TO lesnotes_admin;
 GRANT USAGE ON TYPE billing.invoice_status TO lesnotes_admin;
