@@ -64,7 +64,7 @@ router
 	.get("/tg_auth", authTelegram)
 	.get("/new", etag, getLanguage, newMessage)
 	.get("/m/:user/:id", etag, getLanguage, getToken, loadMessage, message)
-	.get("/m/:name", etag, getLanguage, getToken, loadMessage, message)
+	.get("/m/:name", etag, getLanguage, getFontSize, getTheme, getToken, loadMessage, message)
 	.get("/miniapp", etag, getLanguage, miniapp)
 	.get('/:any*', getLanguage, xxx)
 

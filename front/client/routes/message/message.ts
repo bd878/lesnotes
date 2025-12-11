@@ -5,34 +5,25 @@ import api from '../../api';
 import * as is from '../../third_party/is';
 import { readFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
+import Builder from '../builder';
 
 async function readPublicMessage(ctx) {
+	const { message } = ctx.state
+
 	ctx.set({ "Cache-Control": "no-cache,max-age=0" })
 
-	let message;
-	if (is.notEmpty(ctx.state.message)) {
-		if (ctx.state.message.error.error) {
-			console.error(ctx.state.message.error)
-			ctx.body = "error"
-			ctx.status = 400;
-			return;
-		}
-
-		message = ctx.state.message.message
-	}
-
-	const builder = new Builder(ctx.userAgent.isMobile)
+	const builder = new MessageBuilder(ctx.userAgent.isMobile, ctx.state.lang)
 
 	if (is.notEmpty(message))
 		await builder.addMessage(message)
 
-	ctx.body = await builder.build()
+	ctx.body = await builder.build(ctx.state.theme, ctx.state.fontSize)
 	ctx.status = 200;
 
 	return
 }
 
-class Builder {
+class MessageBuilder {
 	isMobile: boolean = false;
 	constructor(isMobile: boolean) {
 		this.isMobile = isMobile
@@ -54,12 +45,21 @@ class Builder {
 		})
 	}
 
-	async build() {
+	async build(theme?: string, fontSize?: string) {
 		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
 		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
 
 		return mustache.render(layout, {
-			html:     () => (text, render) => "<html>" + render(text) + "</html>",
+			html:     () => (text, render) => {
+				let html = "<html"
+
+				if (theme) html += ` class="${theme}"`;
+				if (this.lang) html += ` lang="${this.lang}"`;
+				if (fontSize) html += ` data-size="${fontSize}"`
+				html += ">"
+
+				return html + render(text) + "</html>"
+			},
 			scripts:   ["/public/pages/message/messageScript.js"],
 			manifest:  "/public/manifest.json",
 			styles:    styles,
