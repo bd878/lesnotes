@@ -1,34 +1,40 @@
 <div class="flex flex-col items-start">
-	<div id="theme-settings" class="flex flex-row mb-1">
-		{{#themes}}
-			{{#myTheme}}
-				<button type="button" data-theme="{{theme}}" class="underline cursor-pointer mr-2">{{label}}</button>
-			{{/myTheme}}
-			{{^myTheme}}
-				<button type="button" data-theme="{{theme}}" class="cursor-pointer mr-2">{{label}}</button>
-			{{/myTheme}}
-		{{/themes}}
-	</div>
+	{{#theme}}
+		<div id="theme-settings" class="flex flex-row mb-1">
+			{{#themes}}
+				{{#myTheme}}
+					<button type="button" data-theme="{{theme}}" class="underline cursor-pointer mr-2">{{label}}</button>
+				{{/myTheme}}
+				{{^myTheme}}
+					<button type="button" data-theme="{{theme}}" class="cursor-pointer mr-2">{{label}}</button>
+				{{/myTheme}}
+			{{/themes}}
+		</div>
+	{{/theme}}
 
-	<div id="lang-settings" class="flex flex-row mb-1">
-		{{#langs}}
-			{{#myLang}}
-				<button type="button" data-lang="{{lang}}" class="underline cursor-pointer mr-2">{{label}}</button>
-			{{/myLang}}
-			{{^myLang}}
-				<button type="button" data-lang="{{lang}}" class="cursor-pointer mr-2">{{label}}</button>
-			{{/myLang}}
-		{{/langs}}
-	</div>
+	{{#lang}}
+		<div id="lang-settings" class="flex flex-row mb-1">
+			{{#langs}}
+				{{#myLang}}
+					<button type="button" data-lang="{{lang}}" class="underline cursor-pointer mr-2">{{label}}</button>
+				{{/myLang}}
+				{{^myLang}}
+					<button type="button" data-lang="{{lang}}" class="cursor-pointer mr-2">{{label}}</button>
+				{{/myLang}}
+			{{/langs}}
+		</div>
+	{{/lang}}
 
-	<div id="font-size-settings" class="flex flex-row">
-		{{#fonts}}
-			{{#myFont}}
-				<button type="button" data-font-size="{{font}}" class="{{css}} underline cursor-pointer mr-2">{{label}}</button>
-			{{/myFont}}
-			{{^myFont}}
-				<button type="button" data-font-size="{{font}}" class="{{css}} cursor-pointer mr-2">{{label}}</button>
-			{{/myFont}}
-		{{/fonts}}
-	</div>
+	{{#font}}
+		<div id="font-size-settings" class="flex flex-row">
+			{{#fonts}}
+				{{#myFont}}
+					<button type="button" data-font-size="{{font}}" class="{{css}} underline cursor-pointer mr-2">{{label}}</button>
+				{{/myFont}}
+				{{^myFont}}
+					<button type="button" data-font-size="{{font}}" class="{{css}} cursor-pointer mr-2">{{label}}</button>
+				{{/myFont}}
+			{{/fonts}}
+		</div>
+	{{/font}}
 </div>

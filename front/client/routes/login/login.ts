@@ -6,16 +6,18 @@ import { resolve, join } from 'node:path';
 import Builder from '../builder';
 
 async function login(ctx) {
-	const builder = new LoginBuilder(ctx.userAgent.isMobile, ctx.state.lang)
+	const { lang, theme, fontSize, query } = ctx.state
 
-	await builder.addSettings(undefined, ctx.state.lang, ctx.state.theme, ctx.state.fontSize)
+	const builder = new LoginBuilder(ctx.userAgent.isMobile, lang)
+
+	await builder.addSettings(undefined, lang, theme, fontSize)
 	await builder.addUsername()
 	await builder.addPassword()
-	await builder.addSubmit(ctx.state.query)
+	await builder.addSubmit(query)
 	await builder.addFooter()
-	await builder.addSidebar(ctx.state.query)
+	await builder.addSidebar(query)
 
-	ctx.body = await builder.build(ctx.state.theme, ctx.state.fontSize)
+	ctx.body = await builder.build(theme, fontSize)
 	ctx.status = 200;
 }
 

@@ -1,5 +1,4 @@
 async function getFontSize(ctx, next) {
-	// may be mutated by getMe
 	console.log("--> getFontSize")
 	switch (ctx.query.size) {
 	case "small":

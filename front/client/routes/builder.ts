@@ -48,6 +48,7 @@ abstract class Builder {
 			myTheme:         function() { return this.theme == theme },
 			myLang:          function() { return this.lang == lang },
 			myFont:          function() { return is.notEmpty(fontSize) ? this.font == fontSize : false },
+			font:            fontSize,
 			theme:           theme,
 			lang:            lang,
 		})

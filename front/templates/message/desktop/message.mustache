@@ -1,11 +1,23 @@
-{{#title}}
-	<h2>{{title}}</h2>
-{{/title}}
+<div id="content" class="h-full max-w-ffull flex flex-row">
+	<div id="sidebar">
+		{{> sidebar}}
+	</div>
 
-{{#text}}
-	<div class="whitespace-pre">{{text}}</div>
-{{/text}}
+	<div id="public-message">
+		<div id="public-message-text">
+			{{#title}}
+				<h2 class="mb-2">{{title}}</h2>
+			{{/title}}
 
-{{#files}}
-	<a class="underline text-blue-600 visited:text-purple-600" href="/files/v1/{{ID}}/download" target="_blank" download="{{name}}">{{name}}</a>
-{{/files}}
+			{{#text}}
+				<div class="whitespace-pre">{{text}}</div>
+			{{/text}}
+		</div>
+
+		<div id="public-message-files">
+			{{#files}}
+				<a class="underline text-blue-600 visited:text-purple-600" href="/files/v1/{{ID}}/download" target="_blank" download="{{name}}">{{name}}</a>
+			{{/files}}
+		</div>
+	</div>
+</div>
