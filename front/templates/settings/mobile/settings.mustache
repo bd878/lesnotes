@@ -3,10 +3,10 @@
 		<div id="theme-settings" class="flex flex-row mb-1">
 			{{#themes}}
 				{{#myTheme}}
-					<button type="button" data-theme="{{theme}}" class="underline cursor-pointer mr-2">{{label}}</button>
+					<a target="_self" href="{{> themeHref}}" class="underline cursor-pointer mr-2">{{label}}</a>
 				{{/myTheme}}
 				{{^myTheme}}
-					<button type="button" data-theme="{{theme}}" class="cursor-pointer mr-2">{{label}}</button>
+					<a target="_self" href="{{> themeHref}}" class="cursor-pointer mr-2">{{label}}</a>
 				{{/myTheme}}
 			{{/themes}}
 		</div>
@@ -16,10 +16,10 @@
 		<div id="lang-settings" class="flex flex-row mb-1">
 			{{#langs}}
 				{{#myLang}}
-					<button type="button" data-lang="{{lang}}" class="underline cursor-pointer mr-2">{{label}}</button>
+					<a target="_self" href="{{> langHref}}" class="underline cursor-pointer mr-2">{{label}}</a>
 				{{/myLang}}
 				{{^myLang}}
-					<button type="button" data-lang="{{lang}}" class="cursor-pointer mr-2">{{label}}</button>
+					<a target="_self" href="{{> langHref}}" class="cursor-pointer mr-2">{{label}}</a>
 				{{/myLang}}
 			{{/langs}}
 		</div>
@@ -29,10 +29,10 @@
 		<div id="font-size-settings" class="flex flex-row">
 			{{#fonts}}
 				{{#myFont}}
-					<button type="button" data-font-size="{{font}}" class="{{css}} underline cursor-pointer mr-2">{{label}}</button>
+					<a target="_self" href="{{> fontHref}}" class="{{css}} underline cursor-pointer mr-2">{{label}}</a>
 				{{/myFont}}
 				{{^myFont}}
-					<button type="button" data-font-size="{{font}}" class="{{css}} cursor-pointer mr-2">{{label}}</button>
+					<a target="_self" href="{{> fontHref}}" class="{{css}} cursor-pointer mr-2">{{label}}</a>
 				{{/myFont}}
 			{{/fonts}}
 		</div>

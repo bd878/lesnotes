@@ -14,7 +14,7 @@ async function home(ctx) {
 
 	ctx.set({ "Cache-Control": "no-cache,max-age=0" })
 
-	const builder = new HomeBuilder(ctx.userAgent.isMobile, ctx.state.lang)
+	const builder = new HomeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.search)
 
 	switch (ctx.state.editorMode) {
 	case "view":

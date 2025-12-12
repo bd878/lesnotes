@@ -6,10 +6,12 @@ import { readFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 
 abstract class Builder {
-	isMobile: boolean = false;
-	lang:     string  = "en";
+	isMobile:      boolean = false;
+	lang:          string  = "en";
+	search:        string = "";
 
-	constructor(isMobile: boolean, lang: string = "en") {
+	constructor(isMobile: boolean, lang: string = "en", search: string = "") {
+		this.search = search
 		this.isMobile = isMobile
 		this.lang = lang
 	}
@@ -37,6 +39,8 @@ abstract class Builder {
 			this.isMobile ? 'templates/settings/mobile/settings.mustache' : 'templates/settings/desktop/settings.mustache'
 		)), { encoding: 'utf-8' });
 
+		const search = this.search
+
 		this.settings = mustache.render(template, {
 			fontSizeHeader:  this.i18n("fontSizeHeader"),
 			updateButton:    this.i18n("updateButton"),
@@ -51,6 +55,9 @@ abstract class Builder {
 			font:            fontSize,
 			theme:           theme,
 			lang:            lang,
+			fontHref:        function() { const params = new URLSearchParams(search); params.set("size",  this.font);  return "?" + params.toString(); },
+			themeHref:       function() { const params = new URLSearchParams(search); params.set("theme", this.theme); return "?" + params.toString(); },
+			langHref:        function() { const params = new URLSearchParams(search); params.set("lang",  this.lang);  return "?" + params.toString(); },
 		})
 	}
 }

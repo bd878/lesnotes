@@ -1,5 +1,3 @@
-import '../../scripts/sidebar_not_authed';
-
 import createTgAuth from '../../scripts/createTgAuth';
 import getByID from '../../scripts/getByID'
 

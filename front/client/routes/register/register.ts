@@ -6,7 +6,7 @@ import { resolve, join } from 'node:path';
 import Builder from '../builder';
 
 async function register(ctx) {
-	const builder = new RegisterBuilder(ctx.userAgent.isMobile, ctx.state.lang)
+	const builder = new RegisterBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.search)
 
 	await builder.addSettings(undefined, ctx.state.lang, ctx.state.theme, ctx.state.fontSize)
 	await builder.addUsername()

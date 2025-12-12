@@ -8,7 +8,7 @@ import Builder from '../builder';
 async function login(ctx) {
 	const { lang, theme, fontSize, query } = ctx.state
 
-	const builder = new LoginBuilder(ctx.userAgent.isMobile, lang)
+	const builder = new LoginBuilder(ctx.userAgent.isMobile, lang, ctx.search)
 
 	await builder.addSettings(undefined, lang, theme, fontSize)
 	await builder.addUsername()

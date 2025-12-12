@@ -1,5 +1,6 @@
 import * as is from '../third_party/is';
 
+// TODO: remove, same logic is in ctx.search
 async function getQuery(ctx, next) {
 	// may be mutated by getMe
 	console.log("--> getQuery")
