@@ -1,5 +1,4 @@
 async function getLanguage(ctx, next) {
-	// may be mutated by getMe
 	console.log("--> getLanguage")
 
 	switch (ctx.query.lang) {

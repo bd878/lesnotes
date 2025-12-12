@@ -15,9 +15,9 @@ type RepoConnection interface {
 }
 
 type Repository interface {
-	Save(ctx context.Context, id int64, login, hashedPassword, theme, lang string, fontSize int32) (err error)
+	Save(ctx context.Context, id int64, login, hashedPassword string, metadata []byte) (err error)
 	Delete(ctx context.Context, id int64) (err error)
-	Update(ctx context.Context, id int64, newLogin, newTheme, newLang string, newFontSize int32) (err error)
+	Update(ctx context.Context, id int64, newLogin string, metadata []byte) (err error)
 	Find(ctx context.Context, id int64/*TODO: not used, remove*/, login string) (*usersmodel.User, error)
 	// TODO: add Get(id int64)
 	Truncate(ctx context.Context) error
@@ -51,14 +51,14 @@ func (f *fsm) applyAppend(raw []byte) interface{} {
 	var cmd AppendCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.repo.Save(context.Background(), cmd.Id, cmd.Login, cmd.HashedPassword, cmd.Theme, cmd.Lang, cmd.FontSize)
+	return f.repo.Save(context.Background(), cmd.Id, cmd.Login, cmd.HashedPassword, cmd.Metadata)
 }
 
 func (f *fsm) applyUpdate(raw []byte) interface{} {
 	var cmd UpdateCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.repo.Update(context.Background(), cmd.Id, cmd.Login, cmd.Theme, cmd.Lang, cmd.FontSize)
+	return f.repo.Update(context.Background(), cmd.Id, cmd.Login, cmd.Metadata)
 }
 
 func (f *fsm) applyDelete(raw []byte) interface{} {

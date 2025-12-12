@@ -10,11 +10,11 @@ import { resolve, join } from 'node:path';
 import Builder from '../builder'
 
 async function home(ctx) {
-	const { me, stack, message } = ctx.state
+	const { me, stack, message, lang, theme, fontSize } = ctx.state
 
 	ctx.set({ "Cache-Control": "no-cache,max-age=0" })
 
-	const builder = new HomeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.search)
+	const builder = new HomeBuilder(ctx.userAgent.isMobile, lang, ctx.search)
 
 	switch (ctx.state.editorMode) {
 	case "view":
@@ -32,7 +32,7 @@ async function home(ctx) {
 		return
 	}
 
-	await builder.addSettings(undefined, ctx.state.lang, me.theme, me.fontSize)
+	await builder.addSettings(undefined, lang, theme, fontSize)
 	await builder.addMessagesList(undefined, stack)
 	await builder.addFilesList(message, ctx.query.edit)
 	await builder.addFilesForm(message, ctx.query.edit)
@@ -40,7 +40,7 @@ async function home(ctx) {
 	await builder.addSidebar()
 	await builder.addFooter()
 
-	ctx.body = await builder.build(message, ctx.query.edit, me.theme, me.fontSize)
+	ctx.body = await builder.build(message, ctx.query.edit, theme, fontSize)
 	ctx.status = 200;
 
 	return;

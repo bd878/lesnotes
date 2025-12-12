@@ -18,10 +18,8 @@ service Users {
 message User {
 	int64     id               = 1;
 	string    login            = 2;
-	string    theme            = 5;
-	string    lang             = 6;
-	int32     font_size        = 7;
-	string    hashed_password  = 8;
+	string    hashed_password  = 3;
+	optional bytes metadata    = 5;
 }
 
 message GetUserRequest {
@@ -36,9 +34,7 @@ message CreateUserRequest {
 	int64     id      = 1;
 	string    login   = 2;
 	string    password = 3;
-	string    theme   = 4;
-	string    lang    = 5;
-	int32     font_size = 6;
+	optional bytes metadata = 4;
 }
 
 message CreateUserResponse {
@@ -53,9 +49,7 @@ message DeleteUserResponse {}
 message UpdateUserRequest {
 	int64   id    = 1;
 	string  login = 2;
-	string  theme = 3;
-	string  lang  = 4;
-	int32   font_size = 5;
+	optional bytes metadata = 3;
 }
 
 message UpdateUserResponse {}

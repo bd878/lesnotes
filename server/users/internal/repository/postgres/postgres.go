@@ -11,7 +11,6 @@ import (
 
 	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/users/pkg/model"
-	"github.com/bd878/gallery/server/users/internal/repository"
 )
 
 type Repository struct {
@@ -26,41 +25,18 @@ func New(pool *pgxpool.Pool, tableName string) *Repository {
 	}
 }
 
-func (r *Repository) Save(ctx context.Context, id int64, login, salt, theme, lang string, fontSize int32) (err error) {
-	const query = "INSERT INTO %s(id, login, salt, theme, lang, font_size) VALUES ($1, $2, $3, $4, $5, $6)"
+func (r *Repository) Save(ctx context.Context, id int64, login, salt string, metadata []byte) (err error) {
+	const query = "INSERT INTO %s(id, login, salt, metadata) VALUES ($1, $2, $3, $4)"
 
-	_, err = r.pool.Exec(ctx, r.table(query), id, login, salt, theme, lang, fontSize)
-	if err != nil {
-		logger.Error(err)
-		return repository.ErrUserExists
-	}
+	_, err = r.pool.Exec(ctx, r.table(query), id, login, salt, metadata)
 
-	return err
+	return
 }
 
 func (r *Repository) Delete(ctx context.Context, id int64) (err error) {
 	const query = "DELETE FROM %s WHERE id = $1"
 
-	var tx pgx.Tx
-	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
-	if err != nil {
-		return err
-	}
-	defer func() {
-		p := recover()
-		switch {
-		case p != nil:
-			_ = tx.Rollback(ctx)
-			panic(p)
-		case err != nil:
-			fmt.Fprintf(os.Stderr, "rollback with error: %v\n", err)
-			err = tx.Rollback(ctx)
-		default:
-			err = tx.Commit(ctx)
-		}
-	}()
-
-	_, err = tx.Exec(ctx, r.table(query), id)
+	_, err = r.pool.Exec(ctx, r.table(query), id)
 
 	return
 }
@@ -73,24 +49,24 @@ func (r *Repository) Delete(ctx context.Context, id int64) (err error) {
  * @return {[type]}   [description]
  */
 func (r *Repository) Find(ctx context.Context, id int64, login string) (user *model.User, err error) {
-	query := "SELECT id, login, salt, theme, lang, font_size FROM %s WHERE"
+	query := "SELECT id, login, salt, metadata FROM %s WHERE"
 
 	user = &model.User{}
 
 	if id == 0 {
 		query += " login = $1"
-		err = r.pool.QueryRow(ctx, r.table(query), login).Scan(&user.ID, &user.Login, &user.HashedPassword, &user.Theme, &user.Lang, &user.FontSize)
+		err = r.pool.QueryRow(ctx, r.table(query), login).Scan(&user.ID, &user.Login, &user.HashedPassword, &user.Metadata)
 	} else {
 		query += " id = $1"
-		err = r.pool.QueryRow(ctx, r.table(query), id).Scan(&user.ID, &user.Login, &user.HashedPassword, &user.Theme, &user.Lang, &user.FontSize)
+		err = r.pool.QueryRow(ctx, r.table(query), id).Scan(&user.ID, &user.Login, &user.HashedPassword, &user.Metadata)
 	}
 
 	return
 }
 
-func (r *Repository) Update(ctx context.Context, id int64, newLogin, newTheme, newLang string, newFontSize int32) (err error) {
-	const selectQuery = "SELECT login, theme, lang, font_size FROM %s WHERE id = $1"
-	const query = "UPDATE %s SET login = $2, theme = $3, lang = $4, font_size = $5 WHERE id = $1"
+func (r *Repository) Update(ctx context.Context, id int64, newLogin string, newMetadata []byte) (err error) {
+	const selectQuery = "SELECT login, metadata FROM %s WHERE id = $1"
+	const query = "UPDATE %s SET login = $2, metadata = $3 WHERE id = $1"
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
@@ -112,11 +88,11 @@ func (r *Repository) Update(ctx context.Context, id int64, newLogin, newTheme, n
 	}()
 
 	var (
-		login, theme, lang string
-		fontSize int32
+		login string
+		metadata []byte
 	)
 
-	err = tx.QueryRow(ctx, r.table(selectQuery), id).Scan(&login, &theme, &lang, &fontSize)
+	err = tx.QueryRow(ctx, r.table(selectQuery), id).Scan(&login, &metadata)
 	if err != nil {
 		return
 	}
@@ -125,19 +101,11 @@ func (r *Repository) Update(ctx context.Context, id int64, newLogin, newTheme, n
 		login = newLogin
 	}
 
-	if newTheme != "" {
-		theme = newTheme
+	if newMetadata != nil {
+		metadata = newMetadata
 	}
 
-	if newLang != "" {
-		lang = newLang
-	}
-
-	if newFontSize != 0 {
-		fontSize = newFontSize
-	}
-
-	_, err = tx.Exec(ctx, r.table(query), id, login, theme, lang, fontSize)
+	_, err = tx.Exec(ctx, r.table(query), id, login, metadata)
 
 	return
 }
@@ -164,6 +132,7 @@ func (r *Repository) Dump(ctx context.Context) (reader io.ReadCloser, err error)
 		return
 	}
 
+	// TODO: remove, see billing/invoices for example
 	go func(ctx context.Context, query string, conn *pgxpool.Conn, writer io.WriteCloser) {
 		_, err := conn.Conn().PgConn().CopyTo(ctx, writer, query)
 		defer writer.Close()

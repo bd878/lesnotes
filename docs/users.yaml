@@ -133,7 +133,7 @@ paths:
     post:
       summary: Update user info
       description: |
-        Update user's information and settings
+        Update user's login and metadata
       operationId: updateUser
       requestBody:
         content:
@@ -554,28 +554,18 @@ components:
             type: integer
           login:
             type: string
-          theme:
-            type: string
-          font_size:
-            type: number
 # END ME
 
 # UPDATE
     updateForm:
       type: object
-      theme:
-        type: string
-        example: "dark"
-      login:
-        type: string
-        example: "new-login"
-      language:
-        type: string
-        example: "de"
-        required: false
-      font_size:
-        type: number
-        required: false
+      properties:
+        login:
+          type: string
+          example: "new-login"
+        metadata:
+          type: string
+          format: binary
 
     updateJson:
       type: object
@@ -585,22 +575,13 @@ components:
         req:
           type: object
           properties:
-            theme:
-              type: string
-              required: false
-              example: "dark"
             login:
               type: string
               required: false
               example: "abc"
-            language:
+            metadata:
               type: string
-              required: false
-              example: "de"
-            font_size:
-              type: number
-              required: false
-              example: 10
+              format: binary
 
     updateOk:
       type: object

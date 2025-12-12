@@ -99,8 +99,6 @@ func (s *Controller) CreateUser(ctx context.Context, id int64, login, password s
 		Id:         id,
 		Login:      login,
 		Password:   password,
-		// Theme:      "light",
-		// FontSize:   0,
 	})
 	if err != nil {
 		return
@@ -114,7 +112,6 @@ func (s *Controller) CreateUser(ctx context.Context, id int64, login, password s
 	user = &model.User{
 		ID:       id,
 		Login:    login,
-		Theme:    "light",
 		Token:    session.Token,
 		ExpiresUTCNano: session.ExpiresUTCNano,
 	}
@@ -208,21 +205,19 @@ func (s *Controller) GetUser(ctx context.Context, id int64) (user *model.User, e
 	return
 }
 
-func (s *Controller) UpdateUser(ctx context.Context, id int64, newLogin, newTheme, newLang string, newFontSize int32) (err error) {
+func (s *Controller) UpdateUser(ctx context.Context, id int64, newLogin string, metadata []byte) (err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
 		}
 	}
 
-	logger.Debugw("update user", "id", id, "login", newLogin, "theme", newTheme, "lang", newLang, "font_size", newFontSize)
+	logger.Debugw("update user", "id", id, "login", newLogin, "metadata", metadata)
 
 	_, err = s.client.UpdateUser(ctx, &api.UpdateUserRequest{
-		Id:     id,
-		Login:  newLogin,
-		Theme:  newTheme,
-		Lang:   newLang,
-		FontSize: newFontSize,
+		Id:        id,
+		Login:     newLogin,
+		Metadata:  metadata,
 	})
 
 	return

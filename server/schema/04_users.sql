@@ -1,18 +1,16 @@
 \c lesnotes
 CREATE SCHEMA IF NOT EXISTS users;
 
-CREATE TYPE users.theme AS ENUM ('dark', 'light');
-
+-- order is important
 CREATE TABLE IF NOT EXISTS users.users
 (
 	id          bigint       UNIQUE NOT NULL,
 	login       TEXT         UNIQUE NOT NULL,
 	salt        TEXT         NOT NULL,
-	theme       users.theme  NOT NULL DEFAULT 'light',
-	lang        VARCHAR(3)   NOT NULL,
-	font_size   int          NOT NULL,
 	created_at  timestamptz  NOT NULL DEFAULT NOW(),
 	updated_at  timestamptz  NOT NULL DEFAULT NOW(),
+	metadata    bytea        DEFAULT NULL,
+	blocked     bool         NOT NULL DEFAULT false,
 	PRIMARY KEY(id)
 );
 

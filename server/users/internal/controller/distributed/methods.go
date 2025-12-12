@@ -38,8 +38,8 @@ func (m *DistributedUsers) apply(ctx context.Context, reqType RequestType, cmd [
 	return
 }
 
-func (m *DistributedUsers) CreateUser(ctx context.Context, id int64, login, password string) (user *model.User, err error) {
-	logger.Debugw("create user", "id", id, "login", login, "password", password)
+func (m *DistributedUsers) CreateUser(ctx context.Context, id int64, login, password string, metadata []byte) (user *model.User, err error) {
+	logger.Debugw("create user", "id", id, "login", login, "password", password, "metadata", metadata)
 
 
 	hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -51,9 +51,7 @@ func (m *DistributedUsers) CreateUser(ctx context.Context, id int64, login, pass
 		Id:             id,
 		Login:          login,
 		HashedPassword: string(hashed),
-		FontSize:       0,
-		Theme:          "light",
-		Lang:           "",
+		Metadata:       metadata,
 	})
 	if err != nil {
 		return nil, err
@@ -64,10 +62,8 @@ func (m *DistributedUsers) CreateUser(ctx context.Context, id int64, login, pass
 	user = &model.User{
 		ID:           id,
 		Login:        login,
-		Theme:        "light",
-		Lang:         "",
 		HashedPassword: string(hashed),
-		FontSize:      0,
+		Metadata:     metadata,
 	}
 
 	return
@@ -91,15 +87,13 @@ func (m *DistributedUsers) DeleteUser(ctx context.Context, id int64) (err error)
 	return nil
 }
 
-func (m *DistributedUsers) UpdateUser(ctx context.Context, id int64, login, theme, lang string, fontSize int32) (err error) {
-	logger.Debugw("update user", "id", id, "login", login, "theme", theme, "lang", lang, "font_size", fontSize)
+func (m *DistributedUsers) UpdateUser(ctx context.Context, id int64, login string, metadata []byte) (err error) {
+	logger.Debugw("update user", "id", id, "login", login, "metadata", metadata)
 
 	cmd, err := proto.Marshal(&UpdateCommand{
 		Id:    id,
 		Login: login,
-		Lang:  lang,
-		Theme: theme,
-		FontSize: fontSize,
+		Metadata: metadata,
 	})
 	if err != nil {
 		return err

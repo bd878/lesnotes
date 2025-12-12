@@ -58,7 +58,7 @@ router
 	.get('/login', etag, getLanguage, getFontSize, getTheme, getQuery, getToken, notAuthed, login)
 	.get('/logout', etag, getLanguage, getFontSize, getTheme, getQuery, logout)
 	.get('/signup', etag, getLanguage, getFontSize, getToken, getTheme, getQuery, notAuthed, register)
-	.get('/home', etag, getToken, getMe, getLanguage, loadMessage, loadStack, getEditorMode, formatMessage, home)
+	.get('/home', etag, getToken, getMe, getLanguage, getFontSize, getTheme, loadMessage, loadStack, getEditorMode, formatMessage, home)
 	.get('/search', etag, getToken, getMe, getLanguage, loadSearch, loadSearchPath, search)
 	.get('/status', status, getLanguage)
 	.get("/tg_auth", authTelegram)

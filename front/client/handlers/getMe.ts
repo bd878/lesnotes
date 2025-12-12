@@ -13,12 +13,6 @@ async function getMe(ctx, next) {
 
 	ctx.state.me = ctx.state.me.user
 
-	if (ctx.state.me.lang) {
-		ctx.state.lang = ctx.state.me.lang
-	}
-
-	console.log(ctx.state.me)
-
 	if (is.empty(ctx.state.me)) {
 		console.error("no me")
 		ctx.status = 500

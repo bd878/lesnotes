@@ -8,12 +8,10 @@ type (
 	User struct {
 		ID               int64            `json:"id"`
 		Login            string           `json:"login,omitempty"`
-		Theme            string           `json:"theme,omitempty"`
 		Token            string           `json:"token,omitempty"`
-		Lang             string           `json:"language,omitempty"`
 		HashedPassword   string           `json:"-"`
 		ExpiresUTCNano   int64            `json:"expires_utc_nano,omitempty"` // TODO: ExpiresAt
-		FontSize         int32            `json:"font_size,omitempty"`
+		Metadata         []byte           `json:"metadata,omitempty"`
 	}
 
 	SignupResponse struct {
@@ -45,9 +43,7 @@ type (
 	GetMeResponse struct {
 		ID               int64            `json:"id"`
 		Login            string           `json:"login"`
-		Theme            string           `json:"theme"`
-		Lang             string           `json:"language"`
-		FontSize         int32            `json:"font_size"`
+		Metadata         []byte           `json:"metadata,omitempty"`
 	}
 
 	DeleteMeRequest struct {
@@ -64,9 +60,7 @@ type (
 
 	UpdateRequest struct {
 		Login            string           `json:"login,omitempty"`
-		Theme            string           `json:"theme,omitempty"`
-		Lang             string           `json:"language,omitempty"`
-		FontSize         int32            `json:"font_size,omitempty"`
+		Metadata         []byte           `json:"metadata,omitempty"`
 	}
 
 	UpdateResponse struct {

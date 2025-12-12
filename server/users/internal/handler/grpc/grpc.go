@@ -9,10 +9,10 @@ import (
 
 type Controller interface {
 	GetUser(ctx context.Context, id int64) (*model.User, error)
-	UpdateUser(ctx context.Context, id int64, newLogin, newTheme, newLang string, newFontSize int32) (err error)
+	UpdateUser(ctx context.Context, id int64, newLogin string, metadata []byte) (err error)
 	FindUser(ctx context.Context, login string) (*model.User, error)
 	DeleteUser(ctx context.Context, id int64) (err error)
-	CreateUser(ctx context.Context, id int64, login, password string) (*model.User, error)
+	CreateUser(ctx context.Context, id int64, login, password string, metadata []byte) (*model.User, error)
 	GetServers(ctx context.Context) (servers []*api.Server, err error)
 }
 
@@ -44,7 +44,7 @@ func (h *Handler) FindUser(ctx context.Context, req *api.FindUserRequest) (*api.
 }
 
 func (h *Handler) UpdateUser(ctx context.Context, req *api.UpdateUserRequest) (resp *api.UpdateUserResponse, err error) {
-	err = h.controller.UpdateUser(ctx, req.Id, req.Login, req.Theme, req.Lang, req.FontSize)
+	err = h.controller.UpdateUser(ctx, req.Id, req.Login, req.Metadata)
 	if err != nil {
 		return
 	}
@@ -55,7 +55,7 @@ func (h *Handler) UpdateUser(ctx context.Context, req *api.UpdateUserRequest) (r
 }
 
 func (h *Handler) CreateUser(ctx context.Context, req *api.CreateUserRequest) (resp *api.CreateUserResponse, err error) {
-	_, err = h.controller.CreateUser(ctx, req.Id, req.Login, req.Password)
+	_, err = h.controller.CreateUser(ctx, req.Id, req.Login, req.Password, req.Metadata)
 	if err != nil {
 		return
 	}
