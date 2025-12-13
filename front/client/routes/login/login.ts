@@ -6,7 +6,7 @@ import { resolve, join } from 'node:path';
 import Builder from '../builder';
 
 async function login(ctx) {
-	const { lang, theme, fontSize, query } = ctx.state
+	const { lang, theme, fontSize, query, error } = ctx.state
 
 	const builder = new LoginBuilder(ctx.userAgent.isMobile, lang, ctx.search)
 
@@ -17,7 +17,7 @@ async function login(ctx) {
 	await builder.addFooter()
 	await builder.addSidebar(query)
 
-	ctx.body = await builder.build(theme, fontSize)
+	ctx.body = await builder.build(theme, fontSize, ctx.search, error)
 	ctx.status = 200;
 }
 
@@ -68,7 +68,7 @@ class LoginBuilder extends Builder {
 		})
 	}
 
-	async build(theme?: string, fontSize?: string) {
+	async build(theme?: string, fontSize?: string, search?: string, error?: string) {
 		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
 		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
 		const login = await readFile(resolve(join(Config.get('basedir'),
@@ -93,7 +93,10 @@ class LoginBuilder extends Builder {
 			isMobile: this.isMobile ? "true" : "",
 		}, {
 			footer:  this.footer,
-			content: mustache.render(login, {}, {
+			content: mustache.render(login, {
+				action: function() { return "/login" + search },
+				error:  error,
+			}, {
 				username:  this.username,
 				password:  this.password,
 				submit:    this.submit,

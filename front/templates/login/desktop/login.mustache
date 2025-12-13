@@ -4,12 +4,11 @@
 	</div>
 
 	<form
-		id="login-form"
-		action=""
-		onsubmit="return false;"
+		action="{{action}}"
+		method="POST"
 		type="multipart/form-data"
 		autocomplete="off"
-		name="login-form"
+		name="login"
 		class="flex flex-col"
 	>
 		<div>
@@ -20,7 +19,8 @@
 			{{> password}}
 		</div>
 
-		<div id="login-error" class="mt-2 hidden text-sm italic text-red-600 dark:text-red-400">
+		<div class="mt-2 text-sm italic text-red-600 dark:text-red-400">
+			{{error}}
 		</div>
 
 		<div class="mt-4">

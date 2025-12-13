@@ -3,7 +3,9 @@ import models from './models';
 
 async function login(login: string, password: string, lang?: string) {
 	let result = {
-		error:   models.error(),
+		error:     models.error(),
+		token:     "",
+		expiresAt: 0,
 	}
 
 	const form = new FormData()
@@ -19,14 +21,18 @@ async function login(login: string, password: string, lang?: string) {
 		headers["X-Language"] = lang;
 
 	try {
-		const [_1, error] = await api("/users/v1/login", {
+		const [response, error] = await api("/users/v1/login", {
 			method:  "POST",
 			body:    form,
 			headers: headers,
 		});
 
-		if (error)
+		if (error.error) {
 			result.error = models.error(error)
+		} else {
+			result.token = response.token
+			result.expiresAt = response.expires_utc_nano
+		}
 	} catch (e) {
 		result.error.error   = true
 		result.error.status  = 500

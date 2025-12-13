@@ -1,5 +1,6 @@
 declare global {
 	var ENV: string;
+	var DOMAIN: string;
 	var HTTPS: string;
 	var BACKEND_URL: string;
 	var BOT_USERNAME: string;
