@@ -78,12 +78,16 @@ class HomeBuilder extends Builder {
 			this.isMobile ? 'templates/home/mobile/message_edit_form.mustache' : 'templates/home/desktop/message_edit_form.mustache'
 		)), { encoding: 'utf-8' });
 
+		const params = new URLSearchParams(this.search)
+		params.delete("edit")
+
 		this.messageEditForm = mustache.render(template, {
 			ID:               message.ID,
 			private:          message.private,
 			name:             message.name,
 			title:            message.title,
 			text:             message.text,
+			cancelEditHref:   "/home?" + params.toString(),
 			namePlaceholder:  this.i18n("namePlaceholder"),
 			titlePlaceholder: this.i18n("titlePlaceholder"),
 			textPlaceholder:  this.i18n("textPlaceholder"),
@@ -103,12 +107,16 @@ class HomeBuilder extends Builder {
 			this.isMobile ? 'templates/home/mobile/message_view.mustache' : 'templates/home/desktop/message_view.mustache'
 		)), { encoding: 'utf-8' });
 
+		const search = this.search
+
 		this.messageView = mustache.render(template, {
 			ID:               message.ID,
 			title:            message.title,
 			text:             message.text,
 			name:             message.name,
 			private:          message.private,
+			newNoteHref:      function() { const p = new URLSearchParams(search); p.delete("id"); return "/home?" + p.toString(); },
+			editHref:         function() { const p = new URLSearchParams(search); p.set("edit", 1); return "/home?" + p.toString(); },
 			newNoteButton:    this.i18n("newNote"),
 			userID:           userID,
 			domain:           Config.get("domain"),

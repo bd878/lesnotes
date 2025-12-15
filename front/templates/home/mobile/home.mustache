@@ -37,7 +37,7 @@
 
 	<div id="threads" class="px-5 small:px-3">
 		<div id="messages" class="w-full h-full">
-			<div id="messages-list" class="flex flex-col">
+			<div id="messages-list" ondragover="event.preventDefault()" class="flex flex-col">
 				{{> messagesList}}
 			</div>
 		</div>
