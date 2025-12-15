@@ -1,6 +1,6 @@
-import signup from '../signup/signup'
-import * as is from '../../third_party/is'
-import api from '../../api';
+import signup from '../routes/signup/signup'
+import * as is from '../third_party/is'
+import api from '../api';
 
 async function validateSignup(ctx, next) {
 	console.log("--> validate signup")

@@ -44,6 +44,7 @@ async function readStackJson(token: string, threadID: number/*, lastMessageID: n
 
 		messages.messages.reverse()
 
+		// TODO: move thread to api/models/thread.ts
 		thread.isLastPage  = messages.isLastPage
 		thread.isFirstPage = messages.isFirstPage
 		thread.messages    = messages.messages

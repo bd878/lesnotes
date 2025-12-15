@@ -1,7 +1,6 @@
 {
   "include": [
     "./client/api/*",
-    "./client/gui/pages/new/newScript.ts",
     "./client/gui/pages/home/homeScript.ts",
     "environment.d.ts"
   ],

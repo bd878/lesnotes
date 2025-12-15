@@ -53,14 +53,19 @@ class HomeBuilder extends Builder {
 			this.isMobile ? 'templates/home/mobile/messages_list.mustache' : 'templates/home/desktop/messages_list.mustache'
 		)), { encoding: 'utf-8' });
 
-		// TODO: make messages a link, not a button
-		// generate hrefs here
+		const search = this.search
+		const limit = parseInt(LIMIT)
+
 		this.messagesList = mustache.render(template, {
 			stack:            stack,
 			limit:            LIMIT,
 			isSingle:         () => stack.length == 1,
 			newMessageText:   this.i18n("newMessageText"),
 			noMessagesText:   this.i18n("noMessagesText"),
+			messageHref:      function() { const params = new URLSearchParams(search); params.set("id", `${this.ID}`); params.delete("edit"); return "/home?" + params.toString(); },
+			threadHref:       function() { const params = new URLSearchParams(search); params.set("cwd", `${this.ID}`); return "/home?" + params.toString(); },
+			prevPageHref:     function() { const params = new URLSearchParams(search); params.set(this.threadID || 0, `${limit + this.offset}`); return "/home?" + params.toString(); },
+			nextPageHref:     function() { const params = new URLSearchParams(search); params.set(this.threadID || 0, `${Math.max(0, this.offset - limit)}`); return "/home?" + params.toString(); },
 		})
 	}
 

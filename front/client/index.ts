@@ -26,18 +26,17 @@ import getQuery from './handlers/getQuery';
 import expireToken from './handlers/expireToken';
 import redirectHome from './handlers/redirectHome';
 import redirectLogin from './handlers/redirectLogin';
+import validateLogin from './handlers/validateLogin'
+import validateSignup from './handlers/validateSignup';
 
 import assets from './routes/assets/assets';
 import main from './routes/main/main';
 import login from './routes/login/login';
-import validateLogin from './routes/validateLogin/validateLogin';
-import validateSignup from './routes/validateSignup/validateSignup';
 import signup from './routes/signup/signup';
 import home from './routes/home/home';
 import search from './routes/search/search';
 import xxx from './routes/xxx/xxx';
 import message from './routes/message/message';
-import newMessage from './routes/new_message/new_message';
 import miniapp from './routes/miniapp/miniapp';
 import authTelegram from './routes/auth_telegram/auth_telegram';
 import status from './routes/status/status';
@@ -68,7 +67,6 @@ router
 	.get('/search', etag, getToken, getMe, getLanguage, loadSearch, loadSearchPath, search)
 	.get('/status', status, getLanguage)
 	.get("/tg_auth", authTelegram)
-	.get("/new", etag, getLanguage, newMessage)
 	.get("/m/:user/:id", etag, getLanguage, getFontSize, getTheme, getToken, loadMessage, message)
 	.get("/m/:name", etag, getLanguage, getFontSize, getTheme, getToken, loadMessage, message)
 	.get("/miniapp", etag, getLanguage, miniapp)

@@ -1,12 +1,8 @@
-import '../../scripts/sidebar';
-
 import onFormSubmit from './onFormSubmit';
 import onFileInputChange from './onFileInputChange';
 import onSelectFilesClick from './onSelectFilesClick';
 import onMessageCancelClick from './onMessageCancelClick';
 import onMessageUpdateFormSubmit from './onMessageUpdateFormSubmit';
-import onMessagesListClick from './onMessagesListClick';
-import onThreadsListClick from './onThreadsListClick';
 import onMessageDeleteClick from './onMessageDeleteClick';
 import onMessageEditClick from './onMessageEditClick';
 import onMessagePublishClick from './onMessagePublishClick';
@@ -48,11 +44,9 @@ function init() {
 	elems.filesButtonElem.addEventListener("click",       e => onSelectFilesClick(elems, e))
 	elems.messageCancelElem.addEventListener("click",     e => onMessageCancelClick(elems, e))
 	elems.editFormElem.addEventListener("submit",         e => onMessageUpdateFormSubmit(elems, e))
-	elems.messagesListElem.addEventListener("click",      e => onMessagesListClick(elems, e))
 	elems.messagesListElem.addEventListener('dragstart',  e => onMessagesListDragStart(elems, e))
 	elems.messagesListElem.addEventListener('dragover',   e => onMessagesListDragOver(elems, e))
 	elems.messagesListElem.addEventListener('drop',       e => onMessagesListDrop(elems, e))
-	elems.threadsListElem.addEventListener("click",       e => onThreadsListClick(elems, e))
 	elems.messageDeleteElem.addEventListener("click",     e => onMessageDeleteClick(elems, e))
 	elems.messageEditElem.addEventListener("click",       e => onMessageEditClick(elems, e))
 	elems.messagePublishElem.addEventListener("click",    e => onMessagePublishClick(elems, e))

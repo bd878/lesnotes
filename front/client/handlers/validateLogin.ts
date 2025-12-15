@@ -1,6 +1,6 @@
-import login from '../login/login'
-import * as is from '../../third_party/is'
-import api from '../../api';
+import login from '../routes/login/login'
+import * as is from '../third_party/is'
+import api from '../api';
 
 async function validateLogin(ctx, next) {
 	console.log("--> validate login")
