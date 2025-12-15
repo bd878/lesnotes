@@ -130,7 +130,6 @@ class SearchBuilder extends Builder {
 
 				return html + render(text) + "</html>"
 			},
-			scripts:  ["/public/pages/search/searchScript.js"],
 			manifest: "/public/manifest.json",
 			styles:   styles,
 			lang:     this.lang,

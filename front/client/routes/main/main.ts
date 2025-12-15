@@ -58,7 +58,6 @@ class MainBuilder extends Builder {
 
 				return html + render(text) + "</html>"
 			},
-			scripts:  ["/public/pages/main/mainScript.js"],
 			manifest: "/public/manifest.json",
 			styles:   styles,
 			lang:     this.lang,
@@ -67,6 +66,8 @@ class MainBuilder extends Builder {
 			footer:  this.footer,
 			content: mustache.render(main, {
 				settingsHeader: this.i18n("settingsHeader"),
+				botUsername:   `${BOT_USERNAME}`,
+				authUrl:       `https://${BACKEND_URL}/tg_auth`,
 			}, {
 				sidebar:       this.sidebar,
 				authorization: this.authorization,

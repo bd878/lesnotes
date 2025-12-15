@@ -63,7 +63,6 @@ class MessageBuilder extends Builder {
 
 				return html + render(text) + "</html>"
 			},
-			scripts:   ["/public/pages/message/messageScript.js"],
 			manifest:  "/public/manifest.json",
 			styles:    styles,
 			lang:      this.lang,

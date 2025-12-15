@@ -20,11 +20,6 @@ for (const file of files) {
 let ctx = await esbuild.context({
 	entryPoints: [
 		'client/gui/pages/home/homeScript.ts',
-		'client/gui/pages/search/searchScript.ts',
-		'client/gui/pages/logout/logoutScript.ts',
-		'client/gui/pages/main/mainScript.ts',
-		'client/gui/pages/new/newScript.ts',
-		'client/gui/pages/message/messageScript.ts',
 		'client/gui/pages/new/newScript.ts',
 		'client/gui/styles/styles.css'
 	],

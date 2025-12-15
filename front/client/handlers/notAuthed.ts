@@ -11,7 +11,7 @@ async function notAuthed(ctx, next) {
 		if (resp.error.error || resp.expired) {
 			await next()
 		} else {
-			ctx.redirect('/home')
+			ctx.redirect('/home' + ctx.search)
 			ctx.status = 302
 		}
 	}

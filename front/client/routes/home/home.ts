@@ -37,7 +37,7 @@ async function home(ctx) {
 	await builder.addFilesList(message, ctx.query.edit)
 	await builder.addFilesForm(message, ctx.query.edit)
 	await builder.addSearch()
-	await builder.addSidebar()
+	await builder.addSidebar(ctx.search)
 	await builder.addFooter()
 
 	ctx.body = await builder.build(message, ctx.query.edit, theme, fontSize)
@@ -172,13 +172,14 @@ class HomeBuilder extends Builder {
 	}
 
 	sidebar = undefined;
-	async addSidebar() {
+	async addSidebar(search: string) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/sidebar_vertical/mobile/sidebar_vertical.mustache' : 'templates/sidebar_vertical/desktop/sidebar_vertical.mustache'
 		)), { encoding: 'utf-8' });
 
 		this.sidebar = mustache.render(template, {
 			logout:           this.i18n("logout"),
+			logoutHref:       "/logout" + search,
 			settingsHeader:   this.i18n("settingsHeader"),
 		}, {
 			settings:         this.settings,

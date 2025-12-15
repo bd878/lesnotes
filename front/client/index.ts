@@ -23,7 +23,9 @@ import loadSearchPath from './handlers/loadSearchPath';
 import getLanguage from './handlers/getLanguage';
 import getFontSize from './handlers/getFontSize';
 import getQuery from './handlers/getQuery';
+import expireToken from './handlers/expireToken';
 import redirectHome from './handlers/redirectHome';
+import redirectLogin from './handlers/redirectLogin';
 
 import assets from './routes/assets/assets';
 import main from './routes/main/main';
@@ -33,7 +35,6 @@ import validateSignup from './routes/validateSignup/validateSignup';
 import signup from './routes/signup/signup';
 import home from './routes/home/home';
 import search from './routes/search/search';
-import logout from './routes/logout/logout';
 import xxx from './routes/xxx/xxx';
 import message from './routes/message/message';
 import newMessage from './routes/new_message/new_message';
@@ -60,7 +61,7 @@ router
 	.get('/', etag, getLanguage, getTheme, getFontSize, getToken, getQuery, notAuthed, main)
 	.get('/login', etag, getLanguage, getFontSize, getTheme, getQuery, getToken, notAuthed, login)
 	.post('/login', etag, getLanguage, getFontSize, getTheme, getQuery, validateLogin, redirectHome)
-	.get('/logout', etag, getLanguage, getFontSize, getTheme, getQuery, logout)
+	.get('/logout', etag, getLanguage, getFontSize, getTheme, getQuery, expireToken, redirectLogin)
 	.get('/signup', etag, getLanguage, getFontSize, getToken, getTheme, getQuery, notAuthed, signup)
 	.post('/signup', etag, getLanguage, getFontSize, getTheme, getQuery, validateSignup, redirectHome)
 	.get('/home', etag, getToken, getMe, getLanguage, getFontSize, getTheme, loadMessage, loadStack, getEditorMode, formatMessage, home)
