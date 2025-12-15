@@ -36,7 +36,7 @@ class MainBuilder extends Builder {
 		this.authorization = mustache.render(template, {
 			query:     query,
 			login:     this.i18n("login"),
-			register:  this.i18n("register"),
+			signup:    this.i18n("signup"),
 		})
 	}
 

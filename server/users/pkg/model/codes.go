@@ -7,7 +7,7 @@ var (
 	CodePasswordOneSpecial int = 104
 	CodeLoginTooShort      int = 105
 
-	CodeRegisterFailed     int = 111
+	CodeSignupFailed       int = 111
 	CodeUserExists         int = 112
 	CodeLogoutFailed       int = 113
 	CodeDeleteFailed       int = 114

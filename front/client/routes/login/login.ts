@@ -52,7 +52,7 @@ class LoginBuilder extends Builder {
 
 		this.submit = mustache.render(template, {
 			query:    query,
-			register: this.i18n("register"),
+			signup:   this.i18n("signup"),
 			login:    this.i18n("login"),
 		})
 	}
@@ -86,7 +86,6 @@ class LoginBuilder extends Builder {
 
 				return html + render(text) + "</html>"
 			},
-			scripts:  ["/public/pages/login/loginScript.js"],
 			manifest: "/public/manifest.json",
 			styles:   styles,
 			lang:     this.lang,
@@ -94,13 +93,15 @@ class LoginBuilder extends Builder {
 		}, {
 			footer:  this.footer,
 			content: mustache.render(login, {
-				action: function() { return "/login" + search },
-				error:  error,
+				action:        function() { return "/login" + search },
+				error:         error,
+				botUsername:   `${BOT_USERNAME}`,
+				authUrl:       `https://${BACKEND_URL}/tg_auth`,
 			}, {
-				username:  this.username,
-				password:  this.password,
-				submit:    this.submit,
-				sidebar:   this.sidebar,
+				username:      this.username,
+				password:      this.password,
+				submit:        this.submit,
+				sidebar:       this.sidebar,
 			}),
 		});
 	}

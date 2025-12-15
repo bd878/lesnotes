@@ -5,25 +5,27 @@ import { readFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import Builder from '../builder';
 
-async function register(ctx) {
-	const builder = new RegisterBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.search)
+async function signup(ctx) {
+	const { lang, theme, fontSize, query, error } = ctx.state
 
-	await builder.addSettings(undefined, ctx.state.lang, ctx.state.theme, ctx.state.fontSize)
+	const builder = new SignupBuilder(ctx.userAgent.isMobile, lang, ctx.search)
+
+	await builder.addSettings(undefined, lang, theme, fontSize)
 	await builder.addUsername()
 	await builder.addPassword()
 	await builder.addSubmit(ctx.state.query)
 	await builder.addFooter()
 	await builder.addSidebar(ctx.state.query)
 
-	ctx.body = await builder.build(ctx.state.theme, ctx.state.fontSize)
+	ctx.body = await builder.build(theme, fontSize, ctx.search, error)
 	ctx.status = 200;
 }
 
-class RegisterBuilder extends Builder {
+class SignupBuilder extends Builder {
 	username = undefined;
 	async addUsername() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/register/mobile/username.mustache' : 'templates/register/desktop/username.mustache'
+			this.isMobile ? 'templates/signup/mobile/username.mustache' : 'templates/signup/desktop/username.mustache'
 		)), { encoding: 'utf-8' });
 
 		this.username = mustache.render(template, {
@@ -34,7 +36,7 @@ class RegisterBuilder extends Builder {
 	password = undefined;
 	async addPassword() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/register/mobile/password.mustache' : 'templates/register/desktop/password.mustache'
+			this.isMobile ? 'templates/signup/mobile/password.mustache' : 'templates/signup/desktop/password.mustache'
 		)), { encoding: 'utf-8' });
 
 		this.password = mustache.render(template, {
@@ -45,12 +47,12 @@ class RegisterBuilder extends Builder {
 	submit = undefined;
 	async addSubmit(query?: string) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/register/mobile/submit.mustache' : 'templates/register/desktop/submit.mustache'
+			this.isMobile ? 'templates/signup/mobile/submit.mustache' : 'templates/signup/desktop/submit.mustache'
 		)), { encoding: 'utf-8' });
 
 		this.submit = mustache.render(template, {
 			query:    query,
-			register: this.i18n("register"),
+			signup:   this.i18n("signup"),
 			login:    this.i18n("login"),
 		})
 	}
@@ -75,11 +77,11 @@ class RegisterBuilder extends Builder {
 		})
 	}
 
-	async build(theme?: string, fontSize?: string) {
+	async build(theme?: string, fontSize?: string, search?: string, error?: string) {
 		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
 		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
-		const register = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/register/mobile/register.mustache' : 'templates/register/desktop/register.mustache'
+		const signup = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/signup/mobile/signup.mustache' : 'templates/signup/desktop/signup.mustache'
 		)), { encoding: 'utf-8' });
 
 		return mustache.render(layout, {
@@ -93,15 +95,18 @@ class RegisterBuilder extends Builder {
 
 				return html + render(text) + "</html>"
 			},
-			scripts:  ["/public/pages/register/registerScript.js"],
 			manifest: "/public/manifest.json",
 			styles:   styles,
 			lang:     this.lang,
 			isMobile: this.isMobile ? "true" : "",
 		}, {
 			footer:  this.footer,
-			content: mustache.render(register, {
+			content: mustache.render(signup, {
+				action:         function() { return "/signup" + search },
+				error:          error,
 				settingsHeader: this.i18n("settingsHeader"),
+				botUsername:    `${BOT_USERNAME}`,
+				authUrl:        `https://${BACKEND_URL}/tg_auth`,
 			}, {
 				username:  this.username,
 				password:  this.password,
@@ -112,4 +117,4 @@ class RegisterBuilder extends Builder {
 	}
 }
 
-export default register;
+export default signup;

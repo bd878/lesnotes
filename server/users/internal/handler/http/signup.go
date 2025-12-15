@@ -146,9 +146,9 @@ func (h *Handler) Signup(w http.ResponseWriter, req *http.Request) (err error) {
 			json.NewEncoder(w).Encode(server.ServerResponse{
 				Status: "error",
 				Error:  &server.ErrorCode{
-					Code:    users.CodeRegisterFailed,
+					Code:    users.CodeSignupFailed,
 					Explain: "cannot signup user",
-					Human:   lang.Error(users.CodeRegisterFailed),
+					Human:   lang.Error(users.CodeSignupFailed),
 				},
 			})
 		}
@@ -166,7 +166,7 @@ func (h *Handler) Signup(w http.ResponseWriter, req *http.Request) (err error) {
 	})
 
 	response, err := json.Marshal(users.SignupResponse{
-		Description:    "user registered",
+		Description:    "user signed up",
 		ID:             user.ID,
 		Token:          user.Token,
 		ExpiresUTCNano: user.ExpiresUTCNano,

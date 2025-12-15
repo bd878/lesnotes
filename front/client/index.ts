@@ -29,7 +29,8 @@ import assets from './routes/assets/assets';
 import main from './routes/main/main';
 import login from './routes/login/login';
 import validateLogin from './routes/validateLogin/validateLogin';
-import register from './routes/register/register';
+import validateSignup from './routes/validateSignup/validateSignup';
+import signup from './routes/signup/signup';
 import home from './routes/home/home';
 import search from './routes/search/search';
 import logout from './routes/logout/logout';
@@ -60,7 +61,8 @@ router
 	.get('/login', etag, getLanguage, getFontSize, getTheme, getQuery, getToken, notAuthed, login)
 	.post('/login', etag, getLanguage, getFontSize, getTheme, getQuery, validateLogin, redirectHome)
 	.get('/logout', etag, getLanguage, getFontSize, getTheme, getQuery, logout)
-	.get('/signup', etag, getLanguage, getFontSize, getToken, getTheme, getQuery, notAuthed, register)
+	.get('/signup', etag, getLanguage, getFontSize, getToken, getTheme, getQuery, notAuthed, signup)
+	.post('/signup', etag, getLanguage, getFontSize, getTheme, getQuery, validateSignup, redirectHome)
 	.get('/home', etag, getToken, getMe, getLanguage, getFontSize, getTheme, loadMessage, loadStack, getEditorMode, formatMessage, home)
 	.get('/search', etag, getToken, getMe, getLanguage, loadSearch, loadSearchPath, search)
 	.get('/status', status, getLanguage)

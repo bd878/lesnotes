@@ -184,7 +184,7 @@ paths:
 # SIGNUP
   /users/v1/signup:
     post:
-      summary: Registers user
+      summary: Signes up user
       description: |
         Records user & password in database
       operationId: signupUser
@@ -214,7 +214,7 @@ paths:
 
   /users/v2/signup:
     post:
-      summary: Registers user
+      summary: Signes up user
       description: |
         Records user & password in database
       operationId: signupUserJson

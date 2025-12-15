@@ -34,12 +34,12 @@ import login from './login';
 import logout from './logout';
 import getMe from './getMe';
 import getMeJson from './getMeJson';
-import register from './register';
+import signup from './signup';
 import {getFileDownloadUrl, getMessageLinkUrl} from './api';
 
 export {getFileDownloadUrl, getMessageLinkUrl}
 export default {
-	register,
+	signup,
 	login,
 	changeLanguage,
 	changeLanguageJson,

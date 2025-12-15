@@ -1,9 +1,11 @@
 import models from './models';
 import api from './api';
 
-async function register(login: string, password: string, lang?: string) {
+async function signup(login: string, password: string, lang?: string) {
 	let result = {
 		error:       models.error(),
+		token:       "",
+		expiresAt:   0,
 	}
 
 	const form = new FormData()
@@ -19,14 +21,18 @@ async function register(login: string, password: string, lang?: string) {
 		headers["X-Language"] = lang;
 
 	try {
-		const [_1, error] = await api("/users/v1/signup", {
+		const [response, error] = await api("/users/v1/signup", {
 			method:  "POST",
 			body:    form,
 			headers: headers,
 		});
 
-		if (error)
+		if (error.error) {
 			result.error = models.error(error)
+		} else {
+			result.token = response.token
+			result.expiresAt = response.expires_utc_nano
+		}
 	} catch (e) {
 		result.error.error   = true
 		result.error.status  = 500
@@ -36,4 +42,4 @@ async function register(login: string, password: string, lang?: string) {
 	return result
 }
 
-export default register
+export default signup
