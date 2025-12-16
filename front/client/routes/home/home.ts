@@ -93,6 +93,7 @@ class HomeBuilder extends Builder {
 			textPlaceholder:  this.i18n("textPlaceholder"),
 			updateButton:     this.i18n("updateButton"),
 			cancelButton:     this.i18n("cancelButton"),
+			updateAction:     "/update" + this.search,
 			userID:           userID,
 			domain:           Config.get("domain"),
 		})
@@ -116,7 +117,10 @@ class HomeBuilder extends Builder {
 			name:             message.name,
 			private:          message.private,
 			newNoteHref:      function() { const p = new URLSearchParams(search); p.delete("id"); return "/home?" + p.toString(); },
-			editHref:         function() { const p = new URLSearchParams(search); p.set("edit", 1); return "/home?" + p.toString(); },
+			editHref:         function() { const p = new URLSearchParams(search); p.set("edit", "1"); return "/home?" + p.toString(); },
+			deleteAction:     "/delete" + search,
+			publishAction:    "/publish" + search,
+			privateAction:    "/private" + search,
 			newNoteButton:    this.i18n("newNote"),
 			userID:           userID,
 			domain:           Config.get("domain"),
@@ -133,6 +137,7 @@ class HomeBuilder extends Builder {
 			titlePlaceholder: this.i18n("titlePlaceholder"),
 			textPlaceholder:  this.i18n("textPlaceholder"),
 			sendButton:       this.i18n("sendButton"),
+			sendAction:       "/send" + this.search,
 		})
 	}
 

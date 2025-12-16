@@ -6,16 +6,16 @@ import { resolve, join } from 'node:path';
 import Builder from '../builder';
 
 async function signup(ctx) {
-	const { lang, theme, fontSize, query, error } = ctx.state
+	const { lang, theme, fontSize, error } = ctx.state
 
 	const builder = new SignupBuilder(ctx.userAgent.isMobile, lang, ctx.search)
 
 	await builder.addSettings(undefined, lang, theme, fontSize)
 	await builder.addUsername()
 	await builder.addPassword()
-	await builder.addSubmit(ctx.state.query)
+	await builder.addSubmit(ctx.search)
 	await builder.addFooter()
-	await builder.addSidebar(ctx.state.query)
+	await builder.addSidebar(ctx.search)
 
 	ctx.body = await builder.build(theme, fontSize, ctx.search, error)
 	ctx.status = 200;

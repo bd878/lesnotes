@@ -9,14 +9,14 @@ async function validateLogin(ctx, next) {
 
 	if (response.error.error) {
 		ctx.state.error = response.error.human
-		return await login(ctx)
+		await login(ctx)
+	} else {		
+		const expiresAt = new Date(Math.round(response.expiresAt / 1_000_000))
+		console.log("expiresAt", expiresAt.toString())
+		ctx.set({"Set-Cookie":  "token=" + response.token + "; Expires=" + expiresAt.toString() + "; HttpOnly; Path=/; Secure; Domain=" + `${DOMAIN}`})
+
+		await next()
 	}
-
-	const expiresAt = new Date(Math.round(response.expiresAt / 1_000_000))
-	console.log("expiresAt", expiresAt.toString())
-	ctx.set({"Set-Cookie":  "token=" + response.token + "; Expires=" + expiresAt.toString() + "; HttpOnly; Path=/; Secure; Domain=" + `${DOMAIN}`})
-
-	await next()
 
 	console.log("<-- validate login")
 }

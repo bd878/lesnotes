@@ -10,8 +10,8 @@ async function main(ctx) {
 
 	await builder.addSettings(undefined, ctx.state.lang, ctx.state.theme, ctx.state.fontSize)
 	await builder.addFooter()
-	await builder.addSidebar(ctx.state.query)
-	await builder.addAuthorization(ctx.state.query)
+	await builder.addSidebar(ctx.search)
+	await builder.addAuthorization(ctx.search)
 
 	ctx.body = await builder.build(ctx.state.theme, ctx.state.fontSize)
 	ctx.status = 200;

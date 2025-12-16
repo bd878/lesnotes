@@ -10,12 +10,16 @@ import sendMessageJson from './sendMessageJson';
 import searchMessagesJson from './searchMessagesJson';
 import searchMessagesPathJson from './searchMessagesPathJson';
 import updateMessage from './updateMessage';
+import updateMessageJson from './updateMessageJson';
 import privateThread from './privateThread';
 import publishThread from './publishThread';
 import deleteMessage from './deleteMessage';
+import deleteMessageJson from './deleteMessageJson';
 import deleteMessages from './deleteMessages';
 import publishMessages from './publishMessages'
+import publishMessageJson from './publishMessageJson'
 import privateMessages from './privateMessages';
+import privateMessageJson from './privateMessageJson';
 import moveMessage from './moveMessage';
 import uploadFile from './uploadFile';
 import validateMiniappData from './validateMiniappData';
@@ -62,10 +66,14 @@ export default {
 	sendMessage,
 	sendMessageJson,
 	updateMessage,
+	updateMessageJson,
 	deleteMessage,
+	deleteMessageJson,
 	deleteMessages,
 	publishMessages,
+	publishMessageJson,
 	privateMessages,
+	privateMessageJson,
 	privateThread,
 	publishThread,
 	moveMessage,

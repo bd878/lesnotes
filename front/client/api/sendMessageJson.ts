@@ -1,7 +1,7 @@
 import api from './api';
 import models from './models';
 
-async function sendMessageJson(token: string, text: string, file: number, thread: number) {
+async function sendMessageJson(token: string, text: string, title: string, fileIDs: number[], thread: number) {
 	let result = {
 		error:   models.error(),
 		message: models.message(),
@@ -13,9 +13,10 @@ async function sendMessageJson(token: string, text: string, file: number, thread
 			body: {
 				token: token,
 				req: {
-					text:   text,
-					file:   file,
-					thread: thread,
+					text:       text,
+					title:      title,
+					file_ids:   fileIDs,
+					thread:     thread,
 				},
 			},
 		});

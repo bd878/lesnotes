@@ -1,5 +1,10 @@
 {{#ID}}
-	<form data-message-id="{{ID}}" id="message-edit-form" name="message-edit-form" autocomplete="off" onsubmit="return false;" class="w-full flex flex-col grow">
+	<form
+		autocomplete="off"
+		method="POST"
+		type="multipart/form-data"
+		class="w-full flex flex-col grow"
+	>
 		<div class="flex flex-col grow">
 			{{^private}}
 				<div class="flex flex-row mb-2"><a class="hover:underline dark:text-blue-600 dark:hover:text-white italic text-blue-600 text-sm" href="/m/{{name}}" target="_blank">https://{{domain}}/m/</a><input name="messageName" class="grow-1 ml-1 px-1 border-1 border-gray-600 rounded-md placeholder:italic placeholder:text-gray-600 resize-none text-sm" placeholder="{{namePlaceholder}}" value="{{name}}"></input></div>
@@ -11,7 +16,7 @@
 		<div class="flex flex-col">
 			<div></div>
 			<div class="flex flex-row justify-between">
-				<button data-message-id="{{ID}}" type="submit" class="rounded-md border-1 px-4 border-solid dark:hover:text-white text-left cursor-pointer">{{updateButton}}</button>
+				<button formaction="{{updateAction}}" type="submit" class="rounded-md border-1 px-4 border-solid dark:hover:text-white text-left cursor-pointer">{{updateButton}}</button>
 				<a href="{{cancelEditHref}}" target="_self" class="flex justify-center border-1 px-4 border-solid rounded-md dark:hover:text-white text-left cursor-pointer">{{cancelButton}}</a>
 			</div>
 		</div>
