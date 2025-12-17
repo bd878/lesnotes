@@ -1,9 +1,15 @@
 import api from '../api';
 import * as is from '../third_party/is';
 
-async function getMe(ctx, next) {
-	console.log("--> getMe")
+function log(f) {
+	return async function getMeLog(ctx, next) {
+		console.log("--> getMe")
+		await f(ctx, next)
+		console.log("<-- getMe")
+	}
+}
 
+async function getMe(ctx, next) {
 	ctx.state.me = await api.getMeJson(ctx.state.token)
 	if (ctx.state.me.error.error) {
 		ctx.redirect("/login" + ctx.search)
@@ -20,8 +26,6 @@ async function getMe(ctx, next) {
 	}
 
 	await next()
-
-	console.log("<-- getMe")
 }
 
-export default getMe
+export default log(getMe)

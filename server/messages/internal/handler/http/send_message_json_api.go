@@ -67,19 +67,6 @@ func (h *Handler) SendMessageJsonAPI(w http.ResponseWriter, req *http.Request) (
 		return
 	}
 
-	if request.ThreadID != 0 {
-		w.WriteHeader(http.StatusNotImplemented)
-		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status: "error",
-			Error:  &server.ErrorCode{
-				Code:    server.CodeNoID,
-				Explain: "cannot save with thread_id yet",
-			},
-		})
-
-		return
-	}
-
 	private := true
 	if user.ID == users.PublicUserID {
 		private = false
@@ -89,7 +76,6 @@ func (h *Handler) SendMessageJsonAPI(w http.ResponseWriter, req *http.Request) (
 	name := utils.RandomString(8)
 
 	// TODO: check file by file_id exists
-	// TODO: check thread by thread_id exists
 
 	return h.saveMessage(w, req, int64(id), request.Text, request.Title, request.FileIDs, request.ThreadID, user.ID, private, name)
 }

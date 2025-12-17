@@ -2,12 +2,12 @@ import api from '../api';
 import * as is from '../third_party/is';
 
 async function loadMessage(ctx, next) {
-	const id     = parseInt(ctx.query.id) || parseInt(ctx.params.id) || 0
-	const name   = ctx.params.name || ""
+	const id = parseInt(ctx.query.id) || parseInt(ctx.params.id) || 0
+	const name = ctx.params.name || ""
 	const userID = parseInt(ctx.params.user) || 0
-	const token  = ctx.state.token
+	const token = ctx.state.token
 
-	console.log("--> loadMessage", "token", token, "user_id", userID, "id", id, "name", name)
+	console.log("--> loadMessage")
 
 	if (is.notEmpty(token)) {
 		if (is.notEmpty(id)) {

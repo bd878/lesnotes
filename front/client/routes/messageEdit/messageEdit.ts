@@ -8,25 +8,21 @@ import { resolve, join } from 'node:path';
 import HomeBuilder from '../home/builder';
 
 async function readMessageEdit(ctx) {
-	console.log("--> message edit")
+	console.log("--> messageEdit")
 
-	const { me, stack, message, lang, theme, fontSize } = ctx.state
+	const builder = new MessageEditViewBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.search, ctx.path)
 
-	const builder = new MessageEditViewBuilder(ctx.userAgent.isMobile, lang)
-
-	await builder.addMessageEditForm(me.ID, message)
-	await builder.addSettings(lang, theme, fontSize)
-	await builder.addMessagesList(stack)
+	await builder.addMessageEditForm(ctx.state.me.ID, ctx.state.message)
+	await builder.addSettings(ctx.state.lang, ctx.state.theme, ctx.state.fontSize)
+	await builder.addMessagesList(ctx.state.stack)
 	await builder.addSearch()
 	await builder.addSidebar(ctx.search)
 	await builder.addFooter()
 
-	ctx.body = await builder.build(message, theme, fontSize)
+	ctx.body = await builder.build(ctx.state.message, ctx.state.theme, ctx.state.fontSize, true)
 	ctx.status = 200
 
-	console.log("<-- message edit")
-
-	return;
+	console.log("<-- messageEdit")
 }
 
 class MessageEditViewBuilder extends HomeBuilder {
@@ -39,16 +35,13 @@ class MessageEditViewBuilder extends HomeBuilder {
 			this.isMobile ? 'templates/home/mobile/message_edit_form.mustache' : 'templates/home/desktop/message_edit_form.mustache'
 		)), { encoding: 'utf-8' });
 
-		const params = new URLSearchParams(this.search)
-		params.delete("edit")
-
 		this.messageEditForm = mustache.render(template, {
 			ID:               message.ID,
 			private:          message.private,
 			name:             message.name,
 			title:            message.title,
 			text:             message.text,
-			cancelEditHref:   "/home?" + params.toString(),
+			cancelEditHref:   `/messages/${message.ID}` + this.search,
 			namePlaceholder:  this.i18n("namePlaceholder"),
 			titlePlaceholder: this.i18n("titlePlaceholder"),
 			textPlaceholder:  this.i18n("textPlaceholder"),

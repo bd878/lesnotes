@@ -3,7 +3,7 @@ import * as is from '../third_party/is'
 import api from '../api'
 
 async function deleteMessage(ctx, next) {
-	console.log("--> delete message")
+	console.log("--> deleteMessage")
 
 	let form = ctx.request.body
 
@@ -20,7 +20,7 @@ async function deleteMessage(ctx, next) {
 		await next()
 	}
 
-	console.log("<-- delete message")
+	console.log("<-- deleteMessage")
 }
 
 export default deleteMessage;

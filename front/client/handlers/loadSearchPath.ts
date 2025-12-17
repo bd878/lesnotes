@@ -5,7 +5,7 @@ async function loadSearchPath(ctx, next) {
 	const token  = ctx.state.token
 	const search = ctx.state.search
 
-	console.log("--> loadSearchPath", "token", token)
+	console.log("--> loadSearchPath")
 
 	if (is.notEmpty(token)) {
 		if (is.notEmpty(search)) {

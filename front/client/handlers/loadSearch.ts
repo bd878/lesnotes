@@ -5,7 +5,7 @@ async function loadSearch(ctx, next) {
 	const query  = ctx.query.query || ""
 	const token  = ctx.state.token
 
-	console.log("--> loadSearch", "token", token, "query", query)
+	console.log("--> loadSearch")
 
 	if (is.notEmpty(token)) {
 		ctx.state.search = await api.searchMessagesJson(token, query)

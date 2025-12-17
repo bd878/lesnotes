@@ -1,7 +1,7 @@
 import api from './api';
 import models from './models';
 
-async function sendMessageJson(token: string, text: string, title: string, fileIDs: number[], thread: number) {
+async function sendMessageJson(token: string, text: string, title: string, fileIDs: number[], thread: number, isPrivate: boolean) {
 	let result = {
 		error:   models.error(),
 		message: models.message(),
@@ -15,13 +15,14 @@ async function sendMessageJson(token: string, text: string, title: string, fileI
 				req: {
 					text:       text,
 					title:      title,
-					file_ids:   fileIDs,
 					thread:     thread,
+					file_ids:   fileIDs,
+					private:    isPrivate,
 				},
 			},
 		});
 
-		if (error)
+		if (error.error)
 			result.error = models.error(error)
 
 		if (response)

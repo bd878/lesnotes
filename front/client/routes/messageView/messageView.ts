@@ -8,25 +8,21 @@ import { resolve, join } from 'node:path';
 import HomeBuilder from '../home/builder';
 
 async function readMessageView(ctx) {
-	console.log("--> message view")
+	console.log("--> messageView")
 
-	const { me, stack, message, lang, theme, fontSize } = ctx.state
+	const builder = new MessageViewBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.search, ctx.path)
 
-	const builder = new MessageViewBuilder(ctx.userAgent.isMobile, lang)
-
-	await builder.addMessageView(me.ID, message)
-	await builder.addSettings(lang, theme, fontSize)
-	await builder.addMessagesList(stack)
+	await builder.addMessageView(ctx.state.me.ID, ctx.state.message)
+	await builder.addSettings(ctx.state.lang, ctx.state.theme, ctx.state.fontSize)
+	await builder.addMessagesList(ctx.state.stack)
 	await builder.addSearch()
 	await builder.addSidebar(ctx.search)
 	await builder.addFooter()
 
-	ctx.body = await builder.build(message, theme, fontSize)
+	ctx.body = await builder.build(ctx.state.message, ctx.state.theme, ctx.state.fontSize, false)
 	ctx.status = 200
 
-	console.log("<-- message view")
-
-	return;
+	console.log("<-- messageView")
 }
 
 class MessageViewBuilder extends HomeBuilder {
@@ -47,8 +43,8 @@ class MessageViewBuilder extends HomeBuilder {
 			text:             message.text,
 			name:             message.name,
 			private:          message.private,
-			newNoteHref:      function() { const p = new URLSearchParams(search); p.delete("id"); return "/home?" + p.toString(); },
-			editHref:         function() { const p = new URLSearchParams(search); p.set("edit", "1"); return "/home?" + p.toString(); },
+			newNoteHref:      function() { return "/home" + search; },
+			editHref:         function() { return `/editor/messages/${message.ID}` + search; },
 			deleteAction:     "/delete" + search,
 			publishAction:    "/publish" + search,
 			privateAction:    "/private" + search,

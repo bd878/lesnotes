@@ -3,7 +3,7 @@ import * as is from '../third_party/is'
 import api from '../api'
 
 async function sendMessage(ctx, next) {
-	console.log("--> send message")
+	console.log("--> sendMessage")
 
 	let form = ctx.request.body
 
@@ -11,7 +11,7 @@ async function sendMessage(ctx, next) {
 		form = {}
 	}
 
-	const response = await api.sendMessageJson(ctx.state.token, form.text, form.title, [], form.thread)
+	const response = await api.sendMessageJson(ctx.state.token, form.text, form.title, [], parseInt(form.thread) || 0, true)
 
 	if (response.error.error) {
 		ctx.state.error = response.error.human
@@ -20,7 +20,7 @@ async function sendMessage(ctx, next) {
 		await next()
 	}
 
-	console.log("<-- send message")
+	console.log("<-- sendMessage")
 }
 
 export default sendMessage;

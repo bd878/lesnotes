@@ -9,11 +9,13 @@ abstract class Builder {
 	isMobile:      boolean = false;
 	lang:          string  = "en";
 	search:        string = "";
+	path:          string = "";
 
-	constructor(isMobile: boolean, lang: string = "en", search: string = "") {
+	constructor(isMobile: boolean, lang: string = "en", search: string = "", path: string = "") {
 		this.search = search
 		this.isMobile = isMobile
 		this.lang = lang
+		this.path = path
 	}
 
 	i18n(key: string): string {

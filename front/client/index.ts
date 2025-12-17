@@ -12,7 +12,6 @@ import favicon from './handlers/favicon.js';
 import etag from './handlers/etag.js';
 import getMe from './handlers/getMe.js';
 import getToken from './handlers/getToken.js';
-import getTheme from './handlers/getTheme.js';
 import notAuthed from './handlers/notAuthed';
 import authed from './handlers/authed';
 import loadStack from './handlers/loadStack.js';
@@ -20,8 +19,7 @@ import loadMessage from './handlers/loadMessage.js';
 import loadSearch from './handlers/loadSearch';
 import formatMessage from './handlers/formatMessage';
 import loadSearchPath from './handlers/loadSearchPath';
-import getLanguage from './handlers/getLanguage';
-import getFontSize from './handlers/getFontSize';
+import getState from './handlers/getState';
 import expireToken from './handlers/expireToken';
 import redirectHome from './handlers/redirectHome';
 import redirectLogin from './handlers/redirectLogin';
@@ -63,27 +61,27 @@ router
 		ctx.redirect('/')
 		ctx.status = 301
 	})
-	.get('/', etag, getLanguage, getTheme, getFontSize, getToken, notAuthed, main)
-	.get('/login', etag, getLanguage, getFontSize, getTheme, getToken, notAuthed, login)
-	.post('/login', etag, getLanguage, getFontSize, getTheme, validateLogin, redirectHome)
-	.get('/logout', etag, getLanguage, getFontSize, getTheme, expireToken, redirectLogin)
-	.get('/signup', etag, getLanguage, getFontSize, getToken, getTheme, notAuthed, signup)
-	.post('/signup', etag, getLanguage, getFontSize, getTheme, validateSignup, redirectHome)
-	.get('/home', etag, getToken, getMe, getLanguage, getFontSize, getTheme, loadStack, home)
-	.get('/messages/:id', etag, getToken, getMe, getLanguage, getFontSize, getTheme, loadStack, loadMessage, formatMessage, messageView)
-	.get('/editor/messages/:id', etag, getToken, getMe, getLanguage, getFontSize, getTheme, loadStack, loadMessage, formatMessage, messageEdit)
-	.get('/search', etag, getToken, getMe, getLanguage, loadSearch, loadSearchPath, search)
-	.get('/status', status, getLanguage)
-	.post("/delete", getToken, authed, getLanguage, getFontSize, getTheme, deleteMessage, redirectHome)
-	.post("/publish", getToken, authed, getLanguage, getFontSize, getTheme, publishMessage, redirectHome)
-	.post("/private", getToken, authed, getLanguage, getFontSize, getTheme, privateMessage, redirectHome)
-	.post("/send", getToken, authed, getLanguage, getFontSize, getTheme, sendMessage, redirectHome)
-	.post("/update", getToken, authed, getLanguage, getFontSize, getTheme, updateMessage, redirectHome)
+	.get('/', etag, getState, getToken, notAuthed, main)
+	.get('/login', etag, getState, getToken, notAuthed, login)
+	.post('/login', etag, getState, validateLogin, redirectHome)
+	.get('/logout', etag, getState, expireToken, redirectLogin)
+	.get('/signup', etag, getState, getToken, notAuthed, signup)
+	.post('/signup', etag, getState, validateSignup, redirectHome)
+	.get('/home', etag, getToken, getMe, getState, loadStack, home)
+	.get('/messages/:id', etag, getToken, getMe, getState, loadStack, loadMessage, formatMessage, messageView)
+	.get('/editor/messages/:id', etag, getToken, getMe, getState, loadStack, loadMessage, formatMessage, messageEdit)
+	.get('/search', etag, getToken, getMe, getState, loadSearch, loadSearchPath, search)
+	.get('/status', status, getState)
+	.post("/delete", getToken, authed, getState, deleteMessage, redirectHome)
+	.post("/publish", getToken, authed, getState, publishMessage, redirectHome)
+	.post("/private", getToken, authed, getState, privateMessage, redirectHome)
+	.post("/send", getToken, authed, getState, sendMessage, redirectHome)
+	.post("/update", getToken, authed, getState, updateMessage, redirectHome)
 	.get("/tg_auth", authTelegram)
-	.get("/m/:user/:id", etag, getLanguage, getFontSize, getTheme, getToken, loadMessage, publicMessage)
-	.get("/m/:name", etag, getLanguage, getFontSize, getTheme, getToken, loadMessage, publicMessage)
-	.get("/miniapp", etag, getLanguage, miniapp)
-	.get('/:any*', getLanguage, xxx)
+	.get("/m/:user/:id", etag, getState, getToken, loadMessage, publicMessage)
+	.get("/m/:name", etag, getState, getToken, loadMessage, publicMessage)
+	.get("/miniapp", etag, getState, miniapp)
+	.get('/:any*', getState, xxx)
 
 app.use(router.routes());
 

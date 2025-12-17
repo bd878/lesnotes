@@ -20,6 +20,8 @@ class HomeBuilder extends Builder {
 		)), { encoding: 'utf-8' });
 
 		const search = this.search
+		const path = this.path
+
 		const limit = parseInt(LIMIT)
 
 		this.messagesList = mustache.render(template, {
@@ -28,10 +30,10 @@ class HomeBuilder extends Builder {
 			isSingle:         () => stack.length == 1,
 			newMessageText:   this.i18n("newMessageText"),
 			noMessagesText:   this.i18n("noMessagesText"),
-			messageHref:      function() { const params = new URLSearchParams(search); params.set("id", `${this.ID}`); params.delete("edit"); return "/home?" + params.toString(); },
-			threadHref:       function() { const params = new URLSearchParams(search); params.set("cwd", `${this.ID}`); return "/home?" + params.toString(); },
-			prevPageHref:     function() { const params = new URLSearchParams(search); params.set(this.threadID || 0, `${limit + this.offset}`); return "/home?" + params.toString(); },
-			nextPageHref:     function() { const params = new URLSearchParams(search); params.set(this.threadID || 0, `${Math.max(0, this.offset - limit)}`); return "/home?" + params.toString(); },
+			messageHref:      function() { return `/messages/${this.ID}` + search; },
+			threadHref:       function() { const params = new URLSearchParams(search); params.set("cwd", `${this.ID}`); return path + "?" + params.toString(); },
+			prevPageHref:     function() { const params = new URLSearchParams(search); params.set(this.threadID || 0, `${limit + this.offset}`); return path + "?" + params.toString(); },
+			nextPageHref:     function() { const params = new URLSearchParams(search); params.set(this.threadID || 0, `${Math.max(0, this.offset - limit)}`); return path + "?" + params.toString(); },
 		})
 	}
 
@@ -90,6 +92,7 @@ class HomeBuilder extends Builder {
 		)), { encoding: 'utf-8' });
 
 		this.sidebar = mustache.render(template, {
+			mainHref:         "/home" + search,
 			logout:           this.i18n("logout"),
 			logoutHref:       "/logout" + search,
 			settingsHeader:   this.i18n("settingsHeader"),
@@ -100,7 +103,7 @@ class HomeBuilder extends Builder {
 	}
 
 	newMessageForm = undefined;
-	async addNewMessageForm() {
+	async addNewMessageForm(thread?: number) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/home/mobile/new_message_form.mustache' : 'templates/home/desktop/new_message_form.mustache'
 		)), { encoding: 'utf-8' });
@@ -110,6 +113,7 @@ class HomeBuilder extends Builder {
 			textPlaceholder:  this.i18n("textPlaceholder"),
 			sendButton:       this.i18n("sendButton"),
 			sendAction:       "/send" + this.search,
+			thread:           thread || 0,
 		})
 	}
 
@@ -121,7 +125,7 @@ class HomeBuilder extends Builder {
 		)), { encoding: 'utf-8' });
 
 		return mustache.render(layout, {
-			html:   () => (text, render) => {
+			html: () => (text, render) => {
 				let html = "<html"
 
 				if (theme) html += ` class="${theme}"`;
