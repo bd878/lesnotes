@@ -1,3 +1,10 @@
-<form id="messages-search-form"  class="w-full flex flex-row" name="messages-search-form" autocomplete="off" onsubmit="return false;">
+<form
+	action="{{action}}"
+	autocomplete="off"
+	method="POST"
+	type="multipart/form-data"
+	class="w-full flex flex-row"
+>
 	<input required class="w-full placeholder:italic px-1 large:placeholder:text-lg small:placeholder:text-sm placeholder:text-gray-600 border rounded-md" id="messages-search-input" type="text" name="search" placeholder="{{searchPlaceholder}}"></input>
+	<input type="submit" hidden />
 </form>

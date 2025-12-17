@@ -1,14 +1,15 @@
 import api from '../api';
-import * as is from '../third_party/is';
 
 async function loadSearch(ctx, next) {
-	const query  = ctx.query.query || ""
-	const token  = ctx.state.token
-
 	console.log("--> loadSearch")
 
-	if (is.notEmpty(token)) {
-		ctx.state.search = await api.searchMessagesJson(token, query)
+	const response = await api.searchMessagesJson(ctx.state.token, ctx.state.query)
+	if (response.error.error) {
+		console.log(response.error)
+		ctx.body = "error"
+		ctx.state = 400
+	} else {
+		ctx.state.messages = response.messages
 	}
 
 	await next()

@@ -30,6 +30,8 @@ import publishMessage from './handlers/publishMessage';
 import privateMessage from './handlers/privateMessage';
 import sendMessage from './handlers/sendMessage';
 import updateMessage from './handlers/updateMessage';
+import getSearchForm from './handlers/getSearchForm';
+import getSearchQuery from './handlers/getSearchQuery';
 
 import assets from './routes/assets/assets';
 import main from './routes/main/main';
@@ -70,8 +72,9 @@ router
 	.get('home', '/home', etag, getToken, getMe, getState, loadStack, home)
 	.get('message', '/messages/:id', etag, getToken, getMe, getState, loadStack, loadMessage, formatMessage, messageView)
 	.get('editMessage', '/editor/messages/:id', etag, getToken, getMe, getState, loadStack, loadMessage, formatMessage, messageEdit)
-	.get('search', '/search', etag, getToken, getMe, getState, loadSearch, loadSearchPath, search)
 	.get('status', '/status', status, getState)
+	.get('search', '/search', etag, getToken, authed, getState, getMe, getSearchQuery, loadSearch, loadSearchPath, search)
+	.post('/search', etag, getToken, authed, getState, getMe, getSearchForm, loadSearch, loadSearchPath, search)
 	.post("/delete", getToken, authed, getState, deleteMessage)
 	.post("/publish", getToken, authed, getState, publishMessage)
 	.post("/private", getToken, authed, getState, privateMessage)

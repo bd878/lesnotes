@@ -12,33 +12,10 @@ import Builder from '../builder'
 async function search(ctx) {
 	console.log("--> search")
 
-	let messages;
-	if (is.notEmpty(ctx.state.searchPath)) {
-		if (ctx.state.search.error.error) {
-			console.error(ctx.state.search.error)
-			ctx.body = "error"
-			ctx.status = 400
-			return;
-		}
-
-		if (ctx.state.searchPath.error.error) {
-			console.error(ctx.state.searchPath.error)
-			ctx.body = "error"
-			ctx.status = 400
-			return;
-		}
-
-		messages = ctx.state.searchPath.messages
-	} else {
-		console.error("search is empty")
-		ctx.status = 500
-		return
-	}
-
-	const builder = new SearchBuilder(ctx.userAgent.isMobile, ctx.state.lang)
+	const builder = new SearchBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.search, ctx.path)
 
 	await builder.addSettings(ctx.state.lang, ctx.state.theme, ctx.state.fontSize)
-	await builder.addMessagesList(messages)
+	await builder.addMessagesList(ctx.state.messages)
 	await builder.addFilesList()
 	await builder.addSearch()
 	await builder.addSidebar()
@@ -57,11 +34,14 @@ class SearchBuilder extends Builder {
 			this.isMobile ? 'templates/search/mobile/messages_list.mustache' : 'templates/search/desktop/messages_list.mustache'
 		)), { encoding: 'utf-8' });
 
+		const search = this.search
+
 		this.messagesList = mustache.render(template, {
 			list:             list,
 			isEmpty:          () => list.length == 0,
 			isSingle:         () => list.length == 1,
 			emptyListText:    this.i18n("emptyListText"),
+			messageHref:      function() { const params = new URLSearchParams(search); params.delete("query"); return `/messages/${this.ID}?` + params.toString(); },
 		})
 	}
 
@@ -90,6 +70,7 @@ class SearchBuilder extends Builder {
 		)), { encoding: 'utf-8' });
 
 		this.searchForm = mustache.render(template, {
+			action:              "/search" + this.search,
 			searchPlaceholder:   this.i18n("searchPlaceholder"),
 			searchMessages:      this.i18n("search"),
 		})
@@ -101,7 +82,11 @@ class SearchBuilder extends Builder {
 			this.isMobile ? 'templates/sidebar_vertical/mobile/sidebar_vertical.mustache' : 'templates/sidebar_vertical/desktop/sidebar_vertical.mustache'
 		)), { encoding: 'utf-8' });
 
+		const search = this.search
+
 		this.sidebar = mustache.render(template, {
+			mainHref:         function() { const params = new URLSearchParams(search); params.delete("query"); return "/home?" + params.toString(); },
+			logoutHref:       function() { const params = new URLSearchParams(search); params.delete("query"); return "/logout?" + params.toString(); },
 			logout:           this.i18n("logout"),
 			settingsHeader:   this.i18n("settingsHeader"),
 		}, {
@@ -118,7 +103,7 @@ class SearchBuilder extends Builder {
 		)), { encoding: 'utf-8' });
 
 		return mustache.render(layout, {
-			html:     () => (text, render) => {
+			html: () => (text, render) => {
 				let html = "<html"
 
 				if (theme) html += ` class="${theme}"`;

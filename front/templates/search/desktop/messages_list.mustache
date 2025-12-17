@@ -6,7 +6,7 @@
 		<ul class="h-full w-full">
 			{{#list}}
 				<li class="grow-1 max-w-full flex flex-row justify-between whitespace-nowrap first:mt-[2px] last:mb-[2px] mx-[2px]">
-					<a target="_self" href="/messages/{{ID}}?cwd={{threadID}}" class="flex flex-row overflow-hidden dark:hover:bg-slate-600 dark:hover:text-white hover:bg-gray-300 cursor-pointer text-left px-2 w-full z-1">
+					<a target="_self" href="{{messageHref}}" class="flex flex-row overflow-hidden dark:hover:bg-slate-600 dark:hover:text-white hover:bg-gray-300 cursor-pointer text-left px-2 w-full z-1">
 						{{#path}}
 							/<span>{{.}}</span>
 						{{/path}}

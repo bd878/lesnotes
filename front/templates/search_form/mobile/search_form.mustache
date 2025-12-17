@@ -1,4 +1,10 @@
-<form id="messages-search-form" name="messages-search-form" autocomplete="off" onsubmit="return false;" class="flex flex-row">
-	<input required class="w-md placeholder:italic px-1 placeholder:text-gray-600 border rounded-md  mr-3" id="messages-search-input" type="text" name="search" placeholder="{{searchPlaceholder}}"></input>
-	<button id="messages-search-button" type="submit" class="rounded-md border-1 px-4 border-solid text-left cursor-pointer">{{searchMessages}}</button>
+<form
+	action="{{action}}"
+	autocomplete="off"
+	method="POST"
+	type="multipart/form-data"
+	class="flex flex-row"
+>
+	<input required class="w-md placeholder:italic px-1 placeholder:text-gray-600 border rounded-md  mr-3" type="text" name="search" placeholder="{{searchPlaceholder}}"></input>
+	<button type="submit" class="rounded-md border-1 px-4 border-solid text-left cursor-pointer">{{searchMessages}}</button>
 </form>

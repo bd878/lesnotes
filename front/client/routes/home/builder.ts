@@ -82,6 +82,7 @@ class HomeBuilder extends Builder {
 		)), { encoding: 'utf-8' });
 
 		this.searchForm = mustache.render(template, {
+			action:              "/search" + this.search,
 			searchPlaceholder:   this.i18n("searchPlaceholder"),
 			searchMessages:      this.i18n("search"),
 		})
