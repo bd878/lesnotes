@@ -1,5 +1,5 @@
 import * as is from '../../../third_party/is';
-import api from '../../../api';
+import reorderThread from '../../../api/reorderThread';
 
 async function onMessagesListDrop(elems, e) {
 	e.preventDefault()
@@ -28,7 +28,7 @@ async function onMessagesListDrop(elems, e) {
 		return
 	}
 
-	const response = await api.reorderThread(sourceId, -1 /* no parent */, targetId, 0 /* no prev */)
+	const response = await reorderThread(sourceId, -1 /* no parent */, targetId, 0 /* no prev */)
 	if (response.error.error) {
 		console.error('[onMessagesListDrop]: cannot reorder thread:', response)
 		return

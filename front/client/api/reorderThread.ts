@@ -1,9 +1,9 @@
 import api from './api';
-import models from './models';
+import mapError from './models/error';
 
 async function reorderThread(id: number, parent: number, next: number, prev: number) {
 	let result = {
-		error:  models.error(),
+		error:  mapError(),
 		id:     0,
 	}
 
@@ -29,7 +29,7 @@ async function reorderThread(id: number, parent: number, next: number, prev: num
 		});
 
 		if (error)
-			result.error = models.error(error)
+			result.error = mapError(error)
 
 		if (response)
 			result.id = response.id

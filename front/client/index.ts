@@ -18,7 +18,6 @@ import authed from './handlers/authed';
 import loadStack from './handlers/loadStack.js';
 import loadMessage from './handlers/loadMessage.js';
 import loadSearch from './handlers/loadSearch';
-import getEditorMode from './handlers/getEditorMode';
 import formatMessage from './handlers/formatMessage';
 import loadSearchPath from './handlers/loadSearchPath';
 import getLanguage from './handlers/getLanguage';
@@ -41,9 +40,11 @@ import signup from './routes/signup/signup';
 import home from './routes/home/home';
 import search from './routes/search/search';
 import xxx from './routes/xxx/xxx';
-import message from './routes/message/message';
+import publicMessage from './routes/publicMessage/publicMessage';
+import messageView from './routes/messageView/messageView';
+import messageEdit from './routes/messageEdit/messageEdit';
 import miniapp from './routes/miniapp/miniapp';
-import authTelegram from './routes/auth_telegram/auth_telegram';
+import authTelegram from './routes/authTelegram/authTelegram';
 import status from './routes/status/status';
 
 const app = new Koa();
@@ -68,7 +69,9 @@ router
 	.get('/logout', etag, getLanguage, getFontSize, getTheme, expireToken, redirectLogin)
 	.get('/signup', etag, getLanguage, getFontSize, getToken, getTheme, notAuthed, signup)
 	.post('/signup', etag, getLanguage, getFontSize, getTheme, validateSignup, redirectHome)
-	.get('/home', etag, getToken, getMe, getLanguage, getFontSize, getTheme, loadMessage, loadStack, getEditorMode, formatMessage, home)
+	.get('/home', etag, getToken, getMe, getLanguage, getFontSize, getTheme, loadStack, home)
+	.get('/messages/:id', etag, getToken, getMe, getLanguage, getFontSize, getTheme, loadStack, loadMessage, formatMessage, messageView)
+	.get('/editor/messages/:id', etag, getToken, getMe, getLanguage, getFontSize, getTheme, loadStack, loadMessage, formatMessage, messageEdit)
 	.get('/search', etag, getToken, getMe, getLanguage, loadSearch, loadSearchPath, search)
 	.get('/status', status, getLanguage)
 	.post("/delete", getToken, authed, getLanguage, getFontSize, getTheme, deleteMessage, redirectHome)
@@ -77,8 +80,8 @@ router
 	.post("/send", getToken, authed, getLanguage, getFontSize, getTheme, sendMessage, redirectHome)
 	.post("/update", getToken, authed, getLanguage, getFontSize, getTheme, updateMessage, redirectHome)
 	.get("/tg_auth", authTelegram)
-	.get("/m/:user/:id", etag, getLanguage, getFontSize, getTheme, getToken, loadMessage, message)
-	.get("/m/:name", etag, getLanguage, getFontSize, getTheme, getToken, loadMessage, message)
+	.get("/m/:user/:id", etag, getLanguage, getFontSize, getTheme, getToken, loadMessage, publicMessage)
+	.get("/m/:name", etag, getLanguage, getFontSize, getTheme, getToken, loadMessage, publicMessage)
 	.get("/miniapp", etag, getLanguage, miniapp)
 	.get('/:any*', getLanguage, xxx)
 

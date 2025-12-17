@@ -6,6 +6,8 @@ import { resolve, join } from 'node:path';
 import Builder from '../builder';
 
 async function login(ctx) {
+	console.log("--> login")
+
 	const { lang, theme, fontSize, query, error } = ctx.state
 
 	const builder = new LoginBuilder(ctx.userAgent.isMobile, lang, ctx.search)
@@ -19,6 +21,8 @@ async function login(ctx) {
 
 	ctx.body = await builder.build(theme, fontSize, ctx.search, error)
 	ctx.status = 200;
+
+	console.log("<-- login")
 }
 
 class LoginBuilder extends Builder {

@@ -10,6 +10,8 @@ import { resolve, join } from 'node:path';
 import Builder from '../builder'
 
 async function search(ctx) {
+	console.log("--> search")
+
 	const { me } = ctx.state
 
 	let messages;
@@ -48,6 +50,8 @@ async function search(ctx) {
 
 	ctx.body = await builder.build(me.theme, me.fontSize)
 	ctx.status = 200
+
+	console.log("<-- search")
 
 	return
 }

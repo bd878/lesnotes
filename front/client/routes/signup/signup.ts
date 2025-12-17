@@ -6,6 +6,8 @@ import { resolve, join } from 'node:path';
 import Builder from '../builder';
 
 async function signup(ctx) {
+	console.log("--> signup")
+
 	const { lang, theme, fontSize, error } = ctx.state
 
 	const builder = new SignupBuilder(ctx.userAgent.isMobile, lang, ctx.search)
@@ -19,6 +21,8 @@ async function signup(ctx) {
 
 	ctx.body = await builder.build(theme, fontSize, ctx.search, error)
 	ctx.status = 200;
+
+	console.log("<-- signup")
 }
 
 class SignupBuilder extends Builder {

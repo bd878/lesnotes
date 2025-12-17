@@ -1,10 +1,11 @@
 import api from './api';
-import models from './models';
+import mapMessage from './models/message';
+import mapError from './models/error';
 
 async function sendMessage(text: string, title?: string, fileIDs?: number[], thread?: number) {
 	let result = {
-		error:   models.error(),
-		message: models.message(),
+		error:   mapError(),
+		message: mapMessage(),
 	}
 
 	const form = new FormData()
@@ -29,10 +30,10 @@ async function sendMessage(text: string, title?: string, fileIDs?: number[], thr
 		});
 
 		if (error)
-			result.error   = models.error(error)
+			result.error   = mapError(error)
 
 		if (response)
-			result.message = models.message(response.message)
+			result.message = mapMessage(response.message)
 	} catch (e) {
 		result.error.error    = true
 		result.error.status   = 500

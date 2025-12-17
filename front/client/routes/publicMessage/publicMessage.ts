@@ -8,6 +8,8 @@ import { resolve, join } from 'node:path';
 import Builder from '../builder';
 
 async function readPublicMessage(ctx) {
+	console.log("--> public message")
+
 	const { message, lang, theme, fontSize } = ctx.state
 
 	ctx.set({ "Cache-Control": "no-cache,max-age=0" })
@@ -27,6 +29,8 @@ async function readPublicMessage(ctx) {
 
 	ctx.body = await builder.build(message, theme, fontSize)
 	ctx.status = 200;
+
+	console.log("<-- public message")
 
 	return
 }

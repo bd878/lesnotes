@@ -6,6 +6,8 @@ import { resolve, join } from 'node:path';
 import Builder from '../builder';
 
 async function main(ctx) {
+	console.log("--> main")
+
 	const builder = new MainBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.search)
 
 	await builder.addSettings(undefined, ctx.state.lang, ctx.state.theme, ctx.state.fontSize)
@@ -15,6 +17,8 @@ async function main(ctx) {
 
 	ctx.body = await builder.build(ctx.state.theme, ctx.state.fontSize)
 	ctx.status = 200;
+
+	console.log("<-- main")
 }
 
 class MainBuilder extends Builder {

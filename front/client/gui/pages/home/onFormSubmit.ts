@@ -1,4 +1,5 @@
-import api from '../../../api';
+import sendMessage from '../../../api/sendMessage';
+import uploadFile from '../../../api/uploadFile';
 import * as is from '../../../third_party/is';
 
 async function onFormSubmit(elems, e) {
@@ -8,7 +9,6 @@ async function onFormSubmit(elems, e) {
 		console.error("[onFormSubmit]: either text of file must be present")
 		return
 	}
-	const user = await api.getMe()
 
 	let fileID = 0;
 
@@ -19,7 +19,7 @@ async function onFormSubmit(elems, e) {
 
 	if (elems.filesInputElem.files && is.notUndef(elems.filesInputElem.files[0])) {
 		for (const file of elems.filesInputElem.files) {
-			const response = await api.uploadFile(file)
+			const response = await uploadFile(file)
 			if (response.error.error) {
 				console.error("[onFormSubmit]: cannot upload file:", response)
 				return
@@ -30,7 +30,7 @@ async function onFormSubmit(elems, e) {
 	}
 
 	if (elems.messageFormElem.messageText) {
-		const response = await api.sendMessage(elems.messageFormElem.messageText.value, elems.messageFormElem.messageTitle.value, fileIDs, threadID)
+		const response = await sendMessage(elems.messageFormElem.messageText.value, elems.messageFormElem.messageTitle.value, fileIDs, threadID)
 		if (response.error.error) {
 			console.log("[onFormSubmit]: cannod send message:", response)
 			return

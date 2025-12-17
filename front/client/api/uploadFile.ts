@@ -1,9 +1,9 @@
 import api from './api';
-import models from './models';
+import mapError from './models/error';
 
 async function uploadFile(file: any) {
 	let result = {
-		error:   models.error(),
+		error:   mapError(),
 		ID:      0,
 		name:    "",
 	}
@@ -20,7 +20,7 @@ async function uploadFile(file: any) {
 		});
 
 		if (error)
-			result.error = models.error(error)
+			result.error = mapError(error)
 
 		if (response) {
 			result.ID = response.id
