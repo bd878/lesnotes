@@ -54,13 +54,13 @@ func (h *Handler) SendMessageJsonAPI(w http.ResponseWriter, req *http.Request) (
 		return
 	}
 
-	if request.Text == "" {
+	if request.FileIDs == nil && request.Text == "" && request.Title == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:  &server.ErrorCode{
 				Code:    messages.CodeNoText,
-				Explain: "text required",
+				Explain: "file_ids or text or title required",
 			},
 		})
 

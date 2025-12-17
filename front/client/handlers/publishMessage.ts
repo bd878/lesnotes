@@ -14,6 +14,7 @@ async function publishMessage(ctx, next) {
 	const response = await api.publishMessageJson(ctx.state.token, form.id)
 
 	if (response.error.error) {
+		console.log(response.error)
 		ctx.state.error = response.error.human
 		await home(ctx)
 	} else {

@@ -14,6 +14,7 @@ async function sendMessage(ctx, next) {
 	const response = await api.sendMessageJson(ctx.state.token, form.text, form.title, [], parseInt(form.thread) || 0, true)
 
 	if (response.error.error) {
+		console.log(response.error)
 		ctx.state.error = response.error.human
 		await home(ctx)
 	} else {
