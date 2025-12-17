@@ -12,20 +12,11 @@ async function readMessageView(ctx) {
 
 	const { me, stack, message, lang, theme, fontSize } = ctx.state
 
-	ctx.set({ "Cache-Control": "no-cache,max-age=0" })
-
-	if (is.empty(message)) {
-		ctx.body = "no message"
-		ctx.status = 400
-
-		return
-	}
-
 	const builder = new MessageViewBuilder(ctx.userAgent.isMobile, lang)
 
-	await builder.addMessageView(undefined, me.ID, message)
-	await builder.addSettings(undefined, lang, theme, fontSize)
-	await builder.addMessagesList(undefined, stack)
+	await builder.addMessageView(me.ID, message)
+	await builder.addSettings(lang, theme, fontSize)
+	await builder.addMessagesList(stack)
 	await builder.addSearch()
 	await builder.addSidebar(ctx.search)
 	await builder.addFooter()
@@ -40,7 +31,7 @@ async function readMessageView(ctx) {
 
 class MessageViewBuilder extends HomeBuilder {
 	messageView = undefined;
-	async addMessageView(error: string | undefined, userID: number, message?: Message) {
+	async addMessageView(userID: number, message?: Message) {
 		if (is.empty(message))
 			return
 

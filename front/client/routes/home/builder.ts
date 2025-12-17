@@ -14,7 +14,7 @@ class HomeBuilder extends Builder {
 	messageView = undefined;
 
 	messagesList = undefined;
-	async addMessagesList(error: string | undefined, stack: Thread[]) {
+	async addMessagesList(stack: Thread[]) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/home/mobile/messages_list.mustache' : 'templates/home/desktop/messages_list.mustache'
 		)), { encoding: 'utf-8' });

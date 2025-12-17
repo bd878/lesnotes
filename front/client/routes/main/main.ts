@@ -10,7 +10,7 @@ async function main(ctx) {
 
 	const builder = new MainBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.search)
 
-	await builder.addSettings(undefined, ctx.state.lang, ctx.state.theme, ctx.state.fontSize)
+	await builder.addSettings(ctx.state.lang, ctx.state.theme, ctx.state.fontSize)
 	await builder.addFooter()
 	await builder.addSidebar(ctx.search)
 	await builder.addAuthorization(ctx.search)

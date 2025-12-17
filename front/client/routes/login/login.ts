@@ -12,7 +12,7 @@ async function login(ctx) {
 
 	const builder = new LoginBuilder(ctx.userAgent.isMobile, lang, ctx.search)
 
-	await builder.addSettings(undefined, lang, theme, fontSize)
+	await builder.addSettings(lang, theme, fontSize)
 	await builder.addUsername()
 	await builder.addPassword()
 	await builder.addSubmit(query)

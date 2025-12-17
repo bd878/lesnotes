@@ -41,9 +41,9 @@ async function search(ctx) {
 
 	const builder = new SearchBuilder(ctx.userAgent.isMobile, ctx.state.lang)
 
-	await builder.addSettings(undefined, ctx.state.lang, me.theme, me.fontSize)
-	await builder.addMessagesList(undefined, messages)
-	await builder.addFilesList(undefined, undefined)
+	await builder.addSettings(ctx.state.lang, me.theme, me.fontSize)
+	await builder.addMessagesList(messages)
+	await builder.addFilesList()
 	await builder.addSearch()
 	await builder.addSidebar()
 	await builder.addFooter()
@@ -52,13 +52,11 @@ async function search(ctx) {
 	ctx.status = 200
 
 	console.log("<-- search")
-
-	return
 }
 
 class SearchBuilder extends Builder {
 	messagesList = undefined;
-	async addMessagesList(error: string | undefined, list: Message[]) {
+	async addMessagesList(list: Message[]) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/search/mobile/messages_list.mustache' : 'templates/search/desktop/messages_list.mustache'
 		)), { encoding: 'utf-8' });
@@ -72,7 +70,7 @@ class SearchBuilder extends Builder {
 	}
 
 	filesList = undefined;
-	async addFilesList(error: string | undefined, list?: File[]) {
+	async addFilesList(list?: File[]) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/search/mobile/files_list.mustache' : 'templates/search/desktop/files_list.mustache'
 		)), { encoding: 'utf-8' });

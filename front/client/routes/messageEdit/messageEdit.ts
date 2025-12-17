@@ -12,20 +12,11 @@ async function readMessageEdit(ctx) {
 
 	const { me, stack, message, lang, theme, fontSize } = ctx.state
 
-	ctx.set({ "Cache-Control": "no-cache,max-age=0" })
-
-	if (is.empty(message)) {
-		ctx.body = "no message"
-		ctx.status = 400
-
-		return
-	}
-
 	const builder = new MessageEditViewBuilder(ctx.userAgent.isMobile, lang)
 
-	await builder.addMessageEditForm(undefined, me.ID, message)
-	await builder.addSettings(undefined, lang, theme, fontSize)
-	await builder.addMessagesList(undefined, stack)
+	await builder.addMessageEditForm(me.ID, message)
+	await builder.addSettings(lang, theme, fontSize)
+	await builder.addMessagesList(stack)
 	await builder.addSearch()
 	await builder.addSidebar(ctx.search)
 	await builder.addFooter()
@@ -40,7 +31,7 @@ async function readMessageEdit(ctx) {
 
 class MessageEditViewBuilder extends HomeBuilder {
 	messageEditForm = undefined;
-	async addMessageEditForm(error: string | undefined, userID: number, message?: Message) {
+	async addMessageEditForm(userID: number, message?: Message) {
 		if (is.empty(message))
 			return
 

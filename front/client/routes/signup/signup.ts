@@ -12,7 +12,7 @@ async function signup(ctx) {
 
 	const builder = new SignupBuilder(ctx.userAgent.isMobile, lang, ctx.search)
 
-	await builder.addSettings(undefined, lang, theme, fontSize)
+	await builder.addSettings(lang, theme, fontSize)
 	await builder.addUsername()
 	await builder.addPassword()
 	await builder.addSubmit(ctx.search)

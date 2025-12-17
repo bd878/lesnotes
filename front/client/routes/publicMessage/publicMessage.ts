@@ -23,7 +23,7 @@ async function readPublicMessage(ctx) {
 
 	const builder = new MessageBuilder(ctx.userAgent.isMobile, lang)
 
-	await builder.addSettings(undefined, undefined /* no lang selector */, theme, fontSize)
+	await builder.addSettings(undefined /* no lang selector */, theme, fontSize)
 	await builder.addSidebar()
 	await builder.addFooter()
 
