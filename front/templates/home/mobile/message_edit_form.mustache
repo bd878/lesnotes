@@ -1,12 +1,17 @@
 {{#ID}}
-	<form data-message-id="{{ID}}" id="message-edit-form" name="message-edit-form" autocomplete="off" onsubmit="return false;" class="w-full flex flex-col grow">
+	<form
+		autocomplete="off"
+		method="POST"
+		type="multipart/form-data"
+		class="w-full flex flex-col grow"
+	>
 		<div class="flex flex-col grow">
 			{{^private}}
-				<div class="flex flex-row mb-2"><a class="dark:text-blue-600 whitespace-nowrap small:text-xs large:text-base italic text-blue-600 text-sm" href="/m/{{name}}" target="_blank">{{domain}}/m/</a><input name="messageName" class="w-full ml-1 px-1 border-1 border-gray-600 rounded-md placeholder:italic placeholder:text-gray-600 dark:text-white resize-none text-sm small:text-xs large:text-base placeholder:small:text-xs placeholder:large:text-base" placeholder="{{namePlaceholder}}" value="{{name}}"></input></div>
+				<div class="flex flex-row mb-2"><a class="dark:text-blue-600 whitespace-nowrap small:text-xs large:text-base italic text-blue-600 text-sm" href="/m/{{name}}" target="_blank">{{domain}}/m/</a><input name="name" class="w-full ml-1 px-1 border-1 border-gray-600 rounded-md placeholder:italic placeholder:text-gray-600 dark:text-white resize-none text-sm small:text-xs large:text-base placeholder:small:text-xs placeholder:large:text-base" placeholder="{{namePlaceholder}}" value="{{name}}"></input></div>
 			{{/private}}
-
-			<input name="messageTitle" class="mb-2 w-full dark:text-white resize-none px-1 border-1 border-gray-600 rounded-md placeholder:italic placeholder:text-gray-600 rounded-md text-lg" placeholder="{{titlePlaceholder}}" value="{{title}}"></input>
-			<textarea name="messageText" type="input" class="w-full h-full dark:text-white px-1 mb-2 border-1 rounded-md border-gray-600 resize-none overflow-y-scroll wrap-break-word text-start placeholder:italic placeholder:text-gray-600 rounded-md" placeholder="{{textPlaceholder}}">{{text}}</textarea>
+			<input name="id" type="hidden" value="{{ID}}">
+			<input name="title" class="mb-2 w-full dark:text-white resize-none px-1 border-1 border-gray-600 rounded-md placeholder:italic placeholder:text-gray-600 rounded-md text-lg" placeholder="{{titlePlaceholder}}" value="{{title}}"></input>
+			<textarea name="text" type="input" class="w-full h-full dark:text-white px-1 mb-2 border-1 rounded-md border-gray-600 resize-none overflow-y-scroll wrap-break-word text-start placeholder:italic placeholder:text-gray-600 rounded-md" placeholder="{{textPlaceholder}}">{{text}}</textarea>
 		</div>
 		<div class="flex flex-col">
 			<div></div>

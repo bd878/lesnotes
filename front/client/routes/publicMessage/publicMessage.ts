@@ -8,36 +8,23 @@ import { resolve, join } from 'node:path';
 import Builder from '../builder';
 
 async function readPublicMessage(ctx) {
-	console.log("--> public message")
+	console.log("--> publicMessage")
 
-	const { message, lang, theme, fontSize } = ctx.state
+	const builder = new MessageBuilder(ctx.userAgent.isMobile, ctx.state.lang)
 
-	ctx.set({ "Cache-Control": "no-cache,max-age=0" })
-
-	if (is.empty(message)) {
-		ctx.body = "no message"
-		ctx.status = 400
-
-		return
-	}
-
-	const builder = new MessageBuilder(ctx.userAgent.isMobile, lang)
-
-	await builder.addSettings(undefined /* no lang selector */, theme, fontSize)
+	await builder.addSettings(ctx.state.lang, ctx.state.theme, ctx.state.fontSize)
 	await builder.addSidebar()
 	await builder.addFooter()
 
-	ctx.body = await builder.build(message, theme, fontSize)
+	ctx.body = await builder.build(ctx.state.message, ctx.state.theme, ctx.state.fontSize)
 	ctx.status = 200;
 
-	console.log("<-- public message")
-
-	return
+	console.log("<-- publicMessage")
 }
 
 class MessageBuilder extends Builder {
 	sidebar = undefined;
-	async addSidebar(query?: string) {
+	async addSidebar() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/sidebar_vertical/mobile/sidebar_vertical.mustache' : 'templates/sidebar_vertical/desktop/sidebar_vertical.mustache'
 		)), { encoding: 'utf-8' });

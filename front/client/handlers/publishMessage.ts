@@ -3,7 +3,7 @@ import * as is from '../third_party/is'
 import api from '../api'
 
 async function publishMessage(ctx, next) {
-	console.log("--> publish message")
+	console.log("--> publishMessage")
 
 	let form = ctx.request.body
 
@@ -11,17 +11,17 @@ async function publishMessage(ctx, next) {
 		form = {}
 	}
 
-	const response = await api.publishMessageJson(ctx.state.token, form.id)
+	const response = await api.publishMessageJson(ctx.state.token, parseInt(form.id) || 0)
 
 	if (response.error.error) {
 		console.log(response.error)
 		ctx.state.error = response.error.human
 		await home(ctx)
 	} else {
-		await next()
+		ctx.redirect(ctx.router.url('message', {id: form.id}, {query: ctx.query}))
 	}
 
-	console.log("<-- publish message")
+	console.log("<-- publishMessage")
 }
 
 export default publishMessage;

@@ -2,7 +2,7 @@ import home from '../routes/home/home'
 import * as is from '../third_party/is'
 import api from '../api'
 
-async function sendMessage(ctx, next) {
+async function sendMessage(ctx) {
 	console.log("--> sendMessage")
 
 	let form = ctx.request.body
@@ -18,7 +18,7 @@ async function sendMessage(ctx, next) {
 		ctx.state.error = response.error.human
 		await home(ctx)
 	} else {
-		await next()
+		ctx.redirect(ctx.router.url('message', {id: response.message.ID}, {query: ctx.query}))
 	}
 
 	console.log("<-- sendMessage")

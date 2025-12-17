@@ -12,8 +12,6 @@ import Builder from '../builder'
 async function search(ctx) {
 	console.log("--> search")
 
-	const { me } = ctx.state
-
 	let messages;
 	if (is.notEmpty(ctx.state.searchPath)) {
 		if (ctx.state.search.error.error) {
@@ -37,18 +35,16 @@ async function search(ctx) {
 		return
 	}
 
-	ctx.set({ "Cache-Control": "no-cache,max-age=0" })
-
 	const builder = new SearchBuilder(ctx.userAgent.isMobile, ctx.state.lang)
 
-	await builder.addSettings(ctx.state.lang, me.theme, me.fontSize)
+	await builder.addSettings(ctx.state.lang, ctx.state.theme, ctx.state.fontSize)
 	await builder.addMessagesList(messages)
 	await builder.addFilesList()
 	await builder.addSearch()
 	await builder.addSidebar()
 	await builder.addFooter()
 
-	ctx.body = await builder.build(me.theme, me.fontSize)
+	ctx.body = await builder.build(ctx.state.theme, ctx.state.fontSize)
 	ctx.status = 200
 
 	console.log("<-- search")

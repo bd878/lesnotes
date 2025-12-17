@@ -2,10 +2,10 @@
 	<details class="flex flex-col mb-4 small:mb-2 last:mb-0 min-w-full max-w-md" open>
 		<summary>
 			{{#ID}}
-				<a target="_self" href="/home?cwd={{ID}}" class="mb-2 underline">
+				<a target="_self" href="{{threadHref}}" class="mb-2 underline">
 			{{/ID}}
 			{{^ID}}
-				<a target="_self" href="/home" class="mb-2 underline">
+				<a target="_self" href="{{noThreadHref}}" class="mb-2 underline">
 			{{/ID}}
 				{{#title}}
 					/{{title}}
