@@ -1,10 +1,10 @@
 {{#stack}}
 	<div class="flex flex-col w-xs min-w-xs max-w-xs first:ml-0 last:mr-8 ml-2">
 		{{#ID}}
-			<a target="_self" href="/home?cwd={{ID}}" class="mb-2 mt-[2px] ml-[2px] dark:hover:text-white hover:text-blue-600 cursor-pointer underline">
+			<a target="_self" href="{{threadHref}}" class="mb-2 mt-[2px] ml-[2px] dark:hover:text-white hover:text-blue-600 cursor-pointer underline">
 		{{/ID}}
 		{{^ID}}
-			<a target="_self" href="/home" class="mb-2 mt-[2px] ml-[2px] dark:hover:text-white hover:text-blue-600 cursor-pointer underline">
+			<a target="_self" href="{{noThreadHref}}" class="mb-2 mt-[2px] ml-[2px] dark:hover:text-white hover:text-blue-600 cursor-pointer underline">
 		{{/ID}}
 			{{#title}}
 				/{{title}}
@@ -50,10 +50,10 @@
 						</a>
 
 						{{#isCenter}}
-							<a href="{{threadHref}}" target="_self" class="px-2 dark:bg-blue-100 dark:bg-cyan-700 select-text dark:text-white hover:text-blue-600  dark:hover:text-white cursor-pointer text-end" data-thread-id="{{ID}}">{{count}} > </a>
+							<a href="{{messageThreadHref}}" target="_self" class="px-2 dark:bg-blue-100 dark:bg-cyan-700 select-text dark:text-white hover:text-blue-600  dark:hover:text-white cursor-pointer text-end" data-thread-id="{{ID}}">{{count}} > </a>
 						{{/isCenter}}
 						{{^isCenter}}
-							<a href="{{threadHref}}" target="_self" data-thread-id="{{ID}}" class="px-2 dark:hover:text-white hover:text-blue-600 select-text cursor-pointer text-end">{{count}} > </a>
+							<a href="{{messageThreadHref}}" target="_self" data-thread-id="{{ID}}" class="px-2 dark:hover:text-white hover:text-blue-600 select-text cursor-pointer text-end">{{count}} > </a>
 						{{/isCenter}}
 					</li>
 				{{/messages}}
