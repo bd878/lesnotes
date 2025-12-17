@@ -8,18 +8,16 @@ import Builder from '../builder';
 async function signup(ctx) {
 	console.log("--> signup")
 
-	const { lang, theme, fontSize, error } = ctx.state
+	const builder = new SignupBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.search)
 
-	const builder = new SignupBuilder(ctx.userAgent.isMobile, lang, ctx.search)
-
-	await builder.addSettings(lang, theme, fontSize)
+	await builder.addSettings(ctx.state.lang, ctx.state.theme, ctx.state.fontSize)
 	await builder.addUsername()
 	await builder.addPassword()
-	await builder.addSubmit(ctx.search)
+	await builder.addSubmit()
 	await builder.addFooter()
-	await builder.addSidebar(ctx.search)
+	await builder.addSidebar()
 
-	ctx.body = await builder.build(theme, fontSize, ctx.search, error)
+	ctx.body = await builder.build(ctx.state.theme, ctx.state.fontSize, ctx.state.error)
 	ctx.status = 200;
 
 	console.log("<-- signup")
@@ -49,25 +47,25 @@ class SignupBuilder extends Builder {
 	}
 
 	submit = undefined;
-	async addSubmit(query?: string) {
+	async addSubmit() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/signup/mobile/submit.mustache' : 'templates/signup/desktop/submit.mustache'
 		)), { encoding: 'utf-8' });
 
 		this.submit = mustache.render(template, {
-			query:    query,
+			loginHref: "/login" + this.search,
 			signup:   this.i18n("signup"),
 			login:    this.i18n("login"),
 		})
 	}
 
 	sidebar = undefined;
-	async addSidebar(query?: string) {
+	async addSidebar() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/sidebar_horizontal/mobile/sidebar_horizontal.mustache' : 'templates/sidebar_horizontal/desktop/sidebar_horizontal.mustache'
 		)), { encoding: 'utf-8' });
 
-		this.sidebar = mustache.render(template, {query: query, settingsHeader: this.i18n("settingsHeader")}, {settings: this.settings})
+		this.sidebar = mustache.render(template, {mainHref: "/" + this.search, settingsHeader: this.i18n("settingsHeader")}, {settings: this.settings})
 	}
 
 	footer = undefined;
@@ -81,12 +79,14 @@ class SignupBuilder extends Builder {
 		})
 	}
 
-	async build(theme?: string, fontSize?: string, search?: string, error?: string) {
+	async build(theme?: string, fontSize?: string, error?: string) {
 		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
 		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
 		const signup = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/signup/mobile/signup.mustache' : 'templates/signup/desktop/signup.mustache'
 		)), { encoding: 'utf-8' });
+
+		const search = this.search
 
 		return mustache.render(layout, {
 			html:     () => (text, render) => {

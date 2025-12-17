@@ -8,18 +8,16 @@ import Builder from '../builder';
 async function login(ctx) {
 	console.log("--> login")
 
-	const { lang, theme, fontSize, query, error } = ctx.state
+	const builder = new LoginBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.search)
 
-	const builder = new LoginBuilder(ctx.userAgent.isMobile, lang, ctx.search)
-
-	await builder.addSettings(lang, theme, fontSize)
+	await builder.addSettings(ctx.state.lang, ctx.state.theme, ctx.state.fontSize)
 	await builder.addUsername()
 	await builder.addPassword()
-	await builder.addSubmit(query)
+	await builder.addSubmit()
 	await builder.addFooter()
-	await builder.addSidebar(query)
+	await builder.addSidebar()
 
-	ctx.body = await builder.build(theme, fontSize, ctx.search, error)
+	ctx.body = await builder.build(ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.state.error)
 	ctx.status = 200;
 
 	console.log("<-- login")
@@ -49,25 +47,25 @@ class LoginBuilder extends Builder {
 	}
 
 	submit = undefined;
-	async addSubmit(query?: string) {
+	async addSubmit() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/login/mobile/submit.mustache' : 'templates/login/desktop/submit.mustache'
 		)), { encoding: 'utf-8' });
 
 		this.submit = mustache.render(template, {
-			query:    query,
+			signupHref: "/signup" + this.search,
 			signup:   this.i18n("signup"),
 			login:    this.i18n("login"),
 		})
 	}
 
 	sidebar = undefined;
-	async addSidebar(query?: string) {
+	async addSidebar() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/sidebar_horizontal/mobile/sidebar_horizontal.mustache' : 'templates/sidebar_horizontal/desktop/sidebar_horizontal.mustache'
 		)), { encoding: 'utf-8' });
 
-		this.sidebar = mustache.render(template, {query: query, settingsHeader: this.i18n("settingsHeader")}, {
+		this.sidebar = mustache.render(template, {mainHref: "/" + this.search, settingsHeader: this.i18n("settingsHeader")}, {
 			settings:       this.settings,
 		})
 	}

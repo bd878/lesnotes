@@ -12,8 +12,8 @@ async function main(ctx) {
 
 	await builder.addSettings(ctx.state.lang, ctx.state.theme, ctx.state.fontSize)
 	await builder.addFooter()
-	await builder.addSidebar(ctx.search)
-	await builder.addAuthorization(ctx.search)
+	await builder.addSidebar()
+	await builder.addAuthorization()
 
 	ctx.body = await builder.build(ctx.state.theme, ctx.state.fontSize)
 	ctx.status = 200;
@@ -23,22 +23,23 @@ async function main(ctx) {
 
 class MainBuilder extends Builder {
 	sidebar = undefined;
-	async addSidebar(query?: string) {
+	async addSidebar() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/sidebar_horizontal/mobile/sidebar_horizontal.mustache' : 'templates/sidebar_horizontal/desktop/sidebar_horizontal.mustache'
 		)), { encoding: 'utf-8' });
 
-		this.sidebar = mustache.render(template, {query: query, settingsHeader: this.i18n("settingsHeader")}, {settings: this.settings})
+		this.sidebar = mustache.render(template, {mainHref: "/" + this.search, settingsHeader: this.i18n("settingsHeader")}, {settings: this.settings})
 	}
 
 	authorization = undefined;
-	async addAuthorization(query?: string) {
+	async addAuthorization() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/main/mobile/authorization.mustache' : 'templates/main/desktop/authorization.mustache'
 		)), { encoding: 'utf-8' });
 
 		this.authorization = mustache.render(template, {
-			query:     query,
+			loginHref: "/login" + this.search,
+			signupHref: "/signup" + this.search,
 			login:     this.i18n("login"),
 			signup:    this.i18n("signup"),
 		})
