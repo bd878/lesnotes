@@ -10,6 +10,7 @@ type (
 		Name        string  `json:"name"`
 		Count       int32   `json:"count"`
 		Private     bool    `json:"private"`
+		Description string  `json:"description"`
 	}
 
 	ListThreadsRequest struct {
@@ -34,11 +35,19 @@ type (
 		PrevID      int64   `json:"prev"`
 		Name        string  `json:"name"`
 		Private     bool    `json:"private"`
+		Description string  `json:"description"`
 	}
 
 	ReadThreadRequest struct {
 		ID          int64   `json:"id"`
 		UserID      int64   `json:"user_id"`
+	}
+
+	UpdateThreadRequest struct {
+		ID          int64   `json:"id"`
+		UserID      int64   `json:"user_id"`
+		Name        string  `json:"name"`
+		Description string  `json:"description"`
 	}
 
 	DeleteThreadRequest struct {
@@ -60,6 +69,7 @@ type (
 		Name        string  `json:"name"`
 		Private     bool    `json:"private"`
 		Count       int32   `json:"count"`
+		Description string  `json:"description"`
 	}
 
 	ListThreadsResponse struct {
@@ -78,6 +88,11 @@ type (
 	}
 
 	CreateThreadResponse struct {
+		ID          int64   `json:"id"`
+		Description string  `json:"description"`
+	}
+
+	UpdateThreadResponse struct {
 		ID          int64   `json:"id"`
 		Description string  `json:"description"`
 	}

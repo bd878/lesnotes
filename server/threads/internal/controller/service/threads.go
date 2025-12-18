@@ -158,14 +158,15 @@ func (s *Controller) PrivateThread(ctx context.Context, id, userID int64) (err e
 }
 
 
-func (s *Controller) CreateThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name string, private bool) (err error) {
+func (s *Controller) CreateThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name, description string, private bool) (err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
 		}
 	}
 
-	logger.Debugw("create thread", "id", id, "user_id", userID, "parent_id", parentID, "next_id", nextID, "prev_id", prevID, "name", name, "private", private)
+	logger.Debugw("create thread", "id", id, "user_id", userID, "parent_id", parentID,
+		"next_id", nextID, "prev_id", prevID, "name", name, "description", description, "private", private)
 
 	_, err = s.client.Create(ctx, &api.CreateRequest{
 		Id:       id,
@@ -175,6 +176,27 @@ func (s *Controller) CreateThread(ctx context.Context, id, userID, parentID, nex
 		PrevId:   prevID,
 		Name:     name,
 		Private:  private,
+		Description: description,
+	})
+
+	return
+}
+
+
+func (s *Controller) UpdateThread(ctx context.Context, id, userID int64, name, description string) (err error) {
+	if s.isConnFailed() {
+		if err = s.setupConnection(); err != nil {
+			return
+		}
+	}
+
+	logger.Debugw("create thread", "id", id, "user_id", userID, "name", name, "description", description)
+
+	_, err = s.client.Update(ctx, &api.UpdateRequest{
+		Id:          id,
+		UserId:      userID,
+		Name:        name,
+		Description: description,
 	})
 
 	return

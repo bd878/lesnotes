@@ -10,8 +10,8 @@ import (
 	server "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) ReadThreadJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
-	_, ok := req.Context().Value(middleware.UserContextKey{}).(*usersmodel.User)
+func (h *Handler) UpdateThreadJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
+	user, ok := req.Context().Value(middleware.UserContextKey{}).(*usersmodel.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -39,43 +39,37 @@ func (h *Handler) ReadThreadJsonAPI(w http.ResponseWriter, req *http.Request) (e
 		return
 	}
 
-	var request threadsmodel.ReadThreadRequest
+	var request threadsmodel.UpdateThreadRequest
 	if err := json.Unmarshal(data, &request); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
 				Code:    threadsmodel.CodeNoRequest,
-				Explain: "failed to parse read thread request",
+				Explain: "failed to parse update thread request",
 			},
 		})
 
 		return err
 	}
 
-	thread, err := h.controller.ReadThread(req.Context(), request.ID, request.UserID)
+	err = h.controller.UpdateThread(req.Context(), request.ID, user.ID, request.Name, request.Description)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:  &server.ErrorCode{
 				Code:    server.CodeWrongFormat,
-				Explain: "failed to read thread",
+				Explain: "failed to update thread",
 			},
 		})
 
 		return err
 	}
 
-	response, err := json.Marshal(threadsmodel.ReadThreadResponse{
-		ID:       thread.ID,
-		ParentID: thread.ParentID,
-		UserID:   thread.UserID,
-		NextID:   thread.NextID,
-		PrevID:   thread.PrevID,
-		Name:     thread.Name,
-		Private:  thread.Private,
-		Description: thread.Description,
+	response, err := json.Marshal(threadsmodel.UpdateThreadResponse{
+		ID:          request.ID,
+		Description: "updated",
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

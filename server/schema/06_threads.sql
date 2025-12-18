@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS threads.threads
 	prev_id      bigint        NOT NULL,          -- prev message id in a list
 	created_at   timestamptz   NOT NULL DEFAULT NOW(),
 	updated_at   timestamptz   NOT NULL DEFAULT NOW(),
+	description  text          NOT NULL DEFAULT '',
 	PRIMARY KEY(id)
 );
 

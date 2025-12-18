@@ -14,6 +14,7 @@ func ThreadFromProto(proto *api.Thread) *Thread {
 		Count:          proto.Count,
 		NextID:         proto.NextId,
 		PrevID:         proto.PrevId,
+		Description:    proto.Description,
 	}
 }
 
@@ -27,6 +28,7 @@ func ThreadToProto(msg *Thread) *api.Thread {
 		Name:           msg.Name,
 		NextId:         msg.NextID,
 		PrevId:         msg.PrevID,
+		Description:    msg.Description,
 	}
 }
 

@@ -63,6 +63,7 @@ func New(conf Config) *Server {
 	mux.Handle("/threads/v2/list", middleware.Build(handler.ListThreadsJsonAPI))
 	mux.Handle("/threads/v2/resolve", middleware.Build(handler.ResolveThreadJsonAPI))
 	mux.Handle("/threads/v2/create", middleware.Build(handler.CreateThreadJsonAPI))
+	mux.Handle("/threads/v2/update", middleware.Build(handler.UpdateThreadJsonAPI))
 	mux.Handle("/threads/v2/delete", middleware.Build(handler.DeleteThreadJsonAPI))
 	mux.Handle("/threads/v2/reorder", middleware.Build(handler.ReorderThreadJsonAPI))
 

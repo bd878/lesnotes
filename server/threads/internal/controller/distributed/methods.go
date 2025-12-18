@@ -37,8 +37,9 @@ func (m *Distributed) apply(ctx context.Context, reqType RequestType, cmd []byte
 	return
 }
 
-func (m *Distributed) CreateThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name string, private bool) (err error) {
-	logger.Debugw("create thread", "id", id, "user_id", userID, "parent_id", parentID, "next_id", nextID, "prev_id", prevID, "name", name, "private", private)
+func (m *Distributed) CreateThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name, description string, private bool) (err error) {
+	logger.Debugw("create thread", "id", id, "user_id", userID, "parent_id", parentID,
+		"next_id", nextID, "prev_id", prevID, "name", name, "description", description, "private", private)
 
 	cmd, err := proto.Marshal(&AppendCommand{
 		Id:       id,
@@ -48,6 +49,7 @@ func (m *Distributed) CreateThread(ctx context.Context, id, userID, parentID, ne
 		PrevId:   prevID,
 		Name:     name,
 		Private:  private,
+		Description: description,
 	})
 	if err != nil {
 		return err
@@ -58,14 +60,14 @@ func (m *Distributed) CreateThread(ctx context.Context, id, userID, parentID, ne
 	return
 }
 
-func (m *Distributed) UpdateThread(ctx context.Context, id, userID int64, name string, private int32) (err error) {
-	logger.Debugw("update thread", "id", id, "user_id", userID, "name", name, "private", private)
+func (m *Distributed) UpdateThread(ctx context.Context, id, userID int64, name, description string) (err error) {
+	logger.Debugw("update thread", "id", id, "user_id", userID, "name", name, "description", description)
 
 	cmd, err := proto.Marshal(&UpdateCommand{
-		Id:       id,
-		UserId:   userID,
-		Name:     name,
-		Private:  private,
+		Id:           id,
+		UserId:       userID,
+		Name:         name,
+		Description:  description,
 	})
 	if err != nil {
 		return err

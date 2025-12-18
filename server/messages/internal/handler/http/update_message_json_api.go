@@ -67,7 +67,7 @@ func (h *Handler) UpdateMessageJsonAPI(w http.ResponseWriter, req *http.Request)
 	}
 
 	var (
-		public   int
+		public   int // TODO: drop, use /private,/publish instead
 		text, title, name string
 	)
 

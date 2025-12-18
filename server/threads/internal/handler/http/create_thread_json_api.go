@@ -54,7 +54,7 @@ func (h *Handler) CreateThreadJsonAPI(w http.ResponseWriter, req *http.Request) 
 	}
 
 	err = h.controller.CreateThread(req.Context(), request.ID, user.ID, request.ParentID,
-		request.NextID, request.PrevID, request.Name, request.Private)
+		request.NextID, request.PrevID, request.Name, request.Description, request.Private)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

@@ -1,4 +1,3 @@
-// import onFormSubmit from './onFormSubmit';
 import onFileInputChange from './onFileInputChange';
 import onSelectFilesClick from './onSelectFilesClick';
 import onMessagesListDragStart from './onMessagesListDragStart';
@@ -22,8 +21,6 @@ const elems = {
 function init() {
 	console.log("loaded")
 
-	// TODO: rewrite on event bus
-	// elems.messageFormElem.addEventListener("submit",      e => onFormSubmit(elems, e))
 	elems.filesInputElem.addEventListener("change",       e => onFileInputChange(elems, e))
 	elems.filesButtonElem.addEventListener("click",       e => onSelectFilesClick(elems, e))
 	elems.messagesListElem.addEventListener('dragstart',  e => onMessagesListDragStart(elems, e))

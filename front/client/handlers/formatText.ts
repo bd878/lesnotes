@@ -1,7 +1,7 @@
 import * as is from '../third_party/is';
 
-async function formatMessage(ctx, next) {
-	console.log("--> formatMessage")
+async function formatText(ctx, next) {
+	console.log("--> formatText")
 
 	if (is.notEmpty(ctx.state.message) && is.notEmpty(ctx.state.message.text)) {
 		ctx.state.message.text = ctx.state.message.text.replaceAll("\r\n", "&#13;&#10;")
@@ -9,7 +9,7 @@ async function formatMessage(ctx, next) {
 
 	await next()
 
-	console.log("<-- formatMessage")
+	console.log("<-- formatText")
 }
 
-export default formatMessage
+export default formatText

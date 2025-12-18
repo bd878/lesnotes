@@ -94,7 +94,6 @@ func (g *Gateway) UpdateThread(ctx context.Context, id, userID int64) (err error
 	_, err = g.client.Update(ctx, &api.UpdateRequest{
 		Id:        id,
 		UserId:    userID,
-		Private:   -1,
 	})
 
 	return
