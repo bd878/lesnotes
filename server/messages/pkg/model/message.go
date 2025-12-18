@@ -102,7 +102,6 @@ type (
 	UpdateRequest struct {
 		MessageID           int64               `json:"id"`
 		Text                *string             `json:"text,omitempty"`
-		Public              *int                `json:"public,omitempty"` // TODO: drop, use /publish,/private calls
 		Title               *string             `json:"title,omitempty"`
 		Name                *string             `json:"name,omitempty"`
 		FileIDs             []int64             `json:"file_ids,omitempty"`

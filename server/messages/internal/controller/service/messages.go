@@ -181,14 +181,14 @@ func (s *Controller) PrivateMessages(ctx context.Context, ids []int64, userID in
 	return
 }
 
-func (s *Controller) UpdateMessage(ctx context.Context, id int64, text, title, name string, fileIDs []int64, userID int64, private int32) (err error) {
+func (s *Controller) UpdateMessage(ctx context.Context, id int64, text, title, name string, fileIDs []int64, userID int64) (err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
 		}
 	}
 
-	logger.Debugw("update message", "id", id, "text", text, "title", title, "name", name, "file_ids", fileIDs, "user_id", userID, "private", private)
+	logger.Debugw("update message", "id", id, "text", text, "title", title, "name", name, "file_ids", fileIDs, "user_id", userID)
 
 	err = s.threads.UpdateThread(ctx, id, userID)
 	if err != nil {
@@ -202,7 +202,6 @@ func (s *Controller) UpdateMessage(ctx context.Context, id int64, text, title, n
 		Text:      text,
 		Title:     title,
 		Name:      name,
-		Private:   private,
 	})
 
 	return

@@ -16,7 +16,7 @@ type RepoConnection interface {
 
 type Repository interface {
 	SaveMessage(ctx context.Context, id, userID int64, name, title, text string, private bool) error
-	UpdateMessage(ctx context.Context, id, userID int64, name, title, text string, private int32) error
+	UpdateMessage(ctx context.Context, id, userID int64, name, title, text string) error
 	PrivateMessages(ctx context.Context, ids []int64, userID int64) error
 	PublishMessages(ctx context.Context, ids []int64, userID int64) error
 	DeleteMessage(ctx context.Context, id, userID int64) error
@@ -68,7 +68,7 @@ func (f *fsm) applyUpdate(raw []byte) interface{} {
 	var cmd UpdateCommand
 	proto.Unmarshal(raw, &cmd)
 
-	err := f.repo.UpdateMessage(context.Background(), cmd.Id, cmd.UserId, cmd.Name, cmd.Title, cmd.Text, cmd.Private)
+	err := f.repo.UpdateMessage(context.Background(), cmd.Id, cmd.UserId, cmd.Name, cmd.Title, cmd.Text)
 	if err != nil {
 		return err
 	}

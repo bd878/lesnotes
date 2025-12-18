@@ -15,7 +15,6 @@ import (
 func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) (err error) {
 	var (
 		id int64
-		public int
 		fileIDs []int64
 	)
 
@@ -81,40 +80,10 @@ func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) (err e
 		}
 	}
 
-	if req.PostFormValue("public") != "" {
-		public, err = strconv.Atoi(req.PostFormValue("public"))
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(server.ServerResponse{
-				Status: "error",
-				Error: &server.ErrorCode{
-					Code:    server.CodeWrongFormat,
-					Explain: "invalid public param",
-				},
-			})
-
-			return
-		}
-	} else {
-		public = -1
-	}
-
-	return h.updateMessage(req.Context(), w, id, user, text, title, name, fileIDs, public)
+	return h.updateMessage(req.Context(), w, id, user, text, title, name, fileIDs)
 }
 
-func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, messageID int64, user *users.User,
-	text, title, name string, fileIDs []int64, public int,
-) (err error) {
-	var private int32
-
-	if public == 1 {
-		private = 0
-	} else if public == 0 {
-		private = 1
-	} else {
-		private = -1
-	}
-
+func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, messageID int64, user *users.User, text, title, name string, fileIDs []int64) (err error) {
 	if user.ID == users.PublicUserID {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -122,19 +91,6 @@ func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, mess
 			Error: &server.ErrorCode{
 				Code:    messages.CodeMessagePublic,
 				Explain: "cannot move public message",
-			},
-		})
-
-		return
-	}
-
-	if user.ID == users.PublicUserID && private == 1 {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status: "error",
-			Error:  &server.ErrorCode{
-				Code:    messages.CodeMessagePublic,
-				Explain: "cannot make private public message",
 			},
 		})
 
@@ -184,7 +140,7 @@ func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, mess
 		fileIDs = msg.FileIDs
 	}
 
-	err = h.controller.UpdateMessage(ctx, messageID, text, title, name, fileIDs, user.ID, private)
+	err = h.controller.UpdateMessage(ctx, messageID, text, title, name, fileIDs, user.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

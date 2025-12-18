@@ -79,7 +79,6 @@ func (h domainHandler[T]) onMessageUpdated(ctx context.Context, event ddd.Event)
 		Text:     payload.Text,
 		Title:    payload.Title,
 		Name:     payload.Name,
-		Private:  payload.Private,
 	})
 	if err != nil {
 		return err

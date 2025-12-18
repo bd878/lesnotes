@@ -24,7 +24,6 @@ message MessageUpdated {
 	string  text = 3;
 	string  title = 4;
 	string  name = 5;
-	int32   private = 6;
 }
 
 message MessagesPublished {

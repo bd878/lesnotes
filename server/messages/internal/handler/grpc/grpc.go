@@ -9,7 +9,7 @@ import (
 
 type Controller interface {
 	SaveMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, userID int64, private bool, name string) (err error)
-	UpdateMessage(ctx context.Context, id int64, text, title, name string, fileIDs []int64, userID int64, private int32) (err error)
+	UpdateMessage(ctx context.Context, id int64, text, title, name string, fileIDs []int64, userID int64) (err error)
 	DeleteMessages(ctx context.Context, ids []int64, userID int64) (err error)
 	DeleteUserMessages(ctx context.Context, userID int64) (err error)
 	PublishMessages(ctx context.Context, ids []int64, userID int64) (err error)
@@ -48,7 +48,7 @@ func (h *Handler) DeleteUserMessages(ctx context.Context, req *api.DeleteUserMes
 }
 
 func (h *Handler) UpdateMessage(ctx context.Context, req *api.UpdateMessageRequest) (resp *api.UpdateMessageResponse, err error) {
-	err = h.controller.UpdateMessage(ctx, req.Id, req.Text, req.Title, req.Name, req.FileIds, req.UserId, req.Private)
+	err = h.controller.UpdateMessage(ctx, req.Id, req.Text, req.Title, req.Name, req.FileIds, req.UserId)
 
 	resp = &api.UpdateMessageResponse{}
 

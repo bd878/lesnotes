@@ -67,10 +67,10 @@ func (m *DistributedMessages) SaveMessage(ctx context.Context, id int64, text, t
 	return m.publisher.Publish(context.Background(), event)
 }
 
-func (m *DistributedMessages) UpdateMessage(ctx context.Context, id int64, text, title, name string, fileIDs []int64, userID int64, private int32) (err error) {
-	logger.Debugw("update message", "id", id, "text", text, "title", title, "name", name, "file_ids", fileIDs, "user_id", userID, "private", private)
+func (m *DistributedMessages) UpdateMessage(ctx context.Context, id int64, text, title, name string, fileIDs []int64, userID int64) (err error) {
+	logger.Debugw("update message", "id", id, "text", text, "title", title, "name", name, "file_ids", fileIDs, "user_id", userID)
 
-	event, err := domain.UpdateMessage(id, text, title, fileIDs, userID, private, name)
+	event, err := domain.UpdateMessage(id, text, title, fileIDs, userID, name)
 	if err != nil {
 		return err
 	}
@@ -82,7 +82,6 @@ func (m *DistributedMessages) UpdateMessage(ctx context.Context, id int64, text,
 		Text:     text,
 		Name:     name,
 		Title:    title,
-		Private:  private,
 	})
 	if err != nil {
 		return err

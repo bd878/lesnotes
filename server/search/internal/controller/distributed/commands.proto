@@ -16,8 +16,7 @@ message UpdateCommand {
 	int64   user_id = 2;
 	string  text = 3;
 	string  name = 4;
-	int32   private = 5;
-	string  title = 6;
+	string  title = 5;
 }
 
 message DeleteCommand {

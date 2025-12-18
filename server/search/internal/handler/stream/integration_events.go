@@ -12,7 +12,7 @@ import (
 
 type Controller interface {
 	SaveMessage(ctx context.Context, id, userID int64, name, title, text string, private bool) error
-	UpdateMessage(ctx context.Context, id, userID int64, name, title, text string, private int32) error
+	UpdateMessage(ctx context.Context, id, userID int64, name, title, text string) error
 	PublishMessages(ctx context.Context, ids []int64, userID int64) error
 	PrivateMessages(ctx context.Context, ids []int64, userID int64) error
 	DeleteMessage(ctx context.Context, id, userID int64) error
@@ -75,7 +75,7 @@ func (h integrationHandlers) handleMessageUpdated(ctx context.Context, msg am.In
 		return err
 	}
 
-	return h.controller.UpdateMessage(ctx, m.GetId(), m.GetUserId(), m.GetName(), m.GetTitle(), m.GetText(), m.GetPrivate())
+	return h.controller.UpdateMessage(ctx, m.GetId(), m.GetUserId(), m.GetName(), m.GetTitle(), m.GetText())
 }
 
 func (h integrationHandlers) handleMessagesPublish(ctx context.Context, msg am.IncomingMessage) error {

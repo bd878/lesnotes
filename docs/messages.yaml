@@ -728,9 +728,6 @@ components:
               type: integer
               example: 1
               required: true
-            public:
-              type: integer
-              example: 1
             title:
               type: string
               required: false
@@ -751,9 +748,6 @@ components:
           id:
             type: integer
             required: true
-          public:
-            type: integer
-            example: 1
           name:
             type: string
             required: false

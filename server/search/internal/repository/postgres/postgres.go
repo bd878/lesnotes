@@ -50,9 +50,9 @@ func (r *Repository) SaveMessage(ctx context.Context, id, userID int64, name, ti
 	return nil
 }
 
-func (r *Repository) UpdateMessage(ctx context.Context, id, userID int64, newName, newTitle, newText string, newPrivate int32) (err error) {
-	const query = "UPDATE %s SET text = $3, private = $4, title = $5, name = $6 WHERE user_id = $1 AND id = $2"
-	const selectQuery = "SELECT text, private, title, name FROM %s WHERE user_id = $1 AND id = $2"
+func (r *Repository) UpdateMessage(ctx context.Context, id, userID int64, newName, newTitle, newText string) (err error) {
+	const query = "UPDATE %s SET text = $3, title = $4, name = $5 WHERE user_id = $1 AND id = $2"
+	const selectQuery = "SELECT text, title, name FROM %s WHERE user_id = $1 AND id = $2"
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
@@ -73,12 +73,9 @@ func (r *Repository) UpdateMessage(ctx context.Context, id, userID int64, newNam
 		}
 	}()
 
-	var (
-		text, title, name string
-		private  bool
-	)
+	var text, title, name string
 
-	err = tx.QueryRow(ctx, r.messagesTable(selectQuery), userID, id).Scan(&text, &private, &title, &name)
+	err = tx.QueryRow(ctx, r.messagesTable(selectQuery), userID, id).Scan(&text, &title, &name)
 	if err != nil {
 		return
 	}
@@ -95,15 +92,7 @@ func (r *Repository) UpdateMessage(ctx context.Context, id, userID int64, newNam
 		name = newName
 	}
 
-	if newPrivate != -1 {
-		if newPrivate == 0 {
-			private = false
-		} else if newPrivate == 1 {
-			private = true
-		}
-	}
-
-	_, err = tx.Exec(ctx, r.messagesTable(query), userID, id, text, private, title, name)
+	_, err = tx.Exec(ctx, r.messagesTable(query), userID, id, text, title, name)
 	if err != nil {
 		return
 	}

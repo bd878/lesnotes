@@ -63,9 +63,9 @@ func (r *Repository) Create(ctx context.Context, id int64, text string, title st
 	return
 }
 
-func (r *Repository) Update(ctx context.Context, userID, id int64, newText, newTitle, newName string, newFileIDs []int64, newPrivate int) (err error) {
-	const query = "UPDATE %s SET text = $3, file_ids = $4, private = $5, title = $6, name = $7 WHERE user_id = $1 AND id = $2"
-	const selectQuery = "SELECT text, file_ids, private, title, name FROM %s WHERE user_id = $1 AND id = $2"
+func (r *Repository) Update(ctx context.Context, userID, id int64, newText, newTitle, newName string, newFileIDs []int64) (err error) {
+	const query = "UPDATE %s SET text = $3, file_ids = $4, title = $5, name = $6 WHERE user_id = $1 AND id = $2"
+	const selectQuery = "SELECT text, file_ids, title, name FROM %s WHERE user_id = $1 AND id = $2"
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
@@ -89,10 +89,9 @@ func (r *Repository) Update(ctx context.Context, userID, id int64, newText, newT
 	var (
 		text, title, name  string
 		fileIDs  []byte
-		private  bool
 	)
 
-	err = tx.QueryRow(ctx, r.table(selectQuery), userID, id).Scan(&text, &fileIDs, &private, &title, &name)
+	err = tx.QueryRow(ctx, r.table(selectQuery), userID, id).Scan(&text, &fileIDs, &title, &name)
 	if err != nil {
 		return
 	}
@@ -116,15 +115,7 @@ func (r *Repository) Update(ctx context.Context, userID, id int64, newText, newT
 		}
 	}
 
-	if newPrivate != -1 {
-		if newPrivate == 0 {
-			private = false
-		} else if newPrivate == 1 {
-			private = true
-		}
-	}
-
-	_, err = tx.Exec(ctx, r.table(query), userID, id, text, fileIDs, private, title, name)
+	_, err = tx.Exec(ctx, r.table(query), userID, id, text, fileIDs, title, name)
 	if err != nil {
 		return
 	}

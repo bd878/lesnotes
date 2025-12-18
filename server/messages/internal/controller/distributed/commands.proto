@@ -18,8 +18,7 @@ message UpdateCommand {
 	repeated int64   file_ids = 3;
 	string  text = 4;
 	string  name = 5;
-	int32   private = 6;
-	string  title = 7;
+	string  title = 6;
 }
 
 message DeleteCommand {

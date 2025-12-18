@@ -56,10 +56,9 @@ message UpdateMessageRequest {
 	int64    id = 1;
 	int64    user_id = 2;
 	string   text = 3;
-	int32    private = 4;
-	repeated int64 file_ids = 5;
-	string   title = 6;
-	string   name  = 7;
+	repeated int64 file_ids = 4;
+	string   title = 5;
+	string   name  = 6;
 }
 
 message UpdateMessageResponse {

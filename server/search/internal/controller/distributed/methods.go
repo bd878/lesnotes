@@ -86,12 +86,12 @@ func (m *Distributed) DeleteMessage(ctx context.Context, id, userID int64) (err 
 	return
 }
 
-func (m *Distributed) UpdateMessage(ctx context.Context, id, userID int64, name, title, text string, private int32) error {
+func (m *Distributed) UpdateMessage(ctx context.Context, id, userID int64, name, title, text string) error {
 	if !m.isLeader() {
 		return nil
 	}
 
-	logger.Debugw("update search message", "id", id, "user_id", userID, "name", name, "title", title, "text", text, "private", private)
+	logger.Debugw("update search message", "id", id, "user_id", userID, "name", name, "title", title, "text", text)
 
 	cmd, err := proto.Marshal(&UpdateCommand{
 		Id:      id,
@@ -99,7 +99,6 @@ func (m *Distributed) UpdateMessage(ctx context.Context, id, userID int64, name,
 		Title:   title,
 		Name:    name,
 		UserId:  userID,
-		Private: private,
 	})
 	if err != nil {
 		return err

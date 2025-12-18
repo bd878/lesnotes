@@ -66,12 +66,11 @@ type MessageUpdated struct {
 	Text      string
 	Title     string
 	Name      string
-	Private   int32
 }
 
 func (MessageUpdated) Key() string { return MessageUpdatedEvent }
 
-func UpdateMessage(id int64, text, title string, fileIDs []int64, userID int64, private int32, name string) (ddd.Event, error) {
+func UpdateMessage(id int64, text, title string, fileIDs []int64, userID int64, name string) (ddd.Event, error) {
 	if id == 0 {
 		return nil, ErrIDRequired
 	}
@@ -82,7 +81,6 @@ func UpdateMessage(id int64, text, title string, fileIDs []int64, userID int64, 
 		Text:    text,
 		Title:   title,
 		Name:    name,
-		Private: private,
 	}), nil
 }
 
