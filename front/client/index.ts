@@ -45,6 +45,7 @@ import publicMessage from './routes/publicMessage/publicMessage';
 import publicThread from './routes/publicThread/publicThread';
 import threadEdit from './routes/threadEdit/threadEdit';
 import messageView from './routes/messageView/messageView';
+import threadView from './routes/threadView/threadView';
 import messageEdit from './routes/messageEdit/messageEdit';
 import miniapp from './routes/miniapp/miniapp';
 import authTelegram from './routes/authTelegram/authTelegram';

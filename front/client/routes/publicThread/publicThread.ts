@@ -6,15 +6,18 @@ async function readPublicThread(ctx) {
 	const builder = new ThreadBuilder(ctx.userAgent.isMobile, ctx.state.lang)
 
 	await builder.addSettings(ctx.state.lang, ctx.state.theme, ctx.state.fontSize)
-	await builder.addSidebar()
 	await builder.addFooter()
 
-	ctx.body = await builder.build(ctx.state.thread)
+	ctx.body = await builder.build()
 	ctx.status = 200
 
 	console.log("<-- publicThread")
 }
 
-class ThreadBuilder extends Builder {}
+class ThreadBuilder extends Builder {
+	async build() {
+		return "not implemented"
+	}
+}
 
 export default readPublicThread
