@@ -7,7 +7,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import HomeBuilder from '../home/builder';
 
-async function readMessageView(ctx) {
+async function messageView(ctx) {
 	console.log("--> messageView")
 
 	const builder = new MessageViewBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.search, ctx.path)
@@ -55,4 +55,4 @@ class MessageViewBuilder extends HomeBuilder {
 	}
 }
 
-export default readMessageView;
+export default messageView;

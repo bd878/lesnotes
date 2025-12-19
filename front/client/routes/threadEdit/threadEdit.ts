@@ -1,6 +1,6 @@
 import Builder from '../builder';
 
-async function readThreadEdit(ctx) {
+async function threadEdit(ctx) {
 	console.log("--> threadEdit")
 
 	const builder = new ThreadEditBuilder(ctx.userAgent.isMobile, ctx.state.lang)
@@ -20,4 +20,4 @@ class ThreadEditBuilder extends Builder {
 	}
 }
 
-export default readThreadEdit
+export default threadEdit

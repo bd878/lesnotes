@@ -1,6 +1,6 @@
 import Builder from '../builder';
 
-async function readPublicThread(ctx) {
+async function publicThread(ctx) {
 	console.log("--> publicThread")
 
 	const builder = new ThreadBuilder(ctx.userAgent.isMobile, ctx.state.lang)
@@ -20,4 +20,4 @@ class ThreadBuilder extends Builder {
 	}
 }
 
-export default readPublicThread
+export default publicThread

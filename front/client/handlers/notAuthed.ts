@@ -2,7 +2,7 @@ import * as is from '../third_party/is';
 import api from '../api';
 
 async function notAuthed(ctx, next) {
-	console.log("--> not authed")
+	console.log("--> notAuthed")
 
 	if (is.undef(ctx.state.token)) {
 		await next()
@@ -16,7 +16,7 @@ async function notAuthed(ctx, next) {
 		}
 	}
 
-	console.log("<-- not authed")
+	console.log("<-- notAuthed")
 }
 
 export default notAuthed

@@ -1,8 +1,8 @@
 async function redirectHome(ctx, next) {
-	console.log("--> redirect home")
-	ctx.redirect("/home" + ctx.search)
+	console.log("--> redirectHome")
+	ctx.redirect(ctx.router.url("home", {}, {query: ctx.query}))
 	ctx.status = 302
-	console.log("<-- redirect home")
+	console.log("<-- redirectHome")
 }
 
 export default redirectHome

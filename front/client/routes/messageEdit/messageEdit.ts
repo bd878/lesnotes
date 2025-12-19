@@ -7,7 +7,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import HomeBuilder from '../home/builder';
 
-async function readMessageEdit(ctx) {
+async function messageEdit(ctx) {
 	console.log("--> messageEdit")
 
 	const builder = new MessageEditViewBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.search, ctx.path)
@@ -54,4 +54,4 @@ class MessageEditViewBuilder extends HomeBuilder {
 	}
 }
 
-export default readMessageEdit;
+export default messageEdit;

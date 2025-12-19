@@ -3,7 +3,7 @@ import * as is from '../third_party/is'
 import api from '../api'
 
 async function privateMessage(ctx) {
-	console.log("--> private message")
+	console.log("--> privateMessage")
 
 	let form = ctx.request.body
 
@@ -21,7 +21,7 @@ async function privateMessage(ctx) {
 		ctx.redirect(ctx.router.url('message', {id: form.id}, {query: ctx.query}))
 	}
 
-	console.log("<-- private message")
+	console.log("<-- privateMessage")
 }
 
 export default privateMessage;

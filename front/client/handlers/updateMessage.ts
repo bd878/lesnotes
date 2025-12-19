@@ -3,7 +3,7 @@ import * as is from '../third_party/is'
 import api from '../api'
 
 async function updateMessage(ctx) {
-	console.log("--> update message")
+	console.log("--> updateMessage")
 
 	let form = ctx.request.body
 
@@ -21,7 +21,7 @@ async function updateMessage(ctx) {
 		ctx.redirect(ctx.router.url('message', {id: form.id}, {query: ctx.query}))
 	}
 
-	console.log("<-- update message")
+	console.log("<-- updateMessage")
 }
 
 export default updateMessage;

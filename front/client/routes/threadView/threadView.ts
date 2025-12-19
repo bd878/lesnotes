@@ -7,7 +7,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import HomeBuilder from '../home/builder';
 
-async function readThreadView(ctx) {
+async function threadView(ctx) {
 	console.log("--> threadView")
 
 	const builder = new ThreadViewBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.search, ctx.path)
@@ -32,4 +32,4 @@ class ThreadViewBuilder extends HomeBuilder {
 	}
 }
 
-export default readThreadView;
+export default threadView;

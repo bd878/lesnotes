@@ -7,7 +7,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import Builder from '../builder';
 
-async function readPublicMessage(ctx) {
+async function publicMessage(ctx) {
 	console.log("--> publicMessage")
 
 	const builder = new MessageBuilder(ctx.userAgent.isMobile, ctx.state.lang)
@@ -73,4 +73,4 @@ class MessageBuilder extends Builder {
 	}
 }
 
-export default readPublicMessage;
+export default publicMessage;

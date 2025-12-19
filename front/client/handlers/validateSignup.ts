@@ -3,7 +3,7 @@ import * as is from '../third_party/is'
 import api from '../api';
 
 async function validateSignup(ctx, next) {
-	console.log("--> validate signup")
+	console.log("--> validateSignup")
 
 	const response = await processSignup(ctx)
 
@@ -19,7 +19,7 @@ async function validateSignup(ctx, next) {
 		await next()
 	}
 
-	console.log("<-- validate signup")
+	console.log("<-- validateSignup")
 }
 
 async function processSignup(ctx) {
