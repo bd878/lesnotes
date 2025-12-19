@@ -19,10 +19,9 @@ async function uploadFile(file: any) {
 			body: form,
 		});
 
-		if (error)
+		if (error.error) {
 			result.error = mapError(error)
-
-		if (response) {
+		} else {
 			result.ID = response.id
 			result.name = response.name
 		}

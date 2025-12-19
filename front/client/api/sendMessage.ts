@@ -29,11 +29,11 @@ async function sendMessage(text: string, title?: string, fileIDs?: number[], thr
 			body:        form,
 		});
 
-		if (error)
-			result.error   = mapError(error)
-
-		if (response)
+		if (error.error) {
+			result.error = mapError(error)
+		} else {
 			result.message = mapMessage(response.message)
+		}
 	} catch (e) {
 		result.error.error    = true
 		result.error.status   = 500

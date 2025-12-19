@@ -15,11 +15,11 @@ async function authJson(token: string) {
 			}
 		});
 
-		if (error)
+		if (error.error) {
 			result.error = models.error(error)
-
-		if (response)
+		} else {
 			result.expired = response.expired
+		}
 	} catch(e) {
 		console.error(e)
 		result.error.error   = true

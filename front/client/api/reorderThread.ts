@@ -28,11 +28,11 @@ async function reorderThread(id: number, parent: number, next: number, prev: num
 			body: form,
 		});
 
-		if (error)
+		if (error.error) {
 			result.error = mapError(error)
-
-		if (response)
+		} else {
 			result.id = response.id
+		}
 	} catch (e) {
 		result.error.error   = true
 		result.error.status  = 500

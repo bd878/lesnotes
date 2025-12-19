@@ -15,11 +15,11 @@ async function getMeJson(token: string) {
 			},
 		});
 
-		if (error)
+		if (error.error) {
 			result.error = models.error(error)
-
-		if (response)
+		} else {
 			result.user = models.user(response)
+		}
 	} catch(e) {
 		result.error.error   = true
 		result.error.status  = 500

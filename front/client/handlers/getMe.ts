@@ -12,6 +12,7 @@ function log(f) {
 async function getMe(ctx, next) {
 	ctx.state.me = await api.getMeJson(ctx.state.token)
 	if (ctx.state.me.error.error) {
+		console.log(ctx.state.me.error)
 		ctx.redirect("/login" + ctx.search)
 		ctx.status = 302
 		return

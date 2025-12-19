@@ -18,10 +18,9 @@ async function uploadFileJson(token: string, file: any) {
 			body: form,
 		});
 
-		if (error.error)
+		if (error.error) {
 			result.error = models.error(error)
-
-		if (response) {
+		} else {
 			result.ID = response.id
 			result.name = response.name
 		}

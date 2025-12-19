@@ -31,11 +31,11 @@ async function readStackJson(token: string, threadID: number/*, lastMessageID: n
 		const offset = offsets[threadID]
 
 		let messages = { error: models.error(), messages: [], isLastPage: true, isFirstPage: true, count: 0, total: 0, offset: 0 }
-		if (is.notUndef(offset))
+		if (is.notUndef(offset)) {
 			messages = await api.readMessagesJson(token, threadID, 1 /* order */, limit, offset)
-		else
+		} else {
 			messages = await api.readMessagesJson(token, threadID, 1 /* order */, limit, 0)
-
+		}
 
 		if (messages.error.error) {
 			result.error = messages.error

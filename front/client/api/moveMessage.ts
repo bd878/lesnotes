@@ -21,7 +21,7 @@ async function moveMessage(id: number, thread: number) {
 			body: form,
 		});
 
-		if (error)
+		if (error.error)
 			result.error = models.error(error)
 	} catch (e) {
 		result.error.error   = true

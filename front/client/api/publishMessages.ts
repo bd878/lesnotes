@@ -16,11 +16,11 @@ async function publishMessages(ids: number[] = []) {
 			credentials: "include",
 		});
 
-		if (error)
+		if (error.error) {
 			result.error = models.error(error)
-
-		if (response)
+		} else {
 			result.ids = response.ids
+		}
 	} catch (e) {
 		result.error.error   = true
 		result.error.status  = 500

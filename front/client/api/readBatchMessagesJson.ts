@@ -18,10 +18,9 @@ async function readBatchMessagesJson(token: string, ids: number[]) {
 			},
 		});
 
-		if (error)
+		if (error.error) {
 			result.error = models.error(error)
-
-		if (response) {
+		} else {
 			result.messages = response.messages.map(models.message)
 		}
 	} catch (e) {

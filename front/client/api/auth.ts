@@ -13,11 +13,11 @@ async function auth() {
 			credentials: 'include',
 		});
 
-		if (error)
+		if (error.error) {
 			result.error = models.error(error)
-
-		if (response)
+		} else {
 			result.expired = response.expired
+		}
 	} catch(e) {
 		result.error.error   = true
 		result.error.code    = 912

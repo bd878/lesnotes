@@ -34,8 +34,9 @@ async function updateMessage(id: number, text?: string, title?: string, name?: s
 			body: form,
 		});
 
-		if (error)
+		if (error.error) {
 			result.error = models.error(error)
+		}
 	} catch (e) {
 		result.error.error    = true
 		result.error.status   = 500

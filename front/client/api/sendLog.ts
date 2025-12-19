@@ -13,8 +13,9 @@ async function sendLog(body: any) {
 			body:      body,
 		});
 
-		if (error)
+		if (error.error) {
 			result.error = models.error(error)
+		}
 	} catch (e) {
 		result.error.error   = true
 		result.error.status  = 500

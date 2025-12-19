@@ -20,14 +20,14 @@ async function readPathJson(token: string, id: number) {
 			},
 		});
 
-		if (error)
+		if (error.error) {
 			result.error = models.error(error)
-
-		// do not .reverse() here; client may append NullThread and then reverse
-		if (response) {
+		} else {
+			// do not .reverse() here; client may append NullThread and then reverse
 			result.path = response.path.map(models.message)
 			result.threadID = response.thread
 		}
+
 	} catch (e) {
 		result.error.error   = true
 		result.error.status  = 500

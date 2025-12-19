@@ -24,10 +24,9 @@ async function readMessages(thread: number, order: number, limit: number, offset
 			credentials: 'include',
 		});
 
-		if (error)
+		if (error.error) {
 			result.error = models.error(error)
-
-		if (response) {
+		} else {
 			result.messages    = response.messages.map(models.message)
 			result.isLastPage  = response.is_last_page
 			result.isFirstPage = response.is_first_page

@@ -8,6 +8,7 @@ async function validateLogin(ctx, next) {
 	const response = await processLogin(ctx)
 
 	if (response.error.error) {
+		console.log(response.error)
 		ctx.state.error = response.error.human
 		await login(ctx)
 	} else {		

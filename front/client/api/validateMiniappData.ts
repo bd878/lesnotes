@@ -14,11 +14,11 @@ async function validateMiniappData(body: any) {
 			body: body,
 		});
 
-		if (error)
+		if (error.error) {
 			result.error = models.error(error)
-
-		if (response)
+		} else {
 			result.token = response.token
+		}
 	} catch (e) {
 		result.error.error    = true
 		result.error.status   = 500

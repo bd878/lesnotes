@@ -10,6 +10,7 @@ async function authed(ctx, next) {
 	} else {
 		const resp = await api.authJson(ctx.state.token)
 		if (resp.error.error || resp.expired) {
+			console.log(resp.error)
 			ctx.redirect('/login' + ctx.search)
 			ctx.status = 302
 		} else {

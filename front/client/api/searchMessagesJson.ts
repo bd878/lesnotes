@@ -18,11 +18,11 @@ async function searchMessagesJson(token: string, substr: string) {
 			},
 		});
 
-		if (error)
+		if (error.error) {
 			result.error = models.error(error)
-
-		if (response)
+		} else {
 			result.messages = response.list.map(models.searchMessage)
+		}
 	} catch (e) {
 		result.error.error    = true
 		result.error.status   = 500

@@ -28,12 +28,6 @@ import sendLog from './sendLog';
 import auth from './auth';
 import authJson from './authJson';
 import reorderThread from './reorderThread';
-import changeLanguageJson from './changeLanguageJson';
-import changeLanguage from './changeLanguage';
-import changeFontSizeJson from './changeFontSizeJson';
-import changeFontSize from './changeFontSize';
-import changeThemeJson from './changeThemeJson';
-import changeTheme from './changeTheme';
 import login from './login';
 import logout from './logout';
 import getMe from './getMe';
@@ -45,12 +39,6 @@ export {getFileDownloadUrl, getMessageLinkUrl}
 export default {
 	signup,
 	login,
-	changeLanguage,
-	changeLanguageJson,
-	changeFontSizeJson,
-	changeFontSize,
-	changeThemeJson,
-	changeTheme,
 	logout,
 	auth,
 	authJson,

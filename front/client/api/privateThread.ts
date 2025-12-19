@@ -16,11 +16,11 @@ async function privateThread(id: number) {
 			credentials: "include",
 		});
 
-		if (error)
+		if (error.error) {
 			result.error = models.error(error)
-
-		if (response)
+		} else {
 			result.id = response.id
+		}
 	} catch (e) {
 		result.error.error   = true
 		result.error.status  = 500

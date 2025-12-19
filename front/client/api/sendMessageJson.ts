@@ -22,11 +22,11 @@ async function sendMessageJson(token: string, text: string, title: string, fileI
 			},
 		});
 
-		if (error.error)
+		if (error.error) {
 			result.error = models.error(error)
-
-		if (response)
+		} else {
 			result.message = models.message(response.message)
+		}
 
 	} catch (e) {
 		result.error.error    = true

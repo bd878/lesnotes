@@ -20,11 +20,11 @@ async function readMessageJson(token: string, user: number, id: number, name?: s
 			},
 		});
 
-		if (error)
+		if (error.error) {
 			result.error = models.error(error)
-
-		if (response)
+		} else {
 			result.message = models.message(response.messages[0])
+		}
 	} catch (e) {
 		result.error.error   = true
 		result.error.status  = 500
