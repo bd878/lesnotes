@@ -16,7 +16,7 @@ type RepoConnection interface {
 
 type Repository interface {
 	ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (ids []*threads.Thread, isLastPage bool, err error)
-	ReadThread(ctx context.Context, id, userID int64) (thread *threads.Thread, err error)
+	ReadThread(ctx context.Context, id, userID int64, name string) (thread *threads.Thread, err error)
 	AppendThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name, description string, private bool) (err error)
 	UpdateThread(ctx context.Context, id, userID int64, name, description string) (err error)
 	PrivateThread(ctx context.Context, id, userID int64) error

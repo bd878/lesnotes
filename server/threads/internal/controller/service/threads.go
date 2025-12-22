@@ -68,16 +68,16 @@ func (s *Controller) isConnFailed() bool {
 	return false
 }
 
-func (s *Controller) ReadThread(ctx context.Context, id, userID int64) (thread *threads.Thread, err error) {
+func (s *Controller) ReadThread(ctx context.Context, id, userID int64, name string) (thread *threads.Thread, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
 		}
 	}
 
-	logger.Debugw("read thread", "id", id, "user_id", userID)
+	logger.Debugw("read thread", "id", id, "user_id", userID, "name", name)
 
-	resp, err := s.client.Read(ctx, &api.ReadRequest{Id: id, UserId: userID})
+	resp, err := s.client.Read(ctx, &api.ReadRequest{Id: id, UserId: userID, Name: name})
 	if err != nil {
 		return nil, err
 	}

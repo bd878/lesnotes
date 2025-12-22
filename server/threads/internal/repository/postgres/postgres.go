@@ -22,22 +22,24 @@ func New(pool *pgxpool.Pool, tableName string) *Repository {
 	return &Repository{tableName, pool}
 }
 
-func (r *Repository) ReadThread(ctx context.Context, id, userID int64) (thread *threads.Thread, err error) {
-	const query = "SELECT parent_id, next_id, prev_id, name, description, private FROM %s WHERE user_id = $1 AND id = $2"
+func (r *Repository) ReadThread(ctx context.Context, id, userID int64, name string) (thread *threads.Thread, err error) {
+	thread = &threads.Thread{}
 
-	thread = &threads.Thread{
-		ID: id,
-		UserID: userID,
-	}
+	if id != 0 {
+		const query = "SELECT id, parent_id, user_id, next_id, prev_id, name, description, private FROM %s WHERE id = $1 AND (user_id = $2 OR private = false)"
 
-	err = r.pool.QueryRow(ctx, r.table(query), userID, id).Scan(&thread.ParentID, &thread.NextID, &thread.PrevID,
-		&thread.Name, &thread.Description, &thread.Private)
-	if err != nil {
-		return
+		err = r.pool.QueryRow(ctx, r.table(query), id, userID).Scan(&thread.ID, &thread.ParentID, &thread.UserID, &thread.NextID, &thread.PrevID,
+			&thread.Name, &thread.Description, &thread.Private)
+
+	} else if name != "" {
+		const query = "SELECT id, parent_id, user_id, next_id, prev_id, name, description, private FROM %s WHERE name = $1 AND (user_id = $2 OR private = false)"
+
+		err = r.pool.QueryRow(ctx, r.table(query), name, userID).Scan(&thread.ID, &thread.ParentID, &thread.UserID, &thread.NextID, &thread.PrevID,
+			&thread.Name, &thread.Description, &thread.Private)
 	}
 
 	var total int32
-	err = r.pool.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2"), userID, id).Scan(&total)
+	err = r.pool.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2"), thread.UserID, thread.ID).Scan(&total)
 	if err != nil {
 		return
 	}

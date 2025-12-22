@@ -11,7 +11,7 @@ import (
 )
 
 func (h *Handler) ReadThreadJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
-	_, ok := req.Context().Value(middleware.UserContextKey{}).(*usersmodel.User)
+	user, ok := req.Context().Value(middleware.UserContextKey{}).(*usersmodel.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -53,7 +53,14 @@ func (h *Handler) ReadThreadJsonAPI(w http.ResponseWriter, req *http.Request) (e
 		return err
 	}
 
-	thread, err := h.controller.ReadThread(req.Context(), request.ID, request.UserID)
+	var userID int64
+	if request.UserID != 0 {
+		userID = request.UserID
+	} else {
+		userID = user.ID
+	}
+
+	thread, err := h.controller.ReadThread(req.Context(), request.ID, userID, request.Name)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -68,14 +75,8 @@ func (h *Handler) ReadThreadJsonAPI(w http.ResponseWriter, req *http.Request) (e
 	}
 
 	response, err := json.Marshal(threadsmodel.ReadThreadResponse{
-		ID:       thread.ID,
-		ParentID: thread.ParentID,
-		UserID:   thread.UserID,
-		NextID:   thread.NextID,
-		PrevID:   thread.PrevID,
-		Name:     thread.Name,
-		Private:  thread.Private,
-		Description: thread.Description,
+		Threads:     []*threadsmodel.Thread{thread},
+		Description: "ok",
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

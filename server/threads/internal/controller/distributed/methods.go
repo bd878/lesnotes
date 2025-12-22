@@ -153,9 +153,9 @@ func (m *Distributed) ResolveThread(ctx context.Context, id, userID int64) (ids 
 	return m.repo.ResolveThread(ctx, id, userID)
 }
 
-func (m *Distributed) ReadThread(ctx context.Context, id, userID int64) (thread *threads.Thread, err error) {
-	logger.Debugw("read thread", "id", id, "user_id", userID)
-	return m.repo.ReadThread(ctx, id, userID)
+func (m *Distributed) ReadThread(ctx context.Context, id, userID int64, name string) (thread *threads.Thread, err error) {
+	logger.Debugw("read thread", "id", id, "user_id", userID, "name", name)
+	return m.repo.ReadThread(ctx, id, userID, name)
 }
 
 func (m *Distributed) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (list []*threads.Thread, isLastPage bool, err error) {

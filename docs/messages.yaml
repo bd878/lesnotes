@@ -615,7 +615,7 @@ components:
         token:
           type: string
           default: ""
-          required: true
+          required: false
         req:
           type: object
           properties:

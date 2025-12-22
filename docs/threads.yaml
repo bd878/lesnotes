@@ -9,9 +9,9 @@ paths:
 # READ
   /threads/v2/read:
     post:
-      summary: Get thread
+      summary: Get thread or threads
       description: |
-        Reads single thread
+        Read a private thread or threads by id or public thread by name
       operationId: readThreadJson
       requestBody:
         content:
@@ -335,12 +335,20 @@ components:
       token:
         type: string
         example: "AAAAAA"
+        default: ""
+        required: false
       request:
         type: object
         properties:
           id:
             type: integer
-            required: true
+            required: false
+          user:
+            type: integer
+            requried: false
+          name:
+            type: string
+            required: false
 
     readOk:
       type: object
@@ -349,20 +357,28 @@ components:
       response:
         type: object
         properties:
-          id:
-            type: integer
-          parent:
-            type: integer
-          prev:
-            type: integer
-          next:
-            type: integer
-          name:
-            type: string
-          private:
-            type: boolean
           description:
             type: string
+            default: ""
+          is_last_page:
+            type: boolean
+          is_first_page:
+            type: boolean
+            required: false
+          offset:
+            type: integer
+            required: false
+          count:
+            type: integer
+            required: false
+          total:
+            type: integer
+            required: false
+          threads:
+            type: array
+            items:
+              allOf:
+                - $ref: '#/components/schemas/thread'
 
 # END READ
 
@@ -624,3 +640,21 @@ components:
             id:
               type: integer
 # END PRIVATE
+
+    thread:
+      type: object
+      properties:
+          id:
+            type: integer
+          parent:
+            type: integer
+          prev:
+            type: integer
+          next:
+            type: integer
+          name:
+            type: string
+          private:
+            type: boolean
+          description:
+            type: string

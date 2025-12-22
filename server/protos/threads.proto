@@ -49,6 +49,7 @@ message ListResponse {
 message ReadRequest {
 	int64 id = 1;
 	int64 user_id = 2;
+	string name = 3;
 }
 
 message PublishRequest {

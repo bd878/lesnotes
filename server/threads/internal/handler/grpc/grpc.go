@@ -9,7 +9,7 @@ import (
 
 type Controller interface {
 	ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (ids []*threads.Thread, isLastPage bool, err error)
-	ReadThread(ctx context.Context, id, userID int64) (thread *threads.Thread, err error)
+	ReadThread(ctx context.Context, id, userID int64, name string) (thread *threads.Thread, err error)
 	ResolveThread(ctx context.Context, id, userID int64) (ids []int64, err error)
 	CreateThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name, description string, private bool) (err error)
 	UpdateThread(ctx context.Context, id, userID int64, name, description string) (err error)
@@ -33,7 +33,7 @@ func New(ctrl Controller) *Handler {
 }
 
 func (h *Handler) Read(ctx context.Context, req *api.ReadRequest) (resp *api.Thread, err error) {
-	thread, err := h.controller.ReadThread(ctx, req.Id, req.UserId)
+	thread, err := h.controller.ReadThread(ctx, req.Id, req.UserId, req.Name)
 	if err != nil {
 		return nil, err
 	}

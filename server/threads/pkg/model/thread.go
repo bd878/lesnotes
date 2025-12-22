@@ -40,6 +40,7 @@ type (
 
 	ReadThreadRequest struct {
 		ID          int64   `json:"id"`
+		Name        string  `json:"name"`
 		UserID      int64   `json:"user_id"`
 	}
 
@@ -61,15 +62,9 @@ type (
 	}
 
 	ReadThreadResponse struct {
-		ID          int64   `json:"id"`
-		UserID      int64   `json:"user_id"`
-		ParentID    int64   `json:"parent_id"`
-		NextID      int64   `json:"next_id"`
-		PrevID      int64   `json:"prev_id"`
-		Name        string  `json:"name"`
-		Private     bool    `json:"private"`
-		Count       int32   `json:"count"`
-		Description string  `json:"description"`
+		// TODO: count, offset, total, is_last_page...
+		Threads     []*Thread    `json:"threads"`
+		Description string       `json:"description"`
 	}
 
 	ListThreadsResponse struct {
