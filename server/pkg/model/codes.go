@@ -14,4 +14,5 @@ var (
 	CodeWrongQuery         int = 21
 	CodeStatusFailed       int = 22
 	CodeReadFailed         int = 23
+	CodeProhibited         int = 24
 )

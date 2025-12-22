@@ -53,6 +53,45 @@ func (h *Handler) ReadThreadJsonAPI(w http.ResponseWriter, req *http.Request) (e
 		return err
 	}
 
+	if request.Name == "" && request.ID == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status: "error",
+			Error:  &server.ErrorCode{
+				Code:    server.CodeWrongFormat,
+				Explain: "thread name or id required",
+			},
+		})
+
+		return
+	}
+
+	if request.Name != "" && request.ID != 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status: "error",
+			Error:  &server.ErrorCode{
+				Code:    server.CodeWrongFormat,
+				Explain: "both thread name and id are set",
+			},
+		})
+
+		return
+	}
+
+	if request.UserID != 0 && user.ID != usersmodel.PublicUserID && request.UserID != user.ID {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status:   "error",
+			Error:    &server.ErrorCode{
+				Code:    server.CodeProhibited,
+				Explain: "cannot read thread of other user",
+			},
+		})
+
+		return
+	}
+
 	var userID int64
 	if request.UserID != 0 {
 		userID = request.UserID
