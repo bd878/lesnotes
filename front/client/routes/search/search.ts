@@ -12,16 +12,16 @@ import Builder from '../builder'
 async function search(ctx) {
 	console.log("--> search")
 
-	const builder = new SearchBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.search, ctx.path)
+	const builder = new SearchBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
-	await builder.addSettings(ctx.state.lang, ctx.state.theme, ctx.state.fontSize)
+	await builder.addSettings()
 	await builder.addMessagesList(ctx.state.messages)
 	await builder.addFilesList()
 	await builder.addSearch()
 	await builder.addSidebar()
 	await builder.addFooter()
 
-	ctx.body = await builder.build(ctx.state.theme, ctx.state.fontSize)
+	ctx.body = await builder.build()
 	ctx.status = 200
 
 	console.log("<-- search")
@@ -95,12 +95,15 @@ class SearchBuilder extends Builder {
 		})
 	}
 
-	async build(theme?: string, fontSize?: string) {
+	async build() {
 		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
 		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
 		const search = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/search/mobile/search.mustache' : 'templates/search/desktop/search.mustache'
 		)), { encoding: 'utf-8' });
+
+		const theme = this.theme
+		const fontSize = this.fontSize
 
 		return mustache.render(layout, {
 			html: () => (text, render) => {

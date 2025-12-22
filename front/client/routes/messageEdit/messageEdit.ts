@@ -10,16 +10,16 @@ import HomeBuilder from '../home/builder';
 async function messageEdit(ctx) {
 	console.log("--> messageEdit")
 
-	const builder = new MessageEditViewBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.search, ctx.path)
+	const builder = new MessageEditViewBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
 	await builder.addMessageEditForm(ctx.state.me.ID, ctx.state.message)
-	await builder.addSettings(ctx.state.lang, ctx.state.theme, ctx.state.fontSize)
+	await builder.addSettings()
 	await builder.addMessagesList(ctx.state.stack)
 	await builder.addSearch()
 	await builder.addSidebar(ctx.search)
 	await builder.addFooter()
 
-	ctx.body = await builder.build(ctx.state.message, ctx.state.theme, ctx.state.fontSize, true)
+	ctx.body = await builder.build(ctx.state.message)
 	ctx.status = 200
 
 	console.log("<-- messageEdit")
@@ -47,7 +47,7 @@ class MessageEditViewBuilder extends HomeBuilder {
 			textPlaceholder:  this.i18n("textPlaceholder"),
 			updateButton:     this.i18n("updateButton"),
 			cancelButton:     this.i18n("cancelButton"),
-			updateAction:     "/update" + this.search,
+			updateAction:     "/m/update" + this.search,
 			userID:           userID,
 			domain:           Config.get("domain"),
 		})

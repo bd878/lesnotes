@@ -10,13 +10,13 @@ import Builder from '../builder';
 async function publicMessage(ctx) {
 	console.log("--> publicMessage")
 
-	const builder = new MessageBuilder(ctx.userAgent.isMobile, ctx.state.lang)
+	const builder = new MessageBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
-	await builder.addSettings(ctx.state.lang, ctx.state.theme, ctx.state.fontSize)
+	await builder.addSettings()
 	await builder.addSidebar()
 	await builder.addFooter()
 
-	ctx.body = await builder.build(ctx.state.message, ctx.state.theme, ctx.state.fontSize)
+	ctx.body = await builder.build(ctx.state.message)
 	ctx.status = 200;
 
 	console.log("<-- publicMessage")
@@ -36,15 +36,18 @@ class MessageBuilder extends Builder {
 		})
 	}
 
-	async build(message?: Message, theme?: string, fontSize?: string) {
+	async build(message?: Message) {
 		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
 		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
 		const content = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/message/mobile/message.mustache' : 'templates/message/desktop/message.mustache'
 		)), { encoding: 'utf-8' });
 
+		const theme = this.theme
+		const fontSize = this.fontSize
+
 		return mustache.render(layout, {
-			html:     () => (text, render) => {
+			html: () => (text, render) => {
 				let html = "<html"
 
 				if (theme) html += ` class="${theme}"`;

@@ -8,16 +8,16 @@ import Builder from '../builder';
 async function login(ctx) {
 	console.log("--> login")
 
-	const builder = new LoginBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.search)
+	const builder = new LoginBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
-	await builder.addSettings(ctx.state.lang, ctx.state.theme, ctx.state.fontSize)
+	await builder.addSettings()
 	await builder.addUsername()
 	await builder.addPassword()
 	await builder.addSubmit()
 	await builder.addFooter()
 	await builder.addSidebar()
 
-	ctx.body = await builder.build(ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.state.error)
+	ctx.body = await builder.build(ctx.state.error)
 	ctx.status = 200;
 
 	console.log("<-- login")
@@ -70,12 +70,16 @@ class LoginBuilder extends Builder {
 		})
 	}
 
-	async build(theme?: string, fontSize?: string, search?: string, error?: string) {
+	async build(error?: string) {
 		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
 		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
 		const login = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/login/mobile/login.mustache' : 'templates/login/desktop/login.mustache'
 		)), { encoding: 'utf-8' });
+
+		const search = this.search
+		const theme = this.theme
+		const fontSize = this.fontSize
 
 		return mustache.render(layout, {
 			html:     () => (text, render) => {

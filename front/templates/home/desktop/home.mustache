@@ -5,32 +5,26 @@
 
 	<div id="editor" class="min-w-lg max-w-lg flex flex-row ml-8">
 		<div class="flex flex-col grow-2 w-full">
-			<div id="message-editor" class="flex flex-col grow p-2 mb-2 border border-1 border-solid rounded-md">
+			<div class="flex flex-col grow p-2 mb-2 border border-1 border-solid rounded-md">
 				{{#message}}
-					{{#editMessage}}
-						{{> messageEditForm}}
-					{{/editMessage}}
-					{{^editMessage}}
-						{{> messageView}}
-					{{/editMessage}}
+					{{> messageEditForm}}
+					{{> messageView}}
 				{{/message}}
-				{{^message}}
-					{{> newMessageForm}}
-				{{/message}}
+
+				{{> newMessageForm}}
+
+				{{#thread}}
+					{{> threadEditForm}}
+					{{> threadView}}
+				{{/thread}}
 			</div>
 
-			<div id="files-editor">
+			<div>
 				{{#message}}
-					{{#editMessage}}
-						{{> filesForm}}
-					{{/editMessage}}
-					{{^editMessage}}
-						{{> filesList}}
-					{{/editMessage}}
+					{{> filesList}}
 				{{/message}}
-				{{^message}}
-					{{> filesForm}}
-				{{/message}}
+
+				{{> filesForm}}
 			</div>
 		</div>
 	</div>

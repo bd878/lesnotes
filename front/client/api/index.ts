@@ -12,6 +12,7 @@ import searchMessagesJson from './searchMessagesJson';
 import searchMessagesPathJson from './searchMessagesPathJson';
 import updateMessage from './updateMessage';
 import updateMessageJson from './updateMessageJson';
+import updateThreadJson from './updateThreadJson';
 import privateThread from './privateThread';
 import privateThreadJson from './privateThreadJson';
 import publishThread from './publishThread';
@@ -61,6 +62,7 @@ export default {
 	sendMessageJson,
 	updateMessage,
 	updateMessageJson,
+	updateThreadJson,
 	deleteMessage,
 	deleteMessageJson,
 	deleteMessages,

@@ -3,9 +3,9 @@ import Builder from '../builder';
 async function publicThread(ctx) {
 	console.log("--> publicThread")
 
-	const builder = new ThreadBuilder(ctx.userAgent.isMobile, ctx.state.lang)
+	const builder = new ThreadBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
-	await builder.addSettings(ctx.state.lang, ctx.state.theme, ctx.state.fontSize)
+	await builder.addSettings()
 	await builder.addFooter()
 
 	ctx.body = await builder.build()

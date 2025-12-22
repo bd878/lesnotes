@@ -10,12 +10,16 @@ abstract class Builder {
 	lang:          string  = "en";
 	search:        string = "";
 	path:          string = "";
+	theme:         string = "";
+	fontSize:      string = "";
 
-	constructor(isMobile: boolean, lang: string = "en", search: string = "", path: string = "") {
+	constructor(isMobile: boolean, lang: string = "en", theme: string = "light", fontSize: string = "medium", search: string = "", path: string = "") {
 		this.search = search
 		this.isMobile = isMobile
 		this.lang = lang
 		this.path = path
+		this.theme = theme
+		this.fontSize = fontSize
 	}
 
 	i18n(key: string): string {
@@ -36,12 +40,15 @@ abstract class Builder {
 	}
 
 	settings = undefined;
-	async addSettings(lang: string, theme: string, fontSize?: string) {
+	async addSettings() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/settings/mobile/settings.mustache' : 'templates/settings/desktop/settings.mustache'
 		)), { encoding: 'utf-8' });
 
 		const search = this.search
+		const theme = this.theme
+		const fontSize = this.fontSize
+		const lang = this.lang
 
 		this.settings = mustache.render(template, {
 			fontSizeHeader:  this.i18n("fontSizeHeader"),

@@ -12,6 +12,8 @@ import Builder from '../builder'
 class HomeBuilder extends Builder {
 	messageEditForm = undefined;
 	messageView = undefined;
+	threadView = undefined;
+	threadEditForm = undefined;
 
 	messagesList = undefined;
 	async addMessagesList(stack: Thread[]) {
@@ -32,7 +34,7 @@ class HomeBuilder extends Builder {
 			noMessagesText:   this.i18n("noMessagesText"),
 			messageHref:      function() { return `/messages/${this.ID}` + search; },
 			messageThreadHref: function() { const params = new URLSearchParams(search); params.set("cwd", `${this.ID}`); return path + "?" + params.toString(); },
-			editThreadHref:   function() { return `/threads/${this}` + search; /*context is ID, not thread*/ },
+			viewThreadHref:   function() { return `/threads/${this}` + search; /*context is ID, not thread*/ },
 			closeThreadHref:  function() { const params = new URLSearchParams(search); params.set("cwd", `${this}` /*context is parentID*/); return path + "?" + params.toString(); },
 			closeRootChildThreadHref: function() { const params = new URLSearchParams(search); params.delete("cwd"); return path + "?" + params.toString(); },
 			rootThreadHref:   function() { const params = new URLSearchParams(search); params.delete("cwd"); return path + "?" + params.toString(); },
@@ -122,12 +124,15 @@ class HomeBuilder extends Builder {
 		})
 	}
 
-	async build(message?: Message, theme?: string, fontSize?: string, editMessage?: boolean) {
+	async build(message?: Message, thread?: Thread) {
 		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
 		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
 		const home = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/home/mobile/home.mustache' : 'templates/home/desktop/home.mustache'
 		)), { encoding: 'utf-8' });
+
+		const theme = this.theme
+		const fontSize = this.fontSize
 
 		return mustache.render(layout, {
 			html: () => (text, render) => {
@@ -150,11 +155,13 @@ class HomeBuilder extends Builder {
 			footer: this.footer,
 			content: mustache.render(home, {
 				message:     message,
-				editMessage: editMessage,
+				thread:      thread,
 			}, {
 				settings:        this.settings,
 				messageEditForm: this.messageEditForm,
 				messageView:     this.messageView,
+				threadView:      this.threadView,
+				threadEditForm:  this.threadEditForm,
 				newMessageForm:  this.newMessageForm,
 				messagesList:    this.messagesList,
 				sidebar:         this.sidebar,
