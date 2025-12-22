@@ -61,6 +61,14 @@ type (
 		UserID      int64   `json:"user_id"`
 	}
 
+	PublishThreadRequest struct {
+		ID          int64   `json:"id"`
+	}
+
+	PrivateThreadRequest struct {
+		ID          int64   `json:"id"`
+	}
+
 	ReadThreadResponse struct {
 		// TODO: count, offset, total, is_last_page...
 		Threads     []*Thread    `json:"threads"`
