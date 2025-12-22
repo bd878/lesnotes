@@ -341,7 +341,7 @@ func (r *Repository) AppendThread(ctx context.Context, id, userID, parentID, nex
 
 	if err == pgx.ErrNoRows {
 		// new thread
-		_, err = tx.Exec(ctx, r.table(insert), id, userID, parentID, name, private, 0, 0)
+		_, err = tx.Exec(ctx, r.table(insert), id, userID, parentID, name, description, private, 0, 0)
 		return
 	}
 
@@ -393,7 +393,7 @@ func (r *Repository) UpdateThread(ctx context.Context, id, userID int64, newName
 		description = newDescription
 	}
 
-	_, err = tx.Exec(ctx, r.table(query), userID, description, name)
+	_, err = tx.Exec(ctx, r.table(query), userID, id, description, name)
 
 	return
 }

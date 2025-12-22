@@ -93,10 +93,12 @@ class HomeBuilder extends Builder {
 	}
 
 	sidebar = undefined;
-	async addSidebar(search: string) {
+	async addSidebar() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/sidebar_vertical/mobile/sidebar_vertical.mustache' : 'templates/sidebar_vertical/desktop/sidebar_vertical.mustache'
 		)), { encoding: 'utf-8' });
+
+		const search = this.search
 
 		this.sidebar = mustache.render(template, {
 			mainHref:         "/home" + search,

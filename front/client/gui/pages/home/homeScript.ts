@@ -10,7 +10,6 @@ const elems = {
 	button: document.createElement("button"),
 	input:  document.createElement("input"),
 
-	get messageFormElem():       HTMLFormElement     { return getByID("message-form",          this.form) as HTMLFormElement },
 	get filesButtonElem():       HTMLButtonElement   { return getByID("select-files-button",   this.button) as HTMLButtonElement },
 	get filesListElem():         HTMLDivElement      { return getByID("files-list",            this.button) as HTMLDivElement },
 	get noFilesElem():           HTMLDivElement      { return getByID("no-files",              this.div) as HTMLDivElement },
