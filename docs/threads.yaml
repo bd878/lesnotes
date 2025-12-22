@@ -263,6 +263,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/serverError'
+
+  /threads/v2/publish:
+    put:
+      summary: Make thread public
+      description: |
+        Update private field of a thread to make it public
+        TODO: update thread messages recursively
+      operationId: publishThreadJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/publishJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/publishOk'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
 # END PUBLISH
 
 # PRIVATE
@@ -296,6 +322,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/serverError'
 
+  /threads/v2/private:
+    put:
+      summary: Make thread private public API
+      description: |
+        Update private field of a thread to make it private
+      operationId: privateThreadJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/privateJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/privateOk'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
 # END PRIVATE
 components:
   parameters:
@@ -608,6 +658,20 @@ components:
 # END DELETE 
 
 # PUBLISH
+    publishJson:
+      type: object
+      properties:
+        token:
+          type: string
+          default: ""
+          required: true
+        req:
+          type: object
+          properties:
+            id:
+              type: integer
+              required: true
+
     publishOk:
       type: object
       properties:
@@ -625,6 +689,20 @@ components:
 # END PUBLISH
 
 # PRIVATE
+    privateJson:
+      type: object
+      properties:
+        token:
+          type: string
+          default: ""
+          required: true
+        req:
+          type: object
+          properties:
+            id:
+              type: integer
+              required: true
+
     privateOk:
       type: object
       properties:

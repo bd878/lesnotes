@@ -20,7 +20,7 @@ async function loadMessage(ctx, next) {
 			ctx.state.message = await api.readMessageJson("", userID, id)
 		}
 	} else if (is.notEmpty(name)) {
-		ctx.state.message = await api.readMessageJson("", 0 /* me */, 0, name /* public name */)
+		ctx.state.message = await api.readMessageJson("", 0 /* public */, 0, name /* public name */)
 	}
 
 	if (is.notEmpty(ctx.state.message)) {

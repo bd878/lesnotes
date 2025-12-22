@@ -4,6 +4,7 @@ import readMessagesJson from './readMessagesJson';
 import readPathJson from './readPathJson';
 import readBatchMessagesJson from './readBatchMessagesJson';
 import readMessage from './readMessage';
+import readThreadJson from './readThreadJson';
 import readMessageJson from './readMessageJson';
 import sendMessage from './sendMessage';
 import sendMessageJson from './sendMessageJson';
@@ -12,7 +13,9 @@ import searchMessagesPathJson from './searchMessagesPathJson';
 import updateMessage from './updateMessage';
 import updateMessageJson from './updateMessageJson';
 import privateThread from './privateThread';
+import privateThreadJson from './privateThreadJson';
 import publishThread from './publishThread';
+import publishThreadJson from './publishThreadJson';
 import deleteMessage from './deleteMessage';
 import deleteMessageJson from './deleteMessageJson';
 import deleteMessages from './deleteMessages';
@@ -51,6 +54,9 @@ export default {
 	readPathJson,
 	readMessageJson,
 	readMessage,
+	readThreadJson,
+	publishThreadJson,
+	privateThreadJson,
 	sendMessage,
 	sendMessageJson,
 	updateMessage,

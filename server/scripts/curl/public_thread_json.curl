@@ -1,3 +1,4 @@
 url = https://%STAGE%lesnotes.space/threads/v2/publish
+-XPUT
 -H "Content-Type: application/json"
 --data-binary %JSON%

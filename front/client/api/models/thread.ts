@@ -4,6 +4,7 @@ export interface Thread {
 	name:         string;
 	private:      boolean;
 	parentID:     number;
+	description:  string;
 }
 
 const EmptyThread = Object.freeze({
@@ -12,6 +13,7 @@ const EmptyThread = Object.freeze({
 	name:         "",
 	private:      true,
 	parentID:     0,
+	description:  "",
 })
 
 export default function mapThreadFromProto(thread?: any): Thread {
@@ -23,7 +25,8 @@ export default function mapThreadFromProto(thread?: any): Thread {
 		userID:       thread.user_id,
 		name:         thread.name,
 		parentID:     thread.parent_id,
-		private:      thread.private
+		private:      thread.private,
+		description:  thread.description,
 	}
 
 	return res

@@ -88,6 +88,7 @@ router
 	.post('doUpdate',     "/update",              getToken, authed, getState, updateMessage)
 	.get("tgAuth",        "/tg_auth",             authTelegram)
 	.get("userMessage",   "/m/:user/:id",         etag, getState, getToken, loadMessage, publicMessage)
+	.get("userThread",    "/t/:user/:id",         etag, getState, getToken, loadThread, publicThread)
 	.get("publicMessage", "/m/:name",             etag, getState, getToken, loadMessage, publicMessage)
 	.get("publicThread",  "/t/:name",             etag, getState, getToken, loadThread, publicThread)
 	.get("miniapp",       "/miniapp",             etag, getState, miniapp)

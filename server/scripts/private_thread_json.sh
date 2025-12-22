@@ -4,7 +4,7 @@
 
 stage=${STAGE:-"stage."}
 token=${1?"Usage: private_thread_json.sh token thread_id"}
-thread=${2?"Usage: private_thread_json.sh token thread_id"}
+id=${2?"Usage: private_thread_json.sh token thread_id"}
 
 json=$(echo -n '{\"token\":\"%TOKEN%\",\"req\":{\"id\":%ID%}}' | sed -e "s/%TOKEN%/$token/g" -e "s/%ID%/$id/g")
 

@@ -32,7 +32,7 @@ class HomeBuilder extends Builder {
 			noMessagesText:   this.i18n("noMessagesText"),
 			messageHref:      function() { return `/messages/${this.ID}` + search; },
 			messageThreadHref: function() { const params = new URLSearchParams(search); params.set("cwd", `${this.ID}`); return path + "?" + params.toString(); },
-			editThreadHref:   function() { return `/editor/threads/${this}` + search; /*context is ID, not thread*/ },
+			editThreadHref:   function() { return `/threads/${this}` + search; /*context is ID, not thread*/ },
 			closeThreadHref:  function() { const params = new URLSearchParams(search); params.set("cwd", `${this}` /*context is parentID*/); return path + "?" + params.toString(); },
 			closeRootChildThreadHref: function() { const params = new URLSearchParams(search); params.delete("cwd"); return path + "?" + params.toString(); },
 			rootThreadHref:   function() { const params = new URLSearchParams(search); params.delete("cwd"); return path + "?" + params.toString(); },
