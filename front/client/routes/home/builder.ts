@@ -32,8 +32,10 @@ class HomeBuilder extends Builder {
 			noMessagesText:   this.i18n("noMessagesText"),
 			messageHref:      function() { return `/messages/${this.ID}` + search; },
 			messageThreadHref: function() { const params = new URLSearchParams(search); params.set("cwd", `${this.ID}`); return path + "?" + params.toString(); },
-			threadHref:       function() { const params = new URLSearchParams(search); params.set("cwd", `${this}` /*context is ID, not thread*/); return path + "?" + params.toString(); },
-			noThreadHref:     function() { const params = new URLSearchParams(search); params.delete("cwd"); return path + "?" + params.toString(); },
+			editThreadHref:   function() { return `/editor/threads/${this}` + search; /*context is ID, not thread*/ },
+			closeThreadHref:  function() { const params = new URLSearchParams(search); params.set("cwd", `${this}` /*context is parentID*/); return path + "?" + params.toString(); },
+			closeRootChildThreadHref: function() { const params = new URLSearchParams(search); params.delete("cwd"); return path + "?" + params.toString(); },
+			rootThreadHref:   function() { const params = new URLSearchParams(search); params.delete("cwd"); return path + "?" + params.toString(); },
 			prevPageHref:     function() { const params = new URLSearchParams(search); params.set(this.threadID || 0, `${limit + this.offset}`); return path + "?" + params.toString(); },
 			nextPageHref:     function() { const params = new URLSearchParams(search); params.set(this.threadID || 0, `${Math.max(0, this.offset - limit)}`); return path + "?" + params.toString(); },
 		})
@@ -97,7 +99,7 @@ class HomeBuilder extends Builder {
 		this.sidebar = mustache.render(template, {
 			mainHref:         "/home" + search,
 			logout:           this.i18n("logout"),
-			logoutHref:       "/logout" + search,
+			logoutHref:       function() { const params = new URLSearchParams(search); params.delete("cwd"); params.delete("id"); /* TODO: delete pagination */ return "/logout?" + params.toString() },
 			settingsHeader:   this.i18n("settingsHeader"),
 		}, {
 			settings:         this.settings,

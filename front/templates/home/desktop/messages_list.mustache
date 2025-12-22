@@ -1,23 +1,38 @@
 {{#stack}}
 	<div class="flex flex-col w-xs min-w-xs max-w-xs first:ml-0 last:mr-8 ml-2">
-		{{#ID}}
-			<a target="_self" href="{{threadHref}}" class="mb-2 mt-[2px] ml-[2px] dark:hover:text-white hover:text-blue-600 cursor-pointer underline">
-		{{/ID}}
-		{{^ID}}
-			<a target="_self" href="{{noThreadHref}}" class="mb-2 mt-[2px] ml-[2px] dark:hover:text-white hover:text-blue-600 cursor-pointer underline">
-		{{/ID}}
-			{{#title}}
-				/{{title}}
-			{{/title}}
-			{{^title}}
-				{{#text}}
-					/{{text}}
-				{{/text}}
-				{{^text}}
-					/
-				{{/text}}
-			{{/title}}
-		</a>
+		<div class="flex flex-row mb-2 mt-[2px] ml-[2px]">
+			{{^isRoot}}
+				{{#parentID}}
+					<a target="_self" href="{{closeThreadHref}}" class="mr-4 dark:hover:text-white hover:text-blue-600 cursor-pointer underline">X</a>
+				{{/parentID}}
+				{{^parentID}}
+					<a target="_self" href="{{closeRootChildThreadHref}}" class="mr-4 dark:hover:text-white hover:text-blue-600 cursor-pointer underline">X</a>
+				{{/parentID}}
+			{{/isRoot}}
+
+			{{#ID}}
+				<a target="_self" href="{{editThreadHref}}" class="flex flex-row items-center overflow-hidden text-ellipsis dark:hover:text-white hover:text-blue-600 cursor-pointer underline">
+			{{/ID}}
+			{{^ID}}
+				<a target="_self" href="{{rootThreadHref}}" class="flex flex-row items-center overflow-hidden text-ellipsis dark:hover:text-white hover:text-blue-600 cursor-pointer underline">
+			{{/ID}}
+				{{#title}}
+					/{{title}}
+				{{/title}}
+				{{^title}}
+					{{#text}}
+						/{{text}}
+					{{/text}}
+					{{^text}}
+						/
+					{{/text}}
+				{{/title}}
+
+				{{#ID}}
+					<div class="ml-1 text-sm italic">(edit)</div>
+				{{/ID}}
+			</a>
+		</div>
 
 		<div class="overflow-y-auto">
 			<ul class="flex flex-col">

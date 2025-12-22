@@ -24,10 +24,11 @@ async function readStackJson(token: string, threadID: number/*, lastMessageID: n
 	path.path.reverse()
 
 	// threadID = 0 : threads = [0], path.path = [EmptyThread]
-	for (let i = 0; i < threads.length; i++) {
-		const threadID = threads[i] /* first is root : = 0 */
-		const thread = path.path[i] /* first is thread : EmptyThread */
-
+	for (
+		let i = 0, isRoot = true, parentID = 0, threadID = 0 /* first is root : = 0 */, thread = JSON.parse(JSON.stringify(models.EmptyThread)) /* first is thread : EmptyThread */;
+		i < threads.length;
+		i++, isRoot = false, parentID = threads[i-1], threadID = threads[i], thread = path.path[i]
+	) {
 		const offset = offsets[threadID]
 
 		let messages = { error: models.error(), messages: [], isLastPage: true, isFirstPage: true, count: 0, total: 0, offset: 0 }
@@ -45,6 +46,8 @@ async function readStackJson(token: string, threadID: number/*, lastMessageID: n
 		messages.messages.reverse()
 
 		// TODO: move thread to api/models/thread.ts
+		thread.isRoot      = isRoot /* parentID == 0 for root and primary child, how to distinguish? */
+		thread.parentID    = parentID
 		thread.isLastPage  = messages.isLastPage
 		thread.isFirstPage = messages.isFirstPage
 		thread.messages    = messages.messages
