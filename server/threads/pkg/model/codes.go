@@ -6,4 +6,5 @@ var (
 	CodePublishFailed int = 513
 	CodeNoRequest     int = 514
 	CodeWrongID       int = 515
+	CodeThreadPrivate int = 516
 )

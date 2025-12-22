@@ -113,6 +113,19 @@ func (h *Handler) ReadThreadJsonAPI(w http.ResponseWriter, req *http.Request) (e
 		return err
 	}
 
+	if user.ID == usersmodel.PublicUserID && thread.Private {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status: "error",
+			Error:  &server.ErrorCode{
+				Code:    threadsmodel.CodeThreadPrivate,
+				Explain: "cannot read private thread",
+			},
+		})
+
+		return
+	}
+
 	response, err := json.Marshal(threadsmodel.ReadThreadResponse{
 		Threads:     []*threadsmodel.Thread{thread},
 		Description: "ok",
