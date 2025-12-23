@@ -53,5 +53,5 @@ func (h *Handler) SearchMessagesJsonAPI(w http.ResponseWriter, req *http.Request
 		return err
 	}
 
-	return h.searchMessages(req.Context(), w, user.ID, request.Query)
+	return h.searchMessages(req.Context(), w, user.ID, request.Query, request.ThreadID, int32(request.Public))
 }

@@ -19,6 +19,7 @@ type Repository struct {
 	pool               *pgxpool.Pool
 }
 
+// TODO: split repo on messages and files, like billing invoices and payments
 func New(pool *pgxpool.Pool, messagesTableName, filesTableName string) *Repository {
 	return &Repository{messagesTableName, filesTableName, pool}
 }
@@ -187,8 +188,8 @@ func (r *Repository) DeleteMessage(ctx context.Context, id, userID int64) (err e
 	return nil
 }
 
-func (r *Repository) SearchMessages(ctx context.Context, userID int64, substr string) (list []*searchmodel.Message, err error) {
-	const query = "SELECT id, name, title, text, private FROM %s WHERE user_id = $1 AND name || ' ' || title || ' ' || text ILIKE $2"
+func (r *Repository) SearchMessages(ctx context.Context, userID int64, substr string, threadID int64, public int) (list []*searchmodel.Message, err error) {
+	// TODO: filter by thread_id
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
@@ -211,7 +212,19 @@ func (r *Repository) SearchMessages(ctx context.Context, userID int64, substr st
 
 	var rows pgx.Rows
 
-	rows, err = tx.Query(ctx, r.messagesTable(query), userID, "%" + substr + "%")
+	if public != -1 {
+		var private bool
+		if public == 0 {
+			private = true
+		} else {
+			private = false
+		}
+
+		rows, err = tx.Query(ctx, r.messagesTable("SELECT id, name, title, text, private FROM %s WHERE user_id = $1 AND private = $2 AND name || ' ' || title || ' ' || text ILIKE $3"), userID, private, "%" + substr + "%")
+	} else {
+		rows, err = tx.Query(ctx, r.messagesTable("SELECT id, name, title, text, private FROM %s WHERE user_id = $1 AND name || ' ' || title || ' ' || text ILIKE $2"), userID, "%" + substr + "%")
+	}
+
 	defer rows.Close()
 	if err != nil {
 		return

@@ -8,7 +8,7 @@ import (
 )
 
 type Controller interface {
-	SearchMessages(ctx context.Context, userID int64, substr string) (list []*model.Message, err error)
+	SearchMessages(ctx context.Context, userID int64, substr string, threadID int64, public int) (list []*model.Message, err error)
 	GetServers(ctx context.Context) (servers []*api.Server, err error)
 }
 
@@ -24,7 +24,24 @@ func New(ctrl Controller) *Handler {
 }
 
 func (h *Handler) SearchMessages(ctx context.Context, req *api.SearchMessagesRequest) (resp *api.SearchMessagesResponse, err error) {
-	list, err := h.controller.SearchMessages(ctx, req.UserId, req.Substr)
+	var (
+		public int
+		threadID int64
+	)
+
+	if req.ThreadId == nil {
+		threadID = 0
+	} else {
+		threadID = *req.ThreadId
+	}
+
+	if req.Public == nil {
+		public = -1
+	} else {
+		public = int(*req.Public)
+	}
+
+	list, err := h.controller.SearchMessages(ctx, req.UserId, req.Substr, threadID, public)
 	if err != nil {
 		return nil, err
 	}

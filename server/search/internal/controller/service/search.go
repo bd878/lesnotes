@@ -68,18 +68,20 @@ func (s *Controller) isConnFailed() bool {
 	return false
 }
 
-func (s *Controller) SearchMessages(ctx context.Context, userID int64, substr string) (list []*searchmodel.Message, err error) {
+func (s *Controller) SearchMessages(ctx context.Context, userID int64, substr string, threadID int64, public int32) (list []*searchmodel.Message, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
 		}
 	}
 
-	logger.Debugw("search messages", "user_id", userID, "substr", substr)
+	logger.Debugw("search messages", "user_id", userID, "substr", substr, "thread_id", threadID, "public", public)
 
 	res, err := s.client.SearchMessages(ctx, &api.SearchMessagesRequest{
-		Substr: substr,
-		UserId: userID,
+		Substr:   substr,
+		UserId:   userID,
+		ThreadId: &threadID,
+		Public:   &public,
 	})
 	if err != nil {
 		return nil, err

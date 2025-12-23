@@ -19,6 +19,8 @@ type (
 	SearchMessagesRequest struct {
 		UserID      int64         `json:"user_id"`
 		Query       string        `json:"query"`
+		Public      int           `json:"public"`
+		ThreadID    int64         `json:"thread"`
 	}
 
 	SearchMessagesResponse struct {

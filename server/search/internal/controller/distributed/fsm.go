@@ -20,7 +20,7 @@ type Repository interface {
 	PrivateMessages(ctx context.Context, ids []int64, userID int64) error
 	PublishMessages(ctx context.Context, ids []int64, userID int64) error
 	DeleteMessage(ctx context.Context, id, userID int64) error
-	SearchMessages(ctx context.Context, userID int64, substr string) (list []*searchmodel.Message, err error)
+	SearchMessages(ctx context.Context, userID int64, substr string, threadID int64, public int) (list []*searchmodel.Message, err error)
 	Truncate(ctx context.Context) error
 	Dump(ctx context.Context) (reader io.ReadCloser, err error)
 	Restore(ctx context.Context, reader io.ReadCloser) (err error)

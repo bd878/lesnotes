@@ -9,7 +9,7 @@ import (
 )
 
 type Controller interface {
-	SearchMessages(ctx context.Context, userID int64, query string) (list []*searchmodel.Message, err error)
+	SearchMessages(ctx context.Context, userID int64, query string, threadID int64, public int32) (list []*searchmodel.Message, err error)
 }
 
 type Handler struct {
