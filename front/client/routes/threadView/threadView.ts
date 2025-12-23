@@ -12,7 +12,9 @@ async function threadView(ctx) {
 
 	const builder = new ThreadViewBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
-	await builder.addThreadView(ctx.state.me.ID, ctx.state.thread)
+	if (is.notEmpty(ctx.state.thread)) {
+		await builder.addThreadView(ctx.state.thread)
+	}
 	await builder.addSettings()
 	await builder.addMessagesList(ctx.state.stack)
 	await builder.addSearch()
@@ -27,10 +29,7 @@ async function threadView(ctx) {
 
 class ThreadViewBuilder extends HomeBuilder {
 	threadView = undefined;
-	async addThreadView(userID: number, thread?: Thread) {
-		if (is.empty(thread))
-			return
-
+	async addThreadView(thread: Thread) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/home/mobile/thread_view.mustache' : 'templates/home/desktop/thread_view.mustache'
 		)), { encoding: 'utf-8' });
@@ -47,7 +46,6 @@ class ThreadViewBuilder extends HomeBuilder {
 			publishAction:    "/t/publish" + search,
 			privateAction:    "/t/private" + search,
 			newNoteButton:    this.i18n("newNote"),
-			userID:           userID,
 			domain:           Config.get("domain"),
 		})
 	}

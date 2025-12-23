@@ -1,0 +1,26 @@
+{{#ID}}
+	<form
+		autocomplete="off"
+		method="POST"
+		type="multipart/form-data"
+		class="w-full flex flex-col grow"
+	>
+		<div class="flex flex-col grow">
+			{{^private}}
+				<div class="flex flex-row mb-2"><a class="dark:text-blue-600 whitespace-nowrap small:text-xs large:text-base italic text-blue-600 text-sm" href="/t/{{name}}" target="_blank">{{domain}}/t/</a><input name="name" class="w-full ml-1 px-1 border-1 border-gray-600 rounded-md placeholder:italic placeholder:text-gray-600 dark:text-white resize-none text-sm small:text-xs large:text-base placeholder:small:text-xs placeholder:large:text-base" placeholder="{{namePlaceholder}}" value="{{name}}"></input></div>
+			{{/private}}
+			<input name="id" type="hidden" value="{{ID}}">
+			<textarea name="text" type="input" class="w-full h-full dark:text-white px-1 mb-2 border-1 rounded-md border-gray-600 resize-none overflow-y-scroll wrap-break-word text-start placeholder:italic placeholder:text-gray-600 rounded-md" placeholder="{{descriptionPlaceholder}}">{{description}}</textarea>
+		</div>
+		<div class="flex flex-col">
+			<div></div>
+			<div class="flex flex-row justify-between">
+				<button type="submit" class="rounded-md border-1 px-4 border-solid text-left cursor-pointer">{{updateButton}}</button>
+				<a href="{{cancelEditHref}}" target="_self" class="flex justify-center border-1 px-4 border-solid rounded-md text-left cursor-pointer">{{cancelButton}}</a>
+			</div>
+		</div>
+	</form>
+{{/ID}}
+{{^ID}}
+	<div>No thread</div>
+{{/ID}}

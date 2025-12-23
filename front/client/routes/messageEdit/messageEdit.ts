@@ -12,7 +12,7 @@ async function messageEdit(ctx) {
 
 	const builder = new MessageEditViewBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
-	await builder.addMessageEditForm(ctx.state.me.ID, ctx.state.message)
+	await builder.addMessageEditForm(ctx.state.message)
 	await builder.addSettings()
 	await builder.addMessagesList(ctx.state.stack)
 	await builder.addSearch()
@@ -26,8 +26,7 @@ async function messageEdit(ctx) {
 }
 
 class MessageEditViewBuilder extends HomeBuilder {
-	messageEditForm = undefined;
-	async addMessageEditForm(userID: number, message?: Message) {
+	async addMessageEditForm(message?: Message) {
 		if (is.empty(message))
 			return
 
@@ -48,7 +47,6 @@ class MessageEditViewBuilder extends HomeBuilder {
 			updateButton:     this.i18n("updateButton"),
 			cancelButton:     this.i18n("cancelButton"),
 			updateAction:     "/m/update" + this.search,
-			userID:           userID,
 			domain:           Config.get("domain"),
 		})
 	}
