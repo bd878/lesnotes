@@ -19,10 +19,13 @@ import (
 	hclog "github.com/hashicorp/go-hclog"
 
 	"github.com/bd878/gallery/server/waiter"
+	"github.com/bd878/gallery/server/ddd"
+	broker "github.com/bd878/gallery/server/nats"
 	membership "github.com/bd878/gallery/server/discovery/serf"
 	grpcmiddleware "github.com/bd878/gallery/server/internal/middleware/grpc"
 	repository "github.com/bd878/gallery/server/threads/internal/repository/postgres"
 	controller "github.com/bd878/gallery/server/threads/internal/controller/distributed"
+	streamhandler "github.com/bd878/gallery/server/threads/internal/handler/stream"
 	grpchandler "github.com/bd878/gallery/server/threads/internal/handler/grpc"
 )
 
@@ -48,7 +51,7 @@ type Server struct {
 	pool             *pgxpool.Pool
 	listener         net.Listener
 	grpcListener     net.Listener
-	controller       *controller.Distributed
+	controller       *controller.DistributedThreads
 	membership       *membership.Membership
 }
 
@@ -95,7 +98,7 @@ func (s *Server) setupNats() (err error) {
 	return
 }
 
-func (s *Server) setupRaft() error {
+func (s *Server) setupRaft() (err error) {
 	repo := repository.New(s.pool, s.conf.TableName)
 
 	raftLogLevel := hclog.Error.String()
@@ -118,7 +121,11 @@ func (s *Server) setupRaft() error {
 		return bytes.Compare(b, []byte{byte(controller.RaftRPC)}) == 0
 	})
 
-	control, err := controller.New(controller.Config{
+	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
+	stream := broker.NewStream(s.nc)
+	streamhandler.RegisterDomainEventHandlers(dispatcher, streamhandler.NewDomainEventHandlers(stream))
+
+	s.controller, err = controller.New(controller.Config{
 		Raft: raft.Config{
 			LocalID: raft.ServerID(s.conf.NodeName),
 			LogLevel: raftLogLevel,
@@ -127,14 +134,9 @@ func (s *Server) setupRaft() error {
 		Bootstrap:   s.conf.RaftBootstrap,
 		DataDir:     s.conf.DataPath,
 		Servers:     s.conf.RaftServers,
-	}, repo)
-	if err != nil {
-		return err
-	}
+	}, repo, dispatcher)
 
-	s.controller = control
-
-	return nil
+	return
 }
 
 func (s *Server) setupGRPC() error {

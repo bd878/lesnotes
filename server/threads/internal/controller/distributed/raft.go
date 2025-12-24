@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/raft"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/ddd"
 	"github.com/bd878/gallery/server/logger"
 )
 
@@ -27,14 +28,15 @@ type Config struct {
 	NetworkTimeout       time.Duration
 }
 
-type Distributed struct {
+type DistributedThreads struct {
 	conf            Config
 	raft            *raft.Raft
 	repo            Repository
 	snapshotStore   raft.SnapshotStore
+	publisher       ddd.EventPublisher[ddd.Event]
 }
 
-func New(conf Config, repo Repository) (*Distributed, error) {
+func New(conf Config, repo Repository, publisher ddd.EventPublisher[ddd.Event]) (*DistributedThreads, error) {
 	if conf.RetainSnapshots == 0 {
 		conf.RetainSnapshots = 1
 	}
@@ -47,17 +49,18 @@ func New(conf Config, repo Repository) (*Distributed, error) {
 		conf.NetworkTimeout = 10 * time.Second
 	}
 
-	m := &Distributed{
+	m := &DistributedThreads{
 		repo:      repo,
 		conf:      conf,
+		publisher: publisher,
 	}
-	if err := m.setupRaft(); err != nil {
+	if err := m.setupRaft(logger.Default()); err != nil {
 		return nil, err
 	}
 	return m, nil
 }
 
-func (m *Distributed) setupRaft() error {
+func (m *DistributedThreads) setupRaft(log *logger.Logger) error {
 	fsm := &fsm{repo: m.repo}
 
 	raftPath := filepath.Join(m.conf.DataDir, "raft")
@@ -132,7 +135,7 @@ func (m *Distributed) setupRaft() error {
 	return err
 }
 
-func (m *Distributed) WaitForLeader(timeout time.Duration) error {
+func (m *DistributedThreads) WaitForLeader(timeout time.Duration) error {
 	timeoutc := time.After(timeout)
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
@@ -149,7 +152,7 @@ func (m *Distributed) WaitForLeader(timeout time.Duration) error {
 	}
 }
 
-func (m *Distributed) GetServers(_ context.Context) ([](*api.Server), error) {
+func (m *DistributedThreads) GetServers(_ context.Context) ([](*api.Server), error) {
 	future := m.raft.GetConfiguration()
 	if err := future.Error(); err != nil {
 		logger.Error("message", "failed to get servers configuration")
@@ -167,7 +170,7 @@ func (m *Distributed) GetServers(_ context.Context) ([](*api.Server), error) {
 	return servers, nil
 }
 
-func (m *Distributed) Join(id, addr string) error {
+func (m *DistributedThreads) Join(id, addr string) error {
 	leaderFuture := m.raft.VerifyLeader()
 	if err := leaderFuture.Error(); err != nil {
 		return errors.New("cannot join node to cluster: not a leader")
@@ -202,7 +205,7 @@ func (m *Distributed) Join(id, addr string) error {
 	return nil
 }
 
-func (m *Distributed) Leave(id string) error {
+func (m *DistributedThreads) Leave(id string) error {
 	leaderFuture := m.raft.VerifyLeader()
 	if err := leaderFuture.Error(); err != nil {
 		return errors.New("cannot remove node from cluster: not a leader")
@@ -213,14 +216,14 @@ func (m *Distributed) Leave(id string) error {
 	return removeFuture.Error()
 }
 
-func (m *Distributed) Snapshot() error {
+func (m *DistributedThreads) Snapshot() error {
 	logger.Debugln("snapshot this machine")
 
 	snapshotFuture := m.raft.Snapshot()
 	return snapshotFuture.Error()
 }
 
-func (m *Distributed) Restore() error {
+func (m *DistributedThreads) Restore() error {
 	leaderFuture := m.raft.VerifyLeader()
 	if err := leaderFuture.Error(); err != nil {
 		return errors.New("cannot restore from snapshot: not a leader")
@@ -245,12 +248,12 @@ func (m *Distributed) Restore() error {
 	return m.raft.Restore(snapshot, reader, 20 * time.Second)
 }
 
-func (m *Distributed) ShowLeader() error {
+func (m *DistributedThreads) ShowLeader() error {
 	state := m.raft.State()
 	logger.Infow("my state", "addr", m.conf.StreamLayer.Addr(), "state", state.String())
 	return nil
 }
 
-func (m *Distributed) isLeader() bool {
+func (m *DistributedThreads) isLeader() bool {
 	return m.raft.State() == raft.Leader
 }

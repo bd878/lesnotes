@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package threads_events.v1;
+
+option go_package = "github.com/bd878/gallery/server/api";
+
+message ThreadCreated {
+	int64  id = 1;
+	int64  user_id = 2;
+	int64  parent_id = 3;
+	string name = 4;
+	string description = 5;
+	bool   private = 6;
+}
+
+message ThreadDeleted {
+	int64  id = 1;
+	int64  user_id = 2;
+}
+
+message ThreadUpdated {
+	int64  id = 1;
+	int64  user_id = 2;
+	string name = 3;
+	string description = 4;
+}
+
+message ThreadPublished {
+	int64  id = 1;
+	int64  user_id = 2;
+}
+
+message ThreadPrivated {
+	int64  id = 1;
+	int64  user_id = 2;
+}
+
+message ThreadParentChanged {
+	int64  id = 1;
+	int64  user_id = 2;
+	int64  parent_id = 3;
+}

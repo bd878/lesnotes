@@ -100,7 +100,7 @@ func (s *Server) setupNats() (err error) {
 	return
 }
 
-func (s *Server) setupRaft(log *logger.Logger) error {
+func (s *Server) setupRaft(log *logger.Logger) (err error) {
 	repo := repository.New(s.conf.TableName, s.pool)
 
 	raftLogLevel := hclog.Error.String()
@@ -123,12 +123,11 @@ func (s *Server) setupRaft(log *logger.Logger) error {
 		return bytes.Compare(b, []byte{byte(controller.RaftRPC)}) == 0
 	})
 
-
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
 	stream := broker.NewStream(s.nc)
 	streamhandler.RegisterDomainEventHandlers(dispatcher, streamhandler.NewDomainEventHandlers(stream))
 
-	control, err := controller.New(controller.Config{
+	s.controller, err = controller.New(controller.Config{
 		Raft: raft.Config{
 			LocalID: raft.ServerID(s.conf.NodeName),
 			LogLevel: raftLogLevel,
@@ -138,13 +137,8 @@ func (s *Server) setupRaft(log *logger.Logger) error {
 		DataDir:     s.conf.DataPath,
 		Servers:     s.conf.RaftServers,
 	}, repo, dispatcher)
-	if err != nil {
-		return err
-	}
 
-	s.controller = control
-
-	return nil
+	return
 }
 
 func (s *Server) setupGRPC(log *logger.Logger) error {
