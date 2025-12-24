@@ -46,7 +46,7 @@ func (r *MessagesRepository) SaveMessage(ctx context.Context, id, userID int64, 
 
 	_, err = tx.Exec(ctx, r.table(query), id, userID, name, title, text, private)
 
-	return nil
+	return
 }
 
 func (r *MessagesRepository) UpdateMessage(ctx context.Context, id, userID int64, newName, newTitle, newText string) (err error) {
@@ -92,9 +92,6 @@ func (r *MessagesRepository) UpdateMessage(ctx context.Context, id, userID int64
 	}
 
 	_, err = tx.Exec(ctx, r.table(query), userID, id, text, title, name)
-	if err != nil {
-		return
-	}
 
 	return
 }
@@ -150,7 +147,7 @@ func (r *MessagesRepository) PrivateMessages(ctx context.Context, ids []int64, u
 	}()
 
 	for _, id := range ids {
-		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = true WHERE user_id = $1 AND id = $2"), userID, id)
+		_, err = tx.Exec(ctx, r.table("UPDATE %s SET private = true WHERE user_id = $1 AND id = $2"), userID, id)
 		if err != nil {
 			return
 		}
@@ -183,7 +180,7 @@ func (r *MessagesRepository) DeleteMessage(ctx context.Context, id, userID int64
 
 	_, err = tx.Exec(ctx, r.table(query), id, userID)
 
-	return nil
+	return
 }
 
 func (r *MessagesRepository) SearchMessages(ctx context.Context, userID int64, substr string, threadID int64, public int) (list []*search.Message, err error) {

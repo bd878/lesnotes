@@ -46,7 +46,7 @@ func (m *Distributed) SaveMessage(ctx context.Context, id, userID int64, name, t
 
 	logger.Debugw("save search message", "id", id, "user_id", userID, "name", name, "title", title, "text", text, "private", private)
 
-	cmd, err := proto.Marshal(&AppendCommand{
+	cmd, err := proto.Marshal(&AppendMessageCommand{
 		Id:      id,
 		Text:    text,
 		Title:   title,
@@ -58,10 +58,7 @@ func (m *Distributed) SaveMessage(ctx context.Context, id, userID int64, name, t
 		return err
 	}
 
-	_, err = m.apply(ctx, AppendRequest, cmd)
-	if err != nil {
-		return
-	}
+	_, err = m.apply(ctx, AppendMessageRequest, cmd)
 
 	return
 }
@@ -73,7 +70,7 @@ func (m *Distributed) DeleteMessage(ctx context.Context, id, userID int64) (err 
 
 	logger.Debugw("delete search message", "id", id, "user_id", userID)
 
-	cmd, err := proto.Marshal(&DeleteCommand{
+	cmd, err := proto.Marshal(&DeleteMessageCommand{
 		UserId:   userID,
 		Id:       id,
 	})
@@ -81,19 +78,19 @@ func (m *Distributed) DeleteMessage(ctx context.Context, id, userID int64) (err 
 		return err
 	}
 
-	_, err = m.apply(ctx, DeleteRequest, cmd)
+	_, err = m.apply(ctx, DeleteMessageRequest, cmd)
 
 	return
 }
 
-func (m *Distributed) UpdateMessage(ctx context.Context, id, userID int64, name, title, text string) error {
+func (m *Distributed) UpdateMessage(ctx context.Context, id, userID int64, name, title, text string) (err error) {
 	if !m.isLeader() {
 		return nil
 	}
 
 	logger.Debugw("update search message", "id", id, "user_id", userID, "name", name, "title", title, "text", text)
 
-	cmd, err := proto.Marshal(&UpdateCommand{
+	cmd, err := proto.Marshal(&UpdateMessageCommand{
 		Id:      id,
 		Text:    text,
 		Title:   title,
@@ -104,22 +101,19 @@ func (m *Distributed) UpdateMessage(ctx context.Context, id, userID int64, name,
 		return err
 	}
 
-	_, err = m.apply(ctx, UpdateRequest, cmd)
-	if err != nil {
-		return nil
-	}
+	_, err = m.apply(ctx, UpdateMessageRequest, cmd)
 
-	return nil
+	return
 }
 
-func (m *Distributed) PublishMessages(ctx context.Context, ids []int64, userID int64) error {
+func (m *Distributed) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
 	if !m.isLeader() {
 		return nil
 	}
 
 	logger.Debugw("publish search messages", "ids", ids, "user_id", userID)
 
-	cmd, err := proto.Marshal(&PublishCommand{
+	cmd, err := proto.Marshal(&PublishMessagesCommand{
 		Ids:     ids,
 		UserId:  userID,
 	})
@@ -127,19 +121,19 @@ func (m *Distributed) PublishMessages(ctx context.Context, ids []int64, userID i
 		return err
 	}
 
-	_, err = m.apply(ctx, PublishRequest, cmd)
+	_, err = m.apply(ctx, PublishMessagesRequest, cmd)
 
-	return nil
+	return
 }
 
-func (m *Distributed) PrivateMessages(ctx context.Context, ids []int64, userID int64) error {
+func (m *Distributed) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
 	if !m.isLeader() {
 		return nil
 	}
 
 	logger.Debugw("private search messages", "ids", ids, "user_id", userID)
 
-	cmd, err := proto.Marshal(&PrivateCommand{
+	cmd, err := proto.Marshal(&PrivateMessagesCommand{
 		Ids:     ids,
 		UserId:  userID,
 	})
@@ -147,43 +141,134 @@ func (m *Distributed) PrivateMessages(ctx context.Context, ids []int64, userID i
 		return err
 	}
 
-	_, err = m.apply(ctx, PrivateRequest, cmd)
+	_, err = m.apply(ctx, PrivateMessagesRequest, cmd)
 
-	return nil
+	return
 }
 
 func (m *Distributed) SaveThread(ctx context.Context, id, userID, parentID int64, name, description string, private bool) (err error) {
+	if !m.isLeader() {
+		return nil
+	}
+
 	logger.Debugw("save thread", "id", id, "user_id", userID, "parent_id", parentID, "name", name, "description", description, "private", private)
+
+	cmd, err := proto.Marshal(&AppendThreadCommand{
+		Id:          id,
+		Name:        name,
+		UserId:      userID,
+		ParentId:    parentID,
+		Description: description,
+		Private:     private,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = m.apply(ctx, AppendThreadRequest, cmd)
 
 	return
 }
 
 func (m *Distributed) DeleteThread(ctx context.Context, id, userID int64) (err error) {
+	if !m.isLeader() {
+		return nil
+	}
+
 	logger.Debugw("delete thread", "id", id, "user_id", userID)
+
+	cmd, err := proto.Marshal(&DeleteThreadCommand{
+		UserId:   userID,
+		Id:       id,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = m.apply(ctx, DeleteThreadRequest, cmd)
 
 	return
 }
 
 func (m *Distributed) UpdateThread(ctx context.Context, id, userID int64, name, description string) (err error) {
+	if !m.isLeader() {
+		return nil
+	}
+
 	logger.Debugw("update thread", "id", id, "user_id", userID, "name", name, "description", description)
+
+	cmd, err := proto.Marshal(&UpdateThreadCommand{
+		Id:          id,
+		Description: description,
+		Name:        name,
+		UserId:      userID,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = m.apply(ctx, UpdateThreadRequest, cmd)
 
 	return
 }
 
 func (m *Distributed) ChangeThreadParent(ctx context.Context, id, userID, parentID int64) (err error) {
+	if !m.isLeader() {
+		return nil
+	}
+
 	logger.Debugw("change thread parent", "id", id, "user_id", userID, "parent_id", parentID)
+
+	cmd, err := proto.Marshal(&ChangeThreadParentCommand{
+		Id:          id,
+		UserId:      userID,
+		ParentId:    parentID,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = m.apply(ctx, ChangeThreadParentRequest, cmd)
 
 	return
 }
 
 func (m *Distributed) PrivateThread(ctx context.Context, id, userID int64) (err error) {
+	if !m.isLeader() {
+		return nil
+	}
+
 	logger.Debugw("private thread", "id", id, "user_id", userID)
+
+	cmd, err := proto.Marshal(&PrivateThreadCommand{
+		Id:      id,
+		UserId:  userID,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = m.apply(ctx, PrivateThreadRequest, cmd)
 
 	return
 }
 
 func (m *Distributed) PublishThread(ctx context.Context, id, userID int64) (err error) {
+	if !m.isLeader() {
+		return nil
+	}
+
 	logger.Debugw("publish thread", "id", id, "user_id", userID)
+
+	cmd, err := proto.Marshal(&PublishThreadCommand{
+		Id:      id,
+		UserId:  userID,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = m.apply(ctx, PublishThreadRequest, cmd)
 
 	return
 }
@@ -192,3 +277,5 @@ func (m *Distributed) SearchMessages(ctx context.Context, userID int64, substr s
 	logger.Debugw("search messages", "user_id", userID, "substr", substr, "thread_id", threadID, "public", public)
 	return m.messagesRepo.SearchMessages(ctx, userID, substr, threadID, public)
 }
+
+// TODO: search threads

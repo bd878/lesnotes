@@ -3,9 +3,16 @@ package distributed
 type RequestType uint16
 
 const (
-	AppendRequest RequestType = iota
-	UpdateRequest
-	DeleteRequest
-	PublishRequest
-	PrivateRequest
+	AppendMessageRequest RequestType = iota
+	UpdateMessageRequest
+	DeleteMessageRequest
+	PublishMessagesRequest
+	PrivateMessagesRequest
+
+	AppendThreadRequest
+	UpdateThreadRequest
+	DeleteThreadRequest
+	ChangeThreadParentRequest
+	PublishThreadRequest
+	PrivateThreadRequest
 )

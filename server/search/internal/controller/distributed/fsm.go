@@ -33,6 +33,12 @@ type FilesRepository interface {
 }
 
 type ThreadsRepository interface {
+	SaveThread(ctx context.Context, id, userID, parentID int64, name, description string, private bool) error
+	UpdateThread(ctx context.Context, id, userID int64, name, description string) error
+	DeleteThread(ctx context.Context, id, userID int64) error
+	ChangeThreadParent(ctx context.Context, id, userID, parentID int64) error
+	PublishThread(ctx context.Context, id, userID int64) error
+	PrivateThread(ctx context.Context, id, userID int64) error
 	Truncate(ctx context.Context) (err error)
 	Dump(ctx context.Context, writer io.Writer) (err error)
 	Restore(ctx context.Context, reader io.Reader) (err error)
@@ -50,78 +56,95 @@ func (f *fsm) Apply(record *raft.Log) interface{} {
 	buf := record.Data
 	reqType := RequestType(buf[0])
 	switch reqType {
-	case AppendRequest:
-		return f.applyAppend(buf[1:])
-	case UpdateRequest:
-		return f.applyUpdate(buf[1:])
-	case DeleteRequest:
-		return f.applyDelete(buf[1:])
-	case PublishRequest:
-		return f.applyPublish(buf[1:])
-	case PrivateRequest:
-		return f.applyPrivate(buf[1:])
+	case AppendMessageRequest:
+		return f.applyAppendMessage(buf[1:])
+	case UpdateMessageRequest:
+		return f.applyUpdateMessage(buf[1:])
+	case DeleteMessageRequest:
+		return f.applyDeleteMessage(buf[1:])
+	case PublishMessagesRequest:
+		return f.applyPublishMessages(buf[1:])
+	case PrivateMessagesRequest:
+		return f.applyPrivateMessages(buf[1:])
 	default:
 		logger.Errorw("unknown request type", "type", reqType)
 	}
 	return nil
 }
 
-func (f *fsm) applyAppend(raw []byte) interface{} {
-	var cmd AppendCommand
+func (f *fsm) applyAppendMessage(raw []byte) interface{} {
+	var cmd AppendMessageCommand
 	proto.Unmarshal(raw, &cmd)
 
-	err := f.messagesRepo.SaveMessage(context.Background(), cmd.Id, cmd.UserId, cmd.Name, cmd.Title, cmd.Text, cmd.Private)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return f.messagesRepo.SaveMessage(context.Background(), cmd.Id, cmd.UserId, cmd.Name, cmd.Title, cmd.Text, cmd.Private)
 }
 
-func (f *fsm) applyUpdate(raw []byte) interface{} {
-	var cmd UpdateCommand
+func (f *fsm) applyUpdateMessage(raw []byte) interface{} {
+	var cmd UpdateMessageCommand
 	proto.Unmarshal(raw, &cmd)
 
-	err := f.messagesRepo.UpdateMessage(context.Background(), cmd.Id, cmd.UserId, cmd.Name, cmd.Title, cmd.Text)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return f.messagesRepo.UpdateMessage(context.Background(), cmd.Id, cmd.UserId, cmd.Name, cmd.Title, cmd.Text)
 }
 
-func (f *fsm) applyDelete(raw []byte) interface{} {
-	var cmd DeleteCommand
+func (f *fsm) applyDeleteMessage(raw []byte) interface{} {
+	var cmd DeleteMessageCommand
 	proto.Unmarshal(raw, &cmd)
 
-	err := f.messagesRepo.DeleteMessage(context.Background(), cmd.Id, cmd.UserId)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return f.messagesRepo.DeleteMessage(context.Background(), cmd.Id, cmd.UserId)
 }
 
-func (f *fsm) applyPublish(raw []byte) interface{} {
-	var cmd PublishCommand
+func (f *fsm) applyPublishMessages(raw []byte) interface{} {
+	var cmd PublishMessagesCommand
 	proto.Unmarshal(raw, &cmd)
 
-	err := f.messagesRepo.PublishMessages(context.Background(), cmd.Ids, cmd.UserId)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return f.messagesRepo.PublishMessages(context.Background(), cmd.Ids, cmd.UserId)
 }
 
-func (f *fsm) applyPrivate(raw []byte) interface{} {
-	var cmd PrivateCommand
+func (f *fsm) applyPrivateMessages(raw []byte) interface{} {
+	var cmd PrivateMessagesCommand
 	proto.Unmarshal(raw, &cmd)
 
-	err := f.messagesRepo.PrivateMessages(context.Background(), cmd.Ids, cmd.UserId)
-	if err != nil {
-		return err
-	}
+	return f.messagesRepo.PrivateMessages(context.Background(), cmd.Ids, cmd.UserId)
+}
 
-	return nil
+func (f *fsm) applyAppendThread(raw []byte) interface{} {
+	var cmd AppendThreadCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.threadsRepo.SaveThread(context.Background(), cmd.Id, cmd.UserId, cmd.ParentId, cmd.Name, cmd.Description, cmd.Private)
+}
+
+func (f *fsm) applyUpdateThread(raw []byte) interface{} {
+	var cmd UpdateThreadCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.threadsRepo.UpdateThread(context.Background(), cmd.Id, cmd.UserId, cmd.Name, cmd.Description)
+}
+
+func (f *fsm) applyDeleteThread(raw []byte) interface{} {
+	var cmd DeleteThreadCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.threadsRepo.DeleteThread(context.Background(), cmd.Id, cmd.UserId)
+}
+
+func (f *fsm) applyChangeThreadParent(raw []byte) interface{} {
+	var cmd ChangeThreadParentCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.threadsRepo.ChangeThreadParent(context.Background(), cmd.Id, cmd.UserId, cmd.ParentId)
+}
+
+func (f *fsm) applyPublishThread(raw []byte) interface{} {
+	var cmd PublishThreadCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.threadsRepo.PublishThread(context.Background(), cmd.Id, cmd.UserId)
+}
+
+func (f *fsm) applyPrivateThread(raw []byte) interface{} {
+	var cmd PrivateThreadCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.threadsRepo.PrivateThread(context.Background(), cmd.Id, cmd.UserId)
 }

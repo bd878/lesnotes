@@ -23,9 +23,11 @@ CREATE TRIGGER updated_at_search_messages_trgr BEFORE UPDATE ON search.messages 
 CREATE TABLE IF NOT EXISTS search.threads
 (
 	id           bigint       UNIQUE NOT NULL,    -- thread id (aka message id)
+	user_id      bigint       NOT NULL,
 	parent_id    bigint       NOT NULL,           -- thread id (aka message id)
 	name         VARCHAR(256) UNIQUE NOT NULL,
 	description  TEXT         NOT NULL DEFAULT '',
+	private      bool         NOT NULL DEFAULT true,
 	created_at   timestamptz  NOT NULL DEFAULT NOW(),
 	updated_at   timestamptz  NOT NULL DEFAULT NOW(),
 	PRIMARY KEY(id)
