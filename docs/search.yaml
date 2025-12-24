@@ -14,6 +14,14 @@ paths:
         in: query
         type: string
         required: true
+      thread:
+        in: query
+        type: integer
+        required: false
+      public:
+        in: query
+        type: integer
+        required: false
     get:
       summary: Search messages by text
       description: |
@@ -166,6 +174,12 @@ components:
           query:
             type: string
             required: true
+          thread:
+            type: id
+            required: false
+          public:
+            type: integer
+            required: false
 
     searchOk:
       type: object

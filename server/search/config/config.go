@@ -19,4 +19,5 @@ type Config struct {
 	PGConn               string      `json:"pg_conn"`
 	MessagesTableName    string      `json:"messages_table_name"`
 	FilesTableName       string      `json:"files_table_name"`
+	ThreadsTableName     string      `json:"threads_table_name"`
 }

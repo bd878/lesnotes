@@ -33,7 +33,7 @@ type Distributed struct {
 	snapshotStore   raft.SnapshotStore
 }
 
-func New(conf Config, paymentsRepo PaymentsRepository, invoicesRepo InvoicesRepository) (*Distributed, error) {
+func New(conf Config, paymentsRepo PaymentsRepository, invoicesRepo InvoicesRepository) (m *Distributed, err error) {
 	if conf.RetainSnapshots == 0 {
 		conf.RetainSnapshots = 1
 	}
@@ -46,15 +46,15 @@ func New(conf Config, paymentsRepo PaymentsRepository, invoicesRepo InvoicesRepo
 		conf.NetworkTimeout = 10 * time.Second
 	}
 
-	m := &Distributed{
+	m = &Distributed{
 		paymentsRepo: paymentsRepo,
 		invoicesRepo: invoicesRepo,
 		conf:         conf,
 	}
-	if err := m.setupRaft(); err != nil {
-		return nil, err
-	}
-	return m, nil
+
+	err = m.setupRaft()
+
+	return
 }
 
 func (m *Distributed) setupRaft() error {

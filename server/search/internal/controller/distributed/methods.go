@@ -154,5 +154,5 @@ func (m *Distributed) PrivateMessages(ctx context.Context, ids []int64, userID i
 
 func (m *Distributed) SearchMessages(ctx context.Context, userID int64, substr string, threadID int64, public int) (list []*model.Message, err error) {
 	logger.Debugw("search messages", "user_id", userID, "substr", substr, "thread_id", threadID, "public", public)
-	return m.repo.SearchMessages(ctx, userID, substr, threadID, public)
+	return m.messagesRepo.SearchMessages(ctx, userID, substr, threadID, public)
 }

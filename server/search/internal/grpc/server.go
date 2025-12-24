@@ -33,6 +33,7 @@ type Config struct {
 	PGConn              string
 	MessagesTableName   string
 	FilesTableName      string
+	ThreadsTableName    string
 	NodeName            string
 	RaftLogLevel        string
 	RaftBootstrap       bool
@@ -102,8 +103,10 @@ func (s *Server) setupNats() (err error) {
 	return
 }
 
-func (s *Server) setupRaft() error {
-	repo := repository.New(s.pool, s.conf.MessagesTableName, s.conf.FilesTableName)
+func (s *Server) setupRaft() (err error) {
+	messagesRepo := repository.NewMessagesRepository(s.pool, s.conf.MessagesTableName)
+	filesRepo := repository.NewFilesRepository(s.pool, s.conf.FilesTableName)
+	threadsRepo := repository.NewThreadsRepository(s.pool, s.conf.ThreadsTableName)
 
 	raftLogLevel := hclog.Error.String()
 	switch s.conf.RaftLogLevel {
@@ -125,7 +128,7 @@ func (s *Server) setupRaft() error {
 		return bytes.Compare(b, []byte{byte(controller.RaftRPC)}) == 0
 	})
 
-	control, err := controller.New(controller.Config{
+	s.controller, err = controller.New(controller.Config{
 		Raft: raft.Config{
 			LocalID: raft.ServerID(s.conf.NodeName),
 			LogLevel: raftLogLevel,
@@ -134,14 +137,9 @@ func (s *Server) setupRaft() error {
 		Bootstrap:   s.conf.RaftBootstrap,
 		DataDir:     s.conf.DataPath,
 		Servers:     s.conf.RaftServers,
-	}, repo)
-	if err != nil {
-		return err
-	}
+	}, messagesRepo, filesRepo, threadsRepo)
 
-	s.controller = control
-
-	return nil
+	return
 }
 
 func (s *Server) setupStream() error {

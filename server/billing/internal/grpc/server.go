@@ -96,7 +96,7 @@ func (s *Server) setupNats() (err error) {
 	return
 }
 
-func (s *Server) setupRaft() error {
+func (s *Server) setupRaft() (err error) {
 	paymentsRepo := repository.NewPaymentsRepository(s.pool, s.conf.PaymentsTableName)
 	invoicesRepo := repository.NewInvoicesRepository(s.pool, s.conf.InvoicesTableName)
 
@@ -120,7 +120,7 @@ func (s *Server) setupRaft() error {
 		return bytes.Compare(b, []byte{byte(controller.RaftRPC)}) == 0
 	})
 
-	control, err := controller.New(controller.Config{
+	s.controller, err = controller.New(controller.Config{
 		Raft: raft.Config{
 			LocalID: raft.ServerID(s.conf.NodeName),
 			LogLevel: raftLogLevel,
@@ -130,13 +130,8 @@ func (s *Server) setupRaft() error {
 		DataDir:     s.conf.DataPath,
 		Servers:     s.conf.RaftServers,
 	}, paymentsRepo, invoicesRepo)
-	if err != nil {
-		return err
-	}
 
-	s.controller = control
-
-	return nil
+	return
 }
 
 func (s *Server) setupGRPC() error {

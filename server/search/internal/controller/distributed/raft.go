@@ -30,11 +30,13 @@ type Config struct {
 type Distributed struct {
 	conf            Config
 	raft            *raft.Raft
-	repo            Repository
 	snapshotStore   raft.SnapshotStore
+	messagesRepo    MessagesRepository
+	filesRepo       FilesRepository
+	threadsRepo     ThreadsRepository
 }
 
-func New(conf Config, repo Repository) (*Distributed, error) {
+func New(conf Config, messagesRepo MessagesRepository, filesRepo FilesRepository, threadsRepo ThreadsRepository) (m *Distributed, err error) {
 	if conf.RetainSnapshots == 0 {
 		conf.RetainSnapshots = 1
 	}
@@ -47,18 +49,24 @@ func New(conf Config, repo Repository) (*Distributed, error) {
 		conf.NetworkTimeout = 10 * time.Second
 	}
 
-	m := &Distributed{
-		repo:      repo,
-		conf:      conf,
+	m = &Distributed{
+		conf:          conf,
+		messagesRepo:  messagesRepo,
+		filesRepo:     filesRepo,
+		threadsRepo:   threadsRepo,
 	}
-	if err := m.setupRaft(); err != nil {
-		return nil, err
-	}
-	return m, nil
+
+	err = m.setupRaft()
+
+	return
 }
 
 func (m *Distributed) setupRaft() error {
-	fsm := &fsm{repo: m.repo}
+	fsm := &fsm{
+		messagesRepo: m.messagesRepo,
+		filesRepo:    m.filesRepo,
+		threadsRepo:  m.threadsRepo,
+	}
 
 	raftPath := filepath.Join(m.conf.DataDir, "raft")
 	if err := os.MkdirAll(raftPath, 0755); err != nil {

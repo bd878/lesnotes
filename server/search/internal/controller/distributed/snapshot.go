@@ -2,51 +2,328 @@ package distributed
 
 import (
 	"io"
+	"os"
+	"bufio"
+	"strings"
 	"context"
+	"archive/tar"
 
 	"github.com/hashicorp/raft"
 	"github.com/bd878/gallery/server/logger"
 )
 
+/**
+ * Merge two dumps into tar archive
+ */
+
 type snapshot struct {
-	reader io.ReadCloser
+	tarFile         *os.File
+	messagesFile    *os.File
+	filesFile       *os.File
+	threadsFile     *os.File
 }
 
 func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {
-	reader, err := f.repo.Dump(context.Background())
-	if err != nil {
-		if err2 := reader.Close(); err2 != nil {
-			logger.Errorw("failed to close snapshot reader", "error", err2)
-		}
+	var err error
 
+	s := &snapshot{}
+
+	s.messagesFile, err = os.CreateTemp("", "messages_*.bin")
+	if err != nil {
 		return nil, err
 	}
 
-	return &snapshot{reader}, nil
+	s.filesFile, err = os.CreateTemp("", "files_*.bin")
+	if err != nil {
+		return nil, err
+	}
+
+	s.threadsFile, err = os.CreateTemp("", "threads_*.bin")
+	if err != nil {
+		return nil, err
+	}
+
+	s.tarFile, err = os.CreateTemp("", "search_*.tar")
+	if err != nil {
+		return nil, err
+	}
+
+	filesBuf := bufio.NewWriter(s.filesFile)
+	defer filesBuf.Flush()
+
+	err = f.filesRepo.Dump(context.Background(), filesBuf)
+	if err != nil {
+		logger.Errorw("failed to dump files repo", "error", err)
+		return nil, err
+	}
+
+	messagesBuf := bufio.NewWriter(s.messagesFile)
+	defer messagesBuf.Flush()
+
+	err = f.messagesRepo.Dump(context.Background(), messagesBuf)
+	if err != nil {
+		logger.Errorw("failed to dump messages repo", "error", err)
+		return nil, err
+	}
+
+	threadsBuf := bufio.NewWriter(s.threadsFile)
+	defer threadsBuf.Flush()
+
+	err = f.threadsRepo.Dump(context.Background(), threadsBuf)
+	if err != nil {
+		logger.Errorw("failed to dump threads repo", "error", err)
+		return nil, err
+	}
+
+	return s, nil
 }
 
 func (f *fsm) Restore(reader io.ReadCloser) (err error) {
 	logger.Debugln("restoring fsm from snapshot")
-	err = f.repo.Truncate(context.Background())
-	if err != nil {
-		logger.Errorw("truncate returned error", "error", err)
+
+	tr := tar.NewReader(reader)
+
+	for {
+		hdr, err := tr.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+
+		if strings.Contains(hdr.Name, "messages") {
+			err = f.messagesRepo.Truncate(context.Background())
+			if err != nil {
+				logger.Errorw("messages repo truncate returned error", "error", err)
+				return err
+			}
+
+			err = f.messagesRepo.Restore(context.Background(), tr)
+			if err != nil {
+				return err
+			}
+		} else if strings.Contains(hdr.Name, "files") {
+			err = f.filesRepo.Truncate(context.Background())
+			if err != nil {
+				logger.Errorw("files repo truncate returned error", "error", err)
+				return err
+			}
+
+			err = f.filesRepo.Restore(context.Background(), tr)
+			if err != nil {
+				return err
+			}
+		} else if strings.Contains(hdr.Name, "threads") {
+			err = f.threadsRepo.Truncate(context.Background())
+			if err != nil {
+				logger.Errorw("threads repo truncate returned error", "error", err)
+				return err
+			}
+
+			err = f.threadsRepo.Restore(context.Background(), tr)
+			if err != nil {
+				return err
+			}
+		}
 	}
+
 	defer reader.Close()
-	return f.repo.Restore(context.Background(), reader)
+
+	return
 }
 
 func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
-	_, err = io.Copy(sink, s.reader)
-	defer sink.Cancel()
+	tarBuf := bufio.NewWriter(s.tarFile)
+	tw := tar.NewWriter(tarBuf)
+
+	// seek files
+	err = s.messagesFile.Sync()
 	if err != nil {
 		return
 	}
+
+	_, err = s.messagesFile.Seek(0, os.SEEK_SET)
+	if err != nil {
+		return
+	}
+
+	err = s.threadsFile.Sync()
+	if err != nil {
+		return
+	}
+
+	_, err = s.threadsFile.Seek(0, os.SEEK_SET)
+	if err != nil {
+		return
+	}
+
+	err = s.filesFile.Sync()
+	if err != nil {
+		return
+	}
+
+	_, err = s.filesFile.Seek(0, os.SEEK_SET)
+	if err != nil {
+		return
+	}
+
+	// write messages to tar
+	messagesSize, err := fileSize(s.messagesFile)
+	if err != nil {
+		return err
+	}
+
+	logger.Debugw("persisting", "messages size", messagesSize)
+
+	messagesHdr := &tar.Header{
+		Name: s.messagesFile.Name(),
+		Mode: 0600,
+		Size: messagesSize,
+	}
+
+	err = tw.WriteHeader(messagesHdr)
+	if err != nil {
+		return
+	}
+
+	n, err := io.Copy(tw, s.messagesFile)
+	if err != nil {
+		return
+	}
+
+	if err = tw.Flush(); err != nil {
+		return
+	}
+
+	logger.Debugw("copied messages bytes to tar writer", "bytes", n)
+
+	// write files to tar
+	filesSize, err := fileSize(s.filesFile)
+	if err != nil {
+		return err
+	}
+
+	logger.Debugw("persisting", "files size", filesSize)
+
+	filesHdr := &tar.Header{
+		Name: s.filesFile.Name(),
+		Mode: 0600,
+		Size: filesSize,
+	}
+
+	err = tw.WriteHeader(filesHdr)
+	if err != nil {
+		return
+	}
+
+	n, err = io.Copy(tw, s.filesFile)
+	if err != nil {
+		return
+	}
+
+	if err = tw.Flush(); err != nil {
+		return
+	}
+
+	logger.Debugw("copied files bytes to tar writer", "bytes", n)
+
+	// write threads to tar
+	threadsSize, err := fileSize(s.threadsFile)
+	if err != nil {
+		return err
+	}
+
+	logger.Debugw("persisting", "threads size", threadsSize)
+
+	threadsHdr := &tar.Header{
+		Name: s.threadsFile.Name(),
+		Mode: 0600,
+		Size: threadsSize,
+	}
+
+	err = tw.WriteHeader(threadsHdr)
+	if err != nil {
+		return
+	}
+
+	n, err = io.Copy(tw, s.threadsFile)
+	if err != nil {
+		return
+	}
+
+	if err = tw.Flush(); err != nil {
+		return
+	}
+
+	logger.Debugw("copied threads bytes to tar writer", "bytes", n)
+
+	// dump tar to sink
+	if err = tw.Close(); err != nil {
+		return
+	}
+
+	if err = tarBuf.Flush(); err != nil {
+		return
+	}
+
+	err = s.tarFile.Sync()
+	if err != nil {
+		return
+	}
+
+	_, err = s.tarFile.Seek(0, os.SEEK_SET)
+	if err != nil {
+		return
+	}
+
+	tarSize, err := fileSize(s.tarFile)
+	if err != nil {
+		return err
+	}
+
+	logger.Debugw("tar size", "bytes", tarSize)
+
+	n, err = io.Copy(sink, s.tarFile)
+	defer sink.Cancel()
+	if err != nil {
+		return err
+	}
+
+	logger.Debugw("persisting", "copied bytes", n)
 
 	return sink.Close()
 }
 
 func (s *snapshot) Release() {
-	if err := s.reader.Close(); err != nil {
-		logger.Errorw("failed to close snapshot reader", "error", err)
+	if err := os.Remove(s.tarFile.Name()); err != nil {
+		logger.Errorw("cannot remove tar file", "error", err)
 	}
+
+	if err := os.Remove(s.filesFile.Name()); err != nil {
+		logger.Errorw("cannot remove files file", "error", err)
+	}
+
+	if err := os.Remove(s.messagesFile.Name()); err != nil {
+		logger.Errorw("cannot remove messages file", "error", err)
+	}
+
+	if err := os.Remove(s.threadsFile.Name()); err != nil {
+		logger.Errorw("cannot remove threads file", "error", err)
+	}
+}
+
+/**
+ * Utils
+ */
+
+func fileSize(f *os.File) (size int64, err error) {
+	info, err := f.Stat()
+	if err != nil {
+		return 0, err
+	}
+
+	size = info.Size()
+
+	return
 }

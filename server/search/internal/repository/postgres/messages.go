@@ -10,21 +10,19 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/bd878/gallery/server/logger"
-	searchmodel "github.com/bd878/gallery/server/search/pkg/model"
+	search "github.com/bd878/gallery/server/search/pkg/model"
 )
 
-type Repository struct {
-	messagesTableName  string
-	filesTableName     string
-	pool               *pgxpool.Pool
+type MessagesRepository struct {
+	tableName        string
+	pool             *pgxpool.Pool
 }
 
-// TODO: split repo on messages and files, like billing invoices and payments
-func New(pool *pgxpool.Pool, messagesTableName, filesTableName string) *Repository {
-	return &Repository{messagesTableName, filesTableName, pool}
+func NewMessagesRepository(pool *pgxpool.Pool, tableName string) *MessagesRepository {
+	return &MessagesRepository{tableName: tableName, pool: pool}
 }
 
-func (r *Repository) SaveMessage(ctx context.Context, id, userID int64, name, title, text string, private bool) (err error) {
+func (r *MessagesRepository) SaveMessage(ctx context.Context, id, userID int64, name, title, text string, private bool) (err error) {
 	const query = "INSERT INTO %s(id, user_id, name, title, text, private) VALUES ($1, $2, $3, $4, $5, $6)"
 
 	var tx pgx.Tx
@@ -46,12 +44,12 @@ func (r *Repository) SaveMessage(ctx context.Context, id, userID int64, name, ti
 		}
 	}()
 
-	_, err = tx.Exec(ctx, r.messagesTable(query), id, userID, name, title, text, private)
+	_, err = tx.Exec(ctx, r.table(query), id, userID, name, title, text, private)
 
 	return nil
 }
 
-func (r *Repository) UpdateMessage(ctx context.Context, id, userID int64, newName, newTitle, newText string) (err error) {
+func (r *MessagesRepository) UpdateMessage(ctx context.Context, id, userID int64, newName, newTitle, newText string) (err error) {
 	const query = "UPDATE %s SET text = $3, title = $4, name = $5 WHERE user_id = $1 AND id = $2"
 	const selectQuery = "SELECT text, title, name FROM %s WHERE user_id = $1 AND id = $2"
 
@@ -76,7 +74,7 @@ func (r *Repository) UpdateMessage(ctx context.Context, id, userID int64, newNam
 
 	var text, title, name string
 
-	err = tx.QueryRow(ctx, r.messagesTable(selectQuery), userID, id).Scan(&text, &title, &name)
+	err = tx.QueryRow(ctx, r.table(selectQuery), userID, id).Scan(&text, &title, &name)
 	if err != nil {
 		return
 	}
@@ -93,7 +91,7 @@ func (r *Repository) UpdateMessage(ctx context.Context, id, userID int64, newNam
 		name = newName
 	}
 
-	_, err = tx.Exec(ctx, r.messagesTable(query), userID, id, text, title, name)
+	_, err = tx.Exec(ctx, r.table(query), userID, id, text, title, name)
 	if err != nil {
 		return
 	}
@@ -101,7 +99,7 @@ func (r *Repository) UpdateMessage(ctx context.Context, id, userID int64, newNam
 	return
 }
 
-func (r *Repository) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+func (r *MessagesRepository) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -122,7 +120,7 @@ func (r *Repository) PublishMessages(ctx context.Context, ids []int64, userID in
 	}()
 
 	for _, id := range ids {
-		_, err = tx.Exec(ctx, r.messagesTable("UPDATE %s SET private = false WHERE user_id = $1 AND id = $2"), userID, id)
+		_, err = tx.Exec(ctx, r.table("UPDATE %s SET private = false WHERE user_id = $1 AND id = $2"), userID, id)
 		if err != nil {
 			return
 		}
@@ -131,7 +129,7 @@ func (r *Repository) PublishMessages(ctx context.Context, ids []int64, userID in
 	return
 }
 
-func (r *Repository) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+func (r *MessagesRepository) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -152,7 +150,7 @@ func (r *Repository) PrivateMessages(ctx context.Context, ids []int64, userID in
 	}()
 
 	for _, id := range ids {
-		_, err = r.pool.Exec(ctx, r.messagesTable("UPDATE %s SET private = true WHERE user_id = $1 AND id = $2"), userID, id)
+		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = true WHERE user_id = $1 AND id = $2"), userID, id)
 		if err != nil {
 			return
 		}
@@ -161,7 +159,7 @@ func (r *Repository) PrivateMessages(ctx context.Context, ids []int64, userID in
 	return
 }
 
-func (r *Repository) DeleteMessage(ctx context.Context, id, userID int64) (err error) {
+func (r *MessagesRepository) DeleteMessage(ctx context.Context, id, userID int64) (err error) {
 	const query = "DELETE FROM %s WHERE id = $1 AND user_id = $2"
 
 	var tx pgx.Tx
@@ -183,12 +181,12 @@ func (r *Repository) DeleteMessage(ctx context.Context, id, userID int64) (err e
 		}
 	}()
 
-	_, err = tx.Exec(ctx, r.messagesTable(query), id, userID)
+	_, err = tx.Exec(ctx, r.table(query), id, userID)
 
 	return nil
 }
 
-func (r *Repository) SearchMessages(ctx context.Context, userID int64, substr string, threadID int64, public int) (list []*searchmodel.Message, err error) {
+func (r *MessagesRepository) SearchMessages(ctx context.Context, userID int64, substr string, threadID int64, public int) (list []*search.Message, err error) {
 	// TODO: filter by thread_id
 
 	var tx pgx.Tx
@@ -220,9 +218,9 @@ func (r *Repository) SearchMessages(ctx context.Context, userID int64, substr st
 			private = false
 		}
 
-		rows, err = tx.Query(ctx, r.messagesTable("SELECT id, name, title, text, private FROM %s WHERE user_id = $1 AND private = $2 AND name || ' ' || title || ' ' || text ILIKE $3"), userID, private, "%" + substr + "%")
+		rows, err = tx.Query(ctx, r.table("SELECT id, name, title, text, private FROM %s WHERE user_id = $1 AND private = $2 AND name || ' ' || title || ' ' || text ILIKE $3"), userID, private, "%" + substr + "%")
 	} else {
-		rows, err = tx.Query(ctx, r.messagesTable("SELECT id, name, title, text, private FROM %s WHERE user_id = $1 AND name || ' ' || title || ' ' || text ILIKE $2"), userID, "%" + substr + "%")
+		rows, err = tx.Query(ctx, r.table("SELECT id, name, title, text, private FROM %s WHERE user_id = $1 AND name || ' ' || title || ' ' || text ILIKE $2"), userID, "%" + substr + "%")
 	}
 
 	defer rows.Close()
@@ -230,9 +228,9 @@ func (r *Repository) SearchMessages(ctx context.Context, userID int64, substr st
 		return
 	}
 
-	list = make([]*searchmodel.Message, 0)
+	list = make([]*search.Message, 0)
 	for rows.Next() {
-		message := &searchmodel.Message{
+		message := &search.Message{
 			UserID: userID,
 		}
 
@@ -247,57 +245,48 @@ func (r *Repository) SearchMessages(ctx context.Context, userID int64, substr st
 	return
 }
 
-func (r *Repository) Truncate(ctx context.Context) (err error) {
+
+func (r *MessagesRepository) Truncate(ctx context.Context) (err error) {
 	logger.Debugln("truncating table")
-	_, err = r.pool.Exec(ctx, r.messagesTable("TRUNCATE TABLE %s"))
+	_, err = r.pool.Exec(ctx, r.table("TRUNCATE TABLE %s"))
 	return
 }
 
-func (r *Repository) Dump(ctx context.Context) (reader io.ReadCloser, err error) {
-	var (
-		writer io.WriteCloser
-		conn   *pgxpool.Conn
-	)
+func (r *MessagesRepository) Dump(ctx context.Context, writer io.Writer) (err error) {
+	var conn *pgxpool.Conn
 
-	query := r.messagesTable("COPY %s TO STDOUT BINARY")
-
-	reader, writer = io.Pipe()
+	logger.Debugln("dumping invoices repo")
 
 	conn, err = r.pool.Acquire(ctx)
+	defer conn.Release()
 	if err != nil {
-		conn.Release()
 		return
 	}
 
-	go func(ctx context.Context, query string, conn *pgxpool.Conn, writer io.WriteCloser) {
-		_, err := conn.Conn().PgConn().CopyTo(ctx, writer, query)
-		defer writer.Close()
-		defer conn.Release()
-		if err != nil {
-			logger.Errorw("failed to dump", "error", err)
-		}
-	}(ctx, query, conn, writer)
+	// will block, not concurrent safe
+	_, err = conn.Conn().PgConn().CopyTo(ctx, writer, r.table("COPY %s TO STDOUT BINARY"))
 
 	return
 }
 
-func (r *Repository) Restore(ctx context.Context, reader io.ReadCloser) (err error) {
+func (r *MessagesRepository) Restore(ctx context.Context, reader io.Reader) (err error) {
 	var conn *pgxpool.Conn
 
-	query := r.messagesTable("COPY %s FROM STDIN BINARY")
+	logger.Debugln("restoring invoices repo")
+
+	query := r.table("COPY %s FROM STDIN BINARY")
 
 	conn, err = r.pool.Acquire(ctx) 
+	defer conn.Release()
 	if err != nil {
-		conn.Release()
 		return
 	}
 
 	_, err = conn.Conn().PgConn().CopyFrom(ctx, reader, query)
-	defer conn.Release()
 
 	return
 }
 
-func (r Repository) messagesTable(query string) string {
-	return fmt.Sprintf(query, r.messagesTableName)
+func (r MessagesRepository) table(query string) string {
+	return fmt.Sprintf(query, r.tableName)
 }

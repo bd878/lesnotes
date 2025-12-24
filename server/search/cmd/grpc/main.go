@@ -41,6 +41,7 @@ func main() {
 		DataPath:              cfg.DataPath,
 		MessagesTableName:     cfg.MessagesTableName,
 		FilesTableName:        cfg.FilesTableName,
+		ThreadsTableName:      cfg.ThreadsTableName,
 		RaftServers:           cfg.RaftServers,
 		SerfAddr:              cfg.SerfAddr,
 		SerfJoinAddrs:         cfg.SerfJoinAddrs,
