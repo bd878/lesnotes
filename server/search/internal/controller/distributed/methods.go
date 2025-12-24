@@ -152,6 +152,42 @@ func (m *Distributed) PrivateMessages(ctx context.Context, ids []int64, userID i
 	return nil
 }
 
+func (m *Distributed) SaveThread(ctx context.Context, id, userID, parentID int64, name, description string, private bool) (err error) {
+	logger.Debugw("save thread", "id", id, "user_id", userID, "parent_id", parentID, "name", name, "description", description, "private", private)
+
+	return
+}
+
+func (m *Distributed) DeleteThread(ctx context.Context, id, userID int64) (err error) {
+	logger.Debugw("delete thread", "id", id, "user_id", userID)
+
+	return
+}
+
+func (m *Distributed) UpdateThread(ctx context.Context, id, userID int64, name, description string) (err error) {
+	logger.Debugw("update thread", "id", id, "user_id", userID, "name", name, "description", description)
+
+	return
+}
+
+func (m *Distributed) ChangeThreadParent(ctx context.Context, id, userID, parentID int64) (err error) {
+	logger.Debugw("change thread parent", "id", id, "user_id", userID, "parent_id", parentID)
+
+	return
+}
+
+func (m *Distributed) PrivateThread(ctx context.Context, id, userID int64) (err error) {
+	logger.Debugw("private thread", "id", id, "user_id", userID)
+
+	return
+}
+
+func (m *Distributed) PublishThread(ctx context.Context, id, userID int64) (err error) {
+	logger.Debugw("publish thread", "id", id, "user_id", userID)
+
+	return
+}
+
 func (m *Distributed) SearchMessages(ctx context.Context, userID int64, substr string, threadID int64, public int) (list []*model.Message, err error) {
 	logger.Debugw("search messages", "user_id", userID, "substr", substr, "thread_id", threadID, "public", public)
 	return m.messagesRepo.SearchMessages(ctx, userID, substr, threadID, public)

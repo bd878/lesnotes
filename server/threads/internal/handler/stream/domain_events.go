@@ -62,7 +62,7 @@ func (h domainHandler[T]) onThreadCreated(ctx context.Context, event ddd.Event) 
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.ThreadsChannel, am.NewRawMessage(event.ID(), events.ThreadCreatedEvent, data))
+	return h.publisher.Publish(ctx, events.MessagesChannel, am.NewRawMessage(event.ID(), events.ThreadCreatedEvent, data))
 }
 
 func (h domainHandler[T]) onThreadDeleted(ctx context.Context, event ddd.Event) error {
@@ -75,7 +75,7 @@ func (h domainHandler[T]) onThreadDeleted(ctx context.Context, event ddd.Event) 
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.ThreadsChannel, am.NewRawMessage(event.ID(), events.ThreadDeletedEvent, data))	
+	return h.publisher.Publish(ctx, events.MessagesChannel, am.NewRawMessage(event.ID(), events.ThreadDeletedEvent, data))	
 }
 
 func (h domainHandler[T]) onThreadPrivated(ctx context.Context, event ddd.Event) error {
@@ -88,7 +88,7 @@ func (h domainHandler[T]) onThreadPrivated(ctx context.Context, event ddd.Event)
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.ThreadsChannel, am.NewRawMessage(event.ID(), events.ThreadPrivatedEvent, data))	
+	return h.publisher.Publish(ctx, events.MessagesChannel, am.NewRawMessage(event.ID(), events.ThreadPrivatedEvent, data))	
 }
 
 func (h domainHandler[T]) onThreadUpdated(ctx context.Context, event ddd.Event) error {
@@ -103,7 +103,7 @@ func (h domainHandler[T]) onThreadUpdated(ctx context.Context, event ddd.Event) 
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.ThreadsChannel, am.NewRawMessage(event.ID(), events.ThreadUpdatedEvent, data))	
+	return h.publisher.Publish(ctx, events.MessagesChannel, am.NewRawMessage(event.ID(), events.ThreadUpdatedEvent, data))	
 }
 
 func (h domainHandler[T]) onThreadPublished(ctx context.Context, event ddd.Event) error {
@@ -116,7 +116,7 @@ func (h domainHandler[T]) onThreadPublished(ctx context.Context, event ddd.Event
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.ThreadsChannel, am.NewRawMessage(event.ID(), events.ThreadPublishedEvent, data))	
+	return h.publisher.Publish(ctx, events.MessagesChannel, am.NewRawMessage(event.ID(), events.ThreadPublishedEvent, data))	
 }
 
 func (h domainHandler[T]) onThreadParentChanged(ctx context.Context, event ddd.Event) error {
@@ -130,5 +130,5 @@ func (h domainHandler[T]) onThreadParentChanged(ctx context.Context, event ddd.E
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.ThreadsChannel, am.NewRawMessage(event.ID(), events.ThreadParentChangedEvent, data))		
+	return h.publisher.Publish(ctx, events.MessagesChannel, am.NewRawMessage(event.ID(), events.ThreadParentChangedEvent, data))		
 }

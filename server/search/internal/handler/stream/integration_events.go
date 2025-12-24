@@ -8,9 +8,10 @@ import (
 	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/api"
 	messageevents "github.com/bd878/gallery/server/messages/pkg/events"
+	threadsevents "github.com/bd878/gallery/server/threads/pkg/events"
 )
 
-type Controller interface {
+type MessagesController interface {
 	SaveMessage(ctx context.Context, id, userID int64, name, title, text string, private bool) error
 	UpdateMessage(ctx context.Context, id, userID int64, name, title, text string) error
 	PublishMessages(ctx context.Context, ids []int64, userID int64) error
@@ -18,18 +19,41 @@ type Controller interface {
 	DeleteMessage(ctx context.Context, id, userID int64) error
 }
 
+type ThreadsController interface {
+	SaveThread(ctx context.Context, id, userID, parentID int64, name, description string, private bool) error
+	DeleteThread(ctx context.Context, id, userID int64) error
+	UpdateThread(ctx context.Context, id, userID int64, name, description string) error
+	ChangeThreadParent(ctx context.Context, id, userID, parentID int64) error
+	PrivateThread(ctx context.Context, id, userID int64) error
+	PublishThread(ctx context.Context, id, userID int64) error
+}
+
 type integrationHandlers struct {
-	controller Controller
+	messages MessagesController
+	threads  ThreadsController
 }
 
 var _ am.RawMessageHandler = (*integrationHandlers)(nil)
 
-func NewIntegrationEventHandlers(controller Controller) am.RawMessageHandler {
-	return integrationHandlers{controller}
+func NewIntegrationEventHandlers(messages MessagesController, threads ThreadsController) am.RawMessageHandler {
+	return integrationHandlers{
+		messages: messages,
+		threads:  threads,
+	}
 }
 
 func RegisterIntegrationEventHandlers(subscriber am.RawMessageSubscriber, handlers am.RawMessageHandler) (err error) {
-	return subscriber.Subscribe(messageevents.MessagesChannel, handlers)
+	err = subscriber.Subscribe(messageevents.MessagesChannel, handlers)
+	if err != nil {
+		return
+	}
+
+	err = subscriber.Subscribe(threadsevents.MessagesChannel, handlers)
+	if err != nil {
+		return
+	}
+
+	return
 }
 
 func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingMessage) error {
@@ -46,6 +70,19 @@ func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingM
 		return h.handleMessagesPublish(ctx, msg)
 	case messageevents.MessagesPrivateEvent:
 		return h.handleMessagesPrivate(ctx, msg)
+
+	case threadsevents.ThreadCreatedEvent:
+		return h.handleThreadCreated(ctx, msg)
+	case threadsevents.ThreadDeletedEvent:
+		return h.handleThreadDeleted(ctx, msg)
+	case threadsevents.ThreadParentChangedEvent:
+		return h.handleThreadParentChanged(ctx, msg)
+	case threadsevents.ThreadUpdatedEvent:
+		return h.handleThreadUpdated(ctx, msg)
+	case threadsevents.ThreadPublishedEvent:
+		return h.handleThreadPublished(ctx, msg)
+	case threadsevents.ThreadPrivatedEvent:
+		return h.handleThreadPrivated(ctx, msg)
 	}
 
 	return nil
@@ -57,7 +94,7 @@ func (h integrationHandlers) handleMessageCreated(ctx context.Context, msg am.In
 		return err
 	}
 
-	return h.controller.SaveMessage(ctx, m.GetId(), m.GetUserId(), m.GetName(), m.GetTitle(), m.GetText(), m.GetPrivate())
+	return h.messages.SaveMessage(ctx, m.GetId(), m.GetUserId(), m.GetName(), m.GetTitle(), m.GetText(), m.GetPrivate())
 }
 
 func (h integrationHandlers) handleMessageDeleted(ctx context.Context, msg am.IncomingMessage) error {
@@ -66,7 +103,7 @@ func (h integrationHandlers) handleMessageDeleted(ctx context.Context, msg am.In
 		return err
 	}
 
-	return h.controller.DeleteMessage(ctx, m.GetId(), m.GetUserId())
+	return h.messages.DeleteMessage(ctx, m.GetId(), m.GetUserId())
 }
 
 func (h integrationHandlers) handleMessageUpdated(ctx context.Context, msg am.IncomingMessage) error {
@@ -75,7 +112,7 @@ func (h integrationHandlers) handleMessageUpdated(ctx context.Context, msg am.In
 		return err
 	}
 
-	return h.controller.UpdateMessage(ctx, m.GetId(), m.GetUserId(), m.GetName(), m.GetTitle(), m.GetText())
+	return h.messages.UpdateMessage(ctx, m.GetId(), m.GetUserId(), m.GetName(), m.GetTitle(), m.GetText())
 }
 
 func (h integrationHandlers) handleMessagesPublish(ctx context.Context, msg am.IncomingMessage) error {
@@ -84,7 +121,7 @@ func (h integrationHandlers) handleMessagesPublish(ctx context.Context, msg am.I
 		return err
 	}
 
-	return h.controller.PublishMessages(ctx, m.GetIds(), m.GetUserId())
+	return h.messages.PublishMessages(ctx, m.GetIds(), m.GetUserId())
 }
 
 func (h integrationHandlers) handleMessagesPrivate(ctx context.Context, msg am.IncomingMessage) error {
@@ -93,5 +130,59 @@ func (h integrationHandlers) handleMessagesPrivate(ctx context.Context, msg am.I
 		return err
 	}
 
-	return h.controller.PrivateMessages(ctx, m.GetIds(), m.GetUserId())
+	return h.messages.PrivateMessages(ctx, m.GetIds(), m.GetUserId())
+}
+
+func (h integrationHandlers) handleThreadCreated(ctx context.Context, msg am.IncomingMessage) error {
+	m := &api.ThreadCreated{}
+	if err := proto.Unmarshal(msg.Data(), m); err != nil {
+		return err
+	}
+
+	return h.threads.SaveThread(ctx, m.GetId(), m.GetUserId(), m.GetParentId(), m.GetName(), m.GetDescription(), m.GetPrivate())
+}
+
+func (h integrationHandlers) handleThreadDeleted(ctx context.Context, msg am.IncomingMessage) error {
+	m := &api.ThreadDeleted{}
+	if err := proto.Unmarshal(msg.Data(), m); err != nil {
+		return err
+	}
+
+	return h.threads.DeleteThread(ctx, m.GetId(), m.GetUserId())
+}
+
+func (h integrationHandlers) handleThreadUpdated(ctx context.Context, msg am.IncomingMessage) error {
+	m := &api.ThreadUpdated{}
+	if err := proto.Unmarshal(msg.Data(), m); err != nil {
+		return err
+	}
+
+	return h.threads.UpdateThread(ctx, m.GetId(), m.GetUserId(), m.GetName(), m.GetDescription())
+}
+
+func (h integrationHandlers) handleThreadParentChanged(ctx context.Context, msg am.IncomingMessage) error {
+	m := &api.ThreadCreated{}
+	if err := proto.Unmarshal(msg.Data(), m); err != nil {
+		return err
+	}
+
+	return h.threads.ChangeThreadParent(ctx, m.GetId(), m.GetUserId(), m.GetParentId())
+}
+
+func (h integrationHandlers) handleThreadPrivated(ctx context.Context, msg am.IncomingMessage) error {
+	m := &api.ThreadPrivated{}
+	if err := proto.Unmarshal(msg.Data(), m); err != nil {
+		return err
+	}
+
+	return h.threads.PrivateThread(ctx, m.GetId(), m.GetUserId())
+}
+
+func (h integrationHandlers) handleThreadPublished(ctx context.Context, msg am.IncomingMessage) error {
+	m := &api.ThreadPublished{}
+	if err := proto.Unmarshal(msg.Data(), m); err != nil {
+		return err
+	}
+
+	return h.threads.PublishThread(ctx, m.GetId(), m.GetUserId())
 }
