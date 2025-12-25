@@ -67,6 +67,18 @@ func (f *fsm) Apply(record *raft.Log) interface{} {
 		return f.applyPublishMessages(buf[1:])
 	case PrivateMessagesRequest:
 		return f.applyPrivateMessages(buf[1:])
+	case AppendThreadRequest:
+		return f.applyAppendThread(buf[1:])
+	case UpdateThreadRequest:
+		return f.applyUpdateThread(buf[1:])
+	case DeleteThreadRequest:
+		return f.applyDeleteThread(buf[1:])
+	case ChangeThreadParentRequest:
+		return f.applyChangeThreadParent(buf[1:])
+	case PublishThreadRequest:
+		return f.applyPublishThread(buf[1:])
+	case PrivateThreadRequest:
+		return f.applyPrivateThread(buf[1:])
 	default:
 		logger.Errorw("unknown request type", "type", reqType)
 	}
