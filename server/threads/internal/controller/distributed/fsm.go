@@ -6,7 +6,9 @@ import (
 
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
+	"github.com/bd878/gallery/server/ddd"
 	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/threads/internal/domain"
 	threads "github.com/bd878/gallery/server/threads/pkg/model"
 )
 
@@ -34,6 +36,7 @@ var _ raft.FSM = (*fsm)(nil)
 
 type fsm struct {
 	repo Repository
+	publisher       ddd.EventPublisher[ddd.Event]
 }
 
 func (f *fsm) Apply(record *raft.Log) interface{} {
@@ -63,8 +66,16 @@ func (f *fsm) applyAppend(raw []byte) interface{} {
 	proto.Unmarshal(raw, &cmd)
 
 	err := f.repo.AppendThread(context.Background(), cmd.Id, cmd.UserId, cmd.ParentId, cmd.NextId, cmd.PrevId, cmd.Name, cmd.Description, cmd.Private)
+	if err != nil {
+		return err
+	}
 
-	return err
+	event, err := domain.CreateThread(cmd.Id, cmd.UserId, cmd.ParentId, cmd.Name, cmd.Description, cmd.Private)
+	if err != nil {
+		return err
+	}
+
+	return f.publisher.Publish(context.Background(), event)
 }
 
 func (f *fsm) applyReorder(raw []byte) interface{} {
@@ -74,10 +85,22 @@ func (f *fsm) applyReorder(raw []byte) interface{} {
 	logger.Debugln("apply reorder")
 
 	err := f.repo.ReorderThread(context.Background(), cmd.Id, cmd.UserId, cmd.ParentId, cmd.NextId, cmd.PrevId)
+	if err != nil {
+		return err
+	}
 
 	logger.Debugw("repo reorder thread error", "error", err)
 
-	return err
+	if cmd.ParentId != -1 {
+		event, err := domain.ChangeThreadParent(cmd.Id, cmd.UserId, cmd.ParentId)
+		if err != nil {
+			return err
+		}
+
+		return f.publisher.Publish(context.Background(), event)
+	}
+
+	return nil
 }
 
 func (f *fsm) applyUpdate(raw []byte) interface{} {
@@ -85,8 +108,16 @@ func (f *fsm) applyUpdate(raw []byte) interface{} {
 	proto.Unmarshal(raw, &cmd)
 
 	err := f.repo.UpdateThread(context.Background(), cmd.Id, cmd.UserId, cmd.Name, cmd.Description)
+	if err != nil {
+		return err
+	}
 
-	return err
+	event, err := domain.UpdateThread(cmd.Id, cmd.UserId, cmd.Name, cmd.Description)
+	if err != nil {
+		return err
+	}
+
+	return f.publisher.Publish(context.Background(), event)
 }
 
 func (f *fsm) applyDelete(raw []byte) interface{} {
@@ -94,8 +125,16 @@ func (f *fsm) applyDelete(raw []byte) interface{} {
 	proto.Unmarshal(raw, &cmd)
 
 	err := f.repo.DeleteThread(context.Background(), cmd.Id, cmd.UserId)
+	if err != nil {
+		return err
+	}
 
-	return err
+	event, err := domain.DeleteThread(cmd.Id, cmd.UserId)
+	if err != nil {
+		return err
+	}
+
+	return f.publisher.Publish(context.Background(), event)
 }
 
 func (f *fsm) applyPublish(raw []byte) interface{} {
@@ -103,8 +142,16 @@ func (f *fsm) applyPublish(raw []byte) interface{} {
 	proto.Unmarshal(raw, &cmd)
 
 	err := f.repo.PublishThread(context.Background(), cmd.Id, cmd.UserId)
+	if err != nil {
+		return err
+	}
 
-	return err
+	event, err := domain.PublishThread(cmd.Id, cmd.UserId)
+	if err != nil {
+		return err
+	}
+
+	return f.publisher.Publish(context.Background(), event)
 }
 
 func (f *fsm) applyPrivate(raw []byte) interface{} {
@@ -112,6 +159,14 @@ func (f *fsm) applyPrivate(raw []byte) interface{} {
 	proto.Unmarshal(raw, &cmd)
 
 	err := f.repo.PrivateThread(context.Background(), cmd.Id, cmd.UserId)
+	if err != nil {
+		return err
+	}
 
-	return err
+	event, err := domain.PrivateThread(cmd.Id, cmd.UserId)
+	if err != nil {
+		return err
+	}
+
+	return f.publisher.Publish(context.Background(), event)
 }

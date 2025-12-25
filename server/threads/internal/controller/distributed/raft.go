@@ -61,7 +61,7 @@ func New(conf Config, repo Repository, publisher ddd.EventPublisher[ddd.Event]) 
 }
 
 func (m *DistributedThreads) setupRaft(log *logger.Logger) error {
-	fsm := &fsm{repo: m.repo}
+	fsm := &fsm{repo: m.repo, publisher: m.publisher}
 
 	raftPath := filepath.Join(m.conf.DataDir, "raft")
 	if err := os.MkdirAll(raftPath, 0755); err != nil {
