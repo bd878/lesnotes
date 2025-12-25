@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/bd878/gallery/server/logger"
+	search "github.com/bd878/gallery/server/search/pkg/model"
 )
 
 type ThreadsRepository struct {
@@ -25,6 +26,53 @@ func (r *ThreadsRepository) SaveThread(ctx context.Context, id, userID, parentID
 	const query = "INSERT INTO %s(id, user_id, parent_id, name, description, private) VALUES ($1, $2, $3, $4, $5, $6)"
 
 	_, err = r.pool.Exec(ctx, r.table(query), id, userID, parentID, name, description, private)
+
+	return
+}
+
+func (r *ThreadsRepository) SearchThreads(ctx context.Context, parentID, userID int64) (list []*search.Thread, err error) {
+	const query = "SELECT id, user_id FROM %s WHERE user_id = $1 AND parent_id = $2"
+
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			fmt.Fprintf(os.Stderr, "[SearchThreads]: rollback with error: %v\n", err)
+			err = tx.Rollback(ctx)
+		default:
+			err = tx.Commit(ctx)
+		}
+	}()
+
+	var rows pgx.Rows
+
+	rows, err = r.pool.Query(ctx, r.table(query), userID, parentID)
+	defer rows.Close()
+	if err != nil {
+		return
+	}
+
+	list = make([]*search.Thread, 0)
+	for rows.Next() {
+		thread := &search.Thread{
+			UserID: userID,
+		}
+
+		err = rows.Scan(&thread.ID, &thread.Name, &thread.Description, &thread.Private)
+		if err != nil {
+			return
+		}
+
+		list = append(list, thread)
+	}
 
 	return
 }

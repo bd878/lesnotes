@@ -183,9 +183,7 @@ func (r *MessagesRepository) DeleteMessage(ctx context.Context, id, userID int64
 	return
 }
 
-func (r *MessagesRepository) SearchMessages(ctx context.Context, userID int64, substr string, threadID int64, public int) (list []*search.Message, err error) {
-	// TODO: filter by thread_id
-
+func (r *MessagesRepository) SearchMessages(ctx context.Context, userID int64, substr string, public int) (list []*search.Message, err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {

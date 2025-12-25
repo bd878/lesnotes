@@ -20,7 +20,7 @@ type MessagesRepository interface {
 	PrivateMessages(ctx context.Context, ids []int64, userID int64) error
 	PublishMessages(ctx context.Context, ids []int64, userID int64) error
 	DeleteMessage(ctx context.Context, id, userID int64) error
-	SearchMessages(ctx context.Context, userID int64, substr string, threadID int64, public int) (list []*searchmodel.Message, err error)
+	SearchMessages(ctx context.Context, userID int64, substr string, public int) (list []*searchmodel.Message, err error)
 	Truncate(ctx context.Context) (err error)
 	Dump(ctx context.Context, writer io.Writer) (err error)
 	Restore(ctx context.Context, reader io.Reader) (err error)
@@ -39,6 +39,7 @@ type ThreadsRepository interface {
 	ChangeThreadParent(ctx context.Context, id, userID, parentID int64) error
 	PublishThread(ctx context.Context, id, userID int64) error
 	PrivateThread(ctx context.Context, id, userID int64) error
+	SearchThreads(ctx context.Context, parentID, userID int64) (list []*searchmodel.Thread, err error)
 	Truncate(ctx context.Context) (err error)
 	Dump(ctx context.Context, writer io.Writer) (err error)
 	Restore(ctx context.Context, reader io.Reader) (err error)

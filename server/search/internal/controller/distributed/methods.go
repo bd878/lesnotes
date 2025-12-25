@@ -275,7 +275,34 @@ func (m *Distributed) PublishThread(ctx context.Context, id, userID int64) (err 
 
 func (m *Distributed) SearchMessages(ctx context.Context, userID int64, substr string, threadID int64, public int) (list []*model.Message, err error) {
 	logger.Debugw("search messages", "user_id", userID, "substr", substr, "thread_id", threadID, "public", public)
-	return m.messagesRepo.SearchMessages(ctx, userID, substr, threadID, public)
+
+	messages, err := m.messagesRepo.SearchMessages(ctx, userID, substr, public)
+	if err != nil {
+		return nil, err
+	}
+
+	if threadID == -1 && threadID == 0 {
+		return messages, nil
+	}
+
+	// get child threads
+	threads, err := m.threadsRepo.SearchThreads(ctx, threadID, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	list = make([]*model.Message, 0)
+
+	// filter by thread parent id
+	for _, msg := range messages {
+		for _, thread := range threads {
+			if msg.ID == thread.ID {
+				list = append(list, msg)
+			}
+		}
+	}
+
+	return
 }
 
 // TODO: search threads

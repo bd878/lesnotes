@@ -9,7 +9,6 @@ CREATE TABLE IF NOT EXISTS search.messages
 	text       TEXT         NOT NULL DEFAULT '',
 	title      TEXT         NOT NULL DEFAULT '',
 	private    bool         NOT NULL DEFAULT true,
-	thread_id  bigint       NOT NULL DEFAULT 0,
 	created_at timestamptz  NOT NULL DEFAULT NOW(),
 	updated_at timestamptz  NOT NULL DEFAULT NOW(),
 	PRIMARY KEY(id)
@@ -24,7 +23,7 @@ CREATE TABLE IF NOT EXISTS search.threads
 (
 	id           bigint       UNIQUE NOT NULL,    -- thread id (aka message id)
 	user_id      bigint       NOT NULL,
-	parent_id    bigint       NOT NULL,           -- thread id (aka message id)
+	parent_id    bigint       NOT NULL DEFAULT 0, -- thread id (aka message id)
 	name         VARCHAR(256) UNIQUE NOT NULL,
 	description  TEXT         NOT NULL DEFAULT '',
 	private      bool         NOT NULL DEFAULT true,
@@ -33,7 +32,7 @@ CREATE TABLE IF NOT EXISTS search.threads
 	PRIMARY KEY(id)
 );
 
-CREATE INDEX IF NOT EXISTS search_threads_text ON search.threads(text);
+CREATE INDEX IF NOT EXISTS search_threads_description ON search.threads(description);
 
 CREATE TRIGGER created_at_search_threads_trgr BEFORE UPDATE ON search.threads FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
 CREATE TRIGGER updated_at_search_threads_trgr BEFORE UPDATE ON search.threads FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
