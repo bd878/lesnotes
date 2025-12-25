@@ -25,6 +25,8 @@ func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.Event], hand
 	subscriber.Subscribe(handler,
 		domain.ThreadCreatedEvent,
 		domain.ThreadDeletedEvent,
+		domain.ThreadPublishEvent,
+		domain.ThreadPrivateEvent,
 		domain.ThreadParentChangedEvent,
 		domain.ThreadUpdatedEvent,
 	)

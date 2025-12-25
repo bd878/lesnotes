@@ -75,6 +75,8 @@ func (f *fsm) applyAppend(raw []byte) interface{} {
 		return err
 	}
 
+	logger.Debugln("publish create thread")
+
 	return f.publisher.Publish(context.Background(), event)
 }
 
@@ -92,6 +94,8 @@ func (f *fsm) applyReorder(raw []byte) interface{} {
 	logger.Debugw("repo reorder thread error", "error", err)
 
 	if cmd.ParentId != -1 {
+		logger.Debugln("publish reorder thread")
+
 		event, err := domain.ChangeThreadParent(cmd.Id, cmd.UserId, cmd.ParentId)
 		if err != nil {
 			return err
@@ -112,6 +116,8 @@ func (f *fsm) applyUpdate(raw []byte) interface{} {
 		return err
 	}
 
+	logger.Debugln("publish update thread")
+
 	event, err := domain.UpdateThread(cmd.Id, cmd.UserId, cmd.Name, cmd.Description)
 	if err != nil {
 		return err
@@ -128,6 +134,8 @@ func (f *fsm) applyDelete(raw []byte) interface{} {
 	if err != nil {
 		return err
 	}
+
+	logger.Debugln("publish delete thread")
 
 	event, err := domain.DeleteThread(cmd.Id, cmd.UserId)
 	if err != nil {
@@ -146,6 +154,8 @@ func (f *fsm) applyPublish(raw []byte) interface{} {
 		return err
 	}
 
+	logger.Debugln("publish publish thread")
+
 	event, err := domain.PublishThread(cmd.Id, cmd.UserId)
 	if err != nil {
 		return err
@@ -162,6 +172,8 @@ func (f *fsm) applyPrivate(raw []byte) interface{} {
 	if err != nil {
 		return err
 	}
+
+	logger.Debugln("publish private thread")
 
 	event, err := domain.PrivateThread(cmd.Id, cmd.UserId)
 	if err != nil {
