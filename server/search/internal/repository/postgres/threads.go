@@ -31,7 +31,7 @@ func (r *ThreadsRepository) SaveThread(ctx context.Context, id, userID, parentID
 }
 
 func (r *ThreadsRepository) SearchThreads(ctx context.Context, parentID, userID int64) (list []*search.Thread, err error) {
-	const query = "SELECT id, user_id FROM %s WHERE user_id = $1 AND parent_id = $2"
+	const query = "SELECT id, user_id, description, private FROM %s WHERE user_id = $1 AND parent_id = $2"
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
