@@ -37,6 +37,9 @@ func (r *Repository) ReadThread(ctx context.Context, id, userID int64, name stri
 		err = r.pool.QueryRow(ctx, r.table(query), name, userID).Scan(&thread.ID, &thread.ParentID, &thread.UserID, &thread.NextID, &thread.PrevID,
 			&thread.Name, &thread.Description, &thread.Private)
 	}
+	if err != nil {
+		return
+	}
 
 	var total int32
 	err = r.pool.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2"), thread.UserID, thread.ID).Scan(&total)

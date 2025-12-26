@@ -40,7 +40,7 @@ func (h *Handler) Read(ctx context.Context, req *api.ReadRequest) (resp *api.Thr
 
 	resp = threads.ThreadToProto(thread)
 
-	return resp, nil
+	return
 }
 
 func (h *Handler) List(ctx context.Context, req *api.ListRequest) (resp *api.ListResponse, err error) {
@@ -48,6 +48,9 @@ func (h *Handler) List(ctx context.Context, req *api.ListRequest) (resp *api.Lis
 	if err != nil {
 		return nil, err
 	}
+
+	// TODO: do not list child threads of private parent thread.
+	// But it should list all threads (public and private) of a public thread.
 
 	resp = &api.ListResponse{
 		List:       threads.MapThreadsToProto(threads.ThreadToProto, list),
