@@ -235,7 +235,7 @@ func (h *Handler) readMessageOrMessages(ctx context.Context, w http.ResponseWrit
 ) (err error) {
 	var ascending bool
 
-	if userID == users.PublicUserID && messageID == 0 && name == "" {
+	if userID == users.PublicUserID && messageID == 0 && name == "" && threadID == 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",

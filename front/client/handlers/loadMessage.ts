@@ -3,7 +3,7 @@ import * as is from '../third_party/is';
 
 async function loadMessage(ctx, next) {
 	const id = parseInt(ctx.query.id) || parseInt(ctx.params.id) || 0
-	const name = ctx.params.name || ""
+	const name = ctx.params.messageName || ""
 	const userID = parseInt(ctx.params.user) || 0
 	const token = ctx.state.token
 

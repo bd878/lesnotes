@@ -5,7 +5,7 @@ async function loadThread(ctx, next) {
 	const token = ctx.state.token
 	const userID = parseInt(ctx.params.user) || 0
 	const id = parseInt(ctx.query.id) || parseInt(ctx.params.id) || 0
-	const name = ctx.params.name || ""
+	const name = ctx.params.threadName || ""
 
 	console.log("--> loadThread")
 

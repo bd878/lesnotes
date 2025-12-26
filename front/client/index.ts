@@ -20,6 +20,7 @@ import loadThread from './handlers/loadThread';
 import loadSearch from './handlers/loadSearch';
 import formatText from './handlers/formatText';
 import loadSearchPath from './handlers/loadSearchPath';
+import loadThreadMessages from './handlers/loadThreadMessages';
 import getState from './handlers/getState';
 import expireToken from './handlers/expireToken';
 import redirectHome from './handlers/redirectHome';
@@ -46,6 +47,7 @@ import search from './routes/search/search';
 import xxx from './routes/xxx/xxx';
 import publicMessage from './routes/publicMessage/publicMessage';
 import publicThread from './routes/publicThread/publicThread';
+import publicThreadMessage from './routes/publicThreadMessage/publicThreadMessage';
 import threadEdit from './routes/threadEdit/threadEdit';
 import messageView from './routes/messageView/messageView';
 import threadView from './routes/threadView/threadView';
@@ -70,35 +72,36 @@ router
 		ctx.redirect('/')
 		ctx.status = 301
 	})
-	.get('main',             '/',                    etag, getState, getToken, notAuthed, main)
-	.get('login',            '/login',               etag, getState, getToken, notAuthed, login)
-	.get('logout',           '/logout',              etag, getState, expireToken, redirectLogin)
-	.get('signup',           '/signup',              etag, getState, getToken, notAuthed, signup)
-	.get('home',             '/home',                etag, getToken, getMe, getState, loadStack, home)
-	.get('message',          '/messages/:id',        etag, getToken, getMe, getState, loadStack, loadMessage, formatText, messageView)
-	.get('thread',           '/threads/:id',         etag, getToken, getMe, getState, loadStack, loadThread, formatText, threadView)
-	.get('editMessage',      '/editor/messages/:id', etag, getToken, getMe, getState, loadStack, loadMessage, formatText, messageEdit)
-	.get('editThread',       '/editor/threads/:id',  etag, getToken, getMe, getState, loadStack, loadThread, formatText, threadEdit)
-	.get('status',           '/status',              status, getState)
-	.get('search',           '/search',              etag, getToken, authed, getState, getMe, getSearchQuery, loadSearch, loadSearchPath, search)
-	.post('doLogin',         '/login',               etag, getState, validateLogin, redirectHome)
-	.post('doSignup',        '/signup',              etag, getState, validateSignup, redirectHome)
-	.post('doSearch',        '/search',              etag, getToken, authed, getState, getMe, getSearchForm, loadSearch, loadSearchPath, search)
-	.post('doDelete',        "/m/delete",            getToken, authed, getState, deleteMessage)
-	.post('doPublish',       "/m/publish",           getToken, authed, getState, publishMessage)
-	.post('doPrivate',       "/m/private",           getToken, authed, getState, privateMessage)
-	.post('doUpdate',        "/m/update",            getToken, authed, getState, updateMessage)
-	.post('doPublishThread', "/t/publish",           getToken, authed, getState, publishThread)
-	.post('doPrivateThread', "/t/private",           getToken, authed, getState, privateThread)
-	.post('doUpdateThread',  "/t/update",            getToken, authed, getState, updateThread)
-	.post('doSend',          "/send",                getToken, authed, getState, sendMessage)
-	.get("tgAuth",           "/tg_auth",             authTelegram)
-	.get("userMessage",      "/m/:user/:id",         etag, getState, getToken, loadMessage, publicMessage)
-	.get("userThread",       "/t/:user/:id",         etag, getState, getToken, loadThread, publicThread)
-	.get("publicMessage",    "/m/:name",             etag, getState, getToken, loadMessage, publicMessage)
-	.get("publicThread",     "/t/:name",             etag, getState, getToken, loadThread, publicThread)
-	.get("miniapp",          "/miniapp",             etag, getState, miniapp)
-	.get("any",              '/:any*',               getState, xxx)
+	.get("main",                   "/",                             etag, getState, getToken, notAuthed, main)
+	.get("login",                  "/login",                        etag, getState, getToken, notAuthed, login)
+	.get("logout",                 "/logout",                       etag, getState, expireToken, redirectLogin)
+	.get("signup",                 "/signup",                       etag, getState, getToken, notAuthed, signup)
+	.get("home",                   "/home",                         etag, getToken, getMe, getState, loadStack, home)
+	.get("message",                "/messages/:id",                 etag, getToken, getMe, getState, loadStack, loadMessage, formatText, messageView)
+	.get("thread",                 "/threads/:id",                  etag, getToken, getMe, getState, loadStack, loadThread, formatText, threadView)
+	.get("editMessage",            "/editor/messages/:id",          etag, getToken, getMe, getState, loadStack, loadMessage, formatText, messageEdit)
+	.get("editThread",             "/editor/threads/:id",           etag, getToken, getMe, getState, loadStack, loadThread, formatText, threadEdit)
+	.get("status",                 "/status",                       status, getState)
+	.get("search",                 "/search",                       etag, getToken, authed, getState, getMe, getSearchQuery, loadSearch, loadSearchPath, search)
+	.post("doLogin",               "/login",                        etag, getState, validateLogin, redirectHome)
+	.post("doSignup",              "/signup",                       etag, getState, validateSignup, redirectHome)
+	.post("doSearch",              "/search",                       etag, getToken, authed, getState, getMe, getSearchForm, loadSearch, loadSearchPath, search)
+	.post("doDelete",              "/m/delete",                     getToken, authed, getState, deleteMessage)
+	.post("doPublish",             "/m/publish",                    getToken, authed, getState, publishMessage)
+	.post("doPrivate",             "/m/private",                    getToken, authed, getState, privateMessage)
+	.post("doUpdate",              "/m/update",                     getToken, authed, getState, updateMessage)
+	.post("doPublishThread",       "/t/publish",                    getToken, authed, getState, publishThread)
+	.post("doPrivateThread",       "/t/private",                    getToken, authed, getState, privateThread)
+	.post("doUpdateThread",        "/t/update",                     getToken, authed, getState, updateThread)
+	.post("doSend",                "/send",                         getToken, authed, getState, sendMessage)
+	.get("tgAuth",                 "/tg_auth",                      authTelegram)
+	.get("userMessage",            "/m/:user/:id",                  etag, getState, getToken, loadMessage, publicMessage)
+	.get("userThread",             "/t/:user/:id",                  etag, getState, getToken, loadThread, loadThreadMessages, publicThread)
+	.get("publicMessage",          "/m/:messageName",               etag, getState, getToken, loadMessage, publicMessage)
+	.get("publicThread",           "/t/:threadName",                etag, getState, getToken, loadThread, loadThreadMessages, publicThread)
+	.get("publicThreadMessage",    "/t/:threadName/:messageName",   etag, getState, getToken, loadThread, loadThreadMessages, loadMessage, publicThreadMessage)
+	.get("miniapp",                "/miniapp",                      etag, getState, miniapp)
+	.get("any",                    "/:any*",                        getState, xxx)
 
 app.use(router.routes());
 

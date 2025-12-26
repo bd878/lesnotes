@@ -1,23 +1,19 @@
-import Builder from '../builder';
+import PublicThreadBuilder from './builder'
 
 async function publicThread(ctx) {
 	console.log("--> publicThread")
 
-	const builder = new ThreadBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const builder = new PublicThreadBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
+	await builder.addMessagesList(ctx.params.threadName /* TODO: use from load_path, ctx.thread.name is message name now, but thread name required */, ctx.state.messages)
 	await builder.addSettings()
+	await builder.addSidebar()
 	await builder.addFooter()
 
 	ctx.body = await builder.build()
 	ctx.status = 200
 
 	console.log("<-- publicThread")
-}
-
-class ThreadBuilder extends Builder {
-	async build() {
-		return "not implemented"
-	}
 }
 
 export default publicThread
