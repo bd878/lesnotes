@@ -17,6 +17,7 @@ class PublicThreadBuilder extends Builder {
 			settingsHeader: this.i18n("settingsHeader")
 		}, {
 			settings:       this.settings,
+			searchForm:     this.searchForm,
 		})
 	}
 
@@ -33,9 +34,24 @@ class PublicThreadBuilder extends Builder {
 
 		this.messagesList = mustache.render(template, {
 			messages:         messages,
+			limit:            limit,
+			isSingle:         () => messages.length == 1,
 			messageHref:      function() { return `/t/${name}/${this.name}` + search; },
 			prevPageHref:     function() { const params = new URLSearchParams(search); params.set(this.ID || 0, `${limit + this.offset}`); return path + "?" + params.toString(); },
 			nextPageHref:     function() { const params = new URLSearchParams(search); params.set(this.ID || 0, `${Math.max(0, this.offset - limit)}`); return path + "?" + params.toString(); },
+		})
+	}
+
+	searchForm = undefined;
+	async addSearch() {
+		const template = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/search_form/mobile/search_form.mustache' : 'templates/search_form/desktop/search_form.mustache'
+		)), { encoding: 'utf-8' });
+
+		this.searchForm = mustache.render(template, {
+			action:              "/search" + this.search,
+			searchPlaceholder:   this.i18n("searchPlaceholder"),
+			searchMessages:      this.i18n("search"),
 		})
 	}
 

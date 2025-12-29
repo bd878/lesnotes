@@ -1,24 +1,26 @@
 {{#stack}}
 	<details class="flex flex-col mb-4 small:mb-2 last:mb-0 min-w-full max-w-md" open>
 		<summary>
-			{{#ID}}
-				<a target="_self" href="{{threadHref}}" class="mb-2 underline">
-			{{/ID}}
-			{{^ID}}
-				<a target="_self" href="{{rootThreadHref}}" class="mb-2 underline">
-			{{/ID}}
-				{{#title}}
-					/{{title}}
-				{{/title}}
-				{{^title}}
-					{{#text}}
-						/{{text}}
-					{{/text}}
-					{{^text}}
-						/
-					{{/text}}
-				{{/title}}
-			</a>
+			{{#message}}
+				{{#ID}}
+					<a target="_self" href="{{threadHref}}" class="mb-2 underline">
+				{{/ID}}
+				{{^ID}}
+					<a target="_self" href="{{rootThreadHref}}" class="mb-2 underline">
+				{{/ID}}
+					{{#title}}
+						/{{title}}
+					{{/title}}
+					{{^title}}
+						{{#text}}
+							/{{text}}
+						{{/text}}
+						{{^text}}
+							/
+						{{/text}}
+					{{/title}}
+				</a>
+			{{/message}}
 		</summary>
 
 		<div class="overflow-y-auto">
@@ -70,15 +72,17 @@
 			</ul>
 		</div>
 
-		<div class="flex flex-row mt-2">
-			{{^isLastPage}}
-				<a href="{{prevPageHref}}" target="_self" data-offset="{{offset}}" data-limit="{{limit}}" data-thread-id="{{ID}}" data-direction="prev" class="flex justify-center bg-gray-300 dark:bg-slate-600 grow mr-2 last:mr-0 cursor-pointer"><-</a>
-			{{/isLastPage}}
+		{{#paging}}
+			<div class="flex flex-row mt-2">
+				{{^isLastPage}}
+					<a href="{{prevPageHref}}" target="_self" data-offset="{{offset}}" data-limit="{{limit}}" data-thread-id="{{ID}}" data-direction="prev" class="flex justify-center bg-gray-300 dark:bg-slate-600 grow mr-2 last:mr-0 cursor-pointer"><-</a>
+				{{/isLastPage}}
 
-			{{^isFirstPage}}
-				<a href="{{nextPageHref}}" target="_self" data-offset="{{offset}}" data-limit="{{limit}}" data-thread-id="{{ID}}" data-direction="next" class="flex justify-center bg-gray-300 dark:bg-slate-600 grow cursor-pointer">-></a>
-			{{/isFirstPage}}
-		</div>
+				{{^isFirstPage}}
+					<a href="{{nextPageHref}}" target="_self" data-offset="{{offset}}" data-limit="{{limit}}" data-thread-id="{{ID}}" data-direction="next" class="flex justify-center bg-gray-300 dark:bg-slate-600 grow cursor-pointer">-></a>
+				{{/isFirstPage}}
+			</div>
+		{{/paging}}
 	</details>
 {{/stack}}
 {{^stack}}

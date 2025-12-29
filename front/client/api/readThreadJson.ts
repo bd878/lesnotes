@@ -23,7 +23,7 @@ async function readThreadJson(token: string, user: number, id: number, name?: st
 		if (error.error) {
 			result.error = models.error(error)
 		} else {
-			result.thread = models.thread(response.threads[0])
+			result.thread = models.thread(response.thread)
 		}
 	} catch (e) {
 		result.error.error   = true

@@ -70,8 +70,7 @@ type (
 	}
 
 	ReadThreadResponse struct {
-		// TODO: count, offset, total, is_last_page...
-		Threads     []*Thread    `json:"threads"`
+		Thread      *Thread      `json:"thread"`
 		Description string       `json:"description"`
 	}
 

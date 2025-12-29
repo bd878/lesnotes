@@ -114,7 +114,6 @@ func (s *Controller) SaveMessage(ctx context.Context, id int64, text, title stri
 		Title:    title,
 		Name:     name,
 		FileIDs:  fileIDs,
-		ThreadID: threadID,
 		UserID:   userID,
 		Private:  private,
 	}

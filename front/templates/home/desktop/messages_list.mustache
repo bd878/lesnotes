@@ -10,28 +10,30 @@
 				{{/parentID}}
 			{{/isRoot}}
 
-			{{#ID}}
-				<a target="_self" href="{{viewThreadHref}}" class="flex flex-row items-center overflow-hidden text-ellipsis dark:hover:text-white hover:text-blue-600 cursor-pointer underline">
-			{{/ID}}
-			{{^ID}}
-				<a target="_self" href="{{rootThreadHref}}" class="flex flex-row items-center overflow-hidden text-ellipsis dark:hover:text-white hover:text-blue-600 cursor-pointer underline">
-			{{/ID}}
-				{{#title}}
-					/{{title}}
-				{{/title}}
-				{{^title}}
-					{{#text}}
-						/{{text}}
-					{{/text}}
-					{{^text}}
-						/
-					{{/text}}
-				{{/title}}
-
+			{{#message}}
 				{{#ID}}
-					<div class="ml-1 text-sm italic">(edit)</div>
+					<a target="_self" href="{{viewThreadHref}}" class="flex flex-row items-center overflow-hidden text-ellipsis dark:hover:text-white hover:text-blue-600 cursor-pointer underline">
 				{{/ID}}
-			</a>
+				{{^ID}}
+					<a target="_self" href="{{rootThreadHref}}" class="flex flex-row items-center overflow-hidden text-ellipsis dark:hover:text-white hover:text-blue-600 cursor-pointer underline">
+				{{/ID}}
+					{{#title}}
+						/{{title}}
+					{{/title}}
+					{{^title}}
+						{{#text}}
+							/{{text}}
+						{{/text}}
+						{{^text}}
+							/
+						{{/text}}
+					{{/title}}
+
+					{{#ID}}
+						<div class="ml-1 text-sm italic">(edit)</div>
+					{{/ID}}
+				</a>
+			{{/message}}
 		</div>
 
 		<div class="overflow-y-auto">
@@ -83,15 +85,17 @@
 			</ul>
 		</div>
 
-		<div class="flex flex-row mt-2">
-			{{^isLastPage}}
-				<a href="{{prevPageHref}}" target="_self" class="flex justify-center grow cursor-pointer dark:bg-slate-600 dark:hover:text-white bg-gray-300 ml-[2px] mr-2 last:mr-0"><-</a>
-			{{/isLastPage}}
+		{{#paging}}
+			<div class="flex flex-row mt-2">
+				{{^isLastPage}}
+					<a href="{{prevPageHref}}" target="_self" class="flex justify-center grow cursor-pointer dark:bg-slate-600 dark:hover:text-white bg-gray-300 ml-[2px] mr-2 last:mr-0"><-</a>
+				{{/isLastPage}}
 
-			{{^isFirstPage}}
-				<a href="{{nextPageHref}}" target="_self" class="flex justify-center grow cursor-pointer ml-[2px] dark:bg-slate-600 dark:hover:text-white bg-gray-300">-></a>
-			{{/isFirstPage}}
-		</div>
+				{{^isFirstPage}}
+					<a href="{{nextPageHref}}" target="_self" class="flex justify-center grow cursor-pointer ml-[2px] dark:bg-slate-600 dark:hover:text-white bg-gray-300">-></a>
+				{{/isFirstPage}}
+			</div>
+		{{/paging}}
 	</div>
 {{/stack}}
 {{^stack}}

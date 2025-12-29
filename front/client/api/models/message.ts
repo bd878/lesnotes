@@ -14,7 +14,6 @@ export interface Message {
 	title:         string;
 	count:         number;
 	files:         File[];
-	threadID:      number;
 	private:       boolean;
 }
 
@@ -28,7 +27,6 @@ const EmptyMessage: Message = Object.freeze({
 	count: 0,
 	name: "",
 	files:  [],
-	threadID: 0,
 	private: true,
 })
 
@@ -56,7 +54,6 @@ export default function mapMessageFromProto(message?: any): Message {
 		title: message.title,
 		count: message.count,
 		private: Boolean(message.private),
-		threadID: message.thread,
 		files: [],
 	}
 	if (is.array(message.files)) {

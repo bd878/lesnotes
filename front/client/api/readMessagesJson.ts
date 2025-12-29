@@ -5,11 +5,7 @@ async function readMessagesJson(token: string, user: number, thread: number, ord
 	let result = {
 		error:       models.error(),
 		messages:    [],
-		isLastPage:  true,
-		isFirstPage: true,
-		total:       0,
-		count:       0,
-		offset:      0,
+		paging:      models.paging(),
 	}
 
 	try {
@@ -30,12 +26,8 @@ async function readMessagesJson(token: string, user: number, thread: number, ord
 		if (error.error) {
 			result.error = models.error(error)
 		} else {
-			result.messages    = response.messages.map(models.message)
-			result.isLastPage  = response.is_last_page
-			result.isFirstPage = response.is_first_page
-			result.total       = response.total
-			result.count       = response.count
-			result.offset      = response.offset
+			result.messages = response.messages.map(models.message)
+			result.paging   = models.paging(response)
 		}
 	} catch (e) {
 		result.error.error   = true

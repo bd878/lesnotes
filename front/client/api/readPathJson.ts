@@ -1,9 +1,16 @@
+import type { Error, Message } from './models'
 import api from './api';
 import models from './models';
 
+interface ReadPathResponse {
+	error:    Error;
+	path:     Message[];
+	threadID: number;
+}
+
 // id = 0 : path = []
-async function readPathJson(token: string, id: number) {
-	let result = {
+async function readPathJson(token: string, id: number): Promise<ReadPathResponse> {
+	let result: ReadPathResponse = {
 		error:       models.error(),
 		path:        [],
 		threadID:    0,
@@ -24,7 +31,7 @@ async function readPathJson(token: string, id: number) {
 			result.error = models.error(error)
 		} else {
 			// do not .reverse() here; client may append NullThread and then reverse
-			result.path = response.path.map(models.message /* TODO: thread path or message path??? */)
+			result.path     = response.path.map(models.message)
 			result.threadID = response.thread
 		}
 

@@ -1,5 +1,4 @@
-import type { Message } from '../../api/models';
-import type { Thread } from '../../api/models';
+import type { Message, Thread, ThreadMessages } from '../../api/models';
 import Config from 'config';
 import mustache from 'mustache';
 import api from '../../api';
@@ -16,7 +15,7 @@ class HomeBuilder extends Builder {
 	threadEditForm = undefined;
 
 	messagesList = undefined;
-	async addMessagesList(stack: Thread[]) {
+	async addMessagesList(stack: ThreadMessages[]) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/home/mobile/messages_list.mustache' : 'templates/home/desktop/messages_list.mustache'
 		)), { encoding: 'utf-8' });

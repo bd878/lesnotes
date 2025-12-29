@@ -1,3 +1,12 @@
+export interface ExternalThread {
+	id:           number;
+	user_id:      number;
+	name:         string;
+	parent_id:    string;
+	private:      boolean;
+	description:  string;
+}
+
 export interface Thread {
 	ID:           number;
 	userID:       number;
@@ -5,6 +14,7 @@ export interface Thread {
 	private:      boolean;
 	parentID:     number;
 	description:  string;
+// TODO: add is_root, title, created_at, updated_at
 }
 
 const EmptyThread = Object.freeze({

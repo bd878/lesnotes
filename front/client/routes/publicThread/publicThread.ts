@@ -6,6 +6,7 @@ async function publicThread(ctx) {
 	const builder = new PublicThreadBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
 	await builder.addMessagesList(ctx.params.threadName /* TODO: use from load_path, ctx.thread.name is message name now, but thread name required */, ctx.state.messages)
+	await builder.addSearch()
 	await builder.addSettings()
 	await builder.addSidebar()
 	await builder.addFooter()

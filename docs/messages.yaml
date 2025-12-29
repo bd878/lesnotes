@@ -903,8 +903,6 @@ components:
           type: integer
         user_id:
           type: integer
-        thread:
-          type: integer
         count:
           type: integer
         name:

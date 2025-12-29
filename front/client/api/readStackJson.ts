@@ -1,43 +1,43 @@
+import type { Error, ThreadMessages } from './models';
 import api from './index';
 import models from './models';
 import * as is from '../third_party/is'
 
-async function readStackJson(token: string, threadID: number/*, lastMessageID: number*/, limit: number, offsets: Record<number, number> = {}) {
+interface StackResponse {
+	error:     Error;
+	stack:     ThreadMessages[];
+}
+
+async function readStackJson(token: string, messageID: number/*, lastMessageID: number*/, limit: number, offsets: Record<number, number> = {}): Promise<StackResponse> {
 	let result = {
 		error:       models.error(),
 		stack:       [],
 	}
 
-	const path = await api.readPathJson(token, threadID)
+	const path = await api.readPathJson(token, messageID)
 	if (path.error.error) {
 		result.error = path.error
 		return result;
 	}
 
-	const ids = path.path.map(thread => thread.ID)
+	const ids = path.path.map(message => message.ID)
 	ids.reverse()
 
-	// len(threads) == len(path.path)
-	const threads = [0 /* root thread */ , ...ids]
+	// len(messages) == len(path.path)
+	const messageIDs = [0 /* root */ , ...ids] /* threadID == messageID */
 
-	path.path.push(JSON.parse(JSON.stringify(models.EmptyThread /* root thread */)))
+	path.path.push(JSON.parse(JSON.stringify(models.EmptyMessage /* root message */)))
 	path.path.reverse()
 
-	// threadID = 0 : threads = [0], path.path = [EmptyThread]
+	// messageID = 0 : messages = [0], path.path = [EmptyMessage]
 	for (
-		let i = 0, isRoot = true, parentID = 0, threadID = 0 /* first is root : = 0 */, thread = JSON.parse(JSON.stringify(models.EmptyThread)) /* first is thread : EmptyThread */;
-		i < threads.length;
-		i++, isRoot = false, parentID = threads[i-1], threadID = threads[i], thread = path.path[i]
+		let i = 0, isRoot = true, parentID = 0, messageID = 0 /* first is root : = 0 */, message = JSON.parse(JSON.stringify(models.EmptyMessage)) /* first is message : EmptyMessage */;
+		i < messageIDs.length;
+		i++, isRoot = false, parentID = messageIDs[i-1], messageID = messageIDs[i], message = path.path[i]
 	) {
-		const offset = offsets[threadID]
+		const offset = is.undef(offsets[messageID]) ? 0 : offsets[messageID];
 
-		let messages = { error: models.error(), messages: [], isLastPage: true, isFirstPage: true, count: 0, total: 0, offset: 0 }
-		if (is.notUndef(offset)) {
-			messages = await api.readMessagesJson(token, 0, threadID, 1 /* order */, limit, offset)
-		} else {
-			messages = await api.readMessagesJson(token, 0, threadID, 1 /* order */, limit, 0)
-		}
-
+		const messages = await api.readMessagesJson(token, 0, messageID, 1 /* order */, limit, offset)
 		if (messages.error.error) {
 			result.error = messages.error
 			return result;
@@ -45,17 +45,9 @@ async function readStackJson(token: string, threadID: number/*, lastMessageID: n
 
 		messages.messages.reverse()
 
-		// TODO: move thread to api/models/thread.ts
-		thread.isRoot      = isRoot /* parentID == 0 for root and primary child, how to distinguish? */
-		thread.parentID    = parentID
-		thread.isLastPage  = messages.isLastPage
-		thread.isFirstPage = messages.isFirstPage
-		thread.messages    = messages.messages
-		thread.total       = messages.total
-		thread.count       = messages.count
-		thread.offset      = messages.offset
-
-		result.stack.push(thread)
+		result.stack.push(
+			models.threadMessages(messages.messages, messages.paging, message, parentID, isRoot),
+		)
 	}
 
 	return result;

@@ -14,6 +14,7 @@ import getMe from './handlers/getMe.js';
 import getToken from './handlers/getToken.js';
 import notAuthed from './handlers/notAuthed';
 import authed from './handlers/authed';
+import noCache from './handlers/noCache';
 import loadStack from './handlers/loadStack';
 import loadMessage from './handlers/loadMessage';
 import loadThread from './handlers/loadThread';
@@ -72,17 +73,17 @@ router
 		ctx.redirect('/')
 		ctx.status = 301
 	})
-	.get("main",                   "/",                             etag, getState, getToken, notAuthed, main)
-	.get("login",                  "/login",                        etag, getState, getToken, notAuthed, login)
-	.get("logout",                 "/logout",                       etag, getState, expireToken, redirectLogin)
-	.get("signup",                 "/signup",                       etag, getState, getToken, notAuthed, signup)
-	.get("home",                   "/home",                         etag, getToken, getMe, getState, loadStack, home)
-	.get("message",                "/messages/:id",                 etag, getToken, getMe, getState, loadStack, loadMessage, formatText, messageView)
-	.get("thread",                 "/threads/:id",                  etag, getToken, getMe, getState, loadStack, loadThread, formatText, threadView)
-	.get("editMessage",            "/editor/messages/:id",          etag, getToken, getMe, getState, loadStack, loadMessage, formatText, messageEdit)
-	.get("editThread",             "/editor/threads/:id",           etag, getToken, getMe, getState, loadStack, loadThread, formatText, threadEdit)
-	.get("status",                 "/status",                       status, getState)
-	.get("search",                 "/search",                       etag, getToken, authed, getState, getMe, getSearchQuery, loadSearch, loadSearchPath, search)
+	.get("main",                   "/",                             etag, noCache, getState, getToken, notAuthed, main)
+	.get("login",                  "/login",                        etag, noCache, getState, getToken, notAuthed, login)
+	.get("logout",                 "/logout",                       etag, noCache, getState, expireToken, redirectLogin)
+	.get("signup",                 "/signup",                       etag, noCache, getState, getToken, notAuthed, signup)
+	.get("home",                   "/home",                         etag, noCache, getToken, getMe, getState, loadStack, home)
+	.get("message",                "/messages/:id",                 etag, noCache, getToken, getMe, getState, loadStack, loadMessage, formatText, messageView)
+	.get("thread",                 "/threads/:id",                  etag, noCache, getToken, getMe, getState, loadStack, loadThread, formatText, threadView)
+	.get("editMessage",            "/editor/messages/:id",          etag, noCache, getToken, getMe, getState, loadStack, loadMessage, formatText, messageEdit)
+	.get("editThread",             "/editor/threads/:id",           etag, noCache, getToken, getMe, getState, loadStack, loadThread, formatText, threadEdit)
+	.get("status",                 "/status",                       status, noCache, getState)
+	.get("search",                 "/search",                       etag, noCache, getToken, authed, getState, getMe, getSearchQuery, loadSearch, loadSearchPath, search)
 	.post("doLogin",               "/login",                        etag, getState, validateLogin, redirectHome)
 	.post("doSignup",              "/signup",                       etag, getState, validateSignup, redirectHome)
 	.post("doSearch",              "/search",                       etag, getToken, authed, getState, getMe, getSearchForm, loadSearch, loadSearchPath, search)
@@ -95,11 +96,11 @@ router
 	.post("doUpdateThread",        "/t/update",                     getToken, authed, getState, updateThread)
 	.post("doSend",                "/send",                         getToken, authed, getState, sendMessage)
 	.get("tgAuth",                 "/tg_auth",                      authTelegram)
-	.get("userMessage",            "/m/:user/:id",                  etag, getState, getToken, loadMessage, publicMessage)
-	.get("userThread",             "/t/:user/:id",                  etag, getState, getToken, loadThread, loadThreadMessages, publicThread)
-	.get("publicMessage",          "/m/:messageName",               etag, getState, getToken, loadMessage, publicMessage)
-	.get("publicThread",           "/t/:threadName",                etag, getState, getToken, loadThread, loadThreadMessages, publicThread)
-	.get("publicThreadMessage",    "/t/:threadName/:messageName",   etag, getState, getToken, loadThread, loadThreadMessages, loadMessage, publicThreadMessage)
+	.get("userMessage",            "/m/:user/:id",                  etag, noCache, getState, getToken, loadMessage, publicMessage)
+	.get("userThread",             "/t/:user/:id",                  etag, noCache, getState, getToken, loadThread, loadThreadMessages, publicThread)
+	.get("publicMessage",          "/m/:messageName",               etag, noCache, getState, getToken, loadMessage, publicMessage)
+	.get("publicThread",           "/t/:threadName",                etag, noCache, getState, getToken, loadThread, loadThreadMessages, publicThread)
+	.get("publicThreadMessage",    "/t/:threadName/:messageName",   etag, noCache, getState, getToken, loadThread, loadThreadMessages, loadMessage, publicThreadMessage)
 	.get("miniapp",                "/miniapp",                      etag, getState, miniapp)
 	.get("any",                    "/:any*",                        getState, xxx)
 

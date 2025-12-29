@@ -127,7 +127,7 @@ func (h *Handler) ReadThreadJsonAPI(w http.ResponseWriter, req *http.Request) (e
 	}
 
 	response, err := json.Marshal(threadsmodel.ReadThreadResponse{
-		Threads:     []*threadsmodel.Thread{thread},
+		Thread:      thread,
 		Description: "ok",
 	})
 	if err != nil {

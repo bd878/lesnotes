@@ -7,7 +7,6 @@ import (
 type (
 	Message struct {
 		ID                  int64               `json:"id"`
-		ThreadID            int64               `json:"thread"`
 		CreateUTCNano       int64               `json:"create_utc_nano,omitempty"`
 		UpdateUTCNano       int64               `json:"update_utc_nano,omitempty"`
 		UserID              int64               `json:"user_id"`         // TODO: load user, == 0 for public user
