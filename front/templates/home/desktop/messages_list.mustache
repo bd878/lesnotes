@@ -1,14 +1,16 @@
 {{#stack}}
 	<div class="flex flex-col w-xs min-w-xs max-w-xs first:ml-0 last:mr-8 ml-2">
 		<div class="flex flex-row mb-2 mt-[2px] ml-[2px]">
-			{{^isRoot}}
-				{{#parentID}}
-					<a target="_self" href="{{closeThreadHref}}" class="mr-4 dark:hover:text-white hover:text-blue-600 cursor-pointer underline">X</a>
-				{{/parentID}}
-				{{^parentID}}
-					<a target="_self" href="{{closeRootChildThreadHref}}" class="mr-4 dark:hover:text-white hover:text-blue-600 cursor-pointer underline">X</a>
-				{{/parentID}}
-			{{/isRoot}}
+			{{#thread}}
+				{{^isRoot}}
+					{{#parentID}}
+						<a target="_self" href="{{closeThreadHref}}" class="mr-4 dark:hover:text-white hover:text-blue-600 cursor-pointer underline">X</a>
+					{{/parentID}}
+					{{^parentID}}
+						<a target="_self" href="{{closeRootChildThreadHref}}" class="mr-4 dark:hover:text-white hover:text-blue-600 cursor-pointer underline">X</a>
+					{{/parentID}}
+				{{/isRoot}}
+			{{/thread}}
 
 			{{#message}}
 				{{#ID}}
@@ -85,17 +87,15 @@
 			</ul>
 		</div>
 
-		{{#paging}}
-			<div class="flex flex-row mt-2">
-				{{^isLastPage}}
-					<a href="{{prevPageHref}}" target="_self" class="flex justify-center grow cursor-pointer dark:bg-slate-600 dark:hover:text-white bg-gray-300 ml-[2px] mr-2 last:mr-0"><-</a>
-				{{/isLastPage}}
+		<div class="flex flex-row mt-2">
+			{{^isLastPage}}
+				<a href="{{prevPageHref}}" target="_self" class="flex justify-center grow cursor-pointer dark:bg-slate-600 dark:hover:text-white bg-gray-300 ml-[2px] mr-2 last:mr-0"><-</a>
+			{{/isLastPage}}
 
-				{{^isFirstPage}}
-					<a href="{{nextPageHref}}" target="_self" class="flex justify-center grow cursor-pointer ml-[2px] dark:bg-slate-600 dark:hover:text-white bg-gray-300">-></a>
-				{{/isFirstPage}}
-			</div>
-		{{/paging}}
+			{{^isFirstPage}}
+				<a href="{{nextPageHref}}" target="_self" class="flex justify-center grow cursor-pointer ml-[2px] dark:bg-slate-600 dark:hover:text-white bg-gray-300">-></a>
+			{{/isFirstPage}}
+		</div>
 	</div>
 {{/stack}}
 {{^stack}}

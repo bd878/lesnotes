@@ -11,6 +11,7 @@ type (
 		Count       int32   `json:"count"`
 		Private     bool    `json:"private"`
 		Description string  `json:"description"`
+// TODO: add title, is_root
 	}
 
 	ListThreadsRequest struct {

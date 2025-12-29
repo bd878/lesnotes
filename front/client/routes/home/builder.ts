@@ -2,6 +2,7 @@ import type { Message, Thread, ThreadMessages } from '../../api/models';
 import Config from 'config';
 import mustache from 'mustache';
 import api from '../../api';
+import { unwrapPaging } from '../../api/models/paging';
 import * as is from '../../third_party/is';
 import i18n from '../../i18n';
 import { readFile } from 'node:fs/promises';
@@ -26,7 +27,7 @@ class HomeBuilder extends Builder {
 		const limit = parseInt(LIMIT)
 
 		this.messagesList = mustache.render(template, {
-			stack:            stack,
+			stack:            stack.map(unwrapPaging),
 			limit:            LIMIT,
 			isSingle:         () => stack.length == 1,
 			newMessageText:   this.i18n("newMessageText"),
@@ -34,11 +35,11 @@ class HomeBuilder extends Builder {
 			messageHref:      function() { return `/messages/${this.ID}` + search; },
 			messageThreadHref: function() { const params = new URLSearchParams(search); params.set("cwd", `${this.ID}`); return path + "?" + params.toString(); },
 			viewThreadHref:   function() { return `/threads/${this}` + search; /*context is ID, not thread*/ },
-			closeThreadHref:  function() { const params = new URLSearchParams(search); params.set("cwd", `${this}` /*context is parentID*/); return path + "?" + params.toString(); },
+			closeThreadHref:  function() { const params = new URLSearchParams(search); params.set("cwd", `${this.parentID}`); return path + "?" + params.toString(); },
 			closeRootChildThreadHref: function() { const params = new URLSearchParams(search); params.delete("cwd"); return path + "?" + params.toString(); },
 			rootThreadHref:   function() { const params = new URLSearchParams(search); params.delete("cwd"); return path + "?" + params.toString(); },
-			prevPageHref:     function() { const params = new URLSearchParams(search); params.set(this.ID || 0, `${limit + this.offset}`); return path + "?" + params.toString(); },
-			nextPageHref:     function() { const params = new URLSearchParams(search); params.set(this.ID || 0, `${Math.max(0, this.offset - limit)}`); return path + "?" + params.toString(); },
+			prevPageHref:     function() { const params = new URLSearchParams(search); params.set(this.message.ID || 0, `${limit + this.offset}`); return path + "?" + params.toString(); },
+			nextPageHref:     function() { const params = new URLSearchParams(search); params.set(this.message.ID || 0, `${Math.max(0, this.offset - limit)}`); return path + "?" + params.toString(); },
 		})
 	}
 

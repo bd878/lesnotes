@@ -3,7 +3,7 @@ import searchMessage, { EmptySearchMessage } from './searchMessage'
 import searchMessagePath, { EmptySearchMessagePath } from './searchMessagePath'
 import threadMessages, { EmptyThreadMessages } from './threadMessages'
 import thread, { EmptyThread } from './thread'
-import paging, { EmptyPaging } from './paging'
+import paging, { EmptyPaging, unwrapPaging } from './paging'
 import user from './user'
 import file, { EmptyFile } from './file'
 import error from './error'
@@ -25,6 +25,8 @@ export default {
 	EmptyThreadMessages,
 	EmptySearchMessage,
 	EmptySearchMessagePath,
+
+	unwrapPaging,
 }
 
 export type { Thread } from './thread'

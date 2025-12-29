@@ -2,9 +2,10 @@ export interface ExternalThread {
 	id:           number;
 	user_id:      number;
 	name:         string;
-	parent_id:    string;
+	parent_id:    number;
 	private:      boolean;
 	description:  string;
+	is_root:      boolean;
 }
 
 export interface Thread {
@@ -14,6 +15,7 @@ export interface Thread {
 	private:      boolean;
 	parentID:     number;
 	description:  string;
+	isRoot:       boolean; // TODO: not implemented on server
 // TODO: add is_root, title, created_at, updated_at
 }
 
@@ -24,11 +26,13 @@ const EmptyThread = Object.freeze({
 	private:      true,
 	parentID:     0,
 	description:  "",
+	isRoot:       false,
 })
 
-export default function mapThreadFromProto(thread?: any): Thread {
-	if (!thread)
+export default function mapThreadFromProto(thread?: ExternalThread): Thread {
+	if (!thread) {
 		return EmptyThread
+	}
 
 	const res = {
 		ID:           thread.id,
@@ -37,6 +41,7 @@ export default function mapThreadFromProto(thread?: any): Thread {
 		parentID:     thread.parent_id,
 		private:      thread.private,
 		description:  thread.description,
+		isRoot:       thread.is_root,
 	}
 
 	return res

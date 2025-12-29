@@ -18,7 +18,7 @@ async function sendMessage(ctx) {
 		ctx.state.error = response.error.human
 		await home(ctx)
 	} else {
-		ctx.redirect(ctx.router.url('message', {id: response.message.ID}, {query: ctx.query}))
+		ctx.redirect(ctx.router.url('home', {}, {query: ctx.query}))
 	}
 
 	console.log("<-- sendMessage")

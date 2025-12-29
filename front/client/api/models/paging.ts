@@ -38,4 +38,8 @@ export default function mapPagingFromProto(paging?: ExternalPaging): Paging {
 	return res
 }
 
+
+const unwrapPaging = ({ paging, ...other }: { paging: Paging }): Paging => ({ ...other, ...paging });
+
 export { EmptyPaging }
+export { unwrapPaging }

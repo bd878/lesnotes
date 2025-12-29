@@ -6,8 +6,8 @@ const ns_in_ms = 10**6
 
 export interface Message {
 	ID:            number;
-	createUTCNano: string;
-	updateUTCNano: string;
+	createdAt:     string;
+	updatedAt:     string;
 	userID:        number;
 	text:          string;
 	name:          string;
@@ -19,8 +19,8 @@ export interface Message {
 
 const EmptyMessage: Message = Object.freeze({
 	ID: 0,
-	createUTCNano: "",
-	updateUTCNano: "",
+	createdAt: "",
+	updatedAt: "",
 	userID: 0,
 	text: "",
 	title: "",
@@ -31,31 +31,33 @@ const EmptyMessage: Message = Object.freeze({
 })
 
 export default function mapMessageFromProto(message?: any): Message {
-	if (!message)
+	if (!message) {
 		return EmptyMessage
-
-	let createUTCNano = "0"
-	if (message.create_utc_nano) {
-		createUTCNano = new Date(Math.floor(message.create_utc_nano / ns_in_ms)).toLocaleString()
 	}
 
-	let updateUTCNano = "0"
+	let createdAt = "0"
+	if (message.create_utc_nano) {
+		createdAt = new Date(Math.floor(message.create_utc_nano / ns_in_ms)).toLocaleString()
+	}
+
+	let updatedAt = "0"
 	if (message.update_utc_nano) {
-		updateUTCNano = new Date(Math.floor(message.update_utc_nano / ns_in_ms)).toLocaleString()
+		updatedAt = new Date(Math.floor(message.update_utc_nano / ns_in_ms)).toLocaleString()
 	}
 
 	const res = {
-		ID: message.id,
-		createUTCNano: createUTCNano,
-		updateUTCNano: updateUTCNano,
-		userID: message.user_id, // TODO: rename on user
-		text: message.text,
-		name: message.name,
-		title: message.title,
-		count: message.count,
-		private: Boolean(message.private),
-		files: [],
+		ID:          message.id,
+		createdAt:   createdAt,
+		updatedAt:   updatedAt,
+		userID:      message.user_id,
+		text:        message.text,
+		name:        message.name,
+		title:       message.title,
+		count:       message.count,
+		private:     Boolean(message.private),
+		files:       [],
 	}
+
 	if (is.array(message.files)) {
 		res.files = message.files.map(file)
 	}

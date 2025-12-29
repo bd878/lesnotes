@@ -45,9 +45,11 @@ async function readStackJson(token: string, messageID: number/*, lastMessageID: 
 
 		messages.messages.reverse()
 
-		result.stack.push(
-			models.threadMessages(messages.messages, messages.paging, message, parentID, isRoot),
-		)
+		const thread = JSON.parse(JSON.stringify(models.thread()))
+		thread.parentID = parentID
+		thread.isRoot = isRoot
+
+		result.stack.push(models.threadMessages(messages.messages, messages.paging, message, thread))
 	}
 
 	return result;

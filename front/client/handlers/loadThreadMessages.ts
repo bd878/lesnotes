@@ -1,4 +1,5 @@
 import api from '../api';
+import models from '../api/models';
 import * as is from '../third_party/is';
 
 const limit = parseInt(LIMIT)
@@ -34,7 +35,13 @@ async function loadThreadMessages(ctx, next) {
 			ctx.status = 400
 			return
 		}
-		ctx.state.messages = ctx.state.messages.messages
+
+		ctx.state.messages = models.threadMessages(
+			ctx.state.messages.messages,
+			ctx.state.messages.paging,
+			ctx.state.message,
+			ctx.state.thread,
+		)
 	} else {
 		ctx.state.messages = undefined
 	}
