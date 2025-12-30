@@ -165,7 +165,7 @@ class HomeBuilder extends Builder {
 				threadView:      this.threadView,
 				threadEditForm:  this.threadEditForm,
 				newMessageForm:  this.newMessageForm,
-				messagesStack:    this.messagesStack,
+				messagesStack:   this.messagesStack,
 				sidebar:         this.sidebar,
 				filesList:       this.filesList,
 				filesForm:       this.filesForm,

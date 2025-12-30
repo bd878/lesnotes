@@ -16,7 +16,8 @@ class PublicThreadBuilder extends Builder {
 		)), { encoding: 'utf-8' });
 
 		this.sidebar = mustache.render(template, {
-			settingsHeader: this.i18n("settingsHeader")
+			settingsHeader: this.i18n("settingsHeader"),
+			mainHref:       "/home" + this.search,
 		}, {
 			settings:       this.settings,
 			searchForm:     this.searchForm,
