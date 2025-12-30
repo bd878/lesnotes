@@ -15,7 +15,7 @@ async function threadEdit(ctx) {
 	if (is.notEmpty(ctx.state.thread)) {
 		await builder.addThreadEditForm(ctx.state.thread)
 	}
-	await builder.addMessagesList(ctx.state.stack)
+	await builder.addMessagesStack(ctx.state.stack)
 	await builder.addSettings()
 	await builder.addSearch()
 	await builder.addSidebar()

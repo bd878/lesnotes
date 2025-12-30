@@ -16,7 +16,7 @@ async function threadView(ctx) {
 		await builder.addThreadView(ctx.state.thread)
 	}
 	await builder.addSettings()
-	await builder.addMessagesList(ctx.state.stack)
+	await builder.addMessagesStack(ctx.state.stack)
 	await builder.addSearch()
 	await builder.addSidebar()
 	await builder.addFooter()

@@ -14,7 +14,7 @@ async function messageView(ctx) {
 
 	await builder.addMessageView(ctx.state.me.ID, ctx.state.message)
 	await builder.addSettings()
-	await builder.addMessagesList(ctx.state.stack)
+	await builder.addMessagesStack(ctx.state.stack)
 	await builder.addSearch()
 	await builder.addSidebar()
 	await builder.addFooter()

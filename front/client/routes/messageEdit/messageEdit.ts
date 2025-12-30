@@ -14,7 +14,7 @@ async function messageEdit(ctx) {
 
 	await builder.addMessageEditForm(ctx.state.message)
 	await builder.addSettings()
-	await builder.addMessagesList(ctx.state.stack)
+	await builder.addMessagesStack(ctx.state.stack)
 	await builder.addSearch()
 	await builder.addSidebar()
 	await builder.addFooter()

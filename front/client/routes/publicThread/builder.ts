@@ -1,4 +1,4 @@
-import type { Thread, ThreadMessages } from '../../api/models';
+import type { Message, Thread, ThreadMessages } from '../../api/models';
 import { unwrapPaging } from '../../api/models/paging';
 import Config from 'config';
 import mustache from 'mustache';
@@ -7,6 +7,8 @@ import { resolve, join } from 'node:path';
 import Builder from '../builder';
 
 class PublicThreadBuilder extends Builder {
+	messageView = undefined;
+
 	sidebar = undefined;
 	async addSidebar() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
@@ -55,7 +57,7 @@ class PublicThreadBuilder extends Builder {
 		})
 	}
 
-	async build(thread?: Thread) {
+	async build(message?: Message) {
 		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
 		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
 		const content = await readFile(resolve(join(Config.get('basedir'),
@@ -84,11 +86,12 @@ class PublicThreadBuilder extends Builder {
 		}, {
 			footer: this.footer,
 			content: mustache.render(content, {
-				thread:        thread,
+				message:       message,
 			}, {
 				settings:      this.settings,
 				sidebar:       this.sidebar,
 				messagesList:  this.messagesList,
+				messageView:   this.messageView,
 			})
 		})
 	}

@@ -6,7 +6,7 @@ const limit = parseInt(LIMIT)
 
 async function loadThreadMessages(ctx, next) {
 	const userID = is.notEmpty(ctx.state.thread) ? ctx.state.thread.userID : (parseInt(ctx.params.user) || 0)
-	const id = is.notEmpty(ctx.state.thread) ? ctx.state.thread.ID : (parseInt(ctx.params.id) || 0);
+	const id = is.notEmpty(ctx.state.thread) ? ctx.state.thread.ID : 0;
 	const token = ctx.state.token
 	const params = new URLSearchParams(ctx.search)
 	const offset = parseInt(params.get("offset")) || 0

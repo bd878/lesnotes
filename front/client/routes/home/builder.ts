@@ -15,10 +15,10 @@ class HomeBuilder extends Builder {
 	threadView = undefined;
 	threadEditForm = undefined;
 
-	messagesList = undefined;
-	async addMessagesList(stack: ThreadMessages[]) {
+	messagesStack = undefined;
+	async addMessagesStack(stack: ThreadMessages[]) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/home/mobile/messages_list.mustache' : 'templates/home/desktop/messages_list.mustache'
+			this.isMobile ? 'templates/home/mobile/messages_stack.mustache' : 'templates/home/desktop/messages_stack.mustache'
 		)), { encoding: 'utf-8' });
 
 		const search = this.search
@@ -26,7 +26,7 @@ class HomeBuilder extends Builder {
 
 		const limit = parseInt(LIMIT)
 
-		this.messagesList = mustache.render(template, {
+		this.messagesStack = mustache.render(template, {
 			stack:            stack.map(unwrapPaging),
 			limit:            LIMIT,
 			isSingle:         () => stack.length == 1,
@@ -165,7 +165,7 @@ class HomeBuilder extends Builder {
 				threadView:      this.threadView,
 				threadEditForm:  this.threadEditForm,
 				newMessageForm:  this.newMessageForm,
-				messagesList:    this.messagesList,
+				messagesStack:    this.messagesStack,
 				sidebar:         this.sidebar,
 				filesList:       this.filesList,
 				filesForm:       this.filesForm,
