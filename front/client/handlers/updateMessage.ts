@@ -1,4 +1,4 @@
-import home from '../routes/home/home'
+import home from '../routes/home'
 import * as is from '../third_party/is'
 import api from '../api'
 

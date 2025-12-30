@@ -1,4 +1,4 @@
-import signup from '../routes/signup/signup'
+import signup from '../routes/signup'
 import * as is from '../third_party/is'
 import api from '../api';
 

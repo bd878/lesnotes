@@ -1,4 +1,4 @@
-import login from '../routes/login/login'
+import login from '../routes/login'
 import * as is from '../third_party/is'
 import api from '../api';
 

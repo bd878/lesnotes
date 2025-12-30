@@ -39,23 +39,22 @@ import updateThread from './handlers/updateThread';
 import getSearchForm from './handlers/getSearchForm';
 import getSearchQuery from './handlers/getSearchQuery';
 
-import assets from './routes/assets/assets';
-import main from './routes/main/main';
-import login from './routes/login/login';
-import signup from './routes/signup/signup';
-import home from './routes/home/home';
-import search from './routes/search/search';
-import xxx from './routes/xxx/xxx';
-import publicMessage from './routes/publicMessage/publicMessage';
-import publicThread from './routes/publicThread/publicThread';
-import publicThreadMessage from './routes/publicThreadMessage/publicThreadMessage';
-import threadEdit from './routes/threadEdit/threadEdit';
-import messageView from './routes/messageView/messageView';
-import threadView from './routes/threadView/threadView';
-import messageEdit from './routes/messageEdit/messageEdit';
-import miniapp from './routes/miniapp/miniapp';
-import authTelegram from './routes/authTelegram/authTelegram';
-import status from './routes/status/status';
+import assets from './routes/assets';
+import main from './routes/main';
+import login from './routes/login';
+import signup from './routes/signup';
+import home from './routes/home';
+import search from './routes/search';
+import xxx from './routes/xxx';
+import publicMessage from './routes/publicMessage';
+import publicThread from './routes/publicThread';
+import publicThreadMessage from './routes/publicThreadMessage';
+import threadEdit from './routes/threadEdit';
+import messageView from './routes/messageView';
+import threadView from './routes/threadView';
+import messageEdit from './routes/messageEdit';
+import authTelegram from './routes/authTelegram';
+import status from './routes/status';
 
 const app = new Koa();
 const router = new Router();
@@ -99,7 +98,6 @@ router
 	.get("publicMessage",          "/m/:messageName",               etag, noCache, getState, getToken, loadMessage, formatText, publicMessage)
 	.get("publicThread",           "/t/:threadName",                etag, noCache, getState, getToken, loadThread, loadThreadMessages, formatText, publicThread)
 	.get("publicThreadMessage",    "/t/:threadName/:messageName",   etag, noCache, getState, getToken, loadThread, loadThreadMessages, loadMessage, formatText, publicThreadMessage)
-	.get("miniapp",                "/miniapp",                      etag, getState, miniapp)
 	.get("any",                    "/:any*",                        getState, xxx)
 
 app.use(router.routes());
