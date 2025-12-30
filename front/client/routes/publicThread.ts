@@ -8,6 +8,13 @@ async function publicThread(ctx) {
 	await builder.addMessagesList(ctx.params.threadName /* TODO: use from load_path, ctx.thread.name is message name now, but thread name required */, ctx.state.messages)
 	await builder.addSearch()
 	await builder.addSettings()
+
+	if (ctx.state.me.ID) {
+		await builder.addLogout()
+	} else {
+		await builder.addSignup()
+	}
+
 	await builder.addSidebar()
 	await builder.addFooter()
 

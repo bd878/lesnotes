@@ -10,6 +10,7 @@ async function home(ctx) {
 	await builder.addMessagesStack(ctx.state.stack)
 	await builder.addFilesForm()
 	await builder.addSearch()
+	await builder.addLogout()
 	await builder.addSidebar()
 	await builder.addFooter()
 

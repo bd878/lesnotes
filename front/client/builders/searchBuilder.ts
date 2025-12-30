@@ -45,6 +45,20 @@ class SearchBuilder extends AbstractBuilder {
 		this.filesList = mustache.render(template, options)
 	}
 
+	logout = undefined;
+	async addLogout() {
+		const template = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/sidebar_vertical/mobile/logout.mustache' : 'templates/sidebar_vertical/desktop/logout.mustache'
+		)), { encoding: 'utf-8' });
+
+		const search = this.search
+
+		this.logout = mustache.render(template, {
+			logout:           this.i18n("logout"),
+			logoutHref:       function() { const params = new URLSearchParams(search); params.delete("cwd"); params.delete("id"); /* TODO: delete pagination */ return "/logout?" + params.toString() },
+		})
+	}
+
 	searchForm = undefined;
 	async addSearch() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
@@ -74,6 +88,7 @@ class SearchBuilder extends AbstractBuilder {
 		}, {
 			settings:         this.settings,
 			searchForm:       this.searchForm,
+			logout:           this.logout,
 		})
 	}
 

@@ -9,6 +9,13 @@ async function publicThreadMessage(ctx) {
 	await builder.addSearch()
 	await builder.addMessageView(ctx.state.message)
 	await builder.addSettings()
+
+	if (ctx.state.me.ID) {
+		await builder.addLogout()
+	} else {
+		await builder.addSignup()
+	}
+
 	await builder.addSidebar()
 	await builder.addFooter()
 

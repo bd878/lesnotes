@@ -9,6 +9,7 @@ async function threadEdit(ctx) {
 	await builder.addMessagesStack(ctx.state.stack)
 	await builder.addSettings()
 	await builder.addSearch()
+	await builder.addLogout()
 	await builder.addSidebar()
 	await builder.addFooter()
 

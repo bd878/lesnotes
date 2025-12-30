@@ -9,6 +9,7 @@ async function search(ctx) {
 	await builder.addMessagesList(ctx.state.messages)
 	await builder.addFilesList()
 	await builder.addSearch()
+	await builder.addLogout()
 	await builder.addSidebar()
 	await builder.addFooter()
 

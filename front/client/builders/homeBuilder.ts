@@ -92,22 +92,33 @@ class HomeBuilder extends AbstractBuilder {
 		})
 	}
 
+	logout = undefined;
+	async addLogout() {
+		const template = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/sidebar_vertical/mobile/logout.mustache' : 'templates/sidebar_vertical/desktop/logout.mustache'
+		)), { encoding: 'utf-8' });
+
+		const search = this.search
+
+		this.logout = mustache.render(template, {
+			logout:           this.i18n("logout"),
+			logoutHref:       function() { const params = new URLSearchParams(search); params.delete("cwd"); params.delete("id"); /* TODO: delete pagination */ return "/logout?" + params.toString() },
+		})
+	}
+
 	sidebar = undefined;
 	async addSidebar() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/sidebar_vertical/mobile/sidebar_vertical.mustache' : 'templates/sidebar_vertical/desktop/sidebar_vertical.mustache'
 		)), { encoding: 'utf-8' });
 
-		const search = this.search
-
 		this.sidebar = mustache.render(template, {
-			mainHref:         "/home" + search,
-			logout:           this.i18n("logout"),
-			logoutHref:       function() { const params = new URLSearchParams(search); params.delete("cwd"); params.delete("id"); /* TODO: delete pagination */ return "/logout?" + params.toString() },
+			mainHref:         "/home" + this.search,
 			settingsHeader:   this.i18n("settingsHeader"),
 		}, {
 			settings:         this.settings,
 			searchForm:       this.searchForm,
+			logout:           this.logout,
 		})
 	}
 

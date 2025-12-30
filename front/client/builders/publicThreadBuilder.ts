@@ -9,6 +9,34 @@ import AbstractBuilder from './abstractBuilder';
 class PublicThreadBuilder extends AbstractBuilder {
 	messageView = undefined;
 
+	signup = undefined
+	async addSignup() {
+		const template = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/sidebar_vertical/mobile/signup.mustache' : 'templates/sidebar_vertical/desktop/signup.mustache'
+		)), { encoding: 'utf-8' });
+
+		const search = this.search
+
+		this.signup = mustache.render(template, {
+			signup:           this.i18n("signup"),
+			signupHref:       function() { const params = new URLSearchParams(search); params.delete("cwd"); params.delete("id"); /* TODO: delete pagination */ return "/signup?" + params.toString() },
+		})
+	}
+
+	logout = undefined;
+	async addLogout() {
+		const template = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/sidebar_vertical/mobile/logout.mustache' : 'templates/sidebar_vertical/desktop/logout.mustache'
+		)), { encoding: 'utf-8' });
+
+		const search = this.search
+
+		this.logout = mustache.render(template, {
+			logout:           this.i18n("logout"),
+			logoutHref:       function() { const params = new URLSearchParams(search); params.delete("cwd"); params.delete("id"); /* TODO: delete pagination */ return "/logout?" + params.toString() },
+		})
+	}
+
 	sidebar = undefined;
 	async addSidebar() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
@@ -21,6 +49,8 @@ class PublicThreadBuilder extends AbstractBuilder {
 		}, {
 			settings:       this.settings,
 			searchForm:     this.searchForm,
+			signup:         this.signup,
+			logout:         this.logout,
 		})
 	}
 
