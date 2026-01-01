@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS messages.messages
 	PRIMARY KEY(id)
 );
 
+-- TODO: messages.comments, messages.reactions
+
 CREATE TRIGGER created_at_messages_trgr BEFORE UPDATE ON messages.messages FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
 CREATE TRIGGER updated_at_messages_trgr BEFORE UPDATE ON messages.messages FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 

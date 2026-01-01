@@ -1,7 +1,7 @@
 import * as is from '../third_party/is';
 
-async function formatText(ctx, next) {
-	console.log("--> formatText")
+async function formatTextarea(ctx, next) {
+	console.log("--> formatTextarea")
 
 	if (is.notEmpty(ctx.state.message) && is.notEmpty(ctx.state.message.text)) {
 		ctx.state.message.text = ctx.state.message.text.replaceAll("\r\n", "&#13;&#10;")
@@ -12,7 +12,7 @@ async function formatText(ctx, next) {
 
 	await next()
 
-	console.log("<-- formatText")
+	console.log("<-- formatTextarea")
 }
 
-export default formatText
+export default formatTextarea
