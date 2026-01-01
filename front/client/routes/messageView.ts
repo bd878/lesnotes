@@ -13,7 +13,7 @@ async function messageView(ctx) {
 	await builder.addSidebar()
 	await builder.addFooter()
 
-	ctx.body = await builder.build(ctx.state.message)
+	ctx.body = await builder.build()
 	ctx.status = 200
 
 	console.log("<-- messageView")

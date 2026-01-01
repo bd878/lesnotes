@@ -13,7 +13,7 @@ async function threadEdit(ctx) {
 	await builder.addSidebar()
 	await builder.addFooter()
 
-	ctx.body = await builder.build(undefined, ctx.state.thread)
+	ctx.body = await builder.build()
 	ctx.status = 200
 
 	console.log("<-- threadEdit")

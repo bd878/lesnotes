@@ -137,7 +137,7 @@ class HomeBuilder extends AbstractBuilder {
 		})
 	}
 
-	async build(message?: Message, thread?: Thread) {
+	async build() {
 		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
 		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
 		const home = await readFile(resolve(join(Config.get('basedir'),
@@ -166,10 +166,7 @@ class HomeBuilder extends AbstractBuilder {
 			isMobile: this.isMobile ? "true" : "",
 		}, {
 			footer: this.footer,
-			content: mustache.render(home, {
-				message:     message,
-				thread:      thread,
-			}, {
+			content: mustache.render(home, {}, {
 				settings:        this.settings,
 				messageEditForm: this.messageEditForm,
 				messageView:     this.messageView,

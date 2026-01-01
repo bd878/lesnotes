@@ -6,24 +6,15 @@
 	<div class="min-w-lg max-w-lg flex flex-row ml-8">
 		<div class="flex flex-col grow-2 w-full">
 			<div class="flex flex-col grow p-2 mb-2 border border-1 border-solid rounded-md">
-				{{#message}}
-					{{> messageEditForm}}
-					{{> messageView}}
-				{{/message}}
-
+				{{> messageEditForm}}
+				{{> messageView}}
 				{{> newMessageForm}}
-
-				{{#thread}}
-					{{> threadEditForm}}
-					{{> threadView}}
-				{{/thread}}
+				{{> threadEditForm}}
+				{{> threadView}}
 			</div>
 
 			<div>
-				{{#message}}
-					{{> filesList}}
-				{{/message}}
-
+				{{> filesList}}
 				{{> filesForm}}
 			</div>
 		</div>
