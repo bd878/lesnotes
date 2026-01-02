@@ -14,8 +14,9 @@ const EmptyFile: File = Object.freeze({
 })
 
 export default function mapFileFromProto(file?: FileProto): File {
-	if (!file)
+	if (!file) {
 		return EmptyFile
+	}
 
 	return {
 		ID:   file.id,

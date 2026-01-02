@@ -5,10 +5,10 @@ async function home(ctx) {
 
 	const builder = new HomeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
-	await builder.addNewMessageForm(ctx.state.thread)
 	await builder.addSettings()
 	await builder.addMessagesStack(ctx.state.stack)
-	await builder.addFilesForm()
+	await builder.addFilesInput()
+	await builder.addNewMessageForm(ctx.state.thread)
 	await builder.addSearch()
 	await builder.addLogout()
 	await builder.addSidebar()

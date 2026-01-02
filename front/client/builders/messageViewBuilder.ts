@@ -33,6 +33,9 @@ class MessageViewBuilder extends HomeBuilder {
 			newNoteButton:    this.i18n("newNote"),
 			userID:           userID,
 			domain:           Config.get("domain"),
+		}, {
+			filesList:        this.filesList,
+			filesInput:       this.filesInput,
 		})
 	}
 }

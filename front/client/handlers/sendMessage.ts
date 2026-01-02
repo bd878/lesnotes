@@ -3,6 +3,7 @@ import * as is from '../third_party/is'
 import api from '../api'
 
 async function sendMessage(ctx) {
+	// TODO: proxy send message to messages service, /send
 	console.log("--> sendMessage")
 
 	let form = ctx.request.body

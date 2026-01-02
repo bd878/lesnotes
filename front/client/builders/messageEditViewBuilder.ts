@@ -30,6 +30,9 @@ class MessageEditViewBuilder extends HomeBuilder {
 			cancelButton:     this.i18n("cancelButton"),
 			updateAction:     "/m/update" + this.search,
 			domain:           Config.get("domain"),
+		}, {
+			filesInput:       this.filesInput,
+			filesList:        this.filesList,
 		})
 	}
 }

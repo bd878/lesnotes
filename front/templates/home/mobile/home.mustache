@@ -22,14 +22,14 @@
 			<div class="flex flex-col bg-blue-100 justify-between rounded-md">
 				{{#message}}
 					{{#editMessage}}
-						{{> filesForm}}
+						{{> filesInput}}
 					{{/editMessage}}
 					{{^editMessage}}
 						{{> filesList}}
 					{{/editMessage}}
 				{{/message}}
 				{{^message}}
-					{{> filesForm}}
+					{{> filesInput}}
 				{{/message}}
 			</div>
 		</div>

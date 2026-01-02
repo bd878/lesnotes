@@ -1,4 +1,4 @@
-import type { Message, Thread, ThreadMessages } from '../api/models';
+import type { File, Message, Thread, ThreadMessages } from '../api/models';
 import Config from 'config';
 import mustache from 'mustache';
 import api from '../api';
@@ -44,39 +44,27 @@ class HomeBuilder extends AbstractBuilder {
 	}
 
 	filesList = undefined;
-	async addFilesList(message?: Message, editMessage?: boolean) {
+	async addFilesList(files: File[] = []) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/home/mobile/files_list.mustache' : 'templates/home/desktop/files_list.mustache'
 		)), { encoding: 'utf-8' });
 
-		const options = {
+		this.filesList = mustache.render(template, {
 			noFiles:            this.i18n("noFiles"),
-			editMessage:        editMessage,
-			files:              undefined,
-		}
-
-		if (is.notEmpty(message))
-			options.files = message.files
-
-		this.filesList = mustache.render(template, options)
+			files:              files,
+		})
 	}
 
-	filesForm = undefined;
-	async addFilesForm(message?: Message, editMessage?: boolean) {
+	filesInput = undefined;
+	async addFilesInput(files: File[] = []) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/home/mobile/files_form.mustache' : 'templates/home/desktop/files_form.mustache'
+			this.isMobile ? 'templates/home/mobile/files_input.mustache' : 'templates/home/desktop/files_input.mustache'
 		)), { encoding: 'utf-8' });
 
-		const options = {
+		this.filesInput = mustache.render(template, {
 			noFiles:            this.i18n("noFiles"),
-			editMessage:        editMessage,
-			files:              undefined,
-		}
-
-		if (is.notEmpty(message))
-			options.files = message.files
-
-		this.filesForm = mustache.render(template, options)
+			files:              files,
+		})
 	}
 
 	searchForm = undefined;
@@ -134,6 +122,8 @@ class HomeBuilder extends AbstractBuilder {
 			sendButton:       this.i18n("sendButton"),
 			sendAction:       "/send" + this.search,
 			thread:           thread || 0,
+		}, {
+			filesInput:       this.filesInput,
 		})
 	}
 
@@ -175,8 +165,6 @@ class HomeBuilder extends AbstractBuilder {
 				newMessageForm:  this.newMessageForm,
 				messagesStack:   this.messagesStack,
 				sidebar:         this.sidebar,
-				filesList:       this.filesList,
-				filesForm:       this.filesForm,
 			}),
 		});
 	}

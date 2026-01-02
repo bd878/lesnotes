@@ -6,7 +6,6 @@ import readBatchMessagesJson from './readBatchMessagesJson';
 import readMessage from './readMessage';
 import readThreadJson from './readThreadJson';
 import readMessageJson from './readMessageJson';
-import sendMessage from './sendMessage';
 import sendMessageJson from './sendMessageJson';
 import searchMessagesJson from './searchMessagesJson';
 import searchMessagesPathJson from './searchMessagesPathJson';
@@ -58,7 +57,6 @@ export default {
 	readThreadJson,
 	publishThreadJson,
 	privateThreadJson,
-	sendMessage,
 	sendMessageJson,
 	updateMessage,
 	updateMessageJson,

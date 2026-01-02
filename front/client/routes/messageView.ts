@@ -5,9 +5,10 @@ async function messageView(ctx) {
 
 	const builder = new MessageViewBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
-	await builder.addMessageView(ctx.state.me.ID, ctx.state.message)
 	await builder.addSettings()
 	await builder.addMessagesStack(ctx.state.stack)
+	await builder.addFilesList()
+	await builder.addMessageView(ctx.state.me.ID, ctx.state.message)
 	await builder.addSearch()
 	await builder.addLogout()
 	await builder.addSidebar()
