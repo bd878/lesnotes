@@ -5,6 +5,33 @@ info:
     This API handles files requests.
   version: 1.0.0
 paths:
+# LIST
+  /files/v2/list:
+    post:
+      summary: Get user files
+      description: |
+        Read user files with pagination
+      operationId: listFilesJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/componnents/schemas/listJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/comopnents/schemas/listOK'
+        "4XX":
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+# END LIST
+
 # UPLOAD
   /files/v1/upload:
     security:
@@ -103,6 +130,64 @@ paths:
 
 components:
   schemas:
+# LIST
+    listJson:
+      type: object
+      properties:
+        token:
+          type: string
+          default: ""
+          required: false
+        req:
+          type: object
+          properties:
+            user:
+              type: integer
+              required: false
+            limit:
+              type: integer
+              required: false
+            offset:
+              type: integer
+              required: false
+            asc:
+              type: integer
+              required: false
+              exmaple: 0
+
+    listOK:
+      type: object
+      properties:
+        status:
+          type: string
+          default: "ok"
+        response:
+          type: object
+          properties:
+            description:
+              type: string
+              default: ""
+            is_last_page:
+              type: boolean
+            is_first_page:
+              type: boolean
+              required: false
+            offset:
+              type: integer
+              required: false
+            count:
+              type: integer
+              required: false
+            total:
+              type: integer
+              required: false
+            files:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/file'
+# END LIST
+
 # UPLOAD
     uploadForm:
       type: object
@@ -127,6 +212,19 @@ components:
           type: string
           required: true
 # END UPLOAD
+
+    file:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "file"
+        size:
+          type: integer
+          example: 1024
 
     serverError:
       type: object

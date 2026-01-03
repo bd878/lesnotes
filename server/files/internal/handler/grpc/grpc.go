@@ -17,6 +17,7 @@ type Repository interface {
 	GetMeta(ctx context.Context, id int64, fileName string) (file *model.File, err error)
 	DeleteFile(ctx context.Context, ownerID, id int64) (err error)
 	ReadFile(ctx context.Context, oid int32, writer io.Writer) (err error)
+	ListFiles(ctx context.Context, userID int64, limit, offset int32, ascending, private bool) (list []*model.File, isLastPage bool, err error)
 }
 
 type Handler struct {
@@ -168,4 +169,20 @@ func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) error {
 	}
 
 	return stream.SendAndClose(&api.SaveFileStreamResponse{})
+}
+
+func (h *Handler) ListFiles(ctx context.Context, req *api.ListFilesRequest) (resp *api.ListFilesResponse, err error) {
+	logger.Debugw("list files", "user_id", req.UserId, "limit", req.Limit, "offset", req.Offset, "asc", req.Asc, "private", req.Private)
+
+	list, isLastPage, err := h.repo.ListFiles(context.Background(), req.UserId, req.Limit, req.Offset, req.Asc, req.Private)
+	if err != nil {
+		return nil, err
+	}
+
+	resp = &api.ListFilesResponse{
+		Files:      model.MapFilesToProto(model.FileToProto, list),
+		IsLastPage: isLastPage,
+	}
+
+	return
 }

@@ -175,3 +175,34 @@ func (f *Files) SaveFileStream(ctx context.Context, fileStream io.Reader, id, us
 
 	return
 }
+
+func (f *Files) ListFiles(ctx context.Context, userID int64, limit, offset int32, ascending, private bool) (list *files.List, err error) {
+	if f.isConnFailed() {
+		logger.Info("conn failed, setup new connection")
+		f.setupConnection()
+	}
+
+	logger.Debugw("list files", "user_id", userID, "limit", limit, "offset", offset, "ascending", ascending, "private", private)
+
+	resp, err := f.client.ListFiles(ctx, &api.ListFilesRequest{
+		UserId:      userID,
+		Limit:       limit,
+		Offset:      offset,
+		Asc:         ascending,
+		Private:     private,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	list = &files.List{
+		Files:       files.MapFilesFromProto(files.FileFromProto, resp.Files),
+		IsLastPage:  resp.IsLastPage,
+		IsFirstPage: offset == 0,
+		Count:       int32(len(resp.Files)),
+		// TODO: total
+		Offset:      offset,
+	}
+
+	return
+}

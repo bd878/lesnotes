@@ -11,6 +11,7 @@ import (
 type Controller interface {
 	SaveFileStream(ctx context.Context, stream io.Reader, id, userID int64, fileName string, private bool, mime string) (err error)
 	ReadFileStream(ctx context.Context, id int64, fileName string, public bool) (meta *files.File, reader io.Reader, err error)
+	ListFiles(ctx context.Context, userID int64, limit, offset int32, ascending, private bool) (list *files.List, err error)
 }
 
 type Handler struct {

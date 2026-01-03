@@ -104,6 +104,77 @@ func (r *Repository) GetMeta(ctx context.Context, id int64, fileName string) (fi
 	return
 }
 
+func (r *Repository) ListFiles(ctx context.Context, userID int64, limit, offset int32, ascending, private bool) (list []*model.File, isLastPage bool, err error) {
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return nil, false, err
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			fmt.Fprintf(os.Stderr, "[ListFiles]: rollback with error: %v\n", err)
+			err = tx.Rollback(ctx)
+		default:
+			err = tx.Commit(ctx)
+		}
+	}()
+
+	var rows pgx.Rows
+
+	// TODO: handle ascending field
+	if private {
+		// list all : private and public
+		rows, err = tx.Query(ctx, r.table("SELECT id, name, private, mime, size, created_at FROM %s WHERE owner_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3"), userID, limit, offset)
+	} else {
+		// list public only (not private)
+		rows, err = tx.Query(ctx, r.table("SELECT id, name, private, mime, size, created_at FROM %s WHERE owner_id = $1 AND private = false ORDER BY created_at DESC LIMIT $2 OFFSET $3"), userID, limit, offset)
+	}
+
+	defer rows.Close()
+	if err != nil {
+		return
+	}
+
+	list = make([]*model.File, 0)
+	for rows.Next() {
+		file := &model.File{
+			UserID:   userID,
+		}
+
+		err = rows.Scan(&file.ID, &file.Name, &file.Private, &file.Mime, &file.Size, &file.CreateUTCNano)
+		if err != nil {
+			return
+		}
+
+		list = append(list, file)
+	}
+
+	if err = rows.Err(); err != nil {
+		return
+	}
+
+	if int32(len(list)) < limit {
+		isLastPage = true
+	} else {
+		var count int32
+		err = tx.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE owner_id = $1"), userID).Scan(&count)
+		if err != nil {
+			return
+		}
+
+		if count <= offset + limit {
+			isLastPage = true
+		}
+	}
+
+	return
+}
+
 func (r *Repository) ReadFile(ctx context.Context, oid int32, writer io.Writer) (err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})

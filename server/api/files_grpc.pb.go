@@ -21,6 +21,7 @@ type FilesClient interface {
 	ReadBatchFiles(ctx context.Context, in *ReadBatchFilesRequest, opts ...grpc.CallOption) (*ReadBatchFilesResponse, error)
 	SaveFileStream(ctx context.Context, opts ...grpc.CallOption) (Files_SaveFileStreamClient, error)
 	ReadFileStream(ctx context.Context, in *ReadFileStreamRequest, opts ...grpc.CallOption) (Files_ReadFileStreamClient, error)
+	ListFiles(ctx context.Context, in *ListFilesRequest, opts ...grpc.CallOption) (*ListFilesResponse, error)
 }
 
 type filesClient struct {
@@ -115,6 +116,15 @@ func (x *filesReadFileStreamClient) Recv() (*FileData, error) {
 	return m, nil
 }
 
+func (c *filesClient) ListFiles(ctx context.Context, in *ListFilesRequest, opts ...grpc.CallOption) (*ListFilesResponse, error) {
+	out := new(ListFilesResponse)
+	err := c.cc.Invoke(ctx, "/files.v1.Files/ListFiles", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FilesServer is the server API for Files service.
 // All implementations must embed UnimplementedFilesServer
 // for forward compatibility
@@ -123,6 +133,7 @@ type FilesServer interface {
 	ReadBatchFiles(context.Context, *ReadBatchFilesRequest) (*ReadBatchFilesResponse, error)
 	SaveFileStream(Files_SaveFileStreamServer) error
 	ReadFileStream(*ReadFileStreamRequest, Files_ReadFileStreamServer) error
+	ListFiles(context.Context, *ListFilesRequest) (*ListFilesResponse, error)
 	mustEmbedUnimplementedFilesServer()
 }
 
@@ -141,6 +152,9 @@ func (UnimplementedFilesServer) SaveFileStream(Files_SaveFileStreamServer) error
 }
 func (UnimplementedFilesServer) ReadFileStream(*ReadFileStreamRequest, Files_ReadFileStreamServer) error {
 	return status.Errorf(codes.Unimplemented, "method ReadFileStream not implemented")
+}
+func (UnimplementedFilesServer) ListFiles(context.Context, *ListFilesRequest) (*ListFilesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListFiles not implemented")
 }
 func (UnimplementedFilesServer) mustEmbedUnimplementedFilesServer() {}
 
@@ -238,6 +252,24 @@ func (x *filesReadFileStreamServer) Send(m *FileData) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _Files_ListFiles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListFilesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FilesServer).ListFiles(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/files.v1.Files/ListFiles",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FilesServer).ListFiles(ctx, req.(*ListFilesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Files_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "files.v1.Files",
 	HandlerType: (*FilesServer)(nil),
@@ -249,6 +281,10 @@ var _Files_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReadBatchFiles",
 			Handler:    _Files_ReadBatchFiles_Handler,
+		},
+		{
+			MethodName: "ListFiles",
+			Handler:    _Files_ListFiles_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
