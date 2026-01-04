@@ -142,14 +142,18 @@ func (r *Repository) ListFiles(ctx context.Context, userID int64, limit, offset 
 
 	list = make([]*model.File, 0)
 	for rows.Next() {
+		var createdAt time.Time
+
 		file := &model.File{
 			UserID:   userID,
 		}
 
-		err = rows.Scan(&file.ID, &file.Name, &file.Private, &file.Mime, &file.Size, &file.CreateUTCNano)
+		err = rows.Scan(&file.ID, &file.Name, &file.Private, &file.Mime, &file.Size, &createdAt)
 		if err != nil {
 			return
 		}
+
+		file.CreateUTCNano = createdAt.UnixNano()
 
 		list = append(list, file)
 	}
