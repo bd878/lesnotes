@@ -265,6 +265,56 @@ func (r *Repository) DeleteFile(ctx context.Context, ownerID, id int64) (err err
 	return
 }
 
+func (r *Repository) PrivateFile(ctx context.Context, id, userID int64) (err error) {
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			fmt.Fprintf(os.Stderr, "[PrivateFile]: rollback with error: %v\n", err)
+			err = tx.Rollback(ctx)
+		default:
+			err = tx.Commit(ctx)
+		}
+	}()
+
+	_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = true WHERE owner_id = $1 AND id = $2"), userID, id)
+
+	return
+}
+
+func (r *Repository) PublishFile(ctx context.Context, id, userID int64) (err error) {
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			fmt.Fprintf(os.Stderr, "[PublishFile]: rollback with error: %v\n", err)
+			err = tx.Rollback(ctx)
+		default:
+			err = tx.Commit(ctx)
+		}
+	}()
+
+	_, err = tx.Exec(ctx, r.table("UPDATE %s SET private = false WHERE owner_id = $1 AND id = $2"), userID, id)
+
+	return
+}
+
 func (r Repository) table(query string) string {
 	return fmt.Sprintf(query, r.tableName)
 }

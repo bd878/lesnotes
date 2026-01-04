@@ -54,6 +54,8 @@ func New(cfg Config) *Server {
 	middleware.NoAuth().WithAuth(httpmiddleware.TokenAuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
 	mux.Handle("/files/v2/upload",         middleware.Build(handler.UploadFileV2))
 	mux.Handle("POST /files/v2/list",      middleware.Build(handler.ListFilesJsonAPI))
+	mux.Handle("POST /files/v2/publish",   middleware.Build(handler.PublishFileJsonAPI))
+	mux.Handle("POST /files/v2/private",   middleware.Build(handler.PrivateFileJsonAPI))
 
 	server := &Server{
 		Server: &http.Server{

@@ -22,6 +22,8 @@ type FilesClient interface {
 	SaveFileStream(ctx context.Context, opts ...grpc.CallOption) (Files_SaveFileStreamClient, error)
 	ReadFileStream(ctx context.Context, in *ReadFileStreamRequest, opts ...grpc.CallOption) (Files_ReadFileStreamClient, error)
 	ListFiles(ctx context.Context, in *ListFilesRequest, opts ...grpc.CallOption) (*ListFilesResponse, error)
+	PublishFile(ctx context.Context, in *PublishFileRequest, opts ...grpc.CallOption) (*PublishFileResponse, error)
+	PrivateFile(ctx context.Context, in *PrivateFileRequest, opts ...grpc.CallOption) (*PrivateFileResponse, error)
 }
 
 type filesClient struct {
@@ -125,6 +127,24 @@ func (c *filesClient) ListFiles(ctx context.Context, in *ListFilesRequest, opts 
 	return out, nil
 }
 
+func (c *filesClient) PublishFile(ctx context.Context, in *PublishFileRequest, opts ...grpc.CallOption) (*PublishFileResponse, error) {
+	out := new(PublishFileResponse)
+	err := c.cc.Invoke(ctx, "/files.v1.Files/PublishFile", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *filesClient) PrivateFile(ctx context.Context, in *PrivateFileRequest, opts ...grpc.CallOption) (*PrivateFileResponse, error) {
+	out := new(PrivateFileResponse)
+	err := c.cc.Invoke(ctx, "/files.v1.Files/PrivateFile", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FilesServer is the server API for Files service.
 // All implementations must embed UnimplementedFilesServer
 // for forward compatibility
@@ -134,6 +154,8 @@ type FilesServer interface {
 	SaveFileStream(Files_SaveFileStreamServer) error
 	ReadFileStream(*ReadFileStreamRequest, Files_ReadFileStreamServer) error
 	ListFiles(context.Context, *ListFilesRequest) (*ListFilesResponse, error)
+	PublishFile(context.Context, *PublishFileRequest) (*PublishFileResponse, error)
+	PrivateFile(context.Context, *PrivateFileRequest) (*PrivateFileResponse, error)
 	mustEmbedUnimplementedFilesServer()
 }
 
@@ -155,6 +177,12 @@ func (UnimplementedFilesServer) ReadFileStream(*ReadFileStreamRequest, Files_Rea
 }
 func (UnimplementedFilesServer) ListFiles(context.Context, *ListFilesRequest) (*ListFilesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListFiles not implemented")
+}
+func (UnimplementedFilesServer) PublishFile(context.Context, *PublishFileRequest) (*PublishFileResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PublishFile not implemented")
+}
+func (UnimplementedFilesServer) PrivateFile(context.Context, *PrivateFileRequest) (*PrivateFileResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PrivateFile not implemented")
 }
 func (UnimplementedFilesServer) mustEmbedUnimplementedFilesServer() {}
 
@@ -270,6 +298,42 @@ func _Files_ListFiles_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Files_PublishFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PublishFileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FilesServer).PublishFile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/files.v1.Files/PublishFile",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FilesServer).PublishFile(ctx, req.(*PublishFileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Files_PrivateFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PrivateFileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FilesServer).PrivateFile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/files.v1.Files/PrivateFile",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FilesServer).PrivateFile(ctx, req.(*PrivateFileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Files_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "files.v1.Files",
 	HandlerType: (*FilesServer)(nil),
@@ -285,6 +349,14 @@ var _Files_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListFiles",
 			Handler:    _Files_ListFiles_Handler,
+		},
+		{
+			MethodName: "PublishFile",
+			Handler:    _Files_PublishFile_Handler,
+		},
+		{
+			MethodName: "PrivateFile",
+			Handler:    _Files_PrivateFile_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

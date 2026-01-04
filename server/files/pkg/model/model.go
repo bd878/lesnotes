@@ -29,6 +29,14 @@ type (
 		Asc            int           `json:"asc"`
 	}
 
+	PrivateFileRequest struct {
+		ID             int64        `json:"id"`
+	}
+
+	PublishFileRequest struct {
+		ID             int64        `json:"id"`
+	}
+
 	UploadResponse struct {
 		ID             int64         `json:"id"`
 		Name           string        `json:"name,omitempty"`
@@ -42,6 +50,16 @@ type (
 		Count               int32              `json:"count,omitempty"`
 		Total               int32              `json:"total,omitempty"`
 		Offset              int32              `json:"offset,omitempty"`
+		Description         string             `json:"description"`
+	}
+
+	PrivateFileResponse struct {
+		ID                  int64              `json:"id"`
+		Description         string             `json:"description"`
+	}
+
+	PublishFileResponse struct {
+		ID                  int64              `json:"id"`
 		Description         string             `json:"description"`
 	}
 )

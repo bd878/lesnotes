@@ -8,7 +8,7 @@ user=${2?"Usage: list_files_json.sh token OR '' user_id OR 0 limit offset"}
 limit=${3?"Usage: list_files_json.sh token OR '' user_id OR 0 limit offset"}
 offset=${4?"Usage: list_files_json.sh token OR '' user_id OR 0 limit offset"}
 
-json=$(echo -n '{\"token\":\"%TOKEN%\",\"req\":{\"limit\":%LIMIT%,\"offset\":%OFFSET%,\"user_id\":%USER%}}' | 
+json=$(echo -n '{\"token\":\"%TOKEN%\",\"req\":{\"limit\":%LIMIT%,\"offset\":%OFFSET%,\"user\":%USER%}}' | 
 	sed -e "s/%TOKEN%/$token/g" -e "s/%LIMIT%/$limit/g" -e "s/%OFFSET%/$offset/g" -e "s/%USER%/$user/g")
 
 cmd=`cat <<HERE

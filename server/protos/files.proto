@@ -10,6 +10,8 @@ service Files {
 	rpc SaveFileStream(stream FileData) returns (SaveFileStreamResponse) {}
 	rpc ReadFileStream(ReadFileStreamRequest) returns (stream FileData) {}
 	rpc ListFiles(ListFilesRequest) returns (ListFilesResponse) {}
+	rpc PublishFile(PublishFileRequest) returns (PublishFileResponse) {}
+	rpc PrivateFile(PrivateFileRequest) returns (PrivateFileResponse) {}
 }
 
 message File {
@@ -68,4 +70,20 @@ message ReadFileRequest {
 message ListFilesResponse {
 	repeated File files = 1;
 	bool          is_last_page = 2;
+}
+
+message PublishFileRequest {
+	int64 id = 1;
+	int64 user_id = 2;
+}
+
+message PublishFileResponse {
+}
+
+message PrivateFileRequest {
+	int64 id = 1;
+	int64 user_id = 2;
+}
+
+message PrivateFileResponse {
 }

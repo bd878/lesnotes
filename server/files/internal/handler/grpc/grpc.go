@@ -18,6 +18,8 @@ type Repository interface {
 	DeleteFile(ctx context.Context, ownerID, id int64) (err error)
 	ReadFile(ctx context.Context, oid int32, writer io.Writer) (err error)
 	ListFiles(ctx context.Context, userID int64, limit, offset int32, ascending, private bool) (list []*model.File, isLastPage bool, err error)
+	PublishFile(ctx context.Context, id, userID int64) (err error)
+	PrivateFile(ctx context.Context, id, userID int64) (err error)
 }
 
 type Handler struct {
@@ -183,6 +185,32 @@ func (h *Handler) ListFiles(ctx context.Context, req *api.ListFilesRequest) (res
 		Files:      model.MapFilesToProto(model.FileToProto, list),
 		IsLastPage: isLastPage,
 	}
+
+	return
+}
+
+func (h *Handler) PublishFile(ctx context.Context, req *api.PublishFileRequest) (resp *api.PublishFileResponse, err error) {
+	logger.Debugw("publish file", "id", req.Id, "user_id", req.UserId)
+
+	err = h.repo.PublishFile(ctx, req.Id, req.UserId)
+	if err != nil {
+		return
+	}
+
+	resp = &api.PublishFileResponse{}
+
+	return
+}
+
+func (h *Handler) PrivateFile(ctx context.Context, req *api.PrivateFileRequest) (resp *api.PrivateFileResponse, err error) {
+	logger.Debugw("private file", "id", req.Id, "user_id", req.UserId)
+
+	err = h.repo.PrivateFile(ctx, req.Id, req.UserId)
+	if err != nil {
+		return
+	}
+
+	resp = &api.PrivateFileResponse{}
 
 	return
 }

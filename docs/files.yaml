@@ -32,6 +32,60 @@ paths:
                 $ref: '#/components/schemas/serverError'
 # END LIST
 
+# PRIVATE
+  /files/v2/private:
+    post:
+      summary: Private file
+      description: |
+        Private one user file
+      operationId: privateFileJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/privateJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/privateOK'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+# END PRIVATE
+
+# PUBLISH
+  /files/v2/publish:
+    post:
+      summary: Publish file
+      description: |
+        Publish one user file
+      operationId: publishFileJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/publishJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/publishOK'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+# END PUBLISH
+
 # UPLOAD
   /files/v1/upload:
     security:
@@ -130,6 +184,69 @@ paths:
 
 components:
   schemas:
+
+# PUBLISH
+    publishJson:
+      type: object
+      properties:
+        token:
+          type: string
+          default: ""
+          required: true
+        req:
+          type: object
+          properties:
+            id:
+              type: integer
+              required: true
+
+    publishOk:
+      type: object
+      properties:
+        status:
+          type: string 
+          default: "ok"
+        response:
+          type: object
+          properties:
+            description:
+              type: string 
+              default: ""
+            id:
+              type: integer
+# END PUBLISH
+
+# PRIVATE
+    privateJson:
+      type: object
+      properties:
+        token:
+          type: string
+          default: ""
+          required: true
+        req:
+          type: object
+          properties:
+            id:
+              type: integer
+              required: true
+
+    privateOk:
+      type: object
+      properties:
+        status:
+          type: string 
+          default: "ok"
+        response:
+          type: object
+          properties:
+            description:
+              type: string 
+              default: ""
+            id:
+              type: integer
+# END PRIVATE
+
 # LIST
     listJson:
       type: object

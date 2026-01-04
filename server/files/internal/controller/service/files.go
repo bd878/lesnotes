@@ -206,3 +206,29 @@ func (f *Files) ListFiles(ctx context.Context, userID int64, limit, offset int32
 
 	return
 }
+
+func (f *Files) PublishFile(ctx context.Context, id, userID int64) (err error) {
+	if f.isConnFailed() {
+		logger.Info("conn failed, setup new connection")
+		f.setupConnection()
+	}
+
+	logger.Debugw("publish file", "id", id, "user_id", userID)
+
+	_, err = f.client.PublishFile(ctx, &api.PublishFileRequest{Id: id, UserId: userID})
+
+	return
+}
+
+func (f *Files) PrivateFile(ctx context.Context, id, userID int64) (err error) {
+	if f.isConnFailed() {
+		logger.Info("conn failed, setup new connection")
+		f.setupConnection()
+	}
+
+	logger.Debugw("private file", "id", id, "user_id", userID)
+
+	_, err = f.client.PrivateFile(ctx, &api.PrivateFileRequest{Id: id, UserId: userID})
+
+	return
+}
