@@ -12,7 +12,7 @@ async function sendMessage(ctx) {
 		form = {}
 	}
 
-	const response = await api.sendMessageJson(ctx.state.token, form.text, form.title, [], parseInt(form.thread) || 0, true)
+	const response = await api.sendMessageJson(ctx.state.token, form.text, form.title, form.file_ids, parseInt(form.thread) || 0, true)
 
 	if (response.error.error) {
 		console.log(response.error)

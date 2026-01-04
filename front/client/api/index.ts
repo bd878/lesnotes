@@ -15,6 +15,7 @@ import updateThreadJson from './updateThreadJson';
 import privateThread from './privateThread';
 import privateThreadJson from './privateThreadJson';
 import publishThread from './publishThread';
+import listFilesJson from './listFilesJson';
 import publishThreadJson from './publishThreadJson';
 import deleteMessage from './deleteMessage';
 import deleteMessageJson from './deleteMessageJson';
@@ -57,6 +58,7 @@ export default {
 	readThreadJson,
 	publishThreadJson,
 	privateThreadJson,
+	listFilesJson,
 	sendMessageJson,
 	updateMessage,
 	updateMessageJson,

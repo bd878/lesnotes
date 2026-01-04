@@ -7,7 +7,6 @@ async function home(ctx) {
 
 	await builder.addSettings()
 	await builder.addMessagesStack(ctx.state.stack)
-	await builder.addFilesInput()
 	await builder.addNewMessageForm(ctx.state.thread)
 	await builder.addSearch()
 	await builder.addLogout()

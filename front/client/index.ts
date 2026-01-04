@@ -16,6 +16,7 @@ import notAuthed from './handlers/notAuthed';
 import authed from './handlers/authed';
 import noCache from './handlers/noCache';
 import loadStack from './handlers/loadStack';
+import loadFiles from './handlers/loadFiles';
 import loadMessage from './handlers/loadMessage';
 import loadThread from './handlers/loadThread';
 import loadSearch from './handlers/loadSearch';
@@ -45,6 +46,7 @@ import main from './routes/main';
 import login from './routes/login';
 import signup from './routes/signup';
 import home from './routes/home';
+import files from './routes/files';
 import search from './routes/search';
 import xxx from './routes/xxx';
 import publicMessage from './routes/publicMessage';
@@ -78,6 +80,7 @@ router
 	.get("logout",                 "/logout",                       etag, noCache, getState, expireToken, redirectLogin)
 	.get("signup",                 "/signup",                       etag, noCache, getState, getToken, notAuthed, signup)
 	.get("home",                   "/home",                         etag, noCache, getToken, authed, getMe, getState, loadStack, home)
+	.get("files",                  "/files",                        etag, noCache, getToken, authed, getMe, getState, loadStack, loadFiles, files)
 	.get("message",                "/messages/:id",                 etag, noCache, getToken, authed, getMe, getState, loadStack, loadMessage, formatView, messageView)
 	.get("thread",                 "/threads/:id",                  etag, noCache, getToken, authed, getMe, getState, loadStack, loadThread, formatView, threadView)
 	.get("editMessage",            "/editor/messages/:id",          etag, noCache, getToken, authed, getMe, getState, loadStack, loadMessage, formatTextarea, messageEdit)
@@ -87,14 +90,14 @@ router
 	.post("doLogin",               "/login",                        etag, getState, validateLogin, redirectHome)
 	.post("doSignup",              "/signup",                       etag, getState, validateSignup, redirectHome)
 	.post("doSearch",              "/search",                       etag, getToken, authed, getState, getMe, getSearchForm, loadSearch, loadSearchPath, search)
-	.post("doDelete",              "/m/delete",                     getToken, authed, getState, deleteMessage)
-	.post("doPublish",             "/m/publish",                    getToken, authed, getState, publishMessage)
-	.post("doPrivate",             "/m/private",                    getToken, authed, getState, privateMessage)
-	.post("doUpdate",              "/m/update",                     getToken, authed, getState, updateMessage)
+	.post("doDeleteMessage",       "/m/delete",                     getToken, authed, getState, deleteMessage)
+	.post("doPublishMessage",      "/m/publish",                    getToken, authed, getState, publishMessage)
+	.post("doPrivateMessage",      "/m/private",                    getToken, authed, getState, privateMessage)
+	.post("doUpdateMessage",       "/m/update",                     getToken, authed, getState, updateMessage)
 	.post("doPublishThread",       "/t/publish",                    getToken, authed, getState, publishThread)
 	.post("doPrivateThread",       "/t/private",                    getToken, authed, getState, privateThread)
 	.post("doUpdateThread",        "/t/update",                     getToken, authed, getState, updateThread)
-	.post("doSend",                "/send",                         getToken, authed, getState, sendMessage)
+	.post("doSendMessage",         "/send",                         getToken, authed, getState, sendMessage)
 	.get("tgAuth",                 "/tg_auth",                      authTelegram)
 	.get("publicMessage",          "/m/:messageName",               etag, noCache, getState, getToken, getMe, loadMessage, formatView, publicMessage)
 	.get("publicThread",           "/t/:threadName",                etag, noCache, getState, getToken, getMe, loadThread, loadThreadMessages, formatView, publicThread)
