@@ -17,6 +17,7 @@ class HomeBuilder extends AbstractBuilder {
 	threadEditForm  = undefined;
 	pagination      = undefined;
 	filesInput      = undefined;
+	filesForm       = undefined;
 	filesList       = undefined;
 
 	messagesStack = undefined;
@@ -132,6 +133,7 @@ class HomeBuilder extends AbstractBuilder {
 				pagination:      this.pagination,
 				filesList:       this.filesList,
 				filesInput:      this.filesInput,
+				filesForm:       this.filesForm,
 			}),
 		});
 	}

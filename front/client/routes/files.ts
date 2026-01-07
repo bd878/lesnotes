@@ -8,7 +8,7 @@ async function files(ctx) {
 
 	await builder.addSettings()
 	await builder.addMessagesStack(ctx.state.stack)
-	await builder.addFilesInput()
+	await builder.addFilesForm()
 	if (is.notEmpty(ctx.state.files)) {
 		await builder.addFilesList(ctx.state.files.files)
 		await builder.addPagination(ctx.state.files.paging)

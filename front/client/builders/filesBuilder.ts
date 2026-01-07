@@ -36,14 +36,16 @@ class FilesBuilder extends HomeBuilder {
 		})
 	}
 
-	async addFilesInput(files: File[] = []) {
+	async addFilesForm(files: File[] = []) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/files/mobile/files_input.mustache' : 'templates/files/desktop/files_input.mustache'
+			this.isMobile ? 'templates/files/mobile/files_form.mustache' : 'templates/files/desktop/files_form.mustache'
 		)), { encoding: 'utf-8' });
 
-		this.filesInput = mustache.render(template, {
+		this.filesForm = mustache.render(template, {
 			noFiles:            this.i18n("noFiles"),
 			files:              files,
+			sendButton:         this.i18n("sendButton"),
+			sendAction:         `/files/v1/upload`,
 		})
 	}
 }
