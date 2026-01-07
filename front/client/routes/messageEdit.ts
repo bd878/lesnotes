@@ -7,8 +7,6 @@ async function messageEdit(ctx) {
 
 	await builder.addSettings()
 	await builder.addMessagesStack(ctx.state.stack)
-	await builder.addFilesInput()
-	await builder.addFilesList()
 	await builder.addMessageEditForm(ctx.state.message)
 	await builder.addSearch()
 	await builder.addLogout()

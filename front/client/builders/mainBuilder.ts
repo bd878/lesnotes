@@ -31,7 +31,9 @@ class MainBuilder extends AbstractBuilder {
 
 	async build() {
 		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
-		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
+		const layout = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/layout/mobile/layout.mustache' : 'templates/layout/desktop/layout.mustache'
+		)), { encoding: 'utf-8' });
 		const main = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/main/mobile/main.mustache' : 'templates/main/desktop/main.mustache'
 		)), { encoding: 'utf-8' });
@@ -53,7 +55,6 @@ class MainBuilder extends AbstractBuilder {
 			manifest: "/public/manifest.json",
 			styles:   styles,
 			lang:     this.lang,
-			isMobile: this.isMobile ? "true" : "",
 		}, {
 			footer:  this.footer,
 			content: mustache.render(main, {

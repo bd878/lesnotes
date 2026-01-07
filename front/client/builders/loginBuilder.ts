@@ -54,7 +54,9 @@ class LoginBuilder extends AbstractBuilder {
 
 	async build(error?: string) {
 		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
-		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
+		const layout = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/layout/mobile/layout.mustache' : 'templates/layout/desktop/layout.mustache'
+		)), { encoding: 'utf-8' });
 		const login = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/login/mobile/login.mustache' : 'templates/login/desktop/login.mustache'
 		)), { encoding: 'utf-8' });
@@ -77,7 +79,6 @@ class LoginBuilder extends AbstractBuilder {
 			manifest: "/public/manifest.json",
 			styles:   styles,
 			lang:     this.lang,
-			isMobile: this.isMobile ? "true" : "",
 		}, {
 			footer:  this.footer,
 			content: mustache.render(login, {

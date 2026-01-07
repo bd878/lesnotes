@@ -7,7 +7,6 @@ async function messageView(ctx) {
 
 	await builder.addSettings()
 	await builder.addMessagesStack(ctx.state.stack)
-	await builder.addFilesList()
 	await builder.addMessageView(ctx.state.me.ID, ctx.state.message)
 	await builder.addSearch()
 	await builder.addLogout()

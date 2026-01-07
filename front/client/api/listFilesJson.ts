@@ -24,7 +24,7 @@ async function listFilesJson(token: string, user: number, limit: number, offset:
 		if (error.error) {
 			result.error = models.error(error)
 		} else {
-			result.files  = response.fiels.map(models.file)
+			result.files  = response.files.map(models.file)
 			result.paging = models.paging(response)
 		}
 	} catch (e) {

@@ -50,20 +50,11 @@ class SignupBuilder extends AbstractBuilder {
 		this.sidebar = mustache.render(template, {mainHref: "/" + this.search, settingsHeader: this.i18n("settingsHeader")}, {settings: this.settings})
 	}
 
-	footer = undefined;
-	async addFooter() {
-		const template = await readFile(resolve(join(Config.get("basedir"), 'templates/footer.mustache')), { encoding: 'utf-8' });
-
-		this.footer = mustache.render(template, {
-			terms:            this.i18n("terms"),
-			contact:          this.i18n("contact"),
-			docs:             this.i18n("docs"),
-		})
-	}
-
 	async build(error?: string) {
 		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
-		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
+		const layout = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/layout/mobile/layout.mustache' : 'templates/layout/desktop/layout.mustache'
+		)), { encoding: 'utf-8' });
 		const signup = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/signup/mobile/signup.mustache' : 'templates/signup/desktop/signup.mustache'
 		)), { encoding: 'utf-8' });
@@ -86,7 +77,6 @@ class SignupBuilder extends AbstractBuilder {
 			manifest: "/public/manifest.json",
 			styles:   styles,
 			lang:     this.lang,
-			isMobile: this.isMobile ? "true" : "",
 		}, {
 			footer:  this.footer,
 			content: mustache.render(signup, {

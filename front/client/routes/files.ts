@@ -1,3 +1,4 @@
+import * as is from '../third_party/is';
 import FilesBuilder from '../builders/filesBuilder';
 
 async function files(ctx) {
@@ -8,7 +9,9 @@ async function files(ctx) {
 	await builder.addSettings()
 	await builder.addMessagesStack(ctx.state.stack)
 	await builder.addFilesInput()
-	await builder.addFilesList(ctx.state.files)
+	if (is.notEmpty(ctx.state.files)) {
+		await builder.addFilesList(ctx.state.files.files, ctx.state.files.paging)
+	}
 	await builder.addSearch() // TODO: addFilesSearch
 	await builder.addLogout()
 	await builder.addSidebar()

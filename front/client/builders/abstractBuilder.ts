@@ -30,7 +30,9 @@ abstract class AbstractBuilder {
 
 	footer = undefined;
 	async addFooter() {
-		const template = await readFile(resolve(join(Config.get("basedir"), 'templates/footer.mustache')), { encoding: 'utf-8' });
+		const template = await readFile(resolve(join(Config.get("basedir"),
+			this.isMobile ? 'templates/footer/mobile/footer.mustache' : 'templates/footer/desktop/footer.mustache'
+		)), { encoding: 'utf-8' });
 
 		this.footer = mustache.render(template, {
 			terms:            this.i18n("terms"),

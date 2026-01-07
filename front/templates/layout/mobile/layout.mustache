@@ -16,22 +16,12 @@
 		<title>Les notes</title>
 	</head>
 	<body class="large:text-xl small:text-sm dark:bg-gray-900 dark:text-gray-400 text-gray-950">
-		{{#isMobile}}
-			<div data-is-mobile="{{isMobile}}" class="py-5 h-screen flex flex-col items-start relative">
-		{{/isMobile}}
-		{{^isMobile}}
-			<div class="pb-5 pt-10 h-screen flex flex-col items-start relative">
-		{{/isMobile}}
+		<div data-is-mobile="true" class="py-5 h-screen flex flex-col items-start relative">
 			<div class="w-full grow">
 				{{> content}}
 			</div>
 
-		{{#isMobile}}
 			<div class="pt-5 pb-5 w-full">
-		{{/isMobile}}
-		{{^isMobile}}
-			<div class="pt-8 w-full">
-		{{/isMobile}}
 				{{> footer}}
 			</div>
 		</div>

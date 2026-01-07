@@ -45,7 +45,7 @@ import assets from './routes/assets';
 import main from './routes/main';
 import login from './routes/login';
 import signup from './routes/signup';
-import home from './routes/home';
+import newMessage from './routes/newMessage';
 import files from './routes/files';
 import search from './routes/search';
 import xxx from './routes/xxx';
@@ -79,7 +79,7 @@ router
 	.get("login",                  "/login",                        etag, noCache, getState, getToken, notAuthed, login)
 	.get("logout",                 "/logout",                       etag, noCache, getState, expireToken, redirectLogin)
 	.get("signup",                 "/signup",                       etag, noCache, getState, getToken, notAuthed, signup)
-	.get("home",                   "/home",                         etag, noCache, getToken, authed, getMe, getState, loadStack, home)
+	.get("home",                   "/home",                         etag, noCache, getToken, authed, getMe, getState, loadStack, newMessage)
 	.get("files",                  "/files",                        etag, noCache, getToken, authed, getMe, getState, loadStack, loadFiles, files)
 	.get("message",                "/messages/:id",                 etag, noCache, getToken, authed, getMe, getState, loadStack, loadMessage, formatView, messageView)
 	.get("thread",                 "/threads/:id",                  etag, noCache, getToken, authed, getMe, getState, loadStack, loadThread, formatView, threadView)

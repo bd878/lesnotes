@@ -90,7 +90,9 @@ class PublicThreadBuilder extends AbstractBuilder {
 
 	async build(message?: Message) {
 		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
-		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
+		const layout = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/layout/mobile/layout.mustache' : 'templates/layout/desktop/layout.mustache'
+		)), { encoding: 'utf-8' });
 		const content = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/thread/mobile/thread.mustache' : 'templates/thread/desktop/thread.mustache'
 		)), { encoding: 'utf-8' });
@@ -113,7 +115,6 @@ class PublicThreadBuilder extends AbstractBuilder {
 			styles:   styles,
 			lang:     this.lang,
 			theme:    this.theme,
-			isMobile: this.isMobile ? "true" : "",
 		}, {
 			footer: this.footer,
 			content: mustache.render(content, {

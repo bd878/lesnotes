@@ -1,4 +1,3 @@
-import home from '../routes/home'
 import * as is from '../third_party/is'
 import api from '../api'
 
@@ -17,7 +16,7 @@ async function sendMessage(ctx) {
 	if (response.error.error) {
 		console.log(response.error)
 		ctx.state.error = response.error.human
-		await home(ctx)
+		ctx.body = "error"
 	} else {
 		ctx.redirect(ctx.router.url('home', {}, {query: ctx.query}))
 	}

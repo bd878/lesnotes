@@ -23,7 +23,9 @@ class PublicMessageBuilder extends AbstractBuilder {
 
 	async build(message?: Message) {
 		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
-		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
+		const layout = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/layout/mobile/layout.mustache' : 'templates/layout/desktop/layout.mustache'
+		)), { encoding: 'utf-8' });
 		const content = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/message/mobile/message.mustache' : 'templates/message/desktop/message.mustache'
 		)), { encoding: 'utf-8' });
@@ -46,7 +48,6 @@ class PublicMessageBuilder extends AbstractBuilder {
 			styles:    styles,
 			lang:      this.lang,
 			theme:     theme,
-			isMobile:  this.isMobile ? "true" : "",
 		}, {
 			footer:    this.footer,
 			content:   mustache.render(content, {

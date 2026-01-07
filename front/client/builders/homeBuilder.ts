@@ -11,9 +11,12 @@ import AbstractBuilder from './abstractBuilder'
 
 class HomeBuilder extends AbstractBuilder {
 	messageEditForm = undefined;
-	messageView = undefined;
-	threadView = undefined;
-	threadEditForm = undefined;
+	messageView     = undefined;
+	newMessageForm  = undefined;
+	threadView      = undefined;
+	threadEditForm  = undefined;
+	filesList       = undefined;
+	filesInput      = undefined;
 
 	messagesStack = undefined;
 	async addMessagesStack(stack: ThreadMessages[]) {
@@ -40,30 +43,6 @@ class HomeBuilder extends AbstractBuilder {
 			rootThreadHref:   function() { const params = new URLSearchParams(search); params.delete("cwd"); return path + "?" + params.toString(); },
 			prevPageHref:     function() { const params = new URLSearchParams(search); params.set(this.message.ID || 0, `${limit + this.offset}`); return path + "?" + params.toString(); },
 			nextPageHref:     function() { const params = new URLSearchParams(search); params.set(this.message.ID || 0, `${Math.max(0, this.offset - limit)}`); return path + "?" + params.toString(); },
-		})
-	}
-
-	filesList = undefined;
-	async addFilesList(files: File[] = []) {
-		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/home/mobile/files_list.mustache' : 'templates/home/desktop/files_list.mustache'
-		)), { encoding: 'utf-8' });
-
-		this.filesList = mustache.render(template, {
-			noFiles:            this.i18n("noFiles"),
-			files:              files,
-		})
-	}
-
-	filesInput = undefined;
-	async addFilesInput(files: File[] = []) {
-		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/home/mobile/files_input.mustache' : 'templates/home/desktop/files_input.mustache'
-		)), { encoding: 'utf-8' });
-
-		this.filesInput = mustache.render(template, {
-			noFiles:            this.i18n("noFiles"),
-			files:              files,
 		})
 	}
 
@@ -110,26 +89,11 @@ class HomeBuilder extends AbstractBuilder {
 		})
 	}
 
-	newMessageForm = undefined;
-	async addNewMessageForm(thread?: number) {
-		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/home/mobile/new_message_form.mustache' : 'templates/home/desktop/new_message_form.mustache'
-		)), { encoding: 'utf-8' });
-
-		this.newMessageForm = mustache.render(template, {
-			titlePlaceholder: this.i18n("titlePlaceholder"),
-			textPlaceholder:  this.i18n("textPlaceholder"),
-			sendButton:       this.i18n("sendButton"),
-			sendAction:       "/send" + this.search,
-			thread:           thread || 0,
-		}, {
-			filesInput:       this.filesInput,
-		})
-	}
-
 	async build() {
 		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
-		const layout = await readFile(resolve(join(Config.get('basedir'), 'templates/layout.mustache')), { encoding: 'utf-8' });
+		const layout = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/layout/mobile/layout.mustache' : 'templates/layout/desktop/layout.mustache'
+		)), { encoding: 'utf-8' });
 		const home = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/home/mobile/home.mustache' : 'templates/home/desktop/home.mustache'
 		)), { encoding: 'utf-8' });
@@ -153,7 +117,6 @@ class HomeBuilder extends AbstractBuilder {
 			styles:   styles,
 			lang:     this.lang,
 			theme:    theme,
-			isMobile: this.isMobile ? "true" : "",
 		}, {
 			footer: this.footer,
 			content: mustache.render(home, {}, {
@@ -164,6 +127,8 @@ class HomeBuilder extends AbstractBuilder {
 				threadEditForm:  this.threadEditForm,
 				newMessageForm:  this.newMessageForm,
 				messagesStack:   this.messagesStack,
+				filesList:       this.filesList,
+				filesInput:      this.filesInput,
 				sidebar:         this.sidebar,
 			}),
 		});
