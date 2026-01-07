@@ -2,7 +2,6 @@
 	<form
 		autocomplete="off"
 		method="POST"
-		enctype="multipart/form-data"
 		class="w-full flex flex-col grow"
 	>
 		<div class="flex flex-col grow">
@@ -13,6 +12,8 @@
 			<input name="title" class="mb-2 w-full dark:text-white resize-none px-1 border-1 border-gray-600 rounded-md placeholder:italic placeholder:text-gray-600 rounded-md text-lg" placeholder="{{titlePlaceholder}}" value="{{title}}"></input>
 			<textarea name="text" type="input" class="w-full h-full dark:text-white px-1 mb-2 border-1 rounded-md border-gray-600 resize-none overflow-y-scroll wrap-break-word text-start placeholder:italic placeholder:text-gray-600 rounded-md" placeholder="{{textPlaceholder}}">{{{text}}}</textarea>
 		</div>
+
+		{{> filesInput}}
 
 		<div class="flex flex-col">
 			<div></div>

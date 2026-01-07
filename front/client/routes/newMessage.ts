@@ -6,6 +6,7 @@ async function newMessage(ctx) {
 	const builder = new NewMessageBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
 	await builder.addSettings()
+	await builder.addFilesInput(ctx.state.files.files)
 	await builder.addMessagesStack(ctx.state.stack)
 	await builder.addNewMessageForm(ctx.state.thread)
 	await builder.addSearch()

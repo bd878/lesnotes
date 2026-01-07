@@ -7,6 +7,7 @@ async function files(ctx) {
 	const builder = new FilesBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
 	await builder.addSettings()
+	await builder.addGoBack()
 	await builder.addMessagesStack(ctx.state.stack)
 	await builder.addFilesForm()
 	if (is.notEmpty(ctx.state.files)) {

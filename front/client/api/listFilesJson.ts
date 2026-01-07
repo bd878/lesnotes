@@ -1,6 +1,12 @@
 import api from './api';
 import models from './models';
 
+const EmptyFilesList = {
+	error:  models.error(),
+	files:  [],
+	paging: models.paging(),
+}
+
 async function listFilesJson(token: string, user: number, limit: number, offset: number) {
 	let result = {
 		error:       models.error(),
@@ -37,3 +43,4 @@ async function listFilesJson(token: string, user: number, limit: number, offset:
 }
 
 export default listFilesJson;
+export { EmptyFilesList };

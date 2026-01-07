@@ -34,8 +34,6 @@ class MessageViewBuilder extends HomeBuilder {
 			userID:           userID,
 			domain:           Config.get("domain"),
 		}, {
-			filesList:        this.filesList,
-			filesInput:       this.filesInput,
 		})
 	}
 }

@@ -38,6 +38,9 @@ const texts = {
 		emptyListText: "List is empty",
 		newNote: "New note",
 		settingsHeader: "Settings",
+		defaultFile: "--Select files (use ctrl to select multiple)--",
+		filesSummary: "Files",
+		goBack: "Back",
 
 		terms: "Terms",
 		contact: "Contact",
@@ -83,6 +86,9 @@ const texts = {
 		emptyListText: "Ничего не найдено",
 		newNote: "Новая заметка",
 		settingsHeader: "Настройки",
+		defaultFile: "--Выберите файлы (ctrl для выбора нескольких)--",
+		filesSummary: "Файлы",
+		goBack: "Назад",
 
 		terms: "Политика",
 		contact: "Контакты",
@@ -128,6 +134,9 @@ const texts = {
 		emptyListText: "Nichts gefunden",
 		newNote: "Neue Notiz",
 		settingsHeader: "Einstellung",
+		defaultFile: "--Wählen die dateien (ctrl für mehrerer)--",
+		filesSummary: "Dateien",
+		goBack: "Zurück",
 
 		terms: "",
 		contact: "",
@@ -173,6 +182,9 @@ const texts = {
 		emptyListText: "Le liste est vide",
 		newNote: "Nouvelle note",
 		settingsHeader: "Réglages",
+		defaultFile: "--Choisissez les fichier, svp (ctrl pour plusieurs)--",
+		filesSummary: "Fichier",
+		goBack: "Revenir",
 
 		terms: "",
 		contact: "",

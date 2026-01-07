@@ -18,6 +18,8 @@ class NewMessageBuilder extends HomeBuilder {
 			sendAction:       "/send" + this.search,
 			thread:           thread || 0,
 			filesListHref:    "/files" + this.search,
+		}, {
+			filesInput: this.filesInput,
 		})
 	}
 }

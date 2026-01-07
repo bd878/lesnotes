@@ -5,6 +5,7 @@
 
 	<div class="min-w-lg max-w-lg flex flex-row ml-8">
 		<div class="flex flex-col grow-2 w-full">
+			{{> goBack}}
 			<div class="flex flex-col grow p-2 mb-2 border border-1 border-solid rounded-md">
 				{{> messageEditForm}}
 				{{> messageView}}
@@ -13,7 +14,6 @@
 				{{> threadView}}
 				{{> filesList}}
 				{{> pagination}}
-				{{> filesInput}}
 			</div>
 			{{> filesForm}}
 		</div>

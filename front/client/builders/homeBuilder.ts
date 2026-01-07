@@ -19,8 +19,12 @@ class HomeBuilder extends AbstractBuilder {
 	filesInput      = undefined;
 	filesForm       = undefined;
 	filesList       = undefined;
+	messagesStack   = undefined;
+	searchForm      = undefined;
+	logout          = undefined;
+	sidebar         = undefined;
+	goBack          = undefined;
 
-	messagesStack = undefined;
 	async addMessagesStack(stack: ThreadMessages[]) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/home/mobile/messages_stack.mustache' : 'templates/home/desktop/messages_stack.mustache'
@@ -48,7 +52,6 @@ class HomeBuilder extends AbstractBuilder {
 		})
 	}
 
-	searchForm = undefined;
 	async addSearch() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/search_form/mobile/search_form.mustache' : 'templates/search_form/desktop/search_form.mustache'
@@ -61,7 +64,6 @@ class HomeBuilder extends AbstractBuilder {
 		})
 	}
 
-	logout = undefined;
 	async addLogout() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/sidebar_vertical/mobile/logout.mustache' : 'templates/sidebar_vertical/desktop/logout.mustache'
@@ -75,7 +77,6 @@ class HomeBuilder extends AbstractBuilder {
 		})
 	}
 
-	sidebar = undefined;
 	async addSidebar() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/sidebar_vertical/mobile/sidebar_vertical.mustache' : 'templates/sidebar_vertical/desktop/sidebar_vertical.mustache'
@@ -88,6 +89,18 @@ class HomeBuilder extends AbstractBuilder {
 			settings:         this.settings,
 			searchForm:       this.searchForm,
 			logout:           this.logout,
+		})
+	}
+
+	async addFilesInput(files: File[]) {
+		const template = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/home/mobile/files_input.mustache' : 'templates/home/desktop/files_input.mustache'
+		)), { encoding: 'utf-8' });
+
+		this.filesInput = mustache.render(template, {
+			files:             files,
+			defaultFile:       this.i18n("defaultFile"),
+			filesSummary:      this.i18n("filesSummary"),
 		})
 	}
 
@@ -132,8 +145,8 @@ class HomeBuilder extends AbstractBuilder {
 				sidebar:         this.sidebar,
 				pagination:      this.pagination,
 				filesList:       this.filesList,
-				filesInput:      this.filesInput,
 				filesForm:       this.filesForm,
+				goBack:          this.goBack,
 			}),
 		});
 	}

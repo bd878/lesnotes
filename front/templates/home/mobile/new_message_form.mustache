@@ -8,6 +8,8 @@
 		<input name="title" class="focus:outline-none w-full small:placeholder:text-sm large:placeholder:text-xl small:text-sm large:text-xl resize-none px-1 placeholder:italic placeholder:text-gray-600 text-lg mb-2" placeholder="{{titlePlaceholder}}"></input>
 		<textarea name="text" type="input" class="mb-2 focus:outline-none w-full px-1 overflow-y-scroll resize-none placeholder:italic placeholder:text-gray-600 text-sm small:placeholder:text-sm large:placeholder:text-lg small:text-sm large:text-lg h-full" placeholder="{{textPlaceholder}}"></textarea>
 
+		{{> filesInput}}
+
 		<div class="flex flex-row">
 			<button type="submit" class="rounded-md border-1 px-2 border-solid text-left cursor-pointer">
 				{{sendButton}}

@@ -32,7 +32,6 @@ class MessageEditViewBuilder extends HomeBuilder {
 			domain:           Config.get("domain"),
 		}, {
 			filesInput:       this.filesInput,
-			filesList:        this.filesList,
 		})
 	}
 }
