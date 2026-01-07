@@ -1,0 +1,9 @@
+<div class="justify-between p-2 rounded-md min-h-[40px] small:min-h-[30px]">
+	<ul class="flex flex-col">
+		{{#files}}
+			<li class="grow-1 max-w-full flex flex-row justify-between whitespace-nowrap">
+				<a target="_blank" href="/files/v1/{{ID}}/download" class="flex flex-row justify-between overflow-hidden cursor-pointer">{{name}}</a>
+			</li>
+		{{/files}}
+	</ul>
+</div>

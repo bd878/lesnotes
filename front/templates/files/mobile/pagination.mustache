@@ -1,0 +1,9 @@
+<div class="flex flex-row mt-2">
+	{{^isLastPage}}
+		<a href="{{prevPageHref}}" target="_self" class="flex justify-center grow cursor-pointer dark:bg-slate-600 dark:hover:text-white bg-gray-300 ml-[2px] mr-2 last:mr-0"><-</a>
+	{{/isLastPage}}
+
+	{{^isFirstPage}}
+		<a href="{{nextPageHref}}" target="_self" class="flex justify-center grow cursor-pointer ml-[2px] dark:bg-slate-600 dark:hover:text-white bg-gray-300">-></a>
+	{{/isFirstPage}}
+</div>

@@ -7,21 +7,38 @@ import { resolve, join } from 'node:path';
 import HomeBuilder from './homeBuilder';
 
 class FilesBuilder extends HomeBuilder {
-	async addFilesList(files: File[] = [], paging: Paging) {
+	async addFilesList(files: File[] = []) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/home/mobile/files_list.mustache' : 'templates/home/desktop/files_list.mustache'
+			this.isMobile ? 'templates/files/mobile/files_list.mustache' : 'templates/files/desktop/files_list.mustache'
 		)), { encoding: 'utf-8' });
 
 		this.filesList = mustache.render(template, {
 			noFiles:            this.i18n("noFiles"),
 			files:              files,
-			paging:             paging,
+		})
+	}
+
+	async addPagination(paging: Paging) {
+		const template = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/files/mobile/pagination.mustache' : 'templates/files/desktop/pagination.mustache'
+		)), { encoding: 'utf-8' });
+
+		const search = this.search
+		const path = this.path
+
+		const limit = parseInt(LIMIT)
+
+		this.pagination = mustache.render(template, {
+			prevPageHref:     function() { const params = new URLSearchParams(search); params.set("files", `${limit + this.offset}`); return path + "?" + params.toString(); },
+			nextPageHref:     function() { const params = new URLSearchParams(search); params.set("files", `${Math.max(0, this.offset - limit)}`); return path + "?" + params.toString(); },
+			isLastPage:       paging.isLastPage,
+			isFirstPage:      paging.isFirstPage,
 		})
 	}
 
 	async addFilesInput(files: File[] = []) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/home/mobile/files_input.mustache' : 'templates/home/desktop/files_input.mustache'
+			this.isMobile ? 'templates/files/mobile/files_input.mustache' : 'templates/files/desktop/files_input.mustache'
 		)), { encoding: 'utf-8' });
 
 		this.filesInput = mustache.render(template, {

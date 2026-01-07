@@ -15,8 +15,9 @@ class HomeBuilder extends AbstractBuilder {
 	newMessageForm  = undefined;
 	threadView      = undefined;
 	threadEditForm  = undefined;
-	filesList       = undefined;
+	pagination      = undefined;
 	filesInput      = undefined;
+	filesList       = undefined;
 
 	messagesStack = undefined;
 	async addMessagesStack(stack: ThreadMessages[]) {
@@ -127,9 +128,10 @@ class HomeBuilder extends AbstractBuilder {
 				threadEditForm:  this.threadEditForm,
 				newMessageForm:  this.newMessageForm,
 				messagesStack:   this.messagesStack,
+				sidebar:         this.sidebar,
+				pagination:      this.pagination,
 				filesList:       this.filesList,
 				filesInput:      this.filesInput,
-				sidebar:         this.sidebar,
 			}),
 		});
 	}
