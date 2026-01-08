@@ -2,13 +2,13 @@
 	<div id="messages-list" ondragover="event.preventDefault()" class="flex flex-col max-w-full overflow-x-auto h-full grow">
 		{{#stack}}
 			{{#open}}
-				<details open class="flex flex-col w-md min-w-md max-w-md ml-2 mb-2">
+				<details open class="flex flex-col w-md min-w-md max-w-md mb-2">
 			{{/open}}
 			{{^open}}
-				<details class="flex flex-col w-md min-w-md max-w-md ml-2 mb-2">
+				<details class="flex flex-col w-md min-w-md max-w-md mb-2">
 			{{/open}}
 				<summary class="mb-2 mt-[2px] ml-[2px]">
-					<span class="inline-flex justify-between w-[calc(100%-20px)] large:w-[calc(100%-30px)] small:w-[calc(100%-20px)]">
+					<span class="inline-flex justify-between w-[calc(100%-25px)] large:w-[calc(100%-35px)] small:w-[calc(100%-25px)]">
 						{{#message}}
 							{{#ID}}
 								<a target="_self" href="{{viewThreadHref}}" class="overflow-hidden text-ellipsis dark:hover:text-white hover:text-blue-600 cursor-pointer underline">
@@ -27,10 +27,6 @@
 										/
 									{{/text}}
 								{{/title}}
-
-								{{#ID}}
-									<span class="ml-1 text-sm italic">(edit)</span>
-								{{/ID}}
 							</a>
 						{{/message}}
 

@@ -5,6 +5,7 @@ async function threadView(ctx) {
 
 	const builder = new ThreadViewBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
+	await builder.addControlPanel()
 	await builder.addThreadView(ctx.state.thread)
 	await builder.addSettings()
 	await builder.addMessagesStack(ctx.state.stack)

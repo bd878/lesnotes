@@ -49,6 +49,9 @@ function openClosed(stack: ThreadMessages, index: number, arr: ThreadMessages[])
 	if (arr.length <= 1) {
 		open = true
 	}
+	if (stack.paging.offset != 0) {
+		open = true
+	}
 
 	return {
 		...stack,

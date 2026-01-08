@@ -5,6 +5,7 @@ async function threadEdit(ctx) {
 
 	const builder = new ThreadEditBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
+	await builder.addControlPanel()
 	await builder.addThreadEditForm(ctx.state.thread)
 	await builder.addMessagesStack(ctx.state.stack)
 	await builder.addSettings()

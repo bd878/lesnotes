@@ -24,6 +24,7 @@ class HomeBuilder extends AbstractBuilder {
 	logout          = undefined;
 	sidebar         = undefined;
 	goBack          = undefined;
+	controlPanel    = undefined;
 
 	async addMessagesStack(stack: ThreadMessages[]) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
@@ -61,6 +62,21 @@ class HomeBuilder extends AbstractBuilder {
 			action:              "/search" + this.search,
 			searchPlaceholder:   this.i18n("searchPlaceholder"),
 			searchMessages:      this.i18n("search"),
+		})
+	}
+
+	async addControlPanel() {
+		const template = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/home/mobile/control_panel.mustache' : 'templates/home/desktop/control_panel.mustache'
+		)), { encoding: 'utf-8' });
+
+		const search = this.search;
+
+		this.controlPanel = mustache.render(template, {
+			newNoteHref:      function() { return "/home" + search; },
+			newNoteButton:    this.i18n("newNote"),
+			newFileHref:      function() { return "/files" + search; },
+			newFileButton:    this.i18n("newFile"),
 		})
 	}
 
@@ -147,6 +163,7 @@ class HomeBuilder extends AbstractBuilder {
 				filesList:       this.filesList,
 				filesForm:       this.filesForm,
 				goBack:          this.goBack,
+				controlPanel:    this.controlPanel,
 			}),
 		});
 	}
