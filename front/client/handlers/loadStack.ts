@@ -1,5 +1,10 @@
+import type { ThreadMessages } from '../api/models'
 import api from '../api';
 import * as is from '../third_party/is';
+
+interface OpenClosedThreadMessages extends ThreadMessages {
+	open: boolean;
+}
 
 const limit = parseInt(LIMIT)
 
@@ -25,7 +30,7 @@ async function loadStack(ctx, next) {
 			ctx.status = 400;
 			return;
 		}
-		ctx.state.stack = ctx.state.stack.stack
+		ctx.state.stack = ctx.state.stack.stack.map(openClosed)
 	} else {
 		ctx.state.stack = []
 	}
@@ -33,6 +38,22 @@ async function loadStack(ctx, next) {
 	await next()
 
 	console.log("<-- loadStack")
+}
+
+function openClosed(stack: ThreadMessages, index: number, arr: ThreadMessages[]): OpenClosedThreadMessages {
+	let open = false;
+
+	if (arr.length > 1 && index == (arr.length - 1)) {
+		open = true
+	}
+	if (arr.length <= 1) {
+		open = true
+	}
+
+	return {
+		...stack,
+		open,
+	}
 }
 
 function buildThreadOffsets(searchParams): Record<number, number> {
@@ -49,3 +70,4 @@ function buildThreadOffsets(searchParams): Record<number, number> {
 }
 
 export default loadStack
+export type { OpenClosedThreadMessages };

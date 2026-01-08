@@ -1,103 +1,114 @@
-{{#stack}}
-	<div class="flex flex-col w-xs min-w-xs max-w-xs first:ml-0 last:mr-8 ml-2">
-		<div class="flex flex-row mb-2 mt-[2px] ml-[2px]">
-			{{#thread}}
-				{{^isRoot}}
-					{{#parentID}}
-						<a target="_self" href="{{closeThreadHref}}" class="mr-4 dark:hover:text-white hover:text-blue-600 cursor-pointer underline">X</a>
-					{{/parentID}}
-					{{^parentID}}
-						<a target="_self" href="{{closeRootChildThreadHref}}" class="mr-4 dark:hover:text-white hover:text-blue-600 cursor-pointer underline">X</a>
-					{{/parentID}}
-				{{/isRoot}}
-			{{/thread}}
+<div id="messages" class="flex flex-col w-full max-w-full overflow-x-hidden h-full">
+	<div id="messages-list" ondragover="event.preventDefault()" class="flex flex-col max-w-full overflow-x-auto h-full grow">
+		{{#stack}}
+			{{#open}}
+				<details open class="flex flex-col w-md min-w-md max-w-md ml-2 mb-2">
+			{{/open}}
+			{{^open}}
+				<details class="flex flex-col w-md min-w-md max-w-md ml-2 mb-2">
+			{{/open}}
+				<summary class="mb-2 mt-[2px] ml-[2px]">
+					<span class="inline-flex justify-between w-[calc(100%-20px)] large:w-[calc(100%-30px)] small:w-[calc(100%-20px)]">
+						{{#message}}
+							{{#ID}}
+								<a target="_self" href="{{viewThreadHref}}" class="overflow-hidden text-ellipsis dark:hover:text-white hover:text-blue-600 cursor-pointer underline">
+							{{/ID}}
+							{{^ID}}
+								<a target="_self" href="{{rootThreadHref}}" class="overflow-hidden text-ellipsis dark:hover:text-white hover:text-blue-600 cursor-pointer underline">
+							{{/ID}}
+								{{#title}}
+									/{{title}}
+								{{/title}}
+								{{^title}}
+									{{#text}}
+										/{{text}}
+									{{/text}}
+									{{^text}}
+										/
+									{{/text}}
+								{{/title}}
 
-			{{#message}}
-				{{#ID}}
-					<a target="_self" href="{{viewThreadHref}}" class="flex flex-row items-center overflow-hidden text-ellipsis dark:hover:text-white hover:text-blue-600 cursor-pointer underline">
-				{{/ID}}
-				{{^ID}}
-					<a target="_self" href="{{rootThreadHref}}" class="flex flex-row items-center overflow-hidden text-ellipsis dark:hover:text-white hover:text-blue-600 cursor-pointer underline">
-				{{/ID}}
-					{{#title}}
-						/{{title}}
-					{{/title}}
-					{{^title}}
-						{{#text}}
-							/{{text}}
-						{{/text}}
-						{{^text}}
-							/
-						{{/text}}
-					{{/title}}
+								{{#ID}}
+									<span class="ml-1 text-sm italic">(edit)</span>
+								{{/ID}}
+							</a>
+						{{/message}}
 
-					{{#ID}}
-						<div class="ml-1 text-sm italic">(edit)</div>
-					{{/ID}}
-				</a>
-			{{/message}}
-		</div>
+						{{#thread}}
+							{{^isRoot}}
+								{{#parentID}}
+									<a target="_self" href="{{closeThreadHref}}" class="dark:hover:text-white hover:text-blue-600 cursor-pointer underline">X</a>
+								{{/parentID}}
+								{{^parentID}}
+									<a target="_self" href="{{closeRootChildThreadHref}}" class="dark:hover:text-white hover:text-blue-600 cursor-pointer underline">X</a>
+								{{/parentID}}
+							{{/isRoot}}
+						{{/thread}}
+					</span>
+				</summary>
 
-		<div class="overflow-y-auto">
-			<ul class="flex flex-col">
-				{{#messages}}
-					<li id="list-{{ID}}" data-message-id="{{ID}}" draggable="true" class="grow-1 max-w-full flex flex-row justify-between whitespace-nowrap first:mt-[2px] last:mb-[2px] mx-[2px]">
-						{{#isCenter}}
-							{{#isSelected}}
-								<a href="{{messageHref}}" target="_self" data-message-id="{{ID}}" class="flex flex-row justify-between overflow-hidden select-text dark:bg-cyan-500 dark:text-white bg-gray-300 dark:hover:text-white hover:text-blue-600 cursor-pointer text-left px-2 w-full z-1">
-							{{/isSelected}}
-							{{^isSelected}}
-								<a href="{{messageHref}}" target="_self" data-message-id="{{ID}}" class="flex flex-row justify-between overflow-hidden select-text dark:bg-cyan-700 dark:text-white bg-blue-100 dark:hover:text-white hover:text-blue-600 cursor-pointer text-left px-2 w-full z-1">
-							{{/isSelected}}
-						{{/isCenter}}
-						{{^isCenter}}
-							{{#isSelected}}
-								<a href="{{messageHref}}" target="_self" data-message-id="{{ID}}" class="flex flex-row justify-between overflow-hidden select-text dark:bg-slate-600 dark:text-white bg-gray-300 cursor-pointer text-left px-2 w-full z-1">
-							{{/isSelected}}
-							{{^isSelected}}
-								<a href="{{messageHref}}" target="_self" data-message-id="{{ID}}" class="flex flex-row justify-between overflow-hidden select-text dark:hover:bg-slate-600 dark:hover:text-white hover:bg-gray-300 cursor-pointer text-left px-2 w-full z-1">
-							{{/isSelected}}
-						{{/isCenter}}
-								<div class="overflow-hidden text-ellipsis mr-2" data-message-id="{{ID}}">
-									{{#title}}
-										{{title}}
-									{{/title}}
-									{{^title}}
-										{{text}}
-									{{/title}}
-								</div>
-						</a>
+				<div class="overflow-y-auto">
+					<ul class="flex flex-col">
+						{{#messages}}
+							<li id="list-{{ID}}" data-message-id="{{ID}}" draggable="true" class="grow-1 max-w-full flex flex-row justify-between whitespace-nowrap first:mt-[2px] last:mb-[2px] mx-[2px]">
+								{{#isCenter}}
+									{{#isSelected}}
+										<a href="{{messageHref}}" target="_self" data-message-id="{{ID}}" class="flex flex-row justify-between overflow-hidden select-text dark:bg-cyan-500 dark:text-white bg-gray-300 dark:hover:text-white hover:text-blue-600 cursor-pointer text-left px-2 w-full z-1">
+									{{/isSelected}}
+									{{^isSelected}}
+										<a href="{{messageHref}}" target="_self" data-message-id="{{ID}}" class="flex flex-row justify-between overflow-hidden select-text dark:bg-cyan-700 dark:text-white bg-blue-100 dark:hover:text-white hover:text-blue-600 cursor-pointer text-left px-2 w-full z-1">
+									{{/isSelected}}
+								{{/isCenter}}
+								{{^isCenter}}
+									{{#isSelected}}
+										<a href="{{messageHref}}" target="_self" data-message-id="{{ID}}" class="flex flex-row justify-between overflow-hidden select-text dark:bg-slate-600 dark:text-white bg-gray-300 cursor-pointer text-left px-2 w-full z-1">
+									{{/isSelected}}
+									{{^isSelected}}
+										<a href="{{messageHref}}" target="_self" data-message-id="{{ID}}" class="flex flex-row justify-between overflow-hidden select-text dark:hover:bg-slate-600 dark:hover:text-white hover:bg-gray-300 cursor-pointer text-left px-2 w-full z-1">
+									{{/isSelected}}
+								{{/isCenter}}
+										<div class="overflow-hidden text-ellipsis mr-2" data-message-id="{{ID}}">
+											{{#title}}
+												{{title}}
+											{{/title}}
+											{{^title}}
+												{{text}}
+											{{/title}}
+										</div>
+								</a>
 
-						{{#isCenter}}
-							<a href="{{messageThreadHref}}" target="_self" class="px-2 dark:bg-blue-100 dark:bg-cyan-700 select-text dark:text-white hover:text-blue-600  dark:hover:text-white cursor-pointer text-end" data-thread-id="{{ID}}">{{count}} > </a>
-						{{/isCenter}}
-						{{^isCenter}}
-							<a href="{{messageThreadHref}}" target="_self" data-thread-id="{{ID}}" class="px-2 dark:hover:text-white hover:text-blue-600 select-text cursor-pointer text-end">{{count}} > </a>
-						{{/isCenter}}
-					</li>
-				{{/messages}}
-				{{^messages}}
-					{{#message}}
-						<li class="text-gray-600 italic mx-[2px]">{{noMessagesText}}</li>
-					{{/message}}
-					{{^message}}
-						<li class="text-gray-600 italic">{{newMessageText}}</li>
-					{{/message}}
-				{{/messages}}
-			</ul>
-		</div>
+								{{#isCenter}}
+									<a href="{{messageThreadHref}}" target="_self" class="px-2 dark:bg-blue-100 dark:bg-cyan-700 select-text dark:text-white hover:text-blue-600  dark:hover:text-white cursor-pointer text-end" data-thread-id="{{ID}}">{{count}} > </a>
+								{{/isCenter}}
+								{{^isCenter}}
+									<a href="{{messageThreadHref}}" target="_self" data-thread-id="{{ID}}" class="px-2 dark:hover:text-white hover:text-blue-600 select-text cursor-pointer text-end">{{count}} > </a>
+								{{/isCenter}}
+							</li>
+						{{/messages}}
+						{{^messages}}
+							{{#message}}
+								<li class="text-gray-600 italic mx-[2px]">{{noMessagesText}}</li>
+							{{/message}}
+							{{^message}}
+								<li class="text-gray-600 italic">{{newMessageText}}</li>
+							{{/message}}
+						{{/messages}}
+					</ul>
+				</div>
 
-		<div class="flex flex-row mt-2">
-			{{^isLastPage}}
-				<a href="{{prevPageHref}}" target="_self" class="flex justify-center grow cursor-pointer dark:bg-slate-600 dark:hover:text-white bg-gray-300 ml-[2px] mr-2 last:mr-0"><-</a>
-			{{/isLastPage}}
+				<div class="flex flex-row mt-2">
+					{{^isLastPage}}
+						<a href="{{prevPageHref}}" target="_self" class="flex justify-center grow cursor-pointer dark:bg-slate-600 dark:hover:text-white bg-gray-300 ml-[2px] mr-2 last:mr-0"><-</a>
+					{{/isLastPage}}
 
-			{{^isFirstPage}}
-				<a href="{{nextPageHref}}" target="_self" class="flex justify-center grow cursor-pointer ml-[2px] dark:bg-slate-600 dark:hover:text-white bg-gray-300">-></a>
-			{{/isFirstPage}}
-		</div>
+					{{^isFirstPage}}
+						<a href="{{nextPageHref}}" target="_self" class="flex justify-center grow cursor-pointer ml-[2px] dark:bg-slate-600 dark:hover:text-white bg-gray-300">-></a>
+					{{/isFirstPage}}
+				</div>
+			</details>
+		{{/stack}}
+		{{^stack}}
+			<div class="grow"></div>
+		{{/stack}}
 	</div>
-{{/stack}}
-{{^stack}}
-	<div class="grow"></div>
-{{/stack}}
+</div>

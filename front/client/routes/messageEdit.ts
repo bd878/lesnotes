@@ -6,7 +6,7 @@ async function messageEdit(ctx) {
 	const builder = new MessageEditViewBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
 	await builder.addSettings()
-	await builder.addFilesInput()
+	await builder.addFilesInput(ctx.state.files.files)
 	await builder.addMessagesStack(ctx.state.stack)
 	await builder.addMessageEditForm(ctx.state.message)
 	await builder.addSearch()

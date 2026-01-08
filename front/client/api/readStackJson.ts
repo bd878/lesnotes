@@ -8,6 +8,8 @@ interface StackResponse {
 	stack:     ThreadMessages[];
 }
 
+// TODO: empty stack response
+
 async function readStackJson(token: string, messageID: number/*, lastMessageID: number*/, limit: number, offsets: Record<number, number> = {}): Promise<StackResponse> {
 	let result = {
 		error:       models.error(),
