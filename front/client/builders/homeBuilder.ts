@@ -34,19 +34,29 @@ class HomeBuilder extends AbstractBuilder {
 		const search = this.search
 		const path = this.path
 
+		const close = ((new URLSearchParams(search)).get("close") || "").split(",").map(parseFloat).filter(v => !isNaN(v))
+
 		const limit = parseInt(LIMIT)
 
 		this.messagesStack = mustache.render(template, {
 			stack:            stack.map(unwrapPaging),
 			limit:            LIMIT,
 			isSingle:         () => stack.length == 1,
+			openHref:         function() { const params = new URLSearchParams(search); params.set("close", this.closeIDs); return path + "?" + params.toString() },
+			closeHref:        function() { const params = new URLSearchParams(search); params.set("close", this.openIDs); return path + "?" + params.toString() },
 			newMessageText:   this.i18n("newMessageText"),
 			noMessagesText:   this.i18n("noMessagesText"),
 			messageHref:      function() { return `/messages/${this.ID}` + search; },
 			messageThreadHref: function() { const params = new URLSearchParams(search); params.set("cwd", `${this.ID}`); return path + "?" + params.toString(); },
 			viewThreadHref:   function() { return `/threads/${this}` + search; /*context is ID, not thread*/ },
-			closeThreadHref:  function() { const params = new URLSearchParams(search); params.set("cwd", `${this.parentID}`); return path + "?" + params.toString(); },
-			closeRootChildThreadHref: function() { const params = new URLSearchParams(search); params.delete("cwd"); return path + "?" + params.toString(); },
+			closeThreadHref:  function() {
+				const params = new URLSearchParams(search);
+				const set = new Set(close);
+				set.add(this.ID);
+				(this.parentID == 0 ? params.delete("cwd") : params.set("cwd", `${this.parentID}`));
+				params.set("close", Array.from(set).join(","));
+				return path + "?" + params.toString();
+			},
 			rootThreadHref:   function() { const params = new URLSearchParams(search); params.delete("cwd"); return path + "?" + params.toString(); },
 			prevPageHref:     function() { const params = new URLSearchParams(search); params.set(this.message.ID || 0, `${limit + this.offset}`); return path + "?" + params.toString(); },
 			nextPageHref:     function() { const params = new URLSearchParams(search); params.set(this.message.ID || 0, `${Math.max(0, this.offset - limit)}`); return path + "?" + params.toString(); },

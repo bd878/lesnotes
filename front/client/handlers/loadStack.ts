@@ -3,7 +3,9 @@ import api from '../api';
 import * as is from '../third_party/is';
 
 interface OpenClosedThreadMessages extends ThreadMessages {
-	open: boolean;
+	isClose: boolean;
+	openIDs: string;
+	closeIDs: string;
 }
 
 const limit = parseInt(LIMIT)
@@ -14,14 +16,10 @@ async function loadStack(ctx, next) {
 	const id = parseInt(ctx.query.id) || 0
 	const threadID = parseInt(ctx.query.cwd) || 0
 
-	const offsets = buildThreadOffsets(new URLSearchParams(ctx.request.search))
+	const params = new URLSearchParams(ctx.request.search)
+	const offsets = buildThreadOffsets(params)
 
 	ctx.state.stack = await api.readStackJson(ctx.state.token, threadID, limit, offsets)
-
-	for (const thread of ctx.state.stack.stack) {
-		thread.isCenter = function() { return this.ID == thread.centerID }
-		thread.isSelected = function() { return this.ID == id }
-	}
 
 	if (is.notEmpty(ctx.state.stack)) {
 		if (ctx.state.stack.error.error) {
@@ -30,9 +28,14 @@ async function loadStack(ctx, next) {
 			ctx.status = 400;
 			return;
 		}
-		ctx.state.stack = ctx.state.stack.stack.map(openClosed)
+		ctx.state.stack = ctx.state.stack.stack.map(openClosed(closeIDs(params.get("close") || "")))
 	} else {
 		ctx.state.stack = []
+	}
+
+	for (const stack of ctx.state.stack) {
+		stack.thread.isCenter = function() { return this.ID == stack.thread.centerID }
+		stack.thread.isSelected = function() { return this.ID == id }
 	}
 
 	await next()
@@ -40,22 +43,38 @@ async function loadStack(ctx, next) {
 	console.log("<-- loadStack")
 }
 
-function openClosed(stack: ThreadMessages, index: number, arr: ThreadMessages[]): OpenClosedThreadMessages {
-	let open = false;
+function closeIDs(closeStr: string = ""): number[] {
+	return closeStr.split(",").map(parseFloat).filter(v => !isNaN(v))
+}
 
-	if (arr.length > 1 && index == (arr.length - 1)) {
-		open = true
-	}
-	if (arr.length <= 1) {
-		open = true
-	}
-	if (stack.paging.offset != 0) {
-		open = true
-	}
+type StackMapFn = (stack: ThreadMessages, index: number, arr: ThreadMessages[]) => OpenClosedThreadMessages;
 
-	return {
-		...stack,
-		open,
+function openClosed(closed: number[]): StackMapFn {
+	return function(stack: ThreadMessages, index: number, arr: ThreadMessages[]): OpenClosedThreadMessages {
+		let isClose = false;
+		let openIDs = "";
+		let closeIDs = "";
+
+		const set = new Set(closed)
+
+		if (set.has(stack.message.ID)) {
+			isClose = true
+			closeIDs = Array.from(set).join(",")
+			set.delete(stack.message.ID)
+			openIDs = Array.from(set).join(",")
+		} else {
+			isClose = false
+			openIDs = Array.from(set).join(",")
+			set.add(stack.message.ID)
+			closeIDs = Array.from(set).join(",")
+		}
+
+		return {
+			...stack,
+			isClose,
+			openIDs,
+			closeIDs,
+		}
 	}
 }
 
