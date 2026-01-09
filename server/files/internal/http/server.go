@@ -45,11 +45,12 @@ func New(cfg Config) *Server {
 	})
 	handler := httphandler.New(grpcCtrl)
 
-	mux.Handle("/files/v1/upload",         middleware.Build(handler.UploadFile))
-	mux.Handle("/files/v1/{id}/download",  middleware.Build(handler.DownloadFile))
+	mux.Handle("GET /files/{name}",            middleware.Build(handler.ReadFile))
+	mux.Handle("POST /files/v1/upload",        middleware.Build(handler.UploadFile))
+	mux.Handle("GET /files/v1/{id}/download",  middleware.Build(handler.DownloadFile))
 
 	middleware.NoAuth()
-	mux.Handle("/files/v1/status",         middleware.Build(handler.GetStatus))
+	mux.Handle("GET /files/v1/status",         middleware.Build(handler.GetStatus))
 
 	middleware.NoAuth().WithAuth(httpmiddleware.TokenAuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
 	mux.Handle("/files/v2/upload",         middleware.Build(handler.UploadFileV2))

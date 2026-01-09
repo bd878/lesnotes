@@ -168,6 +168,20 @@ paths:
       operationId: downloadFile
 # END DOWNLOAD
 
+# READ
+  /files/{name}:
+    parameters:
+      name:
+        in: path
+        required: true
+        type: string
+    get:
+      summary: Read file by link
+      description: |
+        Read public or private file by link. Private file requires credentials
+      operationID: readFile
+# END READ
+
 # STATUS
   /files/v1/status:
     get:
