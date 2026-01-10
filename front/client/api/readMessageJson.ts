@@ -1,6 +1,11 @@
 import api from './api';
 import models from './models';
 
+const EmptyReadMessage = {
+	error:   models.error(),
+	message: models.message(),
+}
+
 async function readMessageJson(token: string, user: number, id: number, name?: string) {
 	let result = {
 		error:     models.error(),
@@ -35,3 +40,4 @@ async function readMessageJson(token: string, user: number, id: number, name?: s
 }
 
 export default readMessageJson;
+export { EmptyReadMessage };

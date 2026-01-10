@@ -7,6 +7,7 @@ async function messageView(ctx) {
 
 	await builder.addSettings()
 	await builder.addControlPanel()
+	await builder.addFilesView(ctx.state.message.files)
 	await builder.addMessagesStack(ctx.state.stack)
 	await builder.addMessageView(ctx.state.me.ID, ctx.state.message)
 	await builder.addSearch()

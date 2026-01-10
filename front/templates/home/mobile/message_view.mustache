@@ -13,6 +13,14 @@
 			</p>
 		</div>
 
+		<details class="mb-2 px-1 cursor-pointer">
+			<summary class="mb-1">
+				{{filesSummary}}
+			</summary>
+
+			{{> filesView}}
+		</details>
+
 		<div class="flex flex-row justify-between items-end">
 			<form method="POST"  class="flex flex-row">
 				<button formaction="{{deleteAction}}" type="submit" id="message-delete" data-message-id="{{ID}}" type="button" class="cursor-pointer mr-4">

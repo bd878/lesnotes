@@ -49,7 +49,6 @@ func (h *Handler) ReadBatchFiles(ctx context.Context, req *api.ReadBatchFilesReq
 		}
 
 		files[id] = file
-		files[id].Private = file.Private
 	}
 
 	return &api.ReadBatchFilesResponse{

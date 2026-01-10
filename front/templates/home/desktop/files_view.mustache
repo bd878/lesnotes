@@ -1,0 +1,27 @@
+<ul>
+	{{#files}}
+		<li>
+			{{#isImage}}
+				<div>image: {{name}}</div>
+			{{/isImage}}
+			{{#isDocument}}
+				<div>doc: {{name}}</div>
+			{{/isDocument}}
+			{{#isAudio}}
+				<div>audio: {{name}}</div>
+			{{/isAudio}}
+			{{#isVideo}}
+				<div>video: {{name}}</div>
+			{{/isVideo}}
+			{{#isText}}
+				<div>text: {{name}}</div>
+			{{/isText}}
+			{{#isFile}}
+				<div>file: {{name}}</div>
+			{{/isFile}}
+		</li>
+	{{/files}}
+	{{^files}}
+		<li>No files</li>
+	{{/files}}
+</ul>

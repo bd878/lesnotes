@@ -12,6 +12,7 @@ func FileToProto(file *File) *api.File {
 		Size:          file.Size,
 		Error:         file.Error,
 		Private:       file.Private,
+		Mime:          file.Mime,
 	}
 }
 
@@ -23,6 +24,7 @@ func FileFromProto(proto *api.File) *File {
 		Error:             proto.Error,
 		Size:              proto.Size,
 		Private:           proto.Private,
+		Mime:              proto.Mime,
 	}
 }
 

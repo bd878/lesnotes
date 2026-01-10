@@ -1,4 +1,5 @@
 import type { File, Message, Thread, ThreadMessages } from '../api/models';
+import type { FileWithMime } from '../types';
 import Config from 'config';
 import mustache from 'mustache';
 import api from '../api';
@@ -16,8 +17,9 @@ class HomeBuilder extends AbstractBuilder {
 	threadView      = undefined;
 	threadEditForm  = undefined;
 	pagination      = undefined;
-	filesInput      = undefined;
+	filesSelector   = undefined;
 	filesForm       = undefined;
+	filesView       = undefined;
 	filesList       = undefined;
 	messagesStack   = undefined;
 	searchForm      = undefined;
@@ -118,15 +120,24 @@ class HomeBuilder extends AbstractBuilder {
 		})
 	}
 
-	async addFilesInput(files: File[]) {
+	async addFilesSelector(files: File[]) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/home/mobile/files_input.mustache' : 'templates/home/desktop/files_input.mustache'
+			this.isMobile ? 'templates/home/mobile/files_selector.mustache' : 'templates/home/desktop/files_selector.mustache'
 		)), { encoding: 'utf-8' });
 
-		this.filesInput = mustache.render(template, {
+		this.filesSelector = mustache.render(template, {
 			files:             files,
 			defaultFile:       this.i18n("defaultFile"),
-			filesSummary:      this.i18n("filesSummary"),
+		})
+	}
+
+	async addFilesView(files: FileWithMime[]) {
+		const template = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/home/mobile/files_view.mustache' : 'templates/home/desktop/files_view.mustache'
+		)), { encoding: 'utf-8' });
+
+		this.filesView = mustache.render(template, {
+			files:   files,
 		})
 	}
 

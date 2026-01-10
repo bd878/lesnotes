@@ -1,0 +1,14 @@
+<div class="w-full border-1 border-solid rounded-md">
+	<select
+		multiple
+		name="file_ids"
+		id="files"
+		autocomplete="off"
+		class="w-full"
+	>
+		<option value="" selected>{{defaultFile}}</option>
+		{{#files}}
+			<option value="{{ID}}">{{name}}</option>
+		{{/files}}
+	</select>
+</div>

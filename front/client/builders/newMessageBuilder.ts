@@ -12,13 +12,14 @@ class NewMessageBuilder extends HomeBuilder {
 		)), { encoding: 'utf-8' });
 
 		this.newMessageForm = mustache.render(template, {
+			filesSummary:     this.i18n("filesSummary"),
 			titlePlaceholder: this.i18n("titlePlaceholder"),
 			textPlaceholder:  this.i18n("textPlaceholder"),
 			sendButton:       this.i18n("sendButton"),
 			sendAction:       "/send" + this.search,
 			thread:           thread || 0,
 		}, {
-			filesInput: this.filesInput,
+			filesSelector:    this.filesSelector,
 		})
 	}
 }

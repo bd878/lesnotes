@@ -363,6 +363,8 @@ func (h *Handler) readMessage(ctx context.Context, w http.ResponseWriter, userID
 		list = append(list, &files.File{
 			Name: file.Name,
 			ID:   file.ID,
+			Mime: file.Mime,
+			Size: file.Size,
 		})
 	}
 	message.Files = list
@@ -439,6 +441,8 @@ func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter,
 					list = append(list, &files.File{
 						ID:   file.ID,
 						Name: file.Name,
+						Mime: file.Mime,
+						Size: file.Size,
 					})
 				}
 			}
@@ -512,6 +516,8 @@ func (h *Handler) readMessages(ctx context.Context, w http.ResponseWriter, userI
 					list = append(list, &files.File{
 						ID:   file.ID,
 						Name: file.Name,
+						Mime: file.Mime,
+						Size: file.Size,
 					})
 				}
 			}

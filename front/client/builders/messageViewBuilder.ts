@@ -8,7 +8,6 @@ import { resolve, join } from 'node:path';
 import HomeBuilder from './homeBuilder';
 
 class MessageViewBuilder extends HomeBuilder {
-	messageView = undefined;
 	async addMessageView(userID: number, message?: Message) {
 		if (is.empty(message))
 			return
@@ -25,6 +24,7 @@ class MessageViewBuilder extends HomeBuilder {
 			text:             message.text,
 			name:             message.name,
 			private:          message.private,
+			filesSummary:     this.i18n("filesSummary"),
 			newNoteHref:      function() { return "/home" + search; },
 			editHref:         function() { return `/editor/messages/${message.ID}` + search; },
 			deleteAction:     "/m/delete" + search,
@@ -34,6 +34,7 @@ class MessageViewBuilder extends HomeBuilder {
 			userID:           userID,
 			domain:           Config.get("domain"),
 		}, {
+			filesView:        this.filesView,
 		})
 	}
 }

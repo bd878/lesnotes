@@ -7,7 +7,8 @@ async function messageEdit(ctx) {
 
 	await builder.addSettings()
 	await builder.addControlPanel()
-	await builder.addFilesInput(ctx.state.files.files)
+	await builder.addFilesView(ctx.state.message.files)
+	await builder.addFilesSelector(ctx.state.files.files)
 	await builder.addMessagesStack(ctx.state.stack)
 	await builder.addMessageEditForm(ctx.state.message)
 	await builder.addSearch()

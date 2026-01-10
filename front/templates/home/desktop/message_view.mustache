@@ -11,6 +11,14 @@
 			<p class="w-full small:text-sm large:text-lg mb-1 px-1 resize-none overflow-y-scroll text-start h-full">{{{text}}}</p>
 		</div>
 
+		<details class="mb-2 px-1 cursor-pointer">
+			<summary class="mb-1">
+				{{filesSummary}}
+			</summary>
+
+			{{> filesView}}
+		</details>
+
 		<div class="flex flex-row justify-between items-end">
 			<form
 				method="POST"

@@ -22,6 +22,7 @@ class MessageEditViewBuilder extends HomeBuilder {
 			name:             message.name,
 			title:            message.title,
 			text:             message.text,
+			filesSummary:     this.i18n("filesSummary"),
 			cancelEditHref:   `/messages/${message.ID}` + this.search,
 			namePlaceholder:  this.i18n("namePlaceholder"),
 			titlePlaceholder: this.i18n("titlePlaceholder"),
@@ -31,7 +32,8 @@ class MessageEditViewBuilder extends HomeBuilder {
 			updateAction:     "/m/update" + this.search,
 			domain:           Config.get("domain"),
 		}, {
-			filesInput:       this.filesInput,
+			filesSelector:    this.filesSelector,
+			filesView:        this.filesView,
 		})
 	}
 }
