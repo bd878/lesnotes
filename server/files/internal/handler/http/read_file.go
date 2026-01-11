@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/bd878/gallery/server/logger"
 	users "github.com/bd878/gallery/server/users/pkg/model"
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
 	files "github.com/bd878/gallery/server/files/pkg/model"
@@ -66,9 +65,7 @@ func (h *Handler) ReadFile(w http.ResponseWriter, req *http.Request) (err error)
 		return err
 	}
 
-	logger.Infow("downloading file", "name", file.Name)
-
-	w.Header().Set("Content-Disposition", "attachment; " + "filename*=UTF-8''" + file.Name)
+	w.Header().Set("Content-Disposition", "inline; " + "filename*=UTF-8''" + file.Name)
 	w.Header().Set("Content-Length", fmt.Sprintf("%d", file.Size))
 
 	_, err = io.Copy(w, stream)

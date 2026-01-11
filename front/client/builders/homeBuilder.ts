@@ -138,6 +138,7 @@ class HomeBuilder extends AbstractBuilder {
 
 		this.filesView = mustache.render(template, {
 			files:   files,
+			imgSrc:  function() { return `/files/v1/read/${this.name}` },
 		})
 	}
 

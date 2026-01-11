@@ -15,6 +15,7 @@ class FilesBuilder extends HomeBuilder {
 		this.filesList = mustache.render(template, {
 			noFiles:            this.i18n("noFiles"),
 			files:              files,
+			downloadHref:       function() { return "/files/v1/download?id=" + this.ID },
 		})
 	}
 

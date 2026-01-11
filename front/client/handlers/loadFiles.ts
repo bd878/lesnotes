@@ -27,6 +27,8 @@ async function loadFiles(ctx, next) {
 			ctx.status = 400
 			return
 		}
+
+		ctx.state.files.files.reverse()
 	} else {
 		ctx.state.files = EmptyFilesList
 	}

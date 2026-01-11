@@ -1,5 +1,5 @@
+import updateMessageJson from '../api/updateMessageJson'
 import * as is from '../third_party/is'
-import api from '../api'
 
 async function updateMessage(ctx) {
 	console.log("--> updateMessage")
@@ -10,7 +10,9 @@ async function updateMessage(ctx) {
 		form = {}
 	}
 
-	const response = await api.updateMessageJson(ctx.state.token, parseInt(form.id) || 0, form.text, form.title, form.name, [])
+	const fileIDs = (form.file_ids || []).map(id => parseInt(id) || 0).filter(is.notEmpty)
+
+	const response = await updateMessageJson(ctx.state.token, parseInt(form.id) || 0, form.text, form.title, form.name, fileIDs)
 
 	if (response.error.error) {
 		console.log(response.error)
