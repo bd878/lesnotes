@@ -153,12 +153,12 @@ paths:
 # END UPLOAD
 
 # DOWNLOAD
-  /files/v1/{id}/download:
+  /files/v1/download:
     security:
       - apiKey: []
     parameters:
       id:
-        in: path
+        in: query
         required: true
         type: integer
     get:
@@ -169,7 +169,7 @@ paths:
 # END DOWNLOAD
 
 # READ
-  /files/{name}:
+  /files/v1/read/{name}:
     parameters:
       name:
         in: path

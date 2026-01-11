@@ -20,20 +20,32 @@ func (h *Handler) DownloadFile(w http.ResponseWriter, req *http.Request) (err er
 		isPublic bool
 	)
 
-	if req.PathValue("id") != "" {
-		fileid, err := strconv.Atoi(req.PathValue("id"))
+	values := req.URL.Query()
+
+	if values.Has("id") {
+		value, err := strconv.Atoi(values.Get("id"))
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(server.ServerResponse{
 				Status: "error",
 				Error: &server.ErrorCode{
-					Code:    server.CodeNoID,
-					Explain: "id is empty",
+					Code:    server.CodeWrongQuery,
+					Explain: "wrong id param",
 				},
 			})
 			return err
 		}
-		fileID = int64(fileid)
+		fileID = int64(value)
+	} else {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status: "error",
+			Error:  &server.ErrorCode{
+				Code:    server.CodeNoID,
+				Explain: "id is empty",
+			},
+		})
+		return
 	}
 
 	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
