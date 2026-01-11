@@ -111,20 +111,26 @@ func (h *Handler) uploadFile(w http.ResponseWriter, req *http.Request, public in
 		return err
 	}
 
-	response, err := json.Marshal(files.UploadResponse{
-		ID:          int64(id),
-		Name:        fileName,
-		Description: "saved",
-	})
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return err
+	if req.Referer() != "" {
+		// redirect to referer
+		http.Redirect(w, req, req.Referer(), http.StatusMovedPermanently)
+	} else {
+		// or return json response
+		response, err := json.Marshal(files.UploadResponse{
+			ID:          int64(id),
+			Name:        fileName,
+			Description: "saved",
+		})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return err
+		}
+
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status:   "ok",
+			Response: json.RawMessage(response),
+		})
 	}
 
-	json.NewEncoder(w).Encode(server.ServerResponse{
-		Status:   "ok",
-		Response: json.RawMessage(response),
-	})
-
-	return nil
+	return
 }
