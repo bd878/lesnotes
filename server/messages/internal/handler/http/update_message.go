@@ -111,13 +111,13 @@ func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, mess
 		return err		
 	}
 
-	if text == "" {
+	if text == "" && title == "" && len(fileIDs) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
 				Code:    server.CodeWrongFormat,
-				Explain: "text must be provided",
+				Explain: "either text or title or file_ids must be provided",
 			},
 		})
 
