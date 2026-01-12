@@ -1,27 +1,10 @@
 <ul>
 	{{#files}}
-		<li>
+		<li class="mt-2 first:mt-0">
+			<a href="{{fileHref}}" target="_blank" noopener noreferer class="mb-1 overflow-hidden cursor-pointer dark:text-blue-600 dark:hover:text-white italic text-blue-600 text-sm">{{name}}</a>
 			{{#isImage}}
-				<img alt="{{name}}" src="{{imgSrc}}">image: {{name}}</img>
+				<img class="w-full" alt="{{name}}" src="{{imgSrc}}" />
 			{{/isImage}}
-			{{#isDocument}}
-				<div>doc: {{name}}</div>
-			{{/isDocument}}
-			{{#isAudio}}
-				<div>audio: {{name}}</div>
-			{{/isAudio}}
-			{{#isVideo}}
-				<div>video: {{name}}</div>
-			{{/isVideo}}
-			{{#isText}}
-				<div>text: {{name}}</div>
-			{{/isText}}
-			{{#isFile}}
-				<div>file: {{name}}</div>
-			{{/isFile}}
 		</li>
-	{{/files}}
-	{{^files}}
-		<li>No files</li>
 	{{/files}}
 </ul>

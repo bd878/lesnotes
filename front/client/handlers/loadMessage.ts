@@ -39,6 +39,7 @@ async function loadMessage(ctx, next) {
 
 		ctx.state.message = ctx.state.message.message
 		ctx.state.message.files = ctx.state.message.files.map(fileWithMime)
+		ctx.state.message.files.sort(sortImagesFirst)
 	} else {
 		ctx.state.message = EmptyReadMessage.message
 	}
@@ -71,4 +72,14 @@ function fileWithMime(file: File, index: number, arr: File[]): FileWithMime {
 	}
 
 	return result
+}
+
+function sortImagesFirst(fileA: FileWithMime, fileB: FileWithMime): number {
+	if (fileA.isImage && fileB.isImage) {
+		return 0
+	}
+	if (fileA.isImage && (fileA.isImage != fileB.isImage)) {
+		return -1
+	}
+	return 1
 }

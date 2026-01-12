@@ -137,8 +137,9 @@ class HomeBuilder extends AbstractBuilder {
 		)), { encoding: 'utf-8' });
 
 		this.filesView = mustache.render(template, {
-			files:   files,
-			imgSrc:  function() { return `/files/v1/read/${this.name}` },
+			files:    files,
+			imgSrc:   function() { return `/files/v1/read/${this.name}` },
+			fileHref: function() { return `/files/v1/download?id=${this.ID}` },
 		})
 	}
 
@@ -185,6 +186,7 @@ class HomeBuilder extends AbstractBuilder {
 				filesList:       this.filesList,
 				filesForm:       this.filesForm,
 				goBack:          this.goBack,
+				filesView:       this.filesView,
 				controlPanel:    this.controlPanel,
 			}),
 		});
