@@ -8,6 +8,7 @@ async function files(ctx) {
 
 	await builder.addSettings()
 	await builder.addGoBack()
+	await builder.addNavigation()
 	await builder.addControlPanel()
 	await builder.addMessagesStack(ctx.state.stack)
 	await builder.addFilesForm()

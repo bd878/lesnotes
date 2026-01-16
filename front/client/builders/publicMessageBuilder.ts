@@ -8,7 +8,9 @@ import { resolve, join } from 'node:path';
 import AbstractBuilder from './abstractBuilder'
 
 class PublicMessageBuilder extends AbstractBuilder {
-	sidebar = undefined;
+	sidebar   = undefined;
+	filesView = undefined;
+
 	async addSidebar() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/sidebar_vertical/mobile/sidebar_vertical.mustache' : 'templates/sidebar_vertical/desktop/sidebar_vertical.mustache'
@@ -18,6 +20,18 @@ class PublicMessageBuilder extends AbstractBuilder {
 			settingsHeader: this.i18n("settingsHeader")
 		}, {
 			settings:       this.settings,
+		})
+	}
+
+	async addFilesView(files: FileWithMime[]) {
+		const template = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/message/mobile/files_view.mustache' : 'templates/message/desktop/files_view.mustache'
+		)), { encoding: 'utf-8' });
+
+		this.filesView = mustache.render(template, {
+			files:    files,
+			imgSrc:   function() { return `/files/v1/read/${this.name}` },
+			fileHref: function() { return `/files/v1/download?id=${this.ID}` },
 		})
 	}
 
@@ -57,6 +71,7 @@ class PublicMessageBuilder extends AbstractBuilder {
 			}, {
 				settings:  this.settings,
 				sidebar:   this.sidebar,
+				filesView: this.filesView,
 			})
 		})
 	}

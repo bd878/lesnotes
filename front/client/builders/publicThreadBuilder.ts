@@ -8,6 +8,7 @@ import AbstractBuilder from './abstractBuilder';
 
 class PublicThreadBuilder extends AbstractBuilder {
 	messageView = undefined;
+	filesView   = undefined;
 
 	signup = undefined
 	async addSignup() {
@@ -124,6 +125,7 @@ class PublicThreadBuilder extends AbstractBuilder {
 				sidebar:       this.sidebar,
 				messagesList:  this.messagesList,
 				messageView:   this.messageView,
+				filesView:     this.filesView,
 			})
 		})
 	}

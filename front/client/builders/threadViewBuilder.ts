@@ -8,7 +8,6 @@ import { resolve, join } from 'node:path';
 import HomeBuilder from './homeBuilder';
 
 class ThreadViewBuilder extends HomeBuilder {
-	threadView = undefined;
 	async addThreadView(thread: Thread) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/home/mobile/thread_view.mustache' : 'templates/home/desktop/thread_view.mustache'

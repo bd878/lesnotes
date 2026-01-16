@@ -7,6 +7,7 @@ async function newMessage(ctx) {
 
 	await builder.addSettings()
 	await builder.addFilesSelector(ctx.state.files.files)
+	await builder.addNavigation()
 	await builder.addControlPanel()
 	await builder.addMessagesStack(ctx.state.stack)
 	await builder.addNewMessageForm(ctx.state.thread)
