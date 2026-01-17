@@ -9,7 +9,7 @@ import (
 	server "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) UploadFileV2(w http.ResponseWriter, req *http.Request) (err error) {
+func (h *Handler) UploadFileJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
 	var public int
 	values := req.URL.Query()
 	if values.Has("public") {

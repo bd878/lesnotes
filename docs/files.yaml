@@ -5,6 +5,33 @@ info:
     This API handles files requests.
   version: 1.0.0
 paths:
+# READ META
+  /files/v2/read_meta:
+    post:
+      summary: Get file metadata
+      description: |
+        Read file metadata with permissions
+      operationId: readFileMetaJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/readFileMetaJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/comopnents/schemas/readFileMetaOK'
+        "4XX":
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+# END READ META
+
 # LIST
   /files/v2/list:
     post:
@@ -226,6 +253,36 @@ paths:
 components:
   schemas:
 
+# READ META
+    readFileMetaJson:
+      type: object
+      properties:
+        token:
+          type: string
+          default: ""
+          required: true
+        req:
+          type: object
+          properties:
+            id:
+              type: integer
+              required: true
+
+    readFileMetaOK:
+      type: object
+      properties:
+        status:
+          type: string 
+          default: "ok"
+        response:
+          type: object
+          properties:
+            file:
+              schema:
+                $ref: '#/components/schemas/file'
+
+# END READ META
+
 # PUBLISH
     publishJson:
       type: object
@@ -410,10 +467,15 @@ components:
           example: 1
         name:
           type: string
-          example: "file"
+          example: "file.txt"
         size:
           type: integer
           example: 1024
+        mime:
+          type: string
+          example: "text/plain"
+        private:
+          type: boolean
 
     serverError:
       type: object

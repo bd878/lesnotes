@@ -57,11 +57,19 @@ func (h *Handler) ReadBatchFiles(ctx context.Context, req *api.ReadBatchFilesReq
 }
 
 func (h *Handler) ReadFile(ctx context.Context, req *api.ReadFileRequest) (*api.File, error) {
-	logger.Debugw("read file", "user_id", req.UserId, "id", req.Id)
+	logger.Debugw("read file", "user_id", req.UserId, "id", req.Id, "public", req.Public)
 
 	file, err := h.repo.GetMeta(ctx, req.Id, "")
 	if err != nil {
 		return nil, err
+	}
+
+	if file.Private && file.UserID != req.UserId {
+		return nil, errors.New("requested file is private")
+	}
+
+	if file.Private && req.Public {
+		return nil, errors.New("cannot read private file")
 	}
 
 	return model.FileToProto(file), nil

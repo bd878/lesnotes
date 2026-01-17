@@ -123,6 +123,29 @@ func (f *Files) ReadFileStream(ctx context.Context, id int64, fileName string, p
 	return files.FileFromProto(meta.File), reader, nil
 }
 
+func (f *Files) ReadFileMeta(ctx context.Context, id, userID int64, public bool) (result *files.File, err error) {
+	if f.isConnFailed() {
+		logger.Info("conn failed, setup new connection")
+		f.setupConnection()
+	}
+
+	logger.Debugw("read file meta", "id", id, "user_id", userID, "public", public)
+
+	resp, err := f.client.ReadFile(ctx, &api.ReadFileRequest{
+		Id:     id,
+		UserId: userID,
+		Public: public,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	result = files.FileFromProto(resp)
+
+	return
+
+}
+
 func (f *Files) SaveFileStream(ctx context.Context, fileStream io.Reader, id, userID int64, fileName string, private bool, mime string) (err error) {
 	if f.isConnFailed() {
 		logger.Info("conn failed, setup new connection")

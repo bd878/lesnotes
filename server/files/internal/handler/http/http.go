@@ -15,6 +15,7 @@ type Controller interface {
 	PublishFile(ctx context.Context, id, userID int64) (err error)
 	PrivateFile(ctx context.Context, id, userID int64) (err error)
 	DeleteFile(ctx context.Context, id, userID int64) (err error)
+	ReadFileMeta(ctx context.Context, id, userID int64, public bool) (file *files.File, err error)
 }
 
 type Handler struct {

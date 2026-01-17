@@ -29,6 +29,10 @@ type (
 		Asc            int           `json:"asc"`
 	}
 
+	ReadFileMetaRequest struct {
+		ID             int64        `json:"id"`
+	}
+
 	PrivateFileRequest struct {
 		ID             int64        `json:"id"`
 	}
@@ -70,5 +74,9 @@ type (
 	DeleteFileResponse struct {
 		ID                  int64              `json:"id"`
 		Description         string             `json:"description"`
+	}
+
+	ReadFileMetaResponse struct {
+		File                *File              `json:"file"`
 	}
 )

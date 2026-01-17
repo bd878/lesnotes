@@ -53,7 +53,8 @@ func New(cfg Config) *Server {
 	mux.Handle("GET /files/v1/status",           middleware.Build(handler.GetStatus))
 
 	middleware.NoAuth().WithAuth(httpmiddleware.TokenAuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
-	mux.Handle("POST /files/v2/upload",          middleware.Build(handler.UploadFileV2))
+	mux.Handle("POST /files/v2/read_meta",       middleware.Build(handler.ReadFileMetaJsonAPI))
+	mux.Handle("POST /files/v2/upload",          middleware.Build(handler.UploadFileJsonAPI))
 	mux.Handle("DELETE /files/v2/delete",        middleware.Build(handler.DeleteFileJsonAPI))
 	mux.Handle("POST /files/v2/list",            middleware.Build(handler.ListFilesJsonAPI))
 	mux.Handle("POST /files/v2/publish",         middleware.Build(handler.PublishFileJsonAPI))
