@@ -213,3 +213,16 @@ func (h *Handler) PrivateFile(ctx context.Context, req *api.PrivateFileRequest) 
 
 	return
 }
+
+func (h *Handler) DeleteFile(ctx context.Context, req *api.DeleteFileRequest) (resp *api.DeleteFileResponse, err error) {
+	logger.Debugw("delete file", "id", req.Id, "user_id", req.UserId)
+
+	err = h.repo.DeleteFile(ctx, req.UserId, req.Id)
+	if err != nil {
+		return
+	}
+
+	resp = &api.DeleteFileResponse{}
+
+	return
+}

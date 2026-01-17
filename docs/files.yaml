@@ -16,7 +16,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/componnents/schemas/listJson'
+              $ref: '#/components/schemas/listJson'
       responses:
         "200":
           description: OK
@@ -31,6 +31,33 @@ paths:
               schema:
                 $ref: '#/components/schemas/serverError'
 # END LIST
+
+# DELETE
+  /files/v2/delete:
+    delete:
+      summary: Delete file
+      description: |
+        Delete file
+      operationId: deleteFileJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/deleteJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/comopnents/schemas/deleteOK'
+        "4XX":
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+# END DELETE
 
 # PRIVATE
   /files/v2/private:
@@ -260,6 +287,37 @@ components:
             id:
               type: integer
 # END PRIVATE
+
+# DELETE
+    deleteJson:
+      type: object
+      properties:
+        token:
+          type: string
+          default: ""
+          required: false
+        req:
+          type: object
+          properties:
+            id:
+              type: integer
+              required: true
+
+    deleteOK:
+      type: object
+      properties:
+        status:
+          type: string
+          default: "ok"
+        response:
+          type: object
+          properties:
+            description:
+              type: string
+              default: ""
+            id:
+              type: integer
+# END DELETE
 
 # LIST
     listJson:

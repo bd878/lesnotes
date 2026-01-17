@@ -213,8 +213,6 @@ func (f *Files) PublishFile(ctx context.Context, id, userID int64) (err error) {
 		f.setupConnection()
 	}
 
-	logger.Debugw("publish file", "id", id, "user_id", userID)
-
 	_, err = f.client.PublishFile(ctx, &api.PublishFileRequest{Id: id, UserId: userID})
 
 	return
@@ -226,9 +224,18 @@ func (f *Files) PrivateFile(ctx context.Context, id, userID int64) (err error) {
 		f.setupConnection()
 	}
 
-	logger.Debugw("private file", "id", id, "user_id", userID)
-
 	_, err = f.client.PrivateFile(ctx, &api.PrivateFileRequest{Id: id, UserId: userID})
+
+	return
+}
+
+func (f *Files) DeleteFile(ctx context.Context, id, userID int64) (err error) {
+	if f.isConnFailed() {
+		logger.Info("conn failed, setup new connection")
+		f.setupConnection()
+	}
+
+	_, err = f.client.DeleteFile(ctx, &api.DeleteFileRequest{Id: id, UserId: userID})
 
 	return
 }

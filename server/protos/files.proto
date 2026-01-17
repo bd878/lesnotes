@@ -12,6 +12,7 @@ service Files {
 	rpc ListFiles(ListFilesRequest) returns (ListFilesResponse) {}
 	rpc PublishFile(PublishFileRequest) returns (PublishFileResponse) {}
 	rpc PrivateFile(PrivateFileRequest) returns (PrivateFileResponse) {}
+	rpc DeleteFile(DeleteFileRequest) returns (DeleteFileResponse) {}
 }
 
 message File {
@@ -86,4 +87,12 @@ message PrivateFileRequest {
 }
 
 message PrivateFileResponse {
+}
+
+message DeleteFileRequest {
+	int64 id = 1;
+	int64 user_id = 2;
+}
+
+message DeleteFileResponse {
 }

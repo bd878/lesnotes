@@ -12,4 +12,5 @@ var (
 	CodeWriteFailed   int = 313
 	CodePublishFailed int = 314
 	CodePrivateFailed int = 315
+	CodeDeleteFailed  int = 316
 )

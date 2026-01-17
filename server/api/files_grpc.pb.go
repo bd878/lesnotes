@@ -24,6 +24,7 @@ type FilesClient interface {
 	ListFiles(ctx context.Context, in *ListFilesRequest, opts ...grpc.CallOption) (*ListFilesResponse, error)
 	PublishFile(ctx context.Context, in *PublishFileRequest, opts ...grpc.CallOption) (*PublishFileResponse, error)
 	PrivateFile(ctx context.Context, in *PrivateFileRequest, opts ...grpc.CallOption) (*PrivateFileResponse, error)
+	DeleteFile(ctx context.Context, in *DeleteFileRequest, opts ...grpc.CallOption) (*DeleteFileResponse, error)
 }
 
 type filesClient struct {
@@ -145,6 +146,15 @@ func (c *filesClient) PrivateFile(ctx context.Context, in *PrivateFileRequest, o
 	return out, nil
 }
 
+func (c *filesClient) DeleteFile(ctx context.Context, in *DeleteFileRequest, opts ...grpc.CallOption) (*DeleteFileResponse, error) {
+	out := new(DeleteFileResponse)
+	err := c.cc.Invoke(ctx, "/files.v1.Files/DeleteFile", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FilesServer is the server API for Files service.
 // All implementations must embed UnimplementedFilesServer
 // for forward compatibility
@@ -156,6 +166,7 @@ type FilesServer interface {
 	ListFiles(context.Context, *ListFilesRequest) (*ListFilesResponse, error)
 	PublishFile(context.Context, *PublishFileRequest) (*PublishFileResponse, error)
 	PrivateFile(context.Context, *PrivateFileRequest) (*PrivateFileResponse, error)
+	DeleteFile(context.Context, *DeleteFileRequest) (*DeleteFileResponse, error)
 	mustEmbedUnimplementedFilesServer()
 }
 
@@ -183,6 +194,9 @@ func (UnimplementedFilesServer) PublishFile(context.Context, *PublishFileRequest
 }
 func (UnimplementedFilesServer) PrivateFile(context.Context, *PrivateFileRequest) (*PrivateFileResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PrivateFile not implemented")
+}
+func (UnimplementedFilesServer) DeleteFile(context.Context, *DeleteFileRequest) (*DeleteFileResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteFile not implemented")
 }
 func (UnimplementedFilesServer) mustEmbedUnimplementedFilesServer() {}
 
@@ -334,6 +348,24 @@ func _Files_PrivateFile_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Files_DeleteFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteFileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FilesServer).DeleteFile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/files.v1.Files/DeleteFile",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FilesServer).DeleteFile(ctx, req.(*DeleteFileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Files_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "files.v1.Files",
 	HandlerType: (*FilesServer)(nil),
@@ -357,6 +389,10 @@ var _Files_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "PrivateFile",
 			Handler:    _Files_PrivateFile_Handler,
+		},
+		{
+			MethodName: "DeleteFile",
+			Handler:    _Files_DeleteFile_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

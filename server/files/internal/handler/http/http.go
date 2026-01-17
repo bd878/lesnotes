@@ -14,6 +14,7 @@ type Controller interface {
 	ListFiles(ctx context.Context, userID int64, limit, offset int32, ascending, private bool) (list *files.List, err error)
 	PublishFile(ctx context.Context, id, userID int64) (err error)
 	PrivateFile(ctx context.Context, id, userID int64) (err error)
+	DeleteFile(ctx context.Context, id, userID int64) (err error)
 }
 
 type Handler struct {

@@ -37,6 +37,10 @@ type (
 		ID             int64        `json:"id"`
 	}
 
+	DeleteFileRequest struct {
+		ID             int64        `json:"id"`
+	}
+
 	UploadResponse struct {
 		ID             int64         `json:"id"`
 		Name           string        `json:"name,omitempty"`
@@ -59,6 +63,11 @@ type (
 	}
 
 	PublishFileResponse struct {
+		ID                  int64              `json:"id"`
+		Description         string             `json:"description"`
+	}
+
+	DeleteFileResponse struct {
 		ID                  int64              `json:"id"`
 		Description         string             `json:"description"`
 	}
