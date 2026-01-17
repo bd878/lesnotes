@@ -24,6 +24,9 @@ import publishMessages from './publishMessages'
 import publishMessageJson from './publishMessageJson'
 import privateMessages from './privateMessages';
 import privateMessageJson from './privateMessageJson';
+import privateFileJson from './privateFileJson';
+import publishFileJson from './publishFileJson';
+import deleteFileJson from './deleteFileJson';
 import moveMessage from './moveMessage';
 import uploadFile from './uploadFile';
 import validateMiniappData from './validateMiniappData';
@@ -72,6 +75,9 @@ export default {
 	privateMessageJson,
 	privateThread,
 	publishThread,
+	publishFileJson,
+	privateFileJson,
+	deleteFileJson,
 	moveMessage,
 	uploadFile,
 	getFileDownloadUrl,

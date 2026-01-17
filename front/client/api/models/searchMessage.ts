@@ -19,8 +19,9 @@ const EmptySearchMessage: SearchMessage = Object.freeze({
 })
 
 export default function mapMessageFromProto(message?: any): SearchMessage {
-	if (!message)
+	if (!message) {
 		return EmptySearchMessage
+	}
 
 	const res = {
 		ID:        message.id,

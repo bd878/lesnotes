@@ -1,4 +1,5 @@
 import type { Message } from '../api/models';
+import type { FileWithMime } from '../types';
 import Config from 'config';
 import mustache from 'mustache';
 import * as is from '../third_party/is';

@@ -30,6 +30,9 @@ import redirectHome from './handlers/redirectHome';
 import redirectLogin from './handlers/redirectLogin';
 import validateLogin from './handlers/validateLogin'
 import validateSignup from './handlers/validateSignup';
+import deleteFile from './handlers/deleteFile';
+import publishFile from './handlers/publishFile';
+import privateFile from './handlers/privateFile';
 import deleteMessage from './handlers/deleteMessage';
 import publishMessage from './handlers/publishMessage';
 import privateMessage from './handlers/privateMessage';
@@ -90,6 +93,9 @@ router
 	.post("doLogin",               "/login",                        etag, getState, validateLogin, redirectHome)
 	.post("doSignup",              "/signup",                       etag, getState, validateSignup, redirectHome)
 	.post("doSearch",              "/search",                       etag, getToken, authed, getState, getMe, getSearchForm, loadSearch, loadSearchPath, search)
+	.post("doDeleteFile",          "/f/delete",                     getToken, authed, getState, deleteFile)
+	.post("doPublishFile",         "/f/publish",                    getToken, authed, getState, publishFile)
+	.post("doPrivateFile",         "/f/private",                    getToken, authed, getState, privateFile)
 	.post("doDeleteMessage",       "/m/delete",                     getToken, authed, getState, deleteMessage)
 	.post("doPublishMessage",      "/m/publish",                    getToken, authed, getState, publishMessage)
 	.post("doPrivateMessage",      "/m/private",                    getToken, authed, getState, privateMessage)

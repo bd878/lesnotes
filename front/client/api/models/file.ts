@@ -3,6 +3,7 @@ export interface File {
 	name:      string;
 	size:      number;
 	mime:      string;
+	private:   boolean;
 }
 
 export interface FileProto {
@@ -10,6 +11,7 @@ export interface FileProto {
 	name:      string;
 	size:      number;
 	mime:      string;
+	private:   boolean;
 }
 
 const EmptyFile: File = Object.freeze({
@@ -17,6 +19,7 @@ const EmptyFile: File = Object.freeze({
 	name: "",
 	size: 0,
 	mime: "",
+	private: true,
 })
 
 export default function mapFileFromProto(file?: FileProto): File {
@@ -25,10 +28,11 @@ export default function mapFileFromProto(file?: FileProto): File {
 	}
 
 	return {
-		ID:   file.id,
-		name: file.name,
-		size: file.size,
-		mime: file.mime,
+		ID:      file.id,
+		name:    file.name,
+		size:    file.size,
+		mime:    file.mime,
+		private: file.private,
 	}
 }
 

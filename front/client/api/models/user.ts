@@ -15,8 +15,9 @@ const empty: User = {
 }
 
 export default function mapUserFromProto(user?: any): User {
-	if (!user)
+	if (!user) {
 		return empty
+	}
 
 	let fontSize: string = "medium"
 	if (user.font_size < 10) { fontSize = "small"; }
