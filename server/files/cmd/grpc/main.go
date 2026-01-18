@@ -36,6 +36,7 @@ func main() {
 		PGConn:                 cfg.PGConn,
 		NodeName:               cfg.NodeName,
 		SessionsServiceAddr:    cfg.SessionsServiceAddr,
+		NatsAddr:               cfg.NatsAddr,
 	})
 
 	if err := server.Run(context.Background()); err != nil {

@@ -9,6 +9,7 @@ import (
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/ddd"
 	"github.com/bd878/gallery/server/files/pkg/model"
 )
 
@@ -25,10 +26,14 @@ type Repository interface {
 type Handler struct {
 	api.UnimplementedFilesServer
 	repo       Repository
+	publisher  ddd.EventPublisher[ddd.Event]
 }
 
-func New(repo Repository) *Handler {
-	return &Handler{repo: repo}
+func New(repo Repository, publisher ddd.EventPublisher[ddd.Event]) *Handler {
+	return &Handler{
+		repo:      repo,
+		publisher: publisher,
+	}
 }
 
 func (h *Handler) ReadBatchFiles(ctx context.Context, req *api.ReadBatchFilesRequest) (*api.ReadBatchFilesResponse, error) {

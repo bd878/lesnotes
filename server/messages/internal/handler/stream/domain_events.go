@@ -22,7 +22,13 @@ func NewDomainEventHandlers(publisher am.MessagePublisher[am.Message]) *domainHa
 }
 
 func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.Event], handler ddd.EventHandler[ddd.Event]) {
-	subscriber.Subscribe(handler, domain.MessageCreatedEvent, domain.MessageDeletedEvent)
+	subscriber.Subscribe(handler,
+		domain.MessageCreatedEvent,
+		domain.MessageDeletedEvent,
+		domain.MessagesPrivateEvent,
+		domain.MessagesPublishEvent,
+		domain.MessageUpdatedEvent,
+	)
 }
 
 func (h domainHandler[T]) HandleEvent(ctx context.Context, event T) error {

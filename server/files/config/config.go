@@ -6,6 +6,7 @@ type Config struct {
 	HttpAddr             string      `json:"http_addr"`
 	UsersServiceAddr     string      `json:"users_service_addr"`
 	SessionsServiceAddr  string      `json:"sessions_service_addr"`
+	NatsAddr             string      `json:"nats_addr"`
 
 	PGConn               string      `json:"pg_conn"`
 }
