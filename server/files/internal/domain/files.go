@@ -48,16 +48,14 @@ func UploadFile(id int64, name, description string, userID int64, private bool, 
 type FileDeleted struct {
 	ID      int64
 	UserID  int64
-	Name    string
 }
 
 func (FileDeleted) Key() string { return FileDeletedEvent }
 
-func DeleteFile(id, userID int64, name string) (ddd.Event, error) {
+func DeleteFile(id, userID int64) (ddd.Event, error) {
 	return ddd.NewEvent(FileDeletedEvent, &FileDeleted{
 		ID:       id,
 		UserID:   userID,
-		Name:     name,
 	}), nil
 }
 

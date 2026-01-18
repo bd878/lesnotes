@@ -11,7 +11,10 @@ import (
 	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/ddd"
 	"github.com/bd878/gallery/server/files/pkg/model"
+	"github.com/bd878/gallery/server/files/internal/domain"
 )
+
+// TODO: add controller, derive domain events on controller level
 
 type Repository interface {
 	SaveFile(ctx context.Context, reader io.Reader, id, userID int64, private bool, name, description, mime string) (err error)
@@ -164,7 +167,7 @@ func (r *streamReader) Read(p []byte) (n int, err error) {
 	return r.buf.Read(p)
 }
 
-func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) error {
+func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) (err error) {
 	meta, err := stream.Recv()
 	if err != nil {
 		return err
@@ -177,12 +180,22 @@ func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) error {
 
 	logger.Debugw("save file stream", "id", file.File.Id, "user_id", file.File.UserId, "private", file.File.Private, "name", file.File.Name, "description", file.File.Description, "mime", file.File.Mime)
 
+	event, err := domain.UploadFile(file.File.Id, file.File.Name, file.File.Description, file.File.UserId, file.File.Private, file.File.Mime, file.File.Size)
+	if err != nil {
+		return err
+	}
+
 	err = h.repo.SaveFile(context.Background(), &streamReader{Files_SaveFileStreamServer: stream}, file.File.Id, file.File.UserId, file.File.Private, file.File.Name, file.File.Description, file.File.Mime)
 	if err != nil {
 		return err
 	}
 
-	return stream.SendAndClose(&api.SaveFileStreamResponse{})
+	err = stream.SendAndClose(&api.SaveFileStreamResponse{})
+	if err != nil {
+		return
+	}
+
+	return h.publisher.Publish(context.Background(), event)
 }
 
 func (h *Handler) ListFiles(ctx context.Context, req *api.ListFilesRequest) (resp *api.ListFilesResponse, err error) {
@@ -204,7 +217,17 @@ func (h *Handler) ListFiles(ctx context.Context, req *api.ListFilesRequest) (res
 func (h *Handler) PublishFile(ctx context.Context, req *api.PublishFileRequest) (resp *api.PublishFileResponse, err error) {
 	logger.Debugw("publish file", "id", req.Id, "user_id", req.UserId)
 
+	event, err := domain.PublishFile(req.UserId, req.Id)
+	if err != nil {
+		return nil, err
+	}
+
 	err = h.repo.PublishFile(ctx, req.Id, req.UserId)
+	if err != nil {
+		return
+	}
+
+	err = h.publisher.Publish(context.Background(), event)
 	if err != nil {
 		return
 	}
@@ -217,7 +240,17 @@ func (h *Handler) PublishFile(ctx context.Context, req *api.PublishFileRequest) 
 func (h *Handler) PrivateFile(ctx context.Context, req *api.PrivateFileRequest) (resp *api.PrivateFileResponse, err error) {
 	logger.Debugw("private file", "id", req.Id, "user_id", req.UserId)
 
+	event, err := domain.PrivateFile(req.UserId, req.Id)
+	if err != nil {
+		return nil, err
+	}
+
 	err = h.repo.PrivateFile(ctx, req.Id, req.UserId)
+	if err != nil {
+		return
+	}
+
+	err = h.publisher.Publish(context.Background(), event)
 	if err != nil {
 		return
 	}
@@ -230,7 +263,17 @@ func (h *Handler) PrivateFile(ctx context.Context, req *api.PrivateFileRequest) 
 func (h *Handler) DeleteFile(ctx context.Context, req *api.DeleteFileRequest) (resp *api.DeleteFileResponse, err error) {
 	logger.Debugw("delete file", "id", req.Id, "user_id", req.UserId)
 
+	event, err := domain.DeleteFile(req.UserId, req.Id)
+	if err != nil {
+		return nil, err
+	}
+
 	err = h.repo.DeleteFile(ctx, req.UserId, req.Id)
+	if err != nil {
+		return
+	}
+
+	err = h.publisher.Publish(context.Background(), event)
 	if err != nil {
 		return
 	}
