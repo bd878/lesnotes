@@ -24,6 +24,7 @@ message File {
 	int64         size = 6;
 	bool          private = 7;
 	string        mime = 8;
+	string        description = 9;
 }
 
 message FileChunk {

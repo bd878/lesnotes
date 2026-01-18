@@ -27,8 +27,8 @@ func New(pool *pgxpool.Pool) *Repository {
 	}
 }
 
-func (r *Repository) SaveFile(ctx context.Context, reader io.Reader, id, userID int64, private bool, name string, mime string) (err error) {
-	const query = "INSERT INTO %s(id, owner_id, name, private, oid, mime, size) VALUES ($1, $2, $3, $4, $5, $6, $7)"
+func (r *Repository) SaveFile(ctx context.Context, reader io.Reader, id, userID int64, private bool, name, description string, mime string) (err error) {
+	const query = "INSERT INTO %s(id, owner_id, name, description, private, oid, mime, size) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"
 	const createdAtQuery = "SELECT created_at FROM %s WHERE id = $1"
 
 	var tx pgx.Tx
@@ -70,7 +70,7 @@ func (r *Repository) SaveFile(ctx context.Context, reader io.Reader, id, userID 
 		return
 	}
 
-	_, err = tx.Exec(ctx, r.table(query), id, userID, name, private, oid, mime, size)
+	_, err = tx.Exec(ctx, r.table(query), id, userID, name, description, private, oid, mime, size)
 	if err != nil {
 		return
 	}
@@ -79,7 +79,7 @@ func (r *Repository) SaveFile(ctx context.Context, reader io.Reader, id, userID 
 }
 
 func (r *Repository) GetMeta(ctx context.Context, id int64, fileName string) (file *model.File, err error) {
-	query := "SELECT owner_id, id, name, private, oid, mime, size, created_at FROM %s WHERE"
+	query := "SELECT owner_id, id, name, description, private, oid, mime, size, created_at FROM %s WHERE"
 
 	file = &model.File{
 	}
@@ -88,10 +88,10 @@ func (r *Repository) GetMeta(ctx context.Context, id int64, fileName string) (fi
 
 	if id != 0 {
 		query += " id = $1"
-		err = r.pool.QueryRow(ctx, r.table(query), id).Scan(&file.UserID, &file.ID, &file.Name, &file.Private, &file.OID, &file.Mime, &file.Size, &createdAt)
+		err = r.pool.QueryRow(ctx, r.table(query), id).Scan(&file.UserID, &file.ID, &file.Name, &file.Description, &file.Private, &file.OID, &file.Mime, &file.Size, &createdAt)
 	} else if fileName != "" {
 		query += " name = $1"
-		err = r.pool.QueryRow(ctx, r.table(query), fileName).Scan(&file.UserID, &file.ID, &file.Name, &file.Private, &file.OID, &file.Mime, &file.Size, &createdAt)
+		err = r.pool.QueryRow(ctx, r.table(query), fileName).Scan(&file.UserID, &file.ID, &file.Name, &file.Description, &file.Private, &file.OID, &file.Mime, &file.Size, &createdAt)
 	} else {
 		err = errors.New("id = 0 and fileName is empty")
 	}
@@ -129,10 +129,10 @@ func (r *Repository) ListFiles(ctx context.Context, userID int64, limit, offset 
 	// TODO: handle ascending field
 	if private {
 		// list all : private and public
-		rows, err = tx.Query(ctx, r.table("SELECT id, name, private, mime, size, created_at FROM %s WHERE owner_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3"), userID, limit, offset)
+		rows, err = tx.Query(ctx, r.table("SELECT id, name, description, private, mime, size, created_at FROM %s WHERE owner_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3"), userID, limit, offset)
 	} else {
 		// list public only (not private)
-		rows, err = tx.Query(ctx, r.table("SELECT id, name, private, mime, size, created_at FROM %s WHERE owner_id = $1 AND private = false ORDER BY created_at DESC LIMIT $2 OFFSET $3"), userID, limit, offset)
+		rows, err = tx.Query(ctx, r.table("SELECT id, name, description, private, mime, size, created_at FROM %s WHERE owner_id = $1 AND private = false ORDER BY created_at DESC LIMIT $2 OFFSET $3"), userID, limit, offset)
 	}
 
 	defer rows.Close()
@@ -148,7 +148,7 @@ func (r *Repository) ListFiles(ctx context.Context, userID int64, limit, offset 
 			UserID:   userID,
 		}
 
-		err = rows.Scan(&file.ID, &file.Name, &file.Private, &file.Mime, &file.Size, &createdAt)
+		err = rows.Scan(&file.ID, &file.Name, &file.Description, &file.Private, &file.Mime, &file.Size, &createdAt)
 		if err != nil {
 			return
 		}

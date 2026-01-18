@@ -97,7 +97,7 @@ func (h *Handler) uploadFile(w http.ResponseWriter, req *http.Request, public in
 
 	id := utils.RandomID()
 
-	err = h.controller.SaveFileStream(req.Context(), f, int64(id), user.ID, fileName, private, mime)
+	err = h.controller.SaveFileStream(req.Context(), f, int64(id), user.ID, fileName, "" /* description */, private, mime)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

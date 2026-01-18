@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS files.files
 	size          int           NOT NULL,
 	created_at    timestamptz   NOT NULL DEFAULT NOW(),
 	updated_at    timestamptz   NOT NULL DEFAULT NOW(),
+	description   text          NOT NULL DEFAULT '',
 	PRIMARY KEY(id)
 );
 

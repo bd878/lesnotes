@@ -4,13 +4,14 @@ type (
 	File struct {
 		ID             int64         `json:"id"`
 		OID            int32         `json:"-"`
-		UserID         int64         `json:"user_id,omitempty"`
-		Name           string        `json:"name,omitempty"`
-		CreateUTCNano  int64         `json:"create_utc_nano,omitempty"`
-		Error          string        `json:"error,omitempty"`
-		Size           int64         `json:"size,omitempty"`
-		Mime           string        `json:"mime,omitempty"`
-		Private        bool          `json:"private,omitempty"`
+		UserID         int64         `json:"user_id"`
+		Name           string        `json:"name"`
+		CreateUTCNano  int64         `json:"create_utc_nano"`
+		Error          string        `json:"error"`
+		Size           int64         `json:"size"`
+		Mime           string        `json:"mime"`
+		Private        bool          `json:"private"`
+		Description    string        `json:"description"`
 	}
 
 	List struct {
@@ -47,17 +48,17 @@ type (
 
 	UploadResponse struct {
 		ID             int64         `json:"id"`
-		Name           string        `json:"name,omitempty"`
-		Description    string        `json:"description,omitempty"`
+		Name           string        `json:"name"`
+		Description    string        `json:"description"`
 	}
 
 	ListFilesResponse struct {
 		Files               []*File            `json:"files"`
 		IsLastPage          bool               `json:"is_last_page"`
-		IsFirstPage         bool               `json:"is_first_page,omitempty"`
-		Count               int32              `json:"count,omitempty"`
-		Total               int32              `json:"total,omitempty"`
-		Offset              int32              `json:"offset,omitempty"`
+		IsFirstPage         bool               `json:"is_first_page"`
+		Count               int32              `json:"count"`
+		Total               int32              `json:"total"`
+		Offset              int32              `json:"offset"`
 		Description         string             `json:"description"`
 	}
 

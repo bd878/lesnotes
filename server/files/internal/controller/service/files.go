@@ -146,13 +146,13 @@ func (f *Files) ReadFileMeta(ctx context.Context, id, userID int64, public bool)
 
 }
 
-func (f *Files) SaveFileStream(ctx context.Context, fileStream io.Reader, id, userID int64, fileName string, private bool, mime string) (err error) {
+func (f *Files) SaveFileStream(ctx context.Context, fileStream io.Reader, id, userID int64, fileName, description string, private bool, mime string) (err error) {
 	if f.isConnFailed() {
 		logger.Info("conn failed, setup new connection")
 		f.setupConnection()
 	}
 
-	logger.Debugw("save file stream", "user_id", userID, "name", fileName, "private", private, "mime", mime)
+	logger.Debugw("save file stream", "user_id", userID, "name", fileName, "description", description, "private", private, "mime", mime)
 
 	stream, err := f.client.SaveFileStream(ctx)
 	if err != nil {
@@ -162,11 +162,12 @@ func (f *Files) SaveFileStream(ctx context.Context, fileStream io.Reader, id, us
 	err = stream.Send(&api.FileData{
 		Data: &api.FileData_File{
 			File: &api.File{
-				Id:      id,
-				Name:    fileName,
-				UserId:  userID,
-				Private: private,
-				Mime:    mime,
+				Id:           id,
+				Name:         fileName,
+				UserId:       userID,
+				Private:      private,
+				Mime:         mime,
+				Description:  description,
 			},
 		},
 	})
