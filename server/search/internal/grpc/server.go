@@ -144,7 +144,7 @@ func (s *Server) setupRaft() (err error) {
 
 func (s *Server) setupStream() error {
 	return streamhandler.RegisterIntegrationEventHandlers(broker.NewStream(s.nc),
-		streamhandler.NewIntegrationEventHandlers(s.controller, s.controller/*TODO: split on messages, threads*/))
+		streamhandler.NewIntegrationEventHandlers(s.controller, s.controller, s.controller/*TODO: split on messages, threads, files*/))
 }
 
 func (s *Server) setupGRPC() error {

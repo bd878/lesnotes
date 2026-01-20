@@ -9,6 +9,7 @@ import (
 	"github.com/bd878/gallery/server/api"
 	messageevents "github.com/bd878/gallery/server/messages/pkg/events"
 	threadsevents "github.com/bd878/gallery/server/threads/pkg/events"
+	filesevents "github.com/bd878/gallery/server/files/pkg/events"
 )
 
 type MessagesController interface {
@@ -28,17 +29,26 @@ type ThreadsController interface {
 	PublishThread(ctx context.Context, id, userID int64) error
 }
 
+type FilesController interface {
+	SaveFile(ctx context.Context, id, userID int64, name, description, mime string, private bool, size int64) error
+	PublishFile(ctx context.Context, id, userID int64) error
+	PrivateFile(ctx context.Context, id, userID int64) error
+	DeleteFile(ctx context.Context, id, userID int64) error
+}
+
 type integrationHandlers struct {
 	messages MessagesController
 	threads  ThreadsController
+	files    FilesController
 }
 
 var _ am.RawMessageHandler = (*integrationHandlers)(nil)
 
-func NewIntegrationEventHandlers(messages MessagesController, threads ThreadsController) am.RawMessageHandler {
+func NewIntegrationEventHandlers(messages MessagesController, threads ThreadsController, files FilesController) am.RawMessageHandler {
 	return integrationHandlers{
 		messages: messages,
 		threads:  threads,
+		files:    files,
 	}
 }
 
@@ -83,6 +93,15 @@ func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingM
 		return h.handleThreadPublished(ctx, msg)
 	case threadsevents.ThreadPrivatedEvent:
 		return h.handleThreadPrivated(ctx, msg)
+
+	case filesevents.FileUploadedEvent:
+		return h.handleFileUploaded(ctx, msg)
+	case filesevents.FileDeletedEvent:
+		return h.handleFileDeleted(ctx, msg)
+	case filesevents.FilePublishedEvent:
+		return h.handleFilePublished(ctx, msg)
+	case filesevents.FilePrivatedEvent:
+		return h.handleFilePrivated(ctx, msg)
 	}
 
 	return nil
@@ -185,4 +204,40 @@ func (h integrationHandlers) handleThreadPublished(ctx context.Context, msg am.I
 	}
 
 	return h.threads.PublishThread(ctx, m.GetId(), m.GetUserId())
+}
+
+func (h integrationHandlers) handleFileUploaded(ctx context.Context, msg am.IncomingMessage) error {
+	m := &api.FileUploaded{}
+	if err := proto.Unmarshal(msg.Data(), m); err != nil {
+		return err
+	}
+
+	return h.files.SaveFile(ctx, m.GetId(), m.GetUserId(), m.GetName(), m.GetDescription(), m.GetMime(), m.GetPrivate(), m.GetSize())
+}
+
+func (h integrationHandlers) handleFileDeleted(ctx context.Context, msg am.IncomingMessage) error {
+	m := &api.FileDeleted{}
+	if err := proto.Unmarshal(msg.Data(), m); err != nil {
+		return err
+	}
+
+	return h.files.DeleteFile(ctx, m.GetId(), m.GetUserId())
+}
+
+func (h integrationHandlers) handleFilePublished(ctx context.Context, msg am.IncomingMessage) error {
+	m := &api.FilePublished{}
+	if err := proto.Unmarshal(msg.Data(), m); err != nil {
+		return err
+	}
+
+	return h.files.PublishFile(ctx, m.GetId(), m.GetUserId())
+}
+
+func (h integrationHandlers) handleFilePrivated(ctx context.Context, msg am.IncomingMessage) error {
+	m := &api.FilePrivated{}
+	if err := proto.Unmarshal(msg.Data(), m); err != nil {
+		return err
+	}
+
+	return h.files.PrivateFile(ctx, m.GetId(), m.GetUserId())
 }

@@ -305,4 +305,90 @@ func (m *Distributed) SearchMessages(ctx context.Context, userID int64, substr s
 	return
 }
 
+func (m *Distributed) SaveFile(ctx context.Context, id, userID int64, name, description, mime string, private bool, size int64) (err error) {
+	if !m.isLeader() {
+		return nil
+	}
+
+	logger.Debugw("save file", "id", id, "user_id", userID, "name", name, "description", description, "mime", mime, "private", private, "size", size)
+
+	cmd, err := proto.Marshal(&AppendFileCommand{
+		Id:          id,
+		UserId:      userID,
+		Name:        name,
+		Description: description,
+		Mime:        mime,
+		Private:     private,
+		Size:        size,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = m.apply(ctx, AppendFileRequest, cmd)
+
+	return
+}
+
+func (m *Distributed) PublishFile(ctx context.Context, id, userID int64) (err error) {
+	if !m.isLeader() {
+		return nil
+	}
+
+	logger.Debugw("publish file", "id", id, "user_id", userID)
+
+	cmd, err := proto.Marshal(&PublishFileCommand{
+		Id:          id,
+		UserId:      userID,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = m.apply(ctx, PublishFileRequest, cmd)
+
+	return
+}
+
+func (m *Distributed) PrivateFile(ctx context.Context, id, userID int64) (err error) {
+	if !m.isLeader() {
+		return nil
+	}
+
+	logger.Debugw("private file", "id", id, "user_id", userID)
+
+	cmd, err := proto.Marshal(&PrivateFileCommand{
+		Id:          id,
+		UserId:      userID,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = m.apply(ctx, PrivateFileRequest, cmd)
+
+	return
+}
+
+func (m *Distributed) DeleteFile(ctx context.Context, id, userID int64) (err error) {
+	if !m.isLeader() {
+		return nil
+	}
+
+	logger.Debugw("delete file", "id", id, "user_id", userID)
+
+	cmd, err := proto.Marshal(&DeleteFileCommand{
+		Id:          id,
+		UserId:      userID,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = m.apply(ctx, DeleteFileRequest, cmd)
+
+	return
+}
+
 // TODO: search threads
+// TODO: search files

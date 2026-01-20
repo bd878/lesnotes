@@ -27,6 +27,10 @@ type MessagesRepository interface {
 }
 
 type FilesRepository interface {
+	SaveFile(ctx context.Context, id, userID int64, name, description, mime string, private bool, size int64) (err error)
+	DeleteFile(ctx context.Context, id, userID int64) (err error)
+	PublishFile(ctx context.Context, id, userID int64) (err error)
+	PrivateFile(ctx context.Context, id, userID int64) (err error)
 	Truncate(ctx context.Context) (err error)
 	Dump(ctx context.Context, writer io.Writer) (err error)
 	Restore(ctx context.Context, reader io.Reader) (err error)
@@ -79,6 +83,14 @@ func (f *fsm) Apply(record *raft.Log) interface{} {
 		return f.applyPublishThread(buf[1:])
 	case PrivateThreadRequest:
 		return f.applyPrivateThread(buf[1:])
+	case AppendFileRequest:
+		return f.applyAppendFile(buf[1:])
+	case DeleteFileRequest:
+		return f.applyDeleteFile(buf[1:])
+	case PublishFileRequest:
+		return f.applyPublishFile(buf[1:])
+	case PrivateFileRequest:
+		return f.applyPrivateFile(buf[1:])
 	default:
 		logger.Errorw("unknown request type", "type", reqType)
 	}
@@ -160,4 +172,32 @@ func (f *fsm) applyPrivateThread(raw []byte) interface{} {
 	proto.Unmarshal(raw, &cmd)
 
 	return f.threadsRepo.PrivateThread(context.Background(), cmd.Id, cmd.UserId)
+}
+
+func (f *fsm) applyAppendFile(raw []byte) interface{} {
+	var cmd AppendFileCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.filesRepo.SaveFile(context.Background(), cmd.Id, cmd.UserId, cmd.Name, cmd.Description, cmd.Mime, cmd.Private, cmd.Size)
+}
+
+func (f *fsm) applyDeleteFile(raw []byte) interface{} {
+	var cmd DeleteFileCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.filesRepo.DeleteFile(context.Background(), cmd.Id, cmd.UserId)
+}
+
+func (f *fsm) applyPublishFile(raw []byte) interface{} {
+	var cmd PublishFileCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.filesRepo.PublishFile(context.Background(), cmd.Id, cmd.UserId)
+}
+
+func (f *fsm) applyPrivateFile(raw []byte) interface{} {
+	var cmd PrivateFileCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.filesRepo.PrivateFile(context.Background(), cmd.Id, cmd.UserId)
 }

@@ -15,4 +15,9 @@ const (
 	ChangeThreadParentRequest
 	PublishThreadRequest
 	PrivateThreadRequest
+
+	AppendFileRequest
+	DeleteFileRequest
+	PublishFileRequest
+	PrivateFileRequest
 )

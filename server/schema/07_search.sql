@@ -1,6 +1,7 @@
 \c lesnotes
 CREATE SCHEMA IF NOT EXISTS search;
 
+-- ORDER IS IMPORTANT
 CREATE TABLE IF NOT EXISTS search.messages
 (
 	id         bigint       UNIQUE NOT NULL,    -- message id
@@ -45,6 +46,9 @@ CREATE TABLE IF NOT EXISTS search.files
 	mime          VARCHAR(256)  NOT NULL,
 	created_at    timestamptz   NOT NULL DEFAULT NOW(),
 	updated_at    timestamptz   NOT NULL DEFAULT NOW(),
+	size          int           NOT NULL DEFAULT 0,
+	private       bool          NOT NULL DEFAULT true,
+	description   TEXT          NOT NULL DEFAULT '',
 	PRIMARY KEY(id)
 );
 
