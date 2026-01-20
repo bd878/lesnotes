@@ -17,10 +17,18 @@ CREATE TABLE IF NOT EXISTS messages.messages
 	PRIMARY KEY(id)
 );
 
--- TODO: messages.comments, messages.reactions
-
 CREATE TRIGGER created_at_messages_trgr BEFORE UPDATE ON messages.messages FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
 CREATE TRIGGER updated_at_messages_trgr BEFORE UPDATE ON messages.messages FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
+
+-- TODO: messages.comments, messages.reactions
+
+CREATE TABLE IF NOT EXISTS messages.files
+(
+	file_id       bigint       NOT NULL,
+	message_id    bigint       NOT NULL,
+	user_id       bigint       NOT NULL,
+	PRIMARY KEY(file_id, message_id)
+);
 
 GRANT USAGE ON SCHEMA messages TO lesnotes_admin;
 GRANT INSERT, UPDATE, DELETE, SELECT, TRUNCATE ON ALL TABLES IN SCHEMA messages TO lesnotes_admin;

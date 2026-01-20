@@ -22,7 +22,7 @@ func NewFilesRepository(pool *pgxpool.Pool, tableName string) *FilesRepository {
 }
 
 func (r *FilesRepository) SaveFile(ctx context.Context, id, userID int64, name, description, mime string, private bool, size int64) (err error) {
-	const query = "INSERT INTO %s(id, user_id, name, description, mime, size, private) VALUES ($1, $2, $3, $4, $5, $6, $7)"
+	const query = "INSERT INTO %s(id, owner_id, name, description, mime, size, private) VALUES ($1, $2, $3, $4, $5, $6, $7)"
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
@@ -49,7 +49,7 @@ func (r *FilesRepository) SaveFile(ctx context.Context, id, userID int64, name, 
 }
 
 func (r *FilesRepository) DeleteFile(ctx context.Context, id, userID int64) (err error) {
-	const query = "DELETE FROM %s WHERE id = $1 AND user_id = $2"
+	const query = "DELETE FROM %s WHERE id = $1 AND owner_id = $2"
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
@@ -95,7 +95,7 @@ func (r *FilesRepository) PublishFile(ctx context.Context, id, userID int64) (er
 		}
 	}()
 
-	_, err = tx.Exec(ctx, r.table("UPDATE %s SET private = false WHERE user_id = $1 AND id = $2"), userID, id)
+	_, err = tx.Exec(ctx, r.table("UPDATE %s SET private = false WHERE owner_id = $1 AND id = $2"), userID, id)
 
 	return
 }
@@ -120,7 +120,7 @@ func (r *FilesRepository) PrivateFile(ctx context.Context, id, userID int64) (er
 		}
 	}()
 
-	_, err = tx.Exec(ctx, r.table("UPDATE %s SET private = true WHERE user_id = $1 AND id = $2"), userID, id)
+	_, err = tx.Exec(ctx, r.table("UPDATE %s SET private = true WHERE owner_id = $1 AND id = $2"), userID, id)
 
 	return
 }

@@ -27,14 +27,14 @@ func New(pool *pgxpool.Pool) *Repository {
 	}
 }
 
-func (r *Repository) SaveFile(ctx context.Context, reader io.Reader, id, userID int64, private bool, name, description string, mime string) (err error) {
+func (r *Repository) SaveFile(ctx context.Context, reader io.Reader, id, userID int64, private bool, name, description string, mime string) (size int64, err error) {
 	const query = "INSERT INTO %s(id, owner_id, name, description, private, oid, mime, size) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"
 	const createdAtQuery = "SELECT created_at FROM %s WHERE id = $1"
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer func() {
 		p := recover()
@@ -55,16 +55,15 @@ func (r *Repository) SaveFile(ctx context.Context, reader io.Reader, id, userID 
 	oid, err = lb.Create(ctx, 0)
 	if err != nil {
 		logger.Errorw("failed to create large object", "error", err)
-		return err
+		return
 	}
 
 	object, err := lb.Open(ctx, oid, pgx.LargeObjectModeWrite)
 	defer object.Close()
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	var size int64
 	size, err = io.Copy(object, reader)
 	if err != nil {
 		return

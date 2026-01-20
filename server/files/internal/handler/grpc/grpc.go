@@ -17,7 +17,7 @@ import (
 // TODO: add controller, derive domain events on controller level
 
 type Repository interface {
-	SaveFile(ctx context.Context, reader io.Reader, id, userID int64, private bool, name, description, mime string) (err error)
+	SaveFile(ctx context.Context, reader io.Reader, id, userID int64, private bool, name, description, mime string) (size int64, err error)
 	GetMeta(ctx context.Context, id int64, fileName string) (file *model.File, err error)
 	DeleteFile(ctx context.Context, ownerID, id int64) (err error)
 	ReadFile(ctx context.Context, oid int32, writer io.Writer) (err error)
@@ -180,12 +180,13 @@ func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) (err err
 
 	logger.Debugw("save file stream", "id", file.File.Id, "user_id", file.File.UserId, "private", file.File.Private, "name", file.File.Name, "description", file.File.Description, "mime", file.File.Mime)
 
-	event, err := domain.UploadFile(file.File.Id, file.File.Name, file.File.Description, file.File.UserId, file.File.Private, file.File.Mime, file.File.Size)
+	var size int64
+	size, err = h.repo.SaveFile(context.Background(), &streamReader{Files_SaveFileStreamServer: stream}, file.File.Id, file.File.UserId, file.File.Private, file.File.Name, file.File.Description, file.File.Mime)
 	if err != nil {
 		return err
 	}
 
-	err = h.repo.SaveFile(context.Background(), &streamReader{Files_SaveFileStreamServer: stream}, file.File.Id, file.File.UserId, file.File.Private, file.File.Name, file.File.Description, file.File.Mime)
+	event, err := domain.UploadFile(file.File.Id, file.File.Name, file.File.Description, file.File.UserId, file.File.Private, file.File.Mime, size)
 	if err != nil {
 		return err
 	}
