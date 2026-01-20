@@ -207,3 +207,8 @@ func (m *DistributedMessages) ReadBatchMessages(ctx context.Context, userID int6
 	logger.Debugw("read batch messages", "user_id", userID, "ids", ids)
 	return m.repo.ReadBatchMessages(ctx, userID, ids)
 }
+
+func (m *DistributedMessages) DeleteFile(ctx context.Context, id, userID int64) (err error) {
+	// TODO: not implemented
+	return
+}

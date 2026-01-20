@@ -15,7 +15,6 @@ import (
 
 	"golang.org/x/sync/errgroup"
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/logger"
 	"github.com/jackc/pgx/v5/pgxpool"
 	hclog "github.com/hashicorp/go-hclog"
 
@@ -78,11 +77,15 @@ func New(cfg Config) *Server {
 		panic(err)
 	}
 
-	if err := server.setupRaft(logger.Default()); err != nil {
+	if err := server.setupRaft(); err != nil {
 		panic(err)
 	}
 
-	if err := server.setupGRPC(logger.Default()); err != nil {
+	if err := server.setupStream(); err != nil {
+		panic(err)
+	}
+
+	if err := server.setupGRPC(); err != nil {
 		panic(err)
 	}
 
@@ -100,7 +103,7 @@ func (s *Server) setupNats() (err error) {
 	return
 }
 
-func (s *Server) setupRaft(log *logger.Logger) (err error) {
+func (s *Server) setupRaft() (err error) {
 	repo := repository.New(s.conf.TableName, s.pool)
 
 	raftLogLevel := hclog.Error.String()
@@ -141,7 +144,7 @@ func (s *Server) setupRaft(log *logger.Logger) (err error) {
 	return
 }
 
-func (s *Server) setupGRPC(log *logger.Logger) error {
+func (s *Server) setupGRPC() error {
 	handler := grpchandler.New(s.controller)
 	member, err := membership.New(
 		membership.Config{
@@ -155,7 +158,6 @@ func (s *Server) setupGRPC(log *logger.Logger) error {
 		s.controller,
 	)
 	if err != nil {
-		log.Errorw("failed to establish membership connection", "error", err)
 		return err
 	}
 
@@ -173,6 +175,11 @@ func (s *Server) setupGRPC(log *logger.Logger) error {
 	s.grpcListener = grpcListener
 
 	return nil
+}
+
+func (s *Server) setupStream() error {
+	return streamhandler.RegisterIntegrationEventHandlers(broker.NewStream(s.nc),
+		streamhandler.NewIntegrationEventHandlers(s.controller/*TODO: derive files controller*/))
 }
 
 func (s *Server) Run(ctx context.Context) (err error) {

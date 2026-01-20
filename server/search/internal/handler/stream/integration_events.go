@@ -63,6 +63,11 @@ func RegisterIntegrationEventHandlers(subscriber am.RawMessageSubscriber, handle
 		return
 	}
 
+	err = subscriber.Subscribe(filesevents.FilesChannel, handlers)
+	if err != nil {
+		return
+	}
+
 	return
 }
 

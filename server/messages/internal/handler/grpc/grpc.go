@@ -18,6 +18,8 @@ type Controller interface {
 	ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (messages []*messages.Message, isLastPage bool, err error)
 	ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*messages.Message, err error)
 	GetServers(ctx context.Context) (servers []*api.Server, err error)
+
+	DeleteFile(ctx context.Context, id, userID int64) (err error)
 }
 
 type Handler struct {
