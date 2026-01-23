@@ -17,13 +17,11 @@ type FilesRepository struct {
 	pool             *pgxpool.Pool
 }
 
-func NewFilesRepository(pool *pgxpool.Pool, tableName string) *FilesRepository {
+func NewFilesRepository(tableName string, pool *pgxpool.Pool) *FilesRepository {
 	return &FilesRepository{tableName: tableName, pool: pool}
 }
 
-func (r *FilesRepository) SaveFile(ctx context.Context, id, userID int64, name, description, mime string, private bool, size int64) (err error) {
-	const query = "INSERT INTO %s(id, owner_id, name, description, mime, size, private) VALUES ($1, $2, $3, $4, $5, $6, $7)"
-
+func (r *FilesRepository) SaveMessageFiles(ctx context.Context, messageID, userID int64, fileIDs []int64) (err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -36,46 +34,71 @@ func (r *FilesRepository) SaveFile(ctx context.Context, id, userID int64, name, 
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "[SaveFile]: rollback with error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "[SaveMessageFiles]: rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)
 		}
 	}()
 
-	_, err = tx.Exec(ctx, r.table(query), id, userID, name, description, mime, size, private)
+	const insert = "INSERT INTO %s(file_id, message_id, user_id) VALUES ($1, $2, $3)"
+	for _, fileID := range fileIDs {
+		_, err = tx.Exec(ctx, r.table(insert), fileID, messageID, userID)
+		if err != nil {
+			return
+		}
+	}
+
+	return
+}
+
+func (r *FilesRepository) UpdateMessageFiles(ctx context.Context, messageID, userID int64, fileIDs []int64) (err error) {
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			fmt.Fprintf(os.Stderr, "[UpdateMessageFiles]: rollback with error: %v\n", err)
+			err = tx.Rollback(ctx)
+		default:
+			err = tx.Commit(ctx)
+		}
+	}()
+
+	const delete = "DELETE FROM %s WHERE message_id = $1 AND user_id = $2"
+
+	_, err = tx.Exec(ctx, r.table(delete), messageID, userID)
+	if err != nil {
+		return
+	}
+
+	const insert = "INSERT INTO %s(file_id, message_id, user_id) VALUES ($1, $2, $3)"
+	for _, fileID := range fileIDs {
+		_, err = tx.Exec(ctx, r.table(insert), fileID, messageID, userID)
+		if err != nil {
+			return
+		}
+	}
 
 	return
 }
 
 func (r *FilesRepository) DeleteFile(ctx context.Context, id, userID int64) (err error) {
-	const query = "DELETE FROM %s WHERE id = $1 AND owner_id = $2"
+	const delete = "DELETE FROM %s WHERE message_id = $1 AND user_id = $2"
 
-	var tx pgx.Tx
-	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
-	if err != nil {
-		return err
-	}
-	defer func() {
-		p := recover()
-		switch {
-		case p != nil:
-			_ = tx.Rollback(ctx)
-			panic(p)
-		case err != nil:
-			fmt.Fprintf(os.Stderr, "[DeleteFile]: rollback with error: %v\n", err)
-			err = tx.Rollback(ctx)
-		default:
-			err = tx.Commit(ctx)
-		}
-	}()
-
-	_, err = tx.Exec(ctx, r.table(query), id, userID)
+	_, err = r.pool.Exec(ctx, r.table(delete), id, userID)
 
 	return
 }
 
-func (r *FilesRepository) PublishFile(ctx context.Context, id, userID int64) (err error) {
+func (r *FilesRepository) DeleteMessage(ctx context.Context, messageID, userID int64) (err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -88,39 +111,15 @@ func (r *FilesRepository) PublishFile(ctx context.Context, id, userID int64) (er
 			_ = tx.Rollback(ctx)
 			panic(p)
 		case err != nil:
-			fmt.Fprintf(os.Stderr, "[PublishFile]: rollback with error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "[DeleteMessage]: rollback with error: %v\n", err)
 			err = tx.Rollback(ctx)
 		default:
 			err = tx.Commit(ctx)
 		}
 	}()
 
-	_, err = tx.Exec(ctx, r.table("UPDATE %s SET private = false WHERE owner_id = $1 AND id = $2"), userID, id)
-
-	return
-}
-
-func (r *FilesRepository) PrivateFile(ctx context.Context, id, userID int64) (err error) {
-	var tx pgx.Tx
-	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
-	if err != nil {
-		return err
-	}
-	defer func() {
-		p := recover()
-		switch {
-		case p != nil:
-			_ = tx.Rollback(ctx)
-			panic(p)
-		case err != nil:
-			fmt.Fprintf(os.Stderr, "[PrivateFile]: rollback with error: %v\n", err)
-			err = tx.Rollback(ctx)
-		default:
-			err = tx.Commit(ctx)
-		}
-	}()
-
-	_, err = tx.Exec(ctx, r.table("UPDATE %s SET private = true WHERE owner_id = $1 AND id = $2"), userID, id)
+	const delete = "DELETE FROM %s WHERE message_id = $1 AND user_id = $2"
+	_, err = tx.Exec(ctx, r.table(delete), messageID, userID)
 
 	return
 }

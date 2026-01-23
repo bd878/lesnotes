@@ -30,5 +30,7 @@ CREATE TABLE IF NOT EXISTS messages.files
 	PRIMARY KEY(file_id, message_id)
 );
 
+-- TODO: add foreign key constraint files -> messages
+
 GRANT USAGE ON SCHEMA messages TO lesnotes_admin;
 GRANT INSERT, UPDATE, DELETE, SELECT, TRUNCATE ON ALL TABLES IN SCHEMA messages TO lesnotes_admin;

@@ -115,6 +115,22 @@ func (m *DistributedMessages) DeleteUserMessages(ctx context.Context, userID int
 	return
 }
 
+func (m *DistributedMessages) DeleteFile(ctx context.Context, id, userID int64) (err error) {
+	logger.Debugw("delete file", "id", id, "user_id", userID)
+
+	cmd, err := proto.Marshal(&DeleteFileCommand{
+		Id:      id,
+		UserId:  userID,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = m.apply(ctx, DeleteFileRequest, cmd)
+
+	return
+}
+
 func (m *DistributedMessages) DeleteMessages(ctx context.Context, ids []int64, userID int64) (err error) {
 	logger.Debugw("delete messages", "ids", ids, "user_id", userID)
 
@@ -195,20 +211,15 @@ func (m *DistributedMessages) PrivateMessages(ctx context.Context, ids []int64, 
 
 func (m *DistributedMessages) ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *model.Message, err error) {
 	logger.Debugw("read message", "id", id, "name", name, "user_ids", userIDs)
-	return m.repo.Read(ctx, userIDs, id, name)
+	return m.messagesRepo.Read(ctx, userIDs, id, name)
 }
 
 func (m *DistributedMessages) ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (messages []*model.Message, isLastPage bool, err error) {
 	logger.Debugw("read messages", "user_id", userID, "limit", limit, "offset", offset, "ascending", ascending)
-	return m.repo.ReadMessages(ctx, userID, limit, offset)
+	return m.messagesRepo.ReadMessages(ctx, userID, limit, offset)
 }
 
 func (m *DistributedMessages) ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*model.Message, err error) {
 	logger.Debugw("read batch messages", "user_id", userID, "ids", ids)
-	return m.repo.ReadBatchMessages(ctx, userID, ids)
-}
-
-func (m *DistributedMessages) DeleteFile(ctx context.Context, id, userID int64) (err error) {
-	// TODO: not implemented
-	return
+	return m.messagesRepo.ReadBatchMessages(ctx, userID, ids)
 }

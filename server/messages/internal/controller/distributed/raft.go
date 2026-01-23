@@ -31,12 +31,13 @@ type Config struct {
 type DistributedMessages struct {
 	conf            Config
 	raft            *raft.Raft
-	repo            Repository
+	messagesRepo    MessagesRepository
+	filesRepo       FilesRepository
 	snapshotStore   raft.SnapshotStore
 	publisher       ddd.EventPublisher[ddd.Event]
 }
 
-func New(conf Config, repo Repository, publisher ddd.EventPublisher[ddd.Event]) (*DistributedMessages, error) {
+func New(conf Config, messagesRepo MessagesRepository, filesRepo FilesRepository, publisher ddd.EventPublisher[ddd.Event]) (*DistributedMessages, error) {
 	if conf.RetainSnapshots == 0 {
 		conf.RetainSnapshots = 1
 	}
@@ -50,18 +51,23 @@ func New(conf Config, repo Repository, publisher ddd.EventPublisher[ddd.Event]) 
 	}
 
 	m := &DistributedMessages{
-		repo:      repo,
-		conf:      conf,
-		publisher: publisher,
+		messagesRepo:     messagesRepo,
+		filesRepo:        filesRepo,
+		conf:             conf,
+		publisher:        publisher,
 	}
-	if err := m.setupRaft(logger.Default()); err != nil {
+
+	if err := m.setupRaft(); err != nil {
 		return nil, err
 	}
 	return m, nil
 }
 
-func (m *DistributedMessages) setupRaft(log *logger.Logger) error {
-	fsm := &fsm{repo: m.repo}
+func (m *DistributedMessages) setupRaft() error {
+	fsm := &fsm{
+		messagesRepo: m.messagesRepo,
+		filesRepo:    m.filesRepo,
+	}
 
 	raftPath := filepath.Join(m.conf.DataDir, "raft")
 	if err := os.MkdirAll(raftPath, 0755); err != nil {

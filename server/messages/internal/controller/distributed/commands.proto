@@ -39,3 +39,8 @@ message PrivateCommand {
 	repeated int64 ids = 1;
 	int64   user_id = 2;
 }
+
+message DeleteFileCommand {
+	int64  id         = 1;
+	int64  user_id    = 3;
+}

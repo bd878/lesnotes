@@ -40,6 +40,7 @@ func main() {
 		RaftBootstrap:         cfg.RaftBootstrap,
 		DataPath:              cfg.DataPath,
 		TableName:             cfg.TableName,
+		FilesTableName:        cfg.FilesTableName,
 		RaftServers:           cfg.RaftServers,
 		SerfAddr:              cfg.SerfAddr,
 		SerfJoinAddrs:         cfg.SerfJoinAddrs,

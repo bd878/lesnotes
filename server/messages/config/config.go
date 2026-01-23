@@ -19,5 +19,6 @@ type Config struct {
 	PGConn               string      `json:"pg_conn"`
 	// TODO ShutdownTimeout string     `json:"shutdown_timeout"`
 	TableName            string      `json:"table_name"`
+	FilesTableName       string      `json:"files_table_name"`
 	DataPath             string      `json:"data_path"`
 }

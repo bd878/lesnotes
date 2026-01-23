@@ -33,6 +33,7 @@ type Config struct {
 	Addr                string
 	PGConn              string
 	TableName           string
+	FilesTableName      string
 	NodeName            string
 	RaftLogLevel        string
 	RaftBootstrap       bool
@@ -104,7 +105,8 @@ func (s *Server) setupNats() (err error) {
 }
 
 func (s *Server) setupRaft() (err error) {
-	repo := repository.New(s.conf.TableName, s.pool)
+	messagesRepo := repository.NewMessagesRepository(s.conf.TableName, s.pool)
+	filesRepo := repository.NewFilesRepository(s.conf.FilesTableName, s.pool)
 
 	raftLogLevel := hclog.Error.String()
 	switch s.conf.RaftLogLevel {
@@ -139,7 +141,7 @@ func (s *Server) setupRaft() (err error) {
 		Bootstrap:   s.conf.RaftBootstrap,
 		DataDir:     s.conf.DataPath,
 		Servers:     s.conf.RaftServers,
-	}, repo, dispatcher)
+	}, messagesRepo, filesRepo, dispatcher)
 
 	return
 }
