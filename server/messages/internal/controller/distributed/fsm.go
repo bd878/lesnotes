@@ -31,6 +31,7 @@ type MessagesRepository interface {
 
 type FilesRepository interface {
 	DeleteFile(ctx context.Context, id, userID int64) (err error)
+	ReadMessageFiles(ctx context.Context, messageID int64, userIDs []int64) (fileIDs []int64, err error)
 	SaveMessageFiles(ctx context.Context, messageID, userID int64, fileIDs []int64) (err error)
 	UpdateMessageFiles(ctx context.Context, messageID, userID int64, fileIDs []int64) (err error)
 	DeleteMessage(ctx context.Context, messageID, userID int64) (err error)

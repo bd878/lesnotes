@@ -209,17 +209,55 @@ func (m *DistributedMessages) PrivateMessages(ctx context.Context, ids []int64, 
 	return m.publisher.Publish(context.Background(), event)
 }
 
+// TODO: pass one userID only, for public messages create ReadPublicMessage request
 func (m *DistributedMessages) ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *model.Message, err error) {
 	logger.Debugw("read message", "id", id, "name", name, "user_ids", userIDs)
-	return m.messagesRepo.Read(ctx, userIDs, id, name)
+
+	message, err = m.messagesRepo.Read(ctx, userIDs, id, name)
+	if err != nil {
+		return
+	}
+
+	message.FileIDs, err = m.filesRepo.ReadMessageFiles(ctx, id, userIDs)
+	if err != nil {
+		return
+	}
+
+	return
 }
 
 func (m *DistributedMessages) ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (messages []*model.Message, isLastPage bool, err error) {
 	logger.Debugw("read messages", "user_id", userID, "limit", limit, "offset", offset, "ascending", ascending)
-	return m.messagesRepo.ReadMessages(ctx, userID, limit, offset)
+
+	messages, isLastPage, err = m.messagesRepo.ReadMessages(ctx, userID, limit, offset)
+	if err != nil {
+		return
+	}
+
+	for _, message := range messages {
+		message.FileIDs, err = m.filesRepo.ReadMessageFiles(ctx, message.ID, []int64{userID})
+		if err != nil {
+			return
+		}
+	}
+
+	return
 }
 
 func (m *DistributedMessages) ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*model.Message, err error) {
 	logger.Debugw("read batch messages", "user_id", userID, "ids", ids)
-	return m.messagesRepo.ReadBatchMessages(ctx, userID, ids)
+
+	messages, err = m.messagesRepo.ReadBatchMessages(ctx, userID, ids)
+	if err != nil {
+		return
+	}
+
+	for _, message := range messages {
+		message.FileIDs, err = m.filesRepo.ReadMessageFiles(ctx, message.ID, []int64{userID})
+		if err != nil {
+			return
+		}
+	}
+
+	return
 }
