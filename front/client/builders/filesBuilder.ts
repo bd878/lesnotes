@@ -25,16 +25,6 @@ class FilesBuilder extends HomeBuilder {
 		})
 	}
 
-	async addGoBack() {
-		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/files/mobile/go_back.mustache' : 'templates/files/desktop/go_back.mustache'
-		)), { encoding: 'utf-8' });
-
-		this.goBack = mustache.render(template, {
-			goBack:     this.i18n("goBack"),
-		})
-	}
-
 	async addPagination(paging: Paging) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/files/mobile/pagination.mustache' : 'templates/files/desktop/pagination.mustache'

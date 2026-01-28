@@ -218,7 +218,7 @@ func (m *DistributedMessages) ReadMessage(ctx context.Context, id int64, name st
 		return
 	}
 
-	message.FileIDs, err = m.filesRepo.ReadMessageFiles(ctx, id, userIDs)
+	message.FileIDs, err = m.filesRepo.ReadMessageFiles(ctx, message.ID /* cannot read by name */, append(userIDs, message.UserID))
 	if err != nil {
 		return
 	}
@@ -235,7 +235,7 @@ func (m *DistributedMessages) ReadMessages(ctx context.Context, userID int64, li
 	}
 
 	for _, message := range messages {
-		message.FileIDs, err = m.filesRepo.ReadMessageFiles(ctx, message.ID, []int64{userID})
+		message.FileIDs, err = m.filesRepo.ReadMessageFiles(ctx, message.ID, []int64{userID, message.UserID})
 		if err != nil {
 			return
 		}
@@ -253,7 +253,7 @@ func (m *DistributedMessages) ReadBatchMessages(ctx context.Context, userID int6
 	}
 
 	for _, message := range messages {
-		message.FileIDs, err = m.filesRepo.ReadMessageFiles(ctx, message.ID, []int64{userID})
+		message.FileIDs, err = m.filesRepo.ReadMessageFiles(ctx, message.ID, []int64{userID, message.UserID})
 		if err != nil {
 			return
 		}

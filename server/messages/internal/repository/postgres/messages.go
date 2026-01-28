@@ -28,7 +28,7 @@ func NewMessagesRepository(tableName string, pool *pgxpool.Pool) *MessagesReposi
 }
 
 func (r *MessagesRepository) Create(ctx context.Context, id int64, text string, title string, userID int64, private bool, name string) (err error) {
-	const query = "INSERT INTO %s(id, text, private, name, user_id, title) VALUES ($1, $2, $3, $5, $6, $7)"
+	const query = "INSERT INTO %s(id, text, private, name, user_id, title) VALUES ($1, $2, $3, $4, $5, $6)"
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})

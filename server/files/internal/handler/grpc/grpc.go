@@ -19,7 +19,7 @@ import (
 type Repository interface {
 	SaveFile(ctx context.Context, reader io.Reader, id, userID int64, private bool, name, description, mime string) (size int64, err error)
 	GetMeta(ctx context.Context, id int64, fileName string) (file *model.File, err error)
-	DeleteFile(ctx context.Context, ownerID, id int64) (err error)
+	DeleteFile(ctx context.Context, id, ownerID int64) (err error)
 	ReadFile(ctx context.Context, oid int32, writer io.Writer) (err error)
 	ListFiles(ctx context.Context, userID int64, limit, offset int32, ascending, private bool) (list []*model.File, isLastPage bool, err error)
 	PublishFile(ctx context.Context, id, userID int64) (err error)
@@ -264,7 +264,7 @@ func (h *Handler) PrivateFile(ctx context.Context, req *api.PrivateFileRequest) 
 func (h *Handler) DeleteFile(ctx context.Context, req *api.DeleteFileRequest) (resp *api.DeleteFileResponse, err error) {
 	logger.Debugw("delete file", "id", req.Id, "user_id", req.UserId)
 
-	event, err := domain.DeleteFile(req.UserId, req.Id)
+	event, err := domain.DeleteFile(req.Id, req.UserId)
 	if err != nil {
 		return nil, err
 	}

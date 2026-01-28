@@ -25,7 +25,6 @@ class HomeBuilder extends AbstractBuilder {
 	searchForm      = undefined;
 	logout          = undefined;
 	sidebar         = undefined;
-	goBack          = undefined;
 	controlPanel    = undefined;
 	navigation      = undefined;
 
@@ -201,7 +200,6 @@ class HomeBuilder extends AbstractBuilder {
 				pagination:      this.pagination,
 				filesList:       this.filesList,
 				filesForm:       this.filesForm,
-				goBack:          this.goBack,
 				filesView:       this.filesView,
 				controlPanel:    this.controlPanel,
 				navigation:      this.navigation,

@@ -1,8 +1,8 @@
-<div class="justify-between p-2 rounded-md h-full min-h-[40px] small:min-h-[30px]">
-	<ul class="flex flex-col">
+<div class="justify-between p-2 rounded-md h-full min-h-[40px] small:min-h-[30px] overflow-y-scroll">
+	<ul class="flex flex-col overflow-x-hidden max-w-full">
 		{{#files}}
-			<li class="grow-1 max-w-full flex flex-row justify-between whitespace-nowrap">
-				<details>
+			<li class="grow-1 max-w-full flex flex-row justify-between">
+				<details class="whitespace-wrap">
 					<summary class="cursor-pointer">{{name}}</summary>
 					<form method="POST" autocomplete="off" class="flex flex-col">
 						<input type="hidden" name="id" value="{{ID}}" />

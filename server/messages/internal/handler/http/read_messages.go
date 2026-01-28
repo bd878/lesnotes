@@ -141,6 +141,7 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) (err er
 		}
 	}
 
+	// TODO: refactor
 	if values.Get("user") != "" {
 		id, err := strconv.Atoi(values.Get("user"))
 		if err != nil {
@@ -161,14 +162,18 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) (err er
 	} else if len(ids) > 0 {
 		// read batch messages by given ids
 		return h.readBatchMessages(req.Context(), w, user.ID, ids)
+	} else if user.ID == users.PublicUserID {
+		// read private messages
+		return h.readMessageOrMessages(req.Context(), w, user.ID, limit, offset, messageID, threadID, name, order, true)
 	} else {
-		// read both public and private messages
-		// i.e. user with the token read his private message by name or id
+		// read public messages
 		return h.readMessageOrMessages(req.Context(), w, user.ID, limit, offset, messageID, threadID, name, order, false)
 	}
 }
 
 func (h *Handler) readBatchMessages(ctx context.Context, w http.ResponseWriter, userID int64, ids []int64) (err error) {
+	logger.Debugw("read batch messages", "user_id", userID, "ids", ids)
+
 	list, err := h.controller.ReadBatchMessages(ctx, userID, ids)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -325,6 +330,8 @@ func (h *Handler) readMessageOrMessages(ctx context.Context, w http.ResponseWrit
 }
 
 func (h *Handler) readMessage(ctx context.Context, w http.ResponseWriter, userID, messageID int64, name string, publicOnly bool) (err error) {
+	logger.Debugw("read message", "user_id", userID, "message_id", messageID, "name", name, "public", publicOnly)
+
 	message, err := h.controller.ReadMessage(ctx, messageID, name, []int64{userID, users.PublicUserID})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -360,12 +367,16 @@ func (h *Handler) readMessage(ctx context.Context, w http.ResponseWriter, userID
 			continue
 		}
 
-		list = append(list, &files.File{
-			Name: file.Name,
-			ID:   file.ID,
-			Mime: file.Mime,
-			Size: file.Size,
-		})
+		if !publicOnly || !file.Private {
+			list = append(list, &files.File{
+				Name:         file.Name,
+				ID:           file.ID,
+				Mime:         file.Mime,
+				Size:         file.Size,
+				Private:      file.Private,
+				Description:  file.Description,
+			})
+		}
 	}
 	message.Files = list
 
@@ -401,6 +412,8 @@ func filterPublicMessages(list []*messages.Message) (filtered []*messages.Messag
 
 func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter, userID, threadID int64, limit, offset int32, ascending, publicOnly bool) (err error) {
 	// TODO: read if thread is public
+
+	logger.Debugw("read thread messages", "user_id", userID, "thread_id", threadID, "limit", limit, "offset", offset, "ascending", ascending, "public", publicOnly)
 
 	list, err := h.controller.ReadThreadMessages(ctx, userID, threadID, limit, offset, ascending)
 	if err != nil {
@@ -438,12 +451,16 @@ func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter,
 			for _, id := range message.FileIDs {
 				file := filesRes[id]
 				if file != nil {
-					list = append(list, &files.File{
-						ID:   file.ID,
-						Name: file.Name,
-						Mime: file.Mime,
-						Size: file.Size,
-					})
+					if !publicOnly || !file.Private {
+						list = append(list, &files.File{
+							ID:          file.ID,
+							Name:        file.Name,
+							Mime:        file.Mime,
+							Size:        file.Size,
+							Private:     file.Private,
+							Description: file.Description,
+						})
+					}
 				}
 			}
 			message.Files = list
@@ -477,6 +494,8 @@ func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter,
 }
 
 func (h *Handler) readMessages(ctx context.Context, w http.ResponseWriter, userID int64, limit, offset int32, ascending, publicOnly bool) (err error) {
+	logger.Debugw("read messages", "user_id", userID, "limit", limit, "offset", offset, "ascending", ascending, "public", publicOnly)
+
 	list, err := h.controller.ReadMessages(ctx, userID, limit, offset, ascending)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -513,12 +532,16 @@ func (h *Handler) readMessages(ctx context.Context, w http.ResponseWriter, userI
 			for _, id := range message.FileIDs {
 				file := filesRes[id]
 				if file != nil {
-					list = append(list, &files.File{
-						ID:   file.ID,
-						Name: file.Name,
-						Mime: file.Mime,
-						Size: file.Size,
-					})
+					if !publicOnly || !file.Private {
+						list = append(list, &files.File{
+							ID:           file.ID,
+							Name:         file.Name,
+							Mime:         file.Mime,
+							Size:         file.Size,
+							Private:      file.Private,
+							Description:  file.Description,
+						})
+					}
 				}
 			}
 			message.Files = list

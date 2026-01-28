@@ -25,6 +25,8 @@ async function readMessageJson(token: string, user: number, id: number, name?: s
 			},
 		});
 
+		console.log("read message json", "response", response)
+
 		if (error.error) {
 			result.error = models.error(error)
 		} else {

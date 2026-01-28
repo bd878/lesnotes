@@ -12,7 +12,7 @@ async function deleteFileJson(token: string, id: number) {
 			body: {
 				token: token,
 				req: {
-					ids: [id],
+					id: id,
 				},
 			},
 		});

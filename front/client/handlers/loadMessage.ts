@@ -29,6 +29,8 @@ async function loadMessage(ctx, next) {
 		ctx.state.message = await readMessageJson("", 0 /* public */, 0, name /* public name */)
 	}
 
+	console.log(ctx.state.message)
+
 	if (is.notEmpty(ctx.state.message)) {
 		if (ctx.state.message.error.error) {
 			console.error(ctx.state.message.error)
