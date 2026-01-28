@@ -7,6 +7,7 @@ import (
 	"github.com/bd878/gallery/server/ddd"
 	"github.com/bd878/gallery/server/am"
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/messages/internal/domain"
 	"github.com/bd878/gallery/server/messages/pkg/events"
 )
@@ -32,6 +33,8 @@ func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.Event], hand
 }
 
 func (h domainHandler[T]) HandleEvent(ctx context.Context, event T) error {
+	logger.Debugw("handle event", "name", event.EventName(), "id", event.ID(), "payload", event.Payload())
+
 	switch event.EventName() {
 	case domain.MessageCreatedEvent:
 		return h.onMessageCreated(ctx, event)

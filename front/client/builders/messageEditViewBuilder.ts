@@ -1,4 +1,5 @@
 import type { Message } from '../api/models';
+import type { SelectedFile } from '../types';
 import Config from 'config';
 import mustache from 'mustache';
 import api from '../api';
@@ -33,6 +34,17 @@ class MessageEditViewBuilder extends HomeBuilder {
 			domain:           Config.get("domain"),
 		}, {
 			filesSelector:    this.filesSelector,
+		})
+	}
+
+	async addFilesSelector(files: SelectedFile[]) {
+		const template = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/home/mobile/files_selector.mustache' : 'templates/home/desktop/files_selector.mustache'
+		)), { encoding: 'utf-8' });
+
+		this.filesSelector = mustache.render(template, {
+			files:             files,
+			defaultFile:       this.i18n("defaultFile"),
 		})
 	}
 }

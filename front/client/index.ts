@@ -17,6 +17,7 @@ import authed from './handlers/authed';
 import noCache from './handlers/noCache';
 import loadStack from './handlers/loadStack';
 import loadFiles from './handlers/loadFiles';
+import selectMessageFiles from './handlers/selectMessageFiles';
 import loadMessage from './handlers/loadMessage';
 import loadThread from './handlers/loadThread';
 import loadSearch from './handlers/loadSearch';
@@ -86,7 +87,7 @@ router
 	.get("files",                  "/files",                        etag, noCache, getToken, authed, getMe, getState, loadStack, loadFiles, files)
 	.get("message",                "/messages/:id",                 etag, noCache, getToken, authed, getMe, getState, loadStack, loadMessage, formatView, messageView)
 	.get("thread",                 "/threads/:id",                  etag, noCache, getToken, authed, getMe, getState, loadStack, loadThread, formatView, threadView)
-	.get("editMessage",            "/editor/messages/:id",          etag, noCache, getToken, authed, getMe, getState, loadStack, loadFiles, loadMessage, formatTextarea, messageEdit)
+	.get("editMessage",            "/editor/messages/:id",          etag, noCache, getToken, authed, getMe, getState, loadStack, loadMessage, loadFiles, selectMessageFiles, formatTextarea, messageEdit)
 	.get("editThread",             "/editor/threads/:id",           etag, noCache, getToken, authed, getMe, getState, loadStack, loadThread, formatTextarea, threadEdit)
 	.get("status",                 "/status",                       status, noCache, getState)
 	.get("search",                 "/search",                       etag, noCache, getToken, authed, getState, getMe, getSearchQuery, loadSearch, loadSearchPath, search)

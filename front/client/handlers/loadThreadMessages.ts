@@ -2,7 +2,7 @@ import api from '../api';
 import models from '../api/models';
 import * as is from '../third_party/is';
 
-const limit = parseInt(LIMIT)
+const limit = 10_000
 
 async function loadThreadMessages(ctx, next) {
 	const userID = is.notEmpty(ctx.state.thread) ? ctx.state.thread.userID : (parseInt(ctx.params.user) || 0)
@@ -35,6 +35,8 @@ async function loadThreadMessages(ctx, next) {
 			ctx.status = 400
 			return
 		}
+
+		ctx.state.messages.messages.reverse()
 
 		ctx.state.messages = models.threadMessages(
 			ctx.state.messages.messages,

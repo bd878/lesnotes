@@ -1,10 +1,10 @@
 {{#message}}
-	<div id="message" class="flex flex-col justify-between grow">
+	<div id="message" class="flex flex-col justify-between grow h-full">
 		<div class="flex flex-col h-full">
 			{{#title}}
 				<div class="text-lg small:text-base large:text-xl mb-2 px-1">{{title}}</div>
 			{{/title}}
-			<p class="w-full small:text-sm large:text-lg mb-1 px-1 resize-none overflow-y-scroll text-start h-full">{{{text}}}</p>
+			<p class="w-full h-full overflow-y-scroll small:text-sm large:text-lg mb-1 px-1 resize-none overflow-y-scroll text-start h-full">{{{text}}}</p>
 		</div>
 	</div>
 {{/message}}

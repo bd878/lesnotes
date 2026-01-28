@@ -8,7 +8,12 @@
 	>
 		<option value="" selected>{{defaultFile}}</option>
 		{{#files}}
-			<option value="{{ID}}">{{name}}</option>
+			{{#isSelected}}
+				<option value="{{ID}}" selected>{{name}}</option>
+			{{/isSelected}}
+			{{^isSelected}}
+				<option value="{{ID}}">{{name}}</option>
+			{{/isSelected}}
 		{{/files}}
 	</select>
 </div>

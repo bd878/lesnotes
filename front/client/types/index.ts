@@ -9,4 +9,8 @@ interface FileWithMime extends File {
 	isFile:     boolean;
 }
 
-export type { FileWithMime }
+interface SelectedFile extends File {
+	isSelected: boolean;
+}
+
+export type { FileWithMime, SelectedFile }

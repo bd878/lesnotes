@@ -3,7 +3,7 @@
 		{{> sidebar}}
 	</div>
 
-	<div class="flex flex-col overflow-x-hidden ml-8">
+	<div class="flex flex-col overflow-x-hidden ml-8 min-w-xs max-w-xs">
 		<div class="flex flex-col overflow-x-hidden h-full">
 			<div class="flex flex-row overflow-x-auto h-full">
 				{{> messagesList}}
@@ -14,14 +14,14 @@
 	{{#message}}
 		<div class="min-w-lg max-w-lg flex flex-row ml-8">
 			<div class="flex flex-col grow-2 w-full">
-				<div class="flex flex-col grow p-2 mb-2 border border-1 border-solid rounded-md">
+				<div class="h-full flex flex-col grow p-2 mb-2 border border-1 border-solid rounded-md">
 					{{> messageView}}
 				</div>
 			</div>
 		</div>
 	{{/message}}
 
-	<div class="ml-8 mr-8 max-w-md">
+	<div class="ml-8 mr-8 max-w-md min-w-md overflow-x-hidden overflow-y-scroll">
 		{{>  filesView}}
 	</div>
 </div>
