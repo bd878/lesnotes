@@ -1,10 +1,10 @@
-<div id="content" class="h-full max-w-ffull flex flex-row">
-	<div id="sidebar">
+<div class="h-full max-w-ffull flex flex-row">
+	<div>
 		{{> sidebar}}
 	</div>
 
-	<div id="public-message">
-		<div id="public-message-text">
+	<div>
+		<div>
 			{{#title}}
 				<h2>{{title}}</h2>
 			{{/title}}
@@ -14,7 +14,7 @@
 			{{/text}}
 		</div>
 
-		<div id="public-message-files">
+		<div>
 			{{#files}}
 				<a class="underline text-blue-600 visited:text-purple-600" href="/files/v1/{{ID}}/download" target="_blank" download="{{name}}">{{name}}</a>
 			{{/files}}

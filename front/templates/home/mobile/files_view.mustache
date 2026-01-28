@@ -1,1 +1,10 @@
-<div></div>
+<ul>
+	{{#files}}
+		<li class="mt-2 first:mt-0">
+			<a href="{{fileHref}}" target="_blank" noopener noreferer class="mb-1 overflow-hidden cursor-pointer dark:text-blue-600 dark:hover:text-white italic text-blue-600 text-sm">{{name}}</a>
+			{{#isImage}}
+				<img class="w-full" alt="{{name}}" src="{{imgSrc}}" />
+			{{/isImage}}
+		</li>
+	{{/files}}
+</ul>
