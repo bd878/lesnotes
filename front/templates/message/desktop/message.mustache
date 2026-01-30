@@ -1,23 +1,18 @@
-<div class="h-full max-w-ffull flex flex-row">
-	<div>
+<div class="h-full max-w-full flex flex-row">
+	<div class="min-w-fit max-w-fit ml-8">
 		{{> sidebar}}
 	</div>
 
-	<div>
-		<div>
-			{{#title}}
-				<h2 class="mb-2">{{title}}</h2>
-			{{/title}}
-
-			{{#text}}
-				<div class="whitespace-pre">{{{text}}}</div>
-			{{/text}}
+	{{#message}}
+		<div class="min-w-lg max-w-lg flex flex-row ml-8">
+			<div class="h-full flex flex-col grow p-2 mb-2 border border-1 border-solid rounded-md">
+				{{> messageView}}
+			</div>
 		</div>
+	{{/message}}
 
-		<div>
-			{{#files}}
-				<a class="underline text-blue-600 visited:text-purple-600" href="/files/v1/{{ID}}/download" target="_blank" download="{{name}}">{{name}}</a>
-			{{/files}}
-		</div>
+
+	<div class="ml-8 mr-8 max-w-md min-w-md overflow-x-hidden overflow-y-scroll">
+		{{>  filesView}}
 	</div>
 </div>

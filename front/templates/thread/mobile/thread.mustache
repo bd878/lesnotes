@@ -1,0 +1,27 @@
+<div class="flex flex-col">
+	<div class="w-full max-w-5xl mb-3 px-5 small:px-3">
+		{{> sidebar}}
+	</div>
+
+	{{#message}}
+		<div class="w-full flex px-5 flex-row mb-3">
+			<div class="flex flex-col grow-2 w-full">
+				<div class="flex flex-col grow p-2 mb-2 border border-1 border-solid rounded-md">
+					{{> messageView}}
+				</div>
+			</div>
+		</div>
+
+		<div class="px-5">
+			{{>  filesView}}
+		</div>
+	{{/message}}
+
+	<div class="flex flex-col px-5 overflow-x-hidden w-full">
+		<div class="flex flex-col overflow-x-hidden">
+			<div class="flex flex-row overflow-x-auto">
+				{{> messagesList}}
+			</div>
+		</div>
+	</div>
+</div>

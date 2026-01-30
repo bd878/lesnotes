@@ -1,8 +1,32 @@
-<div class="justify-between p-2 rounded-md min-h-[40px] small:min-h-[30px]">
-	<ul class="flex flex-col">
+<div class="justify-between p-2 rounded-md h-full min-h-[40px] small:min-h-[30px] overflow-y-scroll">
+	<ul class="flex flex-col overflow-x-hidden max-w-full">
 		{{#files}}
-			<li class="grow-1 max-w-full flex flex-row justify-between whitespace-nowrap">
-				<a target="_blank" href="{{downloadHref}}" class="flex flex-row justify-between overflow-hidden cursor-pointer">{{name}}</a>
+			<li class="grow-1 max-w-full flex flex-row justify-between">
+				<details class="whitespace-wrap">
+					<summary class="cursor-pointer">{{name}}</summary>
+					<form method="POST" autocomplete="off" class="flex flex-col">
+						<input type="hidden" name="id" value="{{ID}}" />
+
+						<a target="_blank" href="{{downloadHref}}" class="hover:underline dark:text-blue-600 dark:hover:text-white italic text-blue-600 text-sm overflow-hidden cursor-pointer">{{name}}</a>
+
+						<div class="flex flex-row mt-2">
+							<button formaction="{{deleteAction}}" type="submit" class="mr-4 rounded-md border-1 px-4 border-solid dark:hover:text-white text-left cursor-pointer">
+								{{deleteButton}}
+							</button>
+
+							{{#private}}
+								<button formaction="{{publishAction}}" type="submit" class="rounded-md border-1 px-4 border-solid dark:hover:text-white text-left cursor-pointer">
+									{{publishButton}}
+								</button>
+							{{/private}}
+							{{^private}}
+								<button formaction="{{privateAction}}" type="submit" class="rounded-md border-1 px-4 border-solid dark:hover:text-white text-left cursor-pointer">
+									{{privateButton}}
+								</button>
+							{{/private}}
+						</div>
+					</form>
+				</details>
 			</li>
 		{{/files}}
 	</ul>

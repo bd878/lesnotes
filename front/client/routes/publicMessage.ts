@@ -5,6 +5,8 @@ async function publicMessage(ctx) {
 
 	const builder = new PublicMessageBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
+	await builder.addMessageView(ctx.state.message)
+	await builder.addFilesView(ctx.state.message.files)
 	await builder.addSettings()
 	await builder.addSidebar()
 	await builder.addFooter()

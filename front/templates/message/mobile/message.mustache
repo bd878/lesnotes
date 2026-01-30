@@ -1,23 +1,19 @@
-<div class="h-full max-w-ffull flex flex-row">
-	<div>
+<div class="flex flex-col">
+	<div class="w-full max-w-5xl mb-3 px-5 small:px-3">
 		{{> sidebar}}
 	</div>
 
-	<div>
-		<div>
-			{{#title}}
-				<h2>{{title}}</h2>
-			{{/title}}
-
-			{{#text}}
-				<div class="whitespace-pre">{{text}}</div>
-			{{/text}}
+	{{#message}}
+		<div class="w-full flex px-5 flex-row mb-3">
+			<div class="flex flex-col grow-2 w-full">
+				<div class="flex flex-col grow p-2 mb-2 border border-1 border-solid rounded-md">
+					{{> messageView}}
+				</div>
+			</div>
 		</div>
 
-		<div>
-			{{#files}}
-				<a class="underline text-blue-600 visited:text-purple-600" href="/files/v1/{{ID}}/download" target="_blank" download="{{name}}">{{name}}</a>
-			{{/files}}
+		<div class="px-5">
+			{{>  filesView}}
 		</div>
-	</div>
+	{{/message}}
 </div>

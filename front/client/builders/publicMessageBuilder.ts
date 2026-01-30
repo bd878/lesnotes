@@ -9,8 +9,9 @@ import { resolve, join } from 'node:path';
 import AbstractBuilder from './abstractBuilder'
 
 class PublicMessageBuilder extends AbstractBuilder {
-	sidebar   = undefined;
-	filesView = undefined;
+	sidebar     = undefined;
+	filesView   = undefined;
+	messageView = undefined;
 
 	async addSidebar() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
@@ -33,6 +34,16 @@ class PublicMessageBuilder extends AbstractBuilder {
 			files:    files,
 			imgSrc:   function() { return `/files/v1/read/${this.name}` },
 			fileHref: function() { return `/files/v1/download?id=${this.ID}` },
+		})
+	}
+
+	async addMessageView(message: Message) {
+		const template = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/message/mobile/message_view.mustache' : 'templates/message/desktop/message_view.mustache'
+		)), { encoding: 'utf-8' });
+
+		this.messageView = mustache.render(template, {
+			message: message,
 		})
 	}
 
@@ -66,13 +77,12 @@ class PublicMessageBuilder extends AbstractBuilder {
 		}, {
 			footer:    this.footer,
 			content:   mustache.render(content, {
-				title:  message.title,
-				text:   message.text,
-				files:  message.files,
+				message:     message,
 			}, {
-				settings:  this.settings,
-				sidebar:   this.sidebar,
-				filesView: this.filesView,
+				settings:    this.settings,
+				sidebar:     this.sidebar,
+				filesView:   this.filesView,
+				messageView: this.messageView,
 			})
 		})
 	}

@@ -3,10 +3,10 @@
 		<div class="flex flex-row mb-1">
 			{{#themes}}
 				{{#myTheme}}
-					<a target="_self" href="{{> themeHref}}" class="underline cursor-pointer mr-2">{{label}}</a>
+					<a target="_self" href="{{themeHref}}" class="underline cursor-pointer mr-2">{{label}}</a>
 				{{/myTheme}}
 				{{^myTheme}}
-					<a target="_self" href="{{> themeHref}}" class="cursor-pointer mr-2">{{label}}</a>
+					<a target="_self" href="{{themeHref}}" class="cursor-pointer mr-2">{{label}}</a>
 				{{/myTheme}}
 			{{/themes}}
 		</div>
@@ -16,10 +16,10 @@
 		<div class="flex flex-row mb-1">
 			{{#langs}}
 				{{#myLang}}
-					<a target="_self" href="{{> langHref}}" class="underline cursor-pointer mr-2">{{label}}</a>
+					<a target="_self" href="{{langHref}}" class="underline cursor-pointer mr-2">{{label}}</a>
 				{{/myLang}}
 				{{^myLang}}
-					<a target="_self" href="{{> langHref}}" class="cursor-pointer mr-2">{{label}}</a>
+					<a target="_self" href="{{langHref}}" class="cursor-pointer mr-2">{{label}}</a>
 				{{/myLang}}
 			{{/langs}}
 		</div>
@@ -29,10 +29,10 @@
 		<div class="flex flex-row">
 			{{#fonts}}
 				{{#myFont}}
-					<a target="_self" href="{{> fontHref}}" class="{{css}} underline cursor-pointer mr-2">{{label}}</a>
+					<a target="_self" href="{{fontHref}}" class="{{css}} underline cursor-pointer mr-2">{{label}}</a>
 				{{/myFont}}
 				{{^myFont}}
-					<a target="_self" href="{{> fontHref}}" class="{{css}} cursor-pointer mr-2">{{label}}</a>
+					<a target="_self" href="{{fontHref}}" class="{{css}} cursor-pointer mr-2">{{label}}</a>
 				{{/myFont}}
 			{{/fonts}}
 		</div>
