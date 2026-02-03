@@ -19,7 +19,8 @@ class PublicMessageBuilder extends AbstractBuilder {
 		)), { encoding: 'utf-8' });
 
 		this.sidebar = mustache.render(template, {
-			settingsHeader: this.i18n("settingsHeader")
+			settingsHeader: this.i18n("settingsHeader"),
+			mainHref:       "/" + this.search,
 		}, {
 			settings:       this.settings,
 		})

@@ -14,9 +14,18 @@ type (
 		Count               int32               `json:"count"`           // count messages in this message thread
 		FileIDs             []int64             `json:"-"`
 		Files               []*files.File       `json:"files"`
+		Translations        []Translation       `json:"translations"`
 		Text                string              `json:"text"`
 		Title               string              `json:"title"`
 		Private             bool                `json:"private"`
+	}
+
+	Translation struct {
+		Lang                string              `json:"lang"`
+		Title               string              `json:"title"`
+		Text                string              `json:"text"`
+		CreatedAt           int64               `json:"created_at"`
+		UpdatedAt           int64               `json:"updated_at"`
 	}
 
 	List struct {

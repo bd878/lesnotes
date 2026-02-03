@@ -896,6 +896,22 @@ components:
           type: string
           example: "file"
 
+    translation:
+      type: object
+      properties:
+        lang:
+          type: string
+          example: "de"
+        title:
+          type: string
+          example: "title"
+        text:
+          type: string
+        created_at:
+          type: integer
+        updated_at:
+          type: integer
+
     message:
       type: object
       properties:
@@ -922,3 +938,8 @@ components:
           items:
             schema:
               $ref: '#/components/schemas/file'
+        translations:
+          type: array
+          items:
+            schema:
+              $ref: '#/components/schemas/translation'

@@ -1,0 +1,451 @@
+openapi: "3.0.0"
+info:
+  title: API Specification for translations
+  description: |
+    This API allows saving translations for the
+    same user messages
+  version: 1.0.0
+paths:
+# SEND
+  /translations/v1/send:
+    parametres:
+      - $ref: '#/components/parametres/token'
+    post:
+      summary: Send a translation for a message
+      description: |
+        Send a translation
+      operationId: sendTranslation
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/sendTranslation'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sendTranslationOk'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+
+  /translations/v2/send:
+    post:
+      summary: Send a translation public API
+      description: |
+        Send a translation via json api
+      operationId: sendTranslationJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/sendTranslationJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sendTranslationOk'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+# END SEND
+
+# UPDATE
+  /translations/v1/update:
+    parameters:
+      - $ref: '#/components/parameters/token'
+    put:
+      summary: Update a translation
+      description: |
+        Update a translation
+      operationId: updateForm
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/updateTranslation'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/updateTranslationOk'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+
+  /translations/v2/update:
+    put:
+      summary: Update a translation
+      description: |
+        Update a translation
+      operationId: updateTranslationJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updateTranslationJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/updateTranslationOk'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+# END UPDATE
+
+# READ
+  /translations/v1/read:
+    parameters:
+      - $ref: '#/components/parameters/token'
+      - $ref: '#/components/parameters/message'
+      - $ref: '#/components/parameters/lang'
+    get:
+      summary: Get message translation
+      description: |
+        Read a message translation
+      operationId: readTranslation
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/readTranslationOk'
+        "4XX":
+          description: error 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+
+  /translations/v2/read:
+    post:
+      summary: Get a message translation
+      description: |
+        Read messages translation for a specific lang
+      operationId: readTranslationJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/readTranslationJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/readTranslationOk'
+
+        "4XX":
+          description: error 
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/serverError'
+# END READ
+
+# DELETE
+  /translations/v1/delete:
+    parameters:
+      - $ref: '#/components/parameters/message'
+      - $ref: '#/components/parameters/lang'
+    delete:
+      operationId: deleteTranslation
+      summary: Delete translation
+      description: |
+        Deletes a message translation
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/deleteTranslationOk'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+
+  /translations/v2/delete:
+    delete:
+      operationId: deleteTranslationJson
+      summary: Delete a translation
+      description: |
+        Deletes a message translation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/deleteTranslationJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/deleteTranslationOk'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+# END DELETE
+
+components:
+  parametres:
+    token:
+      name: Cookie
+      in: header
+      schema:
+        type: string
+        example: token=AAAAAA
+    message:
+      name: id
+      in: query
+      required: true
+      schema:
+        type: integer
+        example: 1
+    lang:
+      name: lang
+      in: query
+      required: true
+      schema:
+        type: integer
+        example: 1
+
+  schemas:
+    serverError:
+      type: object
+      status:
+        type: string
+        default: "error"
+      error:
+        type: object
+        properties:
+          code:
+            type: integer
+          explain:
+            type: string
+          human:
+            type: string
+
+# READ
+    readTranslationJson:
+      type: object
+      properties:
+        token:
+          type: string
+          default: ""
+          required: false
+        req:
+          type: object
+          properties:
+            lang:
+              type: string
+              required: true
+              example: "de"
+            message:
+              type: integer
+              required: true
+              example: 123
+
+    readTranslationOk:
+      type: object
+      properties:
+        status:
+          type: string
+          default: "ok"
+        response:
+          - $ref: '#/components/schemas/translation'
+# END READ
+
+# SEND
+    sendTranslation:
+      type: object
+      properties:
+        message:
+          type: integer
+          required: true
+        lang:
+          type: string
+          required: true
+          default: ""
+        title:
+          type: string
+          required: true
+          default: ""
+        text:
+          type: string
+          default: ""
+          required: true
+
+    sendTranslationJson:
+      type: object
+      properties:
+        token:
+          type: string
+          default: ""
+          required: true
+        req:
+          type: object
+          properties:
+            message:
+              type: integer
+              required: true
+            lang:
+              type: string
+              required: true
+              default: ""
+            title:
+              type: string
+              required: true
+              default: ""
+            text:
+              type: string
+              default: ""
+              required: true
+
+    sendTranslationOk:
+      type: object
+      status:
+        type: string
+      response:
+        type: object
+        properties:
+          description:
+            type: string
+# END SEND
+
+# UPDATE
+    updateTranslation:
+      type: object
+      properties:
+        message:
+          type: integer
+          required: true
+        lang:
+          type: string
+          required: true
+          default: ""
+        title:
+          type: string
+          required: true
+          default: ""
+        text:
+          type: string
+          default: ""
+          required: true
+
+    updateTranslationJson:
+      type: object
+      properties:
+        token:
+          type: string
+          default: ""
+          required: true
+        req:
+          type: object
+          properties:
+            message:
+              type: integer
+              required: true
+            lang:
+              type: string
+              required: true
+              default: ""
+            title:
+              type: string
+              required: true
+              default: ""
+            text:
+              type: string
+              default: ""
+              required: true
+
+    updateTranslationOk:
+      type: object
+      properties:
+        status:
+          type: string 
+          default: "ok"
+        response:
+          type: object
+          properties:
+            description:
+              type: string 
+              default: ""
+# END UPDATE
+
+# DELETE
+    deleteTranslationJson:
+      type: object
+      properties:
+        token:
+          type: string
+          default: ""
+          required: true
+        req:
+          type: object
+          properties:
+            message:
+              type: integer
+              required: true
+            lang:
+              type: string
+              required: true
+
+    deleteTranslationOk:
+      type: object
+      properties:
+        status:
+          type: string
+          default: "ok"
+        response:
+          type: object
+          properties:
+            description:
+              type: string 
+              default: ""
+# END DELETE
+
+    translation:
+      type: object
+      properties:
+        lang:
+          type: string
+          example: "de"
+        title:
+          type: string
+          example: "title"
+        text:
+          type: string
+        created_at:
+          type: integer
+        updated_at:
+          type: integer
