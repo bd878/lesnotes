@@ -3,6 +3,7 @@ syntax = "proto3";
 package messages.v1;
 
 import "protos/distributed.proto";
+import "protos/translations.proto";
 
 option go_package = "github.com/bd878/gallery/server/api";
 
@@ -29,6 +30,7 @@ message Message {
 	string   name = 7;
 	repeated int64 file_ids = 8;
 	string   title = 9;
+	repeated translations.v1.Translation translations = 10;
 }
 
 message ReadMessagesRequest {

@@ -8,6 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/messages/pkg/model"
 )
 
 type TranslationsRepository struct {
@@ -17,6 +18,22 @@ type TranslationsRepository struct {
 
 func NewTranslationsRepository(tableName string, pool *pgxpool.Pool) *TranslationsRepository {
 	return &TranslationsRepository{tableName: tableName, pool: pool}
+}
+
+func (r *TranslationsRepository) SaveTranslation(ctx context.Context, messageID int64, lang, text, title string) (err error) {
+	return
+}
+
+func (r *TranslationsRepository) UpdateTranslation(ctx context.Context, messageID int64, lang string, text, title *string) (err error) {
+	return
+}
+
+func (r *TranslationsRepository) DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error) {
+	return
+}
+
+func (r *TranslationsRepository) ReadTranslation(ctx context.Context, messageID int64, lang string) (translation *model.Translation, err error) {
+	return
 }
 
 func (r *TranslationsRepository) Truncate(ctx context.Context) (err error) {

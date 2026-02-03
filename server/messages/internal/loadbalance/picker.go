@@ -54,10 +54,14 @@ func (p *Picker) Pick(info balancer.PickInfo) (
 		 strings.Contains(info.FullMethodName, "PublishMessages") ||
 		 strings.Contains(info.FullMethodName, "PrivateMessages") ||
 		 strings.Contains(info.FullMethodName, "UpdateMessage") ||
+		 strings.Contains(info.FullMethodName, "SaveTranslation") ||
+		 strings.Contains(info.FullMethodName, "UpdateTranslation") ||
+		 strings.Contains(info.FullMethodName, "DeleteTranslation") ||
 		len(p.followers) == 0 {
 			result.SubConn = p.leader
 	} else if strings.Contains(info.FullMethodName, "ReadMessages") ||
 						strings.Contains(info.FullMethodName, "ReadMessage") ||
+						strings.Contains(info.FullMethodName, "ReadTranslation") ||
 						strings.Contains(info.FullMethodName, "ReadBatchMessages") {
 		result.SubConn = p.nextFollower()
 	}

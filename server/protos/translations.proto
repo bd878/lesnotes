@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package translations.v1;
+
+option go_package = "github.com/bd878/gallery/server/api";
+
+service Translations {
+	rpc SaveTranslation(SaveTranslationRequest) returns (SaveTranslationResponse) {}
+	rpc UpdateTranslation(UpdateTranslationRequest) returns (UpdateTranslationResponse) {}
+	rpc DeleteTranslation(DeleteTranslationRequest) returns (DeleteTranslationResponse) {}
+	rpc ReadTranslation(ReadTranslationRequest) returns (ReadTranslationResponse) {}
+}
+
+message Translation {
+	int64     message_id = 1;
+	string    lang = 2;
+	string    text = 3;
+	string    title = 4;
+	int64     created_at = 5;
+	int64     updated_at = 6;
+}
+
+message SaveTranslationRequest {
+	int64     message_id = 1;
+	string    lang = 2;
+	string    text = 3;
+	string    title = 4;
+}
+
+message SaveTranslationResponse {}
+
+message UpdateTranslationRequest {
+	int64     message_id = 1;
+	string    lang = 2;
+	optional string    text = 3;
+	optional string    title = 4;
+}
+
+message UpdateTranslationResponse {}
+
+message DeleteTranslationRequest {
+	int64     message_id = 1;
+	string    lang = 2;
+}
+
+message DeleteTranslationResponse {}
+
+message ReadTranslationRequest {
+	int64     message_id = 1;
+	string    lang = 2;
+}
+
+message ReadTranslationResponse {
+	Translation translation = 1;
+}

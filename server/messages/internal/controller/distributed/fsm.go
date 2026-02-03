@@ -40,11 +40,22 @@ type FilesRepository interface {
 	Restore(ctx context.Context, reader io.Reader) (err error)
 }
 
+type TranslationsRepository interface {
+	SaveTranslation(ctx context.Context, messageID int64, lang, text, title string) (err error)
+	UpdateTranslation(ctx context.Context, messageID int64, lang string, text, title *string) (err error)
+	DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error)
+	ReadTranslation(ctx context.Context, messageID int64, lang string) (translation *model.Translation, err error)
+	Truncate(ctx context.Context) error
+	Dump(ctx context.Context, writer io.Writer) (err error)
+	Restore(ctx context.Context, reader io.Reader) (err error)
+}
+
 var _ raft.FSM = (*fsm)(nil)
 
 type fsm struct {
 	messagesRepo MessagesRepository
 	filesRepo    FilesRepository
+	translationsRepo TranslationsRepository
 }
 
 /**
@@ -72,6 +83,12 @@ func (f *fsm) Apply(record *raft.Log) interface{} {
 		return f.applyPrivate(buf[1:])
 	case DeleteFileRequest:
 		return f.applyDeleteFile(buf[1:])
+	case AppendTranslationRequest:
+		return f.applyAppendTranslation(buf[1:])
+	case UpdateTranslationRequest:
+		return f.applyUpdateTranslation(buf[1:])
+	case DeleteTranslationRequest:
+		return f.applyDeleteTranslation(buf[1:])
 	default:
 		logger.Errorw("unknown request type", "type", reqType)
 	}
@@ -171,6 +188,42 @@ func (f *fsm) applyDeleteFile(raw []byte) interface{} {
 	proto.Unmarshal(raw, &cmd)
 
 	err := f.filesRepo.DeleteFile(context.Background(), cmd.Id, cmd.UserId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (f *fsm) applyAppendTranslation(raw []byte) interface{} {
+	var cmd AppendTranslationCommand
+	proto.Unmarshal(raw, &cmd)
+
+	err := f.translationsRepo.SaveTranslation(context.Background(), cmd.MessageId, cmd.Lang, cmd.Title, cmd.Text)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (f *fsm) applyUpdateTranslation(raw []byte) interface{} {
+	var cmd UpdateTranslationCommand
+	proto.Unmarshal(raw, &cmd)
+
+	err := f.translationsRepo.UpdateTranslation(context.Background(), cmd.MessageId, cmd.Lang, cmd.Title, cmd.Text)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (f *fsm) applyDeleteTranslation(raw []byte) interface{} {
+	var cmd DeleteTranslationCommand
+	proto.Unmarshal(raw, &cmd)
+
+	err := f.translationsRepo.DeleteTranslation(context.Background(), cmd.MessageId, cmd.Lang)
 	if err != nil {
 		return err
 	}

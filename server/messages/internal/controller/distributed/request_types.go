@@ -10,4 +10,7 @@ const (
 	PrivateRequest
 	DeleteUserMessagesRequest
 	DeleteFileRequest
+	AppendTranslationRequest
+	UpdateTranslationRequest
+	DeleteTranslationRequest
 )

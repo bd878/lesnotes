@@ -261,3 +261,11 @@ func (m *DistributedMessages) ReadBatchMessages(ctx context.Context, userID int6
 
 	return
 }
+
+func (m *DistributedMessages) ReadMessageTranslation(ctx context.Context, messageID int64, lang string) (translation *model.Translation, err error) {
+	logger.Debugw("read translation", "message_id", messageID, "lang", lang)
+
+	translation, err = m.translationsRepo.ReadTranslation(ctx, messageID, lang)
+
+	return
+}

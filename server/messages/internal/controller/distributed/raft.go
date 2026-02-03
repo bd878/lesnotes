@@ -33,11 +33,13 @@ type DistributedMessages struct {
 	raft            *raft.Raft
 	messagesRepo    MessagesRepository
 	filesRepo       FilesRepository
+	translationsRepo TranslationsRepository
 	snapshotStore   raft.SnapshotStore
 	publisher       ddd.EventPublisher[ddd.Event]
 }
 
-func New(conf Config, messagesRepo MessagesRepository, filesRepo FilesRepository, publisher ddd.EventPublisher[ddd.Event]) (*DistributedMessages, error) {
+func New(conf Config, messagesRepo MessagesRepository, filesRepo FilesRepository,
+	translationsRepo TranslationsRepository, publisher ddd.EventPublisher[ddd.Event]) (*DistributedMessages, error) {
 	if conf.RetainSnapshots == 0 {
 		conf.RetainSnapshots = 1
 	}
@@ -53,6 +55,7 @@ func New(conf Config, messagesRepo MessagesRepository, filesRepo FilesRepository
 	m := &DistributedMessages{
 		messagesRepo:     messagesRepo,
 		filesRepo:        filesRepo,
+		translationsRepo: translationsRepo,
 		conf:             conf,
 		publisher:        publisher,
 	}
