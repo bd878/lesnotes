@@ -10,7 +10,7 @@ json=$(echo -n '{\"token\":\"%TOKEN%\",\"req\":{\"text\":\"abc\"}}' | sed -e "s/
 cmd=`cat <<HERE
 sed -e "s/%STAGE%/$stage/g" \
 sed -e "s/%JSON%/$json/g" ./curl/send_message_json.curl |
-curl -v -K -
+curl -K -
 HERE`
 result=`eval "$cmd"`
 echo $result

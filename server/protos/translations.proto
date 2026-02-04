@@ -32,8 +32,8 @@ message SaveTranslationResponse {}
 message UpdateTranslationRequest {
 	int64     message_id = 1;
 	string    lang = 2;
-	optional string    text = 3;
-	optional string    title = 4;
+	optional string text = 3;
+	optional string title = 4;
 }
 
 message UpdateTranslationResponse {}

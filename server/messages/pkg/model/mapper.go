@@ -32,6 +32,24 @@ func MessageToProto(msg *Message) *api.Message {
 	}
 }
 
+func TranslationFromProto(proto *api.Translation) *Translation {
+	return &Translation{
+		MessageID:      proto.MessageId,
+		Lang:           proto.Lang,
+		Title:          proto.Title,
+		Text:           proto.Text,
+	}
+}
+
+func TranslationToProto(translation *Translation) *api.Translation {
+	return &api.Translation{
+		MessageId:      translation.MessageID,
+		Lang:           translation.Lang,
+		Title:          translation.Title,
+		Text:           translation.Text,
+	}
+}
+
 func MapMessagesToProto(mapper (func(*Message) *api.Message), msgs []*Message) []*api.Message {
 	res := make([]*api.Message, len(msgs))
 	for i, msg := range msgs {

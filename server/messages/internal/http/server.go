@@ -45,31 +45,39 @@ func New(cfg Config) *Server {
 	threadsGateway := threadsgateway.New(cfg.ThreadsServiceAddr)
 	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
 
-	ctrl := controller.New(controller.Config{
+	messagesController := controller.NewMessagesController(controller.MessagesConfig{
 		RpcAddr: cfg.RpcAddr,
 	}, threadsGateway)
-	handler := httphandler.New(ctrl, filesGateway)
+	translationsController := controller.NewTranslationsController(controller.TranslationsConfig{
+		RpcAddr: cfg.RpcAddr,
+	})
+	handler := httphandler.New(messagesController, translationsController, filesGateway)
 
-	mux.Handle("/messages/v1/send",     middleware.Build(handler.SendMessage))
-	mux.Handle("/messages/v1/read_path", middleware.Build(handler.ReadPath))
-	mux.Handle("/messages/v1/read",     middleware.Build(handler.ReadMessages))
-	mux.Handle("/messages/v1/update",   middleware.Build(handler.UpdateMessage))
-	mux.Handle("/messages/v1/publish",  middleware.Build(handler.PublishMessages))
-	mux.Handle("/messages/v1/private",  middleware.Build(handler.PrivateMessages))
-	mux.Handle("/messages/v1/delete",   middleware.Build(handler.DeleteMessages))
+	mux.Handle("/messages/v1/send",        middleware.Build(handler.SendMessage))
+	mux.Handle("/messages/v1/read_path",   middleware.Build(handler.ReadPath))
+	mux.Handle("/messages/v1/read",        middleware.Build(handler.ReadMessages))
+	mux.Handle("/messages/v1/update",      middleware.Build(handler.UpdateMessage))
+	mux.Handle("/messages/v1/publish",     middleware.Build(handler.PublishMessages))
+	mux.Handle("/messages/v1/private",     middleware.Build(handler.PrivateMessages))
+	mux.Handle("/messages/v1/delete",      middleware.Build(handler.DeleteMessages))
 
 	middleware.NoAuth()
-	mux.Handle("/messages/v1/status",   middleware.Build(handler.GetStatus))
+	mux.Handle("/messages/v1/status",      middleware.Build(handler.GetStatus))
 
 	middleware.WithAuth(httpmiddleware.TokenAuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
-	mux.Handle("/messages/v2/send",     middleware.Build(handler.SendMessageJsonAPI))
-	mux.Handle("/messages/v2/read",     middleware.Build(handler.ReadMessagesJsonAPI))
+	mux.Handle("/messages/v2/send",        middleware.Build(handler.SendMessageJsonAPI))
+	mux.Handle("/messages/v2/read",        middleware.Build(handler.ReadMessagesJsonAPI))
 	// TODO: /threads/v2/read
-	mux.Handle("/messages/v2/read_path",  middleware.Build(handler.ReadPathJsonAPI))
-	mux.Handle("/messages/v2/publish",  middleware.Build(handler.PublishMessagesJsonAPI))
-	mux.Handle("/messages/v2/private",  middleware.Build(handler.PrivateMessagesJsonAPI))
-	mux.Handle("/messages/v2/delete",   middleware.Build(handler.DeleteMessagesJsonAPI))
-	mux.Handle("/messages/v2/update",   middleware.Build(handler.UpdateMessageJsonAPI))
+	mux.Handle("/messages/v2/read_path",   middleware.Build(handler.ReadPathJsonAPI))
+	mux.Handle("/messages/v2/publish",     middleware.Build(handler.PublishMessagesJsonAPI))
+	mux.Handle("/messages/v2/private",     middleware.Build(handler.PrivateMessagesJsonAPI))
+	mux.Handle("/messages/v2/delete",      middleware.Build(handler.DeleteMessagesJsonAPI))
+	mux.Handle("/messages/v2/update",      middleware.Build(handler.UpdateMessageJsonAPI))
+
+	mux.Handle("/translations/v2/send",    middleware.Build(handler.SendTranslationJsonAPI))
+	mux.Handle("/translations/v2/update",  middleware.Build(handler.UpdateTranslationJsonAPI))
+	mux.Handle("/translations/v2/delete",  middleware.Build(handler.DeleteTranslationJsonAPI))
+	mux.Handle("/translations/v2/read",    middleware.Build(handler.ReadTranslationJsonAPI))
 
 	server := &Server{
 		Server: &http.Server{

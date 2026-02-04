@@ -209,6 +209,59 @@ func (m *DistributedMessages) PrivateMessages(ctx context.Context, ids []int64, 
 	return m.publisher.Publish(context.Background(), event)
 }
 
+func (m *DistributedMessages) SaveTranslation(ctx context.Context, messageID int64, lang, title, text string) (err error) {
+	logger.Debugw("save translation", "message_id", messageID, "lang", lang, "title", title, "text", text)
+
+	cmd, err := proto.Marshal(&AppendTranslationCommand{
+		MessageId:    messageID,
+		Lang:         lang,
+		Title:        title,
+		Text:         text,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = m.apply(ctx, AppendTranslationRequest, cmd)
+
+	return
+}
+
+func (m *DistributedMessages) UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string) (err error) {
+	// TODO: deal with nil pointer
+	logger.Debugw("update translation", "message_id", messageID, "lang", lang, "title", title, "text", text)
+
+	cmd, err := proto.Marshal(&UpdateTranslationCommand{
+		MessageId:     messageID,
+		Lang:          lang,
+		Title:         title,
+		Text:          text,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = m.apply(ctx, UpdateTranslationRequest, cmd)
+
+	return
+}
+
+func (m *DistributedMessages) DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error) {
+	logger.Debugw("delete translation", "message_id", messageID, "lang", lang)
+
+	cmd, err := proto.Marshal(&DeleteTranslationCommand{
+		MessageId:  messageID,
+		Lang:       lang,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = m.apply(ctx, DeleteTranslationRequest, cmd)
+
+	return
+}
+
 // TODO: pass one userID only, for public messages create ReadPublicMessage request
 func (m *DistributedMessages) ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *model.Message, err error) {
 	logger.Debugw("read message", "id", id, "name", name, "user_ids", userIDs)
@@ -262,7 +315,7 @@ func (m *DistributedMessages) ReadBatchMessages(ctx context.Context, userID int6
 	return
 }
 
-func (m *DistributedMessages) ReadMessageTranslation(ctx context.Context, messageID int64, lang string) (translation *model.Translation, err error) {
+func (m *DistributedMessages) ReadTranslation(ctx context.Context, messageID int64, lang string) (translation *model.Translation, err error) {
 	logger.Debugw("read translation", "message_id", messageID, "lang", lang)
 
 	translation, err = m.translationsRepo.ReadTranslation(ctx, messageID, lang)

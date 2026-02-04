@@ -1,0 +1,3 @@
+url = https://%STAGE%lesnotes.space/translations/v2/update
+-H "Content-Type: application/json"
+--data-binary %JSON%

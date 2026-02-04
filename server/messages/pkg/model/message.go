@@ -20,14 +20,6 @@ type (
 		Private             bool                `json:"private"`
 	}
 
-	Translation struct {
-		Lang                string              `json:"lang"`
-		Title               string              `json:"title"`
-		Text                string              `json:"text"`
-		CreatedAt           int64               `json:"created_at"`
-		UpdatedAt           int64               `json:"updated_at"`
-	}
-
 	List struct {
 		Messages            []*Message
 		IsLastPage          bool

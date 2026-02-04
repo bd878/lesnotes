@@ -15,7 +15,7 @@ import (
 	threads "github.com/bd878/gallery/server/threads/pkg/model"
 )
 
-type Config struct {
+type MessagesConfig struct {
 	RpcAddr string
 }
 
@@ -30,28 +30,28 @@ type ThreadsGateway interface {
 	ReadThread(ctx context.Context, userID, id int64) (thread *threads.Thread, err error)
 }
 
-type Controller struct {
-	conf       Config
+type MessagesController struct {
+	conf       MessagesConfig
 	client     api.MessagesClient
 	conn       *grpc.ClientConn
 	threads    ThreadsGateway
 }
 
-func New(conf Config, threads ThreadsGateway) *Controller {
-	controller := &Controller{conf: conf, threads: threads}
+func NewMessagesController(conf MessagesConfig, threads ThreadsGateway) *MessagesController {
+	controller := &MessagesController{conf: conf, threads: threads}
 
 	controller.setupConnection()
 
 	return controller
 }
 
-func (s *Controller) Close() {
+func (s *MessagesController) Close() {
 	if s.conn != nil {
 		s.conn.Close()
 	}
 }
 
-func (s *Controller) setupConnection() (err error) {
+func (s *MessagesController) setupConnection() (err error) {
 	conn, err := grpc.NewClient(
 		fmt.Sprintf(
 			"%s:///%s",
@@ -72,7 +72,7 @@ func (s *Controller) setupConnection() (err error) {
 	return
 }
 
-func (s *Controller) isConnFailed() bool {
+func (s *MessagesController) isConnFailed() bool {
 	state := s.conn.GetState()
 	if state == connectivity.Shutdown || state == connectivity.TransientFailure {
 		logger.Debugln("connection failed")
@@ -81,7 +81,7 @@ func (s *Controller) isConnFailed() bool {
 	return false
 }
 
-func (s *Controller) SaveMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (message *model.Message, err error) {
+func (s *MessagesController) SaveMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (message *model.Message, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -121,7 +121,7 @@ func (s *Controller) SaveMessage(ctx context.Context, id int64, text, title stri
 	return
 }
 
-func (s *Controller) DeleteMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+func (s *MessagesController) DeleteMessages(ctx context.Context, ids []int64, userID int64) (err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -146,7 +146,7 @@ func (s *Controller) DeleteMessages(ctx context.Context, ids []int64, userID int
 	return
 }
 
-func (s *Controller) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+func (s *MessagesController) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -163,7 +163,7 @@ func (s *Controller) PublishMessages(ctx context.Context, ids []int64, userID in
 	return
 }
 
-func (s *Controller) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+func (s *MessagesController) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -180,7 +180,7 @@ func (s *Controller) PrivateMessages(ctx context.Context, ids []int64, userID in
 	return
 }
 
-func (s *Controller) UpdateMessage(ctx context.Context, id int64, text, title, name string, fileIDs []int64, userID int64) (err error) {
+func (s *MessagesController) UpdateMessage(ctx context.Context, id int64, text, title, name string, fileIDs []int64, userID int64) (err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -207,7 +207,7 @@ func (s *Controller) UpdateMessage(ctx context.Context, id int64, text, title, n
 }
 
 // Get messages in order
-func (s *Controller) ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool) (list *model.List, err error) {
+func (s *MessagesController) ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool) (list *model.List, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -259,7 +259,7 @@ func (s *Controller) ReadThreadMessages(ctx context.Context, userID int64, threa
 }
 
 // Read messages by given ids
-func (s *Controller) ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*model.Message, err error) {
+func (s *MessagesController) ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*model.Message, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -282,7 +282,7 @@ func (s *Controller) ReadBatchMessages(ctx context.Context, userID int64, ids []
 }
 
 // read all messages not concerning thread
-func (s *Controller) ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (list *model.List, err error) {
+func (s *MessagesController) ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (list *model.List, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -313,7 +313,7 @@ func (s *Controller) ReadMessages(ctx context.Context, userID int64, limit, offs
 	return
 }
 
-func (s *Controller) ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *model.Message, err error) {
+func (s *MessagesController) ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *model.Message, err error) {
 	if s.isConnFailed() {
 		if err := s.setupConnection(); err != nil {
 			return nil, err
@@ -336,7 +336,7 @@ func (s *Controller) ReadMessage(ctx context.Context, id int64, name string, use
 	return
 }
 
-func (s *Controller) ReadPath(ctx context.Context, userID, id int64) (path []*model.Message, parentID int64, err error) {
+func (s *MessagesController) ReadPath(ctx context.Context, userID, id int64) (path []*model.Message, parentID int64, err error) {
 	if s.isConnFailed() {
 		if err := s.setupConnection(); err != nil {
 			return nil, 0, err

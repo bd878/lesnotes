@@ -149,7 +149,9 @@ func (s *Server) setupRaft() (err error) {
 }
 
 func (s *Server) setupGRPC() error {
-	handler := grpchandler.New(s.controller)
+	messagesHandler := grpchandler.NewMessagesHandler(s.controller)
+	translationsHandler := grpchandler.NewTranslationsHandler(s.controller)
+
 	member, err := membership.New(
 		membership.Config{
 			NodeName: s.conf.NodeName,
@@ -173,7 +175,8 @@ func (s *Server) setupGRPC() error {
 		),
 	)
 
-	api.RegisterMessagesServer(s.Server, handler)
+	api.RegisterMessagesServer(s.Server, messagesHandler)
+	api.RegisterTranslationsServer(s.Server, translationsHandler)
 
 	grpcListener := s.mux.Match(cmux.Any())
 	s.grpcListener = grpcListener

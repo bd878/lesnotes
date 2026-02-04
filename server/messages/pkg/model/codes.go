@@ -8,6 +8,8 @@ var (
 	CodeWrongThreadID     int = 205
 	CodeWrongPublic       int = 206
 	CodeNoFile            int = 207
+	CodeNoMessageID       int = 208
+	CodeNoLang            int = 209
 
 	CodeUpdateFailed      int = 211
 	CodeSaveFailed        int = 212

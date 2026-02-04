@@ -9,7 +9,7 @@ import (
 	files "github.com/bd878/gallery/server/files/pkg/model"
 )
 
-type Controller interface {
+type MessagesController interface {
 	SaveMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (message *messages.Message, err error)
 	UpdateMessage(ctx context.Context, id int64, text, title, name string, fileIDs []int64, userID int64) (err error)
 	DeleteMessages(ctx context.Context, ids []int64, userID int64) (err error)
@@ -22,7 +22,14 @@ type Controller interface {
 	ReadPath(ctx context.Context, userID int64, id int64) (messages []*messages.Message, parentID int64, err error)
 }
 
-// TODO: think to move on controller/service level
+type TranslationsController interface {
+	SaveTranslation(ctx context.Context, messageID int64, lang, title, text string) (err error)
+	UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string) (err error)
+	DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error)
+	ReadTranslation(ctx context.Context, messageID int64, lang string) (translation *messages.Translation, err error)
+}
+
+// TODO: move on controller/service level
 type FilesGateway interface {
 	ReadBatchFiles(ctx context.Context, fileIDs []int64, userID int64) (files map[int64]*files.File, err error)
 	ReadFile(ctx context.Context, userID, fileID int64) (file *files.File, err error)
@@ -30,12 +37,17 @@ type FilesGateway interface {
 }
 
 type Handler struct {
-	controller    Controller
-	filesGateway  FilesGateway
+	controller     MessagesController
+	translationsController TranslationsController
+	filesGateway           FilesGateway
 }
 
-func New(controller Controller, filesGateway FilesGateway) *Handler {
-	return &Handler{controller, filesGateway}
+func New(messagesController MessagesController, translationsController TranslationsController, filesGateway FilesGateway) *Handler {
+	return &Handler{
+		controller:             messagesController,
+		translationsController: translationsController,
+		filesGateway:           filesGateway,
+	}
 }
 
 func (h *Handler) GetStatus(w http.ResponseWriter, _ *http.Request) error {
