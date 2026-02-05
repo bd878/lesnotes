@@ -79,6 +79,13 @@ func (s *TranslationsController) SaveTranslation(ctx context.Context, messageID 
 
 	logger.Debugw("save translation", "message_id", messageID, "lang", lang, "title", title, "text", text)
 
+	_, err = s.client.SaveTranslation(ctx, &api.SaveTranslationRequest{
+		MessageId:    messageID,
+		Lang:         lang,
+		Title:        title,
+		Text:         text,
+	})
+
 	return
 }
 
@@ -90,6 +97,13 @@ func (s *TranslationsController) UpdateTranslation(ctx context.Context, messageI
 	}
 
 	logger.Debugw("update translation", "message_id", messageID, "lang", lang, "title", title, "text", text)
+
+	_, err = s.client.UpdateTranslation(ctx, &api.UpdateTranslationRequest{
+		MessageId:   messageID,
+		Lang:        lang,
+		Title:       title,
+		Text:        text,
+	})
 
 	return
 }
@@ -103,6 +117,11 @@ func (s *TranslationsController) DeleteTranslation(ctx context.Context, messageI
 
 	logger.Debugw("delete translation", "message_id", messageID, "lang", lang)
 
+	_, err = s.client.DeleteTranslation(ctx, &api.DeleteTranslationRequest{
+		MessageId:      messageID,
+		Lang:           lang,
+	})
+
 	return
 }
 
@@ -114,6 +133,16 @@ func (s *TranslationsController) ReadTranslation(ctx context.Context, messageID 
 	}
 
 	logger.Debugw("read translation", "message_id", messageID, "lang", lang)
+
+	resp, err := s.client.ReadTranslation(ctx, &api.ReadTranslationRequest{
+		MessageId:    messageID,
+		Lang:         lang,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	translation = model.TranslationFromProto(resp.Translation)
 
 	return
 }
