@@ -17,7 +17,7 @@ fi
 cmd=`cat <<HERE
 sed -e "s/%STAGE%/$stage/g" \
 sed -e "s/%PUBLIC%/$public_filter/g" ./curl/send_message.curl |
-curl -b $cookie -v -K -
+curl -b $cookie -K -
 HERE`
 result=`eval "$cmd"`
 echo $result
