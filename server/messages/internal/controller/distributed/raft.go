@@ -68,8 +68,9 @@ func New(conf Config, messagesRepo MessagesRepository, filesRepo FilesRepository
 
 func (m *DistributedMessages) setupRaft() error {
 	fsm := &fsm{
-		messagesRepo: m.messagesRepo,
-		filesRepo:    m.filesRepo,
+		messagesRepo:     m.messagesRepo,
+		filesRepo:        m.filesRepo,
+		translationsRepo: m.translationsRepo,
 	}
 
 	raftPath := filepath.Join(m.conf.DataDir, "raft")
