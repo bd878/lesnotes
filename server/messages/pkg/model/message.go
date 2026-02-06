@@ -14,7 +14,7 @@ type (
 		Count               int32               `json:"count"`           // count messages in this message thread
 		FileIDs             []int64             `json:"-"`
 		Files               []*files.File       `json:"files"`
-		Translations        []Translation       `json:"translations"`
+		Translations        []*Translation       `json:"translations"`
 		Text                string              `json:"text"`
 		Title               string              `json:"title"`
 		Private             bool                `json:"private"`

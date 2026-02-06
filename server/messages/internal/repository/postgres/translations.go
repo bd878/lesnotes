@@ -67,6 +67,38 @@ func (r *TranslationsRepository) ReadTranslation(ctx context.Context, messageID 
 	return
 }
 
+func (r *TranslationsRepository) ReadMessageTranslations(ctx context.Context, messageID int64) (translations []*model.Translation, err error) {
+	const query = "SELECT lang, title, text, created_at, updated_at FROM %s WHERE message_id = $1"
+
+	rows, err := r.pool.Query(ctx, r.table(query), messageID)
+	if err != nil {
+		return nil, err
+	}
+
+	translations = make([]*model.Translation, 0)
+	for rows.Next() {
+		translation := &model.Translation{
+			MessageID: messageID,
+		}
+
+		var createdAt, updatedAt time.Time
+
+		err = rows.Scan(&translation.Lang, &translation.Title, &translation.Text, &createdAt, &updatedAt)
+		if err != nil {
+			return
+		}
+
+		translation.CreatedAt = createdAt.UnixNano()
+		translation.UpdatedAt = updatedAt.UnixNano()
+
+		translations = append(translations, translation)
+	}
+
+	err = rows.Err()
+
+	return
+}
+
 func (r *TranslationsRepository) Truncate(ctx context.Context) (err error) {
 	logger.Debugln("truncating table")
 	_, err = r.pool.Exec(ctx, r.table("TRUNCATE TABLE %s"))

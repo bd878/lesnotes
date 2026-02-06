@@ -277,6 +277,11 @@ func (m *DistributedMessages) ReadMessage(ctx context.Context, id int64, name st
 		return
 	}
 
+	message.Translations, err = m.translationsRepo.ReadMessageTranslations(ctx, message.ID)
+	if err != nil {
+		return
+	}
+
 	return
 }
 
@@ -290,6 +295,11 @@ func (m *DistributedMessages) ReadMessages(ctx context.Context, userID int64, li
 
 	for _, message := range messages {
 		message.FileIDs, err = m.filesRepo.ReadMessageFiles(ctx, message.ID, []int64{userID, message.UserID})
+		if err != nil {
+			return
+		}
+
+		message.Translations, err = m.translationsRepo.ReadMessageTranslations(ctx, message.ID)
 		if err != nil {
 			return
 		}
@@ -308,6 +318,11 @@ func (m *DistributedMessages) ReadBatchMessages(ctx context.Context, userID int6
 
 	for _, message := range messages {
 		message.FileIDs, err = m.filesRepo.ReadMessageFiles(ctx, message.ID, []int64{userID, message.UserID})
+		if err != nil {
+			return
+		}
+
+		message.Translations, err = m.translationsRepo.ReadMessageTranslations(ctx, message.ID)
 		if err != nil {
 			return
 		}
