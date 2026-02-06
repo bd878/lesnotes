@@ -44,6 +44,7 @@ type (
 	ReadTranslationRequest struct {
 		MessageID           int64               `json:"message"`
 		Lang                string              `json:"lang"`
+		Name                string              `json:"name,omitempty"`
 	}
 
 	ReadTranslationResponse struct {

@@ -11,7 +11,7 @@ type TranslationsController interface {
 	SaveTranslation(ctx context.Context, messageID int64, lang, title, text string) (err error)
 	UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string) (err error)
 	DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error)
-	ReadTranslation(ctx context.Context, userID, messageID int64, lang string) (result *model.Translation, err error)
+	ReadTranslation(ctx context.Context, userID, messageID int64, lang string, name string) (result *model.Translation, err error)
 }
 
 type TranslationsHandler struct {
@@ -50,7 +50,12 @@ func (h *TranslationsHandler) DeleteTranslation(ctx context.Context, req *api.De
 }
 
 func (h *TranslationsHandler) ReadTranslation(ctx context.Context, req *api.ReadTranslationRequest) (resp *api.ReadTranslationResponse, err error) {
-	translation, err := h.controller.ReadTranslation(ctx, req.UserId, req.MessageId, req.Lang)
+	var name string
+	if req.Name != nil {
+		name = *req.Name 
+	}
+
+	translation, err := h.controller.ReadTranslation(ctx, req.UserId, req.MessageId, req.Lang, name)
 	if err != nil {
 		return nil, err
 	}

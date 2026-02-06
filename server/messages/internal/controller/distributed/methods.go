@@ -331,10 +331,10 @@ func (m *DistributedMessages) ReadBatchMessages(ctx context.Context, userID int6
 	return
 }
 
-func (m *DistributedMessages) ReadTranslation(ctx context.Context, userID, messageID int64, lang string) (translation *model.Translation, err error) {
+func (m *DistributedMessages) ReadTranslation(ctx context.Context, userID, messageID int64, lang string, name string) (translation *model.Translation, err error) {
 	logger.Debugw("read translation", "user_id", userID, "message_id", messageID, "lang", lang)
 
-	message, err := m.messagesRepo.Read(ctx, []int64{userID}, messageID, "")
+	message, err := m.messagesRepo.Read(ctx, []int64{userID}, messageID, name)
 	if err != nil {
 		return nil, err
 	}
@@ -344,7 +344,7 @@ func (m *DistributedMessages) ReadTranslation(ctx context.Context, userID, messa
 		return nil, errors.New("cannot read private message")
 	}
 
-	translation, err = m.translationsRepo.ReadTranslation(ctx, messageID, lang)
+	translation, err = m.translationsRepo.ReadTranslation(ctx, message.ID, lang)
 	if err != nil {
 		return nil, err
 	}
