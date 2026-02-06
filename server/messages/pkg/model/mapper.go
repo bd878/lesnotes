@@ -15,6 +15,7 @@ func MessageFromProto(proto *api.Message) *Message {
 		FileIDs:        proto.FileIds,
 		Private:        proto.Private,
 		Name:           proto.Name,
+		Translations:   MapTranslationsFromProto(TranslationFromProto, proto.Translations),
 	}
 }
 
@@ -29,6 +30,7 @@ func MessageToProto(msg *Message) *api.Message {
 		FileIds:        msg.FileIDs,
 		Private:        msg.Private,
 		Name:           msg.Name,
+		Translations:   MapTranslationsToProto(TranslationToProto, msg.Translations),
 	}
 }
 
@@ -62,6 +64,22 @@ func MapMessagesFromProto(mapper (func(*api.Message) *Message), msgs []*api.Mess
 	res := make([]*Message, len(msgs))
 	for i, msg := range msgs {
 		res[i] = mapper(msg)
+	}
+	return res
+}
+
+func MapTranslationsToProto(mapper (func(*Translation) *api.Translation), translations []*Translation) []*api.Translation {
+	res := make([]*api.Translation, len(translations))
+	for i, translation := range translations {
+		res[i] = mapper(translation)
+	}
+	return res
+}
+
+func MapTranslationsFromProto(mapper (func(*api.Translation) *Translation), translations []*api.Translation) []*Translation {
+	res := make([]*Translation, len(translations))
+	for i, translation := range translations {
+		res[i] = mapper(translation)
 	}
 	return res
 }
