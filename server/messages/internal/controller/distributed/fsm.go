@@ -46,6 +46,7 @@ type TranslationsRepository interface {
 	DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error)
 	ReadTranslation(ctx context.Context, messageID int64, lang string) (translation *model.Translation, err error)
 	ReadMessageTranslations(ctx context.Context, messageID int64) (translations []*model.Translation, err error)
+	DeleteMessage(ctx context.Context, messageID int64) (err error)
 	Truncate(ctx context.Context) error
 	Dump(ctx context.Context, writer io.Writer) (err error)
 	Restore(ctx context.Context, reader io.Reader) (err error)
@@ -153,6 +154,11 @@ func (f *fsm) applyDelete(raw []byte) interface{} {
 	}
 
 	err = f.filesRepo.DeleteMessage(context.Background(), cmd.Id, cmd.UserId)
+	if err != nil {
+		return err
+	}
+
+	err = f.translationsRepo.DeleteMessage(context.Background(), cmd.Id)
 	if err != nil {
 		return err
 	}

@@ -99,6 +99,14 @@ func (r *TranslationsRepository) ReadMessageTranslations(ctx context.Context, me
 	return
 }
 
+func (r *TranslationsRepository) DeleteMessage(ctx context.Context, messageID int64) (err error) {
+	const query = "DELETE FROM %s WHERE message_id = $1"
+
+	_, err = r.pool.Exec(ctx, r.table(query), messageID)
+
+	return
+}
+
 func (r *TranslationsRepository) Truncate(ctx context.Context) (err error) {
 	logger.Debugln("truncating table")
 	_, err = r.pool.Exec(ctx, r.table("TRUNCATE TABLE %s"))
