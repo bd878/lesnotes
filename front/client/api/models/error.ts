@@ -15,8 +15,9 @@ const empty: Error = {
 }
 
 export default function mapErrorFromProto(error?: Error): Error {
-	if (!error)
+	if (!error) {
 		return empty
+	}
 
 	return error
 }

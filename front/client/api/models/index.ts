@@ -1,4 +1,5 @@
 import message, { EmptyMessage } from './message'
+import translation, { EmptyTranslation } from './translation';
 import searchMessage, { EmptySearchMessage } from './searchMessage'
 import searchMessagePath, { EmptySearchMessagePath } from './searchMessagePath'
 import threadMessages, { EmptyThreadMessages } from './threadMessages'
@@ -13,6 +14,7 @@ export default {
 	searchMessage,
 	searchMessagePath,
 	threadMessages,
+	translation,
 	thread,
 	paging,
 	user,
@@ -22,6 +24,7 @@ export default {
 	EmptyPaging,
 	EmptyThread,
 	EmptyMessage,
+	EmptyTranslation,
 	EmptyThreadMessages,
 	EmptySearchMessage,
 	EmptySearchMessagePath,
@@ -31,6 +34,7 @@ export default {
 
 export type { Thread } from './thread'
 export type { Message } from './message'
+export type { Translation } from './translation'
 export type { File } from './file'
 export type { Error } from './error'
 export type { User } from './user'
