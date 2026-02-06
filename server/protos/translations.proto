@@ -46,8 +46,9 @@ message DeleteTranslationRequest {
 message DeleteTranslationResponse {}
 
 message ReadTranslationRequest {
-	int64     message_id = 1;
-	string    lang = 2;
+	int64     user_id = 1;
+	int64     message_id = 2;
+	string    lang = 3;
 }
 
 message ReadTranslationResponse {

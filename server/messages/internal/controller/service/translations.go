@@ -125,16 +125,17 @@ func (s *TranslationsController) DeleteTranslation(ctx context.Context, messageI
 	return
 }
 
-func (s *TranslationsController) ReadTranslation(ctx context.Context, messageID int64, lang string) (translation *model.Translation, err error) {
+func (s *TranslationsController) ReadTranslation(ctx context.Context, userID, messageID int64, lang string) (translation *model.Translation, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
 		}
 	}
 
-	logger.Debugw("read translation", "message_id", messageID, "lang", lang)
+	logger.Debugw("read translation", "user_id", userID, "message_id", messageID, "lang", lang)
 
 	resp, err := s.client.ReadTranslation(ctx, &api.ReadTranslationRequest{
+		UserId:       userID,
 		MessageId:    messageID,
 		Lang:         lang,
 	})

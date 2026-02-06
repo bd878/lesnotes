@@ -2,6 +2,7 @@ package distributed
 
 import (
 	"time"
+	"errors"
 	"context"
 	"bytes"
 
@@ -315,10 +316,23 @@ func (m *DistributedMessages) ReadBatchMessages(ctx context.Context, userID int6
 	return
 }
 
-func (m *DistributedMessages) ReadTranslation(ctx context.Context, messageID int64, lang string) (translation *model.Translation, err error) {
-	logger.Debugw("read translation", "message_id", messageID, "lang", lang)
+func (m *DistributedMessages) ReadTranslation(ctx context.Context, userID, messageID int64, lang string) (translation *model.Translation, err error) {
+	logger.Debugw("read translation", "user_id", userID, "message_id", messageID, "lang", lang)
+
+	message, err := m.messagesRepo.Read(ctx, []int64{userID}, messageID, "")
+	if err != nil {
+		return nil, err
+	}
+
+	// only owner can read translations of his private message
+	if message.Private && (message.UserID != userID) {
+		return nil, errors.New("cannot read private message")
+	}
 
 	translation, err = m.translationsRepo.ReadTranslation(ctx, messageID, lang)
+	if err != nil {
+		return nil, err
+	}
 
 	return
 }

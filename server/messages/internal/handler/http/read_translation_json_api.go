@@ -11,8 +11,7 @@ import (
 )
 
 func (h *Handler) ReadTranslationJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
-	// TODO: deal with public user
-	_, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
+	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -80,7 +79,7 @@ func (h *Handler) ReadTranslationJsonAPI(w http.ResponseWriter, req *http.Reques
 		return
 	}
 
-	translation, err := h.translationsController.ReadTranslation(req.Context(), request.MessageID, request.Lang)
+	translation, err := h.translationsController.ReadTranslation(req.Context(), user.ID, request.MessageID, request.Lang)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
