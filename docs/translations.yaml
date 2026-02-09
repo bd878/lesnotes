@@ -166,6 +166,34 @@ paths:
                 - $ref: '#/components/schemas/serverError'
 # END READ
 
+# LIST
+  /translations/v2/list:
+    post:
+      summary: List message translations
+      description: |
+        List all available message translations
+      operationId: listTranslationsJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/listTranslationsJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: '#/commponents/schmas/listTranslationsOK'
+
+        "4XX":
+          description: error 
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/serverError'
+# END LIST
+
 # DELETE
   /translations/v1/delete:
     parameters:
@@ -284,6 +312,47 @@ components:
         response:
           - $ref: '#/components/schemas/translation'
 # END READ
+
+# LIST
+    listTranslationsJson:
+      type: object
+      properties:
+        token:
+          type: string
+          default: ""
+          required: true
+        req:
+          type: object
+          properties:
+            lang:
+              type: string
+              required: true
+              example: "de"
+            message:
+              type: integer
+              required: true
+              example: 123
+
+    listTranslationsOK:
+      type: object
+      properties:
+        status:
+          type: string
+          default: "ok"
+        translations:
+          type: object
+          properties:
+            lang:
+              type: string
+              required: true
+            title:
+              type: string
+              required: false
+            created_at:
+              type: number
+            updated_at:
+              type: number
+# END LIST
 
 # SEND
     sendTranslation:

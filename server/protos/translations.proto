@@ -9,6 +9,7 @@ service Translations {
 	rpc UpdateTranslation(UpdateTranslationRequest) returns (UpdateTranslationResponse) {}
 	rpc DeleteTranslation(DeleteTranslationRequest) returns (DeleteTranslationResponse) {}
 	rpc ReadTranslation(ReadTranslationRequest) returns (ReadTranslationResponse) {}
+	rpc ListTranslations(ListTranslationsRequest) returns (ListTranslationsResponse) {}
 }
 
 message Translation {
@@ -18,6 +19,14 @@ message Translation {
 	string    title = 4;
 	int64     created_at = 5;
 	int64     updated_at = 6;
+}
+
+message TranslationPreview {
+	int64     message_id = 1;
+	string    lang = 2;
+	string    title = 3;
+	int64     created_at = 4;
+	int64     updated_at = 5;
 }
 
 message SaveTranslationRequest {
@@ -54,4 +63,13 @@ message ReadTranslationRequest {
 
 message ReadTranslationResponse {
 	Translation translation = 1;
+}
+
+message ListTranslationsRequest {
+	int64     message_id = 1;
+	string    lang = 2;
+}
+
+message ListTranslationsResponse {
+	repeated TranslationPreview translations = 1;
 }
