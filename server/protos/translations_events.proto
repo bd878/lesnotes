@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package translations_events.v1;
+
+option go_package = "github.com/bd878/gallery/server/api";
+
+message TranslationCreated {
+	int64    message_id = 1;
+	string   lang = 2;
+	string   text = 3;
+	string   title = 4;
+}
+
+message TranslationDeleted {
+	int64    message_id = 1;
+	string   lang = 2;
+}
+
+message TranslationUpdated {
+	int64    message_id = 1;
+	string   lang = 2;
+	optional string text = 3;
+	optional string title = 4;
+}

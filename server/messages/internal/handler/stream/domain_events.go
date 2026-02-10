@@ -29,6 +29,10 @@ func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.Event], hand
 		domain.MessagesPrivateEvent,
 		domain.MessagesPublishEvent,
 		domain.MessageUpdatedEvent,
+
+		domain.TranslationCreatedEvent,
+		domain.TranslationDeletedEvent,
+		domain.TranslationUpdatedEvent,
 	)
 }
 
@@ -46,6 +50,13 @@ func (h domainHandler[T]) HandleEvent(ctx context.Context, event T) error {
 		return h.onMessagesPrivate(ctx, event)
 	case domain.MessagesPublishEvent:
 		return h.onMessagesPublish(ctx, event)
+
+	case domain.TranslationCreatedEvent:
+		return h.onTranslationCreated(ctx, event)
+	case domain.TranslationUpdatedEvent:
+		return h.onTranslationUpdated(ctx, event)
+	case domain.TranslationDeletedEvent:
+		return h.onTranslationDeleted(ctx, event)
 	}
 	return nil
 }
@@ -120,4 +131,47 @@ func (h domainHandler[T]) onMessagesPublish(ctx context.Context, event ddd.Event
 	}
 
 	return h.publisher.Publish(ctx, events.MessagesChannel, am.NewRawMessage(event.ID(), events.MessagesPublishEvent, data))
+}
+
+func (h domainHandler[T]) onTranslationCreated(ctx context.Context, event ddd.Event) error {
+	payload := event.Payload().(*domain.TranslationCreated)
+	data, err := proto.Marshal(&api.TranslationCreated{
+		MessageId:    payload.MessageID,
+		Lang:         payload.Lang,
+		Text:         payload.Text,
+		Title:        payload.Title,
+	})
+	if err != nil {
+		return err
+	}
+
+	return h.publisher.Publish(ctx, events.TranslationsChannel, am.NewRawMessage(event.ID(), events.TranslationCreatedEvent, data))
+}
+
+func (h domainHandler[T]) onTranslationDeleted(ctx context.Context, event ddd.Event) error {
+	payload := event.Payload().(*domain.TranslationDeleted)
+	data, err := proto.Marshal(&api.TranslationDeleted{
+		MessageId:     payload.MessageID,
+		Lang:          payload.Lang,
+	})
+	if err != nil {
+		return err
+	}
+
+	return h.publisher.Publish(ctx, events.TranslationsChannel, am.NewRawMessage(event.ID(), events.TranslationDeletedEvent, data))
+}
+
+func (h domainHandler[T]) onTranslationUpdated(ctx context.Context, event ddd.Event) error {
+	payload := event.Payload().(*domain.TranslationUpdated)
+	data, err := proto.Marshal(&api.TranslationUpdated{
+		MessageId:        payload.MessageID,
+		Lang:             payload.Lang,
+		Text:             payload.Text,
+		Title:            payload.Title,
+	})
+	if err != nil {
+		return err
+	}
+
+	return h.publisher.Publish(ctx, events.TranslationsChannel, am.NewRawMessage(event.ID(), events.TranslationUpdatedEvent, data))
 }

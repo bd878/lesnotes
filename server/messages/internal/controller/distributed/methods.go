@@ -224,8 +224,16 @@ func (m *DistributedMessages) SaveTranslation(ctx context.Context, messageID int
 	}
 
 	_, err = m.apply(ctx, AppendTranslationRequest, cmd)
+	if err != nil {
+		return
+	}
 
-	return
+	event, err := domain.CreateTranslation(messageID, lang, title, text)
+	if err != nil {
+		return err
+	}
+
+	return m.publisher.Publish(context.Background(), event)
 }
 
 func (m *DistributedMessages) UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string) (err error) {
@@ -243,8 +251,16 @@ func (m *DistributedMessages) UpdateTranslation(ctx context.Context, messageID i
 	}
 
 	_, err = m.apply(ctx, UpdateTranslationRequest, cmd)
+	if err != nil {
+		return
+	}
 
-	return
+	event, err := domain.UpdateTranslation(messageID, lang, title, text)
+	if err != nil {
+		return err
+	}
+
+	return m.publisher.Publish(context.Background(), event)
 }
 
 func (m *DistributedMessages) DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error) {
@@ -259,8 +275,16 @@ func (m *DistributedMessages) DeleteTranslation(ctx context.Context, messageID i
 	}
 
 	_, err = m.apply(ctx, DeleteTranslationRequest, cmd)
+	if err != nil {
+		return
+	}
 
-	return
+	event, err := domain.DeleteTranslation(messageID, lang)
+	if err != nil {
+		return err
+	}
+
+	return m.publisher.Publish(context.Background(), event)
 }
 
 // TODO: pass one userID only, for public messages create ReadPublicMessage request
