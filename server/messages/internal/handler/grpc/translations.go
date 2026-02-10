@@ -8,7 +8,7 @@ import (
 )
 
 type TranslationsController interface {
-	SaveTranslation(ctx context.Context, messageID int64, lang, title, text string) (err error)
+	SaveTranslation(ctx context.Context, userID, messageID int64, lang, title, text string) (err error)
 	UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string) (err error)
 	DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error)
 	ReadTranslation(ctx context.Context, userID, messageID int64, lang string, name string) (result *model.Translation, err error)
@@ -27,7 +27,7 @@ func NewTranslationsHandler(ctrl TranslationsController) *TranslationsHandler {
 }
 
 func (h *TranslationsHandler) SaveTranslation(ctx context.Context, req *api.SaveTranslationRequest) (resp *api.SaveTranslationResponse, err error) {
-	err = h.controller.SaveTranslation(ctx, req.MessageId, req.Lang, req.Title, req.Text)
+	err = h.controller.SaveTranslation(ctx, req.UserId, req.MessageId, req.Lang, req.Title, req.Text)
 
 	resp = &api.SaveTranslationResponse{}
 

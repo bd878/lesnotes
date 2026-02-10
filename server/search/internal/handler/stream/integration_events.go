@@ -36,19 +36,28 @@ type FilesController interface {
 	DeleteFile(ctx context.Context, id, userID int64) error
 }
 
+type TranslationsController interface {
+	SaveTranslation(ctx context.Context, userID, messageID int64, lang, title, text string) error
+	DeleteTranslation(ctx context.Context, messageID int64, lang string) error
+	UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string) error
+}
+
 type integrationHandlers struct {
-	messages MessagesController
-	threads  ThreadsController
-	files    FilesController
+	messages       MessagesController
+	threads        ThreadsController
+	files          FilesController
+	translations   TranslationsController
 }
 
 var _ am.RawMessageHandler = (*integrationHandlers)(nil)
 
-func NewIntegrationEventHandlers(messages MessagesController, threads ThreadsController, files FilesController) am.RawMessageHandler {
+func NewIntegrationEventHandlers(messages MessagesController, threads ThreadsController,
+	files FilesController, translations TranslationsController) am.RawMessageHandler {
 	return integrationHandlers{
-		messages: messages,
-		threads:  threads,
-		files:    files,
+		messages:       messages,
+		translations:   translations,
+		threads:        threads,
+		files:          files,
 	}
 }
 
@@ -64,6 +73,11 @@ func RegisterIntegrationEventHandlers(subscriber am.RawMessageSubscriber, handle
 	}
 
 	err = subscriber.Subscribe(filesevents.FilesChannel, handlers)
+	if err != nil {
+		return
+	}
+
+	err = subscriber.Subscribe(messageevents.TranslationsChannel, handlers)
 	if err != nil {
 		return
 	}
@@ -107,6 +121,13 @@ func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingM
 		return h.handleFilePublished(ctx, msg)
 	case filesevents.FilePrivatedEvent:
 		return h.handleFilePrivated(ctx, msg)
+
+	case messageevents.TranslationCreatedEvent:
+		return h.handleTranslationCreated(ctx, msg)
+	case messageevents.TranslationDeletedEvent:
+		return h.handleTranslationDeleted(ctx, msg)
+	case messageevents.TranslationUpdatedEvent:
+		return h.handleTranslationUpdated(ctx, msg)
 	}
 
 	return nil
@@ -245,4 +266,31 @@ func (h integrationHandlers) handleFilePrivated(ctx context.Context, msg am.Inco
 	}
 
 	return h.files.PrivateFile(ctx, m.GetId(), m.GetUserId())
+}
+
+func (h integrationHandlers) handleTranslationCreated(ctx context.Context, msg am.IncomingMessage) error {
+	m := &api.TranslationCreated{}
+	if err := proto.Unmarshal(msg.Data(), m); err != nil {
+		return err
+	}
+
+	return h.translations.SaveTranslation(ctx, m.GetUserId(), m.GetMessageId(), m.GetLang(), m.GetTitle(), m.GetText())
+}
+
+func (h integrationHandlers) handleTranslationDeleted(ctx context.Context, msg am.IncomingMessage) error {
+	m := &api.TranslationDeleted{}
+	if err := proto.Unmarshal(msg.Data(), m); err != nil {
+		return err
+	}
+
+	return h.translations.DeleteTranslation(ctx, m.GetMessageId(), m.GetLang())
+}
+
+func (h integrationHandlers) handleTranslationUpdated(ctx context.Context, msg am.IncomingMessage) error {
+	m := &api.TranslationUpdated{}
+	if err := proto.Unmarshal(msg.Data(), m); err != nil {
+		return err
+	}
+
+	return h.translations.UpdateTranslation(ctx, m.GetMessageId(), m.GetLang(), m.Title, m.Text)
 }

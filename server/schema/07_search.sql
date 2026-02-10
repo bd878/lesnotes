@@ -15,8 +15,6 @@ CREATE TABLE IF NOT EXISTS search.messages
 	PRIMARY KEY(id)
 );
 
-CREATE INDEX IF NOT EXISTS search_messages_text ON search.messages(text);
-
 CREATE TRIGGER created_at_search_messages_trgr BEFORE UPDATE ON search.messages FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
 CREATE TRIGGER updated_at_search_messages_trgr BEFORE UPDATE ON search.messages FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 
@@ -32,8 +30,6 @@ CREATE TABLE IF NOT EXISTS search.threads
 	updated_at   timestamptz  NOT NULL DEFAULT NOW(),
 	PRIMARY KEY(id)
 );
-
-CREATE INDEX IF NOT EXISTS search_threads_description ON search.threads(description);
 
 CREATE TRIGGER created_at_search_threads_trgr BEFORE UPDATE ON search.threads FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
 CREATE TRIGGER updated_at_search_threads_trgr BEFORE UPDATE ON search.threads FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
@@ -52,10 +48,23 @@ CREATE TABLE IF NOT EXISTS search.files
 	PRIMARY KEY(id)
 );
 
-CREATE INDEX IF NOT EXISTS search_files_name ON search.files(name);
-
 CREATE TRIGGER created_at_search_files_trgr BEFORE UPDATE ON search.files FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
 CREATE TRIGGER updated_at_search_files_trgr BEFORE UPDATE ON search.files FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
+
+CREATE TABLE IF NOT EXISTS search.translations
+(
+	message_id    bigint        NOT NULL,
+	user_id       bigint        NOT NULL,
+	lang          VARCHAR(8)    NOT NULL,
+	text          TEXT          NOT NULL DEFAULT '',
+	title         TEXT          NOT NULL DEFAULT '',
+	created_at    timestamptz   NOT NULL DEFAULT NOW(),
+	updated_at    timestamptz   NOT NULL DEFAULT NOW(),
+	PRIMARY KEY(message_id, lang)
+);
+
+CREATE TRIGGER created_at_translations_trgr BEFORE UPDATE ON search.translations FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
+CREATE TRIGGER updated_at_translations_trgr BEFORE UPDATE ON search.translations FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 
 GRANT USAGE ON SCHEMA search TO lesnotes_admin;
 GRANT INSERT, UPDATE, DELETE, SELECT, TRUNCATE ON ALL TABLES IN SCHEMA search TO lesnotes_admin;

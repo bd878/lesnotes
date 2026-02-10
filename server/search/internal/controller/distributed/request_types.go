@@ -20,4 +20,8 @@ const (
 	DeleteFileRequest
 	PublishFileRequest
 	PrivateFileRequest
+
+	AppendTranslationRequest
+	DeleteTranslationRequest
+	UpdateTranslationRequest
 )

@@ -17,10 +17,11 @@ import (
  */
 
 type snapshot struct {
-	tarFile         *os.File
-	messagesFile    *os.File
-	filesFile       *os.File
-	threadsFile     *os.File
+	tarFile               *os.File
+	messagesFile          *os.File
+	filesFile             *os.File
+	threadsFile           *os.File
+	translationsFile      *os.File
 }
 
 func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {
@@ -39,6 +40,11 @@ func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {
 	}
 
 	s.threadsFile, err = os.CreateTemp("", "threads_*.bin")
+	if err != nil {
+		return nil, err
+	}
+
+	s.translationsFile, err = os.CreateTemp("", "translations_*.bin")
 	if err != nil {
 		return nil, err
 	}
@@ -72,6 +78,15 @@ func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {
 	err = f.threadsRepo.Dump(context.Background(), threadsBuf)
 	if err != nil {
 		logger.Errorw("failed to dump threads repo", "error", err)
+		return nil, err
+	}
+
+	translationsBuf := bufio.NewWriter(s.translationsFile)
+	defer translationsBuf.Flush()
+
+	err = f.translationsRepo.Dump(context.Background(), translationsBuf)
+	if err != nil {
+		logger.Errorw("failed to dump translations repo", "error", err)
 		return nil, err
 	}
 
@@ -125,6 +140,17 @@ func (f *fsm) Restore(reader io.ReadCloser) (err error) {
 			if err != nil {
 				return err
 			}
+		} else if strings.Contains(hdr.Name, "translations") {
+			err = f.translationsRepo.Truncate(context.Background())
+			if err != nil {
+				logger.Errorw("translations repo truncate returned error", "error", err)
+				return err
+			}
+
+			err = f.translationsRepo.Restore(context.Background(), tr)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -164,6 +190,16 @@ func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
 	}
 
 	_, err = s.filesFile.Seek(0, os.SEEK_SET)
+	if err != nil {
+		return
+	}
+
+	err = s.translationsFile.Sync()
+	if err != nil {
+		return
+	}
+
+	_, err = s.translationsFile.Seek(0, os.SEEK_SET)
 	if err != nil {
 		return
 	}
@@ -258,6 +294,36 @@ func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
 
 	logger.Debugw("copied threads bytes to tar writer", "bytes", n)
 
+	// write translations to tar
+	translationsSize, err := fileSize(s.translationsFile)
+	if err != nil {
+		return err
+	}
+
+	logger.Debugw("persisting", "translations size", translationsSize)
+
+	translationsHdr := &tar.Header{
+		Name: s.translationsFile.Name(),
+		Mode: 0600,
+		Size: translationsSize,
+	}
+
+	err = tw.WriteHeader(translationsHdr)
+	if err != nil {
+		return
+	}
+
+	n, err = io.Copy(tw, s.translationsFile)
+	if err != nil {
+		return
+	}
+
+	if err = tw.Flush(); err != nil {
+		return
+	}
+
+	logger.Debugw("copied translations bytes to tar writer", "bytes", n)
+
 	// dump tar to sink
 	if err = tw.Close(); err != nil {
 		return
@@ -310,6 +376,10 @@ func (s *snapshot) Release() {
 
 	if err := os.Remove(s.threadsFile.Name()); err != nil {
 		logger.Errorw("cannot remove threads file", "error", err)
+	}
+
+	if err := os.Remove(s.translationsFile.Name()); err != nil {
+		logger.Errorw("cannot remove translations file", "error", err)
 	}
 }
 

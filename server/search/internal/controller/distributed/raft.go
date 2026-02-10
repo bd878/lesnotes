@@ -28,15 +28,17 @@ type Config struct {
 }
 
 type Distributed struct {
-	conf            Config
-	raft            *raft.Raft
-	snapshotStore   raft.SnapshotStore
-	messagesRepo    MessagesRepository
-	filesRepo       FilesRepository
-	threadsRepo     ThreadsRepository
+	conf                Config
+	raft                *raft.Raft
+	snapshotStore       raft.SnapshotStore
+	messagesRepo        MessagesRepository
+	filesRepo           FilesRepository
+	threadsRepo         ThreadsRepository
+	translationsRepo    TranslationsRepository
 }
 
-func New(conf Config, messagesRepo MessagesRepository, filesRepo FilesRepository, threadsRepo ThreadsRepository) (m *Distributed, err error) {
+func New(conf Config, messagesRepo MessagesRepository, filesRepo FilesRepository,
+	threadsRepo ThreadsRepository, translationsRepo TranslationsRepository) (m *Distributed, err error) {
 	if conf.RetainSnapshots == 0 {
 		conf.RetainSnapshots = 1
 	}
@@ -50,10 +52,11 @@ func New(conf Config, messagesRepo MessagesRepository, filesRepo FilesRepository
 	}
 
 	m = &Distributed{
-		conf:          conf,
-		messagesRepo:  messagesRepo,
-		filesRepo:     filesRepo,
-		threadsRepo:   threadsRepo,
+		conf:                  conf,
+		messagesRepo:          messagesRepo,
+		filesRepo:             filesRepo,
+		threadsRepo:           threadsRepo,
+		translationsRepo:      translationsRepo,
 	}
 
 	err = m.setupRaft()
@@ -63,9 +66,10 @@ func New(conf Config, messagesRepo MessagesRepository, filesRepo FilesRepository
 
 func (m *Distributed) setupRaft() error {
 	fsm := &fsm{
-		messagesRepo: m.messagesRepo,
-		filesRepo:    m.filesRepo,
-		threadsRepo:  m.threadsRepo,
+		messagesRepo:        m.messagesRepo,
+		filesRepo:           m.filesRepo,
+		threadsRepo:         m.threadsRepo,
+		translationsRepo:    m.translationsRepo,
 	}
 
 	raftPath := filepath.Join(m.conf.DataDir, "raft")

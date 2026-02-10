@@ -9,6 +9,7 @@ message TranslationCreated {
 	string   lang = 2;
 	string   text = 3;
 	string   title = 4;
+	int64    user_id = 5;
 }
 
 message TranslationDeleted {

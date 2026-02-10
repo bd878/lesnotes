@@ -92,7 +92,7 @@ func (h *Handler) SendTranslationJsonAPI(w http.ResponseWriter, req *http.Reques
 		return
 	}
 
-	err = h.translationsController.SaveTranslation(req.Context(), request.MessageID, request.Lang, request.Title, request.Text)
+	err = h.translationsController.SaveTranslation(req.Context(), user.ID, request.MessageID, request.Lang, request.Title, request.Text)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

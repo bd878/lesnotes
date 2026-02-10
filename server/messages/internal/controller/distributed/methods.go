@@ -210,8 +210,8 @@ func (m *DistributedMessages) PrivateMessages(ctx context.Context, ids []int64, 
 	return m.publisher.Publish(context.Background(), event)
 }
 
-func (m *DistributedMessages) SaveTranslation(ctx context.Context, messageID int64, lang, title, text string) (err error) {
-	logger.Debugw("save translation", "message_id", messageID, "lang", lang, "title", title, "text", text)
+func (m *DistributedMessages) SaveTranslation(ctx context.Context, userID, messageID int64, lang, title, text string) (err error) {
+	logger.Debugw("save translation", "user_id", userID, "message_id", messageID, "lang", lang, "title", title, "text", text)
 
 	cmd, err := proto.Marshal(&AppendTranslationCommand{
 		MessageId:    messageID,
@@ -228,7 +228,7 @@ func (m *DistributedMessages) SaveTranslation(ctx context.Context, messageID int
 		return
 	}
 
-	event, err := domain.CreateTranslation(messageID, lang, title, text)
+	event, err := domain.CreateTranslation(userID, messageID, lang, title, text)
 	if err != nil {
 		return err
 	}

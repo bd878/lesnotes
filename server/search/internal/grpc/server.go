@@ -29,19 +29,20 @@ import (
 )
 
 type Config struct {
-	Addr                string
-	PGConn              string
-	MessagesTableName   string
-	FilesTableName      string
-	ThreadsTableName    string
-	NodeName            string
-	RaftLogLevel        string
-	RaftBootstrap       bool
-	DataPath            string
-	RaftServers         []string
-	SerfAddr            string
-	SerfJoinAddrs       []string
-	NatsAddr            string
+	Addr                    string
+	PGConn                  string
+	MessagesTableName       string
+	FilesTableName          string
+	ThreadsTableName        string
+	TranslationsTableName   string
+	NodeName                string
+	RaftLogLevel            string
+	RaftBootstrap           bool
+	DataPath                string
+	RaftServers             []string
+	SerfAddr                string
+	SerfJoinAddrs           []string
+	NatsAddr                string
 }
 
 type Server struct {
@@ -107,6 +108,7 @@ func (s *Server) setupRaft() (err error) {
 	messagesRepo := repository.NewMessagesRepository(s.pool, s.conf.MessagesTableName)
 	filesRepo := repository.NewFilesRepository(s.pool, s.conf.FilesTableName)
 	threadsRepo := repository.NewThreadsRepository(s.pool, s.conf.ThreadsTableName)
+	translationsRepo := repository.NewTranslationsRepository(s.pool, s.conf.TranslationsTableName)
 
 	raftLogLevel := hclog.Error.String()
 	switch s.conf.RaftLogLevel {
@@ -137,14 +139,14 @@ func (s *Server) setupRaft() (err error) {
 		Bootstrap:   s.conf.RaftBootstrap,
 		DataDir:     s.conf.DataPath,
 		Servers:     s.conf.RaftServers,
-	}, messagesRepo, filesRepo, threadsRepo)
+	}, messagesRepo, filesRepo, threadsRepo, translationsRepo)
 
 	return
 }
 
 func (s *Server) setupStream() error {
 	return streamhandler.RegisterIntegrationEventHandlers(broker.NewStream(s.nc),
-		streamhandler.NewIntegrationEventHandlers(s.controller, s.controller, s.controller/*TODO: split on messages, threads, files*/))
+		streamhandler.NewIntegrationEventHandlers(s.controller, s.controller, s.controller, s.controller/*TODO: split on messages, threads, files*/))
 }
 
 func (s *Server) setupGRPC() error {

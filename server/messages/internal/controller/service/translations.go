@@ -70,17 +70,18 @@ func (s *TranslationsController) isConnFailed() bool {
 	return false
 }
 
-func (s *TranslationsController) SaveTranslation(ctx context.Context, messageID int64, lang, title, text string) (err error) {
+func (s *TranslationsController) SaveTranslation(ctx context.Context, userID, messageID int64, lang, title, text string) (err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
 		}
 	}
 
-	logger.Debugw("save translation", "message_id", messageID, "lang", lang, "title", title, "text", text)
+	logger.Debugw("save translation", "user_id", userID, "message_id", messageID, "lang", lang, "title", title, "text", text)
 
 	_, err = s.client.SaveTranslation(ctx, &api.SaveTranslationRequest{
 		MessageId:    messageID,
+		UserId:       userID,
 		Lang:         lang,
 		Title:        title,
 		Text:         text,

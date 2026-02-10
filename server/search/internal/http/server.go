@@ -53,6 +53,7 @@ func New(conf Config) *Server {
 	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
 	mux.Handle("/search/v1/messages", middleware.Build(handler.SearchMessages))
 	mux.Handle("/search/v1/files", middleware.Build(handler.SearchFiles))
+	// TODO: search translations
 
 	middleware.NoAuth()
 	mux.Handle("/search/v1/status", middleware.Build(handler.GetStatus))

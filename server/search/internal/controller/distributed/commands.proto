@@ -95,3 +95,23 @@ message PrivateFileCommand {
 	int64     id = 1;
 	int64     user_id = 2;
 }
+
+message AppendTranslationCommand {
+	int64     message_id = 1;
+	int64     user_id = 2;
+	string    lang = 3;
+	string    title = 4;
+	string    text = 5;
+}
+
+message DeleteTranslationCommand {
+	int64     message_id = 1;
+	string    lang = 2;
+}
+
+message UpdateTranslationCommand {
+	int64     message_id = 1;
+	string    lang = 2;
+	optional string title = 3;
+	optional string text = 4;
+}

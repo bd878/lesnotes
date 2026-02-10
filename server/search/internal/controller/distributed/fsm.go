@@ -6,8 +6,8 @@ import (
 
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
-	searchmodel "github.com/bd878/gallery/server/search/pkg/model"
 	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/search/pkg/model"
 )
 
 type RepoConnection interface {
@@ -20,7 +20,7 @@ type MessagesRepository interface {
 	PrivateMessages(ctx context.Context, ids []int64, userID int64) error
 	PublishMessages(ctx context.Context, ids []int64, userID int64) error
 	DeleteMessage(ctx context.Context, id, userID int64) error
-	SearchMessages(ctx context.Context, userID int64, substr string, public int) (list []*searchmodel.Message, err error)
+	SearchMessages(ctx context.Context, userID int64, substr string, public int) (list []*model.Message, err error)
 	Truncate(ctx context.Context) (err error)
 	Dump(ctx context.Context, writer io.Writer) (err error)
 	Restore(ctx context.Context, reader io.Reader) (err error)
@@ -43,7 +43,17 @@ type ThreadsRepository interface {
 	ChangeThreadParent(ctx context.Context, id, userID, parentID int64) error
 	PublishThread(ctx context.Context, id, userID int64) error
 	PrivateThread(ctx context.Context, id, userID int64) error
-	SearchThreads(ctx context.Context, parentID, userID int64) (list []*searchmodel.Thread, err error)
+	SearchThreads(ctx context.Context, parentID, userID int64) (list []*model.Thread, err error)
+	Truncate(ctx context.Context) (err error)
+	Dump(ctx context.Context, writer io.Writer) (err error)
+	Restore(ctx context.Context, reader io.Reader) (err error)
+}
+
+type TranslationsRepository interface {
+	SaveTranslation(ctx context.Context, userID, messageID int64, lang, title, text string) error
+	DeleteTranslation(ctx context.Context, messageID int64, lang string) error
+	UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string) error
+	SearchTranslations(ctx context.Context, userID int64, substr string) (list []*model.Translation, err error)
 	Truncate(ctx context.Context) (err error)
 	Dump(ctx context.Context, writer io.Writer) (err error)
 	Restore(ctx context.Context, reader io.Reader) (err error)
@@ -52,9 +62,10 @@ type ThreadsRepository interface {
 var _ raft.FSM = (*fsm)(nil)
 
 type fsm struct {
-	messagesRepo  MessagesRepository
-	filesRepo     FilesRepository
-	threadsRepo   ThreadsRepository
+	messagesRepo       MessagesRepository
+	filesRepo          FilesRepository
+	threadsRepo        ThreadsRepository
+	translationsRepo   TranslationsRepository
 }
 
 func (f *fsm) Apply(record *raft.Log) interface{} {
@@ -91,6 +102,12 @@ func (f *fsm) Apply(record *raft.Log) interface{} {
 		return f.applyPublishFile(buf[1:])
 	case PrivateFileRequest:
 		return f.applyPrivateFile(buf[1:])
+	case AppendTranslationRequest:
+		return f.applyAppendTranslation(buf[1:])
+	case DeleteTranslationRequest:
+		return f.applyDeleteTranslation(buf[1:])
+	case UpdateTranslationRequest:
+		return f.applyUpdateTranslation(buf[1:])
 	default:
 		logger.Errorw("unknown request type", "type", reqType)
 	}
@@ -200,4 +217,25 @@ func (f *fsm) applyPrivateFile(raw []byte) interface{} {
 	proto.Unmarshal(raw, &cmd)
 
 	return f.filesRepo.PrivateFile(context.Background(), cmd.Id, cmd.UserId)
+}
+
+func (f *fsm) applyAppendTranslation(raw []byte) interface{} {
+	var cmd AppendTranslationCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.translationsRepo.SaveTranslation(context.Background(), cmd.UserId, cmd.MessageId, cmd.Lang, cmd.Title, cmd.Text)
+}
+
+func (f *fsm) applyDeleteTranslation(raw []byte) interface{} {
+	var cmd DeleteTranslationCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.translationsRepo.DeleteTranslation(context.Background(), cmd.MessageId, cmd.Lang)
+}
+
+func (f *fsm) applyUpdateTranslation(raw []byte) interface{} {
+	var cmd UpdateTranslationCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.translationsRepo.UpdateTranslation(context.Background(), cmd.MessageId, cmd.Lang, cmd.Title, cmd.Text)
 }

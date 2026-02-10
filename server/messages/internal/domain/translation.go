@@ -17,6 +17,7 @@ var (
 
 type TranslationCreated struct {
 	MessageID     int64
+	UserID        int64
 	Lang          string
 	Text          string
 	Title         string
@@ -24,8 +25,11 @@ type TranslationCreated struct {
 
 func (TranslationCreated) Key() string { return TranslationCreatedEvent }
 
-func CreateTranslation(messageID int64, lang string, title, text string) (ddd.Event, error) {
+func CreateTranslation(userID, messageID int64, lang string, title, text string) (ddd.Event, error) {
 	if messageID == 0 {
+		return nil, ErrIDRequired
+	}
+	if userID == 0 {
 		return nil, ErrIDRequired
 	}
 	if lang == "" {
@@ -34,6 +38,7 @@ func CreateTranslation(messageID int64, lang string, title, text string) (ddd.Ev
 
 	return ddd.NewEvent(TranslationCreatedEvent, &TranslationCreated{
 		MessageID: messageID,
+		UserID:    userID,
 		Lang:      lang,
 		Text:      text,
 		Title:     title,

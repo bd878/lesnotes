@@ -390,5 +390,71 @@ func (m *Distributed) DeleteFile(ctx context.Context, id, userID int64) (err err
 	return
 }
 
+func (m *Distributed) SaveTranslation(ctx context.Context, userID, messageID int64, lang string, title, text string) (err error) {
+	if !m.isLeader() {
+		return nil
+	}
+
+	logger.Debugw("save translation", "user_id", userID, "message_id", messageID, "lang", lang, "title", title, "text", text)
+
+	cmd, err := proto.Marshal(&AppendTranslationCommand{
+		UserId:      userID,
+		MessageId:   messageID,
+		Lang:        lang,
+		Text:        text,
+		Title:       title,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = m.apply(ctx, AppendTranslationRequest, cmd)
+
+	return
+}
+
+func (m *Distributed) DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error) {
+	if !m.isLeader() {
+		return nil
+	}
+
+	logger.Debugw("delete translation", "message_id", messageID, "lang", lang)
+
+	cmd, err := proto.Marshal(&DeleteTranslationCommand{
+		MessageId:    messageID,
+		Lang:         lang,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = m.apply(ctx, DeleteTranslationRequest, cmd)
+
+	return
+}
+
+func (m *Distributed) UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string) (err error) {
+	if !m.isLeader() {
+		return nil
+	}
+
+	logger.Debugw("update translation", "message_id", messageID, "lang", lang, "title", title, "text", text)
+
+	cmd, err := proto.Marshal(&UpdateTranslationCommand{
+		MessageId:     messageID,
+		Lang:          lang,
+		Title:         title,
+		Text:          text,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = m.apply(ctx, UpdateTranslationRequest, cmd)
+
+	return
+}
+
 // TODO: search threads
 // TODO: search files
+// TODO: search translations

@@ -137,6 +137,7 @@ func (h domainHandler[T]) onTranslationCreated(ctx context.Context, event ddd.Ev
 	payload := event.Payload().(*domain.TranslationCreated)
 	data, err := proto.Marshal(&api.TranslationCreated{
 		MessageId:    payload.MessageID,
+		UserId:       payload.UserID,
 		Lang:         payload.Lang,
 		Text:         payload.Text,
 		Title:        payload.Title,

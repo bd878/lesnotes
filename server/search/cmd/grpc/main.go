@@ -33,19 +33,20 @@ func main() {
 	}))
 
 	server := grpc.New(grpc.Config{
-		Addr:                  cfg.RpcAddr,
-		PGConn:                cfg.PGConn,
-		NodeName:              cfg.NodeName,
-		RaftLogLevel:          cfg.RaftLogLevel,
-		RaftBootstrap:         cfg.RaftBootstrap,
-		DataPath:              cfg.DataPath,
-		MessagesTableName:     cfg.MessagesTableName,
-		FilesTableName:        cfg.FilesTableName,
-		ThreadsTableName:      cfg.ThreadsTableName,
-		RaftServers:           cfg.RaftServers,
-		SerfAddr:              cfg.SerfAddr,
-		SerfJoinAddrs:         cfg.SerfJoinAddrs,
-		NatsAddr:              cfg.NatsAddr,
+		Addr:                       cfg.RpcAddr,
+		PGConn:                     cfg.PGConn,
+		NodeName:                   cfg.NodeName,
+		RaftLogLevel:               cfg.RaftLogLevel,
+		RaftBootstrap:              cfg.RaftBootstrap,
+		DataPath:                   cfg.DataPath,
+		MessagesTableName:          cfg.MessagesTableName,
+		TranslationsTableName:      cfg.TranslationsTableName,
+		FilesTableName:             cfg.FilesTableName,
+		ThreadsTableName:           cfg.ThreadsTableName,
+		RaftServers:                cfg.RaftServers,
+		SerfAddr:                   cfg.SerfAddr,
+		SerfJoinAddrs:              cfg.SerfJoinAddrs,
+		NatsAddr:                   cfg.NatsAddr,
 	})
 
 	if err := server.Run(context.Background()); err != nil {

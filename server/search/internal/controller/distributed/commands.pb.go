@@ -997,6 +997,211 @@ func (x *PrivateFileCommand) GetUserId() int64 {
 	return 0
 }
 
+type AppendTranslationCommand struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	MessageId int64  `protobuf:"varint,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	UserId    int64  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Lang      string `protobuf:"bytes,3,opt,name=lang,proto3" json:"lang,omitempty"`
+	Title     string `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`
+	Text      string `protobuf:"bytes,5,opt,name=text,proto3" json:"text,omitempty"`
+}
+
+func (x *AppendTranslationCommand) Reset() {
+	*x = AppendTranslationCommand{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_search_internal_controller_distributed_commands_proto_msgTypes[15]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AppendTranslationCommand) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AppendTranslationCommand) ProtoMessage() {}
+
+func (x *AppendTranslationCommand) ProtoReflect() protoreflect.Message {
+	mi := &file_search_internal_controller_distributed_commands_proto_msgTypes[15]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AppendTranslationCommand.ProtoReflect.Descriptor instead.
+func (*AppendTranslationCommand) Descriptor() ([]byte, []int) {
+	return file_search_internal_controller_distributed_commands_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *AppendTranslationCommand) GetMessageId() int64 {
+	if x != nil {
+		return x.MessageId
+	}
+	return 0
+}
+
+func (x *AppendTranslationCommand) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *AppendTranslationCommand) GetLang() string {
+	if x != nil {
+		return x.Lang
+	}
+	return ""
+}
+
+func (x *AppendTranslationCommand) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *AppendTranslationCommand) GetText() string {
+	if x != nil {
+		return x.Text
+	}
+	return ""
+}
+
+type DeleteTranslationCommand struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	MessageId int64  `protobuf:"varint,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	Lang      string `protobuf:"bytes,2,opt,name=lang,proto3" json:"lang,omitempty"`
+}
+
+func (x *DeleteTranslationCommand) Reset() {
+	*x = DeleteTranslationCommand{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_search_internal_controller_distributed_commands_proto_msgTypes[16]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *DeleteTranslationCommand) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteTranslationCommand) ProtoMessage() {}
+
+func (x *DeleteTranslationCommand) ProtoReflect() protoreflect.Message {
+	mi := &file_search_internal_controller_distributed_commands_proto_msgTypes[16]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteTranslationCommand.ProtoReflect.Descriptor instead.
+func (*DeleteTranslationCommand) Descriptor() ([]byte, []int) {
+	return file_search_internal_controller_distributed_commands_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *DeleteTranslationCommand) GetMessageId() int64 {
+	if x != nil {
+		return x.MessageId
+	}
+	return 0
+}
+
+func (x *DeleteTranslationCommand) GetLang() string {
+	if x != nil {
+		return x.Lang
+	}
+	return ""
+}
+
+type UpdateTranslationCommand struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	MessageId int64   `protobuf:"varint,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	Lang      string  `protobuf:"bytes,2,opt,name=lang,proto3" json:"lang,omitempty"`
+	Title     *string `protobuf:"bytes,3,opt,name=title,proto3,oneof" json:"title,omitempty"`
+	Text      *string `protobuf:"bytes,4,opt,name=text,proto3,oneof" json:"text,omitempty"`
+}
+
+func (x *UpdateTranslationCommand) Reset() {
+	*x = UpdateTranslationCommand{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_search_internal_controller_distributed_commands_proto_msgTypes[17]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UpdateTranslationCommand) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateTranslationCommand) ProtoMessage() {}
+
+func (x *UpdateTranslationCommand) ProtoReflect() protoreflect.Message {
+	mi := &file_search_internal_controller_distributed_commands_proto_msgTypes[17]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateTranslationCommand.ProtoReflect.Descriptor instead.
+func (*UpdateTranslationCommand) Descriptor() ([]byte, []int) {
+	return file_search_internal_controller_distributed_commands_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *UpdateTranslationCommand) GetMessageId() int64 {
+	if x != nil {
+		return x.MessageId
+	}
+	return 0
+}
+
+func (x *UpdateTranslationCommand) GetLang() string {
+	if x != nil {
+		return x.Lang
+	}
+	return ""
+}
+
+func (x *UpdateTranslationCommand) GetTitle() string {
+	if x != nil && x.Title != nil {
+		return *x.Title
+	}
+	return ""
+}
+
+func (x *UpdateTranslationCommand) GetText() string {
+	if x != nil && x.Text != nil {
+		return *x.Text
+	}
+	return ""
+}
+
 var File_search_internal_controller_distributed_commands_proto protoreflect.FileDescriptor
 
 var file_search_internal_controller_distributed_commands_proto_rawDesc = []byte{
@@ -1093,12 +1298,36 @@ var file_search_internal_controller_distributed_commands_proto_rawDesc = []byte{
 	0x61, 0x74, 0x65, 0x46, 0x69, 0x6c, 0x65, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x12, 0x0e,
 	0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x12, 0x17,
 	0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52,
-	0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x42, 0x48, 0x5a, 0x46, 0x67, 0x69, 0x74, 0x68, 0x75,
-	0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x62, 0x64, 0x38, 0x37, 0x38, 0x2f, 0x67, 0x61, 0x6c, 0x6c,
-	0x65, 0x72, 0x79, 0x2f, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2f, 0x73, 0x65, 0x61, 0x72, 0x63,
-	0x68, 0x2f, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2f, 0x63, 0x6f, 0x6e, 0x74, 0x72,
-	0x6f, 0x6c, 0x6c, 0x65, 0x72, 0x2f, 0x64, 0x69, 0x73, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 0x65,
-	0x64, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x22, 0x90, 0x01, 0x0a, 0x18, 0x41, 0x70, 0x70, 0x65,
+	0x6e, 0x64, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x6c, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x43, 0x6f, 0x6d,
+	0x6d, 0x61, 0x6e, 0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x5f,
+	0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67,
+	0x65, 0x49, 0x64, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12, 0x12, 0x0a, 0x04,
+	0x6c, 0x61, 0x6e, 0x67, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6c, 0x61, 0x6e, 0x67,
+	0x12, 0x14, 0x0a, 0x05, 0x74, 0x69, 0x74, 0x6c, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x05, 0x74, 0x69, 0x74, 0x6c, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x74, 0x65, 0x78, 0x74, 0x18, 0x05,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x74, 0x65, 0x78, 0x74, 0x22, 0x4d, 0x0a, 0x18, 0x44, 0x65,
+	0x6c, 0x65, 0x74, 0x65, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x6c, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x43,
+	0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67,
+	0x65, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x6d, 0x65, 0x73, 0x73,
+	0x61, 0x67, 0x65, 0x49, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x6c, 0x61, 0x6e, 0x67, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x04, 0x6c, 0x61, 0x6e, 0x67, 0x22, 0x94, 0x01, 0x0a, 0x18, 0x55, 0x70,
+	0x64, 0x61, 0x74, 0x65, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x6c, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x43,
+	0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67,
+	0x65, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x6d, 0x65, 0x73, 0x73,
+	0x61, 0x67, 0x65, 0x49, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x6c, 0x61, 0x6e, 0x67, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x04, 0x6c, 0x61, 0x6e, 0x67, 0x12, 0x19, 0x0a, 0x05, 0x74, 0x69, 0x74,
+	0x6c, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x48, 0x00, 0x52, 0x05, 0x74, 0x69, 0x74, 0x6c,
+	0x65, 0x88, 0x01, 0x01, 0x12, 0x17, 0x0a, 0x04, 0x74, 0x65, 0x78, 0x74, 0x18, 0x04, 0x20, 0x01,
+	0x28, 0x09, 0x48, 0x01, 0x52, 0x04, 0x74, 0x65, 0x78, 0x74, 0x88, 0x01, 0x01, 0x42, 0x08, 0x0a,
+	0x06, 0x5f, 0x74, 0x69, 0x74, 0x6c, 0x65, 0x42, 0x07, 0x0a, 0x05, 0x5f, 0x74, 0x65, 0x78, 0x74,
+	0x42, 0x48, 0x5a, 0x46, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x62,
+	0x64, 0x38, 0x37, 0x38, 0x2f, 0x67, 0x61, 0x6c, 0x6c, 0x65, 0x72, 0x79, 0x2f, 0x73, 0x65, 0x72,
+	0x76, 0x65, 0x72, 0x2f, 0x73, 0x65, 0x61, 0x72, 0x63, 0x68, 0x2f, 0x69, 0x6e, 0x74, 0x65, 0x72,
+	0x6e, 0x61, 0x6c, 0x2f, 0x63, 0x6f, 0x6e, 0x74, 0x72, 0x6f, 0x6c, 0x6c, 0x65, 0x72, 0x2f, 0x64,
+	0x69, 0x73, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 0x65, 0x64, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x33,
 }
 
 var (
@@ -1113,7 +1342,7 @@ func file_search_internal_controller_distributed_commands_proto_rawDescGZIP() []
 	return file_search_internal_controller_distributed_commands_proto_rawDescData
 }
 
-var file_search_internal_controller_distributed_commands_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_search_internal_controller_distributed_commands_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
 var file_search_internal_controller_distributed_commands_proto_goTypes = []interface{}{
 	(*AppendMessageCommand)(nil),      // 0: AppendMessageCommand
 	(*UpdateMessageCommand)(nil),      // 1: UpdateMessageCommand
@@ -1130,6 +1359,9 @@ var file_search_internal_controller_distributed_commands_proto_goTypes = []inter
 	(*DeleteFileCommand)(nil),         // 12: DeleteFileCommand
 	(*PublishFileCommand)(nil),        // 13: PublishFileCommand
 	(*PrivateFileCommand)(nil),        // 14: PrivateFileCommand
+	(*AppendTranslationCommand)(nil),  // 15: AppendTranslationCommand
+	(*DeleteTranslationCommand)(nil),  // 16: DeleteTranslationCommand
+	(*UpdateTranslationCommand)(nil),  // 17: UpdateTranslationCommand
 }
 var file_search_internal_controller_distributed_commands_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -1325,14 +1557,51 @@ func file_search_internal_controller_distributed_commands_proto_init() {
 				return nil
 			}
 		}
+		file_search_internal_controller_distributed_commands_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AppendTranslationCommand); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_search_internal_controller_distributed_commands_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*DeleteTranslationCommand); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_search_internal_controller_distributed_commands_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UpdateTranslationCommand); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
+	file_search_internal_controller_distributed_commands_proto_msgTypes[17].OneofWrappers = []interface{}{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_search_internal_controller_distributed_commands_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   15,
+			NumMessages:   18,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
