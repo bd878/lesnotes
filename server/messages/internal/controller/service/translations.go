@@ -147,3 +147,26 @@ func (s *TranslationsController) ReadTranslation(ctx context.Context, userID, me
 
 	return
 }
+
+func (s *TranslationsController) ListTranslations(ctx context.Context, userID, messageID int64, name string) (translations []*model.TranslationPreview, err error) {
+	if s.isConnFailed() {
+		if err = s.setupConnection(); err != nil {
+			return
+		}
+	}
+
+	logger.Debugw("list translations", "user_id", userID, "message_id", messageID, "name", name)
+
+	resp, err := s.client.ListTranslations(ctx, &api.ListTranslationsRequest{
+		UserId:    userID,
+		MessageId: messageID,
+		Name:      name,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	translations = model.MapTranslationPreviewsFromProto(model.TranslationPreviewFromProto, resp.Translations)
+
+	return
+}

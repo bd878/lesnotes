@@ -10,6 +10,14 @@ type (
 		UpdatedAt           int64               `json:"updated_at"`
 	}
 
+	TranslationPreview struct {
+		MessageID           int64               `json:"message"`
+		Lang                string              `json:"lang"`
+		Title               string              `json:"title"`
+		CreatedAt           int64               `json:"created_at"`
+		UpdatedAt           int64               `json:"updated_at"`
+	}
+
 	SendTranslationRequest struct {
 		MessageID           int64               `json:"message"`
 		Lang                string              `json:"lang"`
@@ -49,5 +57,14 @@ type (
 
 	ReadTranslationResponse struct {
 		Translation         *Translation        `json:"translation"`
+	}
+
+	ListTranslationsRequest struct {
+		MessageID           int64               `json:"message"`
+		Name                string              `json:"name,omitempty"`
+	}
+
+	ListTranslationsResponse struct {
+		Translations        []*TranslationPreview      `json:"translations"`
 	}
 )

@@ -67,6 +67,38 @@ func (r *TranslationsRepository) ReadTranslation(ctx context.Context, messageID 
 	return
 }
 
+func (r *TranslationsRepository) ListTranslations(ctx context.Context, messageID int64) (previews []*model.TranslationPreview, err error) {
+	const query = "SELECT lang, title, created_at, updated_at FROM %s WHERE message_id = $1"
+
+	rows, err := r.pool.Query(ctx, r.table(query), messageID)
+	if err != nil {
+		return nil, err
+	}
+
+	previews = make([]*model.TranslationPreview, 0)
+	for rows.Next() {
+		preview := &model.TranslationPreview{
+			MessageID: messageID,
+		}
+
+		var createdAt, updatedAt time.Time
+
+		err = rows.Scan(&preview.Lang, &preview.Title, &createdAt, &updatedAt)
+		if err != nil {
+			return
+		}
+
+		preview.CreatedAt = createdAt.UnixNano()
+		preview.UpdatedAt = updatedAt.UnixNano()
+
+		previews = append(previews, preview)
+	}
+
+	err = rows.Err()
+
+	return
+}
+
 func (r *TranslationsRepository) ReadMessageTranslations(ctx context.Context, messageID int64) (translations []*model.Translation, err error) {
 	const query = "SELECT lang, title, text, created_at, updated_at FROM %s WHERE message_id = $1"
 

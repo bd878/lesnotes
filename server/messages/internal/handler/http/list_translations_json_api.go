@@ -10,7 +10,7 @@ import (
 	server "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) ReadTranslationJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
+func (h *Handler) ListTranslationsJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
 	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
@@ -39,7 +39,7 @@ func (h *Handler) ReadTranslationJsonAPI(w http.ResponseWriter, req *http.Reques
 		return
 	}
 
-	var request model.ReadTranslationRequest
+	var request model.ListTranslationsRequest
 	if err = json.Unmarshal(data, &request); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -66,36 +66,35 @@ func (h *Handler) ReadTranslationJsonAPI(w http.ResponseWriter, req *http.Reques
 		return
 	}
 
-	if request.Lang == "" {
+	if request.MessageID != 0 && request.Name != "" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status: "error",
-			Error:  &server.ErrorCode{
-				Code:    model.CodeNoLang,
-				Explain: "lang field is empty",
+			Status:  "error",
+			Error:   &server.ErrorCode{
+				Code:    server.CodeWrongQuery,
+				Explain: "both message and name params are given",
 			},
 		})
 
 		return
 	}
 
-	// TODO: pass request.Name
-	translation, err := h.translationsController.ReadTranslation(req.Context(), user.ID, request.MessageID, request.Lang)
+	translations, err := h.translationsController.ListTranslations(req.Context(), user.ID, request.MessageID, request.Name)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:  &server.ErrorCode{
 				Code:    model.CodeReadFailed,
-				Explain: "failed to read translation",
+				Explain: "failed to list translations",
 			},
 		})
 
 		return
 	}
 
-	response, err := json.Marshal(model.ReadTranslationResponse{
-		Translation: translation,
+	response, err := json.Marshal(model.ListTranslationsResponse{
+		Translations: translations,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

@@ -40,6 +40,8 @@ func TranslationFromProto(proto *api.Translation) *Translation {
 		Lang:           proto.Lang,
 		Title:          proto.Title,
 		Text:           proto.Text,
+		CreatedAt:      proto.CreatedAt,
+		UpdatedAt:      proto.UpdatedAt,
 	}
 }
 
@@ -49,6 +51,28 @@ func TranslationToProto(translation *Translation) *api.Translation {
 		Lang:           translation.Lang,
 		Title:          translation.Title,
 		Text:           translation.Text,
+		CreatedAt:      translation.CreatedAt,
+		UpdatedAt:      translation.UpdatedAt,
+	}
+}
+
+func TranslationPreviewFromProto(proto *api.TranslationPreview) *TranslationPreview {
+	return &TranslationPreview{
+		MessageID:      proto.MessageId,
+		Lang:           proto.Lang,
+		Title:          proto.Title,
+		CreatedAt:      proto.CreatedAt,
+		UpdatedAt:      proto.UpdatedAt,
+	}
+}
+
+func TranslationPreviewToProto(preview *TranslationPreview) *api.TranslationPreview {
+	return &api.TranslationPreview{
+		MessageId:      preview.MessageID,
+		Lang:           preview.Lang,
+		Title:          preview.Title,
+		CreatedAt:      preview.CreatedAt,
+		UpdatedAt:      preview.UpdatedAt,
 	}
 }
 
@@ -80,6 +104,22 @@ func MapTranslationsFromProto(mapper (func(*api.Translation) *Translation), tran
 	res := make([]*Translation, len(translations))
 	for i, translation := range translations {
 		res[i] = mapper(translation)
+	}
+	return res
+}
+
+func MapTranslationPreviewsToProto(mapper (func(*TranslationPreview) *api.TranslationPreview), previews []*TranslationPreview) []*api.TranslationPreview {
+	res := make([]*api.TranslationPreview, len(previews))
+	for i, preview := range previews {
+		res[i] = mapper(preview)
+	}
+	return res
+}
+
+func MapTranslationPreviewsFromProto(mapper (func(*api.TranslationPreview) *TranslationPreview), previews []*api.TranslationPreview) []*TranslationPreview {
+	res := make([]*TranslationPreview, len(previews))
+	for i, preview := range previews {
+		res[i] = mapper(preview)
 	}
 	return res
 }

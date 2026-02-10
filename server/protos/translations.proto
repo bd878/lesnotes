@@ -67,7 +67,8 @@ message ReadTranslationResponse {
 
 message ListTranslationsRequest {
 	int64     message_id = 1;
-	string    lang = 2;
+	string    name = 2;
+	int64     user_id = 3;
 }
 
 message ListTranslationsResponse {

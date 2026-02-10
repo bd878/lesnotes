@@ -21,6 +21,7 @@ type TranslationsClient interface {
 	UpdateTranslation(ctx context.Context, in *UpdateTranslationRequest, opts ...grpc.CallOption) (*UpdateTranslationResponse, error)
 	DeleteTranslation(ctx context.Context, in *DeleteTranslationRequest, opts ...grpc.CallOption) (*DeleteTranslationResponse, error)
 	ReadTranslation(ctx context.Context, in *ReadTranslationRequest, opts ...grpc.CallOption) (*ReadTranslationResponse, error)
+	ListTranslations(ctx context.Context, in *ListTranslationsRequest, opts ...grpc.CallOption) (*ListTranslationsResponse, error)
 }
 
 type translationsClient struct {
@@ -67,6 +68,15 @@ func (c *translationsClient) ReadTranslation(ctx context.Context, in *ReadTransl
 	return out, nil
 }
 
+func (c *translationsClient) ListTranslations(ctx context.Context, in *ListTranslationsRequest, opts ...grpc.CallOption) (*ListTranslationsResponse, error) {
+	out := new(ListTranslationsResponse)
+	err := c.cc.Invoke(ctx, "/translations.v1.Translations/ListTranslations", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TranslationsServer is the server API for Translations service.
 // All implementations must embed UnimplementedTranslationsServer
 // for forward compatibility
@@ -75,6 +85,7 @@ type TranslationsServer interface {
 	UpdateTranslation(context.Context, *UpdateTranslationRequest) (*UpdateTranslationResponse, error)
 	DeleteTranslation(context.Context, *DeleteTranslationRequest) (*DeleteTranslationResponse, error)
 	ReadTranslation(context.Context, *ReadTranslationRequest) (*ReadTranslationResponse, error)
+	ListTranslations(context.Context, *ListTranslationsRequest) (*ListTranslationsResponse, error)
 	mustEmbedUnimplementedTranslationsServer()
 }
 
@@ -93,6 +104,9 @@ func (UnimplementedTranslationsServer) DeleteTranslation(context.Context, *Delet
 }
 func (UnimplementedTranslationsServer) ReadTranslation(context.Context, *ReadTranslationRequest) (*ReadTranslationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadTranslation not implemented")
+}
+func (UnimplementedTranslationsServer) ListTranslations(context.Context, *ListTranslationsRequest) (*ListTranslationsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListTranslations not implemented")
 }
 func (UnimplementedTranslationsServer) mustEmbedUnimplementedTranslationsServer() {}
 
@@ -179,6 +193,24 @@ func _Translations_ReadTranslation_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Translations_ListTranslations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListTranslationsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TranslationsServer).ListTranslations(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/translations.v1.Translations/ListTranslations",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TranslationsServer).ListTranslations(ctx, req.(*ListTranslationsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Translations_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "translations.v1.Translations",
 	HandlerType: (*TranslationsServer)(nil),
@@ -198,6 +230,10 @@ var _Translations_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReadTranslation",
 			Handler:    _Translations_ReadTranslation_Handler,
+		},
+		{
+			MethodName: "ListTranslations",
+			Handler:    _Translations_ListTranslations_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -46,6 +46,7 @@ type TranslationsRepository interface {
 	DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error)
 	ReadTranslation(ctx context.Context, messageID int64, lang string) (translation *model.Translation, err error)
 	ReadMessageTranslations(ctx context.Context, messageID int64) (translations []*model.Translation, err error)
+	ListTranslations(ctx context.Context, messageID int64) (translations []*model.TranslationPreview, err error)
 	DeleteMessage(ctx context.Context, messageID int64) (err error)
 	Truncate(ctx context.Context) error
 	Dump(ctx context.Context, writer io.Writer) (err error)

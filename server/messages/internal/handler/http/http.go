@@ -27,6 +27,7 @@ type TranslationsController interface {
 	UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string) (err error)
 	DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error)
 	ReadTranslation(ctx context.Context, userID, messageID int64, lang string) (translation *messages.Translation, err error)
+	ListTranslations(ctx context.Context, userID, messageID int64, name string) (translations []*messages.TranslationPreview, err error)
 }
 
 // TODO: move on controller/service level

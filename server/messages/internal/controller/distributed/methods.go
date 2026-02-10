@@ -332,7 +332,7 @@ func (m *DistributedMessages) ReadBatchMessages(ctx context.Context, userID int6
 }
 
 func (m *DistributedMessages) ReadTranslation(ctx context.Context, userID, messageID int64, lang string, name string) (translation *model.Translation, err error) {
-	logger.Debugw("read translation", "user_id", userID, "message_id", messageID, "lang", lang)
+	logger.Debugw("read translation", "user_id", userID, "message_id", messageID, "lang", lang, "name", name)
 
 	message, err := m.messagesRepo.Read(ctx, []int64{userID}, messageID, name)
 	if err != nil {
@@ -350,4 +350,25 @@ func (m *DistributedMessages) ReadTranslation(ctx context.Context, userID, messa
 	}
 
 	return
+}
+
+func (m *DistributedMessages) ListTranslations(ctx context.Context, userID, messageID int64, name string) (translations []*model.TranslationPreview, err error) {
+	logger.Debugw("list translations", "user_id", userID, "message_id", messageID, "name", name)
+
+	message, err := m.messagesRepo.Read(ctx, []int64{userID}, messageID, name)
+	if err != nil {
+		return nil, err
+	}
+
+	// only owner can list translations of his private message
+	if message.Private && (message.UserID != userID) {
+		return nil, errors.New("cannot list private translations")
+	}
+
+	translations, err = m.translationsRepo.ListTranslations(ctx, message.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return	
 }

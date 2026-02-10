@@ -78,6 +78,7 @@ func New(cfg Config) *Server {
 	mux.Handle("/translations/v2/update",  middleware.Build(handler.UpdateTranslationJsonAPI))
 	mux.Handle("/translations/v2/delete",  middleware.Build(handler.DeleteTranslationJsonAPI))
 	mux.Handle("/translations/v2/read",    middleware.Build(handler.ReadTranslationJsonAPI))
+	mux.Handle("/translations/v2/list",    middleware.Build(handler.ListTranslationsJsonAPI))
 
 	server := &Server{
 		Server: &http.Server{

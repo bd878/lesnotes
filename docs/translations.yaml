@@ -324,14 +324,13 @@ components:
         req:
           type: object
           properties:
-            lang:
-              type: string
-              required: true
-              example: "de"
             message:
               type: integer
               required: true
               example: 123
+            name:
+              type: string
+              required: false
 
     listTranslationsOK:
       type: object
@@ -342,6 +341,9 @@ components:
         translations:
           type: object
           properties:
+            message:
+              type: integer
+              required: true
             lang:
               type: string
               required: true
