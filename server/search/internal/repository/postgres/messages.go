@@ -213,9 +213,9 @@ func (r *MessagesRepository) SearchMessages(ctx context.Context, userID int64, s
 			private = false
 		}
 
-		rows, err = tx.Query(ctx, r.table("SELECT id, name, title, text, private FROM %s WHERE user_id = $1 AND private = $2 AND name || ' ' || title || ' ' || text ILIKE $3"), userID, private, "%" + substr + "%")
+		rows, err = tx.Query(ctx, r.table("SELECT id, name, title, text, private FROM %s WHERE user_id = $1 AND private = $2 AND name || ' ' || title || ' ' || text ILIKE $3"), userID, private, "'%" + substr + "%'")
 	} else {
-		rows, err = tx.Query(ctx, r.table("SELECT id, name, title, text, private FROM %s WHERE user_id = $1 AND name || ' ' || title || ' ' || text ILIKE $2"), userID, "%" + substr + "%")
+		rows, err = tx.Query(ctx, r.table("SELECT id, name, title, text, private FROM %s WHERE user_id = $1 AND name || ' ' || title || ' ' || text ILIKE $2"), userID, "'%" + substr + "%'")
 	}
 
 	defer rows.Close()

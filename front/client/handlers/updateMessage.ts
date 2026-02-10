@@ -10,6 +10,7 @@ async function updateMessage(ctx) {
 		form = {}
 	}
 
+	// TODO: file_ids may be one id, not an array
 	const fileIDs = (form.file_ids || []).map(id => parseInt(id) || 0).filter(is.notEmpty)
 
 	const response = await updateMessageJson(ctx.state.token, parseInt(form.id) || 0, form.text, form.title, form.name, fileIDs)

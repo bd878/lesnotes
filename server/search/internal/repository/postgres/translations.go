@@ -47,7 +47,7 @@ func (r *TranslationsRepository) UpdateTranslation(ctx context.Context, messageI
 func (r *TranslationsRepository) SearchTranslations(ctx context.Context, userID int64, substr string) (list []*model.Translation, err error) {
 	const query = "SELECT message_id, lang, text, title FROM %s WHERE user_id = $1 AND text || ' ' || title ILIKE $2"
 
-	rows, err := r.pool.Query(ctx, r.table(query), userID, substr)
+	rows, err := r.pool.Query(ctx, r.table(query), userID, "'%" + substr + "%'")
 	defer rows.Close()
 	if err != nil {
 		return
