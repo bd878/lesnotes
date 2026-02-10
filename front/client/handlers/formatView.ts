@@ -9,6 +9,9 @@ async function formatView(ctx, next) {
 	if (is.notEmpty(ctx.state.thread) && is.notEmpty(ctx.state.thread.description)) {
 		ctx.state.thread.description = ctx.state.thread.description.replaceAll("\r\n", "<br />")
 	}
+	if (is.notEmpty(ctx.state.translation) && is.notEmpty(ctx.state.translation.text)) {
+		ctx.state.translation.text = ctx.state.translation.text.replaceAll("\r\n", "<br />")
+	}
 
 	await next()
 

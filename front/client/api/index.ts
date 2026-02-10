@@ -1,21 +1,26 @@
 import readMessages from './readMessages';
 import readStackJson from './readStackJson';
 import readMessagesJson from './readMessagesJson';
+import readTranslationJson from './readTranslationJson';
+import deleteTranslationJson from './deleteTranslationJson';
 import readPathJson from './readPathJson';
 import readBatchMessagesJson from './readBatchMessagesJson';
 import readMessage from './readMessage';
 import readThreadJson from './readThreadJson';
 import readMessageJson from './readMessageJson';
 import sendMessageJson from './sendMessageJson';
+import sendTranslationJson from './sendTranslationJson';
 import searchMessagesJson from './searchMessagesJson';
 import searchMessagesPathJson from './searchMessagesPathJson';
 import updateMessage from './updateMessage';
 import updateMessageJson from './updateMessageJson';
+import updateTranslationJson from './updateTranslationJson';
 import updateThreadJson from './updateThreadJson';
 import privateThread from './privateThread';
 import privateThreadJson from './privateThreadJson';
 import publishThread from './publishThread';
 import listFilesJson from './listFilesJson';
+import listTranslationsJson from './listTranslationsJson';
 import publishThreadJson from './publishThreadJson';
 import deleteMessage from './deleteMessage';
 import deleteMessageJson from './deleteMessageJson';
@@ -57,12 +62,17 @@ export default {
 	readBatchMessagesJson,
 	readPathJson,
 	readMessageJson,
+	readTranslationJson,
+	deleteTranslationJson,
+	updateTranslationJson,
 	readMessage,
 	readThreadJson,
 	publishThreadJson,
 	privateThreadJson,
 	listFilesJson,
+	listTranslationsJson,
 	sendMessageJson,
+	sendTranslationJson,
 	updateMessage,
 	updateMessageJson,
 	updateThreadJson,

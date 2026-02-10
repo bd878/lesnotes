@@ -1,5 +1,3 @@
-import type { Message } from '../api/models';
-import type { FileWithMime } from '../types';
 import Config from 'config';
 import mustache from 'mustache';
 import api from '../api';
@@ -8,10 +6,9 @@ import { readFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import AbstractBuilder from './abstractBuilder'
 
-class PublicMessageBuilder extends AbstractBuilder {
+class PublicTranslationBuilder extends AbstractBuilder {
 	sidebar            = undefined;
-	filesView          = undefined;
-	messageView        = undefined;
+	translationView    = undefined;
 
 	async addSidebar() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
@@ -26,35 +23,21 @@ class PublicMessageBuilder extends AbstractBuilder {
 		})
 	}
 
-	async addFilesView(files: FileWithMime[]) {
+	async addTranslationView() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/message/mobile/files_view.mustache' : 'templates/message/desktop/files_view.mustache'
+			this.isMobile ? 'templates/translation/mobile/translation_view.mustache' : 'templates/translation/desktop/translation_view.mustache'
 		)), { encoding: 'utf-8' });
 
-		this.filesView = mustache.render(template, {
-			files:    files,
-			imgSrc:   function() { return `/files/v1/read/${this.name}` },
-			fileHref: function() { return `/files/v1/download?id=${this.ID}` },
-		})
+		this.translationView = mustache.render(template, {})
 	}
 
-	async addMessageView(message: Message) {
-		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/message/mobile/message_view.mustache' : 'templates/message/desktop/message_view.mustache'
-		)), { encoding: 'utf-8' });
-
-		this.messageView = mustache.render(template, {
-			message: message,
-		})
-	}
-
-	async build(message?: Message) {
+	async build() {
 		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
 		const layout = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/layout/mobile/layout.mustache' : 'templates/layout/desktop/layout.mustache'
 		)), { encoding: 'utf-8' });
 		const content = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/message/mobile/message.mustache' : 'templates/message/desktop/message.mustache'
+			this.isMobile ? 'templates/translation/mobile/translation.mustache' : 'templates/translation/desktop/translation.mustache'
 		)), { encoding: 'utf-8' });
 
 		const theme = this.theme
@@ -78,16 +61,13 @@ class PublicMessageBuilder extends AbstractBuilder {
 		}, {
 			footer:    this.footer,
 			content:   mustache.render(content, {
-				message:     message,
 			}, {
-				settings:     this.settings,
-				sidebar:      this.sidebar,
-				filesView:    this.filesView,
-				messageView:  this.messageView,
-				translations: this.translations,
+				settings:         this.settings,
+				sidebar:          this.sidebar,
+				translationView:  this.translationView,
 			})
 		})
 	}
 }
 
-export default PublicMessageBuilder
+export default PublicTranslationBuilder

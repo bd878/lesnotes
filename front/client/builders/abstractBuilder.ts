@@ -1,3 +1,4 @@
+import type { TranslationPreview } from '../api/models';
 import Config from 'config';
 import i18n from '../i18n';
 import mustache from 'mustache';
@@ -12,6 +13,10 @@ abstract class AbstractBuilder {
 	path:          string = "";
 	theme:         string = "";
 	fontSize:      string = "";
+
+	footer        = undefined;
+	settings      = undefined;
+	translations  = undefined;
 
 	constructor(isMobile: boolean, lang: string = "en", theme: string = "light", fontSize: string = "medium", search: string = "", path: string = "") {
 		this.search = search
@@ -28,7 +33,6 @@ abstract class AbstractBuilder {
 
 	abstract build();
 
-	footer = undefined;
 	async addFooter() {
 		const template = await readFile(resolve(join(Config.get("basedir"),
 			this.isMobile ? 'templates/footer/mobile/footer.mustache' : 'templates/footer/desktop/footer.mustache'
@@ -41,7 +45,6 @@ abstract class AbstractBuilder {
 		})
 	}
 
-	settings = undefined;
 	async addSettings() {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/settings/mobile/settings.mustache' : 'templates/settings/desktop/settings.mustache'
@@ -69,6 +72,21 @@ abstract class AbstractBuilder {
 			fontHref:        function() { const params = new URLSearchParams(search); params.set("size",  this.font);  return "?" + params.toString(); },
 			themeHref:       function() { const params = new URLSearchParams(search); params.set("theme", this.theme); return "?" + params.toString(); },
 			langHref:        function() { const params = new URLSearchParams(search); params.set("lang",  this.lang);  return "?" + params.toString(); },
+		})
+	}
+
+	async addTranslations(previews: TranslationPreview[]) {
+		const template = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/translations/mobile/translations.mustache' : 'templates/translations/desktop/translations.mustache'
+		)), { encoding: 'utf-8' });
+
+		const search = this.search
+
+		this.translations = mustache.render(template, {
+			newTranslation:        this.i18n("newTranslation"),
+			newTranslationHref:    function() { return `/editor/messages/${this.messageID}/lang` },
+			translationHref:       function() { return `/messages/${this.messageID}/${this.lang}` },
+			translations:          previews,
 		})
 	}
 }

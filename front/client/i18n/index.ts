@@ -44,6 +44,7 @@ const texts = {
 		defaultFile: "--Select files (use ctrl to select multiple)--",
 		filesSummary: "Files",
 		goBack: "Back",
+		newTranslation: "New translation",
 
 		terms: "Terms",
 		contact: "Contact",
@@ -95,6 +96,7 @@ const texts = {
 		defaultFile: "--Выберите файлы (ctrl для выбора нескольких)--",
 		filesSummary: "Файлы",
 		goBack: "Назад",
+		newTranslation: "Добавить перевод",
 
 		terms: "Политика",
 		contact: "Контакты",
@@ -146,6 +148,7 @@ const texts = {
 		defaultFile: "--Wählen die dateien (ctrl für mehrerer)--",
 		filesSummary: "Dateien",
 		goBack: "Zurück",
+		newTranslation: "Übersetzung hinzufügen",
 
 		terms: "",
 		contact: "",
@@ -197,6 +200,7 @@ const texts = {
 		defaultFile: "--Choisissez les fichier, svp (ctrl pour plusieurs)--",
 		filesSummary: "Fichier",
 		goBack: "Revenir",
+		newTranslation: "Nouvelle traduction",
 
 		terms: "",
 		contact: "",

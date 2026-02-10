@@ -1,0 +1,15 @@
+<div class="flex flex-row justify-between">
+	<ul class="flex flex-row">
+		{{#translations}}
+			<li>
+				<a href="{{translationHref}}" target="_self" class="hover:text-blue-600 flex items-center dark:hover:text-white underline cursor-pointer mr-2">{{lang}}</a>
+			</li>
+		{{/translations}}
+	</ul>
+
+	<div>
+		<a href="{{newTranslationHref}}" target="_self" class="hover:text-blue-600 flex items-center dark:hover:text-white underline cursor-pointer mr-2">
+			+ {{newTranslation}}
+		</a>
+	</div>
+</div>

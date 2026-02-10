@@ -11,22 +11,25 @@ import { resolve, join } from 'node:path';
 import AbstractBuilder from './abstractBuilder'
 
 class HomeBuilder extends AbstractBuilder {
-	messageEditForm = undefined;
-	messageView     = undefined;
-	newMessageForm  = undefined;
-	threadView      = undefined;
-	threadEditForm  = undefined;
-	pagination      = undefined;
-	filesSelector   = undefined;
-	filesForm       = undefined;
-	filesView       = undefined;
-	filesList       = undefined;
-	messagesStack   = undefined;
-	searchForm      = undefined;
-	logout          = undefined;
-	sidebar         = undefined;
-	controlPanel    = undefined;
-	navigation      = undefined;
+	messageEditForm      = undefined;
+	messageView          = undefined;
+	newMessageForm       = undefined;
+	newTranslationForm   = undefined;
+	translationEditForm  = undefined;
+	translationView      = undefined;
+	threadView           = undefined;
+	threadEditForm       = undefined;
+	pagination           = undefined;
+	filesSelector        = undefined;
+	filesForm            = undefined;
+	filesView            = undefined;
+	filesList            = undefined;
+	messagesStack        = undefined;
+	searchForm           = undefined;
+	logout               = undefined;
+	sidebar              = undefined;
+	controlPanel         = undefined;
+	navigation           = undefined;
 
 	async addMessagesStack(stack: ThreadMessages[]) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
@@ -189,20 +192,24 @@ class HomeBuilder extends AbstractBuilder {
 		}, {
 			footer: this.footer,
 			content: mustache.render(home, {}, {
-				settings:        this.settings,
-				messageEditForm: this.messageEditForm,
-				messageView:     this.messageView,
-				threadView:      this.threadView,
-				threadEditForm:  this.threadEditForm,
-				newMessageForm:  this.newMessageForm,
-				messagesStack:   this.messagesStack,
-				sidebar:         this.sidebar,
-				pagination:      this.pagination,
-				filesList:       this.filesList,
-				filesForm:       this.filesForm,
-				filesView:       this.filesView,
-				controlPanel:    this.controlPanel,
-				navigation:      this.navigation,
+				settings:             this.settings,
+				messageEditForm:      this.messageEditForm,
+				messageView:          this.messageView,
+				threadView:           this.threadView,
+				threadEditForm:       this.threadEditForm,
+				newMessageForm:       this.newMessageForm,
+				newTranslationForm:   this.newTranslationForm,
+				translationEditForm:  this.translationEditForm,
+				translationView:      this.translationView,
+				messagesStack:        this.messagesStack,
+				sidebar:              this.sidebar,
+				pagination:           this.pagination,
+				filesList:            this.filesList,
+				filesForm:            this.filesForm,
+				filesView:            this.filesView,
+				controlPanel:         this.controlPanel,
+				navigation:           this.navigation,
+				translations:         this.translations,
 			}),
 		});
 	}

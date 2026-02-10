@@ -10,8 +10,9 @@ import HomeBuilder from './homeBuilder';
 
 class MessageEditViewBuilder extends HomeBuilder {
 	async addMessageEditForm(message?: Message) {
-		if (is.empty(message))
+		if (is.empty(message)) {
 			return
+		}
 
 		const template = await readFile(resolve(join(Config.get('basedir'), 
 			this.isMobile ? 'templates/home/mobile/message_edit_form.mustache' : 'templates/home/desktop/message_edit_form.mustache'

@@ -1,18 +1,19 @@
 import api from './api';
 import models from './models';
 
-async function deleteMessagesJson(token: string, id: number) {
+async function deleteTranslationJson(token: string, message: number, lang: string) {
 	let result = {
-		error:  models.error(),
+		error: models.error(),
 	}
 
 	try {
-		const [_1, error] = await api("/messages/v2/delete", {
+		const [_1, error] = await api("/translations/v2/delete", {
 			method: "DELETE",
 			body: {
 				token: token,
 				req: {
-					ids: [id],
+					message: message,
+					lang:    lang,
 				},
 			},
 		});
@@ -20,7 +21,7 @@ async function deleteMessagesJson(token: string, id: number) {
 		if (error.error) {
 			result.error = models.error(error)
 		}
-	} catch (e) {
+	} catch(e) {
 		result.error.error   = true
 		result.error.status  = 500
 		result.error.explain = e.toString()
@@ -29,4 +30,4 @@ async function deleteMessagesJson(token: string, id: number) {
 	return result
 }
 
-export default deleteMessagesJson
+export default deleteTranslationJson;

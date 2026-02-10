@@ -1,3 +1,5 @@
+const ns_in_ms = 10**6
+
 export interface Translation {
 	messageID:      number;
 	lang:           string;

@@ -1,5 +1,7 @@
 import type {File} from './file'
+import type {Translation} from './translation'
 import file from './file';
+import translation from './translation';
 import * as is from '../../third_party/is'
 
 const ns_in_ms = 10**6
@@ -14,6 +16,7 @@ export interface Message {
 	title:         string;
 	count:         number;
 	files:         File[];
+	translations:  Translation[];
 	private:       boolean;
 }
 
@@ -27,6 +30,7 @@ const EmptyMessage: Message = Object.freeze({
 	count: 0,
 	name: "",
 	files:  [],
+	translations: [],
 	private: true,
 })
 
@@ -56,10 +60,15 @@ export default function mapMessageFromProto(message?: any): Message {
 		count:       message.count,
 		private:     Boolean(message.private),
 		files:       [],
+		translations: [],
 	}
 
 	if (is.array(message.files)) {
 		res.files = message.files.map(file)
+	}
+
+	if (is.array(message.translations)) {
+		res.translations = message.translations.map(translation)
 	}
 
 	return res

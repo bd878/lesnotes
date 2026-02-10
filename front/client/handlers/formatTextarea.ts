@@ -9,6 +9,9 @@ async function formatTextarea(ctx, next) {
 	if (is.notEmpty(ctx.state.thread) && is.notEmpty(ctx.state.thread.description)) {
 		ctx.state.thread.description = ctx.state.thread.description.replaceAll("\r\n", "&#13;&#10;")
 	}
+	if (is.notEmpty(ctx.state.translation) && is.notEmpty(ctx.state.translation.text)) {
+		ctx.state.translation.text = ctx.state.translation.text.replaceAll("\r\n", "&#13;&#10;")
+	}
 
 	await next()
 

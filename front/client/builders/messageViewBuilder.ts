@@ -9,8 +9,9 @@ import HomeBuilder from './homeBuilder';
 
 class MessageViewBuilder extends HomeBuilder {
 	async addMessageView(userID: number, message?: Message) {
-		if (is.empty(message))
+		if (is.empty(message)) {
 			return
+		}
 
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/home/mobile/message_view.mustache' : 'templates/home/desktop/message_view.mustache'
