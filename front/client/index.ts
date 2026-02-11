@@ -48,6 +48,7 @@ import updateMessage from './handlers/updateMessage';
 import updateThread from './handlers/updateThread';
 import getSearchForm from './handlers/getSearchForm';
 import getSearchQuery from './handlers/getSearchQuery';
+import parseMessageID from './handlers/parseMessageID';
 
 import assets from './routes/assets';
 import main from './routes/main';
@@ -97,8 +98,8 @@ router
 	.get("translation",            "/messages/:id/:lang",           etag, noCache, getToken, authed, getMe, getState, loadStack, loadTranslation, formatView, translationView)
 	.get("thread",                 "/threads/:id",                  etag, noCache, getToken, authed, getMe, getState, loadStack, loadThread, formatView, threadView)
 	.get("editMessage",            "/editor/messages/:id",          etag, noCache, getToken, authed, getMe, getState, loadStack, loadMessage, loadFiles, selectMessageFiles, formatTextarea, messageEdit)
+	.get("newTranslation",         "/editor/messages/:id/new_lang", etag, noCache, getToken, authed, getMe, getState, loadStack, parseMessageID, newTranslation)
 	.get("editTranslation",        "/editor/messages/:id/:lang",    etag, noCache, getToken, authed, getMe, getState, loadStack, loadMessage, loadTranslation, formatTextarea, translationEdit)
-	.get("newTranslation",         "/editor/messages/:id/lang",     etag, noCache, getToken, authed, getMe, getState, loadStack, loadFiles, newTranslation)
 	.get("editThread",             "/editor/threads/:id",           etag, noCache, getToken, authed, getMe, getState, loadStack, loadThread, formatTextarea, threadEdit)
 	.get("status",                 "/status",                       status, noCache, getState)
 	.get("search",                 "/search",                       etag, noCache, getToken, authed, getState, getMe, getSearchQuery, loadSearch, loadSearchPath, search)

@@ -9,7 +9,7 @@ async function newTranslation(ctx) {
 	await builder.addNavigation()
 	await builder.addControlPanel()
 	await builder.addMessagesStack(ctx.state.stack)
-	await builder.addNewTranslationForm()
+	await builder.addNewTranslationForm(ctx.state.messageID)
 	await builder.addSearch()
 	await builder.addLogout()
 	await builder.addSidebar()

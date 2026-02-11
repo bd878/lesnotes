@@ -1,5 +1,6 @@
 import type { File, Message, Thread, ThreadMessages } from '../api/models';
 import type { FileWithMime } from '../types';
+import type { TranslationPreview } from '../api/models';
 import Config from 'config';
 import mustache from 'mustache';
 import api from '../api';
@@ -30,6 +31,7 @@ class HomeBuilder extends AbstractBuilder {
 	sidebar              = undefined;
 	controlPanel         = undefined;
 	navigation           = undefined;
+	translations         = undefined;
 
 	async addMessagesStack(stack: ThreadMessages[]) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
@@ -65,6 +67,21 @@ class HomeBuilder extends AbstractBuilder {
 			rootThreadHref:   function() { const params = new URLSearchParams(search); params.delete("cwd"); return path + "?" + params.toString(); },
 			prevPageHref:     function() { const params = new URLSearchParams(search); params.set(this.message.ID || 0, `${limit + this.offset}`); return path + "?" + params.toString(); },
 			nextPageHref:     function() { const params = new URLSearchParams(search); params.set(this.message.ID || 0, `${Math.max(0, this.offset - limit)}`); return path + "?" + params.toString(); },
+		})
+	}
+
+	async addTranslations(message: Message, previews: TranslationPreview[]) {
+		const template = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/translations/mobile/translations.mustache' : 'templates/translations/desktop/translations.mustache'
+		)), { encoding: 'utf-8' });
+
+		const search = this.search
+
+		this.translations = mustache.render(template, {
+			newTranslation:        this.i18n("newTranslation"),
+			newTranslationHref:    function() { return `/editor/messages/${message.ID}/new_lang` },
+			translationHref:       function() { return `/messages/${message.ID}/${this.lang}` },
+			translations:          previews,
 		})
 	}
 

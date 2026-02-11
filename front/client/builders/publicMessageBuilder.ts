@@ -84,7 +84,6 @@ class PublicMessageBuilder extends AbstractBuilder {
 				sidebar:      this.sidebar,
 				filesView:    this.filesView,
 				messageView:  this.messageView,
-				translations: this.translations,
 			})
 		})
 	}

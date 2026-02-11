@@ -10,7 +10,7 @@ async function translationEdit(ctx) {
 	await builder.addControlPanel()
 	await builder.addMessagesStack(ctx.state.stack)
 	await builder.addTranslationEditForm()
-	await builder.addTranslations([])
+	await builder.addTranslations(ctx.state.message, [])
 	await builder.addSearch()
 	await builder.addLogout()
 	await builder.addSidebar()
