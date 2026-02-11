@@ -1,7 +1,7 @@
 import type {File} from './file'
-import type {Translation} from './translation'
+import type {TranslationPreview} from './translationPreview'
 import file from './file';
-import translation from './translation';
+import translationPreview from './translationPreview';
 import * as is from '../../third_party/is'
 
 const ns_in_ms = 10**6
@@ -16,7 +16,7 @@ export interface Message {
 	title:         string;
 	count:         number;
 	files:         File[];
-	translations:  Translation[];
+	translations:  TranslationPreview[];
 	private:       boolean;
 }
 
@@ -68,7 +68,7 @@ export default function mapMessageFromProto(message?: any): Message {
 	}
 
 	if (is.array(message.translations)) {
-		res.translations = message.translations.map(translation)
+		res.translations = message.translations.map(translationPreview)
 	}
 
 	return res

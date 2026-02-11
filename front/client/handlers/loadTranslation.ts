@@ -18,7 +18,7 @@ async function loadTranslation(ctx, next) {
 		return
 	}
 
-	ctx.state.translation = await readTranslationJson(token, id, lang, "")
+	ctx.state.translation = await readTranslationJson(token, id, lang, name)
 	if (is.notEmpty(ctx.state.translation)) {
 		if (ctx.state.translation.error.error) {
 			console.error(ctx.state.translation.error)

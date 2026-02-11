@@ -49,6 +49,7 @@ import updateThread from './handlers/updateThread';
 import getSearchForm from './handlers/getSearchForm';
 import getSearchQuery from './handlers/getSearchQuery';
 import parseMessageID from './handlers/parseMessageID';
+import listTranslations from './handlers/listTranslations';
 
 import assets from './routes/assets';
 import main from './routes/main';
@@ -95,7 +96,7 @@ router
 	.get("home",                   "/home",                         etag, noCache, getToken, authed, getMe, getState, loadStack, loadFiles, newMessage)
 	.get("files",                  "/files",                        etag, noCache, getToken, authed, getMe, getState, loadStack, loadFiles, files)
 	.get("message",                "/messages/:id",                 etag, noCache, getToken, authed, getMe, getState, loadStack, loadMessage, formatView, messageView)
-	.get("translation",            "/messages/:id/:lang",           etag, noCache, getToken, authed, getMe, getState, loadStack, loadTranslation, formatView, translationView)
+	.get("translation",            "/messages/:id/:lang",           etag, noCache, getToken, authed, getMe, getState, loadStack, loadMessage, loadTranslation, formatView, translationView)
 	.get("thread",                 "/threads/:id",                  etag, noCache, getToken, authed, getMe, getState, loadStack, loadThread, formatView, threadView)
 	.get("editMessage",            "/editor/messages/:id",          etag, noCache, getToken, authed, getMe, getState, loadStack, loadMessage, loadFiles, selectMessageFiles, formatTextarea, messageEdit)
 	.get("newTranslation",         "/editor/messages/:id/new_lang", etag, noCache, getToken, authed, getMe, getState, loadStack, parseMessageID, newTranslation)

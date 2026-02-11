@@ -896,7 +896,7 @@ components:
           type: string
           example: "file"
 
-    translation:
+    translationPreview:
       type: object
       properties:
         lang:
@@ -905,8 +905,8 @@ components:
         title:
           type: string
           example: "title"
-        text:
-          type: string
+        message:
+          type: integer
         created_at:
           type: integer
         updated_at:
@@ -942,4 +942,4 @@ components:
           type: array
           items:
             schema:
-              $ref: '#/components/schemas/translation'
+              $ref: '#/components/schemas/translationPreview'

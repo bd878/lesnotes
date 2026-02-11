@@ -16,7 +16,7 @@ async function sendTranslation(ctx) {
 		ctx.state.error = response.error.human
 		ctx.body = "error"
 	} else {
-		ctx.redurect(ctx.router.url("home", {}, {query: ctx.query}))
+		ctx.redirect(ctx.router.url("home", {}, {query: ctx.query}))
 	}
 
 	console.log("<-- sendTranslation")

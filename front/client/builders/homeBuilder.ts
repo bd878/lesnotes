@@ -70,7 +70,7 @@ class HomeBuilder extends AbstractBuilder {
 		})
 	}
 
-	async addTranslations(message: Message, previews: TranslationPreview[]) {
+	async addTranslations(messageID: number, previews: TranslationPreview[]) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/translations/mobile/translations.mustache' : 'templates/translations/desktop/translations.mustache'
 		)), { encoding: 'utf-8' });
@@ -79,8 +79,8 @@ class HomeBuilder extends AbstractBuilder {
 
 		this.translations = mustache.render(template, {
 			newTranslation:        this.i18n("newTranslation"),
-			newTranslationHref:    function() { return `/editor/messages/${message.ID}/new_lang` },
-			translationHref:       function() { return `/messages/${message.ID}/${this.lang}` },
+			newTranslationHref:    function() { return `/editor/messages/${messageID}/new_lang` },
+			translationHref:       function() { return `/messages/${messageID}/${this.lang}` },
 			translations:          previews,
 		})
 	}

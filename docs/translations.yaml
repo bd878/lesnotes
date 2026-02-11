@@ -350,6 +350,9 @@ components:
             title:
               type: string
               required: false
+            text:
+              type: string
+              required: false
             created_at:
               type: number
             updated_at:
