@@ -149,7 +149,7 @@ func (s *TranslationsController) ReadTranslation(ctx context.Context, userID, me
 	return
 }
 
-func (s *TranslationsController) ListTranslations(ctx context.Context, userID, messageID int64, name string) (translations []*model.TranslationPreview, err error) {
+func (s *TranslationsController) ListTranslations(ctx context.Context, userID, messageID int64, name string) (translations []*model.Translation, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -167,7 +167,7 @@ func (s *TranslationsController) ListTranslations(ctx context.Context, userID, m
 		return nil, err
 	}
 
-	translations = model.MapTranslationPreviewsFromProto(model.TranslationPreviewFromProto, resp.Translations)
+	translations = model.MapTranslationsFromProto(model.TranslationFromProto, resp.Translations)
 
 	return
 }

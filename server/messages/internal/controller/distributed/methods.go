@@ -376,7 +376,7 @@ func (m *DistributedMessages) ReadTranslation(ctx context.Context, userID, messa
 	return
 }
 
-func (m *DistributedMessages) ListTranslations(ctx context.Context, userID, messageID int64, name string) (translations []*model.TranslationPreview, err error) {
+func (m *DistributedMessages) ListTranslations(ctx context.Context, userID, messageID int64, name string) (translations []*model.Translation, err error) {
 	logger.Debugw("list translations", "user_id", userID, "message_id", messageID, "name", name)
 
 	message, err := m.messagesRepo.Read(ctx, []int64{userID}, messageID, name)

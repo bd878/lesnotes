@@ -73,5 +73,5 @@ message ListTranslationsRequest {
 }
 
 message ListTranslationsResponse {
-	repeated TranslationPreview translations = 1;
+	repeated Translation translations = 1;
 }

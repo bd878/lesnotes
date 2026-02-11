@@ -65,6 +65,6 @@ type (
 	}
 
 	ListTranslationsResponse struct {
-		Translations        []*TranslationPreview      `json:"translations"`
+		Translations        []*Translation      `json:"translations"`
 	}
 )

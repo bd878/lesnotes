@@ -15,7 +15,7 @@ func MessageFromProto(proto *api.Message) *Message {
 		FileIDs:        proto.FileIds,
 		Private:        proto.Private,
 		Name:           proto.Name,
-		Translations:   MapTranslationsFromProto(TranslationFromProto, proto.Translations),
+		Translations:   MapTranslationPreviewsFromProto(TranslationPreviewFromProto, proto.Translations),
 	}
 }
 
@@ -30,7 +30,7 @@ func MessageToProto(msg *Message) *api.Message {
 		FileIds:        msg.FileIDs,
 		Private:        msg.Private,
 		Name:           msg.Name,
-		Translations:   MapTranslationsToProto(TranslationToProto, msg.Translations),
+		Translations:   MapTranslationPreviewsToProto(TranslationPreviewToProto, msg.Translations),
 	}
 }
 

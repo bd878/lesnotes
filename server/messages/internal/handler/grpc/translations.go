@@ -12,7 +12,7 @@ type TranslationsController interface {
 	UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string) (err error)
 	DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error)
 	ReadTranslation(ctx context.Context, userID, messageID int64, lang string, name string) (result *model.Translation, err error)
-	ListTranslations(ctx context.Context, userID, messageID int64, name string) (result []*model.TranslationPreview, err error)
+	ListTranslations(ctx context.Context, userID, messageID int64, name string) (result []*model.Translation, err error)
 }
 
 type TranslationsHandler struct {
@@ -68,13 +68,13 @@ func (h *TranslationsHandler) ReadTranslation(ctx context.Context, req *api.Read
 }
 
 func (h *TranslationsHandler) ListTranslations(ctx context.Context, req *api.ListTranslationsRequest) (resp *api.ListTranslationsResponse, err error) {
-	previews, err := h.controller.ListTranslations(ctx, req.UserId, req.MessageId, req.Name)
+	translations, err := h.controller.ListTranslations(ctx, req.UserId, req.MessageId, req.Name)
 	if err != nil {
 		return nil, err
 	}
 
 	resp = &api.ListTranslationsResponse{}
-	resp.Translations = model.MapTranslationPreviewsToProto(model.TranslationPreviewToProto, previews)
+	resp.Translations = model.MapTranslationsToProto(model.TranslationToProto, translations)
 
 	return
 }

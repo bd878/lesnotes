@@ -30,7 +30,7 @@ message Message {
 	string   name = 7;
 	repeated int64 file_ids = 8;
 	string   title = 9;
-	repeated translations.v1.Translation translations = 10;
+	repeated translations.v1.TranslationPreview translations = 10;
 }
 
 message ReadMessagesRequest {
