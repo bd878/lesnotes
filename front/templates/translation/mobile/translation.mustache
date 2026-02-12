@@ -1,1 +1,21 @@
-<div></div>
+<div class="h-full max-w-full flex flex-row">
+	<div class="min-w-fit max-w-fit ml-8">
+		{{> sidebar}}
+	</div>
+
+	{{#translation}}
+		<div class="min-w-lg max-w-lg flex flex-row ml-8">
+			<div class="flex flex-col w-full">
+				{{> translations}}
+				<div class="h-full flex flex-col grow p-2 border border-1 border-solid rounded-md">
+					{{> translationView}}
+				</div>
+			</div>
+		</div>
+	{{/translation}}
+
+
+	<div class="ml-8 mr-8 max-w-md min-w-md overflow-x-hidden overflow-y-auto">
+		{{>  filesView}}
+	</div>
+</div>

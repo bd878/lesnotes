@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/threads/pkg/loadbalance"
 	threads "github.com/bd878/gallery/server/threads/pkg/model"
 )
@@ -58,6 +59,8 @@ func (g *Gateway) CreateThread(ctx context.Context, id, userID, parentID int64, 
 		}
 	}
 
+	logger.Debugw("create thread", "id", id, "user_id", userID, "parent_id", parentID, "name", name, "private", private)
+
 	_, err = g.client.Create(ctx, &api.CreateRequest{
 		Id:        id,
 		UserId:    userID,
@@ -76,6 +79,8 @@ func (g *Gateway) DeleteThread(ctx context.Context, id, userID int64) (err error
 		}
 	}
 
+	logger.Debugw("delete thread", "id", id, "user_id", userID)
+
 	_, err = g.client.Delete(ctx, &api.DeleteRequest{
 		Id:     id,
 		UserId: userID,
@@ -91,6 +96,8 @@ func (g *Gateway) UpdateThread(ctx context.Context, id, userID int64) (err error
 		}
 	}
 
+	logger.Debugw("update thread", "id", id, "user_id", userID)
+
 	_, err = g.client.Update(ctx, &api.UpdateRequest{
 		Id:        id,
 		UserId:    userID,
@@ -105,6 +112,8 @@ func (g *Gateway) ListThreads(ctx context.Context, userID, parentID int64, limit
 			return
 		}
 	}
+
+	logger.Debugw("list threads", "user_id", userID, "parent_id", parentID, "limit", limit, "offset", offset)
 
 	resp, err := g.client.List(ctx, &api.ListRequest{
 		UserId:   userID,
@@ -129,6 +138,8 @@ func (g *Gateway) CountThreads(ctx context.Context, id, userID int64) (total int
 		}
 	}
 
+	logger.Debugw("count threads", "id", id, "user_id", userID)
+
 	resp, err := g.client.Count(ctx, &api.CountRequest{
 		UserId: userID,
 		Id:     id,
@@ -149,6 +160,8 @@ func (g *Gateway) ResolvePath(ctx context.Context, userID, id int64) (path []int
 		}
 	}
 
+	logger.Debugw("resolve path", "user_id", userID, "id", id)
+
 	resp, err := g.client.Resolve(ctx, &api.ResolveRequest{
 		UserId:  userID,
 		Id:      id,
@@ -168,6 +181,8 @@ func (g *Gateway) ReadThread(ctx context.Context, userID, id int64) (thread *thr
 			return
 		}
 	}
+
+	logger.Debugw("read thread", "user_id", userID, "id", id)
 
 	resp, err := g.client.Read(ctx, &api.ReadRequest{
 		Id:     id,

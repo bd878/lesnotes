@@ -1,34 +1,59 @@
 import type { Message } from '../api/models';
-import type { FileWithMime } from '../types';
 import Config from 'config';
 import mustache from 'mustache';
+import api from '../api';
 import * as is from '../third_party/is';
 import { readFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
-import PublicThreadBuilder from './publicThreadBuilder'
+import AbstractPublicBuilder from './abstractPublicBuilder'
 
-class PublicThreadMessageBuilder extends PublicThreadBuilder {
-	async addMessageView(message: Message) {
-		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/thread/mobile/message_view.mustache' : 'templates/thread/desktop/message_view.mustache'
+class PublicThreadMessageBuilder extends AbstractPublicBuilder {
+
+	async build(message?: Message) {
+		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
+		const layout = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/layout/mobile/layout.mustache' : 'templates/layout/desktop/layout.mustache'
+		)), { encoding: 'utf-8' });
+		const content = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/thread/mobile/thread.mustache' : 'templates/thread/desktop/thread.mustache'
 		)), { encoding: 'utf-8' });
 
-		this.messageView = mustache.render(template, {
-			message: message,
+		const theme = this.theme
+		const fontSize = this.fontSize
+
+		return mustache.render(layout, {
+			html: () => (text, render) => {
+				let html = "<html"
+
+				if (theme) html += ` class="${theme}"`;
+				if (this.lang) html += ` lang="${this.lang}"`;
+				if (fontSize) html += ` data-size="${fontSize}"`
+				html += ">"
+
+				return html + render(text) + "</html>"
+			},
+			manifest: "/public/manifest.json",
+			styles:   styles,
+			lang:     this.lang,
+			theme:    this.theme,
+		}, {
+			footer: this.footer,
+			content: mustache.render(content, {
+				message:       message,
+			}, {
+				signup:           this.signup,
+				logout:           this.logout,
+				sidebar:          this.sidebar,
+				translationView:  this.translationView,
+				searchForm:       this.searchForm,
+				messagesList:     this.messagesList,
+				translations:     this.translations,
+				messageView:      this.messageView,
+				filesView:        this.filesView,
+			})
 		})
 	}
 
-	async addFilesView(files: FileWithMime[]) {
-		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/thread/mobile/files_view.mustache' : 'templates/thread/desktop/files_view.mustache'
-		)), { encoding: 'utf-8' });
-
-		this.filesView = mustache.render(template, {
-			files:    files,
-			imgSrc:   function() { return `/files/v1/read/${this.name}` },
-			fileHref: function() { return `/files/v1/download?id=${this.ID}` },
-		})
-	}
 }
 
 export default PublicThreadMessageBuilder

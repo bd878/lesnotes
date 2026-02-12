@@ -11,6 +11,7 @@ async function messageView(ctx) {
 	await builder.addFilesView(ctx.state.message.files)
 	await builder.addMessagesStack(ctx.state.stack)
 	await builder.addMessageView(ctx.state.me.ID, ctx.state.message)
+	await builder.addNewTranslation(ctx.state.message.ID)
 	await builder.addTranslations(ctx.state.message.ID, ctx.state.message.translations)
 	await builder.addSearch()
 	await builder.addLogout()

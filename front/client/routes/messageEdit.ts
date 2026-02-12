@@ -12,6 +12,7 @@ async function messageEdit(ctx) {
 	await builder.addFilesSelector(ctx.state.files.files)
 	await builder.addMessagesStack(ctx.state.stack)
 	await builder.addMessageEditForm(ctx.state.message)
+	await builder.addNewTranslation(ctx.state.message.ID)
 	await builder.addTranslations(ctx.state.message.ID, ctx.state.message.translations)
 	await builder.addSearch()
 	await builder.addLogout()

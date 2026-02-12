@@ -5,8 +5,11 @@
 
 	{{#message}}
 		<div class="min-w-lg max-w-lg flex flex-row ml-8">
-			<div class="h-full flex flex-col grow p-2 mb-2 border border-1 border-solid rounded-md">
-				{{> messageView}}
+			<div class="flex flex-col w-full">
+				{{> translations}}
+				<div class="h-full flex flex-col grow p-2 border border-1 border-solid rounded-md">
+					{{> messageView}}
+				</div>
 			</div>
 		</div>
 	{{/message}}

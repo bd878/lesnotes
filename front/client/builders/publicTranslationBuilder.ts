@@ -1,37 +1,15 @@
+import type { Translation } from '../api/models';
 import Config from 'config';
 import mustache from 'mustache';
 import api from '../api';
 import * as is from '../third_party/is';
 import { readFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
-import AbstractBuilder from './abstractBuilder'
+import AbstractPublicBuilder from './abstractPublicBuilder'
 
-class PublicTranslationBuilder extends AbstractBuilder {
-	sidebar            = undefined;
-	translationView    = undefined;
+class PublicTranslationBuilder extends AbstractPublicBuilder {
 
-	async addSidebar() {
-		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/sidebar_vertical/mobile/sidebar_vertical.mustache' : 'templates/sidebar_vertical/desktop/sidebar_vertical.mustache'
-		)), { encoding: 'utf-8' });
-
-		this.sidebar = mustache.render(template, {
-			settingsHeader: this.i18n("settingsHeader"),
-			mainHref:       "/" + this.search,
-		}, {
-			settings:       this.settings,
-		})
-	}
-
-	async addTranslationView() {
-		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/translation/mobile/translation_view.mustache' : 'templates/translation/desktop/translation_view.mustache'
-		)), { encoding: 'utf-8' });
-
-		this.translationView = mustache.render(template, {})
-	}
-
-	async build() {
+	async build(translation?: Translation) {
 		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
 		const layout = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/layout/mobile/layout.mustache' : 'templates/layout/desktop/layout.mustache'
@@ -54,20 +32,25 @@ class PublicTranslationBuilder extends AbstractBuilder {
 
 				return html + render(text) + "</html>"
 			},
-			manifest:  "/public/manifest.json",
-			styles:    styles,
-			lang:      this.lang,
-			theme:     theme,
+			manifest: "/public/manifest.json",
+			styles:   styles,
+			lang:     this.lang,
+			theme:    this.theme,
 		}, {
-			footer:    this.footer,
-			content:   mustache.render(content, {
+			footer: this.footer,
+			content: mustache.render(content, {
+				translation:      translation,
 			}, {
-				settings:         this.settings,
+				signup:           this.signup,
+				logout:           this.logout,
 				sidebar:          this.sidebar,
 				translationView:  this.translationView,
+				translations:     this.translations,
+				filesView:        this.filesView,
 			})
 		})
 	}
+
 }
 
 export default PublicTranslationBuilder

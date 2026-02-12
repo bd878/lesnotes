@@ -5,12 +5,14 @@ async function publicTranslation(ctx) {
 
 	const builder = new PublicTranslationBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
-	await builder.addTranslationView()
+	await builder.addTranslations(ctx.state.message.ID, ctx.state.message.translations)
+	await builder.addTranslationView(ctx.state.message.ID, ctx.state.translation)
+	await builder.addFilesView(ctx.state.message.files)
 	await builder.addSettings()
 	await builder.addSidebar()
 	await builder.addFooter()
 
-	ctx.body = await builder.build()
+	ctx.body = await builder.build(ctx.state.translation)
 	ctx.status = 200;
 
 	console.log("<-- publicTranslation")

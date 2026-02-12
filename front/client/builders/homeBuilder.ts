@@ -32,6 +32,7 @@ class HomeBuilder extends AbstractBuilder {
 	controlPanel         = undefined;
 	navigation           = undefined;
 	translations         = undefined;
+	newTranslation       = undefined;
 
 	async addMessagesStack(stack: ThreadMessages[]) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
@@ -85,6 +86,21 @@ class HomeBuilder extends AbstractBuilder {
 			translationHref:       function() { return `/messages/${messageID}/${this.lang}` },
 			translations:          previews,
 			hasTranslations:       () => previews.length > 0,
+		}, {
+			newTranslation:   this.newTranslation,
+		})
+	}
+
+	async addNewTranslation(messageID: number) {
+		const template = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/translations/mobile/new_translation.mustache' : 'templates/translations/desktop/new_translation.mustache'
+		)), { encoding: 'utf-8' });
+
+		const search = this.search
+
+		this.newTranslation = mustache.render(template, {
+			newTranslation:        this.i18n("newTranslation"),
+			newTranslationHref:    function() { return `/editor/messages/${messageID}/new_lang` },
 		})
 	}
 

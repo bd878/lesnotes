@@ -193,11 +193,6 @@ func (s *MessagesController) UpdateMessage(ctx context.Context, id int64, text, 
 
 	logger.Debugw("update message", "id", id, "text", text, "title", title, "name", name, "file_ids", fileIDs, "user_id", userID)
 
-	err = s.threads.UpdateThread(ctx, id, userID)
-	if err != nil {
-		return
-	}
-
 	_, err = s.client.UpdateMessage(ctx, &api.UpdateMessageRequest{
 		Id:        id,
 		UserId:    userID,
