@@ -79,9 +79,12 @@ class HomeBuilder extends AbstractBuilder {
 
 		this.translations = mustache.render(template, {
 			newTranslation:        this.i18n("newTranslation"),
+			mainMessage:           this.i18n("mainMessage"),
+			mainMessageHref:       function() { return `/messages/${messageID}` },
 			newTranslationHref:    function() { return `/editor/messages/${messageID}/new_lang` },
 			translationHref:       function() { return `/messages/${messageID}/${this.lang}` },
 			translations:          previews,
+			hasTranslations:       () => previews.length > 0,
 		})
 	}
 

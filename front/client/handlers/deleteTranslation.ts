@@ -10,14 +10,16 @@ async function deleteTranslation(ctx) {
 		form = {}
 	}
 
-	const response = await deleteTranslationJson(ctx.state.token, parseInt(form.message) || 0, form.lang)
+	const messageID = parseInt(form.message) || 0;
+
+	const response = await deleteTranslationJson(ctx.state.token, messageID, form.lang)
 
 	if (response.error.error) {
 		console.log(response.error)
 		ctx.state.error = response.error.human
 		ctx.body = "error"
 	} else {
-		ctx.redirect(ctx.router.url('home', {id: form.id}, {query: ctx.query}))
+		ctx.redirect(ctx.router.url('message', {id: messageID}, {query: ctx.query}))
 	}
 
 	console.log("<-- deleteTranslation")

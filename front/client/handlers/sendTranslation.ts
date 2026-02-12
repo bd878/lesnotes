@@ -10,13 +10,15 @@ async function sendTranslation(ctx) {
 		form = {}
 	}
 
-	const response = await api.sendTranslationJson(ctx.state.token, parseInt(form.message) || 0, form.lang, form.text, form.title)
+	const messageID = parseInt(form.message) || 0
+
+	const response = await api.sendTranslationJson(ctx.state.token, messageID, form.lang, form.text, form.title)
 	if (response.error.error) {
 		console.log(response.error)
 		ctx.state.error = response.error.human
 		ctx.body = "error"
 	} else {
-		ctx.redirect(ctx.router.url("home", {}, {query: ctx.query}))
+		ctx.redirect(ctx.router.url("translation", {id: messageID, lang: form.lang}, {query: ctx.query}))
 	}
 
 	console.log("<-- sendTranslation")

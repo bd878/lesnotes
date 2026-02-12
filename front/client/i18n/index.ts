@@ -46,6 +46,7 @@ const texts = {
 		filesSummary: "Files",
 		goBack: "Back",
 		newTranslation: "New translation",
+		mainMessage: "Main",
 
 		terms: "Terms",
 		contact: "Contact",
@@ -99,6 +100,7 @@ const texts = {
 		filesSummary: "Файлы",
 		goBack: "Назад",
 		newTranslation: "Добавить перевод",
+		mainMessage: "Главная",
 
 		terms: "Политика",
 		contact: "Контакты",
@@ -152,6 +154,7 @@ const texts = {
 		filesSummary: "Dateien",
 		goBack: "Zurück",
 		newTranslation: "Übersetzung hinzufügen",
+		mainMessage: "Haupt Notiz",
 
 		terms: "",
 		contact: "",
@@ -205,6 +208,7 @@ const texts = {
 		filesSummary: "Fichier",
 		goBack: "Revenir",
 		newTranslation: "Nouvelle traduction",
+		mainMessage: "La note principale",
 
 		terms: "",
 		contact: "",
