@@ -71,7 +71,7 @@ class HomeBuilder extends AbstractBuilder {
 		})
 	}
 
-	async addTranslations(messageID: number, previews: TranslationPreview[]) {
+	async addTranslations(message: number | string, previews: TranslationPreview[]) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/translations/mobile/translations.mustache' : 'templates/translations/desktop/translations.mustache'
 		)), { encoding: 'utf-8' });
@@ -81,9 +81,9 @@ class HomeBuilder extends AbstractBuilder {
 		this.translations = mustache.render(template, {
 			newTranslation:        this.i18n("newTranslation"),
 			mainMessage:           this.i18n("mainMessage"),
-			mainMessageHref:       function() { return `/messages/${messageID}` },
-			newTranslationHref:    function() { return `/editor/messages/${messageID}/new_lang` },
-			translationHref:       function() { return `/messages/${messageID}/${this.lang}` },
+			mainMessageHref:       function() { return `/messages/${message}` },
+			newTranslationHref:    function() { return `/editor/messages/${message}/new_lang` },
+			translationHref:       function() { return `/messages/${message}/${this.lang}` },
 			translations:          previews,
 			hasTranslations:       () => previews.length > 0,
 		}, {
@@ -91,7 +91,7 @@ class HomeBuilder extends AbstractBuilder {
 		})
 	}
 
-	async addNewTranslation(messageID: number) {
+	async addNewTranslation(message: number | string) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/translations/mobile/new_translation.mustache' : 'templates/translations/desktop/new_translation.mustache'
 		)), { encoding: 'utf-8' });
@@ -100,7 +100,7 @@ class HomeBuilder extends AbstractBuilder {
 
 		this.newTranslation = mustache.render(template, {
 			newTranslation:        this.i18n("newTranslation"),
-			newTranslationHref:    function() { return `/editor/messages/${messageID}/new_lang` },
+			newTranslationHref:    function() { return `/editor/messages/${message}/new_lang` },
 		})
 	}
 

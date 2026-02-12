@@ -53,13 +53,13 @@ func (h *Handler) ReadTranslationJsonAPI(w http.ResponseWriter, req *http.Reques
 		return
 	}
 
-	if request.MessageID == 0 {
+	if request.MessageID == 0 && request.Name == nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:  &server.ErrorCode{
 				Code:    model.CodeNoMessageID,
-				Explain: "message field is empty",
+				Explain: "either message or name must be specified",
 			},
 		})
 
@@ -80,7 +80,7 @@ func (h *Handler) ReadTranslationJsonAPI(w http.ResponseWriter, req *http.Reques
 	}
 
 	// TODO: pass request.Name
-	translation, err := h.translationsController.ReadTranslation(req.Context(), user.ID, request.MessageID, request.Lang)
+	translation, err := h.translationsController.ReadTranslation(req.Context(), user.ID, request.MessageID, request.Lang, request.Name)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

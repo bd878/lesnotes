@@ -5,8 +5,8 @@ async function publicTranslation(ctx) {
 
 	const builder = new PublicTranslationBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
-	await builder.addTranslations(ctx.state.message.ID, ctx.state.message.translations)
-	await builder.addTranslationView(ctx.state.message.ID, ctx.state.translation)
+	await builder.addTranslations(ctx.state.messageName, ctx.state.message.translations)
+	await builder.addTranslationView(ctx.state.translation)
 	await builder.addFilesView(ctx.state.message.files)
 	await builder.addSettings()
 	await builder.addSidebar()

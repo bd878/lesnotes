@@ -49,6 +49,8 @@ import updateThread from './handlers/updateThread';
 import getSearchForm from './handlers/getSearchForm';
 import getSearchQuery from './handlers/getSearchQuery';
 import parseMessageID from './handlers/parseMessageID';
+import parseMessageName from './handlers/parseMessageName';
+import parseThreadName from './handlers/parseThreadName';
 import listTranslations from './handlers/listTranslations';
 
 import assets from './routes/assets';
@@ -122,10 +124,10 @@ router
 	.post("doSendMessage",         "/send",                         getToken, authed, getState, sendMessage)
 	.post("doSendTranslation",     "/translation/send",             getToken, authed, getState, sendTranslation)
 	.get("tgAuth",                 "/tg_auth",                      authTelegram)
-	.get("publicMessage",          "/m/:messageName",               etag, noCache, getState, getToken, getMe, loadMessage, formatView, publicMessage)
-	.get("publicTranslation",      "/m/:messageName/:lang",         etag, noCache, getState, getToken, getMe, loadTranslation, formatView, publicTranslation)
-	.get("publicThread",           "/t/:threadName",                etag, noCache, getState, getToken, getMe, loadThread, loadThreadMessages, formatView, publicThread)
-	.get("publicThreadMessage",    "/t/:threadName/:messageName",   etag, noCache, getState, getToken, getMe, loadThread, loadThreadMessages, loadMessage, formatView, publicThreadMessage)
+	.get("publicMessage",          "/m/:messageName",               etag, noCache, getState, getToken, getMe, loadMessage, parseMessageName, formatView, publicMessage)
+	.get("publicTranslation",      "/m/:messageName/:lang",         etag, noCache, getState, getToken, getMe, loadMessage, parseMessageName, loadTranslation, formatView, publicTranslation)
+	.get("publicThread",           "/t/:threadName",                etag, noCache, getState, getToken, getMe, loadThread, parseThreadName, loadThreadMessages, formatView, publicThread)
+	.get("publicThreadMessage",    "/t/:threadName/:messageName",   etag, noCache, getState, getToken, getMe, loadThread, parseThreadName, parseMessageName, loadThreadMessages, loadMessage, formatView, publicThreadMessage)
 	.get("any",                    "/:any*",                        getState, xxx)
 
 app.use(router.routes());

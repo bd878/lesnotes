@@ -7,7 +7,7 @@ async function publicThreadMessage(ctx) {
 
 	await builder.addMessagesList(ctx.params.threadName /* TODO: use from load_path, it is message now, thread required */, ctx.state.messages)
 	await builder.addSearch()
-	await builder.addTranslations(ctx.state.message.ID, ctx.state.message.translations)
+	await builder.addTranslations(ctx.state.messageName, ctx.state.threadName, ctx.state.message.translations)
 	await builder.addMessageView(ctx.state.message)
 	await builder.addFilesView(ctx.state.message.files)
 	await builder.addSettings()

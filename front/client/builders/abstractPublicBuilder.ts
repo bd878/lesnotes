@@ -60,24 +60,6 @@ abstract class AbstractPublicBuilder extends AbstractBuilder {
 		})
 	}
 
-	async addTranslations(messageID: number, previews: TranslationPreview[]) {
-		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/translations/mobile/translations.mustache' : 'templates/translations/desktop/translations.mustache'
-		)), { encoding: 'utf-8' });
-
-		const search = this.search
-
-		this.translations = mustache.render(template, {
-			newTranslation:        this.i18n("newTranslation"),
-			mainMessage:           this.i18n("mainMessage"),
-			mainMessageHref:       function() { return `/messages/${messageID}` },
-			newTranslationHref:    function() { return `/editor/messages/${messageID}/new_lang` },
-			translationHref:       function() { return `/messages/${messageID}/${this.lang}` },
-			translations:          previews,
-			hasTranslations:       () => previews.length > 0,
-		})
-	}
-
 	async addFilesView(files: FileWithMime[]) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/message/mobile/files_view.mustache' : 'templates/message/desktop/files_view.mustache'
@@ -120,13 +102,12 @@ abstract class AbstractPublicBuilder extends AbstractBuilder {
 		})
 	}
 
-	async addTranslationView(messageID: number, translation: Translation) {
+	async addTranslationView(translation: Translation) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/translation/mobile/translation_view.mustache' : 'templates/translation/desktop/translation_view.mustache'
 		)), { encoding: 'utf-8' });
 
 		this.translationView = mustache.render(template, {
-			messageID:        messageID,
 			translation:      translation,
 		})
 	}
