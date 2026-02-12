@@ -39,7 +39,6 @@ type fsm struct {
 func (f *fsm) Apply(record *raft.Log) interface{} {
 	buf := record.Data
 	reqType := RequestType(buf[0])
-	logger.Debugw("apply record", "type", reqType, "data", buf[1:])
 	switch reqType {
 	case AppendRequest:
 		return f.applyAppend(buf[1:])

@@ -17,8 +17,8 @@ class PublicThreadMessageBuilder extends AbstractPublicBuilder {
 
 		this.translations = mustache.render(template, {
 			mainMessage:           this.i18n("mainMessage"),
-			mainMessageHref:       function() { return `/t/${thread}/${message}` },
-			translationHref:       function() { return `/t/${thread}/${message}/${this.lang}` },
+			mainMessageHref:       function() { return `/t/${thread}/${message}` + search },
+			translationHref:       function() { return `/t/${thread}/${message}/${this.lang}` + search },
 			translations:          previews,
 			hasTranslations:       () => previews.length > 0,
 		})

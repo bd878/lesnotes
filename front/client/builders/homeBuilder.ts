@@ -81,9 +81,9 @@ class HomeBuilder extends AbstractBuilder {
 		this.translations = mustache.render(template, {
 			newTranslation:        this.i18n("newTranslation"),
 			mainMessage:           this.i18n("mainMessage"),
-			mainMessageHref:       function() { return `/messages/${message}` },
-			newTranslationHref:    function() { return `/editor/messages/${message}/new_lang` },
-			translationHref:       function() { return `/messages/${message}/${this.lang}` },
+			mainMessageHref:       function() { return `/messages/${message}` + search },
+			newTranslationHref:    function() { return `/editor/messages/${message}/new_lang` + search },
+			translationHref:       function() { return `/messages/${message}/${this.lang}` + search },
 			translations:          previews,
 			hasTranslations:       () => previews.length > 0,
 		}, {
@@ -100,7 +100,7 @@ class HomeBuilder extends AbstractBuilder {
 
 		this.newTranslation = mustache.render(template, {
 			newTranslation:        this.i18n("newTranslation"),
-			newTranslationHref:    function() { return `/editor/messages/${message}/new_lang` },
+			newTranslationHref:    function() { return `/editor/messages/${message}/new_lang` + search },
 		})
 	}
 

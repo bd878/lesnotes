@@ -17,8 +17,8 @@ class PublicTranslationBuilder extends AbstractPublicBuilder {
 
 		this.translations = mustache.render(template, {
 			mainMessage:           this.i18n("mainMessage"),
-			mainMessageHref:       function() { return `/m/${message}` },
-			translationHref:       function() { return `/m/${message}/${this.lang}` },
+			mainMessageHref:       function() { return `/m/${message}` + search },
+			translationHref:       function() { return `/m/${message}/${this.lang}` + search },
 			translations:          previews,
 			hasTranslations:       () => previews.length > 0,
 		})
