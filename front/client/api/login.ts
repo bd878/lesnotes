@@ -11,14 +11,17 @@ async function login(login: string, password: string, lang?: string) {
 	const form = new FormData()
 	const headers = {}
 
-	if (login)
+	if (login) {
 		form.append("login", login);
+	}
 
-	if (password)
+	if (password) {
 		form.append("password", password);
+	}
 
-	if (lang)
+	if (lang) {
 		headers["X-Language"] = lang;
+	}
 
 	try {
 		const [response, error] = await api("/users/v1/login", {
