@@ -53,6 +53,7 @@ func (h *Handler) ListThreadsJsonAPI(w http.ResponseWriter, req *http.Request) (
 		return err
 	}
 
+	// TODO: userID from token user.ID, not from request
 	list, isLastPage, err := h.controller.ListThreads(req.Context(), request.UserID, request.ParentID,
 		request.Limit, request.Offset, request.Asc)
 	if err != nil {

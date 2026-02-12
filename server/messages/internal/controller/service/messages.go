@@ -90,11 +90,6 @@ func (s *MessagesController) SaveMessage(ctx context.Context, id int64, text, ti
 
 	logger.Debugw("save message", "id", id, "text", text, "title", title, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private, "name", name)
 
-	err = s.threads.CreateThread(ctx, id, userID, threadID, name, private)
-	if err != nil {
-		return
-	}
-
 	_, err = s.client.SaveMessage(ctx, &api.SaveMessageRequest{
 		Id:       id,
 		Text:     text,
@@ -104,6 +99,15 @@ func (s *MessagesController) SaveMessage(ctx context.Context, id int64, text, ti
 		Private:  private,
 		Name:     name,
 	})
+	if err != nil {
+		return
+	}
+
+	// TODO: what if we fall here? Message is created, but thread is not yet.
+	// In readThreadMessages we request by batch. We arrive in situation, where
+	// len(threads) != len(messages).
+
+	err = s.threads.CreateThread(ctx, id, userID, threadID, name, private)
 	if err != nil {
 		return
 	}
@@ -330,6 +334,8 @@ func (s *MessagesController) ReadMessage(ctx context.Context, id int64, name str
 	if err != nil {
 		return nil, err
 	}
+
+	// TODO: add threads count
 
 	message = model.MessageFromProto(res)
 

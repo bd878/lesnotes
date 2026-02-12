@@ -103,6 +103,8 @@ func (m *DistributedThreads) setupRaft(log *logger.Logger) error {
 		config.LeaderLeaseTimeout = m.conf.Raft.LeaderLeaseTimeout
 	}
 
+	logger.Debugln("raft configuration", config)
+
 	m.raft, err = raft.NewRaft(config, fsm, logStore,
 		stableStore, m.snapshotStore, transport)
 	if err != nil {
@@ -114,6 +116,7 @@ func (m *DistributedThreads) setupRaft(log *logger.Logger) error {
 	if err != nil {
 		return err
 	}
+	logger.Debugw("raft", "has_state", hasState)
 	if m.conf.Bootstrap && !hasState {
 		servers := []raft.Server{{
 			ID:      m.conf.Raft.LocalID,
