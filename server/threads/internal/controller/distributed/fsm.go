@@ -25,7 +25,6 @@ type Repository interface {
 	ResolveThread(ctx context.Context, id, userID int64) (ids []int64, err error)
 	ReorderThread(ctx context.Context, id, userID, parentID, nextID, prevID int64) (err error)
 	CountThreads(ctx context.Context, id, userID int64) (total int32, err error)
-	Truncate(ctx context.Context) error
 	Dump(ctx context.Context) (reader io.ReadCloser, err error)
 	Restore(ctx context.Context, reader io.ReadCloser) (err error)
 }

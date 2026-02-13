@@ -20,7 +20,6 @@ type PaymentsRepository interface {
 	CancelPayment(ctx context.Context, id, userID int64) (err error)
 	RefundPayment(ctx context.Context, id, userID int64) (err error)
 	GetPayment(ctx context.Context, id, userID int64) (payment *billing.Payment, err error)
-	Truncate(ctx context.Context) error
 	Dump(ctx context.Context, writer io.Writer) (err error)
 	Restore(ctx context.Context, reader io.Reader) (err error)
 }
@@ -30,7 +29,6 @@ type InvoicesRepository interface {
 	CancelInvoice(ctx context.Context, id string, userID int64) (err error)
 	PayInvoice(ctx context.Context, id string, userID int64) (err error)
 	GetInvoice(ctx context.Context, id string, userID int64) (invoice *billing.Invoice, err error)
-	Truncate(ctx context.Context) error
 	Dump(ctx context.Context, writer io.Writer) (err error)
 	Restore(ctx context.Context, reader io.Reader) (err error)
 }

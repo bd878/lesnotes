@@ -110,12 +110,6 @@ func (r *Repository) DeleteAll(ctx context.Context, userID int64) (err error) {
 	return
 }
 
-func (r *Repository) Truncate(ctx context.Context) (err error) {
-	logger.Debugln("truncating table")
-	_, err = r.pool.Exec(ctx, r.table("TRUNCATE TABLE %s"))
-	return
-}
-
 func (r *Repository) Dump(ctx context.Context) (reader io.ReadCloser, err error) {
 	var (
 		writer io.WriteCloser

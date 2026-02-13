@@ -5,7 +5,12 @@ import (
 	"fmt"
 	"os"
 	"context"
+	"database/sql"
 
+	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/pressly/goose/v3"
+
+	"github.com/bd878/gallery/server/threads/migrations"
 	"github.com/bd878/gallery/server/threads/internal/grpc"
 	"github.com/bd878/gallery/server/threads/config"
 	"github.com/bd878/gallery/server/logger"
@@ -31,6 +36,31 @@ func main() {
 		LogLevel:   cfg.LogLevel,
 		SkipCaller: 1,
 	}))
+
+	db, err := sql.Open("pgx", cfg.PGConn)
+	if err != nil {
+		panic(err)
+	}
+
+	defer func(db *sql.DB) {
+		if err = goose.Reset(db, "."); err != nil {
+			return
+		}
+
+		if err = db.Close(); err != nil {
+			return
+		}
+	}(db)
+
+	goose.SetVerbose(true)
+
+	goose.SetBaseFS(migrations.FS)
+	if err := goose.SetDialect("postgres"); err != nil {
+		panic(err)
+	}
+	if err := goose.Up(db, "."); err != nil {
+		panic(err)
+	}
 
 	server := grpc.New(grpc.Config{
 		Addr:                  cfg.RpcAddr,

@@ -93,34 +93,16 @@ func (f *fsm) Restore(reader io.ReadCloser) (err error) {
 		}
 
 		if strings.Contains(hdr.Name, "files") {
-			err = f.filesRepo.Truncate(context.Background())
-			if err != nil {
-				logger.Errorw("truncate returned error", "error", err)
-				return err
-			}
-
 			err = f.filesRepo.Restore(context.Background(), tr)
 			if err != nil {
 				return err
 			}
 		} else if strings.Contains(hdr.Name, "messages") {
-			err = f.messagesRepo.Truncate(context.Background())
-			if err != nil {
-				logger.Errorw("truncate returned error", "error", err)
-				return err
-			}
-
 			err = f.messagesRepo.Restore(context.Background(), tr)
 			if err != nil {
 				return err
 			}
 		} else if strings.Contains(hdr.Name, "translations") {
-			err = f.translationsRepo.Truncate(context.Background())
-			if err != nil {
-				logger.Errorw("truncate returned error", "error", err)
-				return err
-			}
-
 			err = f.translationsRepo.Restore(context.Background(), tr)
 			if err != nil {
 				return err

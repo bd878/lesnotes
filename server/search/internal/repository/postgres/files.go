@@ -125,12 +125,6 @@ func (r *FilesRepository) PrivateFile(ctx context.Context, id, userID int64) (er
 	return
 }
 
-func (r *FilesRepository) Truncate(ctx context.Context) (err error) {
-	logger.Debugln("truncating table")
-	_, err = r.pool.Exec(ctx, r.table("TRUNCATE TABLE %s"))
-	return
-}
-
 func (r *FilesRepository) Dump(ctx context.Context, writer io.Writer) (err error) {
 	var conn *pgxpool.Conn
 

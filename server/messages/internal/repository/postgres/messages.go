@@ -383,12 +383,6 @@ func (r *MessagesRepository) ReadMessages(ctx context.Context, userID int64, lim
 	return
 }
 
-func (r *MessagesRepository) Truncate(ctx context.Context) (err error) {
-	logger.Debugln("truncating table")
-	_, err = r.pool.Exec(ctx, r.table("TRUNCATE TABLE %s"))
-	return
-}
-
 func (r *MessagesRepository) Dump(ctx context.Context, writer io.Writer) (err error) {
 	var conn *pgxpool.Conn
 

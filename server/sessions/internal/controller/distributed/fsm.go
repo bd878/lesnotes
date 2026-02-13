@@ -20,8 +20,6 @@ type Repository interface {
 	List(ctx context.Context, userID int64) (sessions []*model.Session, err error)
 	Delete(ctx context.Context, token string) (err error)
 	DeleteAll(ctx context.Context, userID int64) (err error)
-
-	Truncate(ctx context.Context) error
 	Dump(ctx context.Context) (reader io.ReadCloser, err error)
 	Restore(ctx context.Context, reader io.ReadCloser) (err error)
 }

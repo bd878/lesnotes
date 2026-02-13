@@ -1,6 +1,9 @@
 -- +goose Up
 CREATE SCHEMA IF NOT EXISTS threads;
 
+GRANT USAGE ON SCHEMA threads TO lesnotes_admin;
+GRANT INSERT, UPDATE, DELETE, SELECT, TRUNCATE ON ALL TABLES IN SCHEMA threads TO lesnotes_admin;
+
 CREATE TABLE IF NOT EXISTS threads.threads
 (
 	id           bigint        UNIQUE NOT NULL,   -- message id
@@ -18,9 +21,6 @@ CREATE TABLE IF NOT EXISTS threads.threads
 
 CREATE TRIGGER created_at_threads_trgr BEFORE UPDATE ON threads.threads FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
 CREATE TRIGGER updated_at_threads_trgr BEFORE UPDATE ON threads.threads FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
-
-GRANT USAGE ON SCHEMA threads TO lesnotes_admin;
-GRANT INSERT, UPDATE, DELETE, SELECT, TRUNCATE ON ALL TABLES IN SCHEMA threads TO lesnotes_admin;
 
 -- +goose Down
 DROP SCHEMA IF EXISTS threads CASCADE;

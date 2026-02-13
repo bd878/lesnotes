@@ -19,8 +19,6 @@ type Repository interface {
 	Delete(ctx context.Context, id int64) (err error)
 	Update(ctx context.Context, id int64, newLogin string, metadata []byte) (err error)
 	Find(ctx context.Context, id int64/*TODO: not used, remove*/, login string) (*usersmodel.User, error)
-	// TODO: add Get(id int64)
-	Truncate(ctx context.Context) error
 	Dump(ctx context.Context) (reader io.ReadCloser, err error)
 	Restore(ctx context.Context, reader io.ReadCloser) (err error)
 }

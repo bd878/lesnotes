@@ -79,23 +79,11 @@ func (f *fsm) Restore(reader io.ReadCloser) (err error) {
 		}
 
 		if strings.Contains(hdr.Name, "invoices") {
-			err = f.invoicesRepo.Truncate(context.Background())
-			if err != nil {
-				logger.Errorw("truncate returned error", "error", err)
-				return err
-			}
-
 			err = f.invoicesRepo.Restore(context.Background(), tr)
 			if err != nil {
 				return err
 			}
 		} else if strings.Contains(hdr.Name, "payments") {
-			err = f.paymentsRepo.Truncate(context.Background())
-			if err != nil {
-				logger.Errorw("truncate returned error", "error", err)
-				return err
-			}
-
 			err = f.paymentsRepo.Restore(context.Background(), tr)
 			if err != nil {
 				return err

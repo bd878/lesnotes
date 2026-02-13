@@ -21,7 +21,6 @@ type MessagesRepository interface {
 	PublishMessages(ctx context.Context, ids []int64, userID int64) error
 	DeleteMessage(ctx context.Context, id, userID int64) error
 	SearchMessages(ctx context.Context, userID int64, substr string, public int) (list []*model.Message, err error)
-	Truncate(ctx context.Context) (err error)
 	Dump(ctx context.Context, writer io.Writer) (err error)
 	Restore(ctx context.Context, reader io.Reader) (err error)
 }
@@ -31,7 +30,6 @@ type FilesRepository interface {
 	DeleteFile(ctx context.Context, id, userID int64) (err error)
 	PublishFile(ctx context.Context, id, userID int64) (err error)
 	PrivateFile(ctx context.Context, id, userID int64) (err error)
-	Truncate(ctx context.Context) (err error)
 	Dump(ctx context.Context, writer io.Writer) (err error)
 	Restore(ctx context.Context, reader io.Reader) (err error)
 }
@@ -44,7 +42,6 @@ type ThreadsRepository interface {
 	PublishThread(ctx context.Context, id, userID int64) error
 	PrivateThread(ctx context.Context, id, userID int64) error
 	SearchThreads(ctx context.Context, parentID, userID int64) (list []*model.Thread, err error)
-	Truncate(ctx context.Context) (err error)
 	Dump(ctx context.Context, writer io.Writer) (err error)
 	Restore(ctx context.Context, reader io.Reader) (err error)
 }
@@ -54,7 +51,6 @@ type TranslationsRepository interface {
 	DeleteTranslation(ctx context.Context, messageID int64, lang string) error
 	UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string) error
 	SearchTranslations(ctx context.Context, userID int64, substr string) (list []*model.Translation, err error)
-	Truncate(ctx context.Context) (err error)
 	Dump(ctx context.Context, writer io.Writer) (err error)
 	Restore(ctx context.Context, reader io.Reader) (err error)
 }

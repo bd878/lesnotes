@@ -1,9 +1,17 @@
 -- +goose Up
 CREATE SCHEMA IF NOT EXISTS billing;
 
+GRANT USAGE ON SCHEMA billing TO lesnotes_admin;
+GRANT INSERT, UPDATE, DELETE, SELECT, TRUNCATE ON ALL TABLES IN SCHEMA billing TO lesnotes_admin;
+GRANT CREATE ON SCHEMA billing TO lesnotes_admin;
+
 CREATE TYPE billing.currency AS ENUM ('rub', 'usd', 'eur', 'ton', 'btc', 'xtr');
 CREATE TYPE billing.invoice_status AS ENUM ('paid', 'unpaid', 'cancelled');
 CREATE TYPE billing.payment_status AS ENUM ('refunded', 'cancelled', 'processed', 'pending');
+
+GRANT USAGE ON TYPE billing.currency TO lesnotes_admin;
+GRANT USAGE ON TYPE billing.invoice_status TO lesnotes_admin;
+GRANT USAGE ON TYPE billing.payment_status TO lesnotes_admin;
 
 CREATE TABLE IF NOT EXISTS billing.payments
 (
@@ -37,13 +45,6 @@ CREATE TABLE IF NOT EXISTS billing.invoices
 
 CREATE TRIGGER created_at_billing_invoices_trgr BEFORE UPDATE ON billing.invoices FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
 CREATE TRIGGER updated_at_billing_invoices_trgr BEFORE UPDATE ON billing.invoices FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
-
-GRANT USAGE ON SCHEMA billing TO lesnotes_admin;
-GRANT INSERT, UPDATE, DELETE, SELECT, TRUNCATE ON ALL TABLES IN SCHEMA billing TO lesnotes_admin;
-
-GRANT USAGE ON TYPE billing.currency TO lesnotes_admin;
-GRANT USAGE ON TYPE billing.invoice_status TO lesnotes_admin;
-GRANT USAGE ON TYPE billing.payment_status TO lesnotes_admin;
 
 -- +goose Down
 DROP SCHEMA IF EXISTS billing CASCADE;

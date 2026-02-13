@@ -1,6 +1,9 @@
 -- +goose Up
 CREATE SCHEMA IF NOT EXISTS search;
 
+GRANT USAGE ON SCHEMA search TO lesnotes_admin;
+GRANT INSERT, UPDATE, DELETE, SELECT, TRUNCATE ON ALL TABLES IN SCHEMA search TO lesnotes_admin;
+
 CREATE TABLE IF NOT EXISTS search.messages
 (
 	id         bigint       UNIQUE NOT NULL,    -- message id
@@ -64,9 +67,6 @@ CREATE TABLE IF NOT EXISTS search.translations
 
 CREATE TRIGGER created_at_translations_trgr BEFORE UPDATE ON search.translations FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
 CREATE TRIGGER updated_at_translations_trgr BEFORE UPDATE ON search.translations FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
-
-GRANT USAGE ON SCHEMA search TO lesnotes_admin;
-GRANT INSERT, UPDATE, DELETE, SELECT, TRUNCATE ON ALL TABLES IN SCHEMA search TO lesnotes_admin;
 
 -- +goose Down
 DROP SCHEMA IF EXISTS search CASCADE;

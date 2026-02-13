@@ -24,7 +24,6 @@ type MessagesRepository interface {
 	DeleteUserMessages(ctx context.Context, userID int64) (err error)
 	ReadMessages(ctx context.Context, userID int64, limit, offset int32) (messages []*model.Message, isLastPage bool, err error)
 	ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*model.Message, err error)
-	Truncate(ctx context.Context) error
 	Dump(ctx context.Context, writer io.Writer) (err error)
 	Restore(ctx context.Context, reader io.Reader) (err error)
 }
@@ -35,7 +34,6 @@ type FilesRepository interface {
 	SaveMessageFiles(ctx context.Context, messageID, userID int64, fileIDs []int64) (err error)
 	UpdateMessageFiles(ctx context.Context, messageID, userID int64, fileIDs []int64) (err error)
 	DeleteMessage(ctx context.Context, messageID, userID int64) (err error)
-	Truncate(ctx context.Context) error
 	Dump(ctx context.Context, writer io.Writer) (err error)
 	Restore(ctx context.Context, reader io.Reader) (err error)
 }
@@ -48,7 +46,6 @@ type TranslationsRepository interface {
 	ReadMessageTranslations(ctx context.Context, messageID int64) (translations []*model.TranslationPreview, err error)
 	ListTranslations(ctx context.Context, messageID int64) (translations []*model.Translation, err error)
 	DeleteMessage(ctx context.Context, messageID int64) (err error)
-	Truncate(ctx context.Context) error
 	Dump(ctx context.Context, writer io.Writer) (err error)
 	Restore(ctx context.Context, reader io.Reader) (err error)
 }

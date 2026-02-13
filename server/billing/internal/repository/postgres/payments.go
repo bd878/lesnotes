@@ -66,12 +66,6 @@ func (r *PaymentsRepository) GetPayment(ctx context.Context, id, userID int64) (
 	return
 }
 
-func (r *PaymentsRepository) Truncate(ctx context.Context) (err error) {
-	logger.Debugln("truncating table")
-	_, err = r.pool.Exec(ctx, r.table("TRUNCATE TABLE %s"))
-	return
-}
-
 func (r *PaymentsRepository) Dump(ctx context.Context, writer io.Writer) (err error) {
 	var conn *pgxpool.Conn
 

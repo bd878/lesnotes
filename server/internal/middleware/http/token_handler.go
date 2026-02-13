@@ -47,6 +47,7 @@ func (b *tokenAuthBuilder) handleMultipartFormData(w http.ResponseWriter, req *h
 	}
 
 	if err != nil {
+		logger.Errorln(err)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
@@ -101,6 +102,7 @@ func (b *tokenAuthBuilder) handleJson(w http.ResponseWriter, req *http.Request) 
 	}
 
 	if err != nil {
+		logger.Errorln(err)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{

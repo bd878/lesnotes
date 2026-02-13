@@ -181,12 +181,6 @@ func (r *FilesRepository) DeleteMessage(ctx context.Context, messageID, userID i
 	return
 }
 
-func (r *FilesRepository) Truncate(ctx context.Context) (err error) {
-	logger.Debugln("truncating table")
-	_, err = r.pool.Exec(ctx, r.table("TRUNCATE TABLE %s"))
-	return
-}
-
 func (r *FilesRepository) Dump(ctx context.Context, writer io.Writer) (err error) {
 	var conn *pgxpool.Conn
 

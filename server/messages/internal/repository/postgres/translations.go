@@ -139,12 +139,6 @@ func (r *TranslationsRepository) DeleteMessage(ctx context.Context, messageID in
 	return
 }
 
-func (r *TranslationsRepository) Truncate(ctx context.Context) (err error) {
-	logger.Debugln("truncating table")
-	_, err = r.pool.Exec(ctx, r.table("TRUNCATE TABLE %s"))
-	return
-}
-
 func (r *TranslationsRepository) Dump(ctx context.Context, writer io.Writer) (err error) {
 	var conn *pgxpool.Conn
 

@@ -8,21 +8,17 @@ import (
 	"time"
 	"context"
 	"bytes"
-	"database/sql"
 	"google.golang.org/grpc"
 	"github.com/hashicorp/raft"
 	"github.com/soheilhy/cmux"
 	"github.com/nats-io/nats.go"
-	"github.com/pressly/goose/v3"
 
 	"golang.org/x/sync/errgroup"
 	"github.com/bd878/gallery/server/api"
-	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jackc/pgx/v5/pgxpool"
 	hclog "github.com/hashicorp/go-hclog"
 
 	"github.com/bd878/gallery/server/waiter"
-	"github.com/bd878/gallery/server/billing/migrations"
 	membership "github.com/bd878/gallery/server/discovery/serf"
 	grpcmiddleware "github.com/bd878/gallery/server/internal/middleware/grpc"
 	repository "github.com/bd878/gallery/server/billing/internal/repository/postgres"
@@ -71,10 +67,6 @@ func New(cfg Config) *Server {
 		listener:    listener,
 	}
 
-	if err := server.migrateDB(); err != nil {
-		panic(err)
-	}
-
 	if err := server.setupDB(); err != nil {
 		panic(err)
 	}
@@ -97,23 +89,6 @@ func New(cfg Config) *Server {
 func (s *Server) setupDB() (err error) {
 	s.pool, err = pgxpool.New(context.Background(), s.conf.PGConn)
 	return
-}
-
-func (s *Server) migrateDB() (err error) {
-	db, err := sql.Open("pgx", s.conf.PGConn)
-	if err != nil {
-		return err
-	}
-
-	goose.SetBaseFS(migrations.FS)
-	if err := goose.SetDialect("postgres"); err != nil {
-		return err
-	}
-	if err := goose.Up(db, "."); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (s *Server) setupNats() (err error) {
