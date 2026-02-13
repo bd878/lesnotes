@@ -239,6 +239,8 @@ func (s *Controller) LoginUser(ctx context.Context, login, password string) (ses
 		return nil, err
 	}
 
+	logger.Debugw("user found", "user_id", user.Id)
+
 	err = bcrypt.CompareHashAndPassword([]byte(user.HashedPassword), []byte(password))
 	if err != nil {
 		logger.Errorln(err)
