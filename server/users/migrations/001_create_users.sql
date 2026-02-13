@@ -1,7 +1,6 @@
-\c lesnotes
+-- +goose Up
 CREATE SCHEMA IF NOT EXISTS users;
 
--- order is important
 CREATE TABLE IF NOT EXISTS users.users
 (
 	id          bigint       UNIQUE NOT NULL,
@@ -21,3 +20,6 @@ CREATE TRIGGER updated_at_users_trgr BEFORE UPDATE ON users.users FOR EACH ROW E
 
 GRANT USAGE ON SCHEMA users TO lesnotes_admin;
 GRANT INSERT, UPDATE, DELETE, SELECT, TRUNCATE ON ALL TABLES IN SCHEMA users TO lesnotes_admin;
+
+-- +goose Down
+DROP SCHEMA IF EXISTS users CASCADE;

@@ -1,7 +1,6 @@
-\c lesnotes
+-- +goose Up
 CREATE SCHEMA IF NOT EXISTS search;
 
--- ORDER IS IMPORTANT
 CREATE TABLE IF NOT EXISTS search.messages
 (
 	id         bigint       UNIQUE NOT NULL,    -- message id
@@ -68,3 +67,6 @@ CREATE TRIGGER updated_at_translations_trgr BEFORE UPDATE ON search.translations
 
 GRANT USAGE ON SCHEMA search TO lesnotes_admin;
 GRANT INSERT, UPDATE, DELETE, SELECT, TRUNCATE ON ALL TABLES IN SCHEMA search TO lesnotes_admin;
+
+-- +goose Down
+DROP SCHEMA IF EXISTS search CASCADE;

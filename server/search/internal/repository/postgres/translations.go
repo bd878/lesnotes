@@ -77,7 +77,7 @@ func (r *TranslationsRepository) Truncate(ctx context.Context) (err error) {
 func (r *TranslationsRepository) Dump(ctx context.Context, writer io.Writer) (err error) {
 	var conn *pgxpool.Conn
 
-	logger.Debugln("dumping invoices repo")
+	logger.Debugln("dumping translations repo")
 
 	conn, err = r.pool.Acquire(ctx)
 	defer conn.Release()
@@ -94,7 +94,7 @@ func (r *TranslationsRepository) Dump(ctx context.Context, writer io.Writer) (er
 func (r *TranslationsRepository) Restore(ctx context.Context, reader io.Reader) (err error) {
 	var conn *pgxpool.Conn
 
-	logger.Debugln("restoring invoices repo")
+	logger.Debugln("restoring translations repo")
 
 	query := r.table("COPY %s FROM STDIN BINARY")
 

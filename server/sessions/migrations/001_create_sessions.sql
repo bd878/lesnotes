@@ -1,4 +1,4 @@
-\c lesnotes
+-- +goose Up
 CREATE SCHEMA IF NOT EXISTS sessions;
 
 CREATE TABLE IF NOT EXISTS sessions.sessions
@@ -13,3 +13,6 @@ CREATE TRIGGER created_at_sessions_trgr BEFORE UPDATE ON sessions.sessions FOR E
 
 GRANT USAGE ON SCHEMA sessions TO lesnotes_admin;
 GRANT INSERT, UPDATE, DELETE, SELECT, TRUNCATE ON ALL TABLES IN SCHEMA sessions TO lesnotes_admin;
+
+-- +goose Down
+DROP SCHEMA IF EXISTS sessions CASCADE;

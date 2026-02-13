@@ -192,7 +192,7 @@ func (r *ThreadsRepository) Truncate(ctx context.Context) (err error) {
 func (r *ThreadsRepository) Dump(ctx context.Context, writer io.Writer) (err error) {
 	var conn *pgxpool.Conn
 
-	logger.Debugln("dumping invoices repo")
+	logger.Debugln("dumping threads repo")
 
 	conn, err = r.pool.Acquire(ctx)
 	defer conn.Release()
@@ -209,7 +209,7 @@ func (r *ThreadsRepository) Dump(ctx context.Context, writer io.Writer) (err err
 func (r *ThreadsRepository) Restore(ctx context.Context, reader io.Reader) (err error) {
 	var conn *pgxpool.Conn
 
-	logger.Debugln("restoring invoices repo")
+	logger.Debugln("restoring threads repo")
 
 	query := r.table("COPY %s FROM STDIN BINARY")
 

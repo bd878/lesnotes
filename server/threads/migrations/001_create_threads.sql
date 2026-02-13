@@ -1,4 +1,4 @@
-\c lesnotes
+-- +goose Up
 CREATE SCHEMA IF NOT EXISTS threads;
 
 CREATE TABLE IF NOT EXISTS threads.threads
@@ -21,3 +21,6 @@ CREATE TRIGGER updated_at_threads_trgr BEFORE UPDATE ON threads.threads FOR EACH
 
 GRANT USAGE ON SCHEMA threads TO lesnotes_admin;
 GRANT INSERT, UPDATE, DELETE, SELECT, TRUNCATE ON ALL TABLES IN SCHEMA threads TO lesnotes_admin;
+
+-- +goose Down
+DROP SCHEMA IF EXISTS threads CASCADE;

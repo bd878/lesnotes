@@ -1,4 +1,4 @@
-\c lesnotes
+-- +goose Up
 CREATE SCHEMA IF NOT EXISTS billing;
 
 CREATE TYPE billing.currency AS ENUM ('rub', 'usd', 'eur', 'ton', 'btc', 'xtr');
@@ -44,3 +44,6 @@ GRANT INSERT, UPDATE, DELETE, SELECT, TRUNCATE ON ALL TABLES IN SCHEMA billing T
 GRANT USAGE ON TYPE billing.currency TO lesnotes_admin;
 GRANT USAGE ON TYPE billing.invoice_status TO lesnotes_admin;
 GRANT USAGE ON TYPE billing.payment_status TO lesnotes_admin;
+
+-- +goose Down
+DROP SCHEMA IF EXISTS billing CASCADE;
