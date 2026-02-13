@@ -17,6 +17,7 @@ import (
 
 	"golang.org/x/sync/errgroup"
 	"github.com/bd878/gallery/server/api"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jackc/pgx/v5/pgxpool"
 	hclog "github.com/hashicorp/go-hclog"
 
