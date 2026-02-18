@@ -19,4 +19,5 @@ type Config struct {
 	PGConn               string      `json:"pg_conn"`
 	PaymentsTableName    string      `json:"payments_table_name"`
 	InvoicesTableName    string      `json:"invoices_table_name"`
+	GooseTableName       string      `json:"goose_table_name"`
 }

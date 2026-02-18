@@ -18,4 +18,5 @@ type Config struct {
 	DataPath             string      `json:"data_path"`
 	PGConn               string      `json:"pg_conn"`
 	TableName            string      `json:"table_name"`
+	GooseTableName       string      `json:"goose_table_name"`
 }

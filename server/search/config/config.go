@@ -21,4 +21,5 @@ type Config struct {
 	TranslationsTableName   string      `json:"translations_table_name"`
 	FilesTableName          string      `json:"files_table_name"`
 	ThreadsTableName        string      `json:"threads_table_name"`
+	GooseTableName          string      `json:"goose_table_name"`
 }

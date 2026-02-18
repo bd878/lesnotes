@@ -53,6 +53,7 @@ func main() {
 	}(db)
 
 	goose.SetVerbose(true)
+	goose.SetTableName(cfg.GooseTableName)
 
 	goose.SetBaseFS(migrations.FS)
 	if err := goose.SetDialect("postgres"); err != nil {

@@ -19,4 +19,5 @@ type Config struct {
 	PGConn                 string          `json:"pg_conn"`
 	TableName              string          `json:"table_name"`
 	CookieDomain           string          `json:"cookie_domain"`
+	GooseTableName         string          `json:"goose_table_name"`
 }
