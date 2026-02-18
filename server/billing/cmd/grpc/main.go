@@ -13,6 +13,7 @@ import (
 	"github.com/bd878/gallery/server/billing/migrations"
 	"github.com/bd878/gallery/server/billing/internal/grpc"
 	"github.com/bd878/gallery/server/billing/config"
+	"github.com/bd878/gallery/server/internal/system"
 	"github.com/bd878/gallery/server/logger"
 )
 
@@ -31,11 +32,17 @@ func main() {
 	}
 
 	cfg := config.Load(flag.Arg(0))
-	logger.SetDefault(logger.New(logger.Config{
-		NodeName:   cfg.NodeName,
-		LogLevel:   cfg.LogLevel,
-		SkipCaller: 0,
-	}))
+
+	s, err := system.NewSystem(system.Config{
+		NodeName:        cfg.NodeName,
+		LogLevel:        cfg.LogLevel,
+		SkipCaller:      cfg.SkipCaller,
+		NatsAddr:        cfg.NatsAddr,
+		PGConn:          cfg.PGConn,
+	})
+	if err != nil {
+		panic(err)
+	}
 
 	db, err := sql.Open("pgx", cfg.PGConn)
 	if err != nil {
@@ -43,22 +50,18 @@ func main() {
 	}
 
 	defer func(db *sql.DB) {
-		if err = goose.Reset(db, "."); err != nil {
-			return
+		err := s.ResetDB()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
 		}
 
-		if err = db.Close(); err != nil {
-			return
+		err = db.Close()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
 		}
-	}(db)
+	}(s.DB())
 
-	goose.SetVerbose(true)
-
-	goose.SetBaseFS(migrations.FS)
-	if err := goose.SetDialect("postgres"); err != nil {
-		panic(err)
-	}
-	if err := goose.Up(db, "."); err != nil {
+	if err := s.MigrateDB(migrations.FS); err != nil {
 		panic(err)
 	}
 
@@ -77,7 +80,17 @@ func main() {
 		NatsAddr:              cfg.NatsAddr,
 	})
 
+	
+
 	if err := server.Run(context.Background()); err != nil {
 		fmt.Fprintf(os.Stderr, "server exited %v\n", err)
 	}
+
+	s.Waiter().Add(
+		s.WaitForPool,
+		s.WaitForStream,
+		s.WaitForRPC,
+	)
+
+	return s.Waiter().Wait()
 }
