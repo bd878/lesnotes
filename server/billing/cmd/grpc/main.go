@@ -7,13 +7,10 @@ import (
 	"context"
 	"database/sql"
 
-	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/pressly/goose/v3"
-
+	"github.com/bd878/gallery/server/billing"
 	"github.com/bd878/gallery/server/billing/migrations"
-	"github.com/bd878/gallery/server/billing/internal/grpc"
 	"github.com/bd878/gallery/server/billing/config"
-	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/internal/system"
 )
 
 func init() {
@@ -31,54 +28,55 @@ func main() {
 	}
 
 	cfg := config.Load(flag.Arg(0))
-	logger.SetDefault(logger.New(logger.Config{
-		NodeName:   cfg.NodeName,
-		LogLevel:   cfg.LogLevel,
-		SkipCaller: 0,
-	}))
 
-	db, err := sql.Open("pgx", cfg.PGConn)
+	s, err := system.NewSystem(system.Config{
+		Addr:               cfg.Addr,
+		NodeName:           cfg.NodeName,
+		LogLevel:           cfg.LogLevel,
+		RaftLogLevel:       cfg.RaftLogLevel,
+		RaftBootstrap:      cfg.RaftBootstrap,
+		DataPath:           cfg.DataPath,
+		RaftServers:        cfg.RaftServers,
+		SerfAddr:           cfg.SerfAddr,
+		SerfJoinAddrs:      cfg.SerfJoinAddrs,
+		SkipCaller:         cfg.SkipCaller,
+		NatsAddr:           cfg.NatsAddr,
+		PGConn:             cfg.PGConn,
+		GooseTableName:     cfg.GooseTableName,
+	})
 	if err != nil {
 		panic(err)
 	}
 
 	defer func(db *sql.DB) {
-		if err = goose.Reset(db, "."); err != nil {
-			return
+		err := s.ResetDB()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
 		}
 
-		if err = db.Close(); err != nil {
-			return
+		err = db.Close()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
 		}
-	}(db)
+	}(s.DB())
 
-	goose.SetVerbose(true)
-	goose.SetTableName(cfg.GooseTableName)
-
-	goose.SetBaseFS(migrations.FS)
-	if err := goose.SetDialect("postgres"); err != nil {
-		panic(err)
-	}
-	if err := goose.Up(db, "."); err != nil {
+	if err := s.MigrateDB(migrations.FS); err != nil {
 		panic(err)
 	}
 
-	server := grpc.New(grpc.Config{
-		Addr:                  cfg.RpcAddr,
-		PGConn:                cfg.PGConn,
-		NodeName:              cfg.NodeName,
-		RaftLogLevel:          cfg.RaftLogLevel,
-		RaftBootstrap:         cfg.RaftBootstrap,
-		DataPath:              cfg.DataPath,
-		PaymentsTableName:     cfg.PaymentsTableName,
-		InvoicesTableName:     cfg.InvoicesTableName,
-		RaftServers:           cfg.RaftServers,
-		SerfAddr:              cfg.SerfAddr,
-		SerfJoinAddrs:         cfg.SerfJoinAddrs,
-		NatsAddr:              cfg.NatsAddr,
-	})
-
-	if err := server.Run(context.Background()); err != nil {
+	if err := billing.Root(s.Waiter().Context(), s); err != nil {
 		fmt.Fprintf(os.Stderr, "server exited %v\n", err)
+		return err
 	}
+
+	fmt.Println("started billing service")
+	defer fmt.Println("stopped billing service")
+
+	s.Waiter().Add(
+		s.WaitForPool,
+		s.WaitForStream,
+		s.WaitForRPC,
+	)
+
+	return s.Waiter().Wait()
 }
