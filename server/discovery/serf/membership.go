@@ -1,6 +1,7 @@
 package discovery
 
 import (
+	"context"
 	"net"
 
 	"github.com/hashicorp/serf/serf"
@@ -58,7 +59,6 @@ func (m *Membership) setupSerf() error {
 		}
 	}
 
-	go m.runHandler()
 	return nil
 }
 
@@ -70,57 +70,65 @@ type Handler interface {
 	ShowLeader() error
 }
 
-func (m *Membership) runHandler() {
-	for e := range m.events {
-		switch e.EventType() {
-		case serf.EventMemberJoin:
-			for _, member := range e.(serf.MemberEvent).Members {
-				if m.isLocal(member) {
-					continue
-				}
-				m.handleJoin(member)
+func (m *Membership) Run(ctx context.Context) {
+	for {
+		select {
+		case <-ctx.Done():
+			if err := m.Leave(); err != nil {
+				logger.Errorw("membership failed to leave", "error", err)
 			}
-
-		case serf.EventMemberLeave, serf.EventMemberFailed:
-			for _, member := range e.(serf.MemberEvent).Members {
-				if m.isLocal(member) {
-					return
+			return
+		case e := <- m.events:
+			switch e.EventType() {
+			case serf.EventMemberJoin:
+				for _, member := range e.(serf.MemberEvent).Members {
+					if m.isLocal(member) {
+						continue
+					}
+					m.handleJoin(member)
 				}
-				m.handleLeave(member)
-			}
 
-		case serf.EventQuery:
-			switch e.String() {
-			case "query: snapshot":
-				logger.Debugln("performing snapshot")
-				err := m.handler.Snapshot()
-				if err != nil {
-					logger.Debugw("snapshot returned error", "error", err)
+			case serf.EventMemberLeave, serf.EventMemberFailed:
+				for _, member := range e.(serf.MemberEvent).Members {
+					if m.isLocal(member) {
+						return
+					}
+					m.handleLeave(member)
 				}
-				logger.Debugln("snapshot finished")
 
-			case "query: restore":
-				logger.Debugln("performing restore")
-				err := m.handler.Restore()
-				if err != nil {
-					logger.Debugw("restore returned error", "error", err)
-				}
-				logger.Debugln("restore finished")
+			case serf.EventQuery:
+				switch e.String() {
+				case "query: snapshot":
+					logger.Debugln("performing snapshot")
+					err := m.handler.Snapshot()
+					if err != nil {
+						logger.Debugw("snapshot returned error", "error", err)
+					}
+					logger.Debugln("snapshot finished")
 
-			case "query: leader":
-				logger.Debugln("who is leader")
-				err := m.handler.ShowLeader()
-				if err != nil {
-					logger.Debugw("failed to show roles", "error", err)
+				case "query: restore":
+					logger.Debugln("performing restore")
+					err := m.handler.Restore()
+					if err != nil {
+						logger.Debugw("restore returned error", "error", err)
+					}
+					logger.Debugln("restore finished")
+
+				case "query: leader":
+					logger.Debugln("who is leader")
+					err := m.handler.ShowLeader()
+					if err != nil {
+						logger.Debugw("failed to show roles", "error", err)
+					}
+					logger.Debugln("show leader finished")
+
+				default:
+					logger.Errorw("unknown event payload", "payload", e.String())
 				}
-				logger.Debugln("show leader finished")
 
 			default:
-				logger.Errorw("unknown event payload", "payload", e.String())
+				logger.Warnf("Unknown event: %s\n", e.String())
 			}
-
-		default:
-			logger.Warnf("Unknown event: %s\n", e.String())
 		}
 	}
 }

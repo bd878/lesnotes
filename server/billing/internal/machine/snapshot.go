@@ -1,4 +1,4 @@
-package distributed
+package machine
 
 import (
 	"io"
@@ -22,8 +22,7 @@ type snapshot struct {
 	invoicesFile *os.File
 }
 
-// TODO: test
-func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {
+func (f *Machine) Snapshot() (raft.FSMSnapshot, error) {
 	var err error
 
 	s := &snapshot{}
@@ -64,7 +63,7 @@ func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {
 	return s, nil
 }
 
-func (f *fsm) Restore(reader io.ReadCloser) (err error) {
+func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 	logger.Debugln("restoring fsm from snapshot")
 
 	tr := tar.NewReader(reader)
