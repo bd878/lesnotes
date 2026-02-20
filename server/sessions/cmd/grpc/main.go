@@ -4,16 +4,12 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"context"
 	"database/sql"
 
-	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/pressly/goose/v3"
-
+	"github.com/bd878/gallery/server/sessions"
 	"github.com/bd878/gallery/server/sessions/migrations"
-	"github.com/bd878/gallery/server/sessions/internal/grpc"
 	"github.com/bd878/gallery/server/sessions/config"
-	"github.com/bd878/gallery/server/internal/logger"
+	"github.com/bd878/gallery/server/internal/system"
 )
 
 func init() {
@@ -31,53 +27,51 @@ func main() {
 	}
 
 	cfg := config.Load(flag.Arg(0))
-	logger.SetDefault(logger.New(logger.Config{
-		NodeName:         cfg.NodeName,
-		LogLevel:         cfg.LogLevel,
-		SkipCaller:       0,
-	}))
 
-	db, err := sql.Open("pgx", cfg.PGConn)
+	s, err := system.NewSystem(system.Config{
+		RpcAddr:            cfg.RpcAddr,
+		NodeName:           cfg.NodeName,
+		LogLevel:           cfg.LogLevel,
+		SkipCaller:         1,
+		NatsAddr:           cfg.NatsAddr,
+		PGConn:             cfg.PGConn,
+		GooseTableName:     cfg.GooseTableName,
+	})
 	if err != nil {
 		panic(err)
 	}
 
 	defer func(db *sql.DB) {
-		if err = goose.Reset(db, "."); err != nil {
-			return
+		err := s.ResetDB()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "failed to reset db", err)
 		}
 
-		if err = db.Close(); err != nil {
-			return
+		err = db.Close()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "failed to close db", err)
 		}
-	}(db)
+	}(s.DB())
 
-	goose.SetVerbose(true)
-	goose.SetTableName(cfg.GooseTableName)
-
-	goose.SetBaseFS(migrations.FS)
-	if err := goose.SetDialect("postgres"); err != nil {
-		panic(err)
-	}
-	if err := goose.Up(db, "."); err != nil {
+	if err := s.MigrateDB(migrations.FS); err != nil {
 		panic(err)
 	}
 
-	server := grpc.New(grpc.Config{
-		Addr:                 cfg.RpcAddr,
-		PGConn:               cfg.PGConn,
-		NodeName:             cfg.NodeName,
-		RaftLogLevel:         cfg.RaftLogLevel,
-		RaftBootstrap:        cfg.RaftBootstrap,
-		DataPath:             cfg.DataPath,
-
-		TableName:            cfg.TableName,
-		RaftServers:          cfg.RaftServers,
-		SerfAddr:             cfg.SerfAddr,
-		SerfJoinAddrs:        cfg.SerfJoinAddrs,
-	})
-
-	if err := server.Run(context.Background()); err != nil {
+	if err := sessions.Root(s.Waiter().Context(), cfg, s); err != nil {
 		fmt.Fprintf(os.Stderr, "server exited %v\n", err)
+		panic(err)
+	}
+
+	fmt.Println("started sessions service")
+	defer fmt.Println("stopped sessions service")
+
+	s.Waiter().Add(
+		s.WaitForPool,
+		s.WaitForStream,
+		s.WaitForRPC,
+	)
+
+	if err = s.Waiter().Wait(); err != nil {
+		fmt.Fprintln(os.Stderr, "waiter exited with error", err)
 	}
 }

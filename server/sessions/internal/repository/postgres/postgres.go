@@ -1,4 +1,4 @@
-package repository
+package postgres
 
 import (
 	"io"
@@ -13,19 +13,19 @@ import (
 	"github.com/bd878/gallery/server/sessions/pkg/model"
 )
 
-type Repository struct {
+type SessionsRepository struct {
 	tableName  string
 	pool      *pgxpool.Pool
 }
 
-func New(pool *pgxpool.Pool, tableName string) *Repository {
-	return &Repository{
+func NewSessionsRepository(pool *pgxpool.Pool, tableName string) *SessionsRepository {
+	return &SessionsRepository{
 		tableName: tableName,
 		pool:      pool,
 	}
 }
 
-func (r *Repository) Save(ctx context.Context, userID int64, token string, expiresUTCNano int64) (err error) {
+func (r *SessionsRepository) Save(ctx context.Context, userID int64, token string, expiresUTCNano int64) (err error) {
 	const query = "INSERT INTO %s(user_id, value, expires_at) VALUES ($1, $2, $3)"
 
 	expiresAt := time.Unix(0, expiresUTCNano)
@@ -35,7 +35,7 @@ func (r *Repository) Save(ctx context.Context, userID int64, token string, expir
 	return err
 }
 
-func (r *Repository) Get(ctx context.Context, token string) (session *model.Session, err error) {
+func (r *SessionsRepository) Get(ctx context.Context, token string) (session *model.Session, err error) {
 	const query = "SELECT user_id, expires_at FROM %s WHERE value = $1"
 
 	var (
@@ -57,7 +57,7 @@ func (r *Repository) Get(ctx context.Context, token string) (session *model.Sess
 	return
 }
 
-func (r *Repository) List(ctx context.Context, userID int64) (sessions []*model.Session, err error) {
+func (r *SessionsRepository) List(ctx context.Context, userID int64) (sessions []*model.Session, err error) {
 	const query = "SELECT value, expires_at FROM %s WHERE user_id = $1"
 
 	var rows pgx.Rows
@@ -94,7 +94,7 @@ func (r *Repository) List(ctx context.Context, userID int64) (sessions []*model.
 	return
 }
 
-func (r *Repository) Delete(ctx context.Context, token string) (err error) {
+func (r *SessionsRepository) Delete(ctx context.Context, token string) (err error) {
 	const query = "DELETE FROM %s WHERE value = $1"
 
 	_, err = r.pool.Exec(ctx, r.table(query), token)
@@ -102,7 +102,7 @@ func (r *Repository) Delete(ctx context.Context, token string) (err error) {
 	return
 }
 
-func (r *Repository) DeleteAll(ctx context.Context, userID int64) (err error) {
+func (r *SessionsRepository) DeleteAll(ctx context.Context, userID int64) (err error) {
 	const query = "DELETE FROM %s WHERE user_id = $1"
 
 	_, err = r.pool.Exec(ctx, r.table(query), userID)
@@ -110,51 +110,41 @@ func (r *Repository) DeleteAll(ctx context.Context, userID int64) (err error) {
 	return
 }
 
-func (r *Repository) Dump(ctx context.Context) (reader io.ReadCloser, err error) {
-	var (
-		writer io.WriteCloser
-		conn   *pgxpool.Conn
-	)
+func (r *SessionsRepository) Dump(ctx context.Context, writer io.Writer) (err error) {
+	var conn *pgxpool.Conn
 
-	query := r.table("COPY %s TO STDOUT BINARY")
-
-	reader, writer = io.Pipe()
+	logger.Debugln("dumping sessions repo")
 
 	conn, err = r.pool.Acquire(ctx)
+	defer conn.Release()
 	if err != nil {
-		conn.Release()
 		return
 	}
 
-	go func(ctx context.Context, query string, conn *pgxpool.Conn, writer io.WriteCloser) {
-		_, err := conn.Conn().PgConn().CopyTo(ctx, writer, query)
-		defer writer.Close()
-		defer conn.Release()
-		if err != nil {
-			logger.Errorw("failed to dump", "error", err)
-		}
-	}(ctx, query, conn, writer)
+	// will block, not concurrent safe
+	_, err = conn.Conn().PgConn().CopyTo(ctx, writer, r.table("COPY %s TO STDOUT BINARY"))
 
 	return
 }
 
-func (r *Repository) Restore(ctx context.Context, reader io.ReadCloser) (err error) {
+func (r *SessionsRepository) Restore(ctx context.Context, reader io.Reader) (err error) {
 	var conn *pgxpool.Conn
+
+	logger.Debugln("restoring sessions repo")
 
 	query := r.table("COPY %s FROM STDIN BINARY")
 
 	conn, err = r.pool.Acquire(ctx) 
+	defer conn.Release()
 	if err != nil {
-		conn.Release()
 		return
 	}
 
 	_, err = conn.Conn().PgConn().CopyFrom(ctx, reader, query)
-	defer conn.Release()
 
 	return
 }
 
-func (r Repository) table(query string) string {
+func (r SessionsRepository) table(query string) string {
 	return fmt.Sprintf(query, r.tableName)
 }
