@@ -7,7 +7,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"google.golang.org/protobuf/proto"
-	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/users/pkg/model"
 )
 

@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"encoding/json"
 
-	"github.com/bd878/gallery/server/utils"
+	"github.com/bd878/gallery/server/internal/utils"
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
 	messages "github.com/bd878/gallery/server/messages/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"

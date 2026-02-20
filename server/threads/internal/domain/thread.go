@@ -2,7 +2,7 @@ package domain
 
 import (
 	"errors"
-	"github.com/bd878/gallery/server/ddd"
+	"github.com/bd878/gallery/server/internal/ddd"
 )
 
 const (

@@ -18,7 +18,7 @@ import (
 
 	"github.com/bd878/gallery/server/api"
 
-	"github.com/bd878/gallery/server/waiter"
+	"github.com/bd878/gallery/server/internal/waiter"
 	membership "github.com/bd878/gallery/server/internal/discovery/serf"
 	grpcmiddleware "github.com/bd878/gallery/server/internal/middleware/grpc"
 	controller "github.com/bd878/gallery/server/users/internal/controller/distributed"

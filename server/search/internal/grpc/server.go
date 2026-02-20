@@ -18,8 +18,8 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	hclog "github.com/hashicorp/go-hclog"
 
-	"github.com/bd878/gallery/server/waiter"
-	broker "github.com/bd878/gallery/server/nats"
+	"github.com/bd878/gallery/server/internal/waiter"
+	broker "github.com/bd878/gallery/server/internal/nats"
 	membership "github.com/bd878/gallery/server/internal/discovery/serf"
 	grpcmiddleware "github.com/bd878/gallery/server/internal/middleware/grpc"
 	repository "github.com/bd878/gallery/server/search/internal/repository/postgres"

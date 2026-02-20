@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"context"
-	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/internal/logger"
 	"google.golang.org/grpc"
 )
 

@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"path/filepath"
 
-	"github.com/bd878/gallery/server/utils"
+	"github.com/bd878/gallery/server/internal/utils"
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
 	files "github.com/bd878/gallery/server/files/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"

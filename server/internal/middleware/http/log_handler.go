@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/internal/logger"
 )
 
 func Log(next Handler) Handler {

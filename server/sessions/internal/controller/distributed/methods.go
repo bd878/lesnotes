@@ -6,8 +6,8 @@ import (
 	"bytes"
 
 	"google.golang.org/protobuf/proto"
-	"github.com/bd878/gallery/server/utils"
-	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/internal/utils"
+	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/sessions/pkg/model"
 )
 

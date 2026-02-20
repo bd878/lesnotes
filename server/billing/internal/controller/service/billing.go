@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/billing/pkg/loadbalance"
 	billingmodel "github.com/bd878/gallery/server/billing/pkg/model"
 )

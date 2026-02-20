@@ -9,7 +9,7 @@ import (
 	"archive/tar"
 
 	"github.com/hashicorp/raft"
-	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/internal/logger"
 )
 
 /**

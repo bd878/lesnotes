@@ -6,7 +6,7 @@ import (
 	"io"
 	"context"
 
-	"github.com/bd878/gallery/server/utils"
+	"github.com/bd878/gallery/server/internal/utils"
 	users "github.com/bd878/gallery/server/users/pkg/model"
 	sessions "github.com/bd878/gallery/server/sessions/pkg/model"
 )

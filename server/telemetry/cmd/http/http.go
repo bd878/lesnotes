@@ -9,7 +9,7 @@ import (
 
 	"github.com/bd878/gallery/server/telemetry/config"
 	"github.com/bd878/gallery/server/telemetry/internal/http"
-	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/internal/logger"
 )
 
 func init() {

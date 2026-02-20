@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"encoding/json"
 
-	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/internal/logger"
 	server "github.com/bd878/gallery/server/pkg/model"
 )
 

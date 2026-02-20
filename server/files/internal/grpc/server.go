@@ -13,9 +13,9 @@ import (
 
 	"github.com/bd878/gallery/server/api"
 
-	"github.com/bd878/gallery/server/waiter"
-	"github.com/bd878/gallery/server/ddd"
-	broker "github.com/bd878/gallery/server/nats"
+	"github.com/bd878/gallery/server/internal/waiter"
+	"github.com/bd878/gallery/server/internal/ddd"
+	broker "github.com/bd878/gallery/server/internal/nats"
 	grpcmiddleware "github.com/bd878/gallery/server/internal/middleware/grpc"
 	repository "github.com/bd878/gallery/server/files/internal/repository/postgres"
 	streamhandler "github.com/bd878/gallery/server/files/internal/handler/stream"

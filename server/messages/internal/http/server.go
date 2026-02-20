@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/bd878/gallery/server/waiter"
-	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/internal/waiter"
+	"github.com/bd878/gallery/server/internal/logger"
 	usermodel "github.com/bd878/gallery/server/users/pkg/model"
 	httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
 	httphandler "github.com/bd878/gallery/server/messages/internal/handler/http"

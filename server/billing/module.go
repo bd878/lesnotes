@@ -8,7 +8,7 @@ import (
 	"context"
 
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/internal/system"
 	"github.com/bd878/gallery/server/internal/discovery/serf"
 	"github.com/bd878/gallery/server/internal/consensus/raft"

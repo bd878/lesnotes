@@ -5,7 +5,7 @@ import (
 	"io"
 	"encoding/json"
 
-	"github.com/bd878/gallery/server/i18n"
+	"github.com/bd878/gallery/server/internal/i18n"
 	"github.com/bd878/gallery/server/users/internal/controller"
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
 	users "github.com/bd878/gallery/server/users/pkg/model"

@@ -8,7 +8,7 @@ import (
 
 	"github.com/bd878/gallery/server/search/config"
 	"github.com/bd878/gallery/server/search/internal/http"
-	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/internal/logger"
 )
 
 func init() {

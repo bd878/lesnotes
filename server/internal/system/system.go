@@ -18,8 +18,8 @@ import (
 	"golang.org/x/sync/errgroup"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/bd878/gallery/server/logger"
-	"github.com/bd878/gallery/server/waiter"
+	"github.com/bd878/gallery/server/internal/logger"
+	"github.com/bd878/gallery/server/internal/waiter"
 	grpcmiddleware "github.com/bd878/gallery/server/internal/middleware/grpc"
 )
 

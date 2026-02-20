@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"encoding/json"
 
-	"github.com/bd878/gallery/server/logger"
-	"github.com/bd878/gallery/server/utils"
+	"github.com/bd878/gallery/server/internal/logger"
+	"github.com/bd878/gallery/server/internal/utils"
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
 	messages "github.com/bd878/gallery/server/messages/pkg/model"
 	files "github.com/bd878/gallery/server/files/pkg/model"

@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"encoding/json"
 
-	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/internal/logger"
 	server "github.com/bd878/gallery/server/pkg/model"
 	users "github.com/bd878/gallery/server/users/pkg/model"
 	sessions "github.com/bd878/gallery/server/sessions/pkg/model"

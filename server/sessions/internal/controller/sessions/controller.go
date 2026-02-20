@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/bd878/gallery/server/sessions/pkg/model"
-	"github.com/bd878/gallery/server/utils"
+	"github.com/bd878/gallery/server/internal/utils"
 )
 
 type Repository interface {

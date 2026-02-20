@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc/resolver"
 
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/internal/logger"
 )
 
 type Resolver struct {

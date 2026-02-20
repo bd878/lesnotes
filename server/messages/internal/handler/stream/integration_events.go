@@ -4,8 +4,8 @@ import (
 	"context"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/bd878/gallery/server/am"
-	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/internal/am"
+	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/api"
 	filesevents "github.com/bd878/gallery/server/files/pkg/events"
 )

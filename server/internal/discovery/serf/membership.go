@@ -7,7 +7,7 @@ import (
 	"net"
 
 	"github.com/hashicorp/serf/serf"
-	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/internal/logger"
 )
 
 type Membership struct {
@@ -74,7 +74,7 @@ type Handler interface {
 
 func (m *Membership) Run(ctx context.Context) {
 	defer fmt.Fprintf(os.Stdout, "leaving membership")
-	fmt.Fprintf(os.Stdout, "membership started", m.BindAddr)
+	fmt.Fprintf(os.Stdout, "membership started %s\n", m.BindAddr)
 	for {
 		select {
 		case <-ctx.Done():

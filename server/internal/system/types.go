@@ -7,8 +7,8 @@ import (
 	"google.golang.org/grpc"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/bd878/gallery/server/waiter"
-	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/internal/waiter"
+	"github.com/bd878/gallery/server/internal/logger"
 )
 
 type Service interface {

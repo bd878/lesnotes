@@ -1,7 +1,7 @@
 package nats
 
 import (
-	"github.com/bd878/gallery/server/am"
+	"github.com/bd878/gallery/server/internal/am"
 )
 
 type (

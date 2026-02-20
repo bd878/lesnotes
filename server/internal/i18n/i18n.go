@@ -6,7 +6,7 @@ import (
 	"strings"
 	"reflect"
 	"encoding/json"
-	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/internal/logger"
 )
 
 type translations struct {

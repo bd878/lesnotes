@@ -13,7 +13,7 @@ import (
 	"github.com/bd878/gallery/server/users/migrations"
 	"github.com/bd878/gallery/server/users/internal/grpc"
 	"github.com/bd878/gallery/server/users/config"
-	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/internal/logger"
 )
 
 func init() {

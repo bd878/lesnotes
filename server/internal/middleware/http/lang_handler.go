@@ -4,9 +4,9 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/bd878/gallery/server/logger"
-	"github.com/bd878/gallery/server/i18n"
-	"github.com/bd878/gallery/server/third_party/accept"
+	"github.com/bd878/gallery/server/internal/logger"
+	"github.com/bd878/gallery/server/internal/i18n"
+	"github.com/bd878/gallery/server/internal/third_party/accept"
 )
 
 type LangContextKey struct {}

@@ -8,8 +8,8 @@ import (
 	"errors"
 
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/logger"
-	"github.com/bd878/gallery/server/ddd"
+	"github.com/bd878/gallery/server/internal/logger"
+	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/files/pkg/model"
 	"github.com/bd878/gallery/server/files/internal/domain"
 )

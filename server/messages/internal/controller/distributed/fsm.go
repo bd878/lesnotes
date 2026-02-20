@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
 	"github.com/bd878/gallery/server/messages/pkg/model"
-	"github.com/bd878/gallery/server/logger"
+	"github.com/bd878/gallery/server/internal/logger"
 )
 
 type RepoConnection interface {
