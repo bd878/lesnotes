@@ -1,6 +1,8 @@
 package serf
 
 import (
+	"fmt"
+	"os"
 	"context"
 	"net"
 
@@ -71,6 +73,8 @@ type Handler interface {
 }
 
 func (m *Membership) Run(ctx context.Context) {
+	defer fmt.Fprintf(os.Stdout, "leaving membership")
+	fmt.Fprintf(os.Stdout, "membership started", m.BindAddr)
 	for {
 		select {
 		case <-ctx.Done():
@@ -79,6 +83,7 @@ func (m *Membership) Run(ctx context.Context) {
 			}
 			return
 		case e := <- m.events:
+			logger.Debugw("serf new event", "type", e.EventType())
 			switch e.EventType() {
 			case serf.EventMemberJoin:
 				for _, member := range e.(serf.MemberEvent).Members {

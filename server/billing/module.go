@@ -93,6 +93,7 @@ func setupRaft(svc system.Service, cfg config.Config, paymentsRepo *postgres.Pay
 	}
 
 	svc.Waiter().Add(func(ctx context.Context) error {
+		<-ctx.Done()
 		return consensus.Leave(consensus.NodeName())
 	})
 

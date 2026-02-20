@@ -156,7 +156,7 @@ func (s *Server) WaitForStream(ctx context.Context) error {
 	})
 	group, gCtx := errgroup.WithContext(ctx)
 	group.Go(func() error {
-		fmt.Fprintln(os.Stdout, "messsage stream started")
+		fmt.Fprintln(os.Stdout, "message stream started")
 		defer fmt.Fprintln(os.Stdout, "message stream stopped")
 		<-closed
 		return nil

@@ -29,7 +29,7 @@ func main() {
 	cfg := config.Load(flag.Arg(0))
 
 	s, err := system.NewSystem(system.Config{
-		Addr:               cfg.RpcAddr,
+		RpcAddr:            cfg.RpcAddr,
 		NodeName:           cfg.NodeName,
 		LogLevel:           cfg.LogLevel,
 		SkipCaller:         1,
@@ -44,12 +44,12 @@ func main() {
 	defer func(db *sql.DB) {
 		err := s.ResetDB()
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			fmt.Fprintln(os.Stderr, "failed to reset db", err)
 		}
 
 		err = db.Close()
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			fmt.Fprintln(os.Stderr, "failed to close db", err)
 		}
 	}(s.DB())
 

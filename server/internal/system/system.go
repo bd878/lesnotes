@@ -24,7 +24,7 @@ import (
 )
 
 type Config struct {
-	Addr              string
+	RpcAddr           string
 	NodeName          string
 	LogLevel          string
 	SkipCaller        int
@@ -41,7 +41,6 @@ type System struct {
 	rpc          *grpc.Server
 	logger       *logger.Logger
 	listener     net.Listener
-	grpcListener net.Listener
 	waiter       waiter.Waiter
 	mux          cmux.CMux
 }
@@ -104,14 +103,12 @@ func (s *System) initNats() (err error) {
 }
 
 func (s *System) initMux() (err error) {
-	s.listener, err = net.Listen("tcp4", s.cfg.Addr)
+	s.listener, err = net.Listen("tcp4", s.cfg.RpcAddr)
 	if err != nil {
 		return
 	}
 
 	s.mux = cmux.New(s.listener)
-
-	s.grpcListener = s.mux.Match(cmux.Any())
 
 	return
 }
@@ -177,7 +174,7 @@ func (s *System) WaitForRPC(ctx context.Context) (err error) {
 	group.Go(func() error {
 		fmt.Fprintf(os.Stdout, "rpc server started %s\n", s.Addr())
 		defer fmt.Fprintln(os.Stdout, "rpc server shutdown")
-		if err := s.RPC().Serve(s.grpcListener); err != nil {
+		if err := s.RPC().Serve(s.Mux().Match(cmux.Any())); err != nil {
 			return err
 		}
 		return nil
@@ -234,7 +231,7 @@ func (s *System) WaitForStream(ctx context.Context) error {
 	})
 	group, gCtx := errgroup.WithContext(ctx)
 	group.Go(func() error {
-		fmt.Fprintln(os.Stdout, "messsage stream started")
+		fmt.Fprintln(os.Stdout, "message stream started")
 		defer fmt.Fprintln(os.Stdout, "message stream stopped")
 		<-closed
 		return nil
