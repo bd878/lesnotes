@@ -41,6 +41,9 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 
 	controller := application.New(consensus, dispatcher, messagesRepo, filesRepo, translationsRepo, svc.Logger())
 
+	stream.RegisterIntegrationEventHandlers(nats.NewStream(svc.Nats()),
+		stream.NewIntegrationEventHandlers(controller))
+
 	messagesHandler := grpc.NewMessagesHandler(controller)
 	translationsHandler := grpc.NewTranslationsHandler(controller)
 
