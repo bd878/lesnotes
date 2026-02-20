@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/bd878/gallery/server/threads/internal/controller/distributed";
+option go_package = "github.com/bd878/gallery/server/threads/internal/machine";
 
 message AppendCommand {
 	int64   id = 1;

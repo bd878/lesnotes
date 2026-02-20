@@ -1,4 +1,4 @@
-package distributed
+package machine
 
 type RequestType uint16
 

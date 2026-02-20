@@ -10,20 +10,20 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/bd878/gallery/server/internal/logger"
-	threads "github.com/bd878/gallery/server/threads/pkg/model"
+	"github.com/bd878/gallery/server/threads/pkg/model"
 )
 
-type Repository struct {
+type ThreadsRepository struct {
 	tableName          string
 	pool               *pgxpool.Pool
 }
 
-func New(pool *pgxpool.Pool, tableName string) *Repository {
-	return &Repository{tableName, pool}
+func NewThreadsRepository(pool *pgxpool.Pool, tableName string) *ThreadsRepository {
+	return &ThreadsRepository{tableName, pool}
 }
 
-func (r *Repository) ReadThread(ctx context.Context, id, userID int64, name string) (thread *threads.Thread, err error) {
-	thread = &threads.Thread{}
+func (r *ThreadsRepository) ReadThread(ctx context.Context, id, userID int64, name string) (thread *model.Thread, err error) {
+	thread = &model.Thread{}
 
 	if id != 0 {
 		const query = "SELECT id, parent_id, user_id, next_id, prev_id, name, description, private FROM %s WHERE id = $1 AND (user_id = $2 OR private = false)"
@@ -52,7 +52,7 @@ func (r *Repository) ReadThread(ctx context.Context, id, userID int64, name stri
 	return
 }
 
-func (r *Repository) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (list []*threads.Thread, isLastPage bool, err error) {
+func (r *ThreadsRepository) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (list []*model.Thread, isLastPage bool, err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -79,9 +79,9 @@ func (r *Repository) ListThreads(ctx context.Context, userID, parentID int64, li
 		return
 	}
 
-	unordered := make([]*threads.Thread, 0)
+	unordered := make([]*model.Thread, 0)
 	for rows.Next() {
-		thread := &threads.Thread{
+		thread := &model.Thread{
 			ParentID: parentID,
 			UserID:   userID,
 		}
@@ -95,7 +95,7 @@ func (r *Repository) ListThreads(ctx context.Context, userID, parentID int64, li
 	}
 
 	var nextID int64
-	list = make([]*threads.Thread, 0)
+	list = make([]*model.Thread, 0)
 	for range unordered {
 		for _, thread := range unordered {
 			if thread.NextID == nextID {
@@ -128,7 +128,7 @@ func (r *Repository) ListThreads(ctx context.Context, userID, parentID int64, li
 	return
 }
 
-func (r *Repository) CountThreads(ctx context.Context, id, userID int64) (total int32, err error) {
+func (r *ThreadsRepository) CountThreads(ctx context.Context, id, userID int64) (total int32, err error) {
 	const query = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2"
 
 	err = r.pool.QueryRow(ctx, r.table(query), userID, id).Scan(&total)
@@ -136,7 +136,7 @@ func (r *Repository) CountThreads(ctx context.Context, id, userID int64) (total 
 	return
 }
 
-func (r *Repository) ReorderThread(ctx context.Context, id, userID, parentID, nextID, prevID int64) (err error) {
+func (r *ThreadsRepository) ReorderThread(ctx context.Context, id, userID, parentID, nextID, prevID int64) (err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -312,7 +312,7 @@ func (r *Repository) ReorderThread(ctx context.Context, id, userID, parentID, ne
 	return
 }
 
-func (r *Repository) AppendThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name, description string, private bool) (err error) {
+func (r *ThreadsRepository) AppendThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name, description string, private bool) (err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -358,7 +358,7 @@ func (r *Repository) AppendThread(ctx context.Context, id, userID, parentID, nex
 	return
 }
 
-func (r *Repository) UpdateThread(ctx context.Context, id, userID int64, newName, newDescription string) (err error) {
+func (r *ThreadsRepository) UpdateThread(ctx context.Context, id, userID int64, newName, newDescription string) (err error) {
 	const query = "UPDATE %s SET description = $3, name = $4 WHERE user_id = $1 AND id = $2"
 	const selectQuery = "SELECT description, name FROM %s WHERE user_id = $1 AND id = $2"
 
@@ -401,7 +401,7 @@ func (r *Repository) UpdateThread(ctx context.Context, id, userID int64, newName
 	return
 }
 
-func (r *Repository) PrivateThread(ctx context.Context, id, userID int64) (err error) {
+func (r *ThreadsRepository) PrivateThread(ctx context.Context, id, userID int64) (err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -426,7 +426,7 @@ func (r *Repository) PrivateThread(ctx context.Context, id, userID int64) (err e
 	return
 }
 
-func (r *Repository) PublishThread(ctx context.Context, id, userID int64) (err error) {
+func (r *ThreadsRepository) PublishThread(ctx context.Context, id, userID int64) (err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -451,7 +451,7 @@ func (r *Repository) PublishThread(ctx context.Context, id, userID int64) (err e
 	return
 }
 
-func (r *Repository) DeleteThread(ctx context.Context, id, userID int64) (err error) {
+func (r *ThreadsRepository) DeleteThread(ctx context.Context, id, userID int64) (err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -573,7 +573,7 @@ func (r *Repository) DeleteThread(ctx context.Context, id, userID int64) (err er
 	return
 }
 
-func (r *Repository) ResolveThread(ctx context.Context, id, userID int64) (ids []int64, err error) {
+func (r *ThreadsRepository) ResolveThread(ctx context.Context, id, userID int64) (ids []int64, err error) {
 	const query = "SELECT parent_id FROM %s WHERE user_id = $1 AND id = $2"
 
 	var tx pgx.Tx
@@ -615,51 +615,41 @@ func (r *Repository) ResolveThread(ctx context.Context, id, userID int64) (ids [
 	return
 }
 
-func (r *Repository) Dump(ctx context.Context) (reader io.ReadCloser, err error) {
-	var (
-		writer io.WriteCloser
-		conn   *pgxpool.Conn
-	)
+func (r *ThreadsRepository) Dump(ctx context.Context, writer io.Writer) (err error) {
+	var conn *pgxpool.Conn
 
-	query := r.table("COPY %s TO STDOUT BINARY")
-
-	reader, writer = io.Pipe()
+	logger.Debugln("dumping threads repo")
 
 	conn, err = r.pool.Acquire(ctx)
+	defer conn.Release()
 	if err != nil {
-		conn.Release()
 		return
 	}
 
-	go func(ctx context.Context, query string, conn *pgxpool.Conn, writer io.WriteCloser) {
-		_, err := conn.Conn().PgConn().CopyTo(ctx, writer, query)
-		defer writer.Close()
-		defer conn.Release()
-		if err != nil {
-			logger.Errorw("failed to dump", "error", err)
-		}
-	}(ctx, query, conn, writer)
+	// will block, not concurrent safe
+	_, err = conn.Conn().PgConn().CopyTo(ctx, writer, r.table("COPY %s TO STDOUT BINARY"))
 
 	return
 }
 
-func (r *Repository) Restore(ctx context.Context, reader io.ReadCloser) (err error) {
+func (r *ThreadsRepository) Restore(ctx context.Context, reader io.Reader) (err error) {
 	var conn *pgxpool.Conn
+
+	logger.Debugln("restoring threads repo")
 
 	query := r.table("COPY %s FROM STDIN BINARY")
 
 	conn, err = r.pool.Acquire(ctx) 
+	defer conn.Release()
 	if err != nil {
-		conn.Release()
 		return
 	}
 
 	_, err = conn.Conn().PgConn().CopyFrom(ctx, reader, query)
-	defer conn.Release()
 
 	return
 }
 
-func (r Repository) table(query string) string {
+func (r ThreadsRepository) table(query string) string {
 	return fmt.Sprintf(query, r.tableName)
 }

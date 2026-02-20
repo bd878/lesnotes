@@ -102,6 +102,10 @@ func (s *System) initNats() (err error) {
 	return
 }
 
+func (s *System) Nats() *nats.Conn {
+	return s.nc
+}
+
 func (s *System) initMux() (err error) {
 	s.listener, err = net.Listen("tcp4", s.cfg.RpcAddr)
 	if err != nil {
