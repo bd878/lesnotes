@@ -20,7 +20,7 @@ type MessagesRepository struct {
 	pool      *pgxpool.Pool
 }
 
-func NewMessagesRepository(tableName string, pool *pgxpool.Pool) *MessagesRepository {
+func NewMessagesRepository(pool *pgxpool.Pool, tableName string) *MessagesRepository {
 	return &MessagesRepository{
 		tableName: tableName,
 		pool:      pool,

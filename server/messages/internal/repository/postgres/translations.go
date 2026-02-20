@@ -17,7 +17,7 @@ type TranslationsRepository struct {
 	pool             *pgxpool.Pool
 }
 
-func NewTranslationsRepository(tableName string, pool *pgxpool.Pool) *TranslationsRepository {
+func NewTranslationsRepository(pool *pgxpool.Pool, tableName string) *TranslationsRepository {
 	return &TranslationsRepository{tableName: tableName, pool: pool}
 }
 

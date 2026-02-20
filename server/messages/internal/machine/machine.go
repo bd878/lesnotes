@@ -1,4 +1,4 @@
-package distributed
+package machine
 
 import (
 	"io"
@@ -9,10 +9,6 @@ import (
 	"github.com/bd878/gallery/server/messages/pkg/model"
 	"github.com/bd878/gallery/server/internal/logger"
 )
-
-type RepoConnection interface {
-	Release()
-}
 
 type MessagesRepository interface {
 	Create(ctx context.Context, id int64, text, title string, userID int64, private bool, name string) (err error)
@@ -50,12 +46,22 @@ type TranslationsRepository interface {
 	Restore(ctx context.Context, reader io.Reader) (err error)
 }
 
-var _ raft.FSM = (*fsm)(nil)
+var _ raft.FSM = (*Machine)(nil)
 
-type fsm struct {
-	messagesRepo MessagesRepository
-	filesRepo    FilesRepository
-	translationsRepo TranslationsRepository
+type Machine struct {
+	log               *logger.Logger
+	messagesRepo      MessagesRepository
+	filesRepo         FilesRepository
+	translationsRepo  TranslationsRepository
+}
+
+func New(messagesRepo MessagesRepository, filesRepo FilesRepository, translationsRepo TranslationsRepository, log *logger.Logger) *Machine {
+	return &Machine{
+		log:              log,
+		messagesRepo:     messagesRepo,
+		filesRepo:        filesRepo,
+		translationsRepo: translationsRepo,
+	}
 }
 
 /**
@@ -65,7 +71,7 @@ type fsm struct {
  * Apply replicates log state from the bottom up.
  * Leader makes Apply on start.
  */
-func (f *fsm) Apply(record *raft.Log) interface{} {
+func (f *Machine) Apply(record *raft.Log) interface{} {
 	buf := record.Data
 	reqType := RequestType(buf[0])
 	switch reqType {
@@ -90,12 +96,12 @@ func (f *fsm) Apply(record *raft.Log) interface{} {
 	case DeleteTranslationRequest:
 		return f.applyDeleteTranslation(buf[1:])
 	default:
-		logger.Errorw("unknown request type", "type", reqType)
+		f.log.Errorw("unknown request type", "type", reqType)
 	}
 	return nil
 }
 
-func (f *fsm) applyAppend(raw []byte) interface{} {
+func (f *Machine) applyAppend(raw []byte) interface{} {
 	var cmd AppendCommand
 	proto.Unmarshal(raw, &cmd)
 
@@ -113,7 +119,7 @@ func (f *fsm) applyAppend(raw []byte) interface{} {
 	return nil
 }
 
-func (f *fsm) applyUpdate(raw []byte) interface{} {
+func (f *Machine) applyUpdate(raw []byte) interface{} {
 	var cmd UpdateCommand
 	proto.Unmarshal(raw, &cmd)
 
@@ -130,7 +136,7 @@ func (f *fsm) applyUpdate(raw []byte) interface{} {
 	return nil
 }
 
-func (f *fsm) applyDeleteUserMessages(raw []byte) interface{} {
+func (f *Machine) applyDeleteUserMessages(raw []byte) interface{} {
 	var cmd DeleteUserMessagesCommand
 	proto.Unmarshal(raw, &cmd)
 
@@ -142,7 +148,7 @@ func (f *fsm) applyDeleteUserMessages(raw []byte) interface{} {
 	return nil
 }
 
-func (f *fsm) applyDelete(raw []byte) interface{} {
+func (f *Machine) applyDelete(raw []byte) interface{} {
 	var cmd DeleteCommand
 	proto.Unmarshal(raw, &cmd)
 
@@ -164,7 +170,7 @@ func (f *fsm) applyDelete(raw []byte) interface{} {
 	return nil
 }
 
-func (f *fsm) applyPublish(raw []byte) interface{} {
+func (f *Machine) applyPublish(raw []byte) interface{} {
 	var cmd PublishCommand
 	proto.Unmarshal(raw, &cmd)
 
@@ -176,7 +182,7 @@ func (f *fsm) applyPublish(raw []byte) interface{} {
 	return nil
 }
 
-func (f *fsm) applyPrivate(raw []byte) interface{} {
+func (f *Machine) applyPrivate(raw []byte) interface{} {
 	var cmd PrivateCommand
 	proto.Unmarshal(raw, &cmd)
 
@@ -188,7 +194,7 @@ func (f *fsm) applyPrivate(raw []byte) interface{} {
 	return nil
 }
 
-func (f *fsm) applyDeleteFile(raw []byte) interface{} {
+func (f *Machine) applyDeleteFile(raw []byte) interface{} {
 	var cmd DeleteFileCommand
 	proto.Unmarshal(raw, &cmd)
 
@@ -200,7 +206,7 @@ func (f *fsm) applyDeleteFile(raw []byte) interface{} {
 	return nil
 }
 
-func (f *fsm) applyAppendTranslation(raw []byte) interface{} {
+func (f *Machine) applyAppendTranslation(raw []byte) interface{} {
 	var cmd AppendTranslationCommand
 	proto.Unmarshal(raw, &cmd)
 
@@ -212,7 +218,7 @@ func (f *fsm) applyAppendTranslation(raw []byte) interface{} {
 	return nil
 }
 
-func (f *fsm) applyUpdateTranslation(raw []byte) interface{} {
+func (f *Machine) applyUpdateTranslation(raw []byte) interface{} {
 	var cmd UpdateTranslationCommand
 	proto.Unmarshal(raw, &cmd)
 
@@ -224,7 +230,7 @@ func (f *fsm) applyUpdateTranslation(raw []byte) interface{} {
 	return nil
 }
 
-func (f *fsm) applyDeleteTranslation(raw []byte) interface{} {
+func (f *Machine) applyDeleteTranslation(raw []byte) interface{} {
 	var cmd DeleteTranslationCommand
 	proto.Unmarshal(raw, &cmd)
 

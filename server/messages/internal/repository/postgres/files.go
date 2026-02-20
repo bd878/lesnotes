@@ -17,7 +17,7 @@ type FilesRepository struct {
 	pool             *pgxpool.Pool
 }
 
-func NewFilesRepository(tableName string, pool *pgxpool.Pool) *FilesRepository {
+func NewFilesRepository(pool *pgxpool.Pool, tableName string) *FilesRepository {
 	return &FilesRepository{tableName: tableName, pool: pool}
 }
 
