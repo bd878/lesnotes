@@ -1,4 +1,4 @@
-package repository
+package postgres
 
 import (
 	"fmt"
@@ -13,19 +13,19 @@ import (
 	"github.com/bd878/gallery/server/users/pkg/model"
 )
 
-type Repository struct {
+type UsersRepository struct {
 	tableName  string
 	pool      *pgxpool.Pool
 }
 
-func New(pool *pgxpool.Pool, tableName string) *Repository {
-	return &Repository{
+func NewUsersRepository(pool *pgxpool.Pool, tableName string) *UsersRepository {
+	return &UsersRepository{
 		tableName: tableName,
 		pool:      pool,
 	}
 }
 
-func (r *Repository) Save(ctx context.Context, id int64, login, salt string, metadata []byte) (err error) {
+func (r *UsersRepository) Save(ctx context.Context, id int64, login, salt string, metadata []byte) (err error) {
 	const query = "INSERT INTO %s(id, login, salt, metadata) VALUES ($1, $2, $3, $4)"
 
 	_, err = r.pool.Exec(ctx, r.table(query), id, login, salt, metadata)
@@ -33,7 +33,7 @@ func (r *Repository) Save(ctx context.Context, id int64, login, salt string, met
 	return
 }
 
-func (r *Repository) Delete(ctx context.Context, id int64) (err error) {
+func (r *UsersRepository) Delete(ctx context.Context, id int64) (err error) {
 	const query = "DELETE FROM %s WHERE id = $1"
 
 	_, err = r.pool.Exec(ctx, r.table(query), id)
@@ -45,10 +45,10 @@ func (r *Repository) Delete(ctx context.Context, id int64) (err error) {
  * Find by id or login
  * If id == 0 : find by login
  * If login == "" : return error
- * @param  {[type]} r *Repository)  Find(ctx context.Context, id int64, login string) (user *model.User, err error [description]
+ * @param  {[type]} r *UsersRepository)  Find(ctx context.Context, id int64, login string) (user *model.User, err error [description]
  * @return {[type]}   [description]
  */
-func (r *Repository) Find(ctx context.Context, id int64, login string) (user *model.User, err error) {
+func (r *UsersRepository) Find(ctx context.Context, id int64, login string) (user *model.User, err error) {
 	query := "SELECT id, login, salt, metadata FROM %s WHERE"
 
 	user = &model.User{}
@@ -64,7 +64,7 @@ func (r *Repository) Find(ctx context.Context, id int64, login string) (user *mo
 	return
 }
 
-func (r *Repository) Update(ctx context.Context, id int64, newLogin string, newMetadata []byte) (err error) {
+func (r *UsersRepository) Update(ctx context.Context, id int64, newLogin string, newMetadata []byte) (err error) {
 	const selectQuery = "SELECT login, metadata FROM %s WHERE id = $1"
 	const query = "UPDATE %s SET login = $2, metadata = $3 WHERE id = $1"
 
@@ -110,52 +110,41 @@ func (r *Repository) Update(ctx context.Context, id int64, newLogin string, newM
 	return
 }
 
-func (r *Repository) Dump(ctx context.Context) (reader io.ReadCloser, err error) {
-	var (
-		writer io.WriteCloser
-		conn   *pgxpool.Conn
-	)
+func (r *UsersRepository) Dump(ctx context.Context, writer io.Writer) (err error) {
+	var conn *pgxpool.Conn
 
-	query := r.table("COPY %s TO STDOUT BINARY")
-
-	reader, writer = io.Pipe()
+	logger.Debugln("dumping users repo")
 
 	conn, err = r.pool.Acquire(ctx)
+	defer conn.Release()
 	if err != nil {
-		conn.Release()
 		return
 	}
 
-	// TODO: remove, see billing/invoices for example
-	go func(ctx context.Context, query string, conn *pgxpool.Conn, writer io.WriteCloser) {
-		_, err := conn.Conn().PgConn().CopyTo(ctx, writer, query)
-		defer writer.Close()
-		defer conn.Release()
-		if err != nil {
-			logger.Errorw("failed to dump", "error", err)
-		}
-	}(ctx, query, conn, writer)
+	// will block, not concurrent safe
+	_, err = conn.Conn().PgConn().CopyTo(ctx, writer, r.table("COPY %s TO STDOUT BINARY"))
 
 	return
 }
 
-func (r *Repository) Restore(ctx context.Context, reader io.ReadCloser) (err error) {
+func (r *UsersRepository) Restore(ctx context.Context, reader io.Reader) (err error) {
 	var conn *pgxpool.Conn
+
+	logger.Debugln("restoring users repo")
 
 	query := r.table("COPY %s FROM STDIN BINARY")
 
 	conn, err = r.pool.Acquire(ctx) 
+	defer conn.Release()
 	if err != nil {
-		conn.Release()
 		return
 	}
 
 	_, err = conn.Conn().PgConn().CopyFrom(ctx, reader, query)
-	defer conn.Release()
 
 	return
 }
 
-func (r Repository) table(query string) string {
+func (r UsersRepository) table(query string) string {
 	return fmt.Sprintf(query, r.tableName)
 }
