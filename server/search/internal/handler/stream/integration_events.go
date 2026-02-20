@@ -43,6 +43,7 @@ type TranslationsController interface {
 }
 
 type integrationHandlers struct {
+	log            *logger.Logger
 	messages       MessagesController
 	threads        ThreadsController
 	files          FilesController
@@ -52,8 +53,9 @@ type integrationHandlers struct {
 var _ am.RawMessageHandler = (*integrationHandlers)(nil)
 
 func NewIntegrationEventHandlers(messages MessagesController, threads ThreadsController,
-	files FilesController, translations TranslationsController) am.RawMessageHandler {
+	files FilesController, translations TranslationsController, log *logger.Logger) am.RawMessageHandler {
 	return integrationHandlers{
+		log:            log,
 		messages:       messages,
 		translations:   translations,
 		threads:        threads,
@@ -86,7 +88,7 @@ func RegisterIntegrationEventHandlers(subscriber am.RawMessageSubscriber, handle
 }
 
 func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingMessage) error {
-	logger.Debugw("handle message", "name", msg.MessageName(), "subject", msg.Subject())
+	h.log.Debugw("handle message", "name", msg.MessageName(), "subject", msg.Subject())
 
 	switch msg.MessageName() {
 	case messageevents.MessageCreatedEvent:

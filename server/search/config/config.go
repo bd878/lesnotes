@@ -17,9 +17,5 @@ type Config struct {
 	RaftBootstrap           bool        `json:"raft_bootstrap"`
 	DataPath                string      `json:"data_path"`
 	PGConn                  string      `json:"pg_conn"`
-	MessagesTableName       string      `json:"messages_table_name"`
-	TranslationsTableName   string      `json:"translations_table_name"`
-	FilesTableName          string      `json:"files_table_name"`
-	ThreadsTableName        string      `json:"threads_table_name"`
 	GooseTableName          string      `json:"goose_table_name"`
 }
