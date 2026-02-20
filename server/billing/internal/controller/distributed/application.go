@@ -5,8 +5,8 @@ import (
 	"context"
 	"bytes"
 
-	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
+	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/logger"
 	"github.com/bd878/gallery/server/billing/pkg/model"
 	"github.com/bd878/gallery/server/billing/internal/machine"
@@ -20,23 +20,28 @@ type InvoicesRepository interface {
 	GetInvoice(ctx context.Context, id string, userID int64) (invoice *model.Invoice, err error)
 }
 
+type Consensus interface {
+	Apply(cmd []byte, timeout time.Duration) (err error)
+	GetServers(ctx context.Context) ([]*api.Server, error)
+}
+
 type Distributed struct {
-	raft           *raft.Raft
+	consensus      Consensus
 	log            *logger.Logger
 	paymentsRepo   PaymentsRepository
 	invoicesRepo   InvoicesRepository
 }
 
-func New(raft *raft.Raft, paymentsRepo PaymentsRepository, invoicesRepo InvoicesRepository, log *logger.Logger) *Distributed {
+func New(consensus Consensus, paymentsRepo PaymentsRepository, invoicesRepo InvoicesRepository, log *logger.Logger) *Distributed {
 	return &Distributed{
-		raft:           raft,
 		log:            log,
+		consensus:      consensus,
 		paymentsRepo:   paymentsRepo,
 		invoicesRepo:   invoicesRepo,
 	}
 }
 
-func (m *Distributed) apply(ctx context.Context, reqType machine.RequestType, cmd []byte) (res interface{}, err error) {
+func (m *Distributed) apply(ctx context.Context, reqType machine.RequestType, cmd []byte) (err error) {
 	var buf bytes.Buffer
 	_, err = buf.Write([]byte{byte(reqType)})
 	if err != nil {
@@ -48,19 +53,7 @@ func (m *Distributed) apply(ctx context.Context, reqType machine.RequestType, cm
 		return
 	}
 
-	timeout := 10*time.Second
-	/* fsm.Apply() */
-	future := m.raft.Apply(buf.Bytes(), timeout)
-	if future.Error() != nil {
-		return nil, future.Error()
-	}
-
-	res = future.Response()
-	if err, ok := res.(error); ok {
-		return nil, err
-	}
-
-	return
+	return m.consensus.Apply(buf.Bytes(), 10*time.Second)
 }
 
 func (m *Distributed) CreateInvoice(ctx context.Context, id string, userID int64, currency string, total int64, metadata []byte) (err error) {
@@ -78,7 +71,7 @@ func (m *Distributed) CreateInvoice(ctx context.Context, id string, userID int64
 		return err
 	}
 
-	_, err = m.apply(ctx, machine.AppendInvoiceRequest, cmd)
+	err = m.apply(ctx, machine.AppendInvoiceRequest, cmd)
 
 	return
 }
@@ -99,7 +92,7 @@ func (m *Distributed) StartPayment(ctx context.Context, id, userID int64, invoic
 		return err
 	}
 
-	_, err = m.apply(ctx, machine.AppendPaymentRequest, cmd)
+	err = m.apply(ctx, machine.AppendPaymentRequest, cmd)
 
 	return
 }
@@ -120,7 +113,10 @@ func (m *Distributed) ProceedPayment(ctx context.Context, id, userID int64) (err
 		return err
 	}
 
-	_, err = m.apply(ctx, machine.ProceedPaymentRequest, cmd)
+	err = m.apply(ctx, machine.ProceedPaymentRequest, cmd)
+	if err != nil {
+		return
+	}
 
 	cmd1, err := proto.Marshal(&machine.PayInvoiceCommand{
 		Id:     payment.InvoiceID,
@@ -130,7 +126,7 @@ func (m *Distributed) ProceedPayment(ctx context.Context, id, userID int64) (err
 		return err
 	}
 
-	_, err = m.apply(ctx, machine.PayInvoiceRequest, cmd1)
+	err = m.apply(ctx, machine.PayInvoiceRequest, cmd1)
 
 	return
 }
@@ -146,7 +142,7 @@ func (m *Distributed) CancelPayment(ctx context.Context, id, userID int64) (err 
 		return err
 	}
 
-	_, err = m.apply(ctx, machine.CancelPaymentRequest, cmd)
+	err = m.apply(ctx, machine.CancelPaymentRequest, cmd)
 
 	return
 }
@@ -162,7 +158,7 @@ func (m *Distributed) RefundPayment(ctx context.Context, id, userID int64) (err 
 		return err
 	}
 
-	_, err = m.apply(ctx, machine.RefundPaymentRequest, cmd)
+	err = m.apply(ctx, machine.RefundPaymentRequest, cmd)
 
 	return
 }
@@ -175,4 +171,9 @@ func (m *Distributed) GetInvoice(ctx context.Context, id string, userID int64) (
 func (m *Distributed) GetPayment(ctx context.Context, id, userID int64) (payment *model.Payment, err error) {
 	m.log.Debugw("get payment", "id", id, "user_id", userID)
 	return m.paymentsRepo.GetPayment(ctx, id, userID)
+}
+
+func (m *Distributed) GetServers(ctx context.Context) ([]*api.Server, error) {
+	m.log.Debugln("get servers")
+	return m.consensus.GetServers(ctx)
 }

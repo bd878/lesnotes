@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"context"
 	"database/sql"
 
 	"github.com/bd878/gallery/server/billing"
@@ -30,16 +29,10 @@ func main() {
 	cfg := config.Load(flag.Arg(0))
 
 	s, err := system.NewSystem(system.Config{
-		Addr:               cfg.Addr,
+		Addr:               cfg.RpcAddr,
 		NodeName:           cfg.NodeName,
 		LogLevel:           cfg.LogLevel,
-		RaftLogLevel:       cfg.RaftLogLevel,
-		RaftBootstrap:      cfg.RaftBootstrap,
-		DataPath:           cfg.DataPath,
-		RaftServers:        cfg.RaftServers,
-		SerfAddr:           cfg.SerfAddr,
-		SerfJoinAddrs:      cfg.SerfJoinAddrs,
-		SkipCaller:         cfg.SkipCaller,
+		SkipCaller:         1,
 		NatsAddr:           cfg.NatsAddr,
 		PGConn:             cfg.PGConn,
 		GooseTableName:     cfg.GooseTableName,
@@ -64,9 +57,9 @@ func main() {
 		panic(err)
 	}
 
-	if err := billing.Root(s.Waiter().Context(), s); err != nil {
+	if err := billing.Root(s.Waiter().Context(), cfg, s); err != nil {
 		fmt.Fprintf(os.Stderr, "server exited %v\n", err)
-		return err
+		panic(err)
 	}
 
 	fmt.Println("started billing service")
@@ -78,5 +71,7 @@ func main() {
 		s.WaitForRPC,
 	)
 
-	return s.Waiter().Wait()
+	if err = s.Waiter().Wait(); err != nil {
+		fmt.Fprintln(os.Stderr, "waiter exited with error", err)
+	}
 }

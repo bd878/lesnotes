@@ -18,5 +18,5 @@ type Service interface {
 	Mux() cmux.CMux
 	RPC() *grpc.Server
 	Waiter() waiter.Waiter
-	Logger() logger.Logger
+	Logger() *logger.Logger
 }

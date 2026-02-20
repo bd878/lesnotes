@@ -7,31 +7,34 @@ import (
 	"bytes"
 	"context"
 
+	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/logger"
-	"github.com/bd878/gallery/server/waiter"
 	"github.com/bd878/gallery/server/internal/system"
 	"github.com/bd878/gallery/server/discovery/serf"
-	"github.com/bd878/gallery/server/distributed/raft"
+	"github.com/bd878/gallery/server/internal/consensus/raft"
 	"github.com/bd878/gallery/server/billing/config"
 	"github.com/bd878/gallery/server/billing/internal/repository/postgres"
 	"github.com/bd878/gallery/server/billing/internal/machine"
-	"github.com/bd878/gallery/server/billing/internal/controller/application"
+	"github.com/bd878/gallery/server/billing/internal/controller/distributed"
 	"github.com/bd878/gallery/server/billing/internal/handler/grpc"
 )
 
-func Root(ctx context.Context, svc system.Service) (err error) {
+func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error) {
 	paymentsRepo := postgres.NewPaymentsRepository(svc.Pool(), "billing.payments")
 	invoicesRepo := postgres.NewInvoicesRepository(svc.Pool(), "billing.invoices")
 
+	consensus, err := setupRaft(svc, cfg, paymentsRepo, invoicesRepo)
+	if err != nil {
+		return err
+	}
+
+	if err := setupSerf(svc.Waiter().Context(), cfg, consensus, svc.Logger()); err != nil {
+		return err
+	}
+
+	controller := application.New(consensus, paymentsRepo, invoicesRepo, svc.Logger())
+
 	handler := grpc.New(controller)
-
-	if err := setupRaft(svc, paymentsRepo, invoicesRepo); err != nil {
-		return err
-	}
-
-	if err := setupSerf(svc.Waiter().Context(), svc.Config(), handler); err != nil {
-		return err
-	}
 
 	api.RegisterBillingServer(svc.RPC(), handler)
 
@@ -44,7 +47,7 @@ func setupSerf(ctx context.Context, cfg config.Config, handler serf.Handler, log
 			NodeName: cfg.NodeName,
 			BindAddr: cfg.SerfAddr,
 			Tags: map[string]string{
-				"raft_addr": cfg.Addr,
+				"raft_addr": cfg.RpcAddr,
 			},
 			SerfJoinAddrs: cfg.SerfJoinAddrs,
 		},
@@ -57,20 +60,17 @@ func setupSerf(ctx context.Context, cfg config.Config, handler serf.Handler, log
 	go func() {
 		defer func() {
 			if err := membership.Leave(); err != nil {
-				fmt.Fprintf(os.Stderr, err)
+				fmt.Fprintln(os.Stderr, err)
 			}
 		}()
 
-		err := membership.Run(ctx)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, err)
-		}
+		membership.Run(ctx)
 	}()
 
 	return nil
 }
 
-func setupRaft(svc system.Service, paymentsRepo *postgres.PaymentsRepository, invoicesRepo *postgres.InvoicesRepository) error {
+func setupRaft(svc system.Service, cfg config.Config, paymentsRepo *postgres.PaymentsRepository, invoicesRepo *postgres.InvoicesRepository) (*raft.Distributed, error) {
 	raftListener := svc.Mux().Match(func(r io.Reader) bool {
 		b := make([]byte, 1)
 		if _, err := r.Read(b); err != nil {
@@ -81,22 +81,20 @@ func setupRaft(svc system.Service, paymentsRepo *postgres.PaymentsRepository, in
 
 	fsm := machine.New(paymentsRepo, invoicesRepo, svc.Logger())
 
-	distributed, err := raft.New(raft.Config{
-		Bootstrap:      svc.Config().Bootstrap,
-		NodeName:       svc.Config().NodeName,
-		RaftLogLevel:   svc.Config().RaftLogLevel,
-		DataDir:        svc.Config().DataPath,
-		Servers:        svc.Config().RaftServers,
+	consensus, err := raft.New(raft.Config{
+		Bootstrap:      cfg.RaftBootstrap,
+		NodeName:       cfg.NodeName,
+		RaftLogLevel:   cfg.RaftLogLevel,
+		DataDir:        cfg.DataPath,
+		Servers:        cfg.RaftServers,
 	}, raft.NewStreamLayer(raftListener), fsm, svc.Logger())
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	controller := application.New(distributed, paymentsRepo, invoicesRepo, svc.Logger())
-
 	svc.Waiter().Add(func(ctx context.Context) error {
-		return distributed.Leave(distributed.NodeName())
+		return consensus.Leave(consensus.NodeName())
 	})
 
-	return nil
+	return consensus, nil
 }

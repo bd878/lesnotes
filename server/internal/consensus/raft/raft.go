@@ -1,4 +1,4 @@
-package distributed
+package raft
 
 import (
 	"os"
@@ -159,6 +159,20 @@ func (m *Distributed) WaitForLeader(timeout time.Duration) error {
 			}
 		}
 	}
+}
+
+func (m *Distributed) Apply(cmd []byte, timeout time.Duration) (err error) {
+	future := m.raft.Apply(cmd, timeout)
+	if future.Error() != nil {
+		return future.Error()
+	}
+
+	res := future.Response()
+	if err, ok := res.(error); ok {
+		return err
+	}
+
+	return nil
 }
 
 func (m *Distributed) GetServers(_ context.Context) ([](*api.Server), error) {
