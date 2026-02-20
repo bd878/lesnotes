@@ -19,7 +19,7 @@ import (
 	"github.com/bd878/gallery/server/api"
 
 	"github.com/bd878/gallery/server/waiter"
-	membership "github.com/bd878/gallery/server/discovery/serf"
+	membership "github.com/bd878/gallery/server/internal/discovery/serf"
 	grpcmiddleware "github.com/bd878/gallery/server/internal/middleware/grpc"
 	controller "github.com/bd878/gallery/server/users/internal/controller/distributed"
 	repository "github.com/bd878/gallery/server/users/internal/repository/postgres"
@@ -94,6 +94,7 @@ func (s *Server) setupGRPC() (err error) {
 	if err != nil {
 		return err
 	}
+	go s.membership.Run(context.Background())
 
 	s.Server = grpc.NewServer(
 		grpc.ChainUnaryInterceptor(

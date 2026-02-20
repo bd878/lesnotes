@@ -21,7 +21,7 @@ import (
 	"github.com/bd878/gallery/server/waiter"
 	"github.com/bd878/gallery/server/ddd"
 	broker "github.com/bd878/gallery/server/nats"
-	membership "github.com/bd878/gallery/server/discovery/serf"
+	membership "github.com/bd878/gallery/server/internal/discovery/serf"
 	grpcmiddleware "github.com/bd878/gallery/server/internal/middleware/grpc"
 	repository "github.com/bd878/gallery/server/threads/internal/repository/postgres"
 	controller "github.com/bd878/gallery/server/threads/internal/controller/distributed"
@@ -155,6 +155,7 @@ func (s *Server) setupGRPC() error {
 	if err != nil {
 		return err
 	}
+	go member.Run(context.Background())
 
 	s.membership = member
 
