@@ -68,6 +68,7 @@ func main() {
 	s.Waiter().Add(
 		s.WaitForPool,
 		s.WaitForStream,
+		s.WaitForMux,
 		s.WaitForRPC,
 	)
 

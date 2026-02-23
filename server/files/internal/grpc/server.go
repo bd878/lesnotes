@@ -94,7 +94,12 @@ func (s *Server) setupNats() (err error) {
 func (s *Server) Run(ctx context.Context) (err error) {
 	waiter := waiter.New(waiter.CatchSignals())
 
-	waiter.Add(s.WaitForRPC, s.WaitForPool, s.WaitForStream)
+	waiter.Add(
+		s.WaitForMux,
+		s.WaitForRPC,
+		s.WaitForPool,
+		s.WaitForStream,
+	)
 
 	return waiter.Wait()
 }

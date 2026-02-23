@@ -177,7 +177,6 @@ func (s *System) WaitForRPC(ctx context.Context) (err error) {
 
 	group.Go(func() error {
 		fmt.Fprintf(os.Stdout, "rpc server started %s\n", s.Addr())
-		defer fmt.Fprintln(os.Stdout, "rpc server shutdown")
 		if err := s.RPC().Serve(s.Mux().Match(cmux.Any())); err != nil {
 			return err
 		}
@@ -197,17 +196,26 @@ func (s *System) WaitForRPC(ctx context.Context) (err error) {
 			s.RPC().Stop()
 			return fmt.Errorf("rpc server failed to stop gracefully")
 		case <-stopped:
+			fmt.Fprintf(os.Stdout, "rpc server stopped gracefully")
 			return nil
 		}
 	})
+
+	return group.Wait()
+}
+
+func (s *System) WaitForMux(ctx context.Context) (err error) {
+	group, gCtx := errgroup.WithContext(ctx)
+
 	group.Go(func() error {
 		fmt.Fprintln(os.Stdout, "mux serve")
 		s.mux.Serve()
 		return nil
 	})
+
 	group.Go(func() error {
 		<-gCtx.Done()
-		fmt.Fprintln(os.Stdout, "mux close")
+		fmt.Fprintln(os.Stdout, "mux to be shutdown")
 		s.mux.Close()
 		return nil
 	})
@@ -220,7 +228,7 @@ func (s *System) WaitForPool(ctx context.Context) (err error) {
 
 	group.Go(func() error {
 		<-gCtx.Done()
-		fmt.Fprintln(os.Stdout, "closing pgpool connections")
+		fmt.Fprintln(os.Stdout, "pgpool to be shutdown")
 		s.pool.Close()
 		return nil
 	})
@@ -242,6 +250,7 @@ func (s *System) WaitForStream(ctx context.Context) error {
 	})
 	group.Go(func() error {
 		<-gCtx.Done()
+		fmt.Fprintln(os.Stdout, "message stream to be shutdown")
 		return s.nc.Drain()
 	})
 	return group.Wait()
