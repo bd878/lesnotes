@@ -62,7 +62,7 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println("started billing service")
+	fmt.Println("starting billing service")
 	defer fmt.Println("stopped billing service")
 
 	s.Waiter().Add(

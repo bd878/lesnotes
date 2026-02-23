@@ -2,10 +2,10 @@ package messages
 
 import (
 	"os"
-	"io"
 	"fmt"
-	"bytes"
 	"context"
+
+	"golang.org/x/sync/errgroup"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/ddd"
@@ -32,7 +32,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 		return err
 	}
 
-	if err := setupSerf(svc.Waiter().Context(), cfg, consensus, svc.Logger()); err != nil {
+	if err := setupSerf(svc, cfg, consensus, svc.Logger()); err != nil {
 		return err
 	}
 
@@ -53,7 +53,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	return nil
 }
 
-func setupSerf(ctx context.Context, cfg config.Config, handler serf.Handler, logger *logger.Logger) error {
+func setupSerf(svc system.Service, cfg config.Config, handler serf.Handler, logger *logger.Logger) error {
 	membership, err := serf.New(
 		serf.Config{
 			NodeName: cfg.NodeName,
@@ -69,29 +69,28 @@ func setupSerf(ctx context.Context, cfg config.Config, handler serf.Handler, log
 		return err
 	}
 
-	go func() {
-		defer func() {
-			if err := membership.Leave(); err != nil {
-				fmt.Fprintln(os.Stderr, err)
-			}
-		}()
+	svc.Waiter().Add(func(ctx context.Context) (err error) {
+		group, gCtx := errgroup.WithContext(ctx)
 
-		membership.Run(ctx)
-	}()
+		group.Go(func() error {
+			fmt.Fprintln(os.Stdout, "membership run")
+			membership.Run(gCtx)
+			return nil
+		})
+
+		group.Go(func() error {
+			<-gCtx.Done()
+			fmt.Fprintln(os.Stdout, "membership is about to leave")
+			return membership.Leave()
+		})
+
+		return group.Wait()
+	})
 
 	return nil
 }
 
-func setupRaft(svc system.Service, cfg config.Config, messagesRepo *postgres.MessagesRepository,
-	filesRepo *postgres.FilesRepository, translationsRepo *postgres.TranslationsRepository) (*raft.Distributed, error) {
-	raftListener := svc.Mux().Match(func(r io.Reader) bool {
-		b := make([]byte, 1)
-		if _, err := r.Read(b); err != nil {
-			return false
-		}
-		return bytes.Compare(b, []byte{byte(raft.RaftRPC)}) == 0
-	})
-
+func setupRaft(svc system.Service, cfg config.Config, messagesRepo *postgres.MessagesRepository, filesRepo *postgres.FilesRepository, translationsRepo *postgres.TranslationsRepository) (*raft.Distributed, error) {
 	fsm := machine.New(messagesRepo, filesRepo, translationsRepo, svc.Logger())
 
 	consensus, err := raft.New(raft.Config{
@@ -100,13 +99,14 @@ func setupRaft(svc system.Service, cfg config.Config, messagesRepo *postgres.Mes
 		RaftLogLevel:   cfg.RaftLogLevel,
 		DataDir:        cfg.DataPath,
 		Servers:        cfg.RaftServers,
-	}, raft.NewStreamLayer(raftListener), fsm, svc.Logger())
+	}, raft.NewStreamLayer(svc.RaftListener()), fsm, svc.Logger())
 	if err != nil {
 		return nil, err
 	}
 
 	svc.Waiter().Add(func(ctx context.Context) error {
 		<-ctx.Done()
+		fmt.Fprintln(os.Stdout, "raft is about to leave")
 		return consensus.Leave(consensus.NodeName())
 	})
 

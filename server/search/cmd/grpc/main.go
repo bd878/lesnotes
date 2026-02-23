@@ -62,7 +62,7 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println("started search service")
+	fmt.Println("starting search service")
 	defer fmt.Println("stopped search service")
 
 	s.Waiter().Add(

@@ -2,9 +2,7 @@ package billing
 
 import (
 	"os"
-	"io"
 	"fmt"
-	"bytes"
 	"context"
 
 	"golang.org/x/sync/errgroup"
@@ -81,14 +79,6 @@ func setupSerf(svc system.Service, cfg config.Config, handler serf.Handler, logg
 }
 
 func setupRaft(svc system.Service, cfg config.Config, paymentsRepo *postgres.PaymentsRepository, invoicesRepo *postgres.InvoicesRepository) (*raft.Distributed, error) {
-	raftListener := svc.Mux().Match(func(r io.Reader) bool {
-		b := make([]byte, 1)
-		if _, err := r.Read(b); err != nil {
-			return false
-		}
-		return bytes.Compare(b, []byte{byte(raft.RaftRPC)}) == 0
-	})
-
 	fsm := machine.New(paymentsRepo, invoicesRepo, svc.Logger())
 
 	consensus, err := raft.New(raft.Config{
@@ -97,7 +87,7 @@ func setupRaft(svc system.Service, cfg config.Config, paymentsRepo *postgres.Pay
 		RaftLogLevel:   cfg.RaftLogLevel,
 		DataDir:        cfg.DataPath,
 		Servers:        cfg.RaftServers,
-	}, raft.NewStreamLayer(raftListener), fsm, svc.Logger())
+	}, raft.NewStreamLayer(svc.RaftListener()), fsm, svc.Logger())
 	if err != nil {
 		return nil, err
 	}

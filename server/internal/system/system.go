@@ -3,6 +3,8 @@ package system
 import (
 	"fmt"
 	"io/fs"
+	"io"
+	"bytes"
 	"os"
 	"net"
 	"time"
@@ -20,6 +22,7 @@ import (
 
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/internal/waiter"
+	"github.com/bd878/gallery/server/internal/consensus/raft"
 	grpcmiddleware "github.com/bd878/gallery/server/internal/middleware/grpc"
 )
 
@@ -34,15 +37,16 @@ type Config struct {
 }
 
 type System struct {
-	cfg          Config
-	pool         *pgxpool.Pool
-	db           *sql.DB
-	nc           *nats.Conn
-	rpc          *grpc.Server
-	logger       *logger.Logger
-	listener     net.Listener
-	waiter       waiter.Waiter
-	mux          cmux.CMux
+	cfg              Config
+	pool             *pgxpool.Pool
+	db               *sql.DB
+	nc               *nats.Conn
+	rpc              *grpc.Server
+	logger           *logger.Logger
+	listener         net.Listener
+	raftListener     net.Listener
+	waiter           waiter.Waiter
+	mux              cmux.CMux
 }
 
 func NewSystem(cfg Config) (*System, error) {
@@ -64,6 +68,7 @@ func NewSystem(cfg Config) (*System, error) {
 		return nil, err
 	}
 
+	s.initRaftListener()
 	s.initRPC()
 	s.initLogger()
 	s.initWaiter()
@@ -115,6 +120,20 @@ func (s *System) initMux() (err error) {
 	s.mux = cmux.New(s.listener)
 
 	return
+}
+
+func (s *System) initRaftListener() {
+	s.raftListener = s.mux.Match(func(r io.Reader) bool {
+		b := make([]byte, 1)
+		if _, err := r.Read(b); err != nil {
+			return false
+		}
+		return bytes.Compare(b, []byte{byte(raft.RaftRPC)}) == 0
+	})
+}
+
+func (s *System) RaftListener() net.Listener {
+	return s.raftListener
 }
 
 func (s *System) Mux() cmux.CMux {

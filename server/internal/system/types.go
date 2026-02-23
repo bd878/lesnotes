@@ -1,6 +1,7 @@
 package system
 
 import (
+	"net"
 	"database/sql"
 
 	"github.com/soheilhy/cmux"
@@ -21,4 +22,5 @@ type Service interface {
 	RPC() *grpc.Server
 	Waiter() waiter.Waiter
 	Logger() *logger.Logger
+	RaftListener() net.Listener
 }

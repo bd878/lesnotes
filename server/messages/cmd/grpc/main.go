@@ -62,7 +62,7 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println("started messages service")
+	fmt.Println("starting messages service")
 	defer fmt.Println("stopped messages service")
 
 	s.Waiter().Add(
