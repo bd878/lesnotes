@@ -196,7 +196,7 @@ func (s *System) WaitForRPC(ctx context.Context) (err error) {
 			s.RPC().Stop()
 			return fmt.Errorf("rpc server failed to stop gracefully")
 		case <-stopped:
-			fmt.Fprintf(os.Stdout, "rpc server stopped gracefully")
+			fmt.Fprintln(os.Stdout, "rpc server stopped gracefully")
 			return nil
 		}
 	})

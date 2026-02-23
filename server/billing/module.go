@@ -7,6 +7,8 @@ import (
 	"bytes"
 	"context"
 
+	"golang.org/x/sync/errgroup"
+
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/internal/system"
@@ -28,7 +30,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 		return err
 	}
 
-	if err := setupSerf(svc.Waiter().Context(), cfg, consensus, svc.Logger()); err != nil {
+	if err := setupSerf(svc, cfg, consensus, svc.Logger()); err != nil {
 		return err
 	}
 
@@ -41,7 +43,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	return nil
 }
 
-func setupSerf(ctx context.Context, cfg config.Config, handler serf.Handler, logger *logger.Logger) error {
+func setupSerf(svc system.Service, cfg config.Config, handler serf.Handler, logger *logger.Logger) error {
 	membership, err := serf.New(
 		serf.Config{
 			NodeName: cfg.NodeName,
@@ -57,15 +59,23 @@ func setupSerf(ctx context.Context, cfg config.Config, handler serf.Handler, log
 		return err
 	}
 
-	go func() {
-		defer func() {
-			if err := membership.Leave(); err != nil {
-				fmt.Fprintln(os.Stderr, err)
-			}
-		}()
+	svc.Waiter().Add(func(ctx context.Context) (err error) {
+		group, gCtx := errgroup.WithContext(ctx)
 
-		membership.Run(ctx)
-	}()
+		group.Go(func() error {
+			fmt.Fprintln(os.Stdout, "membership run")
+			membership.Run(gCtx)
+			return nil
+		})
+
+		group.Go(func() error {
+			<-gCtx.Done()
+			fmt.Fprintln(os.Stdout, "membership is about to leave")
+			return membership.Leave()
+		})
+
+		return group.Wait()
+	})
 
 	return nil
 }
@@ -94,6 +104,7 @@ func setupRaft(svc system.Service, cfg config.Config, paymentsRepo *postgres.Pay
 
 	svc.Waiter().Add(func(ctx context.Context) error {
 		<-ctx.Done()
+		fmt.Fprintln(os.Stdout, "raft is about to leave")
 		return consensus.Leave(consensus.NodeName())
 	})
 
