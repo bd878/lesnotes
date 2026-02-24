@@ -265,7 +265,6 @@ func (m *Distributed) SaveTranslation(ctx context.Context, userID, messageID int
 }
 
 func (m *Distributed) UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string) (err error) {
-	// TODO: deal with nil pointer
 	m.log.Debugw("update translation", "message_id", messageID, "lang", lang, "title", title, "text", text)
 
 	cmd, err := proto.Marshal(&machine.UpdateTranslationCommand{

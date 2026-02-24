@@ -16,12 +16,21 @@ import (
 )
 
 func main() {
-	PGConn := os.Getenv("PG_CONN")
-	addr := os.Getenv("ADDR")
-	tableName := os.Getenv("TABLE")
+	PGConn, ok := os.LookupEnv("PG_CONN")
+	if !ok {
+		panic("PG_CONN env required")
+	}
+	addr, ok := os.LookupEnv("ADDR")
+	if !ok {
+		panic("ADDR env required")
+	}
+	tableName, ok := os.LookupEnv("TABLE")
+	if !ok {
+		panic("TABLE env required")
+	}
 
 	fmt.Fprintln(os.Stdout, "=== running users migration ===")
-	fmt.Fprintln(os.Stdout, "PGConn", PGConn, "addr", addr, "table", tableName)
+	fmt.Fprintln(os.Stdout, "PGConn:", PGConn, "addr:", addr, "table:", tableName)
 
 	table := func(query string) string {
 		return fmt.Sprintf(query, tableName)

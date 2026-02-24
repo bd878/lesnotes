@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS messages.messages
 (
 	id           bigint        UNIQUE NOT NULL,
 	text         TEXT          NOT NULL,
-	file_ids     jsonb         DEFAULT NULL,
 	private      bool          NOT NULL DEFAULT true,
 	name         VARCHAR(256)  UNIQUE NOT NULL,
 	user_id      bigint        NOT NULL,

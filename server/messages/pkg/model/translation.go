@@ -2,6 +2,7 @@ package model
 
 type (
 	Translation struct {
+		// TODO UserID
 		MessageID           int64               `json:"message"`
 		Lang                string              `json:"lang"`
 		Title               string              `json:"title"`
