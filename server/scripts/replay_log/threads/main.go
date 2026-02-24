@@ -92,7 +92,7 @@ func main() {
 			Description:         thread.Description,
 		})
 		if err != nil {
-			panic(err)
+			fmt.Fprintln(os.Stdout, "[WARN]: failed to save thread:", err)
 		}
 	}
 

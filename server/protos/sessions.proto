@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package sessions.v1;
 
+import "protos/distributed.proto";
+
 option go_package = "github.com/bd878/gallery/server/api";
 
 service Sessions {
@@ -10,6 +12,7 @@ service Sessions {
 	rpc Create(CreateSessionRequest) returns (Session);
 	rpc Remove(RemoveSessionRequest) returns (RemoveSessionResponse);
 	rpc RemoveAll(RemoveAllSessionsRequest) returns (RemoveAllSessionsResponse);
+	rpc GetServers(GetServersRequest) returns (GetServersResponse) {}
 }
 
 message Session {

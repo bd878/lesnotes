@@ -13,6 +13,7 @@ type Controller interface {
 	CreateSession(ctx context.Context, userID int64) (*model.Session, error)
 	RemoveSession(ctx context.Context, token string) error
 	RemoveUserSessions(ctx context.Context, userID int64) error
+	GetServers(ctx context.Context) (servers []*api.Server, err error)
 }
 
 type Handler struct {
@@ -79,5 +80,18 @@ func (h *Handler) RemoveAll(ctx context.Context, req *api.RemoveAllSessionsReque
 	}
 
 	resp = &api.RemoveAllSessionsResponse{}
+	return
+}
+
+func (h *Handler) GetServers(ctx context.Context, _ *api.GetServersRequest) (resp *api.GetServersResponse, err error) {
+	servers, err := h.controller.GetServers(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	resp = &api.GetServersResponse{
+		Servers: servers,
+	}
+
 	return
 }

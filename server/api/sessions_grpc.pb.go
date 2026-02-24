@@ -22,6 +22,7 @@ type SessionsClient interface {
 	Create(ctx context.Context, in *CreateSessionRequest, opts ...grpc.CallOption) (*Session, error)
 	Remove(ctx context.Context, in *RemoveSessionRequest, opts ...grpc.CallOption) (*RemoveSessionResponse, error)
 	RemoveAll(ctx context.Context, in *RemoveAllSessionsRequest, opts ...grpc.CallOption) (*RemoveAllSessionsResponse, error)
+	GetServers(ctx context.Context, in *GetServersRequest, opts ...grpc.CallOption) (*GetServersResponse, error)
 }
 
 type sessionsClient struct {
@@ -77,6 +78,15 @@ func (c *sessionsClient) RemoveAll(ctx context.Context, in *RemoveAllSessionsReq
 	return out, nil
 }
 
+func (c *sessionsClient) GetServers(ctx context.Context, in *GetServersRequest, opts ...grpc.CallOption) (*GetServersResponse, error) {
+	out := new(GetServersResponse)
+	err := c.cc.Invoke(ctx, "/sessions.v1.Sessions/GetServers", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SessionsServer is the server API for Sessions service.
 // All implementations must embed UnimplementedSessionsServer
 // for forward compatibility
@@ -86,6 +96,7 @@ type SessionsServer interface {
 	Create(context.Context, *CreateSessionRequest) (*Session, error)
 	Remove(context.Context, *RemoveSessionRequest) (*RemoveSessionResponse, error)
 	RemoveAll(context.Context, *RemoveAllSessionsRequest) (*RemoveAllSessionsResponse, error)
+	GetServers(context.Context, *GetServersRequest) (*GetServersResponse, error)
 	mustEmbedUnimplementedSessionsServer()
 }
 
@@ -107,6 +118,9 @@ func (UnimplementedSessionsServer) Remove(context.Context, *RemoveSessionRequest
 }
 func (UnimplementedSessionsServer) RemoveAll(context.Context, *RemoveAllSessionsRequest) (*RemoveAllSessionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveAll not implemented")
+}
+func (UnimplementedSessionsServer) GetServers(context.Context, *GetServersRequest) (*GetServersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetServers not implemented")
 }
 func (UnimplementedSessionsServer) mustEmbedUnimplementedSessionsServer() {}
 
@@ -211,6 +225,24 @@ func _Sessions_RemoveAll_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Sessions_GetServers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetServersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SessionsServer).GetServers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sessions.v1.Sessions/GetServers",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SessionsServer).GetServers(ctx, req.(*GetServersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Sessions_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "sessions.v1.Sessions",
 	HandlerType: (*SessionsServer)(nil),
@@ -234,6 +266,10 @@ var _Sessions_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RemoveAll",
 			Handler:    _Sessions_RemoveAll_Handler,
+		},
+		{
+			MethodName: "GetServers",
+			Handler:    _Sessions_GetServers_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

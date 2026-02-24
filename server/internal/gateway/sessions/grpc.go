@@ -7,6 +7,7 @@ import (
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/sessions/pkg/loadbalance"
 	sessionsmodel "github.com/bd878/gallery/server/sessions/pkg/model"
 )
 
@@ -22,14 +23,23 @@ func New(addr string) *Gateway {
 	return g
 }
 
-func (g *Gateway) setupConnection() {
-	conn, err := grpc.NewClient(g.addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+func (g *Gateway) setupConnection() error {
+	conn, err := grpc.NewClient(
+		fmt.Sprintf(
+			"%s:///%s",
+			loadbalance.Name,
+			g.addr,
+		),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	g.conn = conn
 	g.client = api.NewSessionsClient(conn)
+
+	return nil
 }
 
 func (g *Gateway) isConnFailed() bool {
@@ -38,10 +48,11 @@ func (g *Gateway) isConnFailed() bool {
 }
 
 func (g *Gateway) GetSession(ctx context.Context, token string) (*sessionsmodel.Session, error) {
-	if g.isConnFailed() {
-		g.setupConnection()
+	if s.isConnFailed() {
+		if err = s.setupConnection(); err != nil {
+			return
+		}
 	}
-
 	resp, err := g.client.Get(ctx, &api.GetSessionRequest{Token: token})
 	if err != nil {
 		return nil, err
