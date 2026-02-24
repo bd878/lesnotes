@@ -114,7 +114,12 @@ func New(conf Config, streamLayer *StreamLayer, fsm raft.FSM, log *logger.Logger
 		return nil, err
 	}
 
-	if conf.Bootstrap {
+	hasState, err := raft.HasExistingState(logStore, stableStore, m.snapshotStore)
+	if err != nil {
+		return nil, err
+	}
+
+	if conf.Bootstrap && !hasState {
 		servers := []raft.Server{{
 			ID:      raft.ServerID(conf.NodeName),
 			Address: transport.LocalAddr(),
