@@ -95,7 +95,6 @@ func (s *Server) Run(ctx context.Context) (err error) {
 	waiter := waiter.New(waiter.CatchSignals())
 
 	waiter.Add(
-		s.WaitForMux,
 		s.WaitForRPC,
 		s.WaitForPool,
 		s.WaitForStream,

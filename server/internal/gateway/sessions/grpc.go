@@ -1,6 +1,7 @@
 package sessions
 
 import (
+	"fmt"
 	"context"
 
 	"google.golang.org/grpc"
@@ -48,9 +49,9 @@ func (g *Gateway) isConnFailed() bool {
 }
 
 func (g *Gateway) GetSession(ctx context.Context, token string) (*sessionsmodel.Session, error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
+	if g.isConnFailed() {
+		if err := g.setupConnection(); err != nil {
+			return nil, err
 		}
 	}
 	resp, err := g.client.Get(ctx, &api.GetSessionRequest{Token: token})
