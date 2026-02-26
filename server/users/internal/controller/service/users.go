@@ -104,10 +104,15 @@ func (s *Controller) CreateUser(ctx context.Context, id int64, login, password s
 		return
 	}
 
+	logger.Debugln("user created")
+	logger.Debugln("create session")
+
 	session, err := s.sessions.CreateSession(ctx, id)
 	if err != nil {
 		return nil, err
 	}
+
+	logger.Debugln("session created")
 
 	user = &model.User{
 		ID:       id,
