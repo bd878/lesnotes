@@ -1,0 +1,16 @@
+[Unit]
+Description=Gallery users go service
+Wants=network.target
+After=syslog.target network-online.target
+
+[Service]
+User=snd
+Group=snd
+WorkingDirectory=/srv/gallery/stage/users/
+ExecStart=/srv/gallery/stage/users/http /srv/gallery/stage/users/config/http.json
+Restart=on-failure
+RestartSec=10
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target

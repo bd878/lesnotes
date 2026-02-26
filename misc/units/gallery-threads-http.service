@@ -1,0 +1,16 @@
+[Unit]
+Description=Gallery threads go service
+Wants=network.target
+After=syslog.target network-online.target
+
+[Service]
+User=snd
+Group=snd
+WorkingDirectory=/srv/gallery/stage/threads/
+ExecStart=/srv/gallery/stage/threads/http /srv/gallery/stage/threads/config/http.json
+Restart=on-failure
+RestartSec=10
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target

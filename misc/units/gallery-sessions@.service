@@ -1,0 +1,16 @@
+[Unit]
+Description=Gallery sessions go service %i
+Wants=network.target
+After=syslog.target network-online.target
+
+[Service]
+User=snd
+Group=snd
+WorkingDirectory=/srv/gallery/stage/sessions
+ExecStart=/srv/gallery/stage/sessions/grpc ./config/%i.json
+Restart=on-failure
+RestartSec=10
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target

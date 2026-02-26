@@ -8,9 +8,7 @@ set -e
 # env BUILD_DIR, ENV
 
 # init
-mkdir -p "/srv/gallery/$ENV/files" # no error
 touch "$BUILD_DIR/logs/files.log"
-touch "/srv/gallery/$ENV/files/files.log"
 
 echo "*** logging in $BUILD_DIR/logs/files.log"
 
@@ -19,6 +17,8 @@ exec &> "$BUILD_DIR/logs/files.log"
 
 # build 
 echo "*** building files"
+
+echo "$USER"
 
 cd $BUILD_DIR/gallery/server/files
 echo "*** pwd = $(pwd)"
@@ -35,14 +35,14 @@ go build -v  -buildvcs=false ./cmd/http/
 # stop
 set +e
 echo "*** stopping gallery-files"
-systemd-run --user --scope -p "Delegate=yes" -- lxc-attach "gallery-$ENV" -- /srv/misc/scripts/stop_files.sh
+ssh "gallery-$ENV-files" "/srv/misc/scripts/stop_files.sh"
 
-scp grpc "gallery-$ENV:/srv/gallery/$ENV/files/"
-scp http "gallery-$ENV:/srv/gallery/$ENV/files/"
+scp grpc "gallery-$ENV-files:/srv/gallery/$ENV/files/"
+scp http "gallery-$ENV-files:/srv/gallery/$ENV/files/"
 
 # start
 echo "*** starting gallery-files"
-systemd-run --user --scope -p "Delegate=yes" -- lxc-attach "gallery-$ENV" -- /srv/misc/scripts/start_files.sh
+ssh "gallery-$ENV-files" "/srv/misc/scripts/start_files.sh"
 
 set -e
 

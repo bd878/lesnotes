@@ -5,12 +5,13 @@
 
 set -e
 
+HOSTS=( gallery-$ENV gallery-$ENV-4 gallery-$ENV-3 )
+declare -A pause=(["prod"]="30s" ["stage"]="20s")
+
 # env BUILD_DIR, ENV
 
 # init
-mkdir -p "/srv/gallery/$ENV/users" # no error
 touch "$BUILD_DIR/logs/users.log"
-touch "/srv/gallery/$ENV/users/users.log"
 
 echo "*** logging in $BUILD_DIR/logs/users.log"
 
@@ -34,15 +35,19 @@ go build -v -buildvcs=false ./cmd/http/
 
 # stop
 set +e
-echo "*** stopping gallery-users"
-systemd-run --user --scope -p "Delegate=yes" -- lxc-attach gallery-$ENV -- /srv/misc/scripts/stop_users.sh
 
-scp grpc gallery-$ENV:/srv/gallery/$ENV/users/
-scp http gallery-$ENV:/srv/gallery/$ENV/users/
+for host in ${HOSTS[@]}; do
+    echo "*** mv users on $host"
+    ssh "$host" "/srv/misc/scripts/stop_users.sh"
 
-# start
-echo "*** starting gallery-users"
-systemd-run --user --scope -p "Delegate=yes" -- lxc-attach gallery-$ENV -- /srv/misc/scripts/start_users.sh
+    scp grpc "$host:/srv/gallery/$ENV/users/"
+    scp http "$host:/srv/gallery/$ENV/users/"
+
+    echo "*** start users on $host"
+    ssh "$host" "/srv/misc/scripts/start_users.sh"
+
+    sleep ${pause[$ENV]} # let cluster restart
+done
 
 set -e
 

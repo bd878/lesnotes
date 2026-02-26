@@ -1,0 +1,16 @@
+[Unit]
+Description=Gallery search go service %i
+Wants=network.target
+After=syslog.target network-online.target
+
+[Service]
+User=snd
+Group=snd
+WorkingDirectory=/srv/gallery/stage/search
+ExecStart=/srv/gallery/stage/search/grpc ./config/%i.json
+Restart=on-failure
+RestartSec=10
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target

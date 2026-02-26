@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Builds messages service
+# Builds search service
 #
 
 set -e
@@ -10,17 +10,19 @@ declare -A pause=(["prod"]="30s" ["stage"]="20s")
 
 # env BUILD_DIR, ENV
 
-touch "$BUILD_DIR/logs/messages.log"
+BUILD_DIR=`readlink -f $BUILD_DIR`
 
-echo "*** logging in $BUILD_DIR/logs/messages.log"
+touch "$BUILD_DIR/logs/search.log"
+
+echo "*** logging in $BUILD_DIR/logs/search.log"
 
 exec 7<&1
-exec &> "$BUILD_DIR/logs/messages.log"
+exec &> "$BUILD_DIR/logs/search.log"
 
 # build 
-echo "*** building messages"
+echo "*** building search"
 
-cd $BUILD_DIR/gallery/server/messages
+cd $BUILD_DIR/gallery/server/search
 echo "*** pwd = $(pwd)"
 go version
 [ $? -ne 0 ] && echo "*** go is not installed, exit." && exit 1
@@ -35,14 +37,14 @@ go build -v -buildvcs=false ./cmd/http/
 set +e
 
 for host in ${HOSTS[@]}; do
-    echo "*** stop messages on $host"
-    ssh "$host" "/srv/misc/scripts/stop_messages.sh"
+    echo "*** mv search on $host"
+    ssh "$host" "/srv/misc/scripts/stop_search.sh"
 
-    scp grpc "$host:/srv/gallery/$ENV/messages/"
-    scp http "$host:/srv/gallery/$ENV/messages/"
+    scp grpc "$host:/srv/gallery/$ENV/search/"
+    scp http "$host:/srv/gallery/$ENV/search/"
 
-    echo "*** start messages on $host"
-    ssh "$host" "/srv/misc/scripts/start_messages.sh"
+    echo "*** start search on $host"
+    ssh "$host" "/srv/misc/scripts/start_search.sh"
 
     sleep ${pause[$ENV]} # let cluster restart
 done

@@ -1,26 +1,26 @@
 #!/bin/bash
 #
-# Builds messages service
+# Builds billing service
 #
 
 set -e
 
 HOSTS=( gallery-$ENV gallery-$ENV-4 gallery-$ENV-3 )
-declare -A pause=(["prod"]="30s" ["stage"]="20s")
+declare -A pause=(["prod"]="30s" ["stage"]="0")
 
 # env BUILD_DIR, ENV
 
-touch "$BUILD_DIR/logs/messages.log"
+touch "$BUILD_DIR/logs/billing.log"
 
-echo "*** logging in $BUILD_DIR/logs/messages.log"
+echo "*** logging in $BUILD_DIR/logs/billing.log"
 
 exec 7<&1
-exec &> "$BUILD_DIR/logs/messages.log"
+exec &> "$BUILD_DIR/logs/billing.log"
 
 # build 
-echo "*** building messages"
+echo "*** building billing"
 
-cd $BUILD_DIR/gallery/server/messages
+cd $BUILD_DIR/gallery/server/billing
 echo "*** pwd = $(pwd)"
 go version
 [ $? -ne 0 ] && echo "*** go is not installed, exit." && exit 1
@@ -35,15 +35,15 @@ go build -v -buildvcs=false ./cmd/http/
 set +e
 
 for host in ${HOSTS[@]}; do
-    echo "*** stop messages on $host"
-    ssh "$host" "/srv/misc/scripts/stop_messages.sh"
+    echo "*** stop billing on $host"
+    ssh "$host" "/srv/misc/scripts/stop_billing.sh"
 
-    scp grpc "$host:/srv/gallery/$ENV/messages/"
-    scp http "$host:/srv/gallery/$ENV/messages/"
+    scp grpc "$host:/srv/gallery/$ENV/billing/"
+    scp http "$host:/srv/gallery/$ENV/billing/"
 
-    echo "*** start messages on $host"
-    ssh "$host" "/srv/misc/scripts/start_messages.sh"
-
+    echo "*** start billing on $host"
+    ssh "$host" "/srv/misc/scripts/start_billing.sh"
+    
     sleep ${pause[$ENV]} # let cluster restart
 done
 

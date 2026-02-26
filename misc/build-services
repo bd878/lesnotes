@@ -19,56 +19,100 @@ export GIT_DIR="$(pwd)/.git"
 git diff --quiet "$oval" "$nval" -- "front"
 if (( $? > 0 ))
 then
-	echo "*** building front"
-	echo
-	setsid -f bash --login -c "env BUILD_DIR=$BUILD_DIR ENV=$ENV /srv/misc/scripts/build-front"
+    echo "*** building front"
+    echo
+    setsid -f bash --login -c "env BUILD_DIR=$BUILD_DIR ENV=$ENV /srv/misc/scripts/build-front"
 else
-	echo "*** no changes in front"
-	echo
+    echo "*** no changes in front"
+    echo
 fi
 
 git diff --quiet "$oval" "$nval" -- "server/messages"
 if (( $? > 0 ))
 then
-	echo "*** building messages"
-	echo
-	setsid -f bash --login -c "env BUILD_DIR=$BUILD_DIR ENV=$ENV /srv/misc/scripts/build-messages"
+    echo "*** building messages"
+    echo
+    setsid -f bash --login -c "env BUILD_DIR=$BUILD_DIR ENV=$ENV /srv/misc/scripts/build-messages"
 else
-	echo "*** no changes in messages"
-	echo
+    echo "*** no changes in messages"
+    echo
 fi
 
 git diff --quiet "$oval" "$nval" -- "server/users"
 if (( $? > 0 ))
 then
-	echo "*** building users"
-	echo
-	setsid -f bash --login -c "env BUILD_DIR=$BUILD_DIR ENV=$ENV /srv/misc/scripts/build-users"
+    echo "*** building users"
+    echo
+    setsid -f bash --login -c "env BUILD_DIR=$BUILD_DIR ENV=$ENV /srv/misc/scripts/build-users"
 else
-	echo "*** no changes in users"
-	echo
+    echo "*** no changes in users"
+    echo
 fi
 
 git diff --quiet "$oval" "$nval" -- "server/files"
 if (( $? > 0 ))
 then
-	echo "*** building files"
-	echo
-	setsid -f bash --login -c "env BUILD_DIR=$BUILD_DIR ENV=$ENV /srv/misc/scripts/build-files"
+    echo "*** building files"
+    echo
+    setsid -f bash --login -c "env BUILD_DIR=$BUILD_DIR ENV=$ENV /srv/misc/scripts/build-files"
 else
-	echo "*** no changes in files"
-	echo
+    echo "*** no changes in files"
+    echo
+fi
+
+git diff --quiet "$oval" "$nval" -- "server/telemetry"
+if (( $? > 0 ))
+then
+    echo "*** building telemetry"
+    echo
+    setsid -f bash --login -c "env BUILD_DIR=$BUILD_DIR ENV=$ENV /srv/misc/scripts/build-telemetry"
+else
+    echo "*** no changes in telemetry"
+    echo
 fi
 
 git diff --quiet "$oval" "$nval" -- "server/sessions"
 if (( $? > 0 ))
 then
-	echo "*** building sessions"
-	echo
-	setsid -f bash --login -c "env BUILD_DIR=$BUILD_DIR ENV=$ENV /srv/misc/scripts/build-sessions"
+    echo "*** building sessions"
+    echo
+    setsid -f bash --login -c "env BUILD_DIR=$BUILD_DIR ENV=$ENV /srv/misc/scripts/build-sessions"
 else
-	echo "*** no changes in sessions"
-	echo
+    echo "*** no changes in sessions"
+    echo
+fi
+
+git diff --quiet "$oval" "$nval" -- "server/search"
+if (( $? > 0 ))
+then
+    echo "*** building search"
+    echo
+    setsid -f bash --login -c "env BUILD_DIR=$BUILD_DIR ENV=$ENV /srv/misc/scripts/build-search"
+else
+    echo "*** no changes in search"
+    echo
+fi
+
+git diff --quiet "$oval" "$nval" -- "server/threads"
+if (( $? > 0 ))
+then
+    echo "*** building threads"
+    echo
+    setsid -f bash --login -c "env BUILD_DIR=$BUILD_DIR ENV=$ENV /srv/misc/scripts/build-threads"
+else
+    echo "*** no changes in threads"
+    echo
+fi
+
+git diff --quiet "$oval" "$nval" -- "server/billing"
+if (( $? > 0 ))
+then
+    echo "*** building billing"
+    echo
+    setsid -f bash --login -c "env BUILD_DIR=$BUILD_DIR ENV=$ENV /srv/misc/scripts/build-billing"
+else
+    echo "*** no changes in billing"
+    echo
 fi
 
 exec 1<&7 7<&-

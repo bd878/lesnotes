@@ -1,0 +1,17 @@
+[Unit]
+Description=Gallery frontend node.js application
+Wants=network.target
+After=syslog.target network-online.target
+
+[Service]
+User=snd
+Group=snd
+WorkingDirectory=/srv/gallery/stage/front/
+Environment=NODE_CONFIG_DIR=/srv/gallery/stage/front/config/ NODE_ENV=stage
+ExecStart=/home/snd/.nvm/versions/node/v23.11.0/bin/node /srv/gallery/stage/front/build/index.js
+Restart=on-failure
+RestartSec=10
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
