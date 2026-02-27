@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package threads.v1;
 
-import "protos/distributed.proto";
-
 option go_package = "github.com/bd878/gallery/server/api";
 
 service Threads {
@@ -17,7 +15,6 @@ service Threads {
 	rpc Create(CreateRequest) returns (CreateResponse) {}
 	rpc Delete(DeleteRequest) returns (DeleteResponse) {}
 	rpc Count(CountRequest) returns (CountResponse) {}
-	rpc GetServers(GetServersRequest) returns (GetServersResponse) {}
 }
 
 message Thread {

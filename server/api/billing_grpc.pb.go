@@ -17,7 +17,6 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BillingClient interface {
-	GetServers(ctx context.Context, in *GetServersRequest, opts ...grpc.CallOption) (*GetServersResponse, error)
 	CreateInvoice(ctx context.Context, in *CreateInvoiceRequest, opts ...grpc.CallOption) (*CreateInvoiceResponse, error)
 	StartPayment(ctx context.Context, in *StartPaymentRequest, opts ...grpc.CallOption) (*StartPaymentResponse, error)
 	ProceedPayment(ctx context.Context, in *ProceedPaymentRequest, opts ...grpc.CallOption) (*ProceedPaymentResponse, error)
@@ -33,15 +32,6 @@ type billingClient struct {
 
 func NewBillingClient(cc grpc.ClientConnInterface) BillingClient {
 	return &billingClient{cc}
-}
-
-func (c *billingClient) GetServers(ctx context.Context, in *GetServersRequest, opts ...grpc.CallOption) (*GetServersResponse, error) {
-	out := new(GetServersResponse)
-	err := c.cc.Invoke(ctx, "/billing.v1.Billing/GetServers", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *billingClient) CreateInvoice(ctx context.Context, in *CreateInvoiceRequest, opts ...grpc.CallOption) (*CreateInvoiceResponse, error) {
@@ -111,7 +101,6 @@ func (c *billingClient) GetPayment(ctx context.Context, in *GetPaymentRequest, o
 // All implementations must embed UnimplementedBillingServer
 // for forward compatibility
 type BillingServer interface {
-	GetServers(context.Context, *GetServersRequest) (*GetServersResponse, error)
 	CreateInvoice(context.Context, *CreateInvoiceRequest) (*CreateInvoiceResponse, error)
 	StartPayment(context.Context, *StartPaymentRequest) (*StartPaymentResponse, error)
 	ProceedPayment(context.Context, *ProceedPaymentRequest) (*ProceedPaymentResponse, error)
@@ -126,9 +115,6 @@ type BillingServer interface {
 type UnimplementedBillingServer struct {
 }
 
-func (UnimplementedBillingServer) GetServers(context.Context, *GetServersRequest) (*GetServersResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetServers not implemented")
-}
 func (UnimplementedBillingServer) CreateInvoice(context.Context, *CreateInvoiceRequest) (*CreateInvoiceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateInvoice not implemented")
 }
@@ -161,24 +147,6 @@ type UnsafeBillingServer interface {
 
 func RegisterBillingServer(s *grpc.Server, srv BillingServer) {
 	s.RegisterService(&_Billing_serviceDesc, srv)
-}
-
-func _Billing_GetServers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetServersRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(BillingServer).GetServers(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/billing.v1.Billing/GetServers",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BillingServer).GetServers(ctx, req.(*GetServersRequest))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _Billing_CreateInvoice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -311,10 +279,6 @@ var _Billing_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "billing.v1.Billing",
 	HandlerType: (*BillingServer)(nil),
 	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "GetServers",
-			Handler:    _Billing_GetServers_Handler,
-		},
 		{
 			MethodName: "CreateInvoice",
 			Handler:    _Billing_CreateInvoice_Handler,

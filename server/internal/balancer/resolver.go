@@ -63,7 +63,7 @@ func (r *Resolver) ResolveNow(resolver.ResolveNowOptions) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	client := api.NewSearchClient(r.resolverConn)
+	client := api.NewDistributedClient(r.resolverConn)
 
 	logger.Debugw("resolver resolve now servers", "client", r.resolverConn.Target())
 

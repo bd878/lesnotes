@@ -23,6 +23,7 @@ type Controller interface {
 
 type Handler struct {
 	api.UnimplementedThreadsServer
+	api.UnimplementedDistributedServer
 	controller Controller
 }
 

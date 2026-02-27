@@ -15,6 +15,7 @@ type Controller interface {
 
 type Handler struct {
 	api.UnimplementedSearchServer
+	api.UnimplementedDistributedServer
 	controller Controller
 }
 

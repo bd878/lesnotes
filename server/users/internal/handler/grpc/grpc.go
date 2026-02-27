@@ -18,6 +18,7 @@ type Controller interface {
 
 type Handler struct {
 	api.UnimplementedUsersServer
+	api.UnimplementedDistributedServer
 	controller Controller
 }
 

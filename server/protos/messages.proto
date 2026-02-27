@@ -2,13 +2,11 @@ syntax = "proto3";
 
 package messages.v1;
 
-import "protos/distributed.proto";
 import "protos/translations.proto";
 
 option go_package = "github.com/bd878/gallery/server/api";
 
 service Messages {
-	rpc GetServers(GetServersRequest) returns (GetServersResponse) {}
 	rpc SaveMessage(SaveMessageRequest) returns (SaveMessageResponse) {}
 	rpc DeleteMessages(DeleteMessagesRequest) returns (DeleteMessagesResponse) {}
 	rpc DeleteUserMessages(DeleteUserMessagesRequest) returns (DeleteUserMessagesResponse) {}

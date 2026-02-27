@@ -20,6 +20,7 @@ type Controller interface {
 
 type Handler struct {
 	api.UnimplementedBillingServer
+	api.UnimplementedDistributedServer
 	controller Controller
 }
 

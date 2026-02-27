@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package users.v1;
 
-import "protos/distributed.proto";
-
 option go_package = "github.com/bd878/gallery/server/api";
 
 service Users {
@@ -12,7 +10,6 @@ service Users {
 	rpc GetUser(GetUserRequest) returns (User);
 	rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
 	rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
-	rpc GetServers(GetServersRequest) returns (GetServersResponse) {}
 }
 
 message User {

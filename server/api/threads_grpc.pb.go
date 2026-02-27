@@ -27,7 +27,6 @@ type ThreadsClient interface {
 	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
 	Count(ctx context.Context, in *CountRequest, opts ...grpc.CallOption) (*CountResponse, error)
-	GetServers(ctx context.Context, in *GetServersRequest, opts ...grpc.CallOption) (*GetServersResponse, error)
 }
 
 type threadsClient struct {
@@ -128,15 +127,6 @@ func (c *threadsClient) Count(ctx context.Context, in *CountRequest, opts ...grp
 	return out, nil
 }
 
-func (c *threadsClient) GetServers(ctx context.Context, in *GetServersRequest, opts ...grpc.CallOption) (*GetServersResponse, error) {
-	out := new(GetServersResponse)
-	err := c.cc.Invoke(ctx, "/threads.v1.Threads/GetServers", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // ThreadsServer is the server API for Threads service.
 // All implementations must embed UnimplementedThreadsServer
 // for forward compatibility
@@ -151,7 +141,6 @@ type ThreadsServer interface {
 	Create(context.Context, *CreateRequest) (*CreateResponse, error)
 	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
 	Count(context.Context, *CountRequest) (*CountResponse, error)
-	GetServers(context.Context, *GetServersRequest) (*GetServersResponse, error)
 	mustEmbedUnimplementedThreadsServer()
 }
 
@@ -188,9 +177,6 @@ func (UnimplementedThreadsServer) Delete(context.Context, *DeleteRequest) (*Dele
 }
 func (UnimplementedThreadsServer) Count(context.Context, *CountRequest) (*CountResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Count not implemented")
-}
-func (UnimplementedThreadsServer) GetServers(context.Context, *GetServersRequest) (*GetServersResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetServers not implemented")
 }
 func (UnimplementedThreadsServer) mustEmbedUnimplementedThreadsServer() {}
 
@@ -385,24 +371,6 @@ func _Threads_Count_Handler(srv interface{}, ctx context.Context, dec func(inter
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Threads_GetServers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetServersRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ThreadsServer).GetServers(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/threads.v1.Threads/GetServers",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ThreadsServer).GetServers(ctx, req.(*GetServersRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 var _Threads_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "threads.v1.Threads",
 	HandlerType: (*ThreadsServer)(nil),
@@ -446,10 +414,6 @@ var _Threads_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Count",
 			Handler:    _Threads_Count_Handler,
-		},
-		{
-			MethodName: "GetServers",
-			Handler:    _Threads_GetServers_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

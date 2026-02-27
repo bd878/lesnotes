@@ -22,6 +22,7 @@ type MessagesController interface {
 
 type MessagesHandler struct {
 	api.UnimplementedMessagesServer
+	api.UnimplementedDistributedServer
 	controller MessagesController
 }
 

@@ -7,7 +7,7 @@ func init() {
 	balancer.RegisterPicker(
 		Name,
 		[]string{"Create", "Delete", "Publish",
-			"Private", "Update", "reorder"},
+			"Private", "Update", "Reorder"},
 		[]string{"Resolve", "Read", "Count", "List"},
 	)
 }

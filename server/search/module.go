@@ -44,6 +44,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	handler := grpc.New(controller)
 
 	api.RegisterSearchServer(svc.RPC(), handler)
+	api.RegisterDistributedServer(svc.RPC(), handler)
 
 	return nil
 }

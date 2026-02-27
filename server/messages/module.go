@@ -48,6 +48,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	translationsHandler := grpc.NewTranslationsHandler(controller)
 
 	api.RegisterMessagesServer(svc.RPC(), messagesHandler)
+	api.RegisterDistributedServer(svc.RPC(), messagesHandler)
 	api.RegisterTranslationsServer(svc.RPC(), translationsHandler)
 
 	return nil

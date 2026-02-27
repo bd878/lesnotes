@@ -17,7 +17,6 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MessagesClient interface {
-	GetServers(ctx context.Context, in *GetServersRequest, opts ...grpc.CallOption) (*GetServersResponse, error)
 	SaveMessage(ctx context.Context, in *SaveMessageRequest, opts ...grpc.CallOption) (*SaveMessageResponse, error)
 	DeleteMessages(ctx context.Context, in *DeleteMessagesRequest, opts ...grpc.CallOption) (*DeleteMessagesResponse, error)
 	DeleteUserMessages(ctx context.Context, in *DeleteUserMessagesRequest, opts ...grpc.CallOption) (*DeleteUserMessagesResponse, error)
@@ -35,15 +34,6 @@ type messagesClient struct {
 
 func NewMessagesClient(cc grpc.ClientConnInterface) MessagesClient {
 	return &messagesClient{cc}
-}
-
-func (c *messagesClient) GetServers(ctx context.Context, in *GetServersRequest, opts ...grpc.CallOption) (*GetServersResponse, error) {
-	out := new(GetServersResponse)
-	err := c.cc.Invoke(ctx, "/messages.v1.Messages/GetServers", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *messagesClient) SaveMessage(ctx context.Context, in *SaveMessageRequest, opts ...grpc.CallOption) (*SaveMessageResponse, error) {
@@ -131,7 +121,6 @@ func (c *messagesClient) ReadBatchMessages(ctx context.Context, in *ReadBatchMes
 // All implementations must embed UnimplementedMessagesServer
 // for forward compatibility
 type MessagesServer interface {
-	GetServers(context.Context, *GetServersRequest) (*GetServersResponse, error)
 	SaveMessage(context.Context, *SaveMessageRequest) (*SaveMessageResponse, error)
 	DeleteMessages(context.Context, *DeleteMessagesRequest) (*DeleteMessagesResponse, error)
 	DeleteUserMessages(context.Context, *DeleteUserMessagesRequest) (*DeleteUserMessagesResponse, error)
@@ -148,9 +137,6 @@ type MessagesServer interface {
 type UnimplementedMessagesServer struct {
 }
 
-func (UnimplementedMessagesServer) GetServers(context.Context, *GetServersRequest) (*GetServersResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetServers not implemented")
-}
 func (UnimplementedMessagesServer) SaveMessage(context.Context, *SaveMessageRequest) (*SaveMessageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveMessage not implemented")
 }
@@ -189,24 +175,6 @@ type UnsafeMessagesServer interface {
 
 func RegisterMessagesServer(s *grpc.Server, srv MessagesServer) {
 	s.RegisterService(&_Messages_serviceDesc, srv)
-}
-
-func _Messages_GetServers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetServersRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MessagesServer).GetServers(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/messages.v1.Messages/GetServers",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MessagesServer).GetServers(ctx, req.(*GetServersRequest))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _Messages_SaveMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -375,10 +343,6 @@ var _Messages_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "messages.v1.Messages",
 	HandlerType: (*MessagesServer)(nil),
 	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "GetServers",
-			Handler:    _Messages_GetServers_Handler,
-		},
 		{
 			MethodName: "SaveMessage",
 			Handler:    _Messages_SaveMessage_Handler,
