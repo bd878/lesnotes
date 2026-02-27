@@ -6,6 +6,8 @@ import (
 	"os"
 	"database/sql"
 
+	_ "github.com/bd878/gallery/server/sessions/pkg/loadbalance"
+
 	"github.com/bd878/gallery/server/sessions"
 	"github.com/bd878/gallery/server/sessions/migrations"
 	"github.com/bd878/gallery/server/sessions/config"

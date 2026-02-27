@@ -6,6 +6,9 @@ import (
 	"context"
 	"os"
 
+	_ "github.com/bd878/gallery/server/threads/pkg/loadbalance"
+	_ "github.com/bd878/gallery/server/sessions/pkg/loadbalance"
+
 	"github.com/bd878/gallery/server/threads/config"
 	"github.com/bd878/gallery/server/threads/internal/http"
 	"github.com/bd878/gallery/server/internal/logger"

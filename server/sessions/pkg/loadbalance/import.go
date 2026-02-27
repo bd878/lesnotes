@@ -1,7 +1,17 @@
 package loadbalance
 
 import (
-	"github.com/bd878/gallery/server/sessions/internal/loadbalance"
+	"github.com/bd878/gallery/server/internal/balancer"
 )
 
-const Name = loadbalance.Name
+func init() {
+	balancer.RegisterResolver(Name)
+	balancer.RegisterPicker(
+		Name,
+		[]string{"Create", "Remove", "RemoveAll"},
+		[]string{"List", "Get"},
+	)
+}
+
+
+const Name = "sessions"
