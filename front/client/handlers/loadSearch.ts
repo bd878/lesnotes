@@ -1,4 +1,5 @@
 import api from '../api';
+import redirectHome from './redirectHome';
 
 async function loadSearch(ctx, next) {
 	console.log("--> loadSearch")
@@ -8,6 +9,8 @@ async function loadSearch(ctx, next) {
 		console.log(response.error)
 		ctx.body = "error"
 		ctx.state = 400
+		// TODO: show error screen
+		return await redirectHome(ctx, next)
 	} else {
 		ctx.state.messages = response.messages
 	}

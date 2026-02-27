@@ -6,10 +6,22 @@ import (
 	"context"
 	"os"
 
+	"github.com/bd878/gallery/server/internal/balancer"
+	"github.com/bd878/gallery/server/internal/logger"
+
 	"github.com/bd878/gallery/server/search/config"
 	"github.com/bd878/gallery/server/search/internal/http"
-	"github.com/bd878/gallery/server/internal/logger"
+	"github.com/bd878/gallery/server/search/pkg/loadbalance"
 )
+
+func init() {
+	balancer.RegisterResolver(loadbalance.Name)
+	balancer.RegisterPicker(
+		loadbalance.Name,
+		[]string{"SaveMessage, DeleteMessage, PublishMessage, PrivateMessage, UpdateMessage"},
+		[]string{"SearchMessages"},
+	)
+}
 
 func init() {
 	flag.Usage = func() {

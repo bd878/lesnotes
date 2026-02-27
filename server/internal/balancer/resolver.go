@@ -1,4 +1,4 @@
-package loadbalance
+package balancer
 
 import (
 	"context"
@@ -16,6 +16,7 @@ import (
 )
 
 type Resolver struct {
+	name           string
 	mu             sync.Mutex
 	clientConn     resolver.ClientConn
 	resolverConn   *grpc.ClientConn
@@ -39,7 +40,7 @@ func (r *Resolver) Build(
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	r.serviceConfig = r.clientConn.ParseServiceConfig(
-		fmt.Sprintf(`{"loadBalancingConfig":[{"%s":{}}]}`, Name),
+		fmt.Sprintf(`{"loadBalancingConfig":[{"%s":{}}]}`, r.name),
 	)
 	if err != nil {
 		return nil, err
@@ -48,14 +49,12 @@ func (r *Resolver) Build(
 	return r, nil
 }
 
-const Name = "search"
-
 func (r *Resolver) Scheme() string {
-	return Name
+	return r.name
 }
 
-func init() {
-	resolver.Register(&Resolver{})
+func RegisterResolver(name string) {
+	resolver.Register(&Resolver{name: name})
 }
 
 var _ resolver.Resolver = (*Resolver)(nil)

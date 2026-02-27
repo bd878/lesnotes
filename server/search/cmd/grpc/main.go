@@ -6,10 +6,11 @@ import (
 	"os"
 	"database/sql"
 
+	"github.com/bd878/gallery/server/internal/system"
+
 	"github.com/bd878/gallery/server/search"
 	"github.com/bd878/gallery/server/search/migrations"
 	"github.com/bd878/gallery/server/search/config"
-	"github.com/bd878/gallery/server/internal/system"
 )
 
 func init() {

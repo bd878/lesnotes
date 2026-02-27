@@ -267,6 +267,8 @@ func (m *Distributed) SearchMessages(ctx context.Context, userID int64, substr s
 		return nil, err
 	}
 
+	m.log.Debugw("found messages", "count", len(messages))
+
 	if threadID == -1 && threadID == 0 {
 		return messages, nil
 	}

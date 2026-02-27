@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/search/pkg/model"
 )
 
@@ -45,6 +46,8 @@ func (h *Handler) SearchMessages(ctx context.Context, req *api.SearchMessagesReq
 	if err != nil {
 		return nil, err
 	}
+
+	logger.Debugw("found messages", "count", len(list))
 
 	resp = &api.SearchMessagesResponse{
 		List:   model.MapMessagesToProto(model.MessageToProto, list),

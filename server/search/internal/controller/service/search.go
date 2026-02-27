@@ -89,5 +89,7 @@ func (s *Controller) SearchMessages(ctx context.Context, userID int64, substr st
 
 	list = searchmodel.MapMessagesFromProto(searchmodel.MessageFromProto, res.List)
 
+	logger.Debugw("found messages", "count", len(list))
+
 	return 
 }
