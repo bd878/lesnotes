@@ -1,12 +1,14 @@
 package grpc
 
 import (
+	"fmt"
 	"context"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/users/pkg/loadbalance"
 	usersmodel "github.com/bd878/gallery/server/users/pkg/model"
 )
 
@@ -22,14 +24,22 @@ func New(addr string) *Gateway {
 	return g
 }
 
-func (g *Gateway) setupConnection() {
-	conn, err := grpc.NewClient(g.addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+func (g *Gateway) setupConnection() error {
+	conn, err := grpc.NewClient(
+		fmt.Sprintf(
+			"%s:///%s",
+			loadbalance.Name,
+			g.addr,
+		), grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	g.conn = conn
 	g.client = api.NewUsersClient(conn)
+
+	return nil
 }
 
 func (g *Gateway) isConnFailed() bool {
@@ -39,7 +49,9 @@ func (g *Gateway) isConnFailed() bool {
 
 func (g *Gateway) GetUser(ctx context.Context, userID int64) (*usersmodel.User, error) {
 	if g.isConnFailed() {
-		g.setupConnection()
+		if err := g.setupConnection(); err != nil {
+			return nil, err
+		}
 	}
 
 	resp, err := g.client.GetUser(ctx, &api.GetUserRequest{
