@@ -38,9 +38,11 @@ func (h *Handler) GetMe(w http.ResponseWriter, req *http.Request) (err error) {
 	}
 
 	response, err := json.Marshal(users.GetMeResponse{
-		ID:       user.ID,
-		Login:    user.Login,
-		Metadata: user.Metadata,
+		ID:          user.ID,
+		Login:       user.Login,
+		Metadata:    user.Metadata,
+		CreatedAt:   user.CreatedAt,
+		UpdatedAt:   user.UpdatedAt,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

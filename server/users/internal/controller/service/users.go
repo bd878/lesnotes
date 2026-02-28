@@ -210,18 +210,18 @@ func (s *Controller) GetUser(ctx context.Context, id int64) (user *model.User, e
 	return
 }
 
-func (s *Controller) UpdateUser(ctx context.Context, id int64, newLogin string, metadata []byte) (err error) {
+func (s *Controller) UpdateUser(ctx context.Context, id int64, login *string, metadata []byte) (err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
 		}
 	}
 
-	logger.Debugw("update user", "id", id, "login", newLogin, "metadata", metadata)
+	logger.Debugw("update user", "id", id, "login", login, "metadata", metadata)
 
 	_, err = s.client.UpdateUser(ctx, &api.UpdateUserRequest{
 		Id:        id,
-		Login:     newLogin,
+		Login:     login,
 		Metadata:  metadata,
 	})
 

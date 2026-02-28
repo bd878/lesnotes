@@ -14,7 +14,8 @@ import (
 )
 
 type UsersRepository interface {
-	Find(ctx context.Context, id int64, login string) (user *model.User, err error)
+	FindByID(ctx context.Context, id int64) (user *model.User, err error)
+	FindByLogin(ctx context.Context, login string) (user *model.User, err error)
 }
 
 type Consensus interface {
@@ -64,6 +65,8 @@ func (m *Distributed) CreateUser(ctx context.Context, id int64, login, password 
 		Login:          login,
 		HashedPassword: string(hashed),
 		Metadata:       metadata,
+		CreatedAt:      time.Now().UTC().Format(time.RFC3339),
+		UpdatedAt:      time.Now().UTC().Format(time.RFC3339),
 	})
 	if err != nil {
 		return nil, err
@@ -91,39 +94,33 @@ func (m *Distributed) DeleteUser(ctx context.Context, id int64) (err error) {
 		return err
 	}
 
-	err = m.apply(ctx, machine.DeleteRequest, cmd)
-	if err != nil {
-		return
-	}
-
-	return nil
+	return m.apply(ctx, machine.DeleteRequest, cmd)
 }
 
-func (m *Distributed) UpdateUser(ctx context.Context, id int64, login string, metadata []byte) (err error) {
+func (m *Distributed) UpdateUser(ctx context.Context, id int64, login *string, metadata []byte) (err error) {
 	m.log.Debugw("update user", "id", id, "login", login, "metadata", metadata)
 
 	cmd, err := proto.Marshal(&machine.UpdateCommand{
-		Id:          id,
-		Login:       login,
-		Metadata:    metadata,
+		Id:             id,
+		Login:          login,
+		Metadata:       metadata,
+		UpdatedAt:      time.Now().UTC().Format(time.RFC3339),
 	})
 	if err != nil {
 		return err
 	}
 
-	err = m.apply(ctx, machine.UpdateRequest, cmd)
-
-	return
+	return m.apply(ctx, machine.UpdateRequest, cmd)
 }
 
 func (m *Distributed) FindUser(ctx context.Context, login string) (user *model.User, err error) {
 	m.log.Debugw("find user", "login", login)
-	return m.usersRepo.Find(ctx, 0, login)
+	return m.usersRepo.FindByLogin(ctx, login)
 }
 
 func (m *Distributed) GetUser(ctx context.Context, id int64) (user *model.User, err error) {
 	m.log.Debugw("get user", "id", id)
-	return m.usersRepo.Find(ctx, id, "")
+	return m.usersRepo.FindByID(ctx, id)
 }
 
 func (m *Distributed) GetServers(ctx context.Context) ([]*api.Server, error) {

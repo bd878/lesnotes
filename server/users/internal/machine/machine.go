@@ -6,15 +6,13 @@ import (
 
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
-	"github.com/bd878/gallery/server/users/pkg/model"
 	"github.com/bd878/gallery/server/internal/logger"
 )
 
 type UsersRepository interface {
-	Save(ctx context.Context, id int64, login, hashedPassword string, metadata []byte) (err error)
+	Save(ctx context.Context, id int64, login, hashedPassword string, metadata []byte, createdAt, updatedAt string) (err error)
 	Delete(ctx context.Context, id int64) (err error)
-	Update(ctx context.Context, id int64, newLogin string, metadata []byte) (err error)
-	Find(ctx context.Context, id int64/*TODO: not used, remove*/, login string) (*model.User, error)
+	Update(ctx context.Context, id int64, login *string, metadata []byte, updatedAt string) (err error)
 	Dump(ctx context.Context, writer io.Writer) (err error)
 	Restore(ctx context.Context, reader io.Reader) (err error)
 }
@@ -53,14 +51,14 @@ func (f *Machine) applyAppend(raw []byte) interface{} {
 	var cmd AppendCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.usersRepo.Save(context.Background(), cmd.Id, cmd.Login, cmd.HashedPassword, cmd.Metadata)
+	return f.usersRepo.Save(context.Background(), cmd.Id, cmd.Login, cmd.HashedPassword, cmd.Metadata, cmd.CreatedAt, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyUpdate(raw []byte) interface{} {
 	var cmd UpdateCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.usersRepo.Update(context.Background(), cmd.Id, cmd.Login, cmd.Metadata)
+	return f.usersRepo.Update(context.Background(), cmd.Id, cmd.Login, cmd.Metadata, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyDelete(raw []byte) interface{} {

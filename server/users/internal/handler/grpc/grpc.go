@@ -9,7 +9,7 @@ import (
 
 type Controller interface {
 	GetUser(ctx context.Context, id int64) (*model.User, error)
-	UpdateUser(ctx context.Context, id int64, newLogin string, metadata []byte) (err error)
+	UpdateUser(ctx context.Context, id int64, login *string, metadata []byte) (err error)
 	FindUser(ctx context.Context, login string) (*model.User, error)
 	DeleteUser(ctx context.Context, id int64) (err error)
 	CreateUser(ctx context.Context, id int64, login, password string, metadata []byte) (*model.User, error)

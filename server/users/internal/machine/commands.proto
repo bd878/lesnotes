@@ -6,13 +6,16 @@ message AppendCommand {
 	int64   id  = 1;
 	string  login = 2;
 	string  hashed_password = 3;
-	optional bytes   metadata = 4;
+	string  created_at = 4;
+	string  updated_at = 5;
+	optional bytes   metadata = 6;
 }
 
 message UpdateCommand {
 	int64   id = 1;
-	string  login = 2;
-	optional bytes metadata = 3;
+	optional string  login = 2;
+	string  updated_at = 3;
+	optional bytes metadata = 4;
 }
 
 message DeleteCommand {

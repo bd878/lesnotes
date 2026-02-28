@@ -9,6 +9,8 @@ func UserToProto(u *User) *api.User {
 		Id:               u.ID,
 		Login:            u.Login,
 		HashedPassword:   u.HashedPassword,
+		CreatedAt:        u.CreatedAt,
+		UpdatedAt:        u.UpdatedAt,
 		Metadata:         u.Metadata,
 	}
 }
@@ -19,5 +21,7 @@ func UserFromProto(u *api.User) *User {
 		Login:            u.Login,
 		HashedPassword:   u.HashedPassword,
 		Metadata:         u.Metadata,
+		CreatedAt:        u.CreatedAt,
+		UpdatedAt:        u.UpdatedAt,
 	}
 }

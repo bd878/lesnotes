@@ -10,7 +10,9 @@ type (
 		Login            string           `json:"login,omitempty"`
 		Token            string           `json:"token,omitempty"`
 		HashedPassword   string           `json:"-"`
-		ExpiresUTCNano   int64            `json:"expires_utc_nano,omitempty"` // TODO: ExpiresAt
+		ExpiresUTCNano   int64            `json:"expires_utc_nano,omitempty"` // TODO: remove
+		CreatedAt        string           `json:"created_at"`
+		UpdatedAt        string           `json:"updated_at"`
 		Metadata         []byte           `json:"metadata,omitempty"`
 	}
 
@@ -43,6 +45,8 @@ type (
 	GetMeResponse struct {
 		ID               int64            `json:"id"`
 		Login            string           `json:"login"`
+		CreatedAt        string           `json:"created_at"`
+		UpdatedAt        string           `json:"updated_at"`
 		Metadata         []byte           `json:"metadata,omitempty"`
 	}
 
@@ -59,7 +63,7 @@ type (
 	}
 
 	UpdateRequest struct {
-		Login            string           `json:"login,omitempty"`
+		Login            *string          `json:"login,omitempty"`
 		Metadata         []byte           `json:"metadata,omitempty"`
 	}
 

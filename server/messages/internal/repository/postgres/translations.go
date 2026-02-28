@@ -32,7 +32,6 @@ func (r *TranslationsRepository) SaveTranslation(ctx context.Context, messageID 
 func (r *TranslationsRepository) UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string) (err error) {
 	const query = "UPDATE %s SET title = $3, text = $4 WHERE message_id = $1 AND lang = $2"
 
-	// TODO: can we use nil pointer to leave a row untouched?
 	_, err = r.pool.Exec(ctx, r.table(query), messageID, lang, title, text)
 
 	return

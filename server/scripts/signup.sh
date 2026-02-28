@@ -10,7 +10,7 @@ cmd=`cat <<HERE
 sed -e "s/%STAGE%/$stage/g" \
 -e "s/%LOGIN%/$login/g" \
 -e "s/%PASSWORD%/$password/g" ./curl/signup.curl |
-curl -v -K -
+curl -K -
 HERE`
 result=`eval "$cmd"`
 echo $result

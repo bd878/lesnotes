@@ -37,9 +37,14 @@ func (h *Handler) Update(w http.ResponseWriter, req *http.Request) (err error) {
 		return
 	}
 
-	newLogin, newMetadata := req.PostFormValue("login"), req.PostFormValue("metadata")
+	var loginParam *string
 
-	err = h.controller.UpdateUser(req.Context(), user.ID, newLogin, []byte(newMetadata))
+	login, metadata := req.PostFormValue("login"), req.PostFormValue("metadata")
+	if login != "" {
+		loginParam = &login
+	}
+
+	err = h.controller.UpdateUser(req.Context(), user.ID, loginParam, []byte(metadata))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
