@@ -28,9 +28,6 @@ CREATE TABLE IF NOT EXISTS billing.payments
 	PRIMARY KEY(id)
 );
 
-CREATE TRIGGER created_at_billing_payments_trgr BEFORE UPDATE ON billing.payments FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
-CREATE TRIGGER updated_at_billing_payments_trgr BEFORE UPDATE ON billing.payments FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
-
 CREATE TABLE IF NOT EXISTS billing.invoices
 (
 	id             VARCHAR(256)            UNIQUE NOT NULL,
@@ -43,9 +40,6 @@ CREATE TABLE IF NOT EXISTS billing.invoices
 	updated_at     timestamptz             NOT NULL DEFAULT NOW(),
 	PRIMARY KEY(id)
 );
-
-CREATE TRIGGER created_at_billing_invoices_trgr BEFORE UPDATE ON billing.invoices FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
-CREATE TRIGGER updated_at_billing_invoices_trgr BEFORE UPDATE ON billing.invoices FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 
 -- +goose Down
 DROP SCHEMA IF EXISTS billing CASCADE;

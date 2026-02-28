@@ -3,12 +3,13 @@ package postgres
 import (
 	"io"
 	"fmt"
+	"time"
 	"context"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/bd878/gallery/server/internal/logger"
-	billing "github.com/bd878/gallery/server/billing/pkg/model"
+	"github.com/bd878/gallery/server/billing/pkg/model"
 )
 
 type PaymentsRepository struct {
@@ -20,48 +21,54 @@ func NewPaymentsRepository(pool *pgxpool.Pool, tableName string) *PaymentsReposi
 	return &PaymentsRepository{tableName, pool}
 }
 
-func (r *PaymentsRepository) SavePayment(ctx context.Context, id, userID int64, invoiceID string, currency, status string, total int64, metadata []byte) (err error) {
-	const insert = "INSERT INTO %s(id, invoice_id, user_id, status, currency, total, metadata) VALUES ($1, $2, $3, $4, $5, $6, $7)"
+func (r *PaymentsRepository) SavePayment(ctx context.Context, id, userID int64, invoiceID string, currency, status string, total int64,
+	metadata []byte, createdAt, updatedAt string) (err error) {
+	const insert = "INSERT INTO %s(id, invoice_id, user_id, status, currency, total, metadata, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
 
-	_, err = r.pool.Exec(ctx, r.table(insert), id, invoiceID, userID, status, currency, total, metadata)
-
-	return
-}
-
-func (r *PaymentsRepository) ProceedPayment(ctx context.Context, id, userID int64) (err error) {
-	const update = "UPDATE %s SET status = 'processed' WHERE user_id = $1 AND id = $2"
-
-	_, err = r.pool.Exec(ctx, r.table(update), userID, id)
+	_, err = r.pool.Exec(ctx, r.table(insert), id, invoiceID, userID, status, currency, total, metadata, createdAt, updatedAt)
 
 	return
 }
 
-func (r *PaymentsRepository) CancelPayment(ctx context.Context, id, userID int64) (err error) {
-	const update = "UPDATE %s SET status = 'cancelled' WHERE user_id = $1 AND id = $2"
+func (r *PaymentsRepository) ProceedPayment(ctx context.Context, id, userID int64, updatedAt string) (err error) {
+	const update = "UPDATE %s SET status = 'processed', updated_at = $3 WHERE user_id = $1 AND id = $2"
 
-	_, err = r.pool.Exec(ctx, r.table(update), userID, id)
-
-	return
-}
-
-func (r *PaymentsRepository) RefundPayment(ctx context.Context, id, userID int64) (err error) {
-	const update = "UPDATE %s SET status = 'refunded' WHERE user_id = $1 AND id = $2"
-
-	_, err = r.pool.Exec(ctx, r.table(update), userID, id)
+	_, err = r.pool.Exec(ctx, r.table(update), userID, id, updatedAt)
 
 	return
 }
 
-func (r *PaymentsRepository) GetPayment(ctx context.Context, id, userID int64) (payment *billing.Payment, err error) {
-	const query = "SELECT invoice_id, status, currency, total, metadata FROM %s WHERE user_id = $1 AND id = $2"
+func (r *PaymentsRepository) CancelPayment(ctx context.Context, id, userID int64, updatedAt string) (err error) {
+	const update = "UPDATE %s SET status = 'cancelled', updated_at = $3 WHERE user_id = $1 AND id = $2"
 
-	payment = &billing.Payment{
+	_, err = r.pool.Exec(ctx, r.table(update), userID, id, updatedAt)
+
+	return
+}
+
+func (r *PaymentsRepository) RefundPayment(ctx context.Context, id, userID int64, updatedAt string) (err error) {
+	const update = "UPDATE %s SET status = 'refunded', updated_at = $3 WHERE user_id = $1 AND id = $2"
+
+	_, err = r.pool.Exec(ctx, r.table(update), userID, id, updatedAt)
+
+	return
+}
+
+func (r *PaymentsRepository) GetPayment(ctx context.Context, id, userID int64) (payment *model.Payment, err error) {
+	const query = "SELECT invoice_id, status, currency, total, metadata, created_at, updated_at FROM %s WHERE user_id = $1 AND id = $2"
+
+	payment = &model.Payment{
 		ID:     id,
 		UserID: userID,
 	}
 
+	var createdAt, updatedAt *time.Time
+
 	err = r.pool.QueryRow(ctx, r.table(query), userID, id).Scan(&payment.InvoiceID, &payment.Status,
-		&payment.Currency, &payment.Total, &payment.Metadata)
+		&payment.Currency, &payment.Total, &payment.Metadata, &createdAt, &updatedAt)
+
+	payment.CreatedAt = createdAt.Format(time.RFC3339)
+	payment.UpdatedAt = updatedAt.Format(time.RFC3339)
 
 	return
 }

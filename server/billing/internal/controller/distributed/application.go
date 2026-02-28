@@ -32,7 +32,8 @@ type Distributed struct {
 	invoicesRepo   InvoicesRepository
 }
 
-func New(consensus Consensus, paymentsRepo PaymentsRepository, invoicesRepo InvoicesRepository, log *logger.Logger) *Distributed {
+func New(consensus Consensus, paymentsRepo PaymentsRepository,
+	invoicesRepo InvoicesRepository, log *logger.Logger) *Distributed {
 	return &Distributed{
 		log:            log,
 		consensus:      consensus,
@@ -60,41 +61,41 @@ func (m *Distributed) CreateInvoice(ctx context.Context, id string, userID int64
 	m.log.Debugw("invoice payment", "id", id, "user_id", userID, "currency", currency, "total", total, "metadata", metadata)
 
 	cmd, err := proto.Marshal(&machine.AppendInvoiceCommand{
-		Id:        id,
-		UserId:    userID,
-		Currency:  currency,
-		Total:     total,
-		Status:    "unpaid",
-		Metadata:  metadata,
+		Id:            id,
+		UserId:        userID,
+		Currency:      currency,
+		Total:         total,
+		Status:        "unpaid",
+		Metadata:      metadata,
+		CreatedAt:     time.Now().UTC().Format(time.RFC3339),
+		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
 	})
 	if err != nil {
 		return err
 	}
 
-	err = m.apply(ctx, machine.AppendInvoiceRequest, cmd)
-
-	return
+	return m.apply(ctx, machine.AppendInvoiceRequest, cmd)
 }
 
 func (m *Distributed) StartPayment(ctx context.Context, id, userID int64, invoiceID string, currency string, total int64, metadata []byte) (err error) {
 	m.log.Debugw("start payment", "id", id, "user_id", userID, "invoice_id", invoiceID, "currency", currency, "total", total, "metadata", metadata)
 
 	cmd, err := proto.Marshal(&machine.AppendPaymentCommand{
-		Id:        id,
-		UserId:    userID,
-		InvoiceId: invoiceID,
-		Status:    "pending",
-		Currency:  currency,
-		Total:     total,
-		Metadata:  metadata,
+		Id:            id,
+		UserId:        userID,
+		InvoiceId:     invoiceID,
+		Status:        "pending",
+		Currency:      currency,
+		Total:         total,
+		Metadata:      metadata,
+		CreatedAt:     time.Now().UTC().Format(time.RFC3339),
+		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
 	})
 	if err != nil {
 		return err
 	}
 
-	err = m.apply(ctx, machine.AppendPaymentRequest, cmd)
-
-	return
+	return m.apply(ctx, machine.AppendPaymentRequest, cmd)
 }
 
 func (m *Distributed) ProceedPayment(ctx context.Context, id, userID int64) (err error) {
@@ -106,8 +107,9 @@ func (m *Distributed) ProceedPayment(ctx context.Context, id, userID int64) (err
 	}
 
 	cmd, err := proto.Marshal(&machine.ProceedPaymentCommand{
-		Id:     id,
-		UserId: userID,
+		Id:            id,
+		UserId:        userID,
+		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
 	})
 	if err != nil {
 		return err
@@ -115,52 +117,53 @@ func (m *Distributed) ProceedPayment(ctx context.Context, id, userID int64) (err
 
 	err = m.apply(ctx, machine.ProceedPaymentRequest, cmd)
 	if err != nil {
+		// TODO: rollback payment if failed
 		return
 	}
 
+	m.log.Debugw("proceed invoice", "id", id, "user_id", userID)
+
 	cmd1, err := proto.Marshal(&machine.PayInvoiceCommand{
-		Id:     payment.InvoiceID,
-		UserId: userID,
+		Id:            payment.InvoiceID,
+		UserId:        userID,
+		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
 	})
 	if err != nil {
+		// TODO: rollback payment if falied
 		return err
 	}
 
-	err = m.apply(ctx, machine.PayInvoiceRequest, cmd1)
-
-	return
+	return m.apply(ctx, machine.PayInvoiceRequest, cmd1)
 }
 
 func (m *Distributed) CancelPayment(ctx context.Context, id, userID int64) (err error) {
 	m.log.Debugw("cancel payment", "id", id, "user_id", userID)
 
 	cmd, err := proto.Marshal(&machine.CancelPaymentCommand{
-		Id:     id,
-		UserId: userID,
+		Id:            id,
+		UserId:        userID,
+		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
 	})
 	if err != nil {
 		return err
 	}
 
-	err = m.apply(ctx, machine.CancelPaymentRequest, cmd)
-
-	return
+	return m.apply(ctx, machine.CancelPaymentRequest, cmd)
 }
 
 func (m *Distributed) RefundPayment(ctx context.Context, id, userID int64) (err error) {
 	m.log.Debugw("refund payment", "id", id, "user_id", userID)
 
 	cmd, err := proto.Marshal(&machine.RefundPaymentCommand{
-		Id:     id,
-		UserId: userID,
+		Id:            id,
+		UserId:        userID,
+		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
 	})
 	if err != nil {
 		return err
 	}
 
-	err = m.apply(ctx, machine.RefundPaymentRequest, cmd)
-
-	return
+	return m.apply(ctx, machine.RefundPaymentRequest, cmd)
 }
 
 func (m *Distributed) GetInvoice(ctx context.Context, id string, userID int64) (invoice *model.Invoice, err error) {

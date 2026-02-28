@@ -11,7 +11,7 @@ import (
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/billing/pkg/loadbalance"
-	billingmodel "github.com/bd878/gallery/server/billing/pkg/model"
+	"github.com/bd878/gallery/server/billing/pkg/model"
 )
 
 type Config struct {
@@ -160,7 +160,7 @@ func (s *Controller) RefundPayment(ctx context.Context, id, userID int64) (err e
 	return
 }
 
-func (s *Controller) GetInvoice(ctx context.Context, id string, userID int64) (invoice *billingmodel.Invoice, err error) {
+func (s *Controller) GetInvoice(ctx context.Context, id string, userID int64) (invoice *model.Invoice, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -177,12 +177,12 @@ func (s *Controller) GetInvoice(ctx context.Context, id string, userID int64) (i
 		return nil, err
 	}
 
-	invoice = billingmodel.InvoiceFromProto(resp.Invoice)
+	invoice = model.InvoiceFromProto(resp.Invoice)
 
 	return
 }
 
-func (s *Controller) GetPayment(ctx context.Context, id, userID int64) (payment *billingmodel.Payment, err error) {
+func (s *Controller) GetPayment(ctx context.Context, id, userID int64) (payment *model.Payment, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -199,7 +199,7 @@ func (s *Controller) GetPayment(ctx context.Context, id, userID int64) (payment 
 		return nil, err
 	}
 
-	payment = billingmodel.PaymentFromProto(resp.Payment)
+	payment = model.PaymentFromProto(resp.Payment)
 
 	return
 }
