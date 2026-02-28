@@ -11,6 +11,8 @@ message ThreadCreated {
 	string name = 4;
 	string description = 5;
 	bool   private = 6;
+	string created_at = 7;
+	string updated_at = 8;
 }
 
 message ThreadDeleted {
@@ -21,18 +23,21 @@ message ThreadDeleted {
 message ThreadUpdated {
 	int64  id = 1;
 	int64  user_id = 2;
-	string name = 3;
-	string description = 4;
+	optional string name = 3;
+	optional string description = 4;
+	string updated_at = 5;
 }
 
 message ThreadPublished {
 	int64  id = 1;
 	int64  user_id = 2;
+	string updated_at = 3;
 }
 
 message ThreadPrivated {
 	int64  id = 1;
 	int64  user_id = 2;
+	string updated_at = 3;
 }
 
 message ThreadParentChanged {

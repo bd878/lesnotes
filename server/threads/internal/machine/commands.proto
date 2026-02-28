@@ -11,13 +11,16 @@ message AppendCommand {
 	int64   next_id = 6;
 	int64   prev_id = 7;
 	string  description = 8;
+	string  created_at = 9;
+	string  updated_at = 10;
 }
 
 message UpdateCommand {
 	int64   id = 1;
 	int64   user_id = 2;
-	string  name = 3;
-	string  description = 4;
+	optional string  name = 3;
+	optional string  description = 4;
+	string  updated_at = 5;
 }
 
 message ReorderCommand {
@@ -26,6 +29,7 @@ message ReorderCommand {
 	int64  next_id = 3;
 	int64  prev_id = 4;
 	int64  parent_id = 5;
+	string updated_at = 6;
 }
 
 message DeleteCommand {
@@ -36,9 +40,11 @@ message DeleteCommand {
 message PublishCommand {
 	int64   id = 1;
 	int64   user_id = 2;
+	string  updated_at = 3;
 }
 
 message PrivateCommand {
 	int64   id = 1;
 	int64   user_id = 2;
+	string  updated_at = 3;
 }

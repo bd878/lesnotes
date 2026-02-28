@@ -2,72 +2,74 @@ package model
 
 type (
 	Thread struct {
-		ID          int64   `json:"id"`
-		UserID      int64   `json:"user_id"`
-		ParentID    int64   `json:"parent_id"`
-		NextID      int64   `json:"next_id"`
-		PrevID      int64   `json:"prev_id"`
-		Name        string  `json:"name"`
-		Count       int32   `json:"count"`
-		Private     bool    `json:"private"`
-		Description string  `json:"description"`
+		ID               int64        `json:"id"`
+		UserID           int64        `json:"user_id"`
+		ParentID         int64        `json:"parent_id"`
+		NextID           int64        `json:"next_id"`
+		PrevID           int64        `json:"prev_id"`
+		Name             string       `json:"name"`
+		Count            int32        `json:"count"`
+		Private          bool         `json:"private"`
+		Description      string       `json:"description"`
+		CreatedAt        string       `json:"created_at"`
+		UpdatedAt        string       `json:"updated_at"`
 // TODO: add title, is_root
 	}
 
 	ListThreadsRequest struct {
-		UserID      int64   `json:"user_id"`
-		ParentID    int64   `json:"parent"`
-		Limit       int32   `json:"limit"`
-		Offset      int32   `json:"offset"`
-		Asc         bool    `json:"asc"`
+		UserID           int64        `json:"user_id"`
+		ParentID         int64        `json:"parent"`
+		Limit            int32        `json:"limit"`
+		Offset           int32        `json:"offset"`
+		Asc              bool         `json:"asc"`
 	}
 
 	ReorderThreadRequest struct {
-		ID          int64   `json:"id"`
-		ParentID    int64   `json:"parent"`
-		NextID      int64   `json:"next"`
-		PrevID      int64   `json:"prev"`
+		ID               int64        `json:"id"`
+		ParentID         int64        `json:"parent"`
+		NextID           int64        `json:"next"`
+		PrevID           int64        `json:"prev"`
 	}
 
 	CreateThreadRequest struct {
-		ID          int64   `json:"id"`
-		ParentID    int64   `json:"parent"`
-		NextID      int64   `json:"next"`
-		PrevID      int64   `json:"prev"`
-		Name        string  `json:"name"`
-		Private     bool    `json:"private"`
-		Description string  `json:"description"`
+		ID               int64        `json:"id"`
+		ParentID         int64        `json:"parent"`
+		NextID           int64        `json:"next"`
+		PrevID           int64        `json:"prev"`
+		Name             string       `json:"name"`
+		Private          bool         `json:"private"`
+		Description      string       `json:"description"`
 	}
 
 	ReadThreadRequest struct {
-		ID          int64   `json:"id"`
-		Name        string  `json:"name"`
-		UserID      int64   `json:"user_id"`
+		ID               int64        `json:"id"`
+		Name             string       `json:"name"`
+		UserID           int64        `json:"user_id"`
 	}
 
 	UpdateThreadRequest struct {
-		ID          int64   `json:"id"`
-		UserID      int64   `json:"user_id"`
-		Name        string  `json:"name"`
-		Description string  `json:"description"`
+		ID               int64        `json:"id"`
+		UserID           int64        `json:"user_id"`
+		Name             *string      `json:"name,omitempty"`
+		Description      *string      `json:"description,omitempty"`
 	}
 
 	DeleteThreadRequest struct {
-		ID          int64   `json:"id"`
-		ParentID    int64   `json:"parent"`
+		ID               int64        `json:"id"`
+		ParentID         int64        `json:"parent"`
 	}
 
 	ResolveThreadRequest struct {
-		ID          int64   `json:"id"`
-		UserID      int64   `json:"user_id"`
+		ID               int64        `json:"id"`
+		UserID           int64        `json:"user_id"`
 	}
 
 	PublishThreadRequest struct {
-		ID          int64   `json:"id"`
+		ID               int64        `json:"id"`
 	}
 
 	PrivateThreadRequest struct {
-		ID          int64   `json:"id"`
+		ID               int64        `json:"id"`
 	}
 
 	ReadThreadResponse struct {

@@ -183,7 +183,7 @@ func (s *Controller) CreateThread(ctx context.Context, id, userID, parentID, nex
 }
 
 
-func (s *Controller) UpdateThread(ctx context.Context, id, userID int64, name, description string) (err error) {
+func (s *Controller) UpdateThread(ctx context.Context, id, userID int64, name, description *string) (err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return

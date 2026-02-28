@@ -59,6 +59,8 @@ func (h domainHandler[T]) onThreadCreated(ctx context.Context, event ddd.Event) 
 		Name:        payload.Name,
 		Description: payload.Description,
 		Private:     payload.Private,
+		CreatedAt:   payload.CreatedAt,
+		UpdatedAt:   payload.UpdatedAt,
 	})
 	if err != nil {
 		return err
@@ -85,6 +87,7 @@ func (h domainHandler[T]) onThreadPrivated(ctx context.Context, event ddd.Event)
 	data, err := proto.Marshal(&api.ThreadPrivated{
 		Id:          payload.ID,
 		UserId:      payload.UserID,
+		UpdatedAt:   payload.UpdatedAt,
 	})
 	if err != nil {
 		return err
@@ -100,6 +103,7 @@ func (h domainHandler[T]) onThreadUpdated(ctx context.Context, event ddd.Event) 
 		UserId:      payload.UserID,
 		Name:        payload.Name,
 		Description: payload.Description,
+		UpdatedAt:   payload.UpdatedAt,
 	})
 	if err != nil {
 		return err
@@ -113,6 +117,7 @@ func (h domainHandler[T]) onThreadPublished(ctx context.Context, event ddd.Event
 	data, err := proto.Marshal(&api.ThreadPublished{
 		Id:          payload.ID,
 		UserId:      payload.UserID,
+		UpdatedAt:   payload.UpdatedAt,
 	})
 	if err != nil {
 		return err

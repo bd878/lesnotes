@@ -19,17 +19,19 @@ var (
 )
 
 type ThreadCreated struct {
-	ID          int64
-	UserID      int64
-	ParentID    int64
-	Name        string
-	Description string
-	Private     bool
+	ID             int64
+	UserID         int64
+	ParentID       int64
+	Name           string
+	Description    string
+	Private        bool
+	CreatedAt      string
+	UpdatedAt      string
 }
 
 func (ThreadCreated) Key() string { return ThreadCreatedEvent }
 
-func CreateThread(id, userID, parentID int64, name, description string, private bool) (ddd.Event, error) {
+func CreateThread(id, userID, parentID int64, name, description string, private bool, createdAt, updatedAt string) (ddd.Event, error) {
 	if id == 0 {
 		return nil, ErrIDRequired
 	}
@@ -42,19 +44,22 @@ func CreateThread(id, userID, parentID int64, name, description string, private 
 		Name:        name,
 		Description: description,
 		Private:     private,
+		CreatedAt:   createdAt,
+		UpdatedAt:   updatedAt,
 	}), nil
 }
 
 type ThreadUpdated struct {
 	ID          int64
 	UserID      int64
-	Name        string
-	Description string
+	Name        *string
+	Description *string
+	UpdatedAt   string
 }
 
 func (ThreadUpdated) Key() string { return ThreadUpdatedEvent }
 
-func UpdateThread(id, userID int64, name, description string) (ddd.Event, error) {
+func UpdateThread(id, userID int64, name, description *string, updatedAt string) (ddd.Event, error) {
 	if id == 0 {
 		return nil, ErrIDRequired
 	}
@@ -65,6 +70,7 @@ func UpdateThread(id, userID int64, name, description string) (ddd.Event, error)
 		UserID:         userID,
 		Name:           name,
 		Description:    description,
+		UpdatedAt:      updatedAt,
 	}), nil
 }
 
@@ -87,38 +93,42 @@ func DeleteThread(id, userID int64) (ddd.Event, error) {
 }
 
 type ThreadPublished struct {
-	ID       int64
-	UserID   int64
+	ID         int64
+	UserID     int64
+	UpdatedAt  string
 }
 
 func (ThreadPublished) Key() string { return ThreadPublishEvent }
 
-func PublishThread(id, userID int64) (ddd.Event, error) {
+func PublishThread(id, userID int64, updatedAt string) (ddd.Event, error) {
 	if id == 0 {
 		return nil, ErrIDRequired
 	}
 
 	return ddd.NewEvent(ThreadPublishEvent, &ThreadPublished{
-		ID:      id,
-		UserID:  userID,
+		ID:          id,
+		UserID:      userID,
+		UpdatedAt:   updatedAt,
 	}), nil
 }
 
 type ThreadPrivated struct {
 	ID         int64
 	UserID     int64
+	UpdatedAt  string
 }
 
 func (ThreadPrivated) Key() string { return ThreadPrivateEvent }
 
-func PrivateThread(id, userID int64) (ddd.Event, error) {
+func PrivateThread(id, userID int64, updatedAt string) (ddd.Event, error) {
 	if id == 0 {
 		return nil, ErrIDRequired
 	}
 
 	return ddd.NewEvent(ThreadPrivateEvent, &ThreadPrivated{
-		ID:     id,
-		UserID: userID,
+		ID:        id,
+		UserID:    userID,
+		UpdatedAt: updatedAt,
 	}), nil
 }
 

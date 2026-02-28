@@ -19,8 +19,5 @@ CREATE TABLE IF NOT EXISTS threads.threads
 	PRIMARY KEY(id)
 );
 
-CREATE TRIGGER created_at_threads_trgr BEFORE UPDATE ON threads.threads FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
-CREATE TRIGGER updated_at_threads_trgr BEFORE UPDATE ON threads.threads FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
-
 -- +goose Down
 DROP SCHEMA IF EXISTS threads CASCADE;

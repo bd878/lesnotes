@@ -16,7 +16,8 @@ import (
 
 type ThreadsRepository interface {
 	ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (ids []*model.Thread, isLastPage bool, err error)
-	ReadThread(ctx context.Context, id, userID int64, name string) (thread *model.Thread, err error)
+	ReadThreadByID(ctx context.Context, id, userID int64) (thread *model.Thread, err error)
+	ReadThreadByName(ctx context.Context, name string, userID int64) (thread *model.Thread, err error)
 	ResolveThread(ctx context.Context, id, userID int64) (ids []int64, err error)
 	CountThreads(ctx context.Context, id, userID int64) (total int32, err error)
 }
@@ -61,20 +62,26 @@ func (m *Distributed) CreateThread(ctx context.Context, id, userID, parentID, ne
 	m.log.Debugw("create thread", "id", id, "user_id", userID, "parent_id", parentID,
 		"next_id", nextID, "prev_id", prevID, "name", name, "description", description, "private", private)
 
-	event, err := domain.CreateThread(id, userID, parentID, name, description, private)
+
+	createdAt := time.Now().UTC().Format(time.RFC3339)
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
+	event, err := domain.CreateThread(id, userID, parentID, name, description, private, createdAt, updatedAt)
 	if err != nil {
 		return err
 	}
 
 	cmd, err := proto.Marshal(&machine.AppendCommand{
-		Id:       id,
-		UserId:   userID,
-		ParentId: parentID,
-		NextId:   nextID,
-		PrevId:   prevID,
-		Name:     name,
-		Private:  private,
-		Description: description,
+		Id:            id,
+		UserId:        userID,
+		ParentId:      parentID,
+		NextId:        nextID,
+		PrevId:        prevID,
+		Name:          name,
+		Private:       private,
+		Description:   description,
+		CreatedAt:     createdAt,
+		UpdatedAt:     updatedAt,
 	})
 	if err != nil {
 		return err
@@ -88,19 +95,22 @@ func (m *Distributed) CreateThread(ctx context.Context, id, userID, parentID, ne
 	return m.publisher.Publish(context.Background(), event)
 }
 
-func (m *Distributed) UpdateThread(ctx context.Context, id, userID int64, name, description string) (err error) {
+func (m *Distributed) UpdateThread(ctx context.Context, id, userID int64, name, description *string) (err error) {
 	m.log.Debugw("update thread", "id", id, "user_id", userID, "name", name, "description", description)
 
-	event, err := domain.UpdateThread(id, userID, name, description)
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
+	event, err := domain.UpdateThread(id, userID, name, description, updatedAt)
 	if err != nil {
 		return err
 	}
 
 	cmd, err := proto.Marshal(&machine.UpdateCommand{
-		Id:           id,
-		UserId:       userID,
-		Name:         name,
-		Description:  description,
+		Id:            id,
+		UserId:        userID,
+		Name:          name,
+		Description:   description,
+		UpdatedAt:     updatedAt,
 	})
 	if err != nil {
 		return err
@@ -118,14 +128,14 @@ func (m *Distributed) ReorderThread(ctx context.Context, id, userID, parentID, n
 	m.log.Debugw("reorder thread", "id", id, "user_id", userID, "parent_id", parentID, "next_id", nextID, "prev_id", prevID)
 
 	cmd, err := proto.Marshal(&machine.ReorderCommand{
-		Id:        id,
-		UserId:    userID,
-		ParentId:  parentID,
-		NextId:    nextID,
-		PrevId:    prevID,
+		Id:            id,
+		UserId:        userID,
+		ParentId:      parentID,
+		NextId:        nextID,
+		PrevId:        prevID,
+		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
 	})
 	if err != nil {
-		m.log.Debugw("failed to marshal", "error", err)
 		return err
 	}
 
@@ -149,9 +159,12 @@ func (m *Distributed) ReorderThread(ctx context.Context, id, userID, parentID, n
 func (m *Distributed) PrivateThread(ctx context.Context, id, userID int64) error {
 	m.log.Debugw("private thread", "id", id, "user_id", userID)
 
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
 	cmd, err := proto.Marshal(&machine.PrivateCommand{
-		Id:      id,
-		UserId:  userID,
+		Id:            id,
+		UserId:        userID,
+		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
 	})
 	if err != nil {
 		return err
@@ -162,7 +175,7 @@ func (m *Distributed) PrivateThread(ctx context.Context, id, userID int64) error
 		return err
 	}
 
-	event, err := domain.PrivateThread(id, userID)
+	event, err := domain.PrivateThread(id, userID, updatedAt)
 	if err != nil {
 		return err
 	}
@@ -173,9 +186,12 @@ func (m *Distributed) PrivateThread(ctx context.Context, id, userID int64) error
 func (m *Distributed) PublishThread(ctx context.Context, id int64, userID int64) error {
 	m.log.Debugw("publich thread", "id", id, "user_id", userID)
 
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
 	cmd, err := proto.Marshal(&machine.PublishCommand{
-		Id:      id,
-		UserId:  userID,
+		Id:            id,
+		UserId:        userID,
+		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
 	})
 	if err != nil {
 		return err
@@ -186,7 +202,7 @@ func (m *Distributed) PublishThread(ctx context.Context, id int64, userID int64)
 		return err
 	}
 
-	event, err := domain.PublishThread(id, userID)
+	event, err := domain.PublishThread(id, userID, updatedAt)
 	if err != nil {
 		return err
 	}
@@ -198,8 +214,8 @@ func (m *Distributed) DeleteThread(ctx context.Context, id, userID int64) error 
 	m.log.Debugw("delete thread", "id", id, "user_id", userID)
 
 	cmd, err := proto.Marshal(&machine.DeleteCommand{
-		UserId:   userID,
 		Id:       id,
+		UserId:   userID,
 	})
 	if err != nil {
 		return err
@@ -225,7 +241,10 @@ func (m *Distributed) ResolveThread(ctx context.Context, id, userID int64) (ids 
 
 func (m *Distributed) ReadThread(ctx context.Context, id, userID int64, name string) (thread *model.Thread, err error) {
 	m.log.Debugw("read thread", "id", id, "user_id", userID, "name", name)
-	return m.threadsRepo.ReadThread(ctx, id, userID, name)
+	if name != "" {
+		return m.threadsRepo.ReadThreadByName(ctx, name, userID)
+	}
+	return m.threadsRepo.ReadThreadByID(ctx, id, userID)
 }
 
 func (m *Distributed) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (list []*model.Thread, isLastPage bool, err error) {
