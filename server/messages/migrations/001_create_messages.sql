@@ -17,9 +17,6 @@ CREATE TABLE IF NOT EXISTS messages.messages
 	PRIMARY KEY(id)
 );
 
-CREATE TRIGGER created_at_messages_trgr BEFORE UPDATE ON messages.messages FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
-CREATE TRIGGER updated_at_messages_trgr BEFORE UPDATE ON messages.messages FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
-
 CREATE TABLE IF NOT EXISTS messages.files
 (
 	file_id       bigint       NOT NULL,
@@ -30,17 +27,14 @@ CREATE TABLE IF NOT EXISTS messages.files
 
 CREATE TABLE IF NOT EXISTS messages.translations
 (
-	message_id    bigint       NOT NULL,
-	lang          VARCHAR(8)   NOT NULL,
-	text          TEXT         NOT NULL DEFAULT '',
-	title         TEXT         NOT NULL DEFAULT '',
+	message_id    bigint        NOT NULL,
+	lang          VARCHAR(8)    NOT NULL,
+	text          TEXT          NOT NULL DEFAULT '',
+	title         TEXT          NOT NULL DEFAULT '',
 	created_at    timestamptz   NOT NULL DEFAULT NOW(),
 	updated_at    timestamptz   NOT NULL DEFAULT NOW(),
 	PRIMARY KEY(message_id, lang)
 );
-
-CREATE TRIGGER created_at_translations_trgr BEFORE UPDATE ON messages.translations FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
-CREATE TRIGGER updated_at_translations_trgr BEFORE UPDATE ON messages.translations FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 
 -- +goose Down
 DROP SCHEMA IF EXISTS messages CASCADE;

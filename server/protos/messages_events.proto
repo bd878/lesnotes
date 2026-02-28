@@ -11,6 +11,8 @@ message MessageCreated {
 	string  title = 4;
 	string  name = 5;
 	bool    private = 6;
+	string  created_at = 7;
+	string  updated_at = 8;
 }
 
 message MessageDeleted {
@@ -21,17 +23,20 @@ message MessageDeleted {
 message MessageUpdated {
 	int64   id = 1;
 	int64   user_id = 2;
-	string  text = 3;
-	string  title = 4;
-	string  name = 5;
+	optional string  text = 3;
+	optional string  title = 4;
+	optional string  name = 5;
+	string updated_at = 6;
 }
 
 message MessagesPublished {
 	repeated int64 ids = 1;
 	int64   user_id = 2;
+	string  updated_at = 6;
 }
 
 message MessagesPrivated {
 	repeated int64 ids = 1;
 	int64   user_id = 2;
+	string  updated_at = 6;
 }

@@ -25,23 +25,27 @@ type MessageCreated struct {
 	Title     string
 	Name      string
 	Private   bool
+	CreatedAt string
+	UpdatedAt string
 }
 
 func (MessageCreated) Key() string { return MessageCreatedEvent }
 
-func CreateMessage(id int64, text, title string, fileIDs []int64, userID int64, private bool, name string) (ddd.Event, error) {
+func CreateMessage(id int64, text, title string, fileIDs []int64, userID int64, private bool, name string, createdAt, updatedAt string) (ddd.Event, error) {
 	if id == 0 {
 		return nil, ErrIDRequired
 	}
 	/*TODO: other errors*/
 
 	return ddd.NewEvent(MessageCreatedEvent, &MessageCreated{
-		ID:      id,
-		UserID:  userID,
-		Text:    text,
-		Title:   title,
-		Name:    name,
-		Private: private,
+		ID:         id,
+		UserID:     userID,
+		Text:       text,
+		Title:      title,
+		Name:       name,
+		Private:    private,
+		CreatedAt:  createdAt,
+		UpdatedAt:  updatedAt,
 	}), nil
 }
 
@@ -63,53 +67,57 @@ func DeleteMessage(id, userID int64) (ddd.Event, error) {
 type MessageUpdated struct {
 	ID        int64
 	UserID    int64
-	Text      string
-	Title     string
-	Name      string
+	Text      *string
+	Title     *string
+	Name      *string
+	UpdatedAt string
 }
 
 func (MessageUpdated) Key() string { return MessageUpdatedEvent }
 
-func UpdateMessage(id int64, text, title string, fileIDs []int64, userID int64, name string) (ddd.Event, error) {
+func UpdateMessage(id int64, text, title *string, fileIDs []int64, userID int64, name *string, updatedAt string) (ddd.Event, error) {
 	if id == 0 {
 		return nil, ErrIDRequired
 	}
 
 	return ddd.NewEvent(MessageUpdatedEvent, &MessageUpdated{
-		ID:      id,
-		UserID:  userID,
-		Text:    text,
-		Title:   title,
-		Name:    name,
+		ID:         id,
+		UserID:     userID,
+		Text:       text,
+		Title:      title,
+		Name:       name,
+		UpdatedAt:  updatedAt,
 	}), nil
 }
 
 type MessagesPublished struct {
-	IDs      []int64
-	UserID   int64
+	IDs         []int64
+	UserID      int64
+	UpdatedAt   string
 }
 
 func (MessagesPublished) Key() string { return MessagesPublishEvent }
 
-func PublishMessages(userID int64, ids []int64) (ddd.Event, error) {
+func PublishMessages(userID int64, ids []int64, updatedAt string) (ddd.Event, error) {
 	if ids == nil {
 		return nil, ErrIDRequired
 	}
 
-	return ddd.NewEvent(MessagesPublishEvent, &MessagesPublished{IDs: ids, UserID: userID}), nil
+	return ddd.NewEvent(MessagesPublishEvent, &MessagesPublished{IDs: ids, UserID: userID, UpdatedAt: updatedAt}), nil
 }
 
 type MessagesPrivated struct {
-	IDs      []int64
-	UserID   int64
+	IDs         []int64
+	UserID      int64
+	UpdatedAt   string
 }
 
 func (MessagesPrivated) Key() string { return MessagesPrivateEvent }
 
-func PrivateMessages(userID int64, ids []int64) (ddd.Event, error) {
+func PrivateMessages(userID int64, ids []int64, updatedAt string) (ddd.Event, error) {
 	if ids == nil {
 		return nil, ErrIDRequired
 	}
 
-	return ddd.NewEvent(MessagesPrivateEvent, &MessagesPrivated{IDs: ids, UserID: userID}), nil
+	return ddd.NewEvent(MessagesPrivateEvent, &MessagesPrivated{IDs: ids, UserID: userID, UpdatedAt: updatedAt}), nil
 }

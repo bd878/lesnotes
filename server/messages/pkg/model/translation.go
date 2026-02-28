@@ -7,16 +7,16 @@ type (
 		Lang                string              `json:"lang"`
 		Title               string              `json:"title"`
 		Text                string              `json:"text"`
-		CreatedAt           int64               `json:"created_at"`
-		UpdatedAt           int64               `json:"updated_at"`
+		CreatedAt           string              `json:"created_at"`
+		UpdatedAt           string              `json:"updated_at"`
 	}
 
 	TranslationPreview struct {
 		MessageID           int64               `json:"message"`
 		Lang                string              `json:"lang"`
 		Title               string              `json:"title"`
-		CreatedAt           int64               `json:"created_at"`
-		UpdatedAt           int64               `json:"updated_at"`
+		CreatedAt           string              `json:"created_at"`
+		UpdatedAt           string              `json:"updated_at"`
 	}
 
 	SendTranslationRequest struct {

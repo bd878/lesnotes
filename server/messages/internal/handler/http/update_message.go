@@ -97,20 +97,6 @@ func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, mess
 		return
 	}
 
-	msg, err := h.controller.ReadMessage(ctx, messageID, "", []int64{user.ID})
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status: "error",
-			Error: &server.ErrorCode{
-				Code:    messages.CodeNoMessage,
-				Explain: "failed to read message",
-			},
-		})
-
-		return err		
-	}
-
 	if text == "" && title == "" && len(fileIDs) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -124,23 +110,21 @@ func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, mess
 		return nil
 	}
 
-	if text == "" {
-		text = msg.Text
+	var textParam, titleParam, nameParam *string
+
+	if text != "" {
+		textParam = &text
 	}
 
-	if title == "" {
-		title = msg.Title
+	if title != "" {
+		titleParam = &title
 	}
 
-	if name == "" {
-		name = msg.Name
+	if name != "" {
+		nameParam = &name
 	}
 
-	if fileIDs == nil {
-		fileIDs = msg.FileIDs
-	}
-
-	err = h.controller.UpdateMessage(ctx, messageID, text, title, name, fileIDs, user.ID)
+	err = h.controller.UpdateMessage(ctx, messageID, textParam, titleParam, nameParam, fileIDs, user.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

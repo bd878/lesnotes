@@ -10,6 +10,8 @@ message TranslationCreated {
 	string   text = 3;
 	string   title = 4;
 	int64    user_id = 5;
+	string   created_at = 6;
+	string   updated_at = 7;
 }
 
 message TranslationDeleted {
@@ -22,4 +24,5 @@ message TranslationUpdated {
 	string   lang = 2;
 	optional string text = 3;
 	optional string title = 4;
+	string   updated_at = 5;
 }

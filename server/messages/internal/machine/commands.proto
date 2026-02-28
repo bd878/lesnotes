@@ -10,15 +10,18 @@ message AppendCommand {
 	string  name = 5;
 	bool    private = 6;
 	string  title = 7;
+	string  created_at = 8;
+	string  updated_at = 9;
 }
 
 message UpdateCommand {
 	int64   id = 1;
 	int64   user_id = 2;
 	repeated int64   file_ids = 3;
-	string  text = 4;
-	string  name = 5;
-	string  title = 6;
+	optional string  text = 4;
+	optional string  name = 5;
+	optional string  title = 6;
+	string  updated_at = 7;
 }
 
 message DeleteCommand {
@@ -33,11 +36,13 @@ message DeleteUserMessagesCommand {
 message PublishCommand {
 	repeated int64   ids = 1;
 	int64   user_id = 2;
+	string  updated_at = 3;
 }
 
 message PrivateCommand {
 	repeated int64 ids = 1;
 	int64   user_id = 2;
+	string  updated_at = 3;
 }
 
 message DeleteFileCommand {
@@ -50,6 +55,8 @@ message AppendTranslationCommand {
 	string lang = 2;
 	string title = 3;
 	string text = 4;
+	string created_at = 5;
+	string updated_at = 6;
 }
 
 message UpdateTranslationCommand {
@@ -57,6 +64,7 @@ message UpdateTranslationCommand {
 	string lang = 2;
 	optional string title = 3;
 	optional string text = 4;
+	string updated_at = 5;
 }
 
 message DeleteTranslationCommand {

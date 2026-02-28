@@ -7,8 +7,8 @@ import (
 func MessageFromProto(proto *api.Message) *Message {
 	return &Message{
 		ID:             proto.Id,
-		CreateUTCNano:  proto.CreateUtcNano,
-		UpdateUTCNano:  proto.UpdateUtcNano,
+		CreatedAt:      proto.CreatedAt,
+		UpdatedAt:      proto.UpdatedAt,
 		UserID:         proto.UserId,
 		Text:           proto.Text,
 		Title:          proto.Title,
@@ -23,8 +23,8 @@ func MessageToProto(msg *Message) *api.Message {
 	return &api.Message{
 		Id:             msg.ID,
 		UserId:         msg.UserID,
-		CreateUtcNano:  msg.CreateUTCNano,
-		UpdateUtcNano:  msg.UpdateUTCNano,
+		CreatedAt:      msg.CreatedAt,
+		UpdatedAt:      msg.UpdatedAt,
 		Text:           msg.Text,
 		Title:          msg.Title,
 		FileIds:        msg.FileIDs,

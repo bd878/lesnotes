@@ -9,7 +9,7 @@ import (
 
 type MessagesController interface {
 	SaveMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, userID int64, private bool, name string) (err error)
-	UpdateMessage(ctx context.Context, id int64, text, title, name string, fileIDs []int64, userID int64) (err error)
+	UpdateMessage(ctx context.Context, id int64, text, title, name *string, fileIDs []int64, userID int64) (err error)
 	DeleteMessages(ctx context.Context, ids []int64, userID int64) (err error)
 	DeleteUserMessages(ctx context.Context, userID int64) (err error)
 	PublishMessages(ctx context.Context, ids []int64, userID int64) (err error)

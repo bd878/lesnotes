@@ -21,11 +21,13 @@ type TranslationCreated struct {
 	Lang          string
 	Text          string
 	Title         string
+	CreatedAt     string
+	UpdatedAt     string
 }
 
 func (TranslationCreated) Key() string { return TranslationCreatedEvent }
 
-func CreateTranslation(userID, messageID int64, lang string, title, text string) (ddd.Event, error) {
+func CreateTranslation(userID, messageID int64, lang string, title, text, createdAt, updatedAt string) (ddd.Event, error) {
 	if messageID == 0 {
 		return nil, ErrIDRequired
 	}
@@ -37,11 +39,13 @@ func CreateTranslation(userID, messageID int64, lang string, title, text string)
 	}
 
 	return ddd.NewEvent(TranslationCreatedEvent, &TranslationCreated{
-		MessageID: messageID,
-		UserID:    userID,
-		Lang:      lang,
-		Text:      text,
-		Title:     title,
+		MessageID:   messageID,
+		UserID:      userID,
+		Lang:        lang,
+		Text:        text,
+		Title:       title,
+		CreatedAt:   createdAt,
+		UpdatedAt:   updatedAt,
 	}), nil
 }
 
@@ -64,11 +68,12 @@ type TranslationUpdated struct {
 	Lang         string
 	Text         *string
 	Title        *string
+	UpdatedAt    string
 }
 
 func (TranslationUpdated) Key() string { return TranslationUpdatedEvent }
 
-func UpdateTranslation(messageID int64, lang string, title, text *string) (ddd.Event, error) {
+func UpdateTranslation(messageID int64, lang string, title, text *string, updatedAt string) (ddd.Event, error) {
 	if messageID == 0 {
 		return nil, ErrIDRequired
 	}
@@ -81,5 +86,6 @@ func UpdateTranslation(messageID int64, lang string, title, text *string) (ddd.E
 		Lang:        lang,
 		Text:        text,
 		Title:       title,
+		UpdatedAt:   updatedAt,
 	}), nil
 }

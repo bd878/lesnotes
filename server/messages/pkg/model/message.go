@@ -7,8 +7,8 @@ import (
 type (
 	Message struct {
 		ID                  int64                       `json:"id"`
-		CreateUTCNano       int64                       `json:"create_utc_nano,omitempty"`
-		UpdateUTCNano       int64                       `json:"update_utc_nano,omitempty"`
+		CreatedAt           string                      `json:"created_at,omitempty"`
+		UpdatedAt           string                      `json:"updated_at,omitempty"`
 		UserID              int64                       `json:"user_id"`         // TODO: load user, == 0 for public user
 		Name                string                      `json:"name"`
 		Count               int32                       `json:"count"`           // count messages in this message thread
@@ -68,6 +68,8 @@ type (
 		Total               *int32              `json:"total,omitempty"`
 		Offset              *int32              `json:"offset,omitempty"`
 		Description         string              `json:"description"`
+		CreatedAt           string              `json:"created_at"`
+		UpdatedAt           string              `json:"updated_at"`
 	}
 
 	ReadRequest struct {
@@ -109,7 +111,7 @@ type (
 
 	UpdateResponse struct {
 		ID                  int64               `json:"id"`
-		UpdateUTCNano       int64               `json:"update_utc_nano"`
+		UpdatedAt           int64               `json:"updated_at"`
 		Description         string              `json:"description"`
 	}
 )

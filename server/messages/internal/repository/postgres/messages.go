@@ -27,76 +27,18 @@ func NewMessagesRepository(pool *pgxpool.Pool, tableName string) *MessagesReposi
 	}
 }
 
-func (r *MessagesRepository) Create(ctx context.Context, id int64, text string, title string, userID int64, private bool, name string) (err error) {
-	const query = "INSERT INTO %s(id, text, private, name, user_id, title) VALUES ($1, $2, $3, $4, $5, $6)"
+func (r *MessagesRepository) Create(ctx context.Context, id int64, text string, title string, userID int64, private bool, name, createdAt, updatedAt string) (err error) {
+	const query = "INSERT INTO %s(id, text, private, name, user_id, title, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"
 
-	var tx pgx.Tx
-	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
-	if err != nil {
-		return err
-	}
-	defer func() {
-		p := recover()
-		switch {
-		case p != nil:
-			_ = tx.Rollback(ctx)
-			panic(p)
-		case err != nil:
-			fmt.Fprintf(os.Stderr, "[Create]: rollback with error: %v\n", err)
-			err = tx.Rollback(ctx)
-		default:
-			err = tx.Commit(ctx)
-		}
-	}()
-
-	_, err = tx.Exec(ctx, r.table(query), id, text, private, name, userID, title)
+	_, err = r.pool.Exec(ctx, r.table(query), id, text, private, name, userID, title, createdAt, updatedAt)
 
 	return
 }
 
-func (r *MessagesRepository) Update(ctx context.Context, userID, id int64, newText, newTitle, newName string) (err error) {
-	const query = "UPDATE %s SET text = $3, title = $4, name = $5 WHERE user_id = $1 AND id = $2"
-	const selectQuery = "SELECT text, title, name FROM %s WHERE user_id = $1 AND id = $2"
+func (r *MessagesRepository) Update(ctx context.Context, userID, id int64, text, title, name *string, updatedAt string) (err error) {
+	const query = "UPDATE %s SET text = $3, title = $4, name = $5, updated_at = $6 WHERE user_id = $1 AND id = $2"
 
-	var tx pgx.Tx
-	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
-	if err != nil {
-		return
-	}
-	defer func() {
-		p := recover()
-		switch {
-		case p != nil:
-			_ = tx.Rollback(ctx)
-			panic(p)
-		case err != nil:
-			fmt.Fprintf(os.Stderr, "[Update]: rollback with error: %v\n", err)
-			err = tx.Rollback(ctx)
-		default:
-			err = tx.Commit(ctx)
-		}
-	}()
-
-	var text, title, name  string
-
-	err = tx.QueryRow(ctx, r.table(selectQuery), userID, id).Scan(&text, &title, &name)
-	if err != nil {
-		return
-	}
-
-	if newText != "" {
-		text = newText
-	}
-
-	if newTitle != "" {
-		title = newTitle
-	}
-
-	if newName != "" {
-		name = newName
-	}
-
-	_, err = tx.Exec(ctx, r.table(query), userID, id, text, title, name)
+	_, err = r.pool.Exec(ctx, r.table(query), userID, id, text, title, name, updatedAt)
 
 	return
 }
@@ -107,28 +49,9 @@ func (r *MessagesRepository) DeleteMessage(ctx context.Context, userID, id int64
 	return
 }
 
-func (r *MessagesRepository) Publish(ctx context.Context, userID int64, ids []int64) (err error) {
-	var tx pgx.Tx
-	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
-	if err != nil {
-		return err
-	}
-	defer func() {
-		p := recover()
-		switch {
-		case p != nil:
-			_ = tx.Rollback(ctx)
-			panic(p)
-		case err != nil:
-			fmt.Fprintf(os.Stderr, "[Publish]: rollback with error: %v\n", err)
-			err = tx.Rollback(ctx)
-		default:
-			err = tx.Commit(ctx)
-		}
-	}()
-
+func (r *MessagesRepository) Publish(ctx context.Context, userID int64, ids []int64, updatedAt string) (err error) {
 	for _, id := range ids {
-		_, err = tx.Exec(ctx, r.table("UPDATE %s SET private = false WHERE user_id = $1 AND id = $2"), userID, id)
+		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = false, updated_at = $3 WHERE user_id = $1 AND id = $2"), userID, id, updatedAt)
 		if err != nil {
 			return
 		}
@@ -137,28 +60,9 @@ func (r *MessagesRepository) Publish(ctx context.Context, userID int64, ids []in
 	return
 }
 
-func (r *MessagesRepository) Private(ctx context.Context, userID int64, ids []int64) (err error) {
-	var tx pgx.Tx
-	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
-	if err != nil {
-		return err
-	}
-	defer func() {
-		p := recover()
-		switch {
-		case p != nil:
-			_ = tx.Rollback(ctx)
-			panic(p)
-		case err != nil:
-			fmt.Fprintf(os.Stderr, "[Private]: rollback with error: %v\n", err)
-			err = tx.Rollback(ctx)
-		default:
-			err = tx.Commit(ctx)
-		}
-	}()
-
+func (r *MessagesRepository) Private(ctx context.Context, userID int64, ids []int64, updatedAt string) (err error) {
 	for _, id := range ids {
-		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = true WHERE user_id = $1 AND id = $2"), userID, id)
+		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = true, updated_at = $3 WHERE user_id = $1 AND id = $2"), userID, id, updatedAt)
 		if err != nil {
 			return
 		}
@@ -168,28 +72,18 @@ func (r *MessagesRepository) Private(ctx context.Context, userID int64, ids []in
 }
 
 func (r *MessagesRepository) Read(ctx context.Context, userIDs []int64, id int64, name string) (message *model.Message, err error) {
-	var tx pgx.Tx
-	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
-	if err != nil {
-		return
+	if name != "" {
+		return r.ReadByName(ctx, userIDs, name)
 	}
-	defer func() {
-		p := recover()
-		switch {
-		case p != nil:
-			_ = tx.Rollback(ctx)
-			panic(p)
-		case err != nil:
-			fmt.Fprintf(os.Stderr, "[Read]: rollback with error: %v\n", err)
-			err = tx.Rollback(ctx)
-		default:
-			err = tx.Commit(ctx)
-		}
-	}()
+	return r.ReadByID(ctx, userIDs, id)
+}
 
-	message = &model.Message{}
+func (r *MessagesRepository) ReadByID(ctx context.Context, userIDs []int64, id int64) (message *model.Message, err error) {
+	message = &model.Message{
+		ID:    id,
+	}
 
-	var createdAt, updatedAt time.Time
+	var createdAt, updatedAt *time.Time
 
 	ids := "$2"
 	for i := 1; i < len(userIDs); i++ {
@@ -201,26 +95,45 @@ func (r *MessagesRepository) Read(ctx context.Context, userIDs []int64, id int64
 		list[i] = id
 	}
 
-	if id != 0 {
-
-		err = tx.QueryRow(ctx, r.table(`
-SELECT id, user_id, created_at, updated_at, text, private, name, title FROM %s WHERE id = $1 AND (user_id IN (` + ids + `) OR private = false)
-`), append([]interface{}{id}, list...)...).Scan(&message.ID, &message.UserID, &createdAt, &updatedAt, &message.Text, &message.Private, &message.Name, &message.Title)
-
-	} else if name != "" {
-
-		err = tx.QueryRow(ctx, r.table(`
-SELECT id, user_id, created_at, updated_at, text, private, name, title FROM %s WHERE name = $1 AND (user_id IN (` + ids + `) OR private = false)
-`), append([]interface{}{name}, list...)...).Scan(&message.ID, &message.UserID, &createdAt, &updatedAt, &message.Text, &message.Private, &message.Name, &message.Title)
-
-	}
-
+	err = r.pool.QueryRow(ctx, r.table(`
+SELECT user_id, created_at, updated_at, text, private, name, title FROM %s WHERE id = $1 AND (user_id IN (` + ids + `) OR private = false)
+`), append([]interface{}{id}, list...)...).Scan(&message.UserID, &createdAt, &updatedAt, &message.Text, &message.Private, &message.Name, &message.Title)
 	if err != nil {
 		return
 	}
 
-	message.CreateUTCNano = createdAt.UnixNano()
-	message.UpdateUTCNano = updatedAt.UnixNano()
+	message.CreatedAt = createdAt.Format(time.RFC3339)
+	message.UpdatedAt = updatedAt.Format(time.RFC3339)
+
+	return
+}
+
+func (r *MessagesRepository) ReadByName(ctx context.Context, userIDs []int64, name string) (message *model.Message, err error) {
+	message = &model.Message{
+		Name: name,
+	}
+
+	var createdAt, updatedAt *time.Time
+
+	ids := "$2"
+	for i := 1; i < len(userIDs); i++ {
+		ids += fmt.Sprintf(",$%d", i+2)
+	}
+
+	list := make([]interface{}, len(userIDs))
+	for i, id := range userIDs {
+		list[i] = id
+	}
+
+	err = r.pool.QueryRow(ctx, r.table(`
+SELECT id, user_id, created_at, updated_at, text, private, title FROM %s WHERE name = $1 AND (user_id IN (` + ids + `) OR private = false)
+`), append([]interface{}{name}, list...)...).Scan(&message.ID, &message.UserID, &createdAt, &updatedAt, &message.Text, &message.Private, &message.Title)
+	if err != nil {
+		return
+	}
+
+	message.CreatedAt = createdAt.Format(time.RFC3339)
+	message.UpdatedAt = updatedAt.Format(time.RFC3339)
 
 	return
 }
@@ -270,15 +183,15 @@ func (r *MessagesRepository) ReadBatchMessages(ctx context.Context, userID int64
 	for rows.Next() {
 		message := &model.Message{}
 
-		var createdAt, updatedAt time.Time
+		var createdAt, updatedAt *time.Time
 
 		err = rows.Scan(&message.ID, &message.UserID, &message.Name, &message.Text, &message.Private, &createdAt, &updatedAt, &message.Title)
 		if err != nil {
 			return
 		}
 
-		message.CreateUTCNano = createdAt.UnixNano()
-		message.UpdateUTCNano = updatedAt.UnixNano()
+		message.CreatedAt = createdAt.Format(time.RFC3339)
+		message.UpdatedAt = updatedAt.Format(time.RFC3339)
 
 		messages = append(messages, message)
 	}
@@ -356,8 +269,8 @@ func (r *MessagesRepository) ReadMessages(ctx context.Context, userID int64, lim
 			return
 		}
 
-		message.CreateUTCNano = createdAt.UnixNano()
-		message.UpdateUTCNano = updatedAt.UnixNano()
+		message.CreatedAt = createdAt.Format(time.RFC3339)
+		message.UpdatedAt = updatedAt.Format(time.RFC3339)
 
 		messages = append(messages, message)
 	}

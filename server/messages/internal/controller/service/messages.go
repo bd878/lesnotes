@@ -184,7 +184,7 @@ func (s *MessagesController) PrivateMessages(ctx context.Context, ids []int64, u
 	return
 }
 
-func (s *MessagesController) UpdateMessage(ctx context.Context, id int64, text, title, name string, fileIDs []int64, userID int64) (err error) {
+func (s *MessagesController) UpdateMessage(ctx context.Context, id int64, text, title, name *string, fileIDs []int64, userID int64) (err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return

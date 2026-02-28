@@ -75,19 +75,24 @@ func (m *Distributed) apply(ctx context.Context, reqType machine.RequestType, cm
 func (m *Distributed) SaveMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, userID int64, private bool, name string) (err error) {
 	m.log.Debugw("save message", "id", id, "text", text, "title", title, "file_ids", fileIDs, "user_id", userID, "private", private, "name", name)
 
-	event, err := domain.CreateMessage(id, text, title, fileIDs, userID, private, name)
+	createdAt := time.Now().UTC().Format(time.RFC3339)
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
+	event, err := domain.CreateMessage(id, text, title, fileIDs, userID, private, name, createdAt, updatedAt)
 	if err != nil {
 		return err
 	}
 
 	cmd, err := proto.Marshal(&machine.AppendCommand{
-		Id:       id,
-		Text:     text,
-		Title:    title,
-		FileIds:  fileIDs,
-		UserId:   userID,
-		Private:  private,
-		Name:     name,
+		Id:         id,
+		Text:       text,
+		Title:      title,
+		FileIds:    fileIDs,
+		UserId:     userID,
+		Private:    private,
+		Name:       name,
+		CreatedAt:  createdAt,
+		UpdatedAt:  updatedAt,
 	})
 	if err != nil {
 		return err
@@ -101,21 +106,24 @@ func (m *Distributed) SaveMessage(ctx context.Context, id int64, text, title str
 	return m.publisher.Publish(context.Background(), event)
 }
 
-func (m *Distributed) UpdateMessage(ctx context.Context, id int64, text, title, name string, fileIDs []int64, userID int64) (err error) {
+func (m *Distributed) UpdateMessage(ctx context.Context, id int64, text, title, name *string, fileIDs []int64, userID int64) (err error) {
 	m.log.Debugw("update message", "id", id, "text", text, "title", title, "name", name, "file_ids", fileIDs, "user_id", userID)
 
-	event, err := domain.UpdateMessage(id, text, title, fileIDs, userID, name)
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
+	event, err := domain.UpdateMessage(id, text, title, fileIDs, userID, name, updatedAt)
 	if err != nil {
 		return err
 	}
 
 	cmd, err := proto.Marshal(&machine.UpdateCommand{
-		Id:       id,
-		UserId:   userID,
-		FileIds:  fileIDs,
-		Text:     text,
-		Name:     name,
-		Title:    title,
+		Id:          id,
+		UserId:      userID,
+		FileIds:     fileIDs,
+		Text:        text,
+		Name:        name,
+		Title:       title,
+		UpdatedAt:   updatedAt,
 	})
 	if err != nil {
 		return err
@@ -193,9 +201,12 @@ func (m *Distributed) DeleteMessages(ctx context.Context, ids []int64, userID in
 func (m *Distributed) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
 	m.log.Debugw("publish messages", "ids", ids, "user_id", userID)
 
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
 	cmd, err := proto.Marshal(&machine.PublishCommand{
 		Ids:           ids,
 		UserId:        userID,
+		UpdatedAt:     updatedAt,
 	})
 	if err != nil {
 		return err
@@ -206,7 +217,7 @@ func (m *Distributed) PublishMessages(ctx context.Context, ids []int64, userID i
 		return
 	}
 
-	event, err := domain.PublishMessages(userID, ids)
+	event, err := domain.PublishMessages(userID, ids, updatedAt)
 	if err != nil {
 		return err
 	}
@@ -217,9 +228,12 @@ func (m *Distributed) PublishMessages(ctx context.Context, ids []int64, userID i
 func (m *Distributed) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
 	m.log.Debugw("private messages", "ids", ids, "user_id", userID)
 
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
 	cmd, err := proto.Marshal(&machine.PrivateCommand{
 		Ids:           ids,
 		UserId:        userID,
+		UpdatedAt:     updatedAt,
 	})
 	if err != nil {
 		return err
@@ -230,7 +244,7 @@ func (m *Distributed) PrivateMessages(ctx context.Context, ids []int64, userID i
 		return
 	}
 
-	event, err := domain.PrivateMessages(userID, ids)
+	event, err := domain.PrivateMessages(userID, ids, updatedAt)
 	if err != nil {
 		return err
 	}
@@ -241,11 +255,16 @@ func (m *Distributed) PrivateMessages(ctx context.Context, ids []int64, userID i
 func (m *Distributed) SaveTranslation(ctx context.Context, userID, messageID int64, lang, title, text string) (err error) {
 	m.log.Debugw("save translation", "user_id", userID, "message_id", messageID, "lang", lang, "title", title, "text", text)
 
+	createdAt := time.Now().UTC().Format(time.RFC3339)
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
 	cmd, err := proto.Marshal(&machine.AppendTranslationCommand{
-		MessageId:    messageID,
-		Lang:         lang,
-		Title:        title,
-		Text:         text,
+		MessageId:      messageID,
+		Lang:           lang,
+		Title:          title,
+		Text:           text,
+		CreatedAt:      createdAt,
+		UpdatedAt:      updatedAt,
 	})
 	if err != nil {
 		return err
@@ -256,7 +275,7 @@ func (m *Distributed) SaveTranslation(ctx context.Context, userID, messageID int
 		return
 	}
 
-	event, err := domain.CreateTranslation(userID, messageID, lang, title, text)
+	event, err := domain.CreateTranslation(userID, messageID, lang, title, text, createdAt, updatedAt)
 	if err != nil {
 		return err
 	}
@@ -267,11 +286,14 @@ func (m *Distributed) SaveTranslation(ctx context.Context, userID, messageID int
 func (m *Distributed) UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string) (err error) {
 	m.log.Debugw("update translation", "message_id", messageID, "lang", lang, "title", title, "text", text)
 
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
 	cmd, err := proto.Marshal(&machine.UpdateTranslationCommand{
 		MessageId:     messageID,
 		Lang:          lang,
 		Title:         title,
 		Text:          text,
+		UpdatedAt:     updatedAt,
 	})
 	if err != nil {
 		return err
@@ -282,7 +304,7 @@ func (m *Distributed) UpdateTranslation(ctx context.Context, messageID int64, la
 		return
 	}
 
-	event, err := domain.UpdateTranslation(messageID, lang, title, text)
+	event, err := domain.UpdateTranslation(messageID, lang, title, text, updatedAt)
 	if err != nil {
 		return err
 	}

@@ -21,18 +21,18 @@ func NewTranslationsRepository(pool *pgxpool.Pool, tableName string) *Translatio
 	return &TranslationsRepository{tableName: tableName, pool: pool}
 }
 
-func (r *TranslationsRepository) SaveTranslation(ctx context.Context, messageID int64, lang, title, text string) (err error) {
-	const query = "INSERT INTO %s(message_id, lang, text, title) VALUES ($1, $2, $3, $4)"
+func (r *TranslationsRepository) SaveTranslation(ctx context.Context, messageID int64, lang, title, text, createdAt, updatedAt string) (err error) {
+	const query = "INSERT INTO %s(message_id, lang, text, title, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)"
 
-	_, err = r.pool.Exec(ctx, r.table(query), messageID, lang, title, text)
+	_, err = r.pool.Exec(ctx, r.table(query), messageID, lang, title, text, createdAt, updatedAt)
 
 	return
 }
 
-func (r *TranslationsRepository) UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string) (err error) {
-	const query = "UPDATE %s SET title = $3, text = $4 WHERE message_id = $1 AND lang = $2"
+func (r *TranslationsRepository) UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string, updatedAt string) (err error) {
+	const query = "UPDATE %s SET title = $3, text = $4, updated_at = $5 WHERE message_id = $1 AND lang = $2"
 
-	_, err = r.pool.Exec(ctx, r.table(query), messageID, lang, title, text)
+	_, err = r.pool.Exec(ctx, r.table(query), messageID, lang, title, text, updatedAt)
 
 	return
 }
@@ -60,8 +60,8 @@ func (r *TranslationsRepository) ReadTranslation(ctx context.Context, messageID 
 		return
 	}
 
-	translation.CreatedAt = createdAt.UnixNano()
-	translation.UpdatedAt = updatedAt.UnixNano()
+	translation.CreatedAt = createdAt.Format(time.RFC3339)
+	translation.UpdatedAt = updatedAt.Format(time.RFC3339)
 
 	return
 }
@@ -87,8 +87,8 @@ func (r *TranslationsRepository) ListTranslations(ctx context.Context, messageID
 			return
 		}
 
-		translation.CreatedAt = createdAt.UnixNano()
-		translation.UpdatedAt = updatedAt.UnixNano()
+		translation.CreatedAt = createdAt.Format(time.RFC3339)
+		translation.UpdatedAt = updatedAt.Format(time.RFC3339)
 
 		translations = append(translations, translation)
 	}
@@ -119,8 +119,8 @@ func (r *TranslationsRepository) ReadMessageTranslations(ctx context.Context, me
 			return
 		}
 
-		preview.CreatedAt = createdAt.UnixNano()
-		preview.UpdatedAt = updatedAt.UnixNano()
+		preview.CreatedAt = createdAt.Format(time.RFC3339)
+		preview.UpdatedAt = updatedAt.Format(time.RFC3339)
 
 		previews = append(previews, preview)
 	}
