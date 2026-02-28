@@ -7,6 +7,8 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	_ "github.com/bd878/gallery/server/threads/pkg/loadbalance"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
