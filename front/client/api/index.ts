@@ -36,7 +36,6 @@ import moveMessage from './moveMessage';
 import uploadFile from './uploadFile';
 import validateMiniappData from './validateMiniappData';
 import validateTgAuthData from './validateTgAuthData';
-import sendLog from './sendLog';
 import auth from './auth';
 import authJson from './authJson';
 import reorderThread from './reorderThread';
@@ -97,5 +96,4 @@ export default {
 	searchMessagesJson,
 	searchMessagesPathJson,
 	reorderThread,
-	sendLog,
 }

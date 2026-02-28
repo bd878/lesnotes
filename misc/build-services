@@ -60,17 +60,6 @@ else
     echo
 fi
 
-git diff --quiet "$oval" "$nval" -- "server/telemetry"
-if (( $? > 0 ))
-then
-    echo "*** building telemetry"
-    echo
-    setsid -f bash --login -c "env BUILD_DIR=$BUILD_DIR ENV=$ENV /srv/misc/scripts/build-telemetry"
-else
-    echo "*** no changes in telemetry"
-    echo
-fi
-
 git diff --quiet "$oval" "$nval" -- "server/sessions"
 if (( $? > 0 ))
 then
