@@ -17,14 +17,15 @@ service Files {
 
 message File {
 	string        name = 1;
-	int64         create_utc_nano = 2;
-	int64         id = 3;
-	int64         user_id = 4;
-	string        error = 5;
-	int64         size = 6;
-	bool          private = 7;
-	string        mime = 8;
-	string        description = 9;
+	string        created_at = 2;
+	string        updated_at = 3;
+	int64         id = 4;
+	int64         user_id = 5;
+	string        error = 6;
+	int64         size = 7;
+	bool          private = 8;
+	string        mime = 9;
+	string        description = 10;
 }
 
 message FileChunk {

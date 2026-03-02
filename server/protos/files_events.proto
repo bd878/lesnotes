@@ -12,6 +12,8 @@ message FileUploaded {
 	int64     size = 5;
 	string    mime = 6;
 	bool      private = 7;
+	string    created_at = 8;
+	string    updated_at = 9;
 }
 
 message FileDeleted {
@@ -22,9 +24,11 @@ message FileDeleted {
 message FilePublished {
 	int64     id = 1;
 	int64     user_id = 2;
+	string    updated_at = 3;
 }
 
 message FilePrivated {
 	int64     id = 1;
 	int64     user_id = 2;
+	string    updated_at = 3;
 }

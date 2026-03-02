@@ -13,7 +13,7 @@ import (
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/logger"
-	files "github.com/bd878/gallery/server/files/pkg/model"
+	"github.com/bd878/gallery/server/files/pkg/model"
 )
 
 type Config struct {
@@ -23,7 +23,7 @@ type Config struct {
 type Files struct {
 	conf    Config
 	client  api.FilesClient
-	conn   *grpc.ClientConn
+	conn    *grpc.ClientConn
 }
 
 func New(cfg Config) *Files {
@@ -32,17 +32,19 @@ func New(cfg Config) *Files {
 	return f
 }
 
-func (f *Files) setupConnection() {
+func (f *Files) setupConnection() error {
 	conn, err := grpc.NewClient(f.conf.RpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(1024*1024*50), grpc.MaxCallSendMsgSize(1024*1024*50)))
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	client := api.NewFilesClient(conn)
 
 	f.conn = conn
 	f.client = client
+
+	return nil
 }
 
 func (f *Files) isConnFailed() bool {
@@ -88,10 +90,12 @@ func (s *streamReader) Read(p []byte) (int, error) {
 	return s.buf.Read(p)
 }
 
-func (f *Files) ReadFileStream(ctx context.Context, id int64, fileName string, public bool) (result *files.File, reader io.Reader, err error) {
+func (f *Files) ReadFileStream(ctx context.Context, id int64, fileName string, public bool) (result *model.File, reader io.Reader, err error) {
 	if f.isConnFailed() {
 		logger.Info("conn failed, setup new connection")
-		f.setupConnection()
+		if err = f.setupConnection(); err != nil {
+			return
+		}
 	}
 
 	logger.Debugw("read file stream", "id", id, "name", fileName, "public", public)
@@ -120,13 +124,15 @@ func (f *Files) ReadFileStream(ctx context.Context, id int64, fileName string, p
 		Files_ReadFileStreamClient: stream,
 	}
 
-	return files.FileFromProto(meta.File), reader, nil
+	return model.FileFromProto(meta.File), reader, nil
 }
 
-func (f *Files) ReadFileMeta(ctx context.Context, id, userID int64, public bool) (result *files.File, err error) {
+func (f *Files) ReadFileMeta(ctx context.Context, id, userID int64, public bool) (result *model.File, err error) {
 	if f.isConnFailed() {
 		logger.Info("conn failed, setup new connection")
-		f.setupConnection()
+		if err = f.setupConnection(); err != nil {
+			return
+		}
 	}
 
 	logger.Debugw("read file meta", "id", id, "user_id", userID, "public", public)
@@ -140,7 +146,7 @@ func (f *Files) ReadFileMeta(ctx context.Context, id, userID int64, public bool)
 		return nil, err
 	}
 
-	result = files.FileFromProto(resp)
+	result = model.FileFromProto(resp)
 
 	return
 
@@ -149,7 +155,9 @@ func (f *Files) ReadFileMeta(ctx context.Context, id, userID int64, public bool)
 func (f *Files) SaveFileStream(ctx context.Context, fileStream io.Reader, id, userID int64, fileName, description string, private bool, mime string) (err error) {
 	if f.isConnFailed() {
 		logger.Info("conn failed, setup new connection")
-		f.setupConnection()
+		if err = f.setupConnection(); err != nil {
+			return
+		}
 	}
 
 	logger.Debugw("save file stream", "user_id", userID, "name", fileName, "description", description, "private", private, "mime", mime)
@@ -200,10 +208,12 @@ func (f *Files) SaveFileStream(ctx context.Context, fileStream io.Reader, id, us
 	return
 }
 
-func (f *Files) ListFiles(ctx context.Context, userID int64, limit, offset int32, ascending, private bool) (list *files.List, err error) {
+func (f *Files) ListFiles(ctx context.Context, userID int64, limit, offset int32, ascending, private bool) (list *model.List, err error) {
 	if f.isConnFailed() {
 		logger.Info("conn failed, setup new connection")
-		f.setupConnection()
+		if err = f.setupConnection(); err != nil {
+			return
+		}
 	}
 
 	logger.Debugw("list files", "user_id", userID, "limit", limit, "offset", offset, "ascending", ascending, "private", private)
@@ -219,8 +229,8 @@ func (f *Files) ListFiles(ctx context.Context, userID int64, limit, offset int32
 		return nil, err
 	}
 
-	list = &files.List{
-		Files:       files.MapFilesFromProto(files.FileFromProto, resp.Files),
+	list = &model.List{
+		Files:       model.MapFilesFromProto(model.FileFromProto, resp.Files),
 		IsLastPage:  resp.IsLastPage,
 		IsFirstPage: offset == 0,
 		Count:       int32(len(resp.Files)),
@@ -234,7 +244,9 @@ func (f *Files) ListFiles(ctx context.Context, userID int64, limit, offset int32
 func (f *Files) PublishFile(ctx context.Context, id, userID int64) (err error) {
 	if f.isConnFailed() {
 		logger.Info("conn failed, setup new connection")
-		f.setupConnection()
+		if err = f.setupConnection(); err != nil {
+			return
+		}
 	}
 
 	_, err = f.client.PublishFile(ctx, &api.PublishFileRequest{Id: id, UserId: userID})
@@ -245,7 +257,9 @@ func (f *Files) PublishFile(ctx context.Context, id, userID int64) (err error) {
 func (f *Files) PrivateFile(ctx context.Context, id, userID int64) (err error) {
 	if f.isConnFailed() {
 		logger.Info("conn failed, setup new connection")
-		f.setupConnection()
+		if err = f.setupConnection(); err != nil {
+			return
+		}
 	}
 
 	_, err = f.client.PrivateFile(ctx, &api.PrivateFileRequest{Id: id, UserId: userID})
@@ -256,7 +270,9 @@ func (f *Files) PrivateFile(ctx context.Context, id, userID int64) (err error) {
 func (f *Files) DeleteFile(ctx context.Context, id, userID int64) (err error) {
 	if f.isConnFailed() {
 		logger.Info("conn failed, setup new connection")
-		f.setupConnection()
+		if err = f.setupConnection(); err != nil {
+			return
+		}
 	}
 
 	_, err = f.client.DeleteFile(ctx, &api.DeleteFileRequest{Id: id, UserId: userID})

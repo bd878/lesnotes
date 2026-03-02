@@ -54,6 +54,8 @@ func (h domainHandler[T]) onFileUploaded(ctx context.Context, event ddd.Event) e
 		Private:      payload.Private,
 		Size:         payload.Size,
 		Mime:         payload.Mime,
+		CreatedAt:    payload.CreatedAt,
+		UpdatedAt:    payload.UpdatedAt,
 	})
 	if err != nil {
 		return err
@@ -65,8 +67,8 @@ func (h domainHandler[T]) onFileUploaded(ctx context.Context, event ddd.Event) e
 func (h domainHandler[T]) onFileDeleted(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.FileDeleted)
 	data, err := proto.Marshal(&api.FileDeleted{
-		Id:     payload.ID,
-		UserId: payload.UserID, 
+		Id:          payload.ID,
+		UserId:      payload.UserID,
 	})
 	if err != nil {
 		return err
@@ -78,8 +80,9 @@ func (h domainHandler[T]) onFileDeleted(ctx context.Context, event ddd.Event) er
 func (h domainHandler[T]) onFilePrivated(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.FilePrivated)
 	data, err := proto.Marshal(&api.FilePrivated{
-		Id:      payload.ID,
-		UserId:  payload.UserID,
+		Id:          payload.ID,
+		UserId:      payload.UserID,
+		UpdatedAt:   payload.UpdatedAt,
 	})
 	if err != nil {
 		return err
@@ -91,8 +94,9 @@ func (h domainHandler[T]) onFilePrivated(ctx context.Context, event ddd.Event) e
 func (h domainHandler[T]) onFilePublished(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.FilePublished)
 	data, err := proto.Marshal(&api.FilePublished{
-		Id:       payload.ID,
-		UserId:   payload.UserID,
+		Id:          payload.ID,
+		UserId:      payload.UserID,
+		UpdatedAt:   payload.UpdatedAt,
 	})
 	if err != nil {
 		return err

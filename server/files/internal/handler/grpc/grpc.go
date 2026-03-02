@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"io"
+	"time"
 	"context"
 	"bytes"
 	"sync"
@@ -17,13 +18,14 @@ import (
 // TODO: add controller, derive domain events on controller level
 
 type Repository interface {
-	SaveFile(ctx context.Context, reader io.Reader, id, userID int64, private bool, name, description, mime string) (size int64, err error)
-	GetMeta(ctx context.Context, id int64, fileName string) (file *model.File, err error)
+	SaveFile(ctx context.Context, reader io.Reader, id, userID int64, private bool, name, description, mime, createdAt, updatedAt string) (size int64, err error)
+	GetMetaByID(ctx context.Context, id int64) (file *model.File, err error)
+	GetMetaByName(ctx context.Context, fileName string) (file *model.File, err error)
 	DeleteFile(ctx context.Context, id, ownerID int64) (err error)
 	ReadFile(ctx context.Context, oid int32, writer io.Writer) (err error)
 	ListFiles(ctx context.Context, userID int64, limit, offset int32, ascending, private bool) (list []*model.File, isLastPage bool, err error)
-	PublishFile(ctx context.Context, id, userID int64) (err error)
-	PrivateFile(ctx context.Context, id, userID int64) (err error)
+	PublishFile(ctx context.Context, id, userID int64, updatedAt string) (err error)
+	PrivateFile(ctx context.Context, id, userID int64, updatedAt string) (err error)
 }
 
 type Handler struct {
@@ -49,7 +51,7 @@ func (h *Handler) ReadBatchFiles(ctx context.Context, req *api.ReadBatchFilesReq
 			UserID: req.UserId,
 		}
 
-		file, err := h.repo.GetMeta(ctx, id, "")
+		file, err := h.repo.GetMetaByID(ctx, id)
 		if err != nil {
 			files[id].Error = "can not find file"
 			logger.Errorw("failed to read file", "user_id", req.UserId, "id", id, "error", err)
@@ -67,7 +69,7 @@ func (h *Handler) ReadBatchFiles(ctx context.Context, req *api.ReadBatchFilesReq
 func (h *Handler) ReadFile(ctx context.Context, req *api.ReadFileRequest) (*api.File, error) {
 	logger.Debugw("read file", "user_id", req.UserId, "id", req.Id, "public", req.Public)
 
-	file, err := h.repo.GetMeta(ctx, req.Id, "")
+	file, err := h.repo.GetMetaByID(ctx, req.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +104,12 @@ func (w *streamWriter) Write(p []byte) (n int, err error) {
 func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.Files_ReadFileStreamServer) (err error) {
 	logger.Debugw("read file stream", "id", params.Id, "name", params.Name, "public", params.Public)
 
-	file, err := h.repo.GetMeta(context.Background(), params.Id, params.Name)
+	var file *model.File
+	if params.Name != "" {
+		file, err = h.repo.GetMetaByName(context.Background(), params.Name)
+	} else {
+		file, err = h.repo.GetMetaByID(context.Background(), params.Id)
+	}
 	if err != nil {
 		return err
 	}
@@ -118,7 +125,8 @@ func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.F
 				UserId:         file.UserID,
 				Name:           file.Name,
 				Mime:           file.Mime,
-				CreateUtcNano:  file.CreateUTCNano,
+				CreatedAt:      file.CreatedAt,
+				UpdatedAt:      file.UpdatedAt,
 				Private:        file.Private,
 				Size:           file.Size,
 			},
@@ -178,15 +186,21 @@ func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) (err err
 		return errors.New("wrong format: file meta expected")
 	}
 
-	logger.Debugw("save file stream", "id", file.File.Id, "user_id", file.File.UserId, "private", file.File.Private, "name", file.File.Name, "description", file.File.Description, "mime", file.File.Mime)
+	logger.Debugw("save file stream", "id", file.File.Id, "user_id", file.File.UserId, "private", file.File.Private,
+		"name", file.File.Name, "description", file.File.Description, "mime", file.File.Mime)
+
+	createdAt := time.Now().UTC().Format(time.RFC3339)
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
 	var size int64
-	size, err = h.repo.SaveFile(context.Background(), &streamReader{Files_SaveFileStreamServer: stream}, file.File.Id, file.File.UserId, file.File.Private, file.File.Name, file.File.Description, file.File.Mime)
+	size, err = h.repo.SaveFile(context.Background(), &streamReader{Files_SaveFileStreamServer: stream}, file.File.Id, file.File.UserId, file.File.Private,
+		file.File.Name, file.File.Description, file.File.Mime, createdAt, updatedAt)
 	if err != nil {
 		return err
 	}
 
-	event, err := domain.UploadFile(file.File.Id, file.File.Name, file.File.Description, file.File.UserId, file.File.Private, file.File.Mime, size)
+	event, err := domain.UploadFile(file.File.Id, file.File.Name, file.File.Description, file.File.UserId,
+		file.File.Private, file.File.Mime, size, createdAt, updatedAt)
 	if err != nil {
 		return err
 	}
@@ -218,12 +232,14 @@ func (h *Handler) ListFiles(ctx context.Context, req *api.ListFilesRequest) (res
 func (h *Handler) PublishFile(ctx context.Context, req *api.PublishFileRequest) (resp *api.PublishFileResponse, err error) {
 	logger.Debugw("publish file", "id", req.Id, "user_id", req.UserId)
 
-	event, err := domain.PublishFile(req.UserId, req.Id)
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
+	event, err := domain.PublishFile(req.UserId, req.Id, updatedAt)
 	if err != nil {
 		return nil, err
 	}
 
-	err = h.repo.PublishFile(ctx, req.Id, req.UserId)
+	err = h.repo.PublishFile(ctx, req.Id, req.UserId, updatedAt)
 	if err != nil {
 		return
 	}
@@ -241,12 +257,14 @@ func (h *Handler) PublishFile(ctx context.Context, req *api.PublishFileRequest) 
 func (h *Handler) PrivateFile(ctx context.Context, req *api.PrivateFileRequest) (resp *api.PrivateFileResponse, err error) {
 	logger.Debugw("private file", "id", req.Id, "user_id", req.UserId)
 
-	event, err := domain.PrivateFile(req.UserId, req.Id)
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
+	event, err := domain.PrivateFile(req.UserId, req.Id, updatedAt)
 	if err != nil {
 		return nil, err
 	}
 
-	err = h.repo.PrivateFile(ctx, req.Id, req.UserId)
+	err = h.repo.PrivateFile(ctx, req.Id, req.UserId, updatedAt)
 	if err != nil {
 		return
 	}

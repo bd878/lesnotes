@@ -24,11 +24,13 @@ type FileUploaded struct {
 	Private      bool
 	Mime         string
 	Size         int64
+	CreatedAt    string
+	UpdatedAt    string
 }
 
 func (FileUploaded) Key() string { return FileUploadedEvent }
 
-func UploadFile(id int64, name, description string, userID int64, private bool, mime string, size int64) (ddd.Event, error) {
+func UploadFile(id int64, name, description string, userID int64, private bool, mime string, size int64, createdAt, updatedAt string) (ddd.Event, error) {
 	if id == 0 {
 		return nil, ErrIDRequired
 	}
@@ -42,6 +44,8 @@ func UploadFile(id int64, name, description string, userID int64, private bool, 
 		Mime:        mime,
 		Size:        size,
 		Private:     private,
+		CreatedAt:   createdAt,
+		UpdatedAt:   updatedAt,
 	}), nil
 }
 
@@ -60,31 +64,33 @@ func DeleteFile(id, userID int64) (ddd.Event, error) {
 }
 
 type FilePublished struct {
-	ID     int64
-	UserID int64
+	ID         int64
+	UserID     int64
+	UpdatedAt  string
 }
 
 func (FilePublished) Key() string { return FilePublishedEvent }
 
-func PublishFile(userID, id int64) (ddd.Event, error) {
+func PublishFile(userID, id int64, updatedAt string) (ddd.Event, error) {
 	if id == 0 {
 		return nil, ErrIDRequired
 	}
 
-	return ddd.NewEvent(FilePublishedEvent, &FilePublished{ID: id, UserID: userID}), nil
+	return ddd.NewEvent(FilePublishedEvent, &FilePublished{ID: id, UserID: userID, UpdatedAt: updatedAt}), nil
 }
 
 type FilePrivated struct {
 	ID         int64
 	UserID     int64
+	UpdatedAt  string
 }
 
 func (FilePrivated) Key() string { return FilePrivatedEvent}
 
-func PrivateFile(userID, id int64) (ddd.Event, error) {
+func PrivateFile(userID, id int64, updatedAt string) (ddd.Event, error) {
 	if id == 0 {
 		return nil, ErrIDRequired
 	}
 
-	return ddd.NewEvent(FilePrivatedEvent, &FilePrivated{ID: id, UserID: userID}), nil
+	return ddd.NewEvent(FilePrivatedEvent, &FilePrivated{ID: id, UserID: userID, UpdatedAt: updatedAt}), nil
 }

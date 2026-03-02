@@ -8,7 +8,8 @@ func FileToProto(file *File) *api.File {
 	return &api.File{
 		Id:            file.ID,
 		Name:          file.Name,
-		CreateUtcNano: file.CreateUTCNano,
+		CreatedAt:     file.CreatedAt,
+		UpdatedAt:     file.UpdatedAt,
 		Size:          file.Size,
 		Error:         file.Error,
 		Private:       file.Private,
@@ -21,7 +22,8 @@ func FileFromProto(proto *api.File) *File {
 	return &File{
 		ID:                proto.Id,
 		Name:              proto.Name,
-		CreateUTCNano:     proto.CreateUtcNano,
+		CreatedAt:         proto.CreatedAt,
+		UpdatedAt:         proto.UpdatedAt,
 		Error:             proto.Error,
 		Size:              proto.Size,
 		Private:           proto.Private,

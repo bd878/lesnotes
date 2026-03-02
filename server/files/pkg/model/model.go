@@ -6,7 +6,8 @@ type (
 		OID            int32         `json:"-"`
 		UserID         int64         `json:"user_id"`
 		Name           string        `json:"name"`
-		CreateUTCNano  int64         `json:"create_utc_nano"`
+		CreatedAt      string        `json:"created_at"`
+		UpdatedAt      string        `json:"updated_at"`
 		Error          string        `json:"error"`
 		Size           int64         `json:"size"`
 		Mime           string        `json:"mime"`
@@ -15,12 +16,12 @@ type (
 	}
 
 	List struct {
-		Files               []*File
-		IsLastPage          bool
-		IsFirstPage         bool
-		Total               int32
-		Count               int32
-		Offset              int32
+		Files          []*File
+		IsLastPage     bool
+		IsFirstPage    bool
+		Total          int32
+		Count          int32
+		Offset         int32
 	}
 
 	ListFilesRequest struct {
