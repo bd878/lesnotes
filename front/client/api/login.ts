@@ -5,7 +5,7 @@ async function login(login: string, password: string, lang?: string) {
 	let result = {
 		error:     models.error(),
 		token:     "",
-		expiresAt: 0,
+		expiresAt: "",
 	}
 
 	const form = new FormData()
@@ -34,7 +34,7 @@ async function login(login: string, password: string, lang?: string) {
 			result.error = models.error(error)
 		} else {
 			result.token = response.token
-			result.expiresAt = response.expires_utc_nano
+			result.expiresAt = response.expiresAt
 		}
 	} catch (e) {
 		result.error.error   = true

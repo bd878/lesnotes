@@ -107,7 +107,7 @@ func (h *Handler) LoginJsonAPI(w http.ResponseWriter, req *http.Request) (err er
 	case nil:
 		response, err := json.Marshal(users.LoginResponse{
 			Token:          session.Token,
-			ExpiresUTCNano: session.ExpiresUTCNano,
+			ExpiresAt:      session.ExpiresAt,
 		})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)

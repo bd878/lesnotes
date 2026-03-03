@@ -10,7 +10,7 @@ type (
 		Login            string           `json:"login,omitempty"`
 		Token            string           `json:"token,omitempty"`
 		HashedPassword   string           `json:"-"`
-		ExpiresUTCNano   int64            `json:"expires_utc_nano,omitempty"` // TODO: remove
+		ExpiresAt        string           `json:"expires_at,omitempty"` // TODO: remove
 		CreatedAt        string           `json:"created_at"`
 		UpdatedAt        string           `json:"updated_at"`
 		Metadata         []byte           `json:"metadata,omitempty"`
@@ -20,7 +20,7 @@ type (
 		Description      string           `json:"description"`
 		ID               int64            `json:"id"`
 		Token            string           `json:"token"`
-		ExpiresUTCNano   int64            `json:"expires_utc_nano"`
+		ExpiresAt        string           `json:"expires_at"`
 	}
 
 	SignupRequest struct {
@@ -39,7 +39,7 @@ type (
 
 	LoginResponse struct {
 		Token            string           `json:"token"`
-		ExpiresUTCNano   int64            `json:"expires_utc_nano"`
+		ExpiresAt        string           `json:"expires_at"`
 	}
 
 	GetMeResponse struct {

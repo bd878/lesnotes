@@ -115,10 +115,10 @@ func (s *Controller) CreateUser(ctx context.Context, id int64, login, password s
 	logger.Debugln("session created")
 
 	user = &model.User{
-		ID:       id,
-		Login:    login,
-		Token:    session.Token,
-		ExpiresUTCNano: session.ExpiresUTCNano,
+		ID:        id,
+		Login:     login,
+		Token:     session.Token,
+		ExpiresAt: session.ExpiresAt,
 	}
 
 	return
@@ -171,7 +171,12 @@ func (s *Controller) AuthUser(ctx context.Context, token string) (user *model.Us
 		return nil, err
 	}
 
-	if session.ExpiresUTCNano <= time.Now().UnixNano() {
+	expiresAt, err := time.Parse(time.RFC3339, session.ExpiresAt)
+	if err != nil {
+		return nil, err
+	}
+
+	if expiresAt.Unix() <= time.Now().Unix() {
 		return nil, controller.ErrTokenExpired
 	}
 
@@ -186,7 +191,7 @@ func (s *Controller) AuthUser(ctx context.Context, token string) (user *model.Us
 	user = model.UserFromProto(userProto)
 
 	user.Token = session.Token
-	user.ExpiresUTCNano = session.ExpiresUTCNano
+	user.ExpiresAt = session.ExpiresAt
 
 	return
 }

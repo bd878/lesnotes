@@ -94,12 +94,17 @@ func (h *Handler) Login(w http.ResponseWriter, req *http.Request) (err error) {
 		return err
 
 	case nil:
+		expiresAt, err := time.Parse(time.RFC3339, session.ExpiresAt)
+		if err != nil {
+			return err
+		}
+
 		// attach session to response
 		http.SetCookie(w, &http.Cookie{
 			Name:          "token",
 			Value:          session.Token,
 			Domain:         h.config.CookieDomain,
-			Expires:        time.Unix(0, session.ExpiresUTCNano),
+			Expires:        expiresAt,
 			Path:          "/",
 			HttpOnly:       true,
 		})
@@ -120,7 +125,7 @@ func (h *Handler) Login(w http.ResponseWriter, req *http.Request) (err error) {
 
 	response, err := json.Marshal(users.LoginResponse{
 		Token:          session.Token,
-		ExpiresUTCNano: session.ExpiresUTCNano,
+		ExpiresAt:      session.ExpiresAt,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

@@ -155,12 +155,16 @@ func (h *Handler) Signup(w http.ResponseWriter, req *http.Request) (err error) {
 
 		return
 	}
+	expiresAt, err := time.Parse(time.RFC3339, user.ExpiresAt)
+	if err != nil {
+		return err
+	}
 
 	http.SetCookie(w, &http.Cookie{
 		Name:          "token",
 		Value:          user.Token,
 		Domain:         h.config.CookieDomain,
-		Expires:        time.Unix(0, user.ExpiresUTCNano),
+		Expires:        expiresAt,
 		Path:          "/",
 		HttpOnly:       true,
 	})
@@ -169,7 +173,7 @@ func (h *Handler) Signup(w http.ResponseWriter, req *http.Request) (err error) {
 		Description:    "user signed up",
 		ID:             user.ID,
 		Token:          user.Token,
-		ExpiresUTCNano: user.ExpiresUTCNano,
+		ExpiresAt:      user.ExpiresAt,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

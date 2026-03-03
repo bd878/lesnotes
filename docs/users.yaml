@@ -404,8 +404,8 @@ components:
         properties:
           token:
             type: string
-          expires_utc_nano:
-            type: integer
+          expires_at:
+            type: string
 
     loginForm:
       type: object
@@ -531,8 +531,8 @@ components:
             type: integer
           token:
             type: string
-          expires_utc_nano:
-            type: integer
+          expires_at:
+            type: string
 # END SIGNUP
 
 # ME

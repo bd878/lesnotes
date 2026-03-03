@@ -776,9 +776,9 @@ components:
             id:
               type: integer
               example: 1
-            update_utc_nano:
+            updated_at:
               type: integer
-              example: 1234566700000000
+              example: "2020-03-15T09:45:51Z"
 # END UPDATE
 
 # DELETE
@@ -927,10 +927,10 @@ components:
           type: string
         text:
           type: string
-        create_utc_nano:
-          type: integer
-        update_utc_nano:
-          type: integer
+        created_at:
+          type: string
+        updated_at:
+          type: string
         private:
           type: boolean
         files:

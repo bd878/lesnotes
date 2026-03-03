@@ -39,20 +39,10 @@ export default function mapMessageFromProto(message?: any): Message {
 		return EmptyMessage
 	}
 
-	let createdAt = "0"
-	if (message.create_utc_nano) {
-		createdAt = new Date(Math.floor(message.create_utc_nano / ns_in_ms)).toLocaleString()
-	}
-
-	let updatedAt = "0"
-	if (message.update_utc_nano) {
-		updatedAt = new Date(Math.floor(message.update_utc_nano / ns_in_ms)).toLocaleString()
-	}
-
 	const res = {
 		ID:          message.id,
-		createdAt:   createdAt,
-		updatedAt:   updatedAt,
+		createdAt:   message.createdAt,
+		updatedAt:   message.updatedAt,
 		userID:      message.user_id,
 		text:        message.text,
 		name:        message.name,

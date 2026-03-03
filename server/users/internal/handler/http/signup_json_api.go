@@ -127,7 +127,7 @@ func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 		Description:    "user signed up",
 		ID:             user.ID,
 		Token:          user.Token,
-		ExpiresUTCNano: user.ExpiresUTCNano,
+		ExpiresAt:      user.ExpiresAt,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
