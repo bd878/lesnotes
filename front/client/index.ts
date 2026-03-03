@@ -72,7 +72,6 @@ import translationView from './routes/translationView';
 import threadView from './routes/threadView';
 import messageEdit from './routes/messageEdit';
 import translationEdit from './routes/translationEdit';
-import authTelegram from './routes/authTelegram';
 import status from './routes/status';
 
 const app = new Koa();
@@ -123,7 +122,6 @@ router
 	.post("doUpdateThread",        "/t/update",                     getToken, authed, getState, updateThread)
 	.post("doSendMessage",         "/send",                         getToken, authed, getState, sendMessage)
 	.post("doSendTranslation",     "/translation/send",             getToken, authed, getState, sendTranslation)
-	.get("tgAuth",                 "/tg_auth",                      authTelegram)
 	.get("publicMessage",          "/m/:messageName",               etag, noCache, getState, getToken, getMe, loadMessage, parseMessageName, formatView, publicMessage)
 	.get("publicTranslation",      "/m/:messageName/:lang",         etag, noCache, getState, getToken, getMe, loadMessage, parseMessageName, loadTranslation, formatView, publicTranslation)
 	.get("publicThread",           "/t/:threadName",                etag, noCache, getState, getToken, getMe, loadThread, parseThreadName, loadThreadMessages, formatView, publicThread)
