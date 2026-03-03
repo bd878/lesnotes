@@ -16,6 +16,8 @@ async function readStackJson(token: string, messageID: number/*, lastMessageID: 
 		stack:       [],
 	}
 
+	console.log("readStackJson", "token", token, "message", messageID, "limit", limit, "offsets", offsets)
+
 	const path = await api.readPathJson(token, messageID)
 	if (path.error.error) {
 		result.error = path.error

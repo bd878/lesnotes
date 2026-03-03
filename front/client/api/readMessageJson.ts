@@ -12,6 +12,8 @@ async function readMessageJson(token: string, user: number, id: number, name?: s
 		message:   models.message(),
 	}
 
+	console.log("readMessageJson", "token", token, "user", user, "id", id, "name", name)
+
 	try {
 		const [response, error] = await api('/messages/v2/read', {
 			method: "POST",

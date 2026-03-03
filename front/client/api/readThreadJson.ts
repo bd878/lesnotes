@@ -7,6 +7,8 @@ async function readThreadJson(token: string, user: number, id: number, name?: st
 		thread:    models.thread(),
 	}
 
+	console.log("readThreadJson", "token", token, "user", user, "id", id, "name", name)
+
 	try {
 		const [response, error] = await api('/threads/v2/read', {
 			method: "POST",

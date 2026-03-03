@@ -12,7 +12,7 @@ async function validateSignup(ctx, next) {
 		ctx.state.error = response.error.human
 		await signup(ctx)
 	} else {
-		const expiresAt = new Date(Math.round(response.expiresAt / 1_000_000))
+		const expiresAt = new Date(response.expiresAt)
 		console.log("expiresAt", expiresAt.toString())
 		ctx.set({"Set-Cookie":  "token=" + response.token + "; Expires=" + expiresAt.toString() + "; HttpOnly; Path=/; Secure; Domain=" + `${DOMAIN}`})
 

@@ -6,6 +6,8 @@ async function updateTranslationJson(token: string, message: number, lang: strin
 		error: models.error(),
 	}
 
+	console.log("uploadTranslationJson", "token", token, "lang", lang, "title", title, "text", text)
+
 	try {
 		const [_1, error] = await api("/translations/v2/update", {
 			method: "PUT",

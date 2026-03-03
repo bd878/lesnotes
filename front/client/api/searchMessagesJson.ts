@@ -7,6 +7,8 @@ async function searchMessagesJson(token: string, substr: string) {
 		messages: [],
 	}
 
+	console.log("searchMessagesJson", "token", token, "substr", substr)
+
 	try {
 		const [response, error] = await api('/search/v2/messages', {
 			method: "POST",

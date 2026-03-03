@@ -7,6 +7,8 @@ async function updateThreadJson(token: string, id: number, description?: string,
 		error:   models.error(),
 	}
 
+	console.log("updateThreadJson", "token", token, "id", id, "description", description, "name", name)
+
 	try {
 		const [_1, error] = await api("/threads/v2/update", {
 			method: "PUT",

@@ -8,6 +8,8 @@ async function readMessagesJson(token: string, user: number, thread: number, ord
 		paging:      models.paging(),
 	}
 
+	console.log("readMessagesJson", "token", token, "user", user, "thread", thread, "order", order, "limit", limit, "offset", offset)
+
 	try {
 		const [response, error] = await api('/messages/v2/read', {
 			method: "POST",

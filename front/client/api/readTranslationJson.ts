@@ -12,6 +12,8 @@ async function readTranslationJson(token: string, message: number, lang: string,
 		translation:   models.translation(),
 	}
 
+	console.log("readTranslationJson", "token", token, "message", message, "lang", lang, "name", name)
+
 	try {
 		const [response, error] = await api('/translations/v2/read', {
 			method: "POST",

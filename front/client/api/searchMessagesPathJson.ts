@@ -9,6 +9,8 @@ async function searchMessagesPathJson(token: string, messages: SearchMessage[]) 
 		messages: [],
 	}
 
+	console.log("searchMessagesPathJson", "token", token, "messages", messages)
+
 	try {
 		for (const message of messages) {
 			const path = await readPathJson(token, message.ID)

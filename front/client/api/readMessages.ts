@@ -8,6 +8,8 @@ async function readMessages(thread: number, order: number, limit: number, offset
 		paging:      models.paging(),
 	}
 
+	console.log("readMessages", "thread", thread, "order", order, "limit", limit, "offset", offset)
+
 	try {
 		const [response, error] = await api('/messages/v1/read', {
 			queryParams: {

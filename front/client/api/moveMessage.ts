@@ -8,11 +8,15 @@ async function moveMessage(id: number, thread: number) {
 
 	const form = new FormData()
 
-	if (thread)
-		form.append("thread", `${thread}`);
+	console.log("moveMessage", "id", id, "thread", thread)
 
-	if (id)
+	if (thread) {
+		form.append("thread", `${thread}`);
+	}
+
+	if (id) {
 		form.append("id", `${id}`);
+	}
 
 	try {
 		const [_1, error] = await api("/messages/v1/update", {

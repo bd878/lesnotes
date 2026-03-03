@@ -7,6 +7,8 @@ async function readBatchMessagesJson(token: string, ids: number[]) {
 		messages:    [],
 	}
 
+	console.log("readBatchMessagesJson", "token", token, "ids", ids)
+
 	try {
 		const [response, error] = await api('/messages/v2/read', {
 			method: "POST",

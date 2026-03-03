@@ -16,6 +16,8 @@ async function readPathJson(token: string, id: number): Promise<ReadPathResponse
 		threadID:    0,
 	}
 
+	console.log("readPathJson", "token", token, "id", id)
+
 	try {
 		const [response, error] = await api('/messages/v2/read_path', {
 			method: "POST",

@@ -12,6 +12,8 @@ async function listTranslationsJson(token: string, message: number, name?: strin
 		translations:  models.translationPreview(),
 	}
 
+	console.log("listTranslationsJson", "token", token, "message", message, "name", name)
+
 	try {
 		const [response, error] = await api('/translations/v2/list', {
 			method: "POST",

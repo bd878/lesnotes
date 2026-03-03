@@ -7,6 +7,8 @@ async function readMessage(id: number) {
 		message:  models.message(),
 	}
 
+	console.log("readMessage", "id", id)
+
 	try {
 		const [response, error] = await api('/messages/v1/read', {
 			queryParams: {
