@@ -15,7 +15,8 @@ service Sessions {
 message Session {
 	int64     user_id = 1;
 	string    token = 2;
-	int64     expires_utc_nano = 4;
+	string    expires_at = 3;
+	string    created_at = 4;
 }
 
 message CreateSessionRequest {

@@ -94,7 +94,7 @@ message PublishMessagesRequest {
 }
 
 message PublishMessagesResponse {
-	int64    update_utc_nano = 1;
+	string    updated_at = 1;
 }
 
 message PrivateMessagesRequest {
@@ -103,7 +103,7 @@ message PrivateMessagesRequest {
 }
 
 message PrivateMessagesResponse {
-	int64    update_utc_nano = 1;
+	string    updated_at = 1;
 }
 
 message DeleteMessagesResponse {

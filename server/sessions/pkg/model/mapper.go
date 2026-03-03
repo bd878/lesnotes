@@ -8,7 +8,8 @@ func SessionFromProto(proto *api.Session) *Session {
 	return &Session{
 		UserID:             proto.UserId,
 		Token:              proto.Token,
-		ExpiresUTCNano:     proto.ExpiresUtcNano,
+		ExpiresAt:          proto.ExpiresAt,
+		CreatedAt:          proto.CreatedAt,
 	}
 }
 
@@ -16,7 +17,8 @@ func SessionToProto(session *Session) *api.Session {
 	return &api.Session{
 		UserId:             session.UserID,
 		Token:              session.Token,
-		ExpiresUtcNano:     session.ExpiresUTCNano,
+		ExpiresAt:          session.ExpiresAt,
+		CreatedAt:          session.CreatedAt,
 	}
 }
 

@@ -25,40 +25,33 @@ func NewSessionsRepository(pool *pgxpool.Pool, tableName string) *SessionsReposi
 	}
 }
 
-func (r *SessionsRepository) Save(ctx context.Context, userID int64, token string, expiresUTCNano int64) (err error) {
-	const query = "INSERT INTO %s(user_id, value, expires_at) VALUES ($1, $2, $3)"
+func (r *SessionsRepository) Save(ctx context.Context, userID int64, token, createdAt, expiresAt string) (err error) {
+	const query = "INSERT INTO %s(user_id, value, created_at, expires_at) VALUES ($1, $2, $3, $4)"
 
-	expiresAt := time.Unix(0, expiresUTCNano)
-
-	_, err = r.pool.Exec(ctx, r.table(query), userID, token, expiresAt)
+	_, err = r.pool.Exec(ctx, r.table(query), userID, token, createdAt, expiresAt)
 
 	return err
 }
 
 func (r *SessionsRepository) Get(ctx context.Context, token string) (session *model.Session, err error) {
-	const query = "SELECT user_id, expires_at FROM %s WHERE value = $1"
+	const query = "SELECT user_id, created_at, expires_at FROM %s WHERE value = $1"
 
-	var (
-		expiresAt time.Time
-		userID int64
-	)
-
-	err = r.pool.QueryRow(ctx, r.table(query), token).Scan(&userID, &expiresAt)
-	if err != nil {
-		return
-	}
+	var createdAt, expiresAt *time.Time
 
 	session = &model.Session{
-		UserID:         userID,
 		Token:          token,
-		ExpiresUTCNano: expiresAt.UnixNano(),
 	}
+
+	err = r.pool.QueryRow(ctx, r.table(query), token).Scan(&session.UserID, &createdAt, &expiresAt)
+
+	session.CreatedAt = createdAt.Format(time.RFC3339)
+	session.ExpiresAt = expiresAt.Format(time.RFC3339)
 
 	return
 }
 
 func (r *SessionsRepository) List(ctx context.Context, userID int64) (sessions []*model.Session, err error) {
-	const query = "SELECT value, expires_at FROM %s WHERE user_id = $1"
+	const query = "SELECT value, created_at, expires_at FROM %s WHERE user_id = $1"
 
 	var rows pgx.Rows
 	rows, err = r.pool.Query(ctx, r.table(query), userID)
@@ -70,26 +63,24 @@ func (r *SessionsRepository) List(ctx context.Context, userID int64) (sessions [
 
 	sessions = make([]*model.Session, 0)
 	for rows.Next() {
-		var (
-			token string
-			expiresAt time.Time
-		)
+		var createdAt, expiresAt *time.Time
 
-		err = rows.Scan(&token, &expiresAt)
+		session := &model.Session{
+			UserID:         userID,
+		}
+
+		err = rows.Scan(&session.Token, &createdAt, &expiresAt)
 		if err != nil {
 			return
 		}
 
-		sessions = append(sessions, &model.Session{
-			UserID:         userID,
-			Token:          token,
-			ExpiresUTCNano: expiresAt.UnixNano(),
-		})
+		session.CreatedAt = createdAt.Format(time.RFC3339)
+		session.ExpiresAt = expiresAt.Format(time.RFC3339)
+
+		sessions = append(sessions, session)
 	}
 
-	if err = rows.Err(); err != nil {
-		return
-	}
+	err = rows.Err()
 
 	return
 }

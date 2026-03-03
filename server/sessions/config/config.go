@@ -1,8 +1,8 @@
 package config
 
 type Config struct {
-	RpcAddr           string          `json:"rpc_addr"`
-	NodeName          string          `json:"node_name"`
+	RpcAddr                string          `json:"rpc_addr"`
+	NodeName               string          `json:"node_name"`
 
 	SerfAddr               string          `json:"serf_addr"`
 	RaftServers            []string        `json:"raft_servers"`

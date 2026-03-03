@@ -12,7 +12,5 @@ CREATE TABLE IF NOT EXISTS sessions.sessions
 	created_at  timestamptz  NOT NULL DEFAULT NOW()
 );
 
-CREATE TRIGGER created_at_sessions_trgr BEFORE UPDATE ON sessions.sessions FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
-
 -- +goose Down
 DROP SCHEMA IF EXISTS sessions CASCADE;

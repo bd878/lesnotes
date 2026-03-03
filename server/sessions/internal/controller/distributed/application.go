@@ -56,12 +56,15 @@ func (m *Distributed) CreateSession(ctx context.Context, userID int64) (session 
 	m.log.Debugw("create session", "userID", userID)
 
 	token := utils.RandomString(10)
-	expiresUTCNano := time.Now().Add(time.Hour * 24 * 5).UnixNano()
+
+	createdAt := time.Now().UTC().Format(time.RFC3339)
+	expiresAt := time.Now().Add(time.Hour * 24 * 5).UTC().Format(time.RFC3339)
 
 	cmd, err := proto.Marshal(&machine.AppendCommand{
-		UserId: userID,
-		Token:  token,
-		ExpiresUtcNano: expiresUTCNano,
+		UserId:     userID,
+		Token:      token,
+		ExpiresAt:  expiresAt,
+		CreatedAt:  createdAt,
 	})
 	if err != nil {
 		return nil, err
@@ -72,7 +75,8 @@ func (m *Distributed) CreateSession(ctx context.Context, userID int64) (session 
 	session = &model.Session{
 		UserID:         userID,
 		Token:          token,
-		ExpiresUTCNano: expiresUTCNano,
+		CreatedAt:      createdAt,
+		ExpiresAt:      expiresAt,
 	}
 
 	return
@@ -100,9 +104,7 @@ func (m *Distributed) RemoveSession(ctx context.Context, token string) error {
 		return err
 	}
 
-	err = m.apply(ctx, machine.DeleteRequest, cmd)
-
-	return err
+	return m.apply(ctx, machine.DeleteRequest, cmd)
 }
 
 func (m *Distributed) RemoveUserSessions(ctx context.Context, userID int64) error {
@@ -115,9 +117,7 @@ func (m *Distributed) RemoveUserSessions(ctx context.Context, userID int64) erro
 		return err
 	}
 
-	err = m.apply(ctx, machine.DeleteUserSessionsRequest, cmd)
-
-	return err
+	return m.apply(ctx, machine.DeleteUserSessionsRequest, cmd)
 }
 
 func (m *Distributed) GetServers(ctx context.Context) ([]*api.Server, error) {
