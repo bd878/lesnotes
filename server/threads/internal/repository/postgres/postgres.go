@@ -23,17 +23,16 @@ func NewThreadsRepository(pool *pgxpool.Pool, tableName string) *ThreadsReposito
 	return &ThreadsRepository{tableName: tableName, pool: pool}
 }
 
-func (r *ThreadsRepository) ReadThreadByID(ctx context.Context, id, userID int64) (thread *model.Thread, err error) {
-	query := "SELECT parent_id, next_id, prev_id, name, description, private, created_at, updated_at FROM %s WHERE id = $1 AND (user_id = $2 OR private = false)"
+func (r *ThreadsRepository) ReadThreadByID(ctx context.Context, id, userID int64/*may be public*/) (thread *model.Thread, err error) {
+	query := "SELECT user_id, parent_id, next_id, prev_id, name, description, private, created_at, updated_at FROM %s WHERE id = $1 AND (user_id = $2 OR private = false)"
 
 	thread = &model.Thread{
 		ID:     id,
-		UserID: userID,
 	}
 
 	var createdAt, updatedAt *time.Time
 
-	err = r.pool.QueryRow(ctx, r.table(query), id, userID).Scan(&thread.ParentID, &thread.NextID, &thread.PrevID,
+	err = r.pool.QueryRow(ctx, r.table(query), id, userID).Scan(&thread.UserID, &thread.ParentID, &thread.NextID, &thread.PrevID,
 		&thread.Name, &thread.Description, &thread.Private, &createdAt, &updatedAt)
 	if err != nil {
 		return
@@ -47,17 +46,16 @@ func (r *ThreadsRepository) ReadThreadByID(ctx context.Context, id, userID int64
 	return
 }
 
-func (r *ThreadsRepository) ReadThreadByName(ctx context.Context, name string, userID int64) (thread *model.Thread, err error) {
-	query := "SELECT id, parent_id, next_id, prev_id, description, private, created_at, updated_at FROM %s WHERE name = $1 AND (user_id = $2 OR private = false)"
+func (r *ThreadsRepository) ReadThreadByName(ctx context.Context, name string, userID int64 /*may be public*/) (thread *model.Thread, err error) {
+	query := "SELECT user_id, id, parent_id, next_id, prev_id, description, private, created_at, updated_at FROM %s WHERE name = $1 AND (user_id = $2 OR private = false)"
 
 	thread = &model.Thread{
 		Name:     name,
-		UserID:   userID,
 	}
 
 	var createdAt, updatedAt *time.Time
 
-	err = r.pool.QueryRow(ctx, r.table(query), name, userID).Scan(&thread.ID, &thread.ParentID, &thread.NextID, &thread.PrevID,
+	err = r.pool.QueryRow(ctx, r.table(query), name, userID).Scan(&thread.UserID, &thread.ID, &thread.ParentID, &thread.NextID, &thread.PrevID,
 		&thread.Description, &thread.Private, &createdAt, &updatedAt)
 	if err != nil {
 		return
