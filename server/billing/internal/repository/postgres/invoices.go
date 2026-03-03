@@ -58,6 +58,9 @@ func (r *InvoicesRepository) GetInvoice(ctx context.Context, id string, userID i
 
 	err = r.pool.QueryRow(ctx, r.table(query), userID, id).Scan(&invoice.Status, &invoice.Currency,
 		&invoice.Total, &invoice.Metadata, &createdAt, &updatedAt)
+	if err != nil {
+		return
+	}
 
 	invoice.CreatedAt = createdAt.Format(time.RFC3339)
 	invoice.UpdatedAt = updatedAt.Format(time.RFC3339)

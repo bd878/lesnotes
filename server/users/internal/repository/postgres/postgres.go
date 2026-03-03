@@ -50,6 +50,9 @@ func (r *UsersRepository) FindByID(ctx context.Context, id int64) (user *model.U
 	var createdAt, updatedAt *time.Time
 
 	err = r.pool.QueryRow(ctx, r.table(query), id).Scan(&user.Login, &user.HashedPassword, &user.Metadata, &createdAt, &updatedAt)
+	if err != nil {
+		return
+	}
 
 	user.CreatedAt = createdAt.Format(time.RFC3339)
 	user.UpdatedAt = updatedAt.Format(time.RFC3339)
@@ -67,6 +70,9 @@ func (r *UsersRepository) FindByLogin(ctx context.Context, login string) (user *
 	var createdAt, updatedAt *time.Time
 
 	err = r.pool.QueryRow(ctx, r.table(query), login).Scan(&user.ID, &user.HashedPassword, &user.Metadata, &createdAt, &updatedAt)
+	if err != nil {
+		return
+	}
 
 	user.CreatedAt = createdAt.Format(time.RFC3339)
 	user.UpdatedAt = updatedAt.Format(time.RFC3339)

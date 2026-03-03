@@ -84,7 +84,9 @@ func (r *Repository) GetMetaByID(ctx context.Context, id int64) (file *model.Fil
 	var createdAt, updatedAt *time.Time
 	err = r.pool.QueryRow(ctx, r.table(query), id).Scan(&file.UserID, &file.Name, &file.Description,
 		&file.Private, &file.OID, &file.Mime, &file.Size, &createdAt, &updatedAt)
-
+	if err != nil {
+		return
+	}
 
 	file.CreatedAt = createdAt.Format(time.RFC3339)
 	file.UpdatedAt = updatedAt.Format(time.RFC3339)
@@ -102,6 +104,9 @@ func (r *Repository) GetMetaByName(ctx context.Context, fileName string) (file *
 	var createdAt, updatedAt *time.Time
 	err = r.pool.QueryRow(ctx, r.table(query), fileName).Scan(&file.UserID, &file.ID,
 		&file.Description, &file.Private, &file.OID, &file.Mime, &file.Size, &createdAt, &updatedAt)
+	if err != nil {
+		return
+	}
 
 	file.CreatedAt = createdAt.Format(time.RFC3339)
 	file.UpdatedAt = updatedAt.Format(time.RFC3339)

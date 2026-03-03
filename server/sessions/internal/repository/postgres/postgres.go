@@ -43,6 +43,9 @@ func (r *SessionsRepository) Get(ctx context.Context, token string) (session *mo
 	}
 
 	err = r.pool.QueryRow(ctx, r.table(query), token).Scan(&session.UserID, &createdAt, &expiresAt)
+	if err != nil {
+		return
+	}
 
 	session.CreatedAt = createdAt.Format(time.RFC3339)
 	session.ExpiresAt = expiresAt.Format(time.RFC3339)

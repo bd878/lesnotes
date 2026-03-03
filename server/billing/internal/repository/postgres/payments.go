@@ -66,6 +66,9 @@ func (r *PaymentsRepository) GetPayment(ctx context.Context, id, userID int64) (
 
 	err = r.pool.QueryRow(ctx, r.table(query), userID, id).Scan(&payment.InvoiceID, &payment.Status,
 		&payment.Currency, &payment.Total, &payment.Metadata, &createdAt, &updatedAt)
+	if err != nil {
+		return
+	}
 
 	payment.CreatedAt = createdAt.Format(time.RFC3339)
 	payment.UpdatedAt = updatedAt.Format(time.RFC3339)
