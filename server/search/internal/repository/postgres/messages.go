@@ -4,13 +4,14 @@ import (
 	"io"
 	"os"
 	"fmt"
+	"time"
 	"context"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/bd878/gallery/server/internal/logger"
-	search "github.com/bd878/gallery/server/search/pkg/model"
+	"github.com/bd878/gallery/server/search/pkg/model"
 )
 
 type MessagesRepository struct {
@@ -22,134 +23,38 @@ func NewMessagesRepository(pool *pgxpool.Pool, tableName string) *MessagesReposi
 	return &MessagesRepository{tableName: tableName, pool: pool}
 }
 
-func (r *MessagesRepository) SaveMessage(ctx context.Context, id, userID int64, name, title, text string, private bool) (err error) {
-	const query = "INSERT INTO %s(id, user_id, name, title, text, private) VALUES ($1, $2, $3, $4, $5, $6)"
+func (r *MessagesRepository) SaveMessage(ctx context.Context, id, userID int64, name, title, text string, private bool, createdAt, updatedAt string) (err error) {
+	const query = "INSERT INTO %s(id, user_id, name, title, text, private, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"
 
-	var tx pgx.Tx
-	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
-	if err != nil {
-		return err
-	}
-	defer func() {
-		p := recover()
-		switch {
-		case p != nil:
-			_ = tx.Rollback(ctx)
-			panic(p)
-		case err != nil:
-			fmt.Fprintf(os.Stderr, "[SaveMessage]: rollback with error: %v\n", err)
-			err = tx.Rollback(ctx)
-		default:
-			err = tx.Commit(ctx)
-		}
-	}()
-
-	_, err = tx.Exec(ctx, r.table(query), id, userID, name, title, text, private)
+	_, err = r.pool.Exec(ctx, r.table(query), id, userID, name, title, text, private, createdAt, updatedAt)
 
 	return
 }
 
-func (r *MessagesRepository) UpdateMessage(ctx context.Context, id, userID int64, newName, newTitle, newText string) (err error) {
-	const query = "UPDATE %s SET text = $3, title = $4, name = $5 WHERE user_id = $1 AND id = $2"
-	const selectQuery = "SELECT text, title, name FROM %s WHERE user_id = $1 AND id = $2"
+func (r *MessagesRepository) UpdateMessage(ctx context.Context, id, userID int64, name, title, text *string, updatedAt string) (err error) {
+	const query = "UPDATE %s SET text = $3, title = $4, name = $5, updated_at = $6 WHERE user_id = $1 AND id = $2"
 
-	var tx pgx.Tx
-	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
-	if err != nil {
-		return
-	}
-	defer func() {
-		p := recover()
-		switch {
-		case p != nil:
-			_ = tx.Rollback(ctx)
-			panic(p)
-		case err != nil:
-			fmt.Fprintf(os.Stderr, "[UpdateMessage]: rollback with error: %v\n", err)
-			err = tx.Rollback(ctx)
-		default:
-			err = tx.Commit(ctx)
-		}
-	}()
-
-	var text, title, name string
-
-	err = tx.QueryRow(ctx, r.table(selectQuery), userID, id).Scan(&text, &title, &name)
-	if err != nil {
-		return
-	}
-
-	if newText != "" {
-		text = newText
-	}
-
-	if newTitle != "" {
-		title = newTitle
-	}
-
-	if newName != "" {
-		name = newName
-	}
-
-	_, err = tx.Exec(ctx, r.table(query), userID, id, text, title, name)
+	_, err = r.pool.Exec(ctx, r.table(query), userID, id, text, title, name, updatedAt)
 
 	return
 }
 
-func (r *MessagesRepository) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
-	var tx pgx.Tx
-	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
-	if err != nil {
-		return err
-	}
-	defer func() {
-		p := recover()
-		switch {
-		case p != nil:
-			_ = tx.Rollback(ctx)
-			panic(p)
-		case err != nil:
-			fmt.Fprintf(os.Stderr, "[PublishMessages]: rollback with error: %v\n", err)
-			err = tx.Rollback(ctx)
-		default:
-			err = tx.Commit(ctx)
-		}
-	}()
-
+func (r *MessagesRepository) PublishMessages(ctx context.Context, ids []int64, userID int64, updatedAt string) (err error) {
 	for _, id := range ids {
-		_, err = tx.Exec(ctx, r.table("UPDATE %s SET private = false WHERE user_id = $1 AND id = $2"), userID, id)
+		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = false, updated_at = $3 WHERE user_id = $1 AND id = $2"), userID, id, updatedAt)
 		if err != nil {
-			return
+			logger.Errorln(err)
 		}
 	}
 
 	return
 }
 
-func (r *MessagesRepository) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
-	var tx pgx.Tx
-	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
-	if err != nil {
-		return err
-	}
-	defer func() {
-		p := recover()
-		switch {
-		case p != nil:
-			_ = tx.Rollback(ctx)
-			panic(p)
-		case err != nil:
-			fmt.Fprintf(os.Stderr, "[PrivateMessages]: rollback with error: %v\n", err)
-			err = tx.Rollback(ctx)
-		default:
-			err = tx.Commit(ctx)
-		}
-	}()
-
+func (r *MessagesRepository) PrivateMessages(ctx context.Context, ids []int64, userID int64, updatedAt string) (err error) {
 	for _, id := range ids {
-		_, err = tx.Exec(ctx, r.table("UPDATE %s SET private = true WHERE user_id = $1 AND id = $2"), userID, id)
+		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = true, updated_at = $3 WHERE user_id = $1 AND id = $2"), userID, id, updatedAt)
 		if err != nil {
-			return
+			logger.Errorln(err)
 		}
 	}
 
@@ -159,31 +64,12 @@ func (r *MessagesRepository) PrivateMessages(ctx context.Context, ids []int64, u
 func (r *MessagesRepository) DeleteMessage(ctx context.Context, id, userID int64) (err error) {
 	const query = "DELETE FROM %s WHERE id = $1 AND user_id = $2"
 
-	var tx pgx.Tx
-	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
-	if err != nil {
-		return err
-	}
-	defer func() {
-		p := recover()
-		switch {
-		case p != nil:
-			_ = tx.Rollback(ctx)
-			panic(p)
-		case err != nil:
-			fmt.Fprintf(os.Stderr, "[DeleteMessage]: rollback with error: %v\n", err)
-			err = tx.Rollback(ctx)
-		default:
-			err = tx.Commit(ctx)
-		}
-	}()
-
-	_, err = tx.Exec(ctx, r.table(query), id, userID)
+	_, err = r.pool.Exec(ctx, r.table(query), id, userID)
 
 	return
 }
 
-func (r *MessagesRepository) SearchMessages(ctx context.Context, userID int64, substr string, public int) (list []*search.Message, err error) {
+func (r *MessagesRepository) SearchMessages(ctx context.Context, userID int64, substr string, public int) (list []*model.Message, err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -213,9 +99,9 @@ func (r *MessagesRepository) SearchMessages(ctx context.Context, userID int64, s
 			private = false
 		}
 
-		rows, err = tx.Query(ctx, r.table("SELECT id, name, title, text, private FROM %s WHERE user_id = $1 AND private = $2 AND name || ' ' || title || ' ' || text ILIKE $3"), userID, private, "'%" + substr + "%'")
+		rows, err = tx.Query(ctx, r.table("SELECT id, name, title, text, private, created_at, updated_at FROM %s WHERE user_id = $1 AND private = $2 AND name || ' ' || title || ' ' || text ILIKE $3"), userID, private, "%" + substr + "%")
 	} else {
-		rows, err = tx.Query(ctx, r.table("SELECT id, name, title, text, private FROM %s WHERE user_id = $1 AND name || ' ' || title || ' ' || text ILIKE $2"), userID, "'%" + substr + "%'")
+		rows, err = tx.Query(ctx, r.table("SELECT id, name, title, text, private, created_at, updated_at FROM %s WHERE user_id = $1 AND name || ' ' || title || ' ' || text ILIKE $2"), userID, "%" + substr + "%")
 	}
 
 	defer rows.Close()
@@ -223,16 +109,21 @@ func (r *MessagesRepository) SearchMessages(ctx context.Context, userID int64, s
 		return
 	}
 
-	list = make([]*search.Message, 0)
+	list = make([]*model.Message, 0)
 	for rows.Next() {
-		message := &search.Message{
+		var createdAt, updatedAt *time.Time
+
+		message := &model.Message{
 			UserID: userID,
 		}
 
-		err = rows.Scan(&message.ID, &message.Name, &message.Title, &message.Text, &message.Private)
+		err = rows.Scan(&message.ID, &message.Name, &message.Title, &message.Text, &message.Private, &createdAt, &updatedAt)
 		if err != nil {
 			return
 		}
+
+		message.CreatedAt = createdAt.Format(time.RFC3339)
+		message.UpdatedAt = updatedAt.Format(time.RFC3339)
 
 		list = append(list, message)
 	}

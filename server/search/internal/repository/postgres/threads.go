@@ -4,13 +4,14 @@ import (
 	"io"
 	"os"
 	"fmt"
+	"time"
 	"context"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/bd878/gallery/server/internal/logger"
-	search "github.com/bd878/gallery/server/search/pkg/model"
+	"github.com/bd878/gallery/server/search/pkg/model"
 )
 
 type ThreadsRepository struct {
@@ -22,16 +23,16 @@ func NewThreadsRepository(pool *pgxpool.Pool, tableName string) *ThreadsReposito
 	return &ThreadsRepository{tableName: tableName, pool: pool}
 }
 
-func (r *ThreadsRepository) SaveThread(ctx context.Context, id, userID, parentID int64, name, description string, private bool) (err error) {
-	const query = "INSERT INTO %s(id, user_id, parent_id, name, description, private) VALUES ($1, $2, $3, $4, $5, $6)"
+func (r *ThreadsRepository) SaveThread(ctx context.Context, id, userID, parentID int64, name, description string, private bool, createdAt, updatedAt string) (err error) {
+	const query = "INSERT INTO %s(id, user_id, parent_id, name, description, private, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"
 
-	_, err = r.pool.Exec(ctx, r.table(query), id, userID, parentID, name, description, private)
+	_, err = r.pool.Exec(ctx, r.table(query), id, userID, parentID, name, description, private, createdAt, updatedAt)
 
 	return
 }
 
-func (r *ThreadsRepository) SearchThreads(ctx context.Context, parentID, userID int64) (list []*search.Thread, err error) {
-	const query = "SELECT id, user_id, description, private FROM %s WHERE user_id = $1 AND parent_id = $2"
+func (r *ThreadsRepository) SearchThreads(ctx context.Context, parentID, userID int64) (list []*model.Thread, err error) {
+	const query = "SELECT id, user_id, description, private, created_at, updated_at FROM %s WHERE user_id = $1 AND parent_id = $2"
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
@@ -60,16 +61,21 @@ func (r *ThreadsRepository) SearchThreads(ctx context.Context, parentID, userID 
 		return
 	}
 
-	list = make([]*search.Thread, 0)
+	list = make([]*model.Thread, 0)
 	for rows.Next() {
-		thread := &search.Thread{
+		var createdAt, updatedAt *time.Time
+
+		thread := &model.Thread{
 			UserID: userID,
 		}
 
-		err = rows.Scan(&thread.ID, &thread.Name, &thread.Description, &thread.Private)
+		err = rows.Scan(&thread.ID, &thread.Name, &thread.Description, &thread.Private, &createdAt, &updatedAt)
 		if err != nil {
 			return
 		}
+
+		thread.CreatedAt = createdAt.Format(time.RFC3339)
+		thread.UpdatedAt = updatedAt.Format(time.RFC3339)
 
 		list = append(list, thread)
 	}
@@ -77,45 +83,10 @@ func (r *ThreadsRepository) SearchThreads(ctx context.Context, parentID, userID 
 	return
 }
 
-func (r *ThreadsRepository) UpdateThread(ctx context.Context, id, userID int64, newName, newDescription string) (err error) {
-	const query = "SELECT name, description FROM %s WHERE user_id = $1 AND id = $2"
-	const update = "UPDATE %s SET name = $3, description = $4 WHERE user_id = $1 AND id = $2"
+func (r *ThreadsRepository) UpdateThread(ctx context.Context, id, userID int64, name, description *string, updatedAt string) (err error) {
+	const update = "UPDATE %s SET name = $3, description = $4, updated_at = $5 WHERE user_id = $1 AND id = $2"
 
-	var tx pgx.Tx
-	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
-	if err != nil {
-		return
-	}
-	defer func() {
-		p := recover()
-		switch {
-		case p != nil:
-			_ = tx.Rollback(ctx)
-			panic(p)
-		case err != nil:
-			fmt.Fprintf(os.Stderr, "[UpdateThread]: rollback with error: %v\n", err)
-			err = tx.Rollback(ctx)
-		default:
-			err = tx.Commit(ctx)
-		}
-	}()
-
-	var name, description string
-
-	err = tx.QueryRow(ctx, r.table(query), userID, id).Scan(&name, &description)
-	if err != nil {
-		return
-	}
-
-	if newName != "" {
-		name = newName
-	}
-
-	if newDescription != "" {
-		description = newDescription
-	}
-
-	_, err = tx.Exec(ctx, r.table(update), userID, id, name, description)
+	_, err = r.pool.Exec(ctx, r.table(update), userID, id, name, description, updatedAt)
 
 	return
 }
@@ -167,18 +138,18 @@ func (r *ThreadsRepository) ChangeThreadParent(ctx context.Context, id, userID, 
 	return
 }
 
-func (r *ThreadsRepository) PublishThread(ctx context.Context, id, userID int64) (err error) {
-	const update = "UPDATE %s SET private = false WHERE user_id = $1 AND id = $2"
+func (r *ThreadsRepository) PublishThread(ctx context.Context, id, userID int64, updatedAt string) (err error) {
+	const update = "UPDATE %s SET private = false, updated_at = $3 WHERE user_id = $1 AND id = $2"
 
-	_, err = r.pool.Exec(ctx, r.table(update), userID, id)
+	_, err = r.pool.Exec(ctx, r.table(update), userID, id, updatedAt)
 
 	return
 }
 
-func (r *ThreadsRepository) PrivateThread(ctx context.Context, id, userID int64) (err error) {
-	const update = "UPDATE %s SET private = true WHERE user_id = $1 AND id = $2"
+func (r *ThreadsRepository) PrivateThread(ctx context.Context, id, userID int64, updatedAt string) (err error) {
+	const update = "UPDATE %s SET private = true, updated_at = $3 WHERE user_id = $1 AND id = $2"
 
-	_, err = r.pool.Exec(ctx, r.table(update), userID, id)
+	_, err = r.pool.Exec(ctx, r.table(update), userID, id, updatedAt)
 
 	return
 }

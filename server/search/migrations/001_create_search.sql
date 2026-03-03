@@ -17,9 +17,6 @@ CREATE TABLE IF NOT EXISTS search.messages
 	PRIMARY KEY(id)
 );
 
-CREATE TRIGGER created_at_search_messages_trgr BEFORE UPDATE ON search.messages FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
-CREATE TRIGGER updated_at_search_messages_trgr BEFORE UPDATE ON search.messages FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
-
 CREATE TABLE IF NOT EXISTS search.threads
 (
 	id           bigint       UNIQUE NOT NULL,    -- thread id (aka message id)
@@ -32,9 +29,6 @@ CREATE TABLE IF NOT EXISTS search.threads
 	updated_at   timestamptz  NOT NULL DEFAULT NOW(),
 	PRIMARY KEY(id)
 );
-
-CREATE TRIGGER created_at_search_threads_trgr BEFORE UPDATE ON search.threads FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
-CREATE TRIGGER updated_at_search_threads_trgr BEFORE UPDATE ON search.threads FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 
 CREATE TABLE IF NOT EXISTS search.files
 (
@@ -50,9 +44,6 @@ CREATE TABLE IF NOT EXISTS search.files
 	PRIMARY KEY(id)
 );
 
-CREATE TRIGGER created_at_search_files_trgr BEFORE UPDATE ON search.files FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
-CREATE TRIGGER updated_at_search_files_trgr BEFORE UPDATE ON search.files FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
-
 CREATE TABLE IF NOT EXISTS search.translations
 (
 	message_id    bigint        NOT NULL,
@@ -64,9 +55,6 @@ CREATE TABLE IF NOT EXISTS search.translations
 	updated_at    timestamptz   NOT NULL DEFAULT NOW(),
 	PRIMARY KEY(message_id, lang)
 );
-
-CREATE TRIGGER created_at_translations_trgr BEFORE UPDATE ON search.translations FOR EACH ROW EXECUTE PROCEDURE created_at_trigger();
-CREATE TRIGGER updated_at_translations_trgr BEFORE UPDATE ON search.translations FOR EACH ROW EXECUTE PROCEDURE updated_at_trigger();
 
 -- +goose Down
 DROP SCHEMA IF EXISTS search CASCADE;

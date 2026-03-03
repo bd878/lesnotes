@@ -16,12 +16,16 @@ message SearchMessage {
 	string  name    = 4;
 	string  text    = 5;
 	bool    private = 6;
+	string  created_at = 7;
+	string  updated_at = 8;
 }
 
 message SearchFile {
 	int64   id      = 1;
 	int64   user_id = 2;
 	string  name    = 3;
+	string  created_at = 4;
+	string  updated_at = 5;
 }
 
 message SearchMessagesRequest {

@@ -13,33 +13,33 @@ import (
 )
 
 type MessagesController interface {
-	SaveMessage(ctx context.Context, id, userID int64, name, title, text string, private bool) error
-	UpdateMessage(ctx context.Context, id, userID int64, name, title, text string) error
-	PublishMessages(ctx context.Context, ids []int64, userID int64) error
-	PrivateMessages(ctx context.Context, ids []int64, userID int64) error
+	SaveMessage(ctx context.Context, id, userID int64, name, title, text string, private bool, createdAt, updatedAt string) error
+	UpdateMessage(ctx context.Context, id, userID int64, name, title, text *string, updatedAt string) error
+	PublishMessages(ctx context.Context, ids []int64, userID int64, updatedAt string) error
+	PrivateMessages(ctx context.Context, ids []int64, userID int64, updatedAt string) error
 	DeleteMessage(ctx context.Context, id, userID int64) error
 }
 
 type ThreadsController interface {
-	SaveThread(ctx context.Context, id, userID, parentID int64, name, description string, private bool) error
+	SaveThread(ctx context.Context, id, userID, parentID int64, name, description string, private bool, createdAt, updatedAt string) error
 	DeleteThread(ctx context.Context, id, userID int64) error
-	UpdateThread(ctx context.Context, id, userID int64, name, description string) error
+	UpdateThread(ctx context.Context, id, userID int64, name, description *string, updatedAt string) error
 	ChangeThreadParent(ctx context.Context, id, userID, parentID int64) error
-	PrivateThread(ctx context.Context, id, userID int64) error
-	PublishThread(ctx context.Context, id, userID int64) error
+	PrivateThread(ctx context.Context, id, userID int64, updatedAt string) error
+	PublishThread(ctx context.Context, id, userID int64, updatedAt string) error
 }
 
 type FilesController interface {
-	SaveFile(ctx context.Context, id, userID int64, name, description, mime string, private bool, size int64) error
-	PublishFile(ctx context.Context, id, userID int64) error
-	PrivateFile(ctx context.Context, id, userID int64) error
+	SaveFile(ctx context.Context, id, userID int64, name, description, mime string, private bool, size int64, createdAt, updatedAt string) error
+	PublishFile(ctx context.Context, id, userID int64, updatedAt string) error
+	PrivateFile(ctx context.Context, id, userID int64, updatedAt string) error
 	DeleteFile(ctx context.Context, id, userID int64) error
 }
 
 type TranslationsController interface {
-	SaveTranslation(ctx context.Context, userID, messageID int64, lang, title, text string) error
+	SaveTranslation(ctx context.Context, userID, messageID int64, lang, title, text string, createdAt, updatedAt string) error
 	DeleteTranslation(ctx context.Context, messageID int64, lang string) error
-	UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string) error
+	UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string, updatedAt string) error
 }
 
 type integrationHandlers struct {
@@ -141,7 +141,8 @@ func (h integrationHandlers) handleMessageCreated(ctx context.Context, msg am.In
 		return err
 	}
 
-	return h.messages.SaveMessage(ctx, m.GetId(), m.GetUserId(), m.GetName(), m.GetTitle(), m.GetText(), m.GetPrivate())
+	return h.messages.SaveMessage(ctx, m.GetId(), m.GetUserId(), m.GetName(),
+		m.GetTitle(), m.GetText(), m.GetPrivate(), m.GetCreatedAt(), m.GetUpdatedAt())
 }
 
 func (h integrationHandlers) handleMessageDeleted(ctx context.Context, msg am.IncomingMessage) error {
@@ -159,7 +160,7 @@ func (h integrationHandlers) handleMessageUpdated(ctx context.Context, msg am.In
 		return err
 	}
 
-	return h.messages.UpdateMessage(ctx, m.GetId(), m.GetUserId(), m.GetName(), m.GetTitle(), m.GetText())
+	return h.messages.UpdateMessage(ctx, m.GetId(), m.GetUserId(), m.Name, m.Title, m.Text, m.GetUpdatedAt())
 }
 
 func (h integrationHandlers) handleMessagesPublish(ctx context.Context, msg am.IncomingMessage) error {
@@ -168,7 +169,7 @@ func (h integrationHandlers) handleMessagesPublish(ctx context.Context, msg am.I
 		return err
 	}
 
-	return h.messages.PublishMessages(ctx, m.GetIds(), m.GetUserId())
+	return h.messages.PublishMessages(ctx, m.GetIds(), m.GetUserId(), m.GetUpdatedAt())
 }
 
 func (h integrationHandlers) handleMessagesPrivate(ctx context.Context, msg am.IncomingMessage) error {
@@ -177,7 +178,7 @@ func (h integrationHandlers) handleMessagesPrivate(ctx context.Context, msg am.I
 		return err
 	}
 
-	return h.messages.PrivateMessages(ctx, m.GetIds(), m.GetUserId())
+	return h.messages.PrivateMessages(ctx, m.GetIds(), m.GetUserId(), m.GetUpdatedAt())
 }
 
 func (h integrationHandlers) handleThreadCreated(ctx context.Context, msg am.IncomingMessage) error {
@@ -186,7 +187,8 @@ func (h integrationHandlers) handleThreadCreated(ctx context.Context, msg am.Inc
 		return err
 	}
 
-	return h.threads.SaveThread(ctx, m.GetId(), m.GetUserId(), m.GetParentId(), m.GetName(), m.GetDescription(), m.GetPrivate())
+	return h.threads.SaveThread(ctx, m.GetId(), m.GetUserId(), m.GetParentId(),
+		m.GetName(), m.GetDescription(), m.GetPrivate(), m.GetCreatedAt(), m.GetUpdatedAt())
 }
 
 func (h integrationHandlers) handleThreadDeleted(ctx context.Context, msg am.IncomingMessage) error {
@@ -204,7 +206,7 @@ func (h integrationHandlers) handleThreadUpdated(ctx context.Context, msg am.Inc
 		return err
 	}
 
-	return h.threads.UpdateThread(ctx, m.GetId(), m.GetUserId(), m.GetName(), m.GetDescription())
+	return h.threads.UpdateThread(ctx, m.GetId(), m.GetUserId(), m.Name, m.Description, m.GetUpdatedAt())
 }
 
 func (h integrationHandlers) handleThreadParentChanged(ctx context.Context, msg am.IncomingMessage) error {
@@ -222,7 +224,7 @@ func (h integrationHandlers) handleThreadPrivated(ctx context.Context, msg am.In
 		return err
 	}
 
-	return h.threads.PrivateThread(ctx, m.GetId(), m.GetUserId())
+	return h.threads.PrivateThread(ctx, m.GetId(), m.GetUserId(), m.GetUpdatedAt())
 }
 
 func (h integrationHandlers) handleThreadPublished(ctx context.Context, msg am.IncomingMessage) error {
@@ -231,7 +233,7 @@ func (h integrationHandlers) handleThreadPublished(ctx context.Context, msg am.I
 		return err
 	}
 
-	return h.threads.PublishThread(ctx, m.GetId(), m.GetUserId())
+	return h.threads.PublishThread(ctx, m.GetId(), m.GetUserId(), m.GetUpdatedAt())
 }
 
 func (h integrationHandlers) handleFileUploaded(ctx context.Context, msg am.IncomingMessage) error {
@@ -240,7 +242,8 @@ func (h integrationHandlers) handleFileUploaded(ctx context.Context, msg am.Inco
 		return err
 	}
 
-	return h.files.SaveFile(ctx, m.GetId(), m.GetUserId(), m.GetName(), m.GetDescription(), m.GetMime(), m.GetPrivate(), m.GetSize())
+	return h.files.SaveFile(ctx, m.GetId(), m.GetUserId(), m.GetName(),
+		m.GetDescription(), m.GetMime(), m.GetPrivate(), m.GetSize(), m.GetCreatedAt(), m.GetUpdatedAt())
 }
 
 func (h integrationHandlers) handleFileDeleted(ctx context.Context, msg am.IncomingMessage) error {
@@ -258,7 +261,7 @@ func (h integrationHandlers) handleFilePublished(ctx context.Context, msg am.Inc
 		return err
 	}
 
-	return h.files.PublishFile(ctx, m.GetId(), m.GetUserId())
+	return h.files.PublishFile(ctx, m.GetId(), m.GetUserId(), m.GetUpdatedAt())
 }
 
 func (h integrationHandlers) handleFilePrivated(ctx context.Context, msg am.IncomingMessage) error {
@@ -267,7 +270,7 @@ func (h integrationHandlers) handleFilePrivated(ctx context.Context, msg am.Inco
 		return err
 	}
 
-	return h.files.PrivateFile(ctx, m.GetId(), m.GetUserId())
+	return h.files.PrivateFile(ctx, m.GetId(), m.GetUserId(), m.GetUpdatedAt())
 }
 
 func (h integrationHandlers) handleTranslationCreated(ctx context.Context, msg am.IncomingMessage) error {
@@ -276,7 +279,8 @@ func (h integrationHandlers) handleTranslationCreated(ctx context.Context, msg a
 		return err
 	}
 
-	return h.translations.SaveTranslation(ctx, m.GetUserId(), m.GetMessageId(), m.GetLang(), m.GetTitle(), m.GetText())
+	return h.translations.SaveTranslation(ctx, m.GetUserId(), m.GetMessageId(),
+		m.GetLang(), m.GetTitle(), m.GetText(), m.GetCreatedAt(), m.GetUpdatedAt())
 }
 
 func (h integrationHandlers) handleTranslationDeleted(ctx context.Context, msg am.IncomingMessage) error {
@@ -294,5 +298,5 @@ func (h integrationHandlers) handleTranslationUpdated(ctx context.Context, msg a
 		return err
 	}
 
-	return h.translations.UpdateTranslation(ctx, m.GetMessageId(), m.GetLang(), m.Title, m.Text)
+	return h.translations.UpdateTranslation(ctx, m.GetMessageId(), m.GetLang(), m.Title, m.Text, m.GetUpdatedAt())
 }

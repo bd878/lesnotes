@@ -67,26 +67,26 @@ func (m *Distributed) apply(ctx context.Context, reqType machine.RequestType, cm
 
 	return m.consensus.Apply(buf.Bytes(), 10*time.Second)
 }
-func (m *Distributed) SaveMessage(ctx context.Context, id, userID int64, name, title, text string, private bool) (err error) {
+func (m *Distributed) SaveMessage(ctx context.Context, id, userID int64, name, title, text string, private bool, createdAt, updatedAt string) (err error) {
 	// for integration events; though raft will not allow .apply for not a leader, anyway
 	// may be we do not need raft for search, when every node receives a message
 	m.log.Debugw("save search message", "id", id, "user_id", userID, "name", name, "title", title, "text", text, "private", private)
 
 	cmd, err := proto.Marshal(&machine.AppendMessageCommand{
-		Id:      id,
-		Text:    text,
-		Title:   title,
-		Name:    name,
-		UserId:  userID,
-		Private: private,
+		Id:          id,
+		Text:        text,
+		Title:       title,
+		Name:        name,
+		UserId:      userID,
+		Private:     private,
+		CreatedAt:   createdAt,
+		UpdatedAt:   updatedAt,
 	})
 	if err != nil {
 		return err
 	}
 
-	err = m.apply(ctx, machine.AppendMessageRequest, cmd)
-
-	return
+	return m.apply(ctx, machine.AppendMessageRequest, cmd)
 }
 
 func (m *Distributed) DeleteMessage(ctx context.Context, id, userID int64) (err error) {
@@ -100,63 +100,58 @@ func (m *Distributed) DeleteMessage(ctx context.Context, id, userID int64) (err 
 		return err
 	}
 
-	err = m.apply(ctx, machine.DeleteMessageRequest, cmd)
-
-	return
+	return m.apply(ctx, machine.DeleteMessageRequest, cmd)
 }
 
-func (m *Distributed) UpdateMessage(ctx context.Context, id, userID int64, name, title, text string) (err error) {
+func (m *Distributed) UpdateMessage(ctx context.Context, id, userID int64, name, title, text *string, updatedAt string) (err error) {
 	m.log.Debugw("update search message", "id", id, "user_id", userID, "name", name, "title", title, "text", text)
 
 	cmd, err := proto.Marshal(&machine.UpdateMessageCommand{
-		Id:      id,
-		Text:    text,
-		Title:   title,
-		Name:    name,
-		UserId:  userID,
+		Id:         id,
+		Text:       text,
+		Title:      title,
+		Name:       name,
+		UserId:     userID,
+		UpdatedAt:  updatedAt,
 	})
 	if err != nil {
 		return err
 	}
 
-	err = m.apply(ctx, machine.UpdateMessageRequest, cmd)
-
-	return
+	return m.apply(ctx, machine.UpdateMessageRequest, cmd)
 }
 
-func (m *Distributed) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+func (m *Distributed) PublishMessages(ctx context.Context, ids []int64, userID int64, updatedAt string) (err error) {
 	m.log.Debugw("publish search messages", "ids", ids, "user_id", userID)
 
 	cmd, err := proto.Marshal(&machine.PublishMessagesCommand{
-		Ids:     ids,
-		UserId:  userID,
+		Ids:       ids,
+		UserId:    userID,
+		UpdatedAt: updatedAt,
 	})
 	if err != nil {
 		return err
 	}
 
-	err = m.apply(ctx, machine.PublishMessagesRequest, cmd)
-
-	return
+	return m.apply(ctx, machine.PublishMessagesRequest, cmd)
 }
 
-func (m *Distributed) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+func (m *Distributed) PrivateMessages(ctx context.Context, ids []int64, userID int64, updatedAt string) (err error) {
 	m.log.Debugw("private search messages", "ids", ids, "user_id", userID)
 
 	cmd, err := proto.Marshal(&machine.PrivateMessagesCommand{
-		Ids:     ids,
-		UserId:  userID,
+		Ids:         ids,
+		UserId:      userID,
+		UpdatedAt:   updatedAt,
 	})
 	if err != nil {
 		return err
 	}
 
-	err = m.apply(ctx, machine.PrivateMessagesRequest, cmd)
-
-	return
+	return m.apply(ctx, machine.PrivateMessagesRequest, cmd)
 }
 
-func (m *Distributed) SaveThread(ctx context.Context, id, userID, parentID int64, name, description string, private bool) (err error) {
+func (m *Distributed) SaveThread(ctx context.Context, id, userID, parentID int64, name, description string, private bool, createdAt, updatedAt string) (err error) {
 	m.log.Debugw("save thread", "id", id, "user_id", userID, "parent_id", parentID, "name", name, "description", description, "private", private)
 
 	cmd, err := proto.Marshal(&machine.AppendThreadCommand{
@@ -166,14 +161,14 @@ func (m *Distributed) SaveThread(ctx context.Context, id, userID, parentID int64
 		ParentId:    parentID,
 		Description: description,
 		Private:     private,
+		CreatedAt:   createdAt,
+		UpdatedAt:   updatedAt,
 	})
 	if err != nil {
 		return err
 	}
 
-	err = m.apply(ctx, machine.AppendThreadRequest, cmd)
-
-	return
+	return m.apply(ctx, machine.AppendThreadRequest, cmd)
 }
 
 func (m *Distributed) DeleteThread(ctx context.Context, id, userID int64) (err error) {
@@ -187,12 +182,10 @@ func (m *Distributed) DeleteThread(ctx context.Context, id, userID int64) (err e
 		return err
 	}
 
-	err = m.apply(ctx, machine.DeleteThreadRequest, cmd)
-
-	return
+	return m.apply(ctx, machine.DeleteThreadRequest, cmd)
 }
 
-func (m *Distributed) UpdateThread(ctx context.Context, id, userID int64, name, description string) (err error) {
+func (m *Distributed) UpdateThread(ctx context.Context, id, userID int64, name, description *string, updatedAt string) (err error) {
 	m.log.Debugw("update thread", "id", id, "user_id", userID, "name", name, "description", description)
 
 	cmd, err := proto.Marshal(&machine.UpdateThreadCommand{
@@ -200,14 +193,13 @@ func (m *Distributed) UpdateThread(ctx context.Context, id, userID int64, name, 
 		Description: description,
 		Name:        name,
 		UserId:      userID,
+		UpdatedAt:   updatedAt,
 	})
 	if err != nil {
 		return err
 	}
 
-	err = m.apply(ctx, machine.UpdateThreadRequest, cmd)
-
-	return
+	return m.apply(ctx, machine.UpdateThreadRequest, cmd)
 }
 
 func (m *Distributed) ChangeThreadParent(ctx context.Context, id, userID, parentID int64) (err error) {
@@ -222,41 +214,37 @@ func (m *Distributed) ChangeThreadParent(ctx context.Context, id, userID, parent
 		return err
 	}
 
-	err = m.apply(ctx, machine.ChangeThreadParentRequest, cmd)
-
-	return
+	return m.apply(ctx, machine.ChangeThreadParentRequest, cmd)
 }
 
-func (m *Distributed) PrivateThread(ctx context.Context, id, userID int64) (err error) {
+func (m *Distributed) PrivateThread(ctx context.Context, id, userID int64, updatedAt string) (err error) {
 	m.log.Debugw("private thread", "id", id, "user_id", userID)
 
 	cmd, err := proto.Marshal(&machine.PrivateThreadCommand{
-		Id:      id,
-		UserId:  userID,
+		Id:         id,
+		UserId:     userID,
+		UpdatedAt:  updatedAt,
 	})
 	if err != nil {
 		return err
 	}
 
-	err = m.apply(ctx, machine.PrivateThreadRequest, cmd)
-
-	return
+	return m.apply(ctx, machine.PrivateThreadRequest, cmd)
 }
 
-func (m *Distributed) PublishThread(ctx context.Context, id, userID int64) (err error) {
+func (m *Distributed) PublishThread(ctx context.Context, id, userID int64, updatedAt string) (err error) {
 	m.log.Debugw("publish thread", "id", id, "user_id", userID)
 
 	cmd, err := proto.Marshal(&machine.PublishThreadCommand{
-		Id:      id,
-		UserId:  userID,
+		Id:         id,
+		UserId:     userID,
+		UpdatedAt:  updatedAt,
 	})
 	if err != nil {
 		return err
 	}
 
-	err = m.apply(ctx, machine.PublishThreadRequest, cmd)
-
-	return
+	return m.apply(ctx, machine.PublishThreadRequest, cmd)
 }
 
 func (m *Distributed) SearchMessages(ctx context.Context, userID int64, substr string, threadID int64, public int) (list []*model.Message, err error) {
@@ -293,7 +281,7 @@ func (m *Distributed) SearchMessages(ctx context.Context, userID int64, substr s
 	return
 }
 
-func (m *Distributed) SaveFile(ctx context.Context, id, userID int64, name, description, mime string, private bool, size int64) (err error) {
+func (m *Distributed) SaveFile(ctx context.Context, id, userID int64, name, description, mime string, private bool, size int64, createdAt, updatedAt string) (err error) {
 	m.log.Debugw("save file", "id", id, "user_id", userID, "name", name, "description", description, "mime", mime, "private", private, "size", size)
 
 	cmd, err := proto.Marshal(&machine.AppendFileCommand{
@@ -304,46 +292,44 @@ func (m *Distributed) SaveFile(ctx context.Context, id, userID int64, name, desc
 		Mime:        mime,
 		Private:     private,
 		Size:        size,
+		CreatedAt:   createdAt,
+		UpdatedAt:   updatedAt,
 	})
 	if err != nil {
 		return err
 	}
 
-	err = m.apply(ctx, machine.AppendFileRequest, cmd)
-
-	return
+	return m.apply(ctx, machine.AppendFileRequest, cmd)
 }
 
-func (m *Distributed) PublishFile(ctx context.Context, id, userID int64) (err error) {
+func (m *Distributed) PublishFile(ctx context.Context, id, userID int64, updatedAt string) (err error) {
 	m.log.Debugw("publish file", "id", id, "user_id", userID)
 
 	cmd, err := proto.Marshal(&machine.PublishFileCommand{
 		Id:          id,
 		UserId:      userID,
+		UpdatedAt:   updatedAt,
 	})
 	if err != nil {
 		return err
 	}
 
-	err = m.apply(ctx, machine.PublishFileRequest, cmd)
-
-	return
+	return m.apply(ctx, machine.PublishFileRequest, cmd)
 }
 
-func (m *Distributed) PrivateFile(ctx context.Context, id, userID int64) (err error) {
+func (m *Distributed) PrivateFile(ctx context.Context, id, userID int64, updatedAt string) (err error) {
 	m.log.Debugw("private file", "id", id, "user_id", userID)
 
 	cmd, err := proto.Marshal(&machine.PrivateFileCommand{
 		Id:          id,
 		UserId:      userID,
+		UpdatedAt:   updatedAt,
 	})
 	if err != nil {
 		return err
 	}
 
-	err = m.apply(ctx, machine.PrivateFileRequest, cmd)
-
-	return
+	return m.apply(ctx, machine.PrivateFileRequest, cmd)
 }
 
 func (m *Distributed) DeleteFile(ctx context.Context, id, userID int64) (err error) {
@@ -357,12 +343,10 @@ func (m *Distributed) DeleteFile(ctx context.Context, id, userID int64) (err err
 		return err
 	}
 
-	err = m.apply(ctx, machine.DeleteFileRequest, cmd)
-
-	return
+	return m.apply(ctx, machine.DeleteFileRequest, cmd)
 }
 
-func (m *Distributed) SaveTranslation(ctx context.Context, userID, messageID int64, lang string, title, text string) (err error) {
+func (m *Distributed) SaveTranslation(ctx context.Context, userID, messageID int64, lang string, title, text string, createdAt, updatedAt string) (err error) {
 	m.log.Debugw("save translation", "user_id", userID, "message_id", messageID, "lang", lang, "title", title, "text", text)
 
 	cmd, err := proto.Marshal(&machine.AppendTranslationCommand{
@@ -371,14 +355,14 @@ func (m *Distributed) SaveTranslation(ctx context.Context, userID, messageID int
 		Lang:        lang,
 		Text:        text,
 		Title:       title,
+		CreatedAt:   createdAt,
+		UpdatedAt:   updatedAt,
 	})
 	if err != nil {
 		return err
 	}
 
-	err = m.apply(ctx, machine.AppendTranslationRequest, cmd)
-
-	return
+	return m.apply(ctx, machine.AppendTranslationRequest, cmd)
 }
 
 func (m *Distributed) DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error) {
@@ -392,12 +376,10 @@ func (m *Distributed) DeleteTranslation(ctx context.Context, messageID int64, la
 		return err
 	}
 
-	err = m.apply(ctx, machine.DeleteTranslationRequest, cmd)
-
-	return
+	return m.apply(ctx, machine.DeleteTranslationRequest, cmd)
 }
 
-func (m *Distributed) UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string) (err error) {
+func (m *Distributed) UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string, updatedAt string) (err error) {
 	m.log.Debugw("update translation", "message_id", messageID, "lang", lang, "title", title, "text", text)
 
 	cmd, err := proto.Marshal(&machine.UpdateTranslationCommand{
@@ -405,14 +387,13 @@ func (m *Distributed) UpdateTranslation(ctx context.Context, messageID int64, la
 		Lang:          lang,
 		Title:         title,
 		Text:          text,
+		UpdatedAt:     updatedAt,
 	})
 	if err != nil {
 		return err
 	}
 
-	err = m.apply(ctx, machine.UpdateTranslationRequest, cmd)
-
-	return
+	return m.apply(ctx, machine.UpdateTranslationRequest, cmd)
 }
 
 func (m *Distributed) GetServers(ctx context.Context) ([]*api.Server, error) {

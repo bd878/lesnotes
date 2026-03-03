@@ -8,12 +8,16 @@ type (
 		Title              string        `json:"title"`
 		Name               string        `json:"name"`
 		Private            bool          `json:"private"`
+		CreatedAt          string        `json:"created_at"`
+		UpdatedAt          string        `json:"updated_at"`
 	}
 
 	File struct {
 		ID                 int64
 		UserID             int64
 		Name               string
+		CreatedAt          string
+		UpdatedAt          string
 	}
 
 	Thread struct {
@@ -23,6 +27,8 @@ type (
 		Name               string        `json:"name"`
 		Description        string        `json:"description"`
 		Private            bool          `json:"private"`
+		CreatedAt          string        `json:"created_at"`
+		UpdatedAt          string        `json:"updated_at"`
 	}
 
 	Translation struct {
@@ -30,6 +36,8 @@ type (
 		Lang               string        `json:"lang"`
 		Title              string        `json:"title"`
 		Text               string        `json:"text"`
+		CreatedAt          string        `json:"created_at"`
+		UpdatedAt          string        `json:"updated_at"`
 	}
 
 	SearchMessagesRequest struct {

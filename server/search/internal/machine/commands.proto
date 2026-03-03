@@ -9,14 +9,17 @@ message AppendMessageCommand {
 	string  name = 4;
 	bool    private = 5;
 	string  title = 6;
+	string  created_at = 7;
+	string  updated_at = 8;
 }
 
 message UpdateMessageCommand {
 	int64   id = 1;
 	int64   user_id = 2;
-	string  text = 3;
-	string  name = 4;
-	string  title = 5;
+	optional string  text = 3;
+	optional string  name = 4;
+	optional string  title = 5;
+	string  updated_at = 6;
 }
 
 message DeleteMessageCommand {
@@ -27,11 +30,13 @@ message DeleteMessageCommand {
 message PublishMessagesCommand {
 	repeated int64   ids = 1;
 	int64   user_id = 2;
+	string  updated_at = 3;
 }
 
 message PrivateMessagesCommand {
 	repeated int64 ids = 1;
 	int64   user_id = 2;
+	string  updated_at = 3;
 }
 
 message AppendThreadCommand {
@@ -41,13 +46,16 @@ message AppendThreadCommand {
 	string name = 4;
 	string description = 5;
 	bool   private = 6;
+	string created_at = 7;
+	string updated_at = 8;
 }
 
 message UpdateThreadCommand {
 	int64  id = 1;
 	int64  user_id = 2;
-	string name = 3;
-	string description = 4;
+	optional string name = 3;
+	optional string description = 4;
+	string updated_at = 5;
 }
 
 message DeleteThreadCommand {
@@ -64,11 +72,13 @@ message ChangeThreadParentCommand {
 message PublishThreadCommand {
 	int64  id = 1;
 	int64  user_id = 2;
+	string updated_at = 3;
 }
 
 message PrivateThreadCommand {
 	int64  id = 1;
 	int64  user_id = 2;
+	string updated_at = 3;
 }
 
 message AppendFileCommand {
@@ -79,6 +89,8 @@ message AppendFileCommand {
 	int64     size = 5;
 	string    mime = 6;
 	bool      private = 7;
+	string    created_at = 8;
+	string    updated_at = 9;
 }
 
 message DeleteFileCommand {
@@ -89,11 +101,13 @@ message DeleteFileCommand {
 message PublishFileCommand {
 	int64     id = 1;
 	int64     user_id = 2;
+	string    updated_at = 3;
 }
 
 message PrivateFileCommand {
 	int64     id = 1;
 	int64     user_id = 2;
+	string    updated_at = 3;
 }
 
 message AppendTranslationCommand {
@@ -102,6 +116,8 @@ message AppendTranslationCommand {
 	string    lang = 3;
 	string    title = 4;
 	string    text = 5;
+	string    created_at = 6;
+	string    updated_at = 7;
 }
 
 message DeleteTranslationCommand {
@@ -114,4 +130,5 @@ message UpdateTranslationCommand {
 	string    lang = 2;
 	optional string title = 3;
 	optional string text = 4;
+	string    updated_at = 5;
 }

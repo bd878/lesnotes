@@ -10,39 +10,39 @@ import (
 )
 
 type MessagesRepository interface {
-	SaveMessage(ctx context.Context, id, userID int64, name, title, text string, private bool) error
-	UpdateMessage(ctx context.Context, id, userID int64, name, title, text string) error
-	PrivateMessages(ctx context.Context, ids []int64, userID int64) error
-	PublishMessages(ctx context.Context, ids []int64, userID int64) error
+	SaveMessage(ctx context.Context, id, userID int64, name, title, text string, private bool, createdAt, updatedAt string) error
+	UpdateMessage(ctx context.Context, id, userID int64, name, title, text *string, updatedAt string) error
+	PrivateMessages(ctx context.Context, ids []int64, userID int64, updatedAt string) error
+	PublishMessages(ctx context.Context, ids []int64, userID int64, updatedAt string) error
 	DeleteMessage(ctx context.Context, id, userID int64) error
 	Dump(ctx context.Context, writer io.Writer) (err error)
 	Restore(ctx context.Context, reader io.Reader) (err error)
 }
 
 type FilesRepository interface {
-	SaveFile(ctx context.Context, id, userID int64, name, description, mime string, private bool, size int64) (err error)
+	SaveFile(ctx context.Context, id, userID int64, name, description, mime string, private bool, size int64, createdAt, updatedAt string) (err error)
 	DeleteFile(ctx context.Context, id, userID int64) (err error)
-	PublishFile(ctx context.Context, id, userID int64) (err error)
-	PrivateFile(ctx context.Context, id, userID int64) (err error)
+	PublishFile(ctx context.Context, id, userID int64, updatedAt string) (err error)
+	PrivateFile(ctx context.Context, id, userID int64, updatedAt string) (err error)
 	Dump(ctx context.Context, writer io.Writer) (err error)
 	Restore(ctx context.Context, reader io.Reader) (err error)
 }
 
 type ThreadsRepository interface {
-	SaveThread(ctx context.Context, id, userID, parentID int64, name, description string, private bool) error
-	UpdateThread(ctx context.Context, id, userID int64, name, description string) error
+	SaveThread(ctx context.Context, id, userID, parentID int64, name, description string, private bool, createdAt, updatedAt string) error
+	UpdateThread(ctx context.Context, id, userID int64, name, description *string, updatedAt string) error
 	DeleteThread(ctx context.Context, id, userID int64) error
 	ChangeThreadParent(ctx context.Context, id, userID, parentID int64) error
-	PublishThread(ctx context.Context, id, userID int64) error
-	PrivateThread(ctx context.Context, id, userID int64) error
+	PublishThread(ctx context.Context, id, userID int64, updatedAt string) error
+	PrivateThread(ctx context.Context, id, userID int64, updatedAt string) error
 	Dump(ctx context.Context, writer io.Writer) (err error)
 	Restore(ctx context.Context, reader io.Reader) (err error)
 }
 
 type TranslationsRepository interface {
-	SaveTranslation(ctx context.Context, userID, messageID int64, lang, title, text string) error
+	SaveTranslation(ctx context.Context, userID, messageID int64, lang, title, text string, createdAt, updatedAt string) error
 	DeleteTranslation(ctx context.Context, messageID int64, lang string) error
-	UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string) error
+	UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string, updatedAt string) error
 	Dump(ctx context.Context, writer io.Writer) (err error)
 	Restore(ctx context.Context, reader io.Reader) (err error)
 }
@@ -57,7 +57,8 @@ type Machine struct {
 	translationsRepo   TranslationsRepository
 }
 
-func New(messagesRepo MessagesRepository, filesRepo FilesRepository, threadsRepo ThreadsRepository, translationsRepo TranslationsRepository, log *logger.Logger) *Machine {
+func New(messagesRepo MessagesRepository, filesRepo FilesRepository, threadsRepo ThreadsRepository,
+	translationsRepo TranslationsRepository, log *logger.Logger) *Machine {
 	return &Machine{
 		log:                 log,
 		messagesRepo:        messagesRepo,
@@ -117,14 +118,14 @@ func (f *Machine) applyAppendMessage(raw []byte) interface{} {
 	var cmd AppendMessageCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.messagesRepo.SaveMessage(context.Background(), cmd.Id, cmd.UserId, cmd.Name, cmd.Title, cmd.Text, cmd.Private)
+	return f.messagesRepo.SaveMessage(context.Background(), cmd.Id, cmd.UserId, cmd.Name, cmd.Title, cmd.Text, cmd.Private, cmd.CreatedAt, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyUpdateMessage(raw []byte) interface{} {
 	var cmd UpdateMessageCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.messagesRepo.UpdateMessage(context.Background(), cmd.Id, cmd.UserId, cmd.Name, cmd.Title, cmd.Text)
+	return f.messagesRepo.UpdateMessage(context.Background(), cmd.Id, cmd.UserId, cmd.Name, cmd.Title, cmd.Text, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyDeleteMessage(raw []byte) interface{} {
@@ -138,28 +139,28 @@ func (f *Machine) applyPublishMessages(raw []byte) interface{} {
 	var cmd PublishMessagesCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.messagesRepo.PublishMessages(context.Background(), cmd.Ids, cmd.UserId)
+	return f.messagesRepo.PublishMessages(context.Background(), cmd.Ids, cmd.UserId, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyPrivateMessages(raw []byte) interface{} {
 	var cmd PrivateMessagesCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.messagesRepo.PrivateMessages(context.Background(), cmd.Ids, cmd.UserId)
+	return f.messagesRepo.PrivateMessages(context.Background(), cmd.Ids, cmd.UserId, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyAppendThread(raw []byte) interface{} {
 	var cmd AppendThreadCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.threadsRepo.SaveThread(context.Background(), cmd.Id, cmd.UserId, cmd.ParentId, cmd.Name, cmd.Description, cmd.Private)
+	return f.threadsRepo.SaveThread(context.Background(), cmd.Id, cmd.UserId, cmd.ParentId, cmd.Name, cmd.Description, cmd.Private, cmd.CreatedAt, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyUpdateThread(raw []byte) interface{} {
 	var cmd UpdateThreadCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.threadsRepo.UpdateThread(context.Background(), cmd.Id, cmd.UserId, cmd.Name, cmd.Description)
+	return f.threadsRepo.UpdateThread(context.Background(), cmd.Id, cmd.UserId, cmd.Name, cmd.Description, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyDeleteThread(raw []byte) interface{} {
@@ -180,21 +181,21 @@ func (f *Machine) applyPublishThread(raw []byte) interface{} {
 	var cmd PublishThreadCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.threadsRepo.PublishThread(context.Background(), cmd.Id, cmd.UserId)
+	return f.threadsRepo.PublishThread(context.Background(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyPrivateThread(raw []byte) interface{} {
 	var cmd PrivateThreadCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.threadsRepo.PrivateThread(context.Background(), cmd.Id, cmd.UserId)
+	return f.threadsRepo.PrivateThread(context.Background(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyAppendFile(raw []byte) interface{} {
 	var cmd AppendFileCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.filesRepo.SaveFile(context.Background(), cmd.Id, cmd.UserId, cmd.Name, cmd.Description, cmd.Mime, cmd.Private, cmd.Size)
+	return f.filesRepo.SaveFile(context.Background(), cmd.Id, cmd.UserId, cmd.Name, cmd.Description, cmd.Mime, cmd.Private, cmd.Size, cmd.CreatedAt, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyDeleteFile(raw []byte) interface{} {
@@ -208,21 +209,21 @@ func (f *Machine) applyPublishFile(raw []byte) interface{} {
 	var cmd PublishFileCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.filesRepo.PublishFile(context.Background(), cmd.Id, cmd.UserId)
+	return f.filesRepo.PublishFile(context.Background(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyPrivateFile(raw []byte) interface{} {
 	var cmd PrivateFileCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.filesRepo.PrivateFile(context.Background(), cmd.Id, cmd.UserId)
+	return f.filesRepo.PrivateFile(context.Background(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyAppendTranslation(raw []byte) interface{} {
 	var cmd AppendTranslationCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.translationsRepo.SaveTranslation(context.Background(), cmd.UserId, cmd.MessageId, cmd.Lang, cmd.Title, cmd.Text)
+	return f.translationsRepo.SaveTranslation(context.Background(), cmd.UserId, cmd.MessageId, cmd.Lang, cmd.Title, cmd.Text, cmd.CreatedAt, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyDeleteTranslation(raw []byte) interface{} {
@@ -236,5 +237,5 @@ func (f *Machine) applyUpdateTranslation(raw []byte) interface{} {
 	var cmd UpdateTranslationCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.translationsRepo.UpdateTranslation(context.Background(), cmd.MessageId, cmd.Lang, cmd.Title, cmd.Text)
+	return f.translationsRepo.UpdateTranslation(context.Background(), cmd.MessageId, cmd.Lang, cmd.Title, cmd.Text, cmd.UpdatedAt)
 }

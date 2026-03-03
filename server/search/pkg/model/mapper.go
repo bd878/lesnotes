@@ -12,6 +12,8 @@ func MessageFromProto(proto *api.SearchMessage) *Message {
 		Title:          proto.Title,
 		Private:        proto.Private,
 		Name:           proto.Name,
+		CreatedAt:      proto.CreatedAt,
+		UpdatedAt:      proto.UpdatedAt,
 	}
 }
 
@@ -23,6 +25,8 @@ func MessageToProto(msg *Message) *api.SearchMessage {
 		Title:          msg.Title,
 		Private:        msg.Private,
 		Name:           msg.Name,
+		CreatedAt:      msg.CreatedAt,
+		UpdatedAt:      msg.UpdatedAt,
 	}
 }
 
