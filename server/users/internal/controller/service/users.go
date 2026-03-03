@@ -80,7 +80,7 @@ func (s *Controller) setupConnection() (err error) {
 func (s *Controller) isConnFailed() bool {
 	state := s.conn.GetState()
 	if state == connectivity.Shutdown || state == connectivity.TransientFailure {
-		logger.Debugln("connection failed")
+		logger.Debugw("connection failed", "state", state)
 		return true
 	}
 	return false
@@ -278,6 +278,7 @@ func (s *Controller) DeleteUser(ctx context.Context, id int64) (err error) {
 		return
 	}
 
+	// TODO: emit event, drop gateway
 	err = s.messages.DeleteUserMessages(ctx, id)
 	if err != nil {
 		return

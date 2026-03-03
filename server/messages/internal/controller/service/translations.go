@@ -64,7 +64,7 @@ func (s *TranslationsController) setupConnection() (err error) {
 func (s *TranslationsController) isConnFailed() bool {
 	state := s.conn.GetState()
 	if state == connectivity.Shutdown || state == connectivity.TransientFailure {
-		logger.Debugln("connection failed")
+		logger.Debugw("connection failed", "state", state)
 		return true
 	}
 	return false

@@ -10,7 +10,7 @@ import (
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/logger"
-	files "github.com/bd878/gallery/server/files/pkg/model"
+	"github.com/bd878/gallery/server/files/pkg/model"
 )
 
 type Gateway struct {
@@ -37,10 +37,14 @@ func (g *Gateway) setupConnection() {
 
 func (g *Gateway) isConnFailed() bool {
 	state := g.conn.GetState()
-	return state == connectivity.Shutdown || state == connectivity.TransientFailure
+	if state == connectivity.Shutdown || state == connectivity.TransientFailure {
+		logger.Debugw("files conn failed", "state", state)
+		return true
+	}
+	return false
 }
 
-func (g *Gateway) ReadBatchFiles(ctx context.Context, fileIDs []int64, userID int64) (result map[int64]*files.File, err error) {
+func (g *Gateway) ReadBatchFiles(ctx context.Context, fileIDs []int64, userID int64) (result map[int64]*model.File, err error) {
 	if g.isConnFailed() {
 		logger.Info("conn failed, setup new connection")
 		g.setupConnection()
@@ -56,12 +60,12 @@ func (g *Gateway) ReadBatchFiles(ctx context.Context, fileIDs []int64, userID in
 		return nil, err
 	}
 
-	result = files.MapFilesDictFromProto(files.FileFromProto, batch.Files)
+	result = model.MapFilesDictFromProto(model.FileFromProto, batch.Files)
 
 	return
 }
 
-func (g *Gateway) ReadFile(ctx context.Context, userID, fileID int64) (resp *files.File, err error) {
+func (g *Gateway) ReadFile(ctx context.Context, userID, fileID int64) (resp *model.File, err error) {
 	logger.Debugw("read file", "user_id", userID, "file_id", fileID)
 
 	file, err := g.client.ReadFile(ctx, &api.ReadFileRequest{
@@ -72,7 +76,7 @@ func (g *Gateway) ReadFile(ctx context.Context, userID, fileID int64) (resp *fil
 		return nil, err
 	}
 
-	resp = files.FileFromProto(file)
+	resp = model.FileFromProto(file)
 
 	return
 }

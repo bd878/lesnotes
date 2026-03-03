@@ -9,8 +9,9 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/sessions/pkg/loadbalance"
-	sessionsmodel "github.com/bd878/gallery/server/sessions/pkg/model"
+	"github.com/bd878/gallery/server/sessions/pkg/model"
 )
 
 type Gateway struct {
@@ -46,10 +47,14 @@ func (g *Gateway) setupConnection() error {
 
 func (g *Gateway) isConnFailed() bool {
 	state := g.conn.GetState()
-	return state == connectivity.Shutdown || state == connectivity.TransientFailure
+	if state == connectivity.Shutdown || state == connectivity.TransientFailure {
+		logger.Debugw("sessions connection failed", "state", state)
+		return true
+	}
+	return false
 }
 
-func (g *Gateway) GetSession(ctx context.Context, token string) (session *sessionsmodel.Session, err error) {
+func (g *Gateway) GetSession(ctx context.Context, token string) (session *model.Session, err error) {
 	if g.isConnFailed() {
 		if err = g.setupConnection(); err != nil {
 			return
@@ -63,12 +68,12 @@ func (g *Gateway) GetSession(ctx context.Context, token string) (session *sessio
 		return nil, err
 	}
 
-	session = sessionsmodel.SessionFromProto(resp)
+	session = model.SessionFromProto(resp)
 
 	return
 }
 
-func (g *Gateway) ListUserSessions(ctx context.Context, userID int64) (sessions []*sessionsmodel.Session, err error) {
+func (g *Gateway) ListUserSessions(ctx context.Context, userID int64) (sessions []*model.Session, err error) {
 	if g.isConnFailed() {
 		if err = g.setupConnection(); err != nil {
 			return
@@ -82,12 +87,12 @@ func (g *Gateway) ListUserSessions(ctx context.Context, userID int64) (sessions 
 		return nil, err
 	}
 
-	sessions = sessionsmodel.MapSessionsFromProto(sessionsmodel.SessionFromProto, resp.Sessions)
+	sessions = model.MapSessionsFromProto(model.SessionFromProto, resp.Sessions)
 
 	return
 }
 
-func (g *Gateway) CreateSession(ctx context.Context, userID int64) (session *sessionsmodel.Session, err error) {
+func (g *Gateway) CreateSession(ctx context.Context, userID int64) (session *model.Session, err error) {
 	if g.isConnFailed() {
 		if err = g.setupConnection(); err != nil {
 			return
@@ -101,7 +106,7 @@ func (g *Gateway) CreateSession(ctx context.Context, userID int64) (session *ses
 		return nil, err
 	}
 
-	session = sessionsmodel.SessionFromProto(resp)
+	session = model.SessionFromProto(resp)
 
 	return
 }

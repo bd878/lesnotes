@@ -8,8 +8,9 @@ import (
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/users/pkg/loadbalance"
-	usersmodel "github.com/bd878/gallery/server/users/pkg/model"
+	"github.com/bd878/gallery/server/users/pkg/model"
 )
 
 type Gateway struct {
@@ -44,10 +45,14 @@ func (g *Gateway) setupConnection() error {
 
 func (g *Gateway) isConnFailed() bool {
 	state := g.conn.GetState()
-	return state == connectivity.Shutdown || state == connectivity.TransientFailure
+	if state == connectivity.Shutdown || state == connectivity.TransientFailure {
+		logger.Debugw("users gateway conn failed", "state", state)
+		return true
+	}
+	return false
 }
 
-func (g *Gateway) GetUser(ctx context.Context, userID int64) (*usersmodel.User, error) {
+func (g *Gateway) GetUser(ctx context.Context, userID int64) (*model.User, error) {
 	if g.isConnFailed() {
 		if err := g.setupConnection(); err != nil {
 			return nil, err
@@ -61,5 +66,5 @@ func (g *Gateway) GetUser(ctx context.Context, userID int64) (*usersmodel.User, 
 		return nil, err
 	}
 
-	return usersmodel.UserFromProto(resp), nil
+	return model.UserFromProto(resp), nil
 }

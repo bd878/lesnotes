@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/messages/pkg/loadbalance"
 )
 
@@ -43,7 +44,11 @@ func (g *Gateway) setupConnection() {
 
 func (g *Gateway) isConnFailed() bool {
 	state := g.conn.GetState()
-	return state == connectivity.Shutdown || state == connectivity.TransientFailure
+	if state == connectivity.Shutdown || state == connectivity.TransientFailure {
+		logger.Debugw("messages gateway conn failed", "state", state)
+		return true
+	}
+	return false
 }
 
 func (g *Gateway) DeleteUserMessages(ctx context.Context, userID int64) (err error) {

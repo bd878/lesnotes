@@ -11,7 +11,7 @@ import (
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/threads/pkg/loadbalance"
-	threads "github.com/bd878/gallery/server/threads/pkg/model"
+	"github.com/bd878/gallery/server/threads/pkg/model"
 )
 
 type Gateway struct {
@@ -49,7 +49,11 @@ func (g *Gateway) setupConnection() error {
 
 func (g *Gateway) isConnFailed() bool {
 	state := g.conn.GetState()
-	return state == connectivity.Shutdown || state == connectivity.TransientFailure
+	if state == connectivity.Shutdown || state == connectivity.TransientFailure {
+		logger.Debugw("threads conn failed", "state", state)
+		return true
+	}
+	return false
 }
 
 func (g *Gateway) CreateThread(ctx context.Context, id, userID, parentID int64, name string, private bool) (err error) {
@@ -106,7 +110,7 @@ func (g *Gateway) UpdateThread(ctx context.Context, id, userID int64) (err error
 	return
 }
 
-func (g *Gateway) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32) (list []*threads.Thread, isLastPage bool, err error) {
+func (g *Gateway) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32) (list []*model.Thread, isLastPage bool, err error) {
 	if g.isConnFailed() {
 		if err = g.setupConnection(); err != nil {
 			return
@@ -126,7 +130,7 @@ func (g *Gateway) ListThreads(ctx context.Context, userID, parentID int64, limit
 	}
 
 	isLastPage = resp.IsLastPage
-	list = threads.MapThreadsFromProto(threads.ThreadFromProto, resp.List)
+	list = model.MapThreadsFromProto(model.ThreadFromProto, resp.List)
 
 	return
 }
@@ -175,7 +179,7 @@ func (g *Gateway) ResolvePath(ctx context.Context, userID, id int64) (path []int
 	return
 }
 
-func (g *Gateway) ReadThread(ctx context.Context, userID, id int64) (thread *threads.Thread, err error) {
+func (g *Gateway) ReadThread(ctx context.Context, userID, id int64) (thread *model.Thread, err error) {
 	if g.isConnFailed() {
 		if err = g.setupConnection(); err != nil {
 			return
@@ -192,7 +196,7 @@ func (g *Gateway) ReadThread(ctx context.Context, userID, id int64) (thread *thr
 		return nil, err
 	}
 
-	thread = threads.ThreadFromProto(resp)
+	thread = model.ThreadFromProto(resp)
 
 	return
 }

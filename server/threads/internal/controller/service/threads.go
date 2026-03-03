@@ -11,7 +11,7 @@ import (
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/threads/pkg/loadbalance"
-	threads "github.com/bd878/gallery/server/threads/pkg/model"
+	"github.com/bd878/gallery/server/threads/pkg/model"
 )
 
 type Config struct {
@@ -62,13 +62,13 @@ func (s *Controller) setupConnection() (err error) {
 func (s *Controller) isConnFailed() bool {
 	state := s.conn.GetState()
 	if state == connectivity.Shutdown || state == connectivity.TransientFailure {
-		logger.Debugln("connection failed")
+		logger.Debugw("connection failed", "state", state)
 		return true
 	}
 	return false
 }
 
-func (s *Controller) ReadThread(ctx context.Context, id, userID int64, name string) (thread *threads.Thread, err error) {
+func (s *Controller) ReadThread(ctx context.Context, id, userID int64, name string) (thread *model.Thread, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -82,12 +82,12 @@ func (s *Controller) ReadThread(ctx context.Context, id, userID int64, name stri
 		return nil, err
 	}
 
-	thread = threads.ThreadFromProto(resp)
+	thread = model.ThreadFromProto(resp)
 
 	return
 }
 
-func (s *Controller) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (list []*threads.Thread, isLastPage bool, err error) {
+func (s *Controller) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (list []*model.Thread, isLastPage bool, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -107,7 +107,7 @@ func (s *Controller) ListThreads(ctx context.Context, userID, parentID int64, li
 		return nil, false, err
 	}
 
-	return threads.MapThreadsFromProto(threads.ThreadFromProto, resp.List), resp.IsLastPage, err
+	return model.MapThreadsFromProto(model.ThreadFromProto, resp.List), resp.IsLastPage, err
 }
 
 func (s *Controller) ResolveThread(ctx context.Context, id, userID int64) (path []int64, err error) {

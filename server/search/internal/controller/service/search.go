@@ -11,7 +11,7 @@ import (
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/search/pkg/loadbalance"
-	searchmodel "github.com/bd878/gallery/server/search/pkg/model"
+	"github.com/bd878/gallery/server/search/pkg/model"
 )
 
 type Config struct {
@@ -62,13 +62,13 @@ func (s *Controller) setupConnection() (err error) {
 func (s *Controller) isConnFailed() bool {
 	state := s.conn.GetState()
 	if state == connectivity.Shutdown || state == connectivity.TransientFailure {
-		logger.Debugln("connection failed")
+		logger.Debugw("connection failed", "state", state)
 		return true
 	}
 	return false
 }
 
-func (s *Controller) SearchMessages(ctx context.Context, userID int64, substr string, threadID int64, public int32) (list []*searchmodel.Message, err error) {
+func (s *Controller) SearchMessages(ctx context.Context, userID int64, substr string, threadID int64, public int32) (list []*model.Message, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -87,7 +87,7 @@ func (s *Controller) SearchMessages(ctx context.Context, userID int64, substr st
 		return nil, err
 	}
 
-	list = searchmodel.MapMessagesFromProto(searchmodel.MessageFromProto, res.List)
+	list = model.MapMessagesFromProto(model.MessageFromProto, res.List)
 
 	logger.Debugw("found messages", "count", len(list))
 

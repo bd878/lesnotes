@@ -49,7 +49,11 @@ func (f *Files) setupConnection() error {
 
 func (f *Files) isConnFailed() bool {
 	state := f.conn.GetState()
-	return state == connectivity.Shutdown || state == connectivity.TransientFailure
+	if state == connectivity.Shutdown || state == connectivity.TransientFailure {
+		logger.Debugw("conn failed", "state", state)
+		return true
+	}
+	return false
 }
 
 func (f *Files) Close() {

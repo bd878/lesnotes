@@ -8,8 +8,9 @@ import (
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/sessions/pkg/loadbalance"
-	sessionsmodel "github.com/bd878/gallery/server/sessions/pkg/model"
+	"github.com/bd878/gallery/server/sessions/pkg/model"
 )
 
 type Gateway struct {
@@ -45,10 +46,14 @@ func (g *Gateway) setupConnection() error {
 
 func (g *Gateway) isConnFailed() bool {
 	state := g.conn.GetState()
-	return state == connectivity.Shutdown || state == connectivity.TransientFailure
+	if state == connectivity.Shutdown || state == connectivity.TransientFailure {
+		logger.Debugw("gateway conn failed", "state", state)
+		return true
+	}
+	return false
 }
 
-func (g *Gateway) GetSession(ctx context.Context, token string) (*sessionsmodel.Session, error) {
+func (g *Gateway) GetSession(ctx context.Context, token string) (*model.Session, error) {
 	if g.isConnFailed() {
 		if err := g.setupConnection(); err != nil {
 			return nil, err
@@ -59,5 +64,5 @@ func (g *Gateway) GetSession(ctx context.Context, token string) (*sessionsmodel.
 		return nil, err
 	}
 
-	return sessionsmodel.SessionFromProto(resp), nil
+	return model.SessionFromProto(resp), nil
 }
