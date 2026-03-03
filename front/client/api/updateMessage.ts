@@ -2,30 +2,38 @@ import api from './api';
 import * as is from '../third_party/is'
 import models from './models';
 
-async function updateMessage(id: number, text?: string, title?: string, name?: string, fileIDs?: number[], isPublic?: boolean) {
+async function updateMessage(id: number, text: string, title: string, name?: string, fileIDs?: number[], isPublic?: boolean) {
 	let result = {
 		error:   models.error(),
 	}
 
 	const form = new FormData()
 
-	if (text)
+	if (text) {
 		form.append("text", text);
+	}
 
-	if (id)
+	if (id) {
 		form.append("id", `${id}`);
+	}
 
-	if (title)
+	if (title) {
 		form.append("title", title);
+	}
 
-	if (name)
+	if (name) {
 		form.append("name", name);
+	}
 
-	if (fileIDs)
+	if (fileIDs) {
 		form.append("file_ids", JSON.stringify(fileIDs))
+	}
 
-	if (is.notUndef(isPublic))
+	if (is.notUndef(isPublic)) {
 		form.append("public", `${isPublic}`)
+	}
+
+	console.log("updateMessage", "id", id, "text", text, "title", title, "name", name, "file_ids", fileIDs, "is_public", isPublic)
 
 	try {
 		const [_1, error] = await api("/messages/v1/update", {

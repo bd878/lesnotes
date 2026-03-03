@@ -7,6 +7,8 @@ async function sendMessageJson(token: string, text: string, title: string, fileI
 		message: models.message(),
 	}
 
+	console.log("sendMessageJson", "token", token, "text", text, "title", title, "file_ids", fileIDs, "thread", thread, "is_private", isPrivate)
+
 	try {
 		const [response, error] = await api("/messages/v2/send", {
 			method: "POST",

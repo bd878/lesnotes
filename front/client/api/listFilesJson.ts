@@ -14,6 +14,8 @@ async function listFilesJson(token: string, user: number, limit: number, offset:
 		paging:      models.paging(),
 	}
 
+	console.log("listFilesJson", "token", token, "user", user, "limit", limit, "offset", offset)
+
 	try {
 		const [response, error] = await api('/files/v2/list', {
 			method: "POST",

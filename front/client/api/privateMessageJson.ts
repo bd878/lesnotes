@@ -6,6 +6,8 @@ async function privateMessageJson(token: string, id: number) {
 		error:  models.error(),
 	}
 
+	console.log("privateMessageJson", "token", token, "id", id)
+
 	try {
 		const [_1, error] = await api("/messages/v2/private", {
 			method: "PUT",

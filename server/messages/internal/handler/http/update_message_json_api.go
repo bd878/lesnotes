@@ -66,19 +66,5 @@ func (h *Handler) UpdateMessageJsonAPI(w http.ResponseWriter, req *http.Request)
 		return nil
 	}
 
-	var text, title, name string
-
-	if request.Text != nil {
-		text = *request.Text
-	}
-
-	if request.Title != nil {
-		title = *request.Title
-	}
-
-	if request.Name != nil {
-		name = *request.Name
-	}
-
-	return h.updateMessage(req.Context(), w, request.MessageID, user, text, title, name, request.FileIDs)
+	return h.updateMessage(req.Context(), w, request.MessageID, user, request.Text, request.Title, request.Name, request.FileIDs)
 }

@@ -6,6 +6,8 @@ async function deleteFileJson(token: string, id: number) {
 		error:  models.error(),
 	}
 
+	console.log("deleteFileJson", "token", token, "id", id)
+
 	try {
 		const [_1, error] = await api("/files/v2/delete", {
 			method: "DELETE",

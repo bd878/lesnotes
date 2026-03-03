@@ -7,6 +7,8 @@ async function privateThread(id: number) {
 		id:     0,
 	}
 
+	console.log("privateThread", "id", id)
+
 	try {
 		const [response, error] = await api("/threads/v1/private", {
 			queryParams: {

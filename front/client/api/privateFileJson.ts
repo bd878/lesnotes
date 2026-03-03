@@ -6,6 +6,8 @@ async function privateFileJson(token: string, id: number) {
 		error:  models.error(),
 	}
 
+	console.log("privateFileJson", "token", token, "id", id)
+
 	try {
 		const [_1, error] = await api("/files/v2/private", {
 			method: "POST",

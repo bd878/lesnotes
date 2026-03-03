@@ -7,6 +7,8 @@ async function publishMessages(ids: number[] = []) {
 		ids:    [],
 	}
 
+	console.log("publishMessages", "ids", ids)
+
 	try {
 		const [response, error] = await api("/messages/v1/publish", {
 			queryParams: {

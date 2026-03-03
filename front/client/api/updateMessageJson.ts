@@ -2,10 +2,12 @@ import api from './api';
 import * as is from '../third_party/is'
 import models from './models';
 
-async function updateMessageJson(token: string, id: number, text?: string, title?: string, name?: string, fileIDs?: number[]) {
+async function updateMessageJson(token: string, id: number, text: string, title: string, name?: string, fileIDs?: number[]) {
 	let result = {
 		error:   models.error(),
 	}
+
+	console.log("updateMessageJson", "token", token, "id", id, "text", text, "title", title, "name", name, "file_ids", fileIDs)
 
 	try {
 		const [_1, error] = await api("/messages/v2/update", {

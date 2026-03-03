@@ -6,6 +6,8 @@ async function deleteTranslationJson(token: string, message: number, lang: strin
 		error: models.error(),
 	}
 
+	console.log("deleteTranslationJson", "token", token, "message", message, "lang", lang)
+
 	try {
 		const [_1, error] = await api("/translations/v2/delete", {
 			method: "DELETE",

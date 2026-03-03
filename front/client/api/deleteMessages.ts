@@ -7,6 +7,8 @@ async function deleteMessages(ids: number[] = []) {
 		ids:    [],
 	}
 
+	console.log("deleteMessages", "ids", ids)
+
 	try {
 		const [response, error] = await api("/messages/v1/delete", {
 			queryParams: {

@@ -7,6 +7,8 @@ async function publishThread(id: number) {
 		id:     0,
 	}
 
+	console.log("publishThread", "id", id)
+
 	try {
 		const [response, error] = await api("/threads/v1/publish", {
 			queryParams: {

@@ -7,6 +7,8 @@ async function privateMessages(ids: number[] = []) {
 		ids:    [],
 	}
 
+	console.log("privateMessages", "ids", ids)
+
 	try {
 		const [response, error] = await api("/messages/v1/private", {
 			queryParams: {

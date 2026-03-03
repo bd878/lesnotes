@@ -6,6 +6,8 @@ async function publishFileJson(token: string, id: number) {
 		error:  models.error(),
 	}
 
+	console.log("publishFileJson", "token", token, "id", id)
+
 	try {
 		const [_1, error] = await api("/files/v2/publish", {
 			method: "POST",

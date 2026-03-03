@@ -7,6 +7,8 @@ async function publishThreadJson(token: string, id: number) {
 		id:     0,
 	}
 
+	console.log("publish thread json", "token", token, "id", id)
+
 	try {
 		const [response, error] = await api("/threads/v2/publish", {
 			method: "PUT",

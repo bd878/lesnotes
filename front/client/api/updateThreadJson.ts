@@ -2,7 +2,7 @@ import api from './api';
 import * as is from '../third_party/is'
 import models from './models';
 
-async function updateThreadJson(token: string, id: number, description?: string, name?: string) {
+async function updateThreadJson(token: string, id: number, description: string, name?: string) {
 	let result = {
 		error:   models.error(),
 	}

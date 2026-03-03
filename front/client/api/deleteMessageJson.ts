@@ -6,6 +6,8 @@ async function deleteMessagesJson(token: string, id: number) {
 		error:  models.error(),
 	}
 
+	console.log("deleteMessagesJson", "token", token, "id", id)
+
 	try {
 		const [_1, error] = await api("/messages/v2/delete", {
 			method: "DELETE",

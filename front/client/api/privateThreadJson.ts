@@ -7,6 +7,8 @@ async function privateThreadJson(token: string, id: number) {
 		id:     0,
 	}
 
+	console.log("privateThreadJson", "token", token, "id", id)
+
 	try {
 		const [response, error] = await api("/threads/v2/private", {
 			method: "PUT",

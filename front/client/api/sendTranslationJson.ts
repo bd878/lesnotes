@@ -7,6 +7,8 @@ async function sendTranslationJson(token: string, message: number, lang: string,
 		translation: models.translation(),
 	}
 
+	console.log("sendTranslationJson", "token", token, "message", message, "lang", lang, "text", text, "title", title)
+
 	try {
 		const [response, error] = await api("/translations/v2/send", {
 			method: "POST",

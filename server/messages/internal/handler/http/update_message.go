@@ -80,10 +80,10 @@ func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) (err e
 		}
 	}
 
-	return h.updateMessage(req.Context(), w, id, user, text, title, name, fileIDs)
+	return h.updateMessage(req.Context(), w, id, user, &text, &title, &name, fileIDs)
 }
 
-func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, messageID int64, user *users.User, text, title, name string, fileIDs []int64) (err error) {
+func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, messageID int64, user *users.User, text, title, name *string, fileIDs []int64) (err error) {
 	if user.ID == users.PublicUserID {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -97,7 +97,7 @@ func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, mess
 		return
 	}
 
-	if text == "" && title == "" && len(fileIDs) == 0 {
+	if text == nil && title == nil && len(fileIDs) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
@@ -110,21 +110,7 @@ func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, mess
 		return nil
 	}
 
-	var textParam, titleParam, nameParam *string
-
-	if text != "" {
-		textParam = &text
-	}
-
-	if title != "" {
-		titleParam = &title
-	}
-
-	if name != "" {
-		nameParam = &name
-	}
-
-	err = h.controller.UpdateMessage(ctx, messageID, textParam, titleParam, nameParam, fileIDs, user.ID)
+	err = h.controller.UpdateMessage(ctx, messageID, text, title, name, fileIDs, user.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
