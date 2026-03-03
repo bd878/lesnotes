@@ -38,7 +38,7 @@ func (g *Gateway) setupConnection() {
 func (g *Gateway) isConnFailed() bool {
 	state := g.conn.GetState()
 	if state == connectivity.Shutdown || state == connectivity.TransientFailure {
-		logger.Debugw("files conn failed", "state", state)
+		logger.Debugw("files conn failed", "state", state.String())
 		return true
 	}
 	return false
