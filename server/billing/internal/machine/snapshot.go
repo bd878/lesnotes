@@ -45,7 +45,7 @@ func (f *Machine) Snapshot() (raft.FSMSnapshot, error) {
 	paymentsBuf := bufio.NewWriter(s.paymentsFile)
 	defer paymentsBuf.Flush()
 
-	err = f.paymentsRepo.Dump(context.Background(), paymentsBuf)
+	err = f.paymentsRepo.Dump(context.TODO(), paymentsBuf)
 	if err != nil {
 		logger.Errorw("failed to dump payments repo", "error", err)
 		return nil, err
@@ -54,7 +54,7 @@ func (f *Machine) Snapshot() (raft.FSMSnapshot, error) {
 	invoicesBuf := bufio.NewWriter(s.invoicesFile)
 	defer invoicesBuf.Flush()
 
-	err = f.invoicesRepo.Dump(context.Background(), invoicesBuf)
+	err = f.invoicesRepo.Dump(context.TODO(), invoicesBuf)
 	if err != nil {
 		logger.Errorw("failed to dump invoices repo", "error", err)
 		return nil, err
@@ -78,12 +78,12 @@ func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 		}
 
 		if strings.Contains(hdr.Name, "invoices") {
-			err = f.invoicesRepo.Restore(context.Background(), tr)
+			err = f.invoicesRepo.Restore(context.TODO(), tr)
 			if err != nil {
 				return err
 			}
 		} else if strings.Contains(hdr.Name, "payments") {
-			err = f.paymentsRepo.Restore(context.Background(), tr)
+			err = f.paymentsRepo.Restore(context.TODO(), tr)
 			if err != nil {
 				return err
 			}

@@ -73,7 +73,7 @@ func (f *Machine) applyAppendInvoice(raw []byte) interface{} {
 	var cmd AppendInvoiceCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.invoicesRepo.SaveInvoice(context.Background(), cmd.Id, cmd.UserId, cmd.Currency, cmd.Status, cmd.Total,
+	return f.invoicesRepo.SaveInvoice(context.TODO(), cmd.Id, cmd.UserId, cmd.Currency, cmd.Status, cmd.Total,
 		cmd.Metadata, cmd.CreatedAt, cmd.UpdatedAt)
 }
 
@@ -81,7 +81,7 @@ func (f *Machine) applyAppendPayment(raw []byte) interface{} {
 	var cmd AppendPaymentCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.paymentsRepo.SavePayment(context.Background(), cmd.Id, cmd.UserId, cmd.InvoiceId,
+	return f.paymentsRepo.SavePayment(context.TODO(), cmd.Id, cmd.UserId, cmd.InvoiceId,
 		cmd.Currency, cmd.Status, cmd.Total, cmd.Metadata, cmd.CreatedAt, cmd.UpdatedAt)
 }
 
@@ -89,33 +89,33 @@ func (f *Machine) applyProceedPayment(raw []byte) interface{} {
 	var cmd ProceedPaymentCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.paymentsRepo.ProceedPayment(context.Background(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
+	return f.paymentsRepo.ProceedPayment(context.TODO(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyPayInvoice(raw []byte) interface{} {
 	var cmd PayInvoiceCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.invoicesRepo.PayInvoice(context.Background(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
+	return f.invoicesRepo.PayInvoice(context.TODO(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyCancelPayment(raw []byte) interface{} {
 	var cmd CancelPaymentCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.paymentsRepo.CancelPayment(context.Background(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
+	return f.paymentsRepo.CancelPayment(context.TODO(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyCancelInvoice(raw []byte) interface{} {
 	var cmd CancelInvoiceCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.invoicesRepo.CancelInvoice(context.Background(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
+	return f.invoicesRepo.CancelInvoice(context.TODO(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyRefundPayment(raw []byte) interface{} {
 	var cmd RefundPaymentCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.paymentsRepo.RefundPayment(context.Background(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
+	return f.paymentsRepo.RefundPayment(context.TODO(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
 }

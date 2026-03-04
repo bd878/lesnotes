@@ -9,6 +9,7 @@ import (
 
 	"google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/balancer/base"
+	"github.com/bd878/gallery/server/internal/logger"
 )
 
 var _ base.PickerBuilder = (*Picker)(nil)
@@ -31,12 +32,23 @@ func (p *Picker) Build(buildInfo base.PickerBuildInfo) balancer.Picker {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
+	logger.Debugln("build picker")
+
+	p.leader = nil
+
 	var followers []*conn
 	for sc, scInfo := range buildInfo.ReadySCs {
+		logger.Debugw("scinfo", "address", scInfo.Address.Addr, "is_leader", scInfo.Address.Attributes.Value("is_leader"))
+
 		isLeader := scInfo.
 			Address.
 			Attributes.
 			Value("is_leader").(bool)
+
+		sc.RegisterHealthListener(func (subConn balancer.SubConnState) {
+			fmt.Fprintln(os.Stdout, "address", scInfo.Address.Addr,
+				"ConnectivityState", subConn.ConnectivityState.String(), "ConnectionError", subConn.ConnectionError)
+		})
 
 		if isLeader {
 			p.leader = &conn{SubConn: sc, Address: scInfo.Address.Addr}
@@ -51,11 +63,11 @@ func (p *Picker) Build(buildInfo base.PickerBuildInfo) balancer.Picker {
 
 var _ balancer.Picker = (*Picker)(nil)
 
-func (p *Picker) Pick(info balancer.PickInfo) (
-	balancer.PickResult, error,
-) {
+func (p *Picker) Pick(info balancer.PickInfo) (balancer.PickResult, error) {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
+
+	logger.Debugw("picker pick", "FullMethodName", info.FullMethodName)
 
 	var result balancer.PickResult
 
@@ -74,6 +86,11 @@ func (p *Picker) Pick(info balancer.PickInfo) (
 		return result, balancer.ErrNoSubConnAvailable
 	}
 	result.SubConn = endpoint.SubConn
+
+	result.Done = func(info balancer.DoneInfo) {
+		fmt.Fprintln(os.Stdout, "done info", "error", info.Err, "bytesSent", info.BytesSent, "bytesReceived", info.BytesReceived)
+	}
+
 	fmt.Fprintln(os.Stdout, "pick conn", "method_name", info.FullMethodName, "addr", endpoint.Address)
 	return result, nil
 }

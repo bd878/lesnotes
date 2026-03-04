@@ -92,48 +92,48 @@ func (f *Machine) applyAppend(raw []byte) interface{} {
 	proto.Unmarshal(raw, &cmd)
 
 	// Put does not put message with same id twice
-	err := f.messagesRepo.Create(context.Background(), cmd.Id, cmd.Text, cmd.Title, cmd.UserId, cmd.Private, cmd.Name, cmd.CreatedAt, cmd.UpdatedAt)
+	err := f.messagesRepo.Create(context.TODO(), cmd.Id, cmd.Text, cmd.Title, cmd.UserId, cmd.Private, cmd.Name, cmd.CreatedAt, cmd.UpdatedAt)
 	if err != nil {
 		return err
 	}
 
-	return f.filesRepo.SaveMessageFiles(context.Background(), cmd.Id, cmd.UserId, cmd.FileIds)
+	return f.filesRepo.SaveMessageFiles(context.TODO(), cmd.Id, cmd.UserId, cmd.FileIds)
 }
 
 func (f *Machine) applyUpdate(raw []byte) interface{} {
 	var cmd UpdateCommand
 	proto.Unmarshal(raw, &cmd)
 
-	err := f.messagesRepo.Update(context.Background(), cmd.UserId, cmd.Id, cmd.Text, cmd.Title, cmd.Name, cmd.UpdatedAt)
+	err := f.messagesRepo.Update(context.TODO(), cmd.UserId, cmd.Id, cmd.Text, cmd.Title, cmd.Name, cmd.UpdatedAt)
 	if err != nil {
 		return err
 	}
 
-	return f.filesRepo.UpdateMessageFiles(context.Background(), cmd.Id, cmd.UserId, cmd.FileIds)
+	return f.filesRepo.UpdateMessageFiles(context.TODO(), cmd.Id, cmd.UserId, cmd.FileIds)
 }
 
 func (f *Machine) applyDeleteUserMessages(raw []byte) interface{} {
 	var cmd DeleteUserMessagesCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.messagesRepo.DeleteUserMessages(context.Background(), cmd.UserId)
+	return f.messagesRepo.DeleteUserMessages(context.TODO(), cmd.UserId)
 }
 
 func (f *Machine) applyDelete(raw []byte) interface{} {
 	var cmd DeleteCommand
 	proto.Unmarshal(raw, &cmd)
 
-	err := f.messagesRepo.DeleteMessage(context.Background(), cmd.UserId, cmd.Id)
+	err := f.messagesRepo.DeleteMessage(context.TODO(), cmd.UserId, cmd.Id)
 	if err != nil {
 		return err
 	}
 
-	err = f.filesRepo.DeleteMessage(context.Background(), cmd.Id, cmd.UserId)
+	err = f.filesRepo.DeleteMessage(context.TODO(), cmd.Id, cmd.UserId)
 	if err != nil {
 		return err
 	}
 
-	err = f.translationsRepo.DeleteMessage(context.Background(), cmd.Id)
+	err = f.translationsRepo.DeleteMessage(context.TODO(), cmd.Id)
 	if err != nil {
 		return err
 	}
@@ -145,42 +145,42 @@ func (f *Machine) applyPublish(raw []byte) interface{} {
 	var cmd PublishCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.messagesRepo.Publish(context.Background(), cmd.UserId, cmd.Ids, cmd.UpdatedAt)
+	return f.messagesRepo.Publish(context.TODO(), cmd.UserId, cmd.Ids, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyPrivate(raw []byte) interface{} {
 	var cmd PrivateCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.messagesRepo.Private(context.Background(), cmd.UserId, cmd.Ids, cmd.UpdatedAt)
+	return f.messagesRepo.Private(context.TODO(), cmd.UserId, cmd.Ids, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyDeleteFile(raw []byte) interface{} {
 	var cmd DeleteFileCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.filesRepo.DeleteFile(context.Background(), cmd.Id, cmd.UserId)
+	return f.filesRepo.DeleteFile(context.TODO(), cmd.Id, cmd.UserId)
 }
 
 func (f *Machine) applyAppendTranslation(raw []byte) interface{} {
 	var cmd AppendTranslationCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.translationsRepo.SaveTranslation(context.Background(), cmd.MessageId, cmd.Lang, cmd.Title, cmd.Text, cmd.CreatedAt, cmd.UpdatedAt)
+	return f.translationsRepo.SaveTranslation(context.TODO(), cmd.MessageId, cmd.Lang, cmd.Title, cmd.Text, cmd.CreatedAt, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyUpdateTranslation(raw []byte) interface{} {
 	var cmd UpdateTranslationCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.translationsRepo.UpdateTranslation(context.Background(), cmd.MessageId, cmd.Lang, cmd.Title, cmd.Text, cmd.UpdatedAt)
+	return f.translationsRepo.UpdateTranslation(context.TODO(), cmd.MessageId, cmd.Lang, cmd.Title, cmd.Text, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyDeleteTranslation(raw []byte) interface{} {
 	var cmd DeleteTranslationCommand
 	proto.Unmarshal(raw, &cmd)
 
-	err := f.translationsRepo.DeleteTranslation(context.Background(), cmd.MessageId, cmd.Lang)
+	err := f.translationsRepo.DeleteTranslation(context.TODO(), cmd.MessageId, cmd.Lang)
 	if err != nil {
 		return err
 	}

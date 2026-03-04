@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 
@@ -109,6 +110,11 @@ func (s *MessagesController) SaveMessage(ctx context.Context, id int64, text, ti
 
 	err = s.threads.CreateThread(ctx, id, userID, threadID, name, private)
 	if err != nil {
+		if status, ok := status.FromError(err); ok {
+			logger.Debugw("thread failed", "message", status.Message())
+		} else {
+			logger.Debugw("non-rpc error", "error", err)
+		}
 		return
 	}
 
@@ -138,6 +144,11 @@ func (s *MessagesController) DeleteMessages(ctx context.Context, ids []int64, us
 	for _, id := range ids {
 		err = s.threads.DeleteThread(ctx, id, userID)
 		if err != nil {
+			if status, ok := status.FromError(err); ok {
+				logger.Debugw("thread failed", "message", status.Message())
+			} else {
+				logger.Debugw("non-rpc error", "error", err)
+			}
 			return
 		}
 	}

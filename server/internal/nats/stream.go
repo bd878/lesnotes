@@ -57,7 +57,7 @@ func (s *Stream) handleMsg(topicName string, handler am.RawMessageHandler) func(
 			subject: topicName,
 		}
 
-		wCtx, cancel := context.WithCancel(context.Background())
+		wCtx, cancel := context.WithCancel(context.TODO())
 		defer cancel()
 
 		errc := make(chan error)

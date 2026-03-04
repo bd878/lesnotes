@@ -81,7 +81,7 @@ func (b *authBuilder) Handle(w http.ResponseWriter, req *http.Request) (err erro
 		return
 	}
 
-	req = req.WithContext(context.WithValue(context.Background(), UserContextKey{}, user))
+	req = req.WithContext(context.WithValue(context.TODO(), UserContextKey{}, user))
 
 	return b.next.Handle(w, req)
 }

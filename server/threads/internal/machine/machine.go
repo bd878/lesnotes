@@ -60,7 +60,7 @@ func (f *Machine) applyAppend(raw []byte) interface{} {
 	var cmd AppendCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.threadsRepo.AppendThread(context.Background(), cmd.Id, cmd.UserId, cmd.ParentId, cmd.NextId,
+	return f.threadsRepo.AppendThread(context.TODO(), cmd.Id, cmd.UserId, cmd.ParentId, cmd.NextId,
 		cmd.PrevId, cmd.Name, cmd.Description, cmd.Private, cmd.CreatedAt, cmd.UpdatedAt)
 }
 
@@ -68,33 +68,33 @@ func (f *Machine) applyReorder(raw []byte) interface{} {
 	var cmd ReorderCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.threadsRepo.ReorderThread(context.Background(), cmd.Id, cmd.UserId, cmd.ParentId, cmd.NextId, cmd.PrevId, cmd.UpdatedAt)
+	return f.threadsRepo.ReorderThread(context.TODO(), cmd.Id, cmd.UserId, cmd.ParentId, cmd.NextId, cmd.PrevId, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyUpdate(raw []byte) interface{} {
 	var cmd UpdateCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.threadsRepo.UpdateThread(context.Background(), cmd.Id, cmd.UserId, cmd.Name, cmd.Description, cmd.UpdatedAt)
+	return f.threadsRepo.UpdateThread(context.TODO(), cmd.Id, cmd.UserId, cmd.Name, cmd.Description, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyDelete(raw []byte) interface{} {
 	var cmd DeleteCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.threadsRepo.DeleteThread(context.Background(), cmd.Id, cmd.UserId)
+	return f.threadsRepo.DeleteThread(context.TODO(), cmd.Id, cmd.UserId)
 }
 
 func (f *Machine) applyPublish(raw []byte) interface{} {
 	var cmd PublishCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.threadsRepo.PublishThread(context.Background(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
+	return f.threadsRepo.PublishThread(context.TODO(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyPrivate(raw []byte) interface{} {
 	var cmd PrivateCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.threadsRepo.PrivateThread(context.Background(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
+	return f.threadsRepo.PrivateThread(context.TODO(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
 }

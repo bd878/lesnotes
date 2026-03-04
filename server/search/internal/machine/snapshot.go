@@ -57,7 +57,7 @@ func (f *Machine) Snapshot() (raft.FSMSnapshot, error) {
 	filesBuf := bufio.NewWriter(s.filesFile)
 	defer filesBuf.Flush()
 
-	err = f.filesRepo.Dump(context.Background(), filesBuf)
+	err = f.filesRepo.Dump(context.TODO(), filesBuf)
 	if err != nil {
 		logger.Errorw("failed to dump files repo", "error", err)
 		return nil, err
@@ -66,7 +66,7 @@ func (f *Machine) Snapshot() (raft.FSMSnapshot, error) {
 	messagesBuf := bufio.NewWriter(s.messagesFile)
 	defer messagesBuf.Flush()
 
-	err = f.messagesRepo.Dump(context.Background(), messagesBuf)
+	err = f.messagesRepo.Dump(context.TODO(), messagesBuf)
 	if err != nil {
 		logger.Errorw("failed to dump messages repo", "error", err)
 		return nil, err
@@ -75,7 +75,7 @@ func (f *Machine) Snapshot() (raft.FSMSnapshot, error) {
 	threadsBuf := bufio.NewWriter(s.threadsFile)
 	defer threadsBuf.Flush()
 
-	err = f.threadsRepo.Dump(context.Background(), threadsBuf)
+	err = f.threadsRepo.Dump(context.TODO(), threadsBuf)
 	if err != nil {
 		logger.Errorw("failed to dump threads repo", "error", err)
 		return nil, err
@@ -84,7 +84,7 @@ func (f *Machine) Snapshot() (raft.FSMSnapshot, error) {
 	translationsBuf := bufio.NewWriter(s.translationsFile)
 	defer translationsBuf.Flush()
 
-	err = f.translationsRepo.Dump(context.Background(), translationsBuf)
+	err = f.translationsRepo.Dump(context.TODO(), translationsBuf)
 	if err != nil {
 		logger.Errorw("failed to dump translations repo", "error", err)
 		return nil, err
@@ -108,22 +108,22 @@ func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 		}
 
 		if strings.Contains(hdr.Name, "messages") {
-			err = f.messagesRepo.Restore(context.Background(), tr)
+			err = f.messagesRepo.Restore(context.TODO(), tr)
 			if err != nil {
 				return err
 			}
 		} else if strings.Contains(hdr.Name, "files") {
-			err = f.filesRepo.Restore(context.Background(), tr)
+			err = f.filesRepo.Restore(context.TODO(), tr)
 			if err != nil {
 				return err
 			}
 		} else if strings.Contains(hdr.Name, "threads") {
-			err = f.threadsRepo.Restore(context.Background(), tr)
+			err = f.threadsRepo.Restore(context.TODO(), tr)
 			if err != nil {
 				return err
 			}
 		} else if strings.Contains(hdr.Name, "translations") {
-			err = f.translationsRepo.Restore(context.Background(), tr)
+			err = f.translationsRepo.Restore(context.TODO(), tr)
 			if err != nil {
 				return err
 			}

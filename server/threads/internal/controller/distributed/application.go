@@ -92,7 +92,7 @@ func (m *Distributed) CreateThread(ctx context.Context, id, userID, parentID, ne
 		return
 	}
 
-	return m.publisher.Publish(context.Background(), event)
+	return m.publisher.Publish(context.TODO(), event)
 }
 
 func (m *Distributed) UpdateThread(ctx context.Context, id, userID int64, name, description *string) (err error) {
@@ -121,7 +121,7 @@ func (m *Distributed) UpdateThread(ctx context.Context, id, userID int64, name, 
 		return err
 	}
 
-	return m.publisher.Publish(context.Background(), event)
+	return m.publisher.Publish(context.TODO(), event)
 }
 
 func (m *Distributed) ReorderThread(ctx context.Context, id, userID, parentID, nextID, prevID int64) (err error) {
@@ -150,7 +150,7 @@ func (m *Distributed) ReorderThread(ctx context.Context, id, userID, parentID, n
 			return err
 		}
 
-		err = m.publisher.Publish(context.Background(), event)
+		err = m.publisher.Publish(context.TODO(), event)
 	}
 
 	return
@@ -180,7 +180,7 @@ func (m *Distributed) PrivateThread(ctx context.Context, id, userID int64) error
 		return err
 	}
 
-	return m.publisher.Publish(context.Background(), event)
+	return m.publisher.Publish(context.TODO(), event)
 }
 
 func (m *Distributed) PublishThread(ctx context.Context, id int64, userID int64) error {
@@ -207,7 +207,7 @@ func (m *Distributed) PublishThread(ctx context.Context, id int64, userID int64)
 		return err
 	}
 
-	return m.publisher.Publish(context.Background(), event)
+	return m.publisher.Publish(context.TODO(), event)
 }
 
 func (m *Distributed) DeleteThread(ctx context.Context, id, userID int64) error {
@@ -231,7 +231,7 @@ func (m *Distributed) DeleteThread(ctx context.Context, id, userID int64) error 
 		return err
 	}
 
-	return m.publisher.Publish(context.Background(), event)
+	return m.publisher.Publish(context.TODO(), event)
 }
 
 func (m *Distributed) ResolveThread(ctx context.Context, id, userID int64) (ids []int64, err error) {

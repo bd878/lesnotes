@@ -39,7 +39,7 @@ func (f *Machine) Snapshot() (raft.FSMSnapshot, error) {
 	usersBuf := bufio.NewWriter(s.usersFile)
 	defer usersBuf.Flush()
 
-	err = f.usersRepo.Dump(context.Background(), usersBuf)
+	err = f.usersRepo.Dump(context.TODO(), usersBuf)
 	if err != nil {
 		logger.Errorw("failed to dump users repo", "error", err)
 		return nil, err
@@ -63,7 +63,7 @@ func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 		}
 
 		if strings.Contains(hdr.Name, "users") {
-			err = f.usersRepo.Restore(context.Background(), tr)
+			err = f.usersRepo.Restore(context.TODO(), tr)
 			if err != nil {
 				return err
 			}

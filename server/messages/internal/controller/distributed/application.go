@@ -103,7 +103,7 @@ func (m *Distributed) SaveMessage(ctx context.Context, id int64, text, title str
 		return
 	}
 
-	return m.publisher.Publish(context.Background(), event)
+	return m.publisher.Publish(context.TODO(), event)
 }
 
 func (m *Distributed) UpdateMessage(ctx context.Context, id int64, text, title, name *string, fileIDs []int64, userID int64) (err error) {
@@ -134,7 +134,7 @@ func (m *Distributed) UpdateMessage(ctx context.Context, id int64, text, title, 
 		return err
 	}
 
-	return m.publisher.Publish(context.Background(), event)
+	return m.publisher.Publish(context.TODO(), event)
 }
 
 func (m *Distributed) DeleteUserMessages(ctx context.Context, userID int64) (err error) {
@@ -191,7 +191,7 @@ func (m *Distributed) DeleteMessages(ctx context.Context, ids []int64, userID in
 			return err
 		}
 
-		m.publisher.Publish(context.Background(), event)
+		m.publisher.Publish(context.TODO(), event)
 
 	}
 
@@ -222,7 +222,7 @@ func (m *Distributed) PublishMessages(ctx context.Context, ids []int64, userID i
 		return err
 	}
 
-	return m.publisher.Publish(context.Background(), event)
+	return m.publisher.Publish(context.TODO(), event)
 }
 
 func (m *Distributed) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
@@ -249,7 +249,7 @@ func (m *Distributed) PrivateMessages(ctx context.Context, ids []int64, userID i
 		return err
 	}
 
-	return m.publisher.Publish(context.Background(), event)
+	return m.publisher.Publish(context.TODO(), event)
 }
 
 func (m *Distributed) SaveTranslation(ctx context.Context, userID, messageID int64, lang, title, text string) (err error) {
@@ -280,7 +280,7 @@ func (m *Distributed) SaveTranslation(ctx context.Context, userID, messageID int
 		return err
 	}
 
-	return m.publisher.Publish(context.Background(), event)
+	return m.publisher.Publish(context.TODO(), event)
 }
 
 func (m *Distributed) UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string) (err error) {
@@ -309,7 +309,7 @@ func (m *Distributed) UpdateTranslation(ctx context.Context, messageID int64, la
 		return err
 	}
 
-	return m.publisher.Publish(context.Background(), event)
+	return m.publisher.Publish(context.TODO(), event)
 }
 
 func (m *Distributed) DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error) {
@@ -333,7 +333,7 @@ func (m *Distributed) DeleteTranslation(ctx context.Context, messageID int64, la
 		return err
 	}
 
-	return m.publisher.Publish(context.Background(), event)
+	return m.publisher.Publish(context.TODO(), event)
 }
 
 // TODO: pass one userID only, for public messages create ReadPublicMessage request

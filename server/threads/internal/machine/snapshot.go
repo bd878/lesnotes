@@ -39,7 +39,7 @@ func (f *Machine) Snapshot() (raft.FSMSnapshot, error) {
 	threadsBuf := bufio.NewWriter(s.threadsFile)
 	defer threadsBuf.Flush()
 
-	err = f.threadsRepo.Dump(context.Background(), threadsBuf)
+	err = f.threadsRepo.Dump(context.TODO(), threadsBuf)
 	if err != nil {
 		logger.Errorw("failed to dump threads repo", "error", err)
 		return nil, err
@@ -63,7 +63,7 @@ func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 		}
 
 		if strings.Contains(hdr.Name, "threads") {
-			err = f.threadsRepo.Restore(context.Background(), tr)
+			err = f.threadsRepo.Restore(context.TODO(), tr)
 			if err != nil {
 				return err
 			}

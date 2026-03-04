@@ -118,124 +118,124 @@ func (f *Machine) applyAppendMessage(raw []byte) interface{} {
 	var cmd AppendMessageCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.messagesRepo.SaveMessage(context.Background(), cmd.Id, cmd.UserId, cmd.Name, cmd.Title, cmd.Text, cmd.Private, cmd.CreatedAt, cmd.UpdatedAt)
+	return f.messagesRepo.SaveMessage(context.TODO(), cmd.Id, cmd.UserId, cmd.Name, cmd.Title, cmd.Text, cmd.Private, cmd.CreatedAt, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyUpdateMessage(raw []byte) interface{} {
 	var cmd UpdateMessageCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.messagesRepo.UpdateMessage(context.Background(), cmd.Id, cmd.UserId, cmd.Name, cmd.Title, cmd.Text, cmd.UpdatedAt)
+	return f.messagesRepo.UpdateMessage(context.TODO(), cmd.Id, cmd.UserId, cmd.Name, cmd.Title, cmd.Text, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyDeleteMessage(raw []byte) interface{} {
 	var cmd DeleteMessageCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.messagesRepo.DeleteMessage(context.Background(), cmd.Id, cmd.UserId)
+	return f.messagesRepo.DeleteMessage(context.TODO(), cmd.Id, cmd.UserId)
 }
 
 func (f *Machine) applyPublishMessages(raw []byte) interface{} {
 	var cmd PublishMessagesCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.messagesRepo.PublishMessages(context.Background(), cmd.Ids, cmd.UserId, cmd.UpdatedAt)
+	return f.messagesRepo.PublishMessages(context.TODO(), cmd.Ids, cmd.UserId, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyPrivateMessages(raw []byte) interface{} {
 	var cmd PrivateMessagesCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.messagesRepo.PrivateMessages(context.Background(), cmd.Ids, cmd.UserId, cmd.UpdatedAt)
+	return f.messagesRepo.PrivateMessages(context.TODO(), cmd.Ids, cmd.UserId, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyAppendThread(raw []byte) interface{} {
 	var cmd AppendThreadCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.threadsRepo.SaveThread(context.Background(), cmd.Id, cmd.UserId, cmd.ParentId, cmd.Name, cmd.Description, cmd.Private, cmd.CreatedAt, cmd.UpdatedAt)
+	return f.threadsRepo.SaveThread(context.TODO(), cmd.Id, cmd.UserId, cmd.ParentId, cmd.Name, cmd.Description, cmd.Private, cmd.CreatedAt, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyUpdateThread(raw []byte) interface{} {
 	var cmd UpdateThreadCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.threadsRepo.UpdateThread(context.Background(), cmd.Id, cmd.UserId, cmd.Name, cmd.Description, cmd.UpdatedAt)
+	return f.threadsRepo.UpdateThread(context.TODO(), cmd.Id, cmd.UserId, cmd.Name, cmd.Description, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyDeleteThread(raw []byte) interface{} {
 	var cmd DeleteThreadCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.threadsRepo.DeleteThread(context.Background(), cmd.Id, cmd.UserId)
+	return f.threadsRepo.DeleteThread(context.TODO(), cmd.Id, cmd.UserId)
 }
 
 func (f *Machine) applyChangeThreadParent(raw []byte) interface{} {
 	var cmd ChangeThreadParentCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.threadsRepo.ChangeThreadParent(context.Background(), cmd.Id, cmd.UserId, cmd.ParentId)
+	return f.threadsRepo.ChangeThreadParent(context.TODO(), cmd.Id, cmd.UserId, cmd.ParentId)
 }
 
 func (f *Machine) applyPublishThread(raw []byte) interface{} {
 	var cmd PublishThreadCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.threadsRepo.PublishThread(context.Background(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
+	return f.threadsRepo.PublishThread(context.TODO(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyPrivateThread(raw []byte) interface{} {
 	var cmd PrivateThreadCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.threadsRepo.PrivateThread(context.Background(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
+	return f.threadsRepo.PrivateThread(context.TODO(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyAppendFile(raw []byte) interface{} {
 	var cmd AppendFileCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.filesRepo.SaveFile(context.Background(), cmd.Id, cmd.UserId, cmd.Name, cmd.Description, cmd.Mime, cmd.Private, cmd.Size, cmd.CreatedAt, cmd.UpdatedAt)
+	return f.filesRepo.SaveFile(context.TODO(), cmd.Id, cmd.UserId, cmd.Name, cmd.Description, cmd.Mime, cmd.Private, cmd.Size, cmd.CreatedAt, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyDeleteFile(raw []byte) interface{} {
 	var cmd DeleteFileCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.filesRepo.DeleteFile(context.Background(), cmd.Id, cmd.UserId)
+	return f.filesRepo.DeleteFile(context.TODO(), cmd.Id, cmd.UserId)
 }
 
 func (f *Machine) applyPublishFile(raw []byte) interface{} {
 	var cmd PublishFileCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.filesRepo.PublishFile(context.Background(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
+	return f.filesRepo.PublishFile(context.TODO(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyPrivateFile(raw []byte) interface{} {
 	var cmd PrivateFileCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.filesRepo.PrivateFile(context.Background(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
+	return f.filesRepo.PrivateFile(context.TODO(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyAppendTranslation(raw []byte) interface{} {
 	var cmd AppendTranslationCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.translationsRepo.SaveTranslation(context.Background(), cmd.UserId, cmd.MessageId, cmd.Lang, cmd.Title, cmd.Text, cmd.CreatedAt, cmd.UpdatedAt)
+	return f.translationsRepo.SaveTranslation(context.TODO(), cmd.UserId, cmd.MessageId, cmd.Lang, cmd.Title, cmd.Text, cmd.CreatedAt, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyDeleteTranslation(raw []byte) interface{} {
 	var cmd DeleteTranslationCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.translationsRepo.DeleteTranslation(context.Background(), cmd.MessageId, cmd.Lang)
+	return f.translationsRepo.DeleteTranslation(context.TODO(), cmd.MessageId, cmd.Lang)
 }
 
 func (f *Machine) applyUpdateTranslation(raw []byte) interface{} {
 	var cmd UpdateTranslationCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.translationsRepo.UpdateTranslation(context.Background(), cmd.MessageId, cmd.Lang, cmd.Title, cmd.Text, cmd.UpdatedAt)
+	return f.translationsRepo.UpdateTranslation(context.TODO(), cmd.MessageId, cmd.Lang, cmd.Title, cmd.Text, cmd.UpdatedAt)
 }

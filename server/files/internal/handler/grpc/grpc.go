@@ -106,9 +106,9 @@ func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.F
 
 	var file *model.File
 	if params.Name != "" {
-		file, err = h.repo.GetMetaByName(context.Background(), params.Name)
+		file, err = h.repo.GetMetaByName(context.TODO(), params.Name)
 	} else {
-		file, err = h.repo.GetMetaByID(context.Background(), params.Id)
+		file, err = h.repo.GetMetaByID(context.TODO(), params.Id)
 	}
 	if err != nil {
 		return err
@@ -136,7 +136,7 @@ func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.F
 		return
 	}
 
-	err = h.repo.ReadFile(context.Background(), file.OID, &streamWriter{stream})
+	err = h.repo.ReadFile(context.TODO(), file.OID, &streamWriter{stream})
 
 	return
 }
@@ -193,7 +193,7 @@ func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) (err err
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
 	var size int64
-	size, err = h.repo.SaveFile(context.Background(), &streamReader{Files_SaveFileStreamServer: stream}, file.File.Id, file.File.UserId, file.File.Private,
+	size, err = h.repo.SaveFile(context.TODO(), &streamReader{Files_SaveFileStreamServer: stream}, file.File.Id, file.File.UserId, file.File.Private,
 		file.File.Name, file.File.Description, file.File.Mime, createdAt, updatedAt)
 	if err != nil {
 		return err
@@ -210,13 +210,13 @@ func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) (err err
 		return
 	}
 
-	return h.publisher.Publish(context.Background(), event)
+	return h.publisher.Publish(context.TODO(), event)
 }
 
 func (h *Handler) ListFiles(ctx context.Context, req *api.ListFilesRequest) (resp *api.ListFilesResponse, err error) {
 	logger.Debugw("list files", "user_id", req.UserId, "limit", req.Limit, "offset", req.Offset, "asc", req.Asc, "private", req.Private)
 
-	list, isLastPage, err := h.repo.ListFiles(context.Background(), req.UserId, req.Limit, req.Offset, req.Asc, req.Private)
+	list, isLastPage, err := h.repo.ListFiles(context.TODO(), req.UserId, req.Limit, req.Offset, req.Asc, req.Private)
 	if err != nil {
 		return nil, err
 	}
@@ -244,7 +244,7 @@ func (h *Handler) PublishFile(ctx context.Context, req *api.PublishFileRequest) 
 		return
 	}
 
-	err = h.publisher.Publish(context.Background(), event)
+	err = h.publisher.Publish(context.TODO(), event)
 	if err != nil {
 		return
 	}
@@ -269,7 +269,7 @@ func (h *Handler) PrivateFile(ctx context.Context, req *api.PrivateFileRequest) 
 		return
 	}
 
-	err = h.publisher.Publish(context.Background(), event)
+	err = h.publisher.Publish(context.TODO(), event)
 	if err != nil {
 		return
 	}
@@ -292,7 +292,7 @@ func (h *Handler) DeleteFile(ctx context.Context, req *api.DeleteFileRequest) (r
 		return
 	}
 
-	err = h.publisher.Publish(context.Background(), event)
+	err = h.publisher.Publish(context.TODO(), event)
 	if err != nil {
 		return
 	}

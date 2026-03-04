@@ -39,7 +39,7 @@ func (f *Machine) Snapshot() (raft.FSMSnapshot, error) {
 	sessionsBuf := bufio.NewWriter(s.sessionsFile)
 	defer sessionsBuf.Flush()
 
-	err = f.sessionsRepo.Dump(context.Background(), sessionsBuf)
+	err = f.sessionsRepo.Dump(context.TODO(), sessionsBuf)
 	if err != nil {
 		logger.Errorw("failed to dump sessions repo", "error", err)
 		return nil, err
@@ -63,7 +63,7 @@ func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 		}
 
 		if strings.Contains(hdr.Name, "sessions") {
-			err = f.sessionsRepo.Restore(context.Background(), tr)
+			err = f.sessionsRepo.Restore(context.TODO(), tr)
 			if err != nil {
 				return err
 			}

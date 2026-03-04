@@ -51,19 +51,19 @@ func (f *Machine) applyAppend(raw []byte) interface{} {
 	var cmd AppendCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.usersRepo.Save(context.Background(), cmd.Id, cmd.Login, cmd.HashedPassword, cmd.Metadata, cmd.CreatedAt, cmd.UpdatedAt)
+	return f.usersRepo.Save(context.TODO(), cmd.Id, cmd.Login, cmd.HashedPassword, cmd.Metadata, cmd.CreatedAt, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyUpdate(raw []byte) interface{} {
 	var cmd UpdateCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.usersRepo.Update(context.Background(), cmd.Id, cmd.Login, cmd.Metadata, cmd.UpdatedAt)
+	return f.usersRepo.Update(context.TODO(), cmd.Id, cmd.Login, cmd.Metadata, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyDelete(raw []byte) interface{} {
 	var cmd DeleteCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.usersRepo.Delete(context.Background(), cmd.Id)
+	return f.usersRepo.Delete(context.TODO(), cmd.Id)
 }
