@@ -87,6 +87,7 @@ func (r *FilesRepository) ReadMessageFiles(ctx context.Context, messageID int64,
 	var query = "SELECT file_id FROM %s WHERE message_id = $1 AND (user_id IN (" + ids + "))"
 
 	rows, err := tx.Query(ctx, r.table(query), append([]interface{}{messageID}, list...)...)
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}

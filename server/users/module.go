@@ -21,8 +21,9 @@ import (
 
 func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error) {
 	usersRepo := postgres.NewUsersRepository(svc.Pool(), "users.users")
+	usersDumper := postgres.NewUsersDumper(svc.Pool(), "users.users")
 
-	consensus, err := setupRaft(svc, cfg, usersRepo)
+	consensus, err := setupRaft(svc, cfg, usersRepo, usersDumper)
 	if err != nil {
 		return err
 	}
@@ -78,8 +79,8 @@ func setupSerf(svc system.Service, cfg config.Config, handler serf.Handler, logg
 	return nil
 }
 
-func setupRaft(svc system.Service, cfg config.Config, usersRepo *postgres.UsersRepository) (*raft.Distributed, error) {
-	fsm := machine.New(usersRepo, svc.Logger())
+func setupRaft(svc system.Service, cfg config.Config, usersRepo *postgres.UsersRepository, usersDumper *postgres.UsersDumper) (*raft.Distributed, error) {
+	fsm := machine.New(usersRepo, usersDumper, svc.Logger())
 
 	consensus, err := raft.New(raft.Config{
 		Bootstrap:      cfg.RaftBootstrap,

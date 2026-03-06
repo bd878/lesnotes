@@ -1,20 +1,24 @@
 package machine
 
 import (
-	"io"
 	"context"
 
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
 	"github.com/bd878/gallery/server/internal/logger"
+	"github.com/bd878/gallery/server/users/pkg/model"
 )
 
 type UsersRepository interface {
 	Save(ctx context.Context, id int64, login, hashedPassword string, metadata []byte, createdAt, updatedAt string) (err error)
 	Delete(ctx context.Context, id int64) (err error)
 	Update(ctx context.Context, id int64, login *string, metadata []byte, updatedAt string) (err error)
-	Dump(ctx context.Context, writer io.Writer) (err error)
-	Restore(ctx context.Context, reader io.Reader) (err error)
+}
+
+type UsersDumper interface {
+	Open(ctx context.Context) (ch chan *model.User, err error)
+	Restore(ctx context.Context, user *model.User) (err error)
+	Close() (err error)
 }
 
 var _ raft.FSM = (*Machine)(nil)
@@ -22,12 +26,14 @@ var _ raft.FSM = (*Machine)(nil)
 type Machine struct {
 	log         *logger.Logger
 	usersRepo   UsersRepository
+	usersDumper UsersDumper
 }
 
-func New(usersRepo UsersRepository, log *logger.Logger) *Machine {
+func New(usersRepo UsersRepository, usersDumper UsersDumper, log *logger.Logger) *Machine {
 	return &Machine{
 		log:         log,
 		usersRepo:   usersRepo,
+		usersDumper: usersDumper,
 	}
 }
 

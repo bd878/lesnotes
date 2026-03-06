@@ -3,45 +3,43 @@ package machine
 import (
 	"io"
 	"os"
-	"bufio"
-	"strings"
 	"context"
-	"archive/tar"
 
 	"github.com/hashicorp/raft"
+	"google.golang.org/protobuf/proto"
+
+	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/logger"
+	"github.com/bd878/gallery/server/internal/store"
+	"github.com/bd878/gallery/server/users/pkg/model"
 )
 
-/**
- * Merge two dumps into tar archive
- */
-
 type snapshot struct {
-	tarFile      *os.File
-	usersFile *os.File
+	store         *store.Store
+	usersDumper   UsersDumper
+	ctx           context.Context
+	ch            <-chan *model.User
 }
 
 func (f *Machine) Snapshot() (raft.FSMSnapshot, error) {
-	var err error
+	logger.Debugln("snapshotting users")
 
 	s := &snapshot{}
 
-	s.usersFile, err = os.CreateTemp("", "users_*.bin")
+	file, err := os.CreateTemp("", "users_*.bin")
 	if err != nil {
 		return nil, err
 	}
 
-	s.tarFile, err = os.CreateTemp("", "users_*.tar")
+	s.store, err = store.NewStore(file)
 	if err != nil {
 		return nil, err
 	}
 
-	usersBuf := bufio.NewWriter(s.usersFile)
-	defer usersBuf.Flush()
-
-	err = f.usersRepo.Dump(context.TODO(), usersBuf)
+	s.usersDumper = f.usersDumper
+	s.ctx = context.TODO()
+	s.ch, err = f.usersDumper.Open(s.ctx)
 	if err != nil {
-		logger.Errorw("failed to dump users repo", "error", err)
 		return nil, err
 	}
 
@@ -51,10 +49,12 @@ func (f *Machine) Snapshot() (raft.FSMSnapshot, error) {
 func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 	logger.Debugln("restoring fsm from snapshot")
 
-	tr := tar.NewReader(reader)
+	store := store.NewReader(reader)
+	defer store.Close()
 
 	for {
-		hdr, err := tr.Next()
+		var data []byte
+		n, err := store.Read(data)
 		if err == io.EOF {
 			break
 		}
@@ -62,122 +62,59 @@ func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 			return err
 		}
 
-		if strings.Contains(hdr.Name, "users") {
-			err = f.usersRepo.Restore(context.TODO(), tr)
-			if err != nil {
-				return err
-			}
+		logger.Debugw("read", "n", n)
+
+		var user api.User
+		if err = proto.Unmarshal(data, &user); err != nil {
+			return err
+		}
+
+		err = f.usersDumper.Restore(context.TODO(), model.UserFromProto(&user))
+		if err != nil {
+			return err
 		}
 	}
-
-	defer reader.Close()
 
 	return
 }
 
 func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
-	tarBuf := bufio.NewWriter(s.tarFile)
-	tw := tar.NewWriter(tarBuf)
+	logger.Debugln("persisting snapshot")
 
-	// seek files
-	err = s.usersFile.Sync()
-	if err != nil {
-		return
+	for u := range s.ch {
+		if u.ID == model.PublicUserID {
+			// restore public user from migration
+			continue
+		}
+
+		data, err := proto.Marshal(model.UserToProto(u))
+		if err != nil {
+			return err
+		}
+
+		n, err := s.store.Append(data)
+		if err != nil {
+			return err
+		}
+
+		logger.Debugw("append user to snapshot", "id", u.ID, "n", n)
+
+		select {
+		case <-s.ctx.Done():
+			return context.Cause(s.ctx)
+		default:
+		}
 	}
 
-	_, err = s.usersFile.Seek(0, os.SEEK_SET)
-	if err != nil {
-		return
-	}
-
-	// write users to tar
-	usersSize, err := fileSize(s.usersFile)
-	if err != nil {
-		return err
-	}
-
-	logger.Debugw("persisting", "users size", usersSize)
-
-	usersHdr := &tar.Header{
-		Name: s.usersFile.Name(),
-		Mode: 0600,
-		Size: usersSize,
-	}
-
-	err = tw.WriteHeader(usersHdr)
-	if err != nil {
-		return
-	}
-
-	n, err := io.Copy(tw, s.usersFile)
-	if err != nil {
-		return
-	}
-
-	if err = tw.Flush(); err != nil {
-		return
-	}
-
-	logger.Debugw("copied users bytes to tar writer", "bytes", n)
-
-	// dump tar to sink
-	if err = tw.Close(); err != nil {
-		return
-	}
-
-	if err = tarBuf.Flush(); err != nil {
-		return
-	}
-
-	err = s.tarFile.Sync()
-	if err != nil {
-		return
-	}
-
-	_, err = s.tarFile.Seek(0, os.SEEK_SET)
-	if err != nil {
-		return
-	}
-
-	tarSize, err := fileSize(s.tarFile)
-	if err != nil {
-		return err
-	}
-
-	logger.Debugw("tar size", "bytes", tarSize)
-
-	n, err = io.Copy(sink, s.tarFile)
-	defer sink.Cancel()
-	if err != nil {
-		return err
-	}
-
-	logger.Debugw("persisting", "copied bytes", n)
-
-	return sink.Close()
+	return
 }
 
 func (s *snapshot) Release() {
-	if err := os.Remove(s.tarFile.Name()); err != nil {
-		logger.Errorw("cannot remove tar file", "error", err)
+	if err := s.store.Close(); err != nil {
+		logger.Errorw("cannot close store file", "error", err)
 	}
 
-	if err := os.Remove(s.usersFile.Name()); err != nil {
-		logger.Errorw("cannot remove users file", "error", err)
+	if err := s.usersDumper.Close(); err != nil {
+		logger.Errorw("cannot close db connection", "error", err)
 	}
-}
-
-/**
- * Utils
- */
-
-func fileSize(f *os.File) (size int64, err error) {
-	info, err := f.Stat()
-	if err != nil {
-		return 0, err
-	}
-
-	size = info.Size()
-
-	return
 }
