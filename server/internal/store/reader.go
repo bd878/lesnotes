@@ -16,18 +16,23 @@ func NewReader(reader io.ReadCloser) *Reader {
 	}
 }
 
+func (s *Reader) ReadSize() (size uint64, err error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	buf := make([]byte, lenWidth)
+	if _, err = s.ReadCloser.Read(buf); err != nil {
+		return 0, err
+	}
+	size = enc.Uint64(buf)
+	return
+}
+
 func (s *Reader) Read(p []byte) (n int, err error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	size := make([]byte, lenWidth)
-	if n, err = s.ReadCloser.Read(size); err != nil {
-		return 0, err
-	}
-	p = make([]byte, enc.Uint64(size))
 	if n, err = s.ReadCloser.Read(p); err != nil {
 		return 0, err
 	}
-	n += lenWidth
 	return
 }
 

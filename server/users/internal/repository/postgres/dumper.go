@@ -3,6 +3,7 @@ package postgres
 import (
 	"fmt"
 	"time"
+	"sync"
 	"context"
 
 	"github.com/jackc/pgx/v5"
@@ -19,6 +20,7 @@ type UsersDumper struct {
 	ctx        context.Context
 	cancel     context.CancelCauseFunc
 	ch         chan *model.User
+	wg         sync.WaitGroup
 }
 
 func NewUsersDumper(pool *pgxpool.Pool, tableName string) *UsersDumper {
@@ -40,8 +42,12 @@ func (r *UsersDumper) Open(ctx context.Context) (ch chan *model.User, err error)
 	ch = make(chan *model.User, 100)
 	r.ch = ch
 
+	r.wg.Add(1)
 	go func() {
 		defer close(r.ch)
+		defer r.rows.Close()
+		defer r.wg.Done()
+
 		for r.rows.Next() {
 			user := &model.User{}
 
@@ -55,6 +61,12 @@ func (r *UsersDumper) Open(ctx context.Context) (ch chan *model.User, err error)
 
 			user.CreatedAt = createdAt.Format(time.RFC3339)
 			user.UpdatedAt = updatedAt.Format(time.RFC3339)
+
+			select {
+			case <-r.ctx.Done():
+				return
+			default:
+			}
 
 			r.ch <- user
 		}
@@ -70,7 +82,9 @@ func (r *UsersDumper) Open(ctx context.Context) (ch chan *model.User, err error)
 }
 
 func (r *UsersDumper) Close() (err error) {
-	r.rows.Close()
+	logger.Debugln("close dumper")
+	r.cancel(nil)
+	r.wg.Wait()
 	return nil
 }
 

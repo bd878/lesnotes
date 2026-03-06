@@ -61,6 +61,17 @@ func (s *Store) Read(p []byte) (n int, err error) {
 	return
 }
 
+func (s *Store) Seek() (err error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	s.buf.Flush()
+	s.pos = 0
+	_, err = s.File.Seek(0, os.SEEK_SET)
+
+	return
+}
+
 func (s *Store) Close() (err error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()

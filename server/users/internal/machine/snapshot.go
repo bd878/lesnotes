@@ -53,7 +53,15 @@ func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 	defer store.Close()
 
 	for {
-		var data []byte
+		size, err := store.ReadSize()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+
+		data := make([]byte, size)
 		n, err := store.Read(data)
 		if err == io.EOF {
 			break
@@ -62,14 +70,19 @@ func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 			return err
 		}
 
-		logger.Debugw("read", "n", n)
+		logger.Debugw("read", "n", n, "data", data)
 
 		var user api.User
 		if err = proto.Unmarshal(data, &user); err != nil {
 			return err
 		}
 
-		err = f.usersDumper.Restore(context.TODO(), model.UserFromProto(&user))
+		logger.Debugw("user", "id", user.Id, "login", user.Login, "salt", user.HashedPassword,
+			"created_at", user.CreatedAt, "updated_at", user.UpdatedAt, "metadata", user.Metadata)
+
+		u := model.UserFromProto(&user)
+
+		err = f.usersDumper.Restore(context.TODO(), u)
 		if err != nil {
 			return err
 		}
@@ -106,10 +119,23 @@ func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
 		}
 	}
 
+	err = s.store.Seek()
+	if err != nil {
+		return
+	}
+
+	n, err := io.Copy(sink, s.store.File)
+	if err != nil {
+		return err
+	}
+
+	logger.Debugw("store persisted", "n", n)
+
 	return
 }
 
 func (s *snapshot) Release() {
+	logger.Debugln("release snapshot")
 	if err := s.store.Close(); err != nil {
 		logger.Errorw("cannot close store file", "error", err)
 	}
