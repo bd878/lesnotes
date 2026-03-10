@@ -22,7 +22,8 @@ message Invoice {
 	int64     total = 5;
 	string    created_at = 6;
 	string    updated_at = 7;
-	optional bytes metadata = 8;
+	Cart      cart = 8;
+	optional bytes metadata = 9;
 }
 
 message Payment {
@@ -42,7 +43,25 @@ message CreateInvoiceRequest {
 	int64   user_id = 2;
 	string  currency = 3;
 	int64   total = 4;
-	optional bytes metadata = 5;
+	Cart    cart = 5;
+	optional bytes metadata = 6;
+}
+
+message Cart {
+	repeated CartItem items = 1;
+}
+
+message CartItem {
+	oneof Item {
+		Premium premium = 1;
+	}
+}
+
+message Premium {
+	string expires_at = 1;
+	int64  cost = 2;
+	int64  discount = 3;
+	string currency = 4;
 }
 
 message CreateInvoiceResponse {

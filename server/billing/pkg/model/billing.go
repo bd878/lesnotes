@@ -11,6 +11,7 @@ type (
 		Total              int64             `json:"total"`
 		CreatedAt          string            `json:"created_at"`
 		UpdatedAt          string            `json:"updated_at"`
+		Cart               *Cart              `json:"cart"`
 		Metadata           json.RawMessage   `json:"metadata,omitempty"`
 	}
 
@@ -26,10 +27,27 @@ type (
 		Metadata           json.RawMessage   `json:"metadata,omitempty"`
 	}
 
+	Cart struct {
+		Items              []*CartItem        `json:"items"`
+	}
+
+	CartItem struct {
+		Type               string            `json:"type"`
+		Item               json.RawMessage   `json:"item"`
+	}
+
+	PremiumItem struct {
+		ExpiresAt          string            `json:"expires_at"`
+		Cost               int64             `json:"cost"`
+		Discount           int64             `json:"discount"`
+		Currency           string            `json:"currency"`
+	}
+
 	CreateInvoiceRequest struct {
 		ID                 string            `json:"id"`
 		Currency           string            `json:"currency"`
 		Total              int64             `json:"total"`
+		Cart               *Cart             `json:"cart"`
 		Metadata           json.RawMessage   `json:"metadata"`
 	}
 

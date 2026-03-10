@@ -5,17 +5,17 @@ import (
 	"context"
 	"net/http"
 
-	billingmodel "github.com/bd878/gallery/server/billing/pkg/model"
+	"github.com/bd878/gallery/server/billing/pkg/model"
 )
 
 type Controller interface {
-	CreateInvoice(ctx context.Context, id string, userID int64, currency string, total int64, metadata []byte) (err error)
+	CreateInvoice(ctx context.Context, id string, userID int64, currency string, total int64, metadata []byte, cart *model.Cart) (err error)
 	StartPayment(ctx context.Context, id, userID int64, invoiceID string, currency string, total int64, metadata []byte) (err error)
 	ProceedPayment(ctx context.Context, id, userID int64) (err error)
 	CancelPayment(ctx context.Context, id, userID int64) (err error)
 	RefundPayment(ctx context.Context, id, userID int64) (err error)
-	GetInvoice(ctx context.Context, id string, userID int64) (invoice *billingmodel.Invoice, err error)
-	GetPayment(ctx context.Context, id, userID int64) (payment *billingmodel.Payment, err error)
+	GetInvoice(ctx context.Context, id string, userID int64) (invoice *model.Invoice, err error)
+	GetPayment(ctx context.Context, id, userID int64) (payment *model.Payment, err error)
 }
 
 type Handler struct {

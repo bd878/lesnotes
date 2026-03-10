@@ -68,14 +68,19 @@ func (s *Controller) isConnFailed() bool {
 	return false
 }
 
-func (s *Controller) CreateInvoice(ctx context.Context, id string, userID int64, currency string, total int64, metadata []byte) (err error) {
+func (s *Controller) CreateInvoice(ctx context.Context, id string, userID int64, currency string, total int64, metadata []byte, cart *model.Cart) (err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
 		}
 	}
 
-	logger.Debugw("create invoice", "id", id, "user_id", userID, "currency", currency, "total", total, "metadata", metadata)
+	logger.Debugw("create invoice", "id", id, "user_id", userID, "currency", currency, "total", total, "metadata", metadata, "cart", cart)
+
+	cc, err := model.CartToProto(cart)
+	if err != nil {
+		return err
+	}
 
 	_, err = s.client.CreateInvoice(ctx, &api.CreateInvoiceRequest{
 		Id:        id,
@@ -83,6 +88,7 @@ func (s *Controller) CreateInvoice(ctx context.Context, id string, userID int64,
 		Currency:  currency,
 		Total:     total,
 		Metadata:  metadata,
+		Cart:      cc,
 	})
 
 	return
@@ -177,7 +183,10 @@ func (s *Controller) GetInvoice(ctx context.Context, id string, userID int64) (i
 		return nil, err
 	}
 
-	invoice = model.InvoiceFromProto(resp.Invoice)
+	invoice, err = model.InvoiceFromProto(resp.Invoice)
+	if err != nil {
+		return nil, err
+	}
 
 	return
 }

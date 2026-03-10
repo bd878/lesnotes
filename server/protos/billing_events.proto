@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package billing_events.v1;
+
+import "protos/billing.proto";
+
+option go_package = "github.com/bd878/gallery/server/api";
+
+message InvoicePayed {
+	string id = 1;
+	int64 user_id = 2;
+	billing.v1.Cart cart = 3;
+	string payed_at = 4;
+}

@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
 	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/billing/pkg/model"
 )
 
 type PaymentsRepository interface {
@@ -15,16 +14,14 @@ type PaymentsRepository interface {
 	ProceedPayment(ctx context.Context, id, userID int64, updatedAt string) (err error)
 	CancelPayment(ctx context.Context, id, userID int64, updatedAt string) (err error)
 	RefundPayment(ctx context.Context, id, userID int64, updatedAt string) (err error)
-	GetPayment(ctx context.Context, id, userID int64) (payment *model.Payment, err error)
 	Dump(ctx context.Context, writer io.Writer) (err error)
 	Restore(ctx context.Context, reader io.Reader) (err error)
 }
 
 type InvoicesRepository interface {
-	SaveInvoice(ctx context.Context, id string, userID int64, currency, status string, total int64, metadata []byte, createdAt, updatedAt string) (err error)
+	SaveInvoice(ctx context.Context, id string, userID int64, currency, status string, total int64, metadata []byte, cart []byte, createdAt, updatedAt string) (err error)
 	CancelInvoice(ctx context.Context, id string, userID int64, updatedAt string) (err error)
 	PayInvoice(ctx context.Context, id string, userID int64, updatedAt string) (err error)
-	GetInvoice(ctx context.Context, id string, userID int64) (invoice *model.Invoice, err error)
 	Dump(ctx context.Context, writer io.Writer) (err error)
 	Restore(ctx context.Context, reader io.Reader) (err error)
 }
@@ -74,7 +71,7 @@ func (f *Machine) applyAppendInvoice(raw []byte) interface{} {
 	proto.Unmarshal(raw, &cmd)
 
 	return f.invoicesRepo.SaveInvoice(context.TODO(), cmd.Id, cmd.UserId, cmd.Currency, cmd.Status, cmd.Total,
-		cmd.Metadata, cmd.CreatedAt, cmd.UpdatedAt)
+		cmd.Metadata, cmd.Cart, cmd.CreatedAt, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyAppendPayment(raw []byte) interface{} {

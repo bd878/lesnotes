@@ -238,6 +238,9 @@ components:
           total:
             type: integer
             required: true
+          cart:
+            schema:
+              $ref: '#/components/schemas/cart'
           metadata:
             type: string
             format: binary
@@ -403,3 +406,36 @@ components:
         metadata:
           type: string
           format: binary
+
+    cart:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            schema:
+              $ref: '#/components/schemas/cartItem'
+
+    cartItem:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - premium
+        item:
+          allOf:
+            - $ref: '#/components/schemas/premiumItem'
+
+    premiumItem:
+      type: object
+      properties:
+        expires_at:
+          type: string
+        cost:
+          type: integer
+        discount:
+          type: integer
+          required: false
+        currency:
+          type: string

@@ -1,10 +1,16 @@
 package model
 
 import (
+	"encoding/json"
 	"github.com/bd878/gallery/server/api"
 )
 
-func InvoiceFromProto(proto *api.Invoice) *Invoice {
+func InvoiceFromProto(proto *api.Invoice) (*Invoice, error) {
+	cart, err := CartFromProto(proto.Cart)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Invoice{
 		ID:             proto.Id,
 		UserID:         proto.UserId,
@@ -14,10 +20,16 @@ func InvoiceFromProto(proto *api.Invoice) *Invoice {
 		CreatedAt:      proto.CreatedAt,
 		UpdatedAt:      proto.UpdatedAt,
 		Metadata:       proto.Metadata,
-	}
+		Cart:           cart,
+	}, nil
 }
 
-func InvoiceToProto(invoice *Invoice) *api.Invoice {
+func InvoiceToProto(invoice *Invoice) (*api.Invoice, error) {
+	cart, err := CartToProto(invoice.Cart)
+	if err != nil {
+		return nil, err
+	}
+
 	return &api.Invoice{
 		Id:             invoice.ID,
 		UserId:         invoice.UserID,
@@ -27,7 +39,8 @@ func InvoiceToProto(invoice *Invoice) *api.Invoice {
 		CreatedAt:      invoice.CreatedAt,
 		UpdatedAt:      invoice.UpdatedAt,
 		Metadata:       invoice.Metadata,
-	}
+		Cart:           cart,
+	}, nil
 }
 
 func PaymentFromProto(proto *api.Payment) *Payment {
@@ -55,6 +68,74 @@ func PaymentToProto(payment *Payment) *api.Payment {
 		CreatedAt:      payment.CreatedAt,
 		UpdatedAt:      payment.UpdatedAt,
 		Metadata:       payment.Metadata,
+	}
+}
+
+func CartFromProto(proto *api.Cart) (*Cart, error) {
+	items, err := MapCartItemsFromProto(CartItemFromProto, proto.Items)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Cart{
+		Items: items,
+	}, nil
+}
+
+func CartToProto(cart *Cart) (*api.Cart, error) {
+	items, err := MapCartItemsToProto(CartItemToProto, cart.Items)
+	if err != nil {
+		return nil, err
+	}
+
+	return &api.Cart{
+		Items: items,
+	}, nil
+}
+
+func CartItemFromProto(item *api.CartItem) (*CartItem, error) {
+	switch v := item.Item.(type) {
+	case *api.CartItem_Premium:
+		premium, err := json.Marshal(&PremiumItem{
+			ExpiresAt:   v.Premium.ExpiresAt,
+			Cost:        v.Premium.Cost,
+			Discount:    v.Premium.Discount,
+			Currency:    v.Premium.Currency,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		return &CartItem{
+			Type: "premium",
+			Item: json.RawMessage(premium),
+		}, nil
+	default:
+		return &CartItem{Type: "unknown"}, nil
+	}
+}
+
+func CartItemToProto(item *CartItem) (*api.CartItem, error) {
+	switch item.Type {
+	case "premium":
+		var premium PremiumItem
+		err := json.Unmarshal(item.Item, &premium)
+		if err != nil {
+			return nil, err
+		}
+
+		return &api.CartItem{
+			Item: &api.CartItem_Premium{
+				Premium: &api.Premium{
+					ExpiresAt: premium.ExpiresAt,
+					Cost:      premium.Cost,
+					Discount:  premium.Discount,
+					Currency:  premium.Currency,
+				},
+			},
+		}, nil
+	default:
+		return &api.CartItem{}, nil
 	}
 }
 
@@ -88,4 +169,26 @@ func MapPaymentsFromProto(mapper (func(*api.Payment) *Payment), payments []*api.
 		res[i] = mapper(payment)
 	}
 	return res
+}
+
+func MapCartItemsToProto(mapper (func(*CartItem) (*api.CartItem, error)), items []*CartItem) (res []*api.CartItem, err error) {
+	res = make([]*api.CartItem, len(items))
+	for i, item := range items {
+		res[i], err = mapper(item)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func MapCartItemsFromProto(mapper (func(*api.CartItem) (*CartItem, error)), items []*api.CartItem) (res []*CartItem, err error) {
+	res = make([]*CartItem, len(items))
+	for i, item := range items {
+		res[i], err = mapper(item)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
 }

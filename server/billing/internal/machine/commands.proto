@@ -10,7 +10,8 @@ message AppendInvoiceCommand {
 	int64   total = 5;
 	string  created_at = 6;
 	string  updated_at = 7;
-	optional bytes metadata = 8;
+	bytes   cart = 8;
+	optional bytes metadata = 9;
 }
 
 message AppendPaymentCommand {

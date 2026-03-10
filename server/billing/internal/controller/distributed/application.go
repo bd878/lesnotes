@@ -7,17 +7,20 @@ import (
 
 	"google.golang.org/protobuf/proto"
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/billing/pkg/model"
 	"github.com/bd878/gallery/server/billing/internal/machine"
+	"github.com/bd878/gallery/server/billing/internal/domain"
 )
 
+// TODO: can we return *api.Payment directly from repo w/o model conversion?
 type PaymentsRepository interface {
 	GetPayment(ctx context.Context, id, userID int64) (payment *model.Payment, err error)
 }
 
 type InvoicesRepository interface {
-	GetInvoice(ctx context.Context, id string, userID int64) (invoice *model.Invoice, err error)
+	GetInvoice(ctx context.Context, id string, userID int64) (invoice *api.Invoice, err error)
 }
 
 type Consensus interface {
@@ -28,14 +31,16 @@ type Consensus interface {
 type Distributed struct {
 	consensus      Consensus
 	log            *logger.Logger
+	publisher      ddd.EventPublisher[ddd.Event]
 	paymentsRepo   PaymentsRepository
 	invoicesRepo   InvoicesRepository
 }
 
-func New(consensus Consensus, paymentsRepo PaymentsRepository,
+func New(consensus Consensus, publisher ddd.EventPublisher[ddd.Event], paymentsRepo PaymentsRepository,
 	invoicesRepo InvoicesRepository, log *logger.Logger) *Distributed {
 	return &Distributed{
 		log:            log,
+		publisher:      publisher,
 		consensus:      consensus,
 		paymentsRepo:   paymentsRepo,
 		invoicesRepo:   invoicesRepo,
@@ -57,14 +62,20 @@ func (m *Distributed) apply(ctx context.Context, reqType machine.RequestType, cm
 	return m.consensus.Apply(buf.Bytes(), 10*time.Second)
 }
 
-func (m *Distributed) CreateInvoice(ctx context.Context, id string, userID int64, currency string, total int64, metadata []byte) (err error) {
-	m.log.Debugw("invoice payment", "id", id, "user_id", userID, "currency", currency, "total", total, "metadata", metadata)
+func (m *Distributed) CreateInvoice(ctx context.Context, id string, userID int64, currency string, total int64, metadata []byte, cart *api.Cart) (err error) {
+	m.log.Debugw("invoice payment", "id", id, "user_id", userID, "currency", currency, "total", total, "metadata", metadata, "cart", cart)
+
+	cc, err := proto.Marshal(cart)
+	if err != nil {
+		return err
+	}
 
 	cmd, err := proto.Marshal(&machine.AppendInvoiceCommand{
 		Id:            id,
 		UserId:        userID,
 		Currency:      currency,
 		Total:         total,
+		Cart:          cc,
 		Status:        "unpaid",
 		Metadata:      metadata,
 		CreatedAt:     time.Now().UTC().Format(time.RFC3339),
@@ -115,25 +126,42 @@ func (m *Distributed) ProceedPayment(ctx context.Context, id, userID int64) (err
 		return err
 	}
 
+	invoice, err := m.invoicesRepo.GetInvoice(ctx, payment.InvoiceID, userID)
+	if err != nil {
+		return err
+	}
+
+	m.log.Debugw("get invoice", "payment_id", id, "invoice_id", invoice.Id, "user_id", userID)
+
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
+	event, err := domain.PayInvoice(invoice.Id, invoice.Cart, userID, updatedAt)
+	if err != nil {
+		return err
+	}
+
+	cmd1, err := proto.Marshal(&machine.PayInvoiceCommand{
+		Id:            payment.InvoiceID,
+		UserId:        userID,
+		UpdatedAt:     updatedAt,
+	})
+	if err != nil {
+		return err
+	}
+
 	err = m.apply(ctx, machine.ProceedPaymentRequest, cmd)
 	if err != nil {
 		// TODO: rollback payment if failed
 		return
 	}
 
-	m.log.Debugw("proceed invoice", "id", id, "user_id", userID)
-
-	cmd1, err := proto.Marshal(&machine.PayInvoiceCommand{
-		Id:            payment.InvoiceID,
-		UserId:        userID,
-		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
-	})
+	err = m.apply(ctx, machine.PayInvoiceRequest, cmd1)
 	if err != nil {
-		// TODO: rollback payment if falied
+		// TODO: rollback payment if failed
 		return err
 	}
 
-	return m.apply(ctx, machine.PayInvoiceRequest, cmd1)
+	return m.publisher.Publish(context.TODO(), event)
 }
 
 func (m *Distributed) CancelPayment(ctx context.Context, id, userID int64) (err error) {
@@ -166,7 +194,7 @@ func (m *Distributed) RefundPayment(ctx context.Context, id, userID int64) (err 
 	return m.apply(ctx, machine.RefundPaymentRequest, cmd)
 }
 
-func (m *Distributed) GetInvoice(ctx context.Context, id string, userID int64) (invoice *model.Invoice, err error) {
+func (m *Distributed) GetInvoice(ctx context.Context, id string, userID int64) (invoice *api.Invoice, err error) {
 	m.log.Debugw("get invoice", "id", id, "user_id", userID)
 	return m.invoicesRepo.GetInvoice(ctx, id, userID)
 }

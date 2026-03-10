@@ -7,9 +7,10 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"google.golang.org/protobuf/proto"
 
+	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/billing/pkg/model"
 )
 
 type InvoicesRepository struct {
@@ -22,10 +23,10 @@ func NewInvoicesRepository(pool *pgxpool.Pool, tableName string) *InvoicesReposi
 }
 
 func (r *InvoicesRepository) SaveInvoice(ctx context.Context, id string, userID int64, currency, status string, total int64,
-	metadata []byte, createdAt, updatedAt string) (err error) {
-	const insert = "INSERT INTO %s(id, user_id, currency, status, total, metadata, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"
+	metadata []byte, cart []byte, createdAt, updatedAt string) (err error) {
+	const insert = "INSERT INTO %s(id, user_id, currency, status, total, metadata, cart, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
 
-	_, err = r.pool.Exec(ctx, r.table(insert), id, userID, currency, status, total, metadata, createdAt, updatedAt)
+	_, err = r.pool.Exec(ctx, r.table(insert), id, userID, currency, status, total, metadata, cart, createdAt, updatedAt)
 
 	return
 }
@@ -46,22 +47,31 @@ func (r *InvoicesRepository) CancelInvoice(ctx context.Context, id string, userI
 	return
 }
 
-func (r *InvoicesRepository) GetInvoice(ctx context.Context, id string, userID int64) (invoice *model.Invoice, err error) {
-	const query = "SELECT status, currency, total, metadata, created_at, updated_at FROM %s WHERE user_id = $1 AND id = $2"
+func (r *InvoicesRepository) GetInvoice(ctx context.Context, id string, userID int64) (invoice *api.Invoice, err error) {
+	const query = "SELECT status, currency, total, metadata, cart, created_at, updated_at FROM %s WHERE user_id = $1 AND id = $2"
 
-	invoice = &model.Invoice{
-		ID:      id,
-		UserID:  userID,
+	invoice = &api.Invoice{
+		Id:      id,
+		UserId:  userID,
 	}
 
 	var createdAt, updatedAt *time.Time
 
+	var cart []byte
+
 	err = r.pool.QueryRow(ctx, r.table(query), userID, id).Scan(&invoice.Status, &invoice.Currency,
-		&invoice.Total, &invoice.Metadata, &createdAt, &updatedAt)
+		&invoice.Total, &invoice.Metadata, &cart, &createdAt, &updatedAt)
 	if err != nil {
 		return
 	}
 
+	var cc api.Cart
+	err = proto.Unmarshal(cart, &cc)
+	if err != nil {
+		return
+	}
+
+	invoice.Cart = &cc
 	invoice.CreatedAt = createdAt.Format(time.RFC3339)
 	invoice.UpdatedAt = updatedAt.Format(time.RFC3339)
 
