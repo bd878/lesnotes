@@ -22,11 +22,11 @@ func NewInvoicesRepository(pool *pgxpool.Pool, tableName string) *InvoicesReposi
 	return &InvoicesRepository{tableName: tableName, pool: pool}
 }
 
-func (r *InvoicesRepository) SaveInvoice(ctx context.Context, id string, userID int64, currency, status string, total int64,
+func (r *InvoicesRepository) SaveInvoice(ctx context.Context, id string, userID int64, status string, total int64,
 	metadata []byte, cart []byte, createdAt, updatedAt string) (err error) {
-	const insert = "INSERT INTO %s(id, user_id, currency, status, total, metadata, cart, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
+	const insert = "INSERT INTO %s(id, user_id, status, total, metadata, cart, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"
 
-	_, err = r.pool.Exec(ctx, r.table(insert), id, userID, currency, status, total, metadata, cart, createdAt, updatedAt)
+	_, err = r.pool.Exec(ctx, r.table(insert), id, userID, status, total, metadata, cart, createdAt, updatedAt)
 
 	return
 }
@@ -48,7 +48,7 @@ func (r *InvoicesRepository) CancelInvoice(ctx context.Context, id string, userI
 }
 
 func (r *InvoicesRepository) GetInvoice(ctx context.Context, id string, userID int64) (invoice *api.Invoice, err error) {
-	const query = "SELECT status, currency, total, metadata, cart, created_at, updated_at FROM %s WHERE user_id = $1 AND id = $2"
+	const query = "SELECT status, total, metadata, cart, created_at, updated_at FROM %s WHERE user_id = $1 AND id = $2"
 
 	invoice = &api.Invoice{
 		Id:      id,
@@ -59,7 +59,7 @@ func (r *InvoicesRepository) GetInvoice(ctx context.Context, id string, userID i
 
 	var cart []byte
 
-	err = r.pool.QueryRow(ctx, r.table(query), userID, id).Scan(&invoice.Status, &invoice.Currency,
+	err = r.pool.QueryRow(ctx, r.table(query), userID, id).Scan(&invoice.Status,
 		&invoice.Total, &invoice.Metadata, &cart, &createdAt, &updatedAt)
 	if err != nil {
 		return

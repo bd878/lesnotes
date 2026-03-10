@@ -6,7 +6,7 @@ stage=${STAGE:-"stage."}
 token=${1?:"Usage: proceed_payment_json.sh token id"}
 id=${2?:"Usage: proceed_payment_json.sh token id"}
 
-json=$(echo -n '{\"token\":\"%TOKEN%\",\"req\":{\"ID\":%ID%}}' | sed -e "s/%TOKEN%/$token/g" -e "s/%ID%/$id/g")
+json=$(echo -n '{\"token\":\"%TOKEN%\",\"req\":{\"id\":%ID%}}' | sed -e "s/%TOKEN%/$token/g" -e "s/%ID%/$id/g")
 
 cmd=`cat <<HERE
 sed -e "s/%STAGE%/$stage/g" \

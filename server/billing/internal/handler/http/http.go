@@ -9,7 +9,7 @@ import (
 )
 
 type Controller interface {
-	CreateInvoice(ctx context.Context, id string, userID int64, currency string, total int64, metadata []byte, cart *model.Cart) (err error)
+	CreateInvoice(ctx context.Context, id string, userID int64, total int64, metadata []byte, cart *model.Cart) (err error)
 	StartPayment(ctx context.Context, id, userID int64, invoiceID string, currency string, total int64, metadata []byte) (err error)
 	ProceedPayment(ctx context.Context, id, userID int64) (err error)
 	CancelPayment(ctx context.Context, id, userID int64) (err error)

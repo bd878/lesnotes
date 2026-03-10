@@ -15,7 +15,6 @@ func InvoiceFromProto(proto *api.Invoice) (*Invoice, error) {
 		ID:             proto.Id,
 		UserID:         proto.UserId,
 		Status:         proto.Status,
-		Currency:       proto.Currency,
 		Total:          proto.Total,
 		CreatedAt:      proto.CreatedAt,
 		UpdatedAt:      proto.UpdatedAt,
@@ -33,7 +32,6 @@ func InvoiceToProto(invoice *Invoice) (*api.Invoice, error) {
 	return &api.Invoice{
 		Id:             invoice.ID,
 		UserId:         invoice.UserID,
-		Currency:       invoice.Currency,
 		Total:          invoice.Total,
 		Status:         invoice.Status,
 		CreatedAt:      invoice.CreatedAt,

@@ -62,8 +62,8 @@ func (m *Distributed) apply(ctx context.Context, reqType machine.RequestType, cm
 	return m.consensus.Apply(buf.Bytes(), 10*time.Second)
 }
 
-func (m *Distributed) CreateInvoice(ctx context.Context, id string, userID int64, currency string, total int64, metadata []byte, cart *api.Cart) (err error) {
-	m.log.Debugw("invoice payment", "id", id, "user_id", userID, "currency", currency, "total", total, "metadata", metadata, "cart", cart)
+func (m *Distributed) CreateInvoice(ctx context.Context, id string, userID int64, total int64, metadata []byte, cart *api.Cart) (err error) {
+	m.log.Debugw("invoice payment", "id", id, "user_id", userID, "total", total, "metadata", metadata, "cart", cart)
 
 	cc, err := proto.Marshal(cart)
 	if err != nil {
@@ -73,7 +73,6 @@ func (m *Distributed) CreateInvoice(ctx context.Context, id string, userID int64
 	cmd, err := proto.Marshal(&machine.AppendInvoiceCommand{
 		Id:            id,
 		UserId:        userID,
-		Currency:      currency,
 		Total:         total,
 		Cart:          cc,
 		Status:        "unpaid",

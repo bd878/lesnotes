@@ -17,13 +17,12 @@ service Billing {
 message Invoice {
 	string    id = 1;
 	int64     user_id = 2;
-	string    currency = 3;
-	string    status = 4;
-	int64     total = 5;
-	string    created_at = 6;
-	string    updated_at = 7;
-	Cart      cart = 8;
-	optional bytes metadata = 9;
+	string    status = 3;
+	int64     total = 4;
+	string    created_at = 5;
+	string    updated_at = 6;
+	Cart      cart = 7;
+	optional bytes metadata = 8;
 }
 
 message Payment {
@@ -41,10 +40,9 @@ message Payment {
 message CreateInvoiceRequest {
 	string  id = 1;
 	int64   user_id = 2;
-	string  currency = 3;
-	int64   total = 4;
-	Cart    cart = 5;
-	optional bytes metadata = 6;
+	int64   total = 3;
+	Cart    cart = 4;
+	optional bytes metadata = 5;
 }
 
 message Cart {

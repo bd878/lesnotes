@@ -53,7 +53,7 @@ func (h *Handler) CreateInvoiceJsonAPI(w http.ResponseWriter, req *http.Request)
 		return err
 	}
 
-	err = h.controller.CreateInvoice(req.Context(), request.ID, user.ID, request.Currency, request.Total, []byte(request.Metadata), request.Cart)
+	err = h.controller.CreateInvoice(req.Context(), request.ID, user.ID, request.Total, []byte(request.Metadata), request.Cart)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

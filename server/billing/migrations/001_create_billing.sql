@@ -33,7 +33,6 @@ CREATE TABLE IF NOT EXISTS billing.invoices
 	id             VARCHAR(256)            UNIQUE NOT NULL,
 	user_id        bigint                  NOT NULL,
 	status         billing.invoice_status  NOT NULL DEFAULT 'unpaid',
-	currency       billing.currency        NOT NULL DEFAULT 'rub',
 	total          bigint                  NOT NULL,
 	cart           bytea                   NOT NULL,
 	metadata       bytea                   DEFAULT NULL,

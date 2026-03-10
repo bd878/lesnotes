@@ -9,7 +9,7 @@ import (
 
 type Controller interface {
 	GetServers(ctx context.Context) (servers []*api.Server, err error)
-	CreateInvoice(ctx context.Context, id string, userID int64, currency string, total int64, metadata []byte, cart *api.Cart) (err error)
+	CreateInvoice(ctx context.Context, id string, userID int64, total int64, metadata []byte, cart *api.Cart) (err error)
 	StartPayment(ctx context.Context, id, userID int64, invoiceID string, currency string, total int64, metadata []byte) (err error)
 	ProceedPayment(ctx context.Context, id, userID int64) (err error)
 	CancelPayment(ctx context.Context, id, userID int64) (err error)
@@ -33,7 +33,7 @@ func New(ctrl Controller) *Handler {
 func (h *Handler) CreateInvoice(ctx context.Context, req *api.CreateInvoiceRequest) (resp *api.CreateInvoiceResponse, err error) {
 	// TODO: validate cart
 
-	err = h.controller.CreateInvoice(ctx, req.Id, req.UserId, req.Currency, req.Total, req.Metadata, req.Cart)
+	err = h.controller.CreateInvoice(ctx, req.Id, req.UserId, req.Total, req.Metadata, req.Cart)
 	if err != nil {
 		return nil, err
 	}

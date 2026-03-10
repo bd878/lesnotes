@@ -68,14 +68,14 @@ func (s *Controller) isConnFailed() bool {
 	return false
 }
 
-func (s *Controller) CreateInvoice(ctx context.Context, id string, userID int64, currency string, total int64, metadata []byte, cart *model.Cart) (err error) {
+func (s *Controller) CreateInvoice(ctx context.Context, id string, userID int64, total int64, metadata []byte, cart *model.Cart) (err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
 		}
 	}
 
-	logger.Debugw("create invoice", "id", id, "user_id", userID, "currency", currency, "total", total, "metadata", metadata, "cart", cart)
+	logger.Debugw("create invoice", "id", id, "user_id", userID, "total", total, "metadata", metadata, "cart", cart)
 
 	cc, err := model.CartToProto(cart)
 	if err != nil {
@@ -85,7 +85,6 @@ func (s *Controller) CreateInvoice(ctx context.Context, id string, userID int64,
 	_, err = s.client.CreateInvoice(ctx, &api.CreateInvoiceRequest{
 		Id:        id,
 		UserId:    userID,
-		Currency:  currency,
 		Total:     total,
 		Metadata:  metadata,
 		Cart:      cc,

@@ -19,7 +19,7 @@ type PaymentsRepository interface {
 }
 
 type InvoicesRepository interface {
-	SaveInvoice(ctx context.Context, id string, userID int64, currency, status string, total int64, metadata []byte, cart []byte, createdAt, updatedAt string) (err error)
+	SaveInvoice(ctx context.Context, id string, userID int64, status string, total int64, metadata []byte, cart []byte, createdAt, updatedAt string) (err error)
 	CancelInvoice(ctx context.Context, id string, userID int64, updatedAt string) (err error)
 	PayInvoice(ctx context.Context, id string, userID int64, updatedAt string) (err error)
 	Dump(ctx context.Context, writer io.Writer) (err error)
@@ -70,7 +70,7 @@ func (f *Machine) applyAppendInvoice(raw []byte) interface{} {
 	var cmd AppendInvoiceCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.invoicesRepo.SaveInvoice(context.TODO(), cmd.Id, cmd.UserId, cmd.Currency, cmd.Status, cmd.Total,
+	return f.invoicesRepo.SaveInvoice(context.TODO(), cmd.Id, cmd.UserId, cmd.Status, cmd.Total,
 		cmd.Metadata, cmd.Cart, cmd.CreatedAt, cmd.UpdatedAt)
 }
 

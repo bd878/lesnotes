@@ -45,7 +45,6 @@ type (
 
 	CreateInvoiceRequest struct {
 		ID                 string            `json:"id"`
-		Currency           string            `json:"currency"`
 		Total              int64             `json:"total"`
 		Cart               *Cart             `json:"cart"`
 		Metadata           json.RawMessage   `json:"metadata"`

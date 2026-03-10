@@ -3,18 +3,33 @@
 # Create invoice via json api
 
 stage=${STAGE:-"stage."}
-token=${1?:"Usage: create_invoice_json.sh token id currency total"}
-id=${2?:"Usage: create_invoice_json.sh token id currency total"}
-currency=${3?:"Usage: create_invoice_json.sh token id currency total"}
-total=${4?:"Usage: create_invoice_json.sh token id currency total"}
+token=${1?:"Usage: create_invoice_json.sh token id"}
+id=${2?:"Usage: create_invoice_json.sh token id"}
 
-json=$(echo -n '{\"token\":\"%TOKEN%\",\"req\":{\"id\":\"%ID%\",\"currency\":\"%CURRENCY%\",\"total\":%TOTAL%}}' |
-	sed -e "s/%TOKEN%/$token/g" -e "s/%ID%/$id/g" -e "s/%CURRENCY%/$currency/g" -e "s/%TOTAL%/$total/g")
+json=$(echo -n '
+{
+  \"token\": \"%TOKEN%\",
+  \"req\": {
+    \"id\": \"%ID%\",
+    \"total\": 1000,
+    \"cart\": {
+      \"items\": [
+        {
+          \"type\": \"premium\",
+          \"item\": {
+            \"expires_at\": \"2027-01-01T23:59:59Z\",
+            \"cost\": 1000,
+            \"currency\": \"xtr\"
+          }
+        }
+      ]
+    }
+  }
+}' | tr -d ' ' | tr -d '\n' | sed -e "s/%TOKEN%/$token/g" -e "s/%ID%/$id/g" )
 
 cmd=`cat <<HERE
-sed -e "s/%STAGE%/$stage/g" \
--e "s/%JSON%/$json/g" ./curl/create_invoice_json.curl |
-curl -K -
+sed -e "s/%STAGE%/$stage/g" -e "s/%JSON%/$(echo -n $json)/g" ./curl/create_invoice_json.curl | curl -K -
 HERE`
+# echo $cmd
 result=`eval "$cmd"`
 echo $result
