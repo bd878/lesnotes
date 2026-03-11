@@ -17,8 +17,8 @@ type UsersRepository interface {
 }
 
 type UsersDumper interface {
-	Open(ctx context.Context) (ch chan *api.UserSnapshot, err error)
-	Restore(ctx context.Context, user *api.UserSnapshot) (err error)
+	Open(ctx context.Context) (ch chan *api.UsersSnapshot, err error)
+	Restore(ctx context.Context, user *api.UsersSnapshot) (err error)
 	Close() (err error)
 }
 

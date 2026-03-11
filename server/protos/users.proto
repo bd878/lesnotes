@@ -22,7 +22,14 @@ message User {
 	optional bytes metadata = 7;
 }
 
-message UserSnapshot {
+message UsersSnapshot {
+	oneof Item {
+		UserSnapshotItem user = 1;
+		PremiumSnapshotItem premium = 2;
+	}
+}
+
+message UserSnapshotItem {
 	int64 id = 1;
 	string login = 2;
 	string hashed_password = 3;
@@ -31,7 +38,7 @@ message UserSnapshot {
 	optional bytes metadata = 6;
 }
 
-message PremiumSnapshot {
+message PremiumSnapshotItem {
 	int64 id = 1;
 	string invoice_id = 2;
 	string created_at = 3;
