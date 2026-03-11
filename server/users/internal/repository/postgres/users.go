@@ -41,7 +41,23 @@ func (r *UsersRepository) Delete(ctx context.Context, id int64) (err error) {
 }
 
 func (r *UsersRepository) FindByID(ctx context.Context, id int64) (user *model.User, err error) {
-	query := "SELECT login, salt, metadata, created_at, updated_at FROM %s WHERE id = $1"
+	query := fmt.Sprintf(`
+SELECT DISTINCT
+	u.login,
+	u.salt,
+	u.metadata,
+	u.created_at,
+	u.updated_at,
+	coalesce(p.is_premium, false) as is_premium
+FROM %s u
+LEFT JOIN (
+	SELECT id, EXTRACT(EPOCH FROM expires_at - NOW()) > 0 as is_premium
+	FROM %s
+	WHERE id = $1
+) p
+ON u.id = p.id
+WHERE u.id = $1
+`, r.usersTableName, r.premiumsTableName)
 
 	user = &model.User{
 		ID:     id,
@@ -49,7 +65,8 @@ func (r *UsersRepository) FindByID(ctx context.Context, id int64) (user *model.U
 
 	var createdAt, updatedAt *time.Time
 
-	err = r.pool.QueryRow(ctx, r.usersTable(query), id).Scan(&user.Login, &user.HashedPassword, &user.Metadata, &createdAt, &updatedAt)
+	err = r.pool.QueryRow(ctx, query, id).Scan(&user.Login, &user.HashedPassword,
+		&user.Metadata, &createdAt, &updatedAt, &user.IsPremium)
 	if err != nil {
 		return
 	}
@@ -61,7 +78,22 @@ func (r *UsersRepository) FindByID(ctx context.Context, id int64) (user *model.U
 }
 
 func (r *UsersRepository) FindByLogin(ctx context.Context, login string) (user *model.User, err error) {
-	query := "SELECT id, salt, metadata, created_at, updated_at FROM %s WHERE login = $1"
+	query := fmt.Sprintf(`
+SELECT DISTINCT
+	u.id,
+	u.salt,
+	u.metadata,
+	u.created_at,
+	u.updated_at,
+	coalesce(p.is_premium, false) as is_premium
+FROM %s u
+LEFT JOIN (
+	SELECT id, EXTRACT(EPOCH FROM expires_at - NOW()) > 0 as is_premium
+	FROM %s
+) p
+ON u.id = p.id
+WHERE u.login = $1
+`, r.usersTableName, r.premiumsTableName)
 
 	user = &model.User{
 		Login:   login,
@@ -69,7 +101,8 @@ func (r *UsersRepository) FindByLogin(ctx context.Context, login string) (user *
 
 	var createdAt, updatedAt *time.Time
 
-	err = r.pool.QueryRow(ctx, r.usersTable(query), login).Scan(&user.ID, &user.HashedPassword, &user.Metadata, &createdAt, &updatedAt)
+	err = r.pool.QueryRow(ctx, query, login).Scan(&user.ID, &user.HashedPassword,
+		&user.Metadata, &createdAt, &updatedAt, &user.IsPremium)
 	if err != nil {
 		return
 	}

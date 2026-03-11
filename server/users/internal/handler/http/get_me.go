@@ -40,6 +40,7 @@ func (h *Handler) GetMe(w http.ResponseWriter, req *http.Request) (err error) {
 	response, err := json.Marshal(users.GetMeResponse{
 		ID:          user.ID,
 		Login:       user.Login,
+		IsPremium:   user.IsPremium,
 		Metadata:    user.Metadata,
 		CreatedAt:   user.CreatedAt,
 		UpdatedAt:   user.UpdatedAt,
