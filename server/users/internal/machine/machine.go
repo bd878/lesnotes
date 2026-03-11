@@ -5,8 +5,8 @@ import (
 
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
+	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/users/pkg/model"
 )
 
 type UsersRepository interface {
@@ -17,8 +17,8 @@ type UsersRepository interface {
 }
 
 type UsersDumper interface {
-	Open(ctx context.Context) (ch chan *model.User, err error)
-	Restore(ctx context.Context, user *model.User) (err error)
+	Open(ctx context.Context) (ch chan *api.UserSnapshot, err error)
+	Restore(ctx context.Context, user *api.UserSnapshot) (err error)
 	Close() (err error)
 }
 

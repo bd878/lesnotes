@@ -18,7 +18,7 @@ type snapshot struct {
 	store         *store.Store
 	usersDumper   UsersDumper
 	ctx           context.Context
-	ch            <-chan *model.User
+	ch            <-chan *api.UserSnapshot
 }
 
 func (f *Machine) Snapshot() (raft.FSMSnapshot, error) {
@@ -72,7 +72,7 @@ func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 
 		logger.Debugw("read", "n", n, "data", data)
 
-		var user api.User
+		var user api.UserSnapshot
 		if err = proto.Unmarshal(data, &user); err != nil {
 			return err
 		}
@@ -80,9 +80,7 @@ func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 		logger.Debugw("user", "id", user.Id, "login", user.Login, "salt", user.HashedPassword,
 			"created_at", user.CreatedAt, "updated_at", user.UpdatedAt, "metadata", user.Metadata)
 
-		u := model.UserFromProto(&user)
-
-		err = f.usersDumper.Restore(context.TODO(), u)
+		err = f.usersDumper.Restore(context.TODO(), &user)
 		if err != nil {
 			return err
 		}
@@ -95,12 +93,12 @@ func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
 	logger.Debugln("persisting snapshot")
 
 	for u := range s.ch {
-		if u.ID == model.PublicUserID {
+		if u.Id == model.PublicUserID {
 			// restore public user from migration
 			continue
 		}
 
-		data, err := proto.Marshal(model.UserToProto(u))
+		data, err := proto.Marshal(u)
 		if err != nil {
 			return err
 		}
@@ -110,7 +108,7 @@ func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
 			return err
 		}
 
-		logger.Debugw("append user to snapshot", "id", u.ID, "n", n)
+		logger.Debugw("append user to snapshot", "id", u.Id, "n", n)
 
 		select {
 		case <-s.ctx.Done():

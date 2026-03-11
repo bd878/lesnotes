@@ -13,6 +13,7 @@ type (
 		ExpiresAt        string           `json:"expires_at,omitempty"` // TODO: remove
 		CreatedAt        string           `json:"created_at"`
 		UpdatedAt        string           `json:"updated_at"`
+		IsPremium        bool             `json:"is_premium"`
 		Metadata         []byte           `json:"metadata,omitempty"`
 	}
 
@@ -45,6 +46,7 @@ type (
 	GetMeResponse struct {
 		ID               int64            `json:"id"`
 		Login            string           `json:"login"`
+		IsPremium        bool             `json:"is_premium"`
 		CreatedAt        string           `json:"created_at"`
 		UpdatedAt        string           `json:"updated_at"`
 		Metadata         []byte           `json:"metadata,omitempty"`

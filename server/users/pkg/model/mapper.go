@@ -12,6 +12,7 @@ func UserToProto(u *User) *api.User {
 		CreatedAt:        u.CreatedAt,
 		UpdatedAt:        u.UpdatedAt,
 		Metadata:         u.Metadata,
+		IsPremium:        u.IsPremium,
 	}
 }
 
@@ -23,5 +24,6 @@ func UserFromProto(u *api.User) *User {
 		Metadata:         u.Metadata,
 		CreatedAt:        u.CreatedAt,
 		UpdatedAt:        u.UpdatedAt,
+		IsPremium:        u.IsPremium,
 	}
 }

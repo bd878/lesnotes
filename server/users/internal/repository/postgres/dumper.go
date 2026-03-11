@@ -9,8 +9,8 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/users/pkg/model"
 )
 
 type UsersDumper struct {
@@ -20,7 +20,7 @@ type UsersDumper struct {
 	rows              pgx.Rows
 	ctx               context.Context
 	cancel            context.CancelCauseFunc
-	ch                chan *model.User
+	ch                chan *api.UserSnapshot
 	wg                sync.WaitGroup
 }
 
@@ -32,7 +32,7 @@ func NewUsersDumper(pool *pgxpool.Pool, usersTableName, premiumsTableName string
 	}
 }
 
-func (r *UsersDumper) Open(ctx context.Context) (ch chan *model.User, err error) {
+func (r *UsersDumper) Open(ctx context.Context) (ch chan *api.UserSnapshot, err error) {
 	query := "SELECT id, login, salt, metadata, created_at, updated_at FROM %s"
 
 	r.ctx, r.cancel = context.WithCancelCause(ctx)
@@ -41,7 +41,7 @@ func (r *UsersDumper) Open(ctx context.Context) (ch chan *model.User, err error)
 		return
 	}
 
-	ch = make(chan *model.User, 100)
+	ch = make(chan *api.UserSnapshot, 100)
 	r.ch = ch
 
 	r.wg.Add(1)
@@ -51,10 +51,10 @@ func (r *UsersDumper) Open(ctx context.Context) (ch chan *model.User, err error)
 		defer r.wg.Done()
 
 		for r.rows.Next() {
-			user := &model.User{}
+			user := &api.UserSnapshot{}
 
 			var createdAt, updatedAt *time.Time
-			err = r.rows.Scan(&user.ID, &user.Login, &user.HashedPassword, &user.Metadata, &createdAt, &updatedAt)
+			err = r.rows.Scan(&user.Id, &user.Login, &user.HashedPassword, &user.Metadata, &createdAt, &updatedAt)
 			if err != nil {
 				logger.Errorln(err)
 				r.cancel(err)
@@ -90,10 +90,10 @@ func (r *UsersDumper) Close() (err error) {
 	return nil
 }
 
-func (r *UsersDumper) Restore(ctx context.Context, user *model.User) (err error) {
+func (r *UsersDumper) Restore(ctx context.Context, user *api.UserSnapshot) (err error) {
 	query := "INSERT INTO %s(id, login, salt, metadata, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)"
 
-	_, err = r.pool.Exec(ctx, r.usersTable(query), user.ID, user.Login, user.HashedPassword, user.Metadata, user.CreatedAt, user.UpdatedAt)
+	_, err = r.pool.Exec(ctx, r.usersTable(query), user.Id, user.Login, user.HashedPassword, user.Metadata, user.CreatedAt, user.UpdatedAt)
 
 	return
 }

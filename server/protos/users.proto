@@ -18,7 +18,24 @@ message User {
 	string    hashed_password = 3;
 	string    created_at = 4;
 	string    updated_at = 5;
+	bool      is_premium = 6;
+	optional bytes metadata = 7;
+}
+
+message UserSnapshot {
+	int64 id = 1;
+	string login = 2;
+	string hashed_password = 3;
+	string created_at = 4;
+	string updated_at = 5;
 	optional bytes metadata = 6;
+}
+
+message PremiumSnapshot {
+	int64 id = 1;
+	string invoice_id = 2;
+	string created_at = 3;
+	string expires_at = 4;
 }
 
 message GetUserRequest {
