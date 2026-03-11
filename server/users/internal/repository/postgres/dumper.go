@@ -41,6 +41,11 @@ func (r *UsersDumper) Open(ctx context.Context) (ch chan *api.UsersSnapshot, err
 	r.wg.Add(1)
 	go r.runPremiums()
 
+	go func() {
+		r.wg.Wait()
+		close(r.ch)
+	}()
+
 	return
 }
 
@@ -48,6 +53,7 @@ func (r *UsersDumper) runUsers() {
 	query := "SELECT id, login, salt, metadata, created_at, updated_at FROM %s"
 
 	defer r.wg.Done()
+	defer logger.Debugln("users dump finished")
 
 	rows, err := r.pool.Query(r.ctx, r.usersTable(query))
 	if err != nil {
@@ -96,6 +102,7 @@ func (r *UsersDumper) runPremiums() {
 	query := "SELECT id, invoice_id, created_at, expires_at FROM %s"
 
 	defer r.wg.Done()
+	defer logger.Debugln("premiums dump finished")
 
 	rows, err := r.pool.Query(r.ctx, r.premiumsTable(query))
 	if err != nil {
@@ -144,7 +151,6 @@ func (r *UsersDumper) Close() (err error) {
 	logger.Debugln("close dumper")
 	r.cancel(nil)
 	r.wg.Wait()
-	close(r.ch)
 	return nil
 }
 

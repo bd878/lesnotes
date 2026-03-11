@@ -240,8 +240,6 @@ func (m *Distributed) Leave(id string) error {
 }
 
 func (m *Distributed) Snapshot() error {
-	m.log.Debugln("snapshot this machine")
-
 	snapshotFuture := m.raft.Snapshot()
 	return snapshotFuture.Error()
 }

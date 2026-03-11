@@ -62,13 +62,15 @@ func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 		}
 
 		data := make([]byte, size)
-		_, err = store.Read(data)
+		n, err := store.Read(data)
 		if err == io.EOF {
 			break
 		}
 		if err != nil {
 			return err
 		}
+
+		logger.Debugw("restore", "n", n)
 
 		var snapshot api.UsersSnapshot
 		if err = proto.Unmarshal(data, &snapshot); err != nil {
@@ -88,6 +90,15 @@ func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
 	logger.Debugln("persisting snapshot")
 
 	for snapshot := range s.ch {
+		switch v := snapshot.Item.(type) {
+		case *api.UsersSnapshot_User:
+			logger.Debugw("user snapshot", "id", v.User.Id)
+		case *api.UsersSnapshot_Premium:
+			logger.Debugw("premium snapshot", "invoice_id", v.Premium.InvoiceId)
+		default:
+			logger.Debugln("unknown snapshot")
+		}
+
 		if u, ok := snapshot.Item.(*api.UsersSnapshot_User); ok {
 			if u.User.Id == model.PublicUserID {
 				// restore public user from migration
@@ -100,10 +111,12 @@ func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
 			return err
 		}
 
-		_, err = s.store.Append(data)
+		n, err := s.store.Append(data)
 		if err != nil {
 			return err
 		}
+
+		logger.Debugw("persist", "n", n)
 
 		select {
 		case <-s.ctx.Done():
@@ -111,6 +124,8 @@ func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
 		default:
 		}
 	}
+
+	logger.Debugln("seek store")
 
 	err = s.store.Seek()
 	if err != nil {
