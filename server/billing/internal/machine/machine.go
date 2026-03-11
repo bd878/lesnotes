@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
+	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/logger"
 )
 
@@ -26,17 +27,25 @@ type InvoicesRepository interface {
 	Restore(ctx context.Context, reader io.Reader) (err error)
 }
 
+type Dumper interface {
+	Open(ctx context.Context) (ch chan *api.BillingSnapshot, err error)
+	Restore(ctx context.Context, snapshot *api.BillingSnapshot) (err error)
+	Close() (err error)
+}
+
 var _ raft.FSM = (*Machine)(nil)
 
 type Machine struct {
 	log             *logger.Logger
+	dumper          Dumper
 	paymentsRepo    PaymentsRepository
 	invoicesRepo    InvoicesRepository
 }
 
-func New(paymentsRepo PaymentsRepository, invoicesRepo InvoicesRepository, log *logger.Logger) *Machine {
+func New(paymentsRepo PaymentsRepository, invoicesRepo InvoicesRepository, dumper Dumper, log *logger.Logger) *Machine {
 	return &Machine{
 		log:          log,
+		dumper:       dumper,
 		paymentsRepo: paymentsRepo,
 		invoicesRepo: invoicesRepo,
 	}

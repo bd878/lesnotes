@@ -25,8 +25,9 @@ import (
 func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error) {
 	paymentsRepo := postgres.NewPaymentsRepository(svc.Pool(), "billing.payments")
 	invoicesRepo := postgres.NewInvoicesRepository(svc.Pool(), "billing.invoices")
+	dumper := postgres.NewDumper(svc.Pool(), "billing.payments", "billing.invoices")
 
-	consensus, err := setupRaft(svc, cfg, paymentsRepo, invoicesRepo)
+	consensus, err := setupRaft(svc, cfg, paymentsRepo, invoicesRepo, dumper)
 	if err != nil {
 		return err
 	}
@@ -85,8 +86,9 @@ func setupSerf(svc system.Service, cfg config.Config, handler serf.Handler, logg
 	return nil
 }
 
-func setupRaft(svc system.Service, cfg config.Config, paymentsRepo *postgres.PaymentsRepository, invoicesRepo *postgres.InvoicesRepository) (*raft.Distributed, error) {
-	fsm := machine.New(paymentsRepo, invoicesRepo, svc.Logger())
+func setupRaft(svc system.Service, cfg config.Config, paymentsRepo *postgres.PaymentsRepository,
+	invoicesRepo *postgres.InvoicesRepository, dumper *postgres.Dumper) (*raft.Distributed, error) {
+	fsm := machine.New(paymentsRepo, invoicesRepo, dumper, svc.Logger())
 
 	consensus, err := raft.New(raft.Config{
 		Bootstrap:      cfg.RaftBootstrap,
