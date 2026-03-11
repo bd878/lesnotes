@@ -113,6 +113,22 @@ func (m *Distributed) UpdateUser(ctx context.Context, id int64, login *string, m
 	return m.apply(ctx, machine.UpdateRequest, cmd)
 }
 
+func (m *Distributed) MakePremium(ctx context.Context, id int64, invoiceID, createdAt, expiresAt string) (err error) {
+	m.log.Debugw("make premium", "id", id, "invoice_id", invoiceID, "created_at", createdAt, "expiresAt", expiresAt)
+
+	cmd, err := proto.Marshal(&machine.MakePremiumCommand{
+		InvoiceId:       invoiceID,
+		Id:              id,
+		CreatedAt:       createdAt,
+		ExpiresAt:       expiresAt,
+	})
+	if err != nil {
+		return err
+	}
+
+	return m.apply(ctx, machine.MakePremiumRequest, cmd)
+}
+
 func (m *Distributed) FindUser(ctx context.Context, login string) (user *model.User, err error) {
 	m.log.Debugw("find user", "login", login)
 	return m.usersRepo.FindByLogin(ctx, login)

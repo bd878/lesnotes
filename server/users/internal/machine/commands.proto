@@ -21,3 +21,10 @@ message UpdateCommand {
 message DeleteCommand {
 	int64   id = 1;
 }
+
+message MakePremiumCommand {
+	string invoice_id = 1;
+	int64 id = 2;
+	string expires_at = 3;
+	string created_at = 4;
+}

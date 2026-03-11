@@ -8,6 +8,7 @@ import (
 
 const (
 	InvoicePayedEvent = "billing.InvoicePayed"
+	PremiumPayedEvent = "billing.PremiumPayed"
 )
 
 var (
@@ -34,5 +35,31 @@ func PayInvoice(id string, cart *api.Cart, userID int64, payedAt string) (ddd.Ev
 		Cart:       cart,
 		UserID:     userID,
 		PayedAt:    payedAt,
+	}), nil
+}
+
+type PremiumPayed struct {
+	InvoiceID  string
+	UserID     int64
+	ExpiresAt  string
+	Cost       int64
+	Discount   int64
+	CreatedAt  string
+}
+
+func (PremiumPayed) Key() string { return PremiumPayedEvent }
+
+func PayPremium(invoiceID string, userID int64, expiresAt, createdAt string, cost, discount int64) (ddd.Event, error) {
+	if invoiceID == "" {
+		return nil, ErrIDRequired
+	}
+
+	return ddd.NewEvent(PremiumPayedEvent, &PremiumPayed{
+		InvoiceID:  invoiceID,
+		UserID:     userID,
+		ExpiresAt:  expiresAt,
+		CreatedAt:  createdAt,
+		Cost:       cost,
+		Discount:   discount,
 	}), nil
 }

@@ -14,19 +14,21 @@ import (
 )
 
 type UsersDumper struct {
-	pool       *pgxpool.Pool
-	tableName  string
-	rows       pgx.Rows
-	ctx        context.Context
-	cancel     context.CancelCauseFunc
-	ch         chan *model.User
-	wg         sync.WaitGroup
+	pool              *pgxpool.Pool
+	usersTableName    string
+	premiumsTableName string
+	rows              pgx.Rows
+	ctx               context.Context
+	cancel            context.CancelCauseFunc
+	ch                chan *model.User
+	wg                sync.WaitGroup
 }
 
-func NewUsersDumper(pool *pgxpool.Pool, tableName string) *UsersDumper {
+func NewUsersDumper(pool *pgxpool.Pool, usersTableName, premiumsTableName string) *UsersDumper {
 	return &UsersDumper{
-		pool:      pool,
-		tableName: tableName,
+		pool:                 pool,
+		usersTableName:       usersTableName,
+		premiumsTableName:    premiumsTableName,
 	}
 }
 
@@ -34,7 +36,7 @@ func (r *UsersDumper) Open(ctx context.Context) (ch chan *model.User, err error)
 	query := "SELECT id, login, salt, metadata, created_at, updated_at FROM %s"
 
 	r.ctx, r.cancel = context.WithCancelCause(ctx)
-	r.rows, err = r.pool.Query(r.ctx, r.table(query))
+	r.rows, err = r.pool.Query(r.ctx, r.usersTable(query))
 	if err != nil {
 		return
 	}
@@ -91,11 +93,11 @@ func (r *UsersDumper) Close() (err error) {
 func (r *UsersDumper) Restore(ctx context.Context, user *model.User) (err error) {
 	query := "INSERT INTO %s(id, login, salt, metadata, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)"
 
-	_, err = r.pool.Exec(ctx, r.table(query), user.ID, user.Login, user.HashedPassword, user.Metadata, user.CreatedAt, user.UpdatedAt)
+	_, err = r.pool.Exec(ctx, r.usersTable(query), user.ID, user.Login, user.HashedPassword, user.Metadata, user.CreatedAt, user.UpdatedAt)
 
 	return
 }
 
-func (r UsersDumper) table(query string) string {
-	return fmt.Sprintf(query, r.tableName)
+func (r UsersDumper) usersTable(query string) string {
+	return fmt.Sprintf(query, r.usersTableName)
 }

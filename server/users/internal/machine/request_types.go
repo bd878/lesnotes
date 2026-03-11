@@ -6,4 +6,5 @@ const (
 	AppendRequest RequestType = iota
 	UpdateRequest
 	DeleteRequest
+	MakePremiumRequest
 )

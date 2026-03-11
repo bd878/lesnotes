@@ -12,3 +12,12 @@ message InvoicePayed {
 	billing.v1.Cart cart = 3;
 	string payed_at = 4;
 }
+
+message PremiumPayed {
+	string invoice_id = 1;
+	int64 user_id = 2;
+	string expires_at = 3;
+	int64 cost = 4;
+	int64 discount = 5;
+	string created_at = 6;
+}

@@ -13,6 +13,7 @@ type UsersRepository interface {
 	Save(ctx context.Context, id int64, login, hashedPassword string, metadata []byte, createdAt, updatedAt string) (err error)
 	Delete(ctx context.Context, id int64) (err error)
 	Update(ctx context.Context, id int64, login *string, metadata []byte, updatedAt string) (err error)
+	MakePremium(ctx context.Context, id int64, invoiceID, createdAt, expiresAt string) (err error)
 }
 
 type UsersDumper interface {
@@ -47,6 +48,8 @@ func (f *Machine) Apply(record *raft.Log) interface{} {
 		return f.applyUpdate(buf[1:])
 	case DeleteRequest:
 		return f.applyDelete(buf[1:])
+	case MakePremiumRequest:
+		return f.applyMakePremium(buf[1:])
 	default:
 		f.log.Errorw("unknown request type", "type", reqType)
 	}
@@ -72,4 +75,11 @@ func (f *Machine) applyDelete(raw []byte) interface{} {
 	proto.Unmarshal(raw, &cmd)
 
 	return f.usersRepo.Delete(context.TODO(), cmd.Id)
+}
+
+func (f *Machine) applyMakePremium(raw []byte) interface{} {
+	var cmd MakePremiumCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.usersRepo.MakePremium(context.TODO(), cmd.Id, cmd.InvoiceId, cmd.CreatedAt, cmd.ExpiresAt)
 }

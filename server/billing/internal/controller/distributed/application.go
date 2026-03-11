@@ -134,9 +134,26 @@ func (m *Distributed) ProceedPayment(ctx context.Context, id, userID int64) (err
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
-	event, err := domain.PayInvoice(invoice.Id, invoice.Cart, userID, updatedAt)
+	events := make([]ddd.Event, 0)
+
+	invoiceEvent, err := domain.PayInvoice(invoice.Id, invoice.Cart, userID, updatedAt)
 	if err != nil {
 		return err
+	}
+
+	events = append(events, invoiceEvent)
+
+	for _, cartItem := range invoice.Cart.Items {
+		switch v := cartItem.Item.(type) {
+		case *api.CartItem_Premium:
+			event, err := domain.PayPremium(invoice.Id, userID,
+				v.Premium.ExpiresAt, updatedAt, v.Premium.Cost, v.Premium.Discount)
+			if err != nil {
+				return err
+			}
+
+			events = append(events, event)
+		}
 	}
 
 	cmd1, err := proto.Marshal(&machine.PayInvoiceCommand{
@@ -160,7 +177,7 @@ func (m *Distributed) ProceedPayment(ctx context.Context, id, userID int64) (err
 		return err
 	}
 
-	return m.publisher.Publish(context.TODO(), event)
+	return m.publisher.Publish(context.TODO(), events...)
 }
 
 func (m *Distributed) CancelPayment(ctx context.Context, id, userID int64) (err error) {

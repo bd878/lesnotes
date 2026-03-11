@@ -34,6 +34,8 @@ func (h domainHandler[T]) HandleEvent(ctx context.Context, event T) error {
 	switch event.EventName() {
 	case domain.InvoicePayedEvent:
 		return h.onInvoicePayed(ctx, event)
+	case domain.PremiumPayedEvent:
+		return h.onPremiumPayed(ctx, event)
 	}
 
 	return nil
@@ -53,4 +55,22 @@ func (h domainHandler[T]) onInvoicePayed(ctx context.Context, event ddd.Event) e
 	}
 
 	return h.publisher.Publish(ctx, events.BillingChannel, am.NewRawMessage(event.ID(), events.InvoicePayedEvent, data))
+}
+
+func (h domainHandler[T]) onPremiumPayed(ctx context.Context, event ddd.Event) error {
+	payload := event.Payload().(*domain.PremiumPayed)
+
+	data, err := proto.Marshal(&api.PremiumPayed{
+		InvoiceId:   payload.InvoiceID,
+		ExpiresAt:   payload.ExpiresAt,
+		CreatedAt:   payload.CreatedAt,
+		UserId:      payload.UserID,
+		Cost:        payload.Cost,
+		Discount:    payload.Discount,
+	})
+	if err != nil {
+		return err
+	}
+
+	return h.publisher.Publish(ctx, events.BillingChannel, am.NewRawMessage(event.ID(), events.PremiumPayedEvent, data))
 }

@@ -4,4 +4,5 @@ const (
 	BillingChannel = "gallery.billing.Billing"
 
 	InvoicePayedEvent = "billingapi.InvoicePayed"
+	PremiumPayedEvent = "billingapi.PremiumPayed"
 )
