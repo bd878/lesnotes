@@ -1,11 +1,11 @@
 package machine
 
 import (
-	"io"
 	"context"
 
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
+	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/logger"
 )
 
@@ -15,8 +15,6 @@ type MessagesRepository interface {
 	PrivateMessages(ctx context.Context, ids []int64, userID int64, updatedAt string) error
 	PublishMessages(ctx context.Context, ids []int64, userID int64, updatedAt string) error
 	DeleteMessage(ctx context.Context, id, userID int64) error
-	Dump(ctx context.Context, writer io.Writer) (err error)
-	Restore(ctx context.Context, reader io.Reader) (err error)
 }
 
 type FilesRepository interface {
@@ -24,8 +22,6 @@ type FilesRepository interface {
 	DeleteFile(ctx context.Context, id, userID int64) (err error)
 	PublishFile(ctx context.Context, id, userID int64, updatedAt string) (err error)
 	PrivateFile(ctx context.Context, id, userID int64, updatedAt string) (err error)
-	Dump(ctx context.Context, writer io.Writer) (err error)
-	Restore(ctx context.Context, reader io.Reader) (err error)
 }
 
 type ThreadsRepository interface {
@@ -35,22 +31,25 @@ type ThreadsRepository interface {
 	ChangeThreadParent(ctx context.Context, id, userID, parentID int64) error
 	PublishThread(ctx context.Context, id, userID int64, updatedAt string) error
 	PrivateThread(ctx context.Context, id, userID int64, updatedAt string) error
-	Dump(ctx context.Context, writer io.Writer) (err error)
-	Restore(ctx context.Context, reader io.Reader) (err error)
 }
 
 type TranslationsRepository interface {
 	SaveTranslation(ctx context.Context, userID, messageID int64, lang, title, text string, createdAt, updatedAt string) error
 	DeleteTranslation(ctx context.Context, messageID int64, lang string) error
 	UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string, updatedAt string) error
-	Dump(ctx context.Context, writer io.Writer) (err error)
-	Restore(ctx context.Context, reader io.Reader) (err error)
+}
+
+type Dumper interface {
+	Open(ctx context.Context) (ch chan *api.SearchSnapshot, err error)
+	Restore(ctx context.Context, user *api.SearchSnapshot) (err error)
+	Close() (err error)
 }
 
 var _ raft.FSM = (*Machine)(nil)
 
 type Machine struct {
 	log                *logger.Logger
+	dumper             Dumper
 	messagesRepo       MessagesRepository
 	filesRepo          FilesRepository
 	threadsRepo        ThreadsRepository
@@ -58,9 +57,10 @@ type Machine struct {
 }
 
 func New(messagesRepo MessagesRepository, filesRepo FilesRepository, threadsRepo ThreadsRepository,
-	translationsRepo TranslationsRepository, log *logger.Logger) *Machine {
+	translationsRepo TranslationsRepository, dumper Dumper, log *logger.Logger) *Machine {
 	return &Machine{
 		log:                 log,
+		dumper:              dumper,
 		messagesRepo:        messagesRepo,
 		filesRepo:           filesRepo,
 		translationsRepo:    translationsRepo,

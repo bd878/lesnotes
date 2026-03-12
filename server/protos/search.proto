@@ -9,6 +9,59 @@ service Search {
 	rpc SearchFiles(SearchFilesRequest) returns (SearchFilesResponse) {}
 }
 
+message SearchSnapshot {
+	oneof Item {
+		SearchMessageSnapshotItem message = 1;
+		SearchFileSnapshotItem file = 2;
+		SearchThreadSnapshotItem thread = 3;
+		SearchTranslationSnapshotItem translation = 4;
+	}
+}
+
+message SearchMessageSnapshotItem {
+	int64   id      = 1;
+	int64   user_id = 2;
+	string  title   = 3;
+	string  name    = 4;
+	string  text    = 5;
+	bool    private = 6;
+	string  created_at = 7;
+	string  updated_at = 8;
+}
+
+message SearchFileSnapshotItem {
+	int64   id      = 1;
+	int64   user_id = 2;
+	string  name    = 3;
+	string  mime = 4;
+	string  created_at = 5;
+	string  updated_at = 6;
+	int64   size = 7;
+	bool    private = 8;
+	string  description = 9;	
+}
+
+message SearchThreadSnapshotItem {
+	int64   id = 1;
+	int64   user_id = 2;
+	int64   parent_id = 3;
+	string  name = 4;
+	string  description = 5;
+	bool    private = 6;
+	string  created_at = 7;
+	string  updated_at = 8;
+}
+
+message SearchTranslationSnapshotItem {
+	int64   message_id = 1;
+	int64   user_id = 2;
+	string  lang = 3;
+	string  text = 4;
+	string  title = 5;
+	string  created_at = 6;
+	string  updated_at = 7;
+}
+
 message SearchMessage {
 	int64   id      = 1;
 	int64   user_id = 2;

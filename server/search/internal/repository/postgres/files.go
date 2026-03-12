@@ -1,13 +1,10 @@
 package postgres
 
 import (
-	"io"
 	"fmt"
 	"context"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-
-	"github.com/bd878/gallery/server/internal/logger"
 )
 
 type FilesRepository struct {
@@ -44,41 +41,6 @@ func (r *FilesRepository) PublishFile(ctx context.Context, id, userID int64, upd
 
 func (r *FilesRepository) PrivateFile(ctx context.Context, id, userID int64, updatedAt string) (err error) {
 	_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = true, updated_at = $3 WHERE owner_id = $1 AND id = $2"), userID, id, updatedAt)
-
-	return
-}
-
-func (r *FilesRepository) Dump(ctx context.Context, writer io.Writer) (err error) {
-	var conn *pgxpool.Conn
-
-	logger.Debugln("dumping files repo")
-
-	conn, err = r.pool.Acquire(ctx)
-	defer conn.Release()
-	if err != nil {
-		return
-	}
-
-	// will block, not concurrent safe
-	_, err = conn.Conn().PgConn().CopyTo(ctx, writer, r.table("COPY %s TO STDOUT BINARY"))
-
-	return
-}
-
-func (r *FilesRepository) Restore(ctx context.Context, reader io.Reader) (err error) {
-	var conn *pgxpool.Conn
-
-	logger.Debugln("restoring files repo")
-
-	query := r.table("COPY %s FROM STDIN BINARY")
-
-	conn, err = r.pool.Acquire(ctx) 
-	defer conn.Release()
-	if err != nil {
-		return
-	}
-
-	_, err = conn.Conn().PgConn().CopyFrom(ctx, reader, query)
 
 	return
 }

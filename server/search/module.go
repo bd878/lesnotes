@@ -26,8 +26,9 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	filesRepo := postgres.NewFilesRepository(svc.Pool(), "search.files")
 	threadsRepo := postgres.NewThreadsRepository(svc.Pool(), "search.threads")
 	translationsRepo := postgres.NewTranslationsRepository(svc.Pool(), "search.translations")
+	dumper := postgres.NewDumper(svc.Pool(), "search.messages", "search.files", "search.threads", "search.translations")
 
-	consensus, err := setupRaft(svc, cfg, messagesRepo, threadsRepo, filesRepo, translationsRepo)
+	consensus, err := setupRaft(svc, cfg, messagesRepo, threadsRepo, filesRepo, translationsRepo, dumper)
 	if err != nil {
 		return err
 	}
@@ -87,9 +88,9 @@ func setupSerf(svc system.Service, cfg config.Config, handler serf.Handler, logg
 }
 
 func setupRaft(svc system.Service, cfg config.Config, messagesRepo *postgres.MessagesRepository, threadsRepo *postgres.ThreadsRepository,
-	filesRepo *postgres.FilesRepository, translationsRepo *postgres.TranslationsRepository) (*raft.Distributed, error) {
+	filesRepo *postgres.FilesRepository, translationsRepo *postgres.TranslationsRepository, dumper *postgres.Dumper) (*raft.Distributed, error) {
 
-	fsm := machine.New(messagesRepo, filesRepo, threadsRepo, translationsRepo, svc.Logger())
+	fsm := machine.New(messagesRepo, filesRepo, threadsRepo, translationsRepo, dumper, svc.Logger())
 
 	consensus, err := raft.New(raft.Config{
 		Bootstrap:      cfg.RaftBootstrap,
