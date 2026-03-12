@@ -1,11 +1,11 @@
 package machine
 
 import (
-	"io"
 	"context"
 
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
+	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/logger"
 )
 
@@ -13,20 +13,26 @@ type SessionsRepository interface {
 	Save(ctx context.Context, userID int64, token, createdAt, expiresAt string) (err error)
 	Delete(ctx context.Context, token string) (err error)
 	DeleteAll(ctx context.Context, userID int64) (err error)
-	Dump(ctx context.Context, writer io.Writer) (err error)
-	Restore(ctx context.Context, reader io.Reader) (err error)
+}
+
+type Dumper interface {
+	Open(ctx context.Context) (ch chan *api.SessionsSnapshot, err error)
+	Restore(ctx context.Context, user *api.SessionsSnapshot) (err error)
+	Close() (err error)
 }
 
 var _ raft.FSM = (*Machine)(nil)
 
 type Machine struct {
 	log            *logger.Logger
+	dumper         Dumper
 	sessionsRepo   SessionsRepository
 }
 
-func New(sessionsRepo SessionsRepository, log *logger.Logger) *Machine {
+func New(sessionsRepo SessionsRepository, dumper Dumper, log *logger.Logger) *Machine {
 	return &Machine{
 		log:          log,
+		dumper:       dumper,
 		sessionsRepo: sessionsRepo,
 	}
 }

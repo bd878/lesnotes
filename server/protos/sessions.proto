@@ -12,6 +12,19 @@ service Sessions {
 	rpc RemoveAll(RemoveAllSessionsRequest) returns (RemoveAllSessionsResponse);
 }
 
+message SessionsSnapshot {
+	oneof Item {
+		SessionSnapshotItem session = 1;
+	}
+}
+
+message SessionSnapshotItem {
+	int64     user_id = 1;
+	string    token = 2;
+	string    expires_at = 3;
+	string    created_at = 4;	
+}
+
 message Session {
 	int64     user_id = 1;
 	string    token = 2;
