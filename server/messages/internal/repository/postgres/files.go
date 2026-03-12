@@ -1,15 +1,12 @@
 package postgres
 
 import (
-	"io"
 	"os"
 	"fmt"
 	"context"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-
-	"github.com/bd878/gallery/server/internal/logger"
 )
 
 type FilesRepository struct {
@@ -178,41 +175,6 @@ func (r *FilesRepository) DeleteMessage(ctx context.Context, messageID, userID i
 
 	const delete = "DELETE FROM %s WHERE message_id = $1 AND user_id = $2"
 	_, err = tx.Exec(ctx, r.table(delete), messageID, userID)
-
-	return
-}
-
-func (r *FilesRepository) Dump(ctx context.Context, writer io.Writer) (err error) {
-	var conn *pgxpool.Conn
-
-	logger.Debugln("dumping files repo")
-
-	conn, err = r.pool.Acquire(ctx)
-	defer conn.Release()
-	if err != nil {
-		return
-	}
-
-	// will block, not concurrent safe
-	_, err = conn.Conn().PgConn().CopyTo(ctx, writer, r.table("COPY %s TO STDOUT BINARY"))
-
-	return
-}
-
-func (r *FilesRepository) Restore(ctx context.Context, reader io.Reader) (err error) {
-	var conn *pgxpool.Conn
-
-	logger.Debugln("restoring files repo")
-
-	query := r.table("COPY %s FROM STDIN BINARY")
-
-	conn, err = r.pool.Acquire(ctx) 
-	defer conn.Release()
-	if err != nil {
-		return
-	}
-
-	_, err = conn.Conn().PgConn().CopyFrom(ctx, reader, query)
 
 	return
 }

@@ -12,6 +12,15 @@ service Translations {
 	rpc ListTranslations(ListTranslationsRequest) returns (ListTranslationsResponse) {}
 }
 
+message TranslationSnapshotItem {
+	int64     message_id = 1;
+	string    lang = 2;
+	string    text = 3;
+	string    title = 4;
+	string    created_at = 5;
+	string    updated_at = 6;
+}
+
 message Translation {
 	int64     message_id = 1;
 	string    lang = 2;

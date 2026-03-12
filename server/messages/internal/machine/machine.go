@@ -1,11 +1,11 @@
 package machine
 
 import (
-	"io"
 	"context"
 
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
+	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/logger"
 )
 
@@ -16,8 +16,6 @@ type MessagesRepository interface {
 	Publish(ctx context.Context, userID int64, ids []int64, updatedAt string) (err error)
 	Private(ctx context.Context, userID int64, ids []int64, updatedAt string) (err error)
 	DeleteUserMessages(ctx context.Context, userID int64) (err error)
-	Dump(ctx context.Context, writer io.Writer) (err error)
-	Restore(ctx context.Context, reader io.Reader) (err error)
 }
 
 type FilesRepository interface {
@@ -25,8 +23,6 @@ type FilesRepository interface {
 	SaveMessageFiles(ctx context.Context, messageID, userID int64, fileIDs []int64) (err error)
 	UpdateMessageFiles(ctx context.Context, messageID, userID int64, fileIDs []int64) (err error)
 	DeleteMessage(ctx context.Context, messageID, userID int64) (err error)
-	Dump(ctx context.Context, writer io.Writer) (err error)
-	Restore(ctx context.Context, reader io.Reader) (err error)
 }
 
 type TranslationsRepository interface {
@@ -34,23 +30,29 @@ type TranslationsRepository interface {
 	UpdateTranslation(ctx context.Context, messageID int64, lang string, text, title *string, updatedAt string) (err error)
 	DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error)
 	DeleteMessage(ctx context.Context, messageID int64) (err error)
-	Dump(ctx context.Context, writer io.Writer) (err error)
-	Restore(ctx context.Context, reader io.Reader) (err error)
+}
+
+type Dumper interface {
+	Open(ctx context.Context) (ch chan *api.MessagesSnapshot, err error)
+	Restore(ctx context.Context, user *api.MessagesSnapshot) (err error)
+	Close() (err error)
 }
 
 var _ raft.FSM = (*Machine)(nil)
 
 type Machine struct {
 	log               *logger.Logger
+	dumper            Dumper
 	messagesRepo      MessagesRepository
 	filesRepo         FilesRepository
 	translationsRepo  TranslationsRepository
 }
 
 func New(messagesRepo MessagesRepository, filesRepo FilesRepository,
-	translationsRepo TranslationsRepository, log *logger.Logger) *Machine {
+	translationsRepo TranslationsRepository, dumper Dumper, log *logger.Logger) *Machine {
 	return &Machine{
 		log:              log,
+		dumper:           dumper,
 		messagesRepo:     messagesRepo,
 		filesRepo:        filesRepo,
 		translationsRepo: translationsRepo,
@@ -180,10 +182,5 @@ func (f *Machine) applyDeleteTranslation(raw []byte) interface{} {
 	var cmd DeleteTranslationCommand
 	proto.Unmarshal(raw, &cmd)
 
-	err := f.translationsRepo.DeleteTranslation(context.TODO(), cmd.MessageId, cmd.Lang)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return f.translationsRepo.DeleteTranslation(context.TODO(), cmd.MessageId, cmd.Lang)
 }

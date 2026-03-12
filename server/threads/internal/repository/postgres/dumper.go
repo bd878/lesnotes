@@ -106,9 +106,9 @@ func (r *Dumper) Restore(ctx context.Context, snapshot *api.ThreadsSnapshot) (er
 	switch v := snapshot.Item.(type) {
 	case *api.ThreadsSnapshot_Thread:
 
-		query := "INSERT INTO %s(id, name, private, user_id, parent_id, next_id, prev_id, created_at, updated_at, description) VALUES ($1, $2, $3, $4, $5, $6)"
+		query := "INSERT INTO %s(id, name, private, user_id, parent_id, next_id, prev_id, created_at, updated_at, description) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)"
 
-		_, err = r.pool.Exec(ctx, r.threadsTable(query), v.Thread.Id, v.Thread.Name, v.Thread.UserId, v.Thread.ParentId,
+		_, err = r.pool.Exec(ctx, r.threadsTable(query), v.Thread.Id, v.Thread.Name, v.Thread.Private, v.Thread.UserId, v.Thread.ParentId,
 			v.Thread.NextId, v.Thread.PrevId, v.Thread.CreatedAt, v.Thread.UpdatedAt, v.Thread.Description)
 
 		return

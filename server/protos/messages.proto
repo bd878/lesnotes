@@ -18,6 +18,31 @@ service Messages {
 	rpc ReadBatchMessages(ReadBatchMessagesRequest) returns (ReadBatchMessagesResponse) {}
 }
 
+message MessagesSnapshot {
+	oneof Item {
+		MessageSnapshotItem message = 1;
+		FileSnapshotItem file = 2;
+		translations.v1.TranslationSnapshotItem translation = 3;
+	}
+}
+
+message MessageSnapshotItem {
+	int64    id = 1;
+	string   text = 2;
+	bool     private = 3;
+	string   name = 4;
+	int64    user_id = 5;
+	string   created_at = 6;
+	string   updated_at = 7;
+	string   title = 8;
+}
+
+message FileSnapshotItem {
+	int64    file_id = 1;
+	int64    message_id = 2;
+	int64    user_id = 3;
+}
+
 message Message {
 	int64    id = 1;
 	int64    user_id = 2;

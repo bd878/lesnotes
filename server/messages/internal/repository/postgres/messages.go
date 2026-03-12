@@ -176,6 +176,7 @@ func (r *MessagesRepository) ReadBatchMessages(ctx context.Context, userID int64
 		fmt.Sprintf(` JOIN (VALUES %s) AS x(id, ordering) ON m.id = x.id WHERE m.user_id = $1 ORDER BY x.ordering ASC`, order)
 
 	rows, err = tx.Query(ctx, query, userID)
+	defer rows.Close()
 	if err != nil {
 		return
 	}
@@ -252,6 +253,7 @@ func (r *MessagesRepository) ReadMessages(ctx context.Context, userID int64, lim
 	query := "SELECT id, user_id, name, text, private, created_at, updated_at, title FROM %s WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3"
 
 	rows, err = tx.Query(ctx, r.table(query), userID, limit, offset)
+	defer rows.Close()
 	if err != nil {
 		return
 	}
