@@ -3,45 +3,42 @@ package machine
 import (
 	"io"
 	"os"
-	"bufio"
-	"strings"
 	"context"
-	"archive/tar"
 
 	"github.com/hashicorp/raft"
+	"google.golang.org/protobuf/proto"
+
+	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/logger"
+	"github.com/bd878/gallery/server/internal/store"
 )
 
-/**
- * Merge two dumps into tar archive
- */
-
 type snapshot struct {
-	tarFile      *os.File
-	threadsFile *os.File
+	store         *store.Store
+	dumper   Dumper
+	ctx           context.Context
+	ch            <-chan *api.ThreadsSnapshot
 }
 
 func (f *Machine) Snapshot() (raft.FSMSnapshot, error) {
-	var err error
+	logger.Debugln("snapshotting threads")
 
 	s := &snapshot{}
 
-	s.threadsFile, err = os.CreateTemp("", "threads_*.bin")
+	file, err := os.CreateTemp("", "threads_*.bin")
 	if err != nil {
 		return nil, err
 	}
 
-	s.tarFile, err = os.CreateTemp("", "threads_*.tar")
+	s.store, err = store.NewStore(file)
 	if err != nil {
 		return nil, err
 	}
 
-	threadsBuf := bufio.NewWriter(s.threadsFile)
-	defer threadsBuf.Flush()
-
-	err = f.threadsRepo.Dump(context.TODO(), threadsBuf)
+	s.dumper = f.dumper
+	s.ctx = context.TODO()
+	s.ch, err = f.dumper.Open(s.ctx)
 	if err != nil {
-		logger.Errorw("failed to dump threads repo", "error", err)
 		return nil, err
 	}
 
@@ -51,10 +48,11 @@ func (f *Machine) Snapshot() (raft.FSMSnapshot, error) {
 func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 	logger.Debugln("restoring fsm from snapshot")
 
-	tr := tar.NewReader(reader)
+	store := store.NewReader(reader)
+	defer store.Close()
 
 	for {
-		hdr, err := tr.Next()
+		size, err := store.ReadSize()
 		if err == io.EOF {
 			break
 		}
@@ -62,122 +60,85 @@ func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 			return err
 		}
 
-		if strings.Contains(hdr.Name, "threads") {
-			err = f.threadsRepo.Restore(context.TODO(), tr)
-			if err != nil {
-				return err
-			}
+		data := make([]byte, size)
+		n, err := store.Read(data)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+
+		logger.Debugw("restore", "n", n)
+
+		var snapshot api.ThreadsSnapshot
+		if err = proto.Unmarshal(data, &snapshot); err != nil {
+			return err
+		}
+
+		err = f.dumper.Restore(context.TODO(), &snapshot)
+		if err != nil {
+			return err
 		}
 	}
-
-	defer reader.Close()
 
 	return
 }
 
 func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
-	tarBuf := bufio.NewWriter(s.tarFile)
-	tw := tar.NewWriter(tarBuf)
+	logger.Debugln("persisting snapshot")
 
-	// seek files
-	err = s.threadsFile.Sync()
+	for snapshot := range s.ch {
+		switch v := snapshot.Item.(type) {
+		case *api.ThreadsSnapshot_Thread:
+			logger.Debugw("thread snapshot", "id", v.Thread.Id)
+		default:
+			logger.Debugln("unknown snapshot")
+		}
+
+		data, err := proto.Marshal(snapshot)
+		if err != nil {
+			return err
+		}
+
+		n, err := s.store.Append(data)
+		if err != nil {
+			return err
+		}
+
+		logger.Debugw("persist", "n", n)
+
+		select {
+		case <-s.ctx.Done():
+			return context.Cause(s.ctx)
+		default:
+		}
+	}
+
+	logger.Debugln("seek store")
+
+	err = s.store.Seek()
 	if err != nil {
 		return
 	}
 
-	_, err = s.threadsFile.Seek(0, os.SEEK_SET)
-	if err != nil {
-		return
-	}
-
-	// write threads to tar
-	threadsSize, err := fileSize(s.threadsFile)
-	if err != nil {
-		return err
-	}
-
-	logger.Debugw("persisting", "threads size", threadsSize)
-
-	threadsHdr := &tar.Header{
-		Name: s.threadsFile.Name(),
-		Mode: 0600,
-		Size: threadsSize,
-	}
-
-	err = tw.WriteHeader(threadsHdr)
-	if err != nil {
-		return
-	}
-
-	n, err := io.Copy(tw, s.threadsFile)
-	if err != nil {
-		return
-	}
-
-	if err = tw.Flush(); err != nil {
-		return
-	}
-
-	logger.Debugw("copied threads bytes to tar writer", "bytes", n)
-
-	// dump tar to sink
-	if err = tw.Close(); err != nil {
-		return
-	}
-
-	if err = tarBuf.Flush(); err != nil {
-		return
-	}
-
-	err = s.tarFile.Sync()
-	if err != nil {
-		return
-	}
-
-	_, err = s.tarFile.Seek(0, os.SEEK_SET)
-	if err != nil {
-		return
-	}
-
-	tarSize, err := fileSize(s.tarFile)
+	n, err := io.Copy(sink, s.store.File)
 	if err != nil {
 		return err
 	}
 
-	logger.Debugw("tar size", "bytes", tarSize)
+	logger.Debugw("store persisted", "n", n)
 
-	n, err = io.Copy(sink, s.tarFile)
-	defer sink.Cancel()
-	if err != nil {
-		return err
-	}
-
-	logger.Debugw("persisting", "copied bytes", n)
-
-	return sink.Close()
+	return
 }
 
 func (s *snapshot) Release() {
-	if err := os.Remove(s.tarFile.Name()); err != nil {
-		logger.Errorw("cannot remove tar file", "error", err)
+	logger.Debugln("release snapshot")
+	if err := s.store.Close(); err != nil {
+		logger.Errorw("cannot close store file", "error", err)
 	}
 
-	if err := os.Remove(s.threadsFile.Name()); err != nil {
-		logger.Errorw("cannot remove threads file", "error", err)
+	if err := s.dumper.Close(); err != nil {
+		logger.Errorw("cannot close db connection", "error", err)
 	}
-}
-
-/**
- * Utils
- */
-
-func fileSize(f *os.File) (size int64, err error) {
-	info, err := f.Stat()
-	if err != nil {
-		return 0, err
-	}
-
-	size = info.Size()
-
-	return
 }

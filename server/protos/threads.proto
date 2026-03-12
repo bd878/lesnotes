@@ -17,6 +17,26 @@ service Threads {
 	rpc Count(CountRequest) returns (CountResponse) {}
 }
 
+message ThreadsSnapshot {
+	oneof Item {
+		ThreadSnapshotItem thread = 1;
+	}
+}
+
+message ThreadSnapshotItem {
+	int64    id = 1;
+	string   name = 2;
+	bool     private = 3;
+	int64    user_id = 4;
+	int64    parent_id = 5;
+	int64    next_id = 6;
+	int64    prev_id = 7;
+	int32    count = 8;
+	string   description = 9;
+	string   created_at = 10;
+	string   updated_at = 11;	
+}
+
 message Thread {
 	int64    id = 1;
 	string   name = 2;

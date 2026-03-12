@@ -1,7 +1,6 @@
 package postgres
 
 import (
-	"io"
 	"os"
 	"fmt"
 	"time"
@@ -92,6 +91,7 @@ func (r *ThreadsRepository) ListThreads(ctx context.Context, userID, parentID in
 
 	var rows pgx.Rows
 	rows, err = tx.Query(ctx, r.table(selectThreads), userID, parentID)
+	defer rows.Close()
 	if err != nil {
 		return
 	}
@@ -564,41 +564,6 @@ func (r *ThreadsRepository) ResolveThread(ctx context.Context, id, userID int64)
 
 		threadID = parentID
 	}
-
-	return
-}
-
-func (r *ThreadsRepository) Dump(ctx context.Context, writer io.Writer) (err error) {
-	var conn *pgxpool.Conn
-
-	logger.Debugln("dumping threads repo")
-
-	conn, err = r.pool.Acquire(ctx)
-	defer conn.Release()
-	if err != nil {
-		return
-	}
-
-	// will block, not concurrent safe
-	_, err = conn.Conn().PgConn().CopyTo(ctx, writer, r.table("COPY %s TO STDOUT BINARY"))
-
-	return
-}
-
-func (r *ThreadsRepository) Restore(ctx context.Context, reader io.Reader) (err error) {
-	var conn *pgxpool.Conn
-
-	logger.Debugln("restoring threads repo")
-
-	query := r.table("COPY %s FROM STDIN BINARY")
-
-	conn, err = r.pool.Acquire(ctx) 
-	defer conn.Release()
-	if err != nil {
-		return
-	}
-
-	_, err = conn.Conn().PgConn().CopyFrom(ctx, reader, query)
 
 	return
 }

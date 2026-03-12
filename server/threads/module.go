@@ -24,8 +24,9 @@ import (
 
 func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error) {
 	threadsRepo := postgres.NewThreadsRepository(svc.Pool(), "threads.threads")
+	threadsDumper := postgres.NewDumper(svc.Pool(), "threads.threads")
 
-	consensus, err := setupRaft(svc, cfg, threadsRepo)
+	consensus, err := setupRaft(svc, cfg, threadsRepo, threadsDumper)
 	if err != nil {
 		return err
 	}
@@ -84,8 +85,8 @@ func setupSerf(svc system.Service, cfg config.Config, handler serf.Handler, logg
 	return nil
 }
 
-func setupRaft(svc system.Service, cfg config.Config, threadsRepo *postgres.ThreadsRepository) (*raft.Distributed, error) {
-	fsm := machine.New(threadsRepo, svc.Logger())
+func setupRaft(svc system.Service, cfg config.Config, threadsRepo *postgres.ThreadsRepository, dumper *postgres.Dumper) (*raft.Distributed, error) {
+	fsm := machine.New(threadsRepo, dumper, svc.Logger())
 
 	consensus, err := raft.New(raft.Config{
 		Bootstrap:      cfg.RaftBootstrap,
