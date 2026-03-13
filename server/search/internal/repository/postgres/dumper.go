@@ -211,9 +211,9 @@ func (r *Dumper) runThreads() {
 	query := "SELECT id, user_id, parent_id, name, description, private, created_at, updated_at FROM %s"
 
 	defer r.wg.Done()
-	defer logger.Debugln("translations dump finished")
+	defer logger.Debugln("threads dump finished")
 
-	rows, err := r.pool.Query(r.ctx, r.translationsTable(query))
+	rows, err := r.pool.Query(r.ctx, r.threadsTable(query))
 	if err != nil {
 		logger.Errorln(err)
 		r.cancel(err)
@@ -295,7 +295,7 @@ func (r *Dumper) Restore(ctx context.Context, snapshot *api.SearchSnapshot) (err
 
 	case *api.SearchSnapshot_Thread:
 
-		query := "INSERT INTO %s(id, user_id, parent_id, name, description, private, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,48)"
+		query := "INSERT INTO %s(id, user_id, parent_id, name, description, private, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)"
 
 		_, err = r.pool.Exec(ctx, r.threadsTable(query), v.Thread.Id, v.Thread.UserId, v.Thread.ParentId,
 			v.Thread.Name, v.Thread.Description, v.Thread.Private, v.Thread.CreatedAt, v.Thread.UpdatedAt)

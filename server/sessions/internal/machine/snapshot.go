@@ -57,6 +57,7 @@ func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 			break
 		}
 		if err != nil {
+			logger.Errorln(err)
 			return err
 		}
 
@@ -66,10 +67,11 @@ func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 			break
 		}
 		if err != nil {
+			logger.Errorln(err)
 			return err
 		}
 
-		logger.Debugw("restore", "n", n)
+		logger.Debugw("restore", "size", size, "n", n)
 
 		var snapshot api.SessionsSnapshot
 		if err = proto.Unmarshal(data, &snapshot); err != nil {
@@ -94,6 +96,7 @@ func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
 			logger.Debugw("session snapshot", "token", v.Session.Token)
 		default:
 			logger.Debugln("unknown snapshot")
+			continue
 		}
 
 		data, err := proto.Marshal(snapshot)

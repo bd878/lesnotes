@@ -97,6 +97,7 @@ func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
 			logger.Debugw("premium snapshot", "invoice_id", v.Premium.InvoiceId)
 		default:
 			logger.Debugln("unknown snapshot")
+			continue
 		}
 
 		if u, ok := snapshot.Item.(*api.UsersSnapshot_User); ok {

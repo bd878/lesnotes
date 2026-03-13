@@ -98,6 +98,7 @@ func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
 			logger.Debugw("translation snapshot", "message_id", v.Translation.MessageId)
 		default:
 			logger.Debugln("unknown snapshot")
+			continue
 		}
 
 		data, err := proto.Marshal(snapshot)

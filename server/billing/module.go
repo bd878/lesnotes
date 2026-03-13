@@ -25,7 +25,7 @@ import (
 func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error) {
 	paymentsRepo := postgres.NewPaymentsRepository(svc.Pool(), "billing.payments")
 	invoicesRepo := postgres.NewInvoicesRepository(svc.Pool(), "billing.invoices")
-	dumper := postgres.NewDumper(svc.Pool(), "billing.payments", "billing.invoices")
+	dumper := postgres.NewDumper(svc.Pool(), "billing.invoices", "billing.payments")
 
 	consensus, err := setupRaft(svc, cfg, paymentsRepo, invoicesRepo, dumper)
 	if err != nil {

@@ -96,6 +96,7 @@ func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
 			logger.Debugw("payment snapshot", "id", v.Payment.Id)
 		default:
 			logger.Debugln("unknown snapshot")
+			continue
 		}
 
 		data, err := proto.Marshal(snapshot)
