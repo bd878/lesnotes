@@ -1,32 +1,31 @@
 openapi: "3.0.0"
 info:
-  title: API Specification for translations
+  title: API Specification for comments
   description: |
-    This API allows saving translations for the
-    same user messages
+    This API allows leaving comments for messages
   version: 1.0.0
 paths:
 # SEND
-  /translations/v1/send:
-    parametres:
-      - $ref: '#/components/parametres/token'
+  /comments/v1/send:
+    parameters:
+      - $ref: '#/components/parameters/token'
     post:
-      summary: Send a translation for a message
+      summary: Saves comment for a message
       description: |
-        Send a translation
-      operationId: sendTranslation
+        Saves comment
+      operationId: sendComment
       requestBody:
         content:
           multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/sendTranslation'
+            scheme:
+              $ref: '#/components/schemas/sendComment'
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/sendTranslationOk'
+                $ref: '#/components/schemas/sendCommentOk'
         "4XX":
           description: error
           content:
@@ -34,24 +33,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/serverError'
 
-  /translations/v2/send:
+  /comments/v2/send:
     post:
-      summary: Send a translation public API
+      summary: Send a comment via public API
       description: |
-        Send a translation via json api
-      operationId: sendTranslationJson
+        Send a comment via json api
+      operationId: sendCommentJson
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/sendTranslationJson'
+              $ref: '#/components/schemas/sendCommentJson'
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/sendTranslationOk'
+                $ref: '#/components/schemas/sendCommentOk'
         "4XX":
           description: error
           content:
@@ -61,26 +60,26 @@ paths:
 # END SEND
 
 # UPDATE
-  /translations/v1/update:
+  /comments/v1/update:
     parameters:
       - $ref: '#/components/parameters/token'
     put:
-      summary: Update a translation
+      summary: Update a comment
       description: |
-        Update a translation
-      operationId: updateTranslation
+        Update a comment
+      operationId: updateComment
       requestBody:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/updateTranslation'
+              $ref: '#/components/schemas/updateComment'
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/updateTranslationOk'
+                $ref: '#/components/schemas/updateCommentOk'
         "4XX":
           description: error
           content:
@@ -88,129 +87,50 @@ paths:
               schema:
                 $ref: '#/components/schemas/serverError'
 
-  /translations/v2/update:
+  /comments/v2/update:
     put:
-      summary: Update a translation
+      summary: Update a comment
       description: |
-        Update a translation
-      operationId: updateTranslationJson
+        Update a comment via json api
+      operationId: updateCommentJson
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/updateTranslationJson'
+              $ref: '#/comments/schemas/updateCommentJson'
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/updateTranslationOk'
+                $ref: '#/components/schemas/updateCommentOk'
         "4XX":
           description: error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/serverError'
+
 # END UPDATE
 
-# READ
-  /translations/v1/read:
+# DELETE
+  /comments/v1/delete:
     parameters:
       - $ref: '#/components/parameters/token'
-      - $ref: '#/components/parameters/message'
-      - $ref: '#/components/parameters/lang'
-    get:
-      summary: Get message translation
-      description: |
-        Read a message translation
-      operationId: readTranslation
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                - $ref: '#/components/schemas/readTranslationOk'
-        "4XX":
-          description: error 
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/serverError'
-
-  /translations/v2/read:
-    post:
-      summary: Get a message translation
-      description: |
-        Read messages translation for a specific lang
-      operationId: readTranslationJson
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/readTranslationJson'
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                - $ref: '#/components/schemas/readTranslationOk'
-
-        "4XX":
-          description: error 
-          content:
-            application/json:
-              schema:
-                - $ref: '#/components/schemas/serverError'
-# END READ
-
-# LIST
-  /translations/v2/list:
-    post:
-      summary: List message translations
-      description: |
-        List all available message translations
-      operationId: listTranslationsJson
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/listTranslationsJson'
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                - $ref: '#/commponents/schmas/listTranslationsOK'
-
-        "4XX":
-          description: error 
-          content:
-            application/json:
-              schema:
-                - $ref: '#/components/schemas/serverError'
-# END LIST
-
-# DELETE
-  /translations/v1/delete:
-    parameters:
-      - $ref: '#/components/parameters/message'
-      - $ref: '#/components/parameters/lang'
+      - $ref: '#/components/parameters/id'
     delete:
-      operationId: deleteTranslation
-      summary: Delete translation
+      operationId: deleteComment
+      summary: Delete comment
       description: |
-        Deletes a message translation
+        Deletes a message comment
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/deleteTranslationOk'
+                $ref: '#/components/schemas/deleteCommentOk'
         "4XX":
           description: error
           content:
@@ -218,24 +138,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/serverError'
 
-  /translations/v2/delete:
+  /comments/v2/delete:
     delete:
-      operationId: deleteTranslationJson
-      summary: Delete a translation
+      operationId: deleteCommentJson
+      summary: Delete a comment
       description: |
-        Deletes a message translation
+        Deletes a message comment
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/deleteTranslationJson'
+              $ref: '#/components/schemas/deleteCommentJson'
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/deleteTranslationOk'
+                $ref: '#/components/schemas/deleteCommentOk'
         "4XX":
           description: error
           content:
@@ -243,6 +163,87 @@ paths:
               schema:
                 $ref: '#/components/schemas/serverError'
 # END DELETE
+
+# LIST
+  /comments/v2/list:
+    post:
+      summary: List comments
+      description: |
+        List all available message comments
+      operationId: listCommentsJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/listCommentsJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: '#/commponents/schmas/listCommentsOK'
+
+        "4XX":
+          description: error 
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/serverError'
+
+# END LIST
+
+# READ
+  /comments/v1/read:
+    parameters:
+      - $ref: '#/components/parameters/token'
+      - $ref: '#/components/parameters/id'
+    get:
+      summary: Get a comment
+      description: |
+        Read a comment of a message
+      operationId: readComment
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/readCommentOk'
+        "4XX":
+          description: error 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serverError'        
+
+  /comments/v2/read:
+    post:
+      summary: Get a comment
+      description: |
+        Read a comment via public json api
+      operationId: readCommentJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/readCommentJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/readCommentOk'
+
+        "4XX":
+          description: error 
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/serverError'      
+
+# END READ
 
 components:
   parametres:
@@ -252,15 +253,9 @@ components:
       schema:
         type: string
         example: token=AAAAAA
-    message:
+
+    id:
       name: id
-      in: query
-      required: true
-      schema:
-        type: integer
-        example: 1
-    lang:
-      name: lang
       in: query
       required: true
       schema:
@@ -283,103 +278,18 @@ components:
           human:
             type: string
 
-# READ
-    readTranslationJson:
-      type: object
-      properties:
-        token:
-          type: string
-          default: ""
-          required: false
-        req:
-          type: object
-          properties:
-            lang:
-              type: string
-              required: true
-              example: "de"
-            message:
-              type: integer
-              required: true
-              example: 123
-
-    readTranslationOk:
-      type: object
-      properties:
-        status:
-          type: string
-          default: "ok"
-        response:
-          - $ref: '#/components/schemas/translation'
-# END READ
-
-# LIST
-    listTranslationsJson:
-      type: object
-      properties:
-        token:
-          type: string
-          default: ""
-          required: true
-        req:
-          type: object
-          properties:
-            message:
-              type: integer
-              required: true
-              example: 123
-            name:
-              type: string
-              required: false
-
-    listTranslationsOK:
-      type: object
-      properties:
-        status:
-          type: string
-          default: "ok"
-        translations:
-          type: object
-          properties:
-            message:
-              type: integer
-              required: true
-            lang:
-              type: string
-              required: true
-            title:
-              type: string
-              required: false
-            text:
-              type: string
-              required: false
-            created_at:
-              type: number
-            updated_at:
-              type: number
-# END LIST
-
 # SEND
-    sendTranslation:
+    sendComment:
       type: object
       properties:
         message:
           type: integer
           required: true
-        lang:
-          type: string
-          required: true
-          default: ""
-        title:
-          type: string
-          required: true
-          default: ""
         text:
           type: string
-          default: ""
           required: true
 
-    sendTranslationJson:
+    sendCommentJson:
       type: object
       properties:
         token:
@@ -392,20 +302,12 @@ components:
             message:
               type: integer
               required: true
-            lang:
-              type: string
-              required: true
-              default: ""
-            title:
-              type: string
-              required: true
-              default: ""
             text:
               type: string
               default: ""
               required: true
 
-    sendTranslationOk:
+    sendCommentOk:
       type: object
       status:
         type: string
@@ -414,29 +316,23 @@ components:
         properties:
           description:
             type: string
+          id:
+            type: integer
+
 # END SEND
 
 # UPDATE
-    updateTranslation:
+    updateComment:
       type: object
       properties:
-        message:
+        id:
           type: integer
           required: true
-        lang:
-          type: string
-          required: true
-          default: ""
-        title:
-          type: string
-          required: true
-          default: ""
         text:
           type: string
-          default: ""
           required: true
 
-    updateTranslationJson:
+    updateCommentJson:
       type: object
       properties:
         token:
@@ -446,23 +342,15 @@ components:
         req:
           type: object
           properties:
-            message:
+            id:
               type: integer
               required: true
-            lang:
-              type: string
-              required: true
-              default: ""
-            title:
-              type: string
-              required: true
-              default: ""
             text:
               type: string
               default: ""
               required: true
 
-    updateTranslationOk:
+    updateCommentOk:
       type: object
       properties:
         status:
@@ -474,10 +362,11 @@ components:
             description:
               type: string 
               default: ""
+
 # END UPDATE
 
 # DELETE
-    deleteTranslationJson:
+    deleteCommentJson:
       type: object
       properties:
         token:
@@ -487,14 +376,11 @@ components:
         req:
           type: object
           properties:
-            message:
+            id:
               type: integer
               required: true
-            lang:
-              type: string
-              required: true
 
-    deleteTranslationOk:
+    deleteCommentOk:
       type: object
       properties:
         status:
@@ -506,17 +392,104 @@ components:
             description:
               type: string 
               default: ""
+
 # END DELETE
 
-    translation:
+# LIST
+    listCommentsJson:
       type: object
       properties:
-        lang:
+        token:
           type: string
-          example: "de"
-        title:
+          default: ""
+          required: true
+        req:
+          type: object
+          properties:
+            message:
+              type: integer
+              required: false
+            user:
+              type: integer
+              required: false
+            limit:
+              type: integer
+            offset:
+              type: integer
+            asc:
+              enum: [0,1]
+
+    listCommentsOK:
+      type: object
+      properties:
+        status:
           type: string
-          example: "title"
+          default: "ok"
+        response:
+          type: object
+          properties:
+            description:
+              type: string
+              default: ""
+            is_last_page:
+              type: boolean
+            is_first_page:
+              type: boolean
+              required: false
+            offset:
+              type: integer
+              required: false
+            count:
+              type: integer
+              required: false
+            total:
+              type: integer
+              required: false
+            comments:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/comment'
+
+# END LIST
+
+# READ
+    readCommentJson:
+      type: object
+      properties:
+        token:
+          type: string
+          default: ""
+          required: false
+        req:
+          type: object
+          properties:
+            id:
+              type: integer
+
+    readCommentOk:
+      type: object
+      properties:
+        status:
+          type: string
+          default: "ok"
+        response:
+          type: object
+          properties:
+            comment:
+              - $ref: '#/components/schemas/comment'
+
+# END READ
+
+    comment:
+      type: object
+      properties:
+        id:
+          type: integer
+        user:
+          type: integer
+        message:
+          type: integer
         text:
           type: string
         created_at:

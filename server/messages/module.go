@@ -26,7 +26,9 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	messagesRepo := postgres.NewMessagesRepository(svc.Pool(), "messages.messages")
 	filesRepo := postgres.NewFilesRepository(svc.Pool(), "messages.files")
 	translationsRepo := postgres.NewTranslationsRepository(svc.Pool(), "messages.translations")
-	dumper := postgres.NewDumper(svc.Pool(), "messages.messages", "messages.files", "messages.translations")
+	commentsRepo := postgres.NewCommentsRepository(svc.Pool(), "messages.comments")
+	dumper := postgres.NewDumper(svc.Pool(), "messages.messages", "messages.files",
+		"messages.translations", "messages.comments")
 
 	consensus, err := setupRaft(svc, cfg, messagesRepo, filesRepo, translationsRepo, dumper)
 	if err != nil {

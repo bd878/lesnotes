@@ -3,6 +3,7 @@ syntax = "proto3";
 package messages.v1;
 
 import "protos/translations.proto";
+import "protos/comments.proto";
 
 option go_package = "github.com/bd878/gallery/server/api";
 
@@ -23,6 +24,7 @@ message MessagesSnapshot {
 		MessageSnapshotItem message = 1;
 		FileSnapshotItem file = 2;
 		translations.v1.TranslationSnapshotItem translation = 3;
+		comments.v1.CommentSnapshotItem comment = 4;
 	}
 }
 
