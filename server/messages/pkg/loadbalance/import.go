@@ -8,9 +8,10 @@ func init() {
 		Name,
 		[]string{"SaveMessage", "DeleteMessages", "DeleteUserMessages",
 			"PublishMessages", "PrivateMessages", "UpdateMessage",
-			"SaveTranslation", "UpdateTranslation", "DeleteTranslation"},
+			"SaveTranslation", "UpdateTranslation", "DeleteTranslation",
+			"SendComment", "UpdateComment", "DeleteComment", "DeleteMessageComments"},
 		[]string{"ReadMessages", "ReadMessage", "ReadTranslation", "ListTranslations",
-			"ReadBatchMessages"},
+			"ReadBatchMessages", "ReadComment", "ListComments"},
 	)
 }
 

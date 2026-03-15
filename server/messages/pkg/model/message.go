@@ -42,7 +42,7 @@ type (
 	}
 
 	PublishRequest struct {
-		IDs                 []int64            `json:"ids"`
+		IDs                 []int64             `json:"ids"`
 	}
 
 	PublishResponse struct {

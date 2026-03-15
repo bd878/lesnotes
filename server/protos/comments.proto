@@ -5,7 +5,7 @@ package comments.v1;
 option go_package = "github.com/bd878/gallery/server/api";
 
 service Comments {
-	rpc SaveComment(SaveCommentRequest) returns (SaveCommentResponse);
+	rpc SendComment(SendCommentRequest) returns (SendCommentResponse);
 	rpc UpdateComment(UpdateCommentRequest) returns (UpdateCommentResponse);
 	rpc DeleteComment(DeleteCommentRequest) returns (DeleteCommentResponse);
 	rpc DeleteMessageComments(DeleteMessageCommentsRequest) returns (DeleteMessageCommentsResponse);
@@ -33,14 +33,23 @@ message Comment {
 	optional bytes metadata = 7;
 }
 
-message SaveCommentRequest {
+message CommentsList {
+	repeated Comment comments = 1;
+	bool     is_last_page = 2;
+	bool     is_first_page = 3;
+	int32    total = 4;
+	int32    count = 5;
+}
+
+message SendCommentRequest {
 	int64     id = 1;
 	int64     message_id = 2;
 	int64     user_id = 3;
 	string    text = 4;
+	optional bytes metadata = 5;
 }
 
-message SaveCommentResponse {
+message SendCommentResponse {
 }
 
 message ListCommentsRequest {
@@ -54,11 +63,16 @@ message ListCommentsRequest {
 message ListCommentsResponse {
 	repeated Comment comments = 1;
 	bool     is_last_page = 2;
+	bool     is_first_page = 3;
+	int32    total = 4;
+	int32    count = 5;
 }
 
 message UpdateCommentRequest {
 	int64      id = 1;
-	string     text = 4;
+	int64      user_id = 2;
+	optional string text = 3;
+	optional bytes  metadata = 4;
 }
 
 message UpdateCommentResponse {
@@ -66,6 +80,7 @@ message UpdateCommentResponse {
 
 message DeleteCommentRequest {
 	int64      id = 1;
+	int64      user_id = 2;
 }
 
 message DeleteCommentResponse {
@@ -73,6 +88,7 @@ message DeleteCommentResponse {
 
 message ReadCommentRequest {
 	int64      id = 1;
+	int64      user_id = 2;
 }
 
 message ReadCommentResponse {

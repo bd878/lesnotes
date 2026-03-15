@@ -31,6 +31,11 @@ type TranslationsRepository interface {
 	ListTranslations(ctx context.Context, messageID int64) (translations []*model.Translation, err error)
 }
 
+type CommentsRepository interface {
+	Read(ctx context.Context, id, userID int64) (comment *api.Comment, err error)
+	ListMessageComments(ctx context.Context, messageID int64, limit, offset int32) (list *api.CommentsList, err error)
+}
+
 type Consensus interface {
 	Apply(cmd []byte, timeout time.Duration) (err error)
 	GetServers(ctx context.Context) ([]*api.Server, error)
@@ -40,17 +45,19 @@ type Distributed struct {
 	consensus         Consensus
 	log               *logger.Logger
 	publisher         ddd.EventPublisher[ddd.Event]
+	commentsRepo      CommentsRepository
 	messagesRepo      MessagesRepository
 	filesRepo         FilesRepository
 	translationsRepo  TranslationsRepository
 }
 
-func New(consensus Consensus, publisher ddd.EventPublisher[ddd.Event], messagesRepo MessagesRepository,
-	filesRepo FilesRepository, translationsRepo TranslationsRepository, log *logger.Logger) *Distributed {
+func New(consensus Consensus, publisher ddd.EventPublisher[ddd.Event], messagesRepo MessagesRepository, filesRepo FilesRepository,
+	translationsRepo TranslationsRepository, commentsRepo CommentsRepository, log *logger.Logger) *Distributed {
 	return &Distributed{
 		log:              log,
 		publisher:        publisher,
 		consensus:        consensus,
+		commentsRepo:     commentsRepo,
 		messagesRepo:     messagesRepo,
 		filesRepo:        filesRepo,
 		translationsRepo: translationsRepo,
@@ -336,6 +343,113 @@ func (m *Distributed) DeleteTranslation(ctx context.Context, messageID int64, la
 	return m.publisher.Publish(context.TODO(), event)
 }
 
+func (m *Distributed) SaveComment(ctx context.Context, id, userID, messageID int64, text string, metadata []byte) (err error) {
+	m.log.Debugw("save comment", "id", id, "user_id", userID, "message_id", messageID, "text", text, "metadata", metadata)
+
+	createdAt := time.Now().UTC().Format(time.RFC3339)
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
+	cmd, err := proto.Marshal(&machine.AppendCommentCommand{
+		Id:         id,
+		UserId:     userID,
+		MessageId:  messageID,
+		Text:       text,
+		Metadata:   metadata,
+		CreatedAt:  createdAt,
+		UpdatedAt:  updatedAt,
+	})
+	if err != nil {
+		return err
+	}
+
+	err = m.apply(ctx, machine.AppendCommentRequest, cmd)
+	if err != nil {
+		return
+	}
+
+	event, err := domain.CreateComment(id, userID, messageID, text, createdAt, updatedAt)
+	if err != nil {
+		return err
+	}
+
+	return m.publisher.Publish(context.TODO(), event)
+}
+
+func (m *Distributed) UpdateComment(ctx context.Context, id, userID int64, text *string, metadata []byte) (err error) {
+	m.log.Debugw("update comment", "id", id, "user_id", userID, "text", *text, "metadata", metadata)
+
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
+	cmd, err := proto.Marshal(&machine.UpdateCommentCommand{
+		Id:       id,
+		UserId:   userID,
+		Text:     text,
+		Metadata: metadata,
+	})
+	if err != nil {
+		return err
+	}
+
+	err = m.apply(ctx, machine.UpdateCommentRequest, cmd)
+	if err != nil {
+		return err
+	}
+
+	event, err := domain.UpdateComment(id, userID, text, updatedAt)
+	if err != nil {
+		return err
+	}
+
+	return m.publisher.Publish(context.TODO(), event)
+}
+
+func (m *Distributed) DeleteComment(ctx context.Context, id, userID int64) (err error) {
+	m.log.Debugw("delete comment", "id", id, "user_id", userID)
+
+	cmd, err := proto.Marshal(&machine.DeleteCommentCommand{
+		Id:     id,
+		UserId: userID,
+	})
+	if err != nil {
+		return err
+	}
+
+	err = m.apply(ctx, machine.DeleteCommentRequest, cmd)
+	if err != nil {
+		return err
+	}
+
+	event, err := domain.DeleteComment(id, userID)
+	if err != nil {
+		return err
+	}
+
+	return m.publisher.Publish(context.TODO(), event)
+}
+
+func (m *Distributed) DeleteMessageComments(ctx context.Context, messageID int64) (err error) {
+	m.log.Debugw("delete message comments", "message_id", messageID)
+
+	cmd, err := proto.Marshal(&machine.DeleteMessageCommentsCommand{
+		MessageId:    messageID,
+	})
+	if err != nil {
+		return err
+	}
+
+	err = m.apply(ctx, machine.DeleteMessageCommentsRequest, cmd)
+	if err != nil {
+		return err
+	}
+
+	event, err := domain.DeleteMessageComments(messageID)
+	if err != nil {
+		return err
+	}
+
+	return m.publisher.Publish(context.TODO(), event)
+}
+
 // TODO: pass one userID only, for public messages create ReadPublicMessage request
 func (m *Distributed) ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *model.Message, err error) {
 	m.log.Debugw("read message", "id", id, "name", name, "user_ids", userIDs)
@@ -444,6 +558,20 @@ func (m *Distributed) ListTranslations(ctx context.Context, userID, messageID in
 	}
 
 	return	
+}
+
+func (m *Distributed) ReadComment(ctx context.Context, id, userID int64) (comment *api.Comment, err error) {
+	m.log.Debugw("read commnet", "id", id, "user_id", userID)
+	return m.commentsRepo.Read(ctx, id, userID)
+}
+
+func (m *Distributed) ListComments(ctx context.Context, messageID, userID *int64, limit, offset int32) (comments *api.CommentsList, err error) {
+	m.log.Debugw("list comments", "message_id", messageID)
+	if messageID != nil {
+		return m.commentsRepo.ListMessageComments(ctx, *messageID, limit, offset)
+	} else {
+		return nil, errors.New("list users comments not implemented")
+	}
 }
 
 func (m *Distributed) GetServers(ctx context.Context) ([]*api.Server, error) {

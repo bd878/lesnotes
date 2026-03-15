@@ -4,14 +4,13 @@ import (
 	"net/http"
 	"encoding/json"
 
-	"github.com/bd878/gallery/server/internal/utils"
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
+	users "github.com/bd878/gallery/server/users/pkg/model"
 	messages "github.com/bd878/gallery/server/messages/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
-	users "github.com/bd878/gallery/server/users/pkg/model"
 )
 
-func (h *Handler) SendMessageJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
+func (h *Handler) ReadCommentJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
 	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
@@ -40,44 +39,60 @@ func (h *Handler) SendMessageJsonAPI(w http.ResponseWriter, req *http.Request) (
 		return
 	}
 
-	var request messages.SendRequest
-	if err = json.Unmarshal(data, &request); err != nil {
+	var request messages.ReadCommentRequest
+	if err := json.Unmarshal(data, &request); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    server.CodeWrongFormat,
 				Explain: "failed to parse request",
 			},
 		})
 
-		return
+		return err
 	}
 
-	if request.FileIDs == nil && request.Text == "" && request.Title == "" {
+
+	if request.ID == 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
-				Code:    messages.CodeNoText,
-				Explain: "file_ids or text or title required",
+			Error: &server.ErrorCode{
+				Code:    server.CodeNoID,
+				Explain: "empty comment id",
 			},
 		})
 
-		return
+		return nil
 	}
 
-	private := true
-	if user.ID == users.PublicUserID {
-		private = false
+	comment, err := h.commentsController.ReadComment(req.Context(), request.ID, user.ID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status: "error",
+			Error:  &server.ErrorCode{
+				Code:    messages.CodeReadFailed,
+				Explain: "failed to read comment",
+			},
+		})
+
+		return err
 	}
 
-	// TODO: generate id on application side, return as value
+	response, err := json.Marshal(messages.ReadCommentResponse{
+		Comment:   comment,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return err
+	}
 
-	id := utils.RandomID()
-	name := utils.RandomString(8)
+	json.NewEncoder(w).Encode(server.ServerResponse{
+		Status:   "ok",
+		Response: json.RawMessage(response),
+	})
 
-	// TODO: check file by file_id exists
-
-	return h.saveMessage(w, req, int64(id), request.Text, request.Title, request.FileIDs, request.ThreadID, user.ID, private, name)
+	return
 }

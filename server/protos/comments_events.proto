@@ -9,16 +9,22 @@ message CommentCreated {
 	int64    user_id = 2;
 	int64    id = 3;
 	string   text = 4;
-	string   created_at = 6;
-	string   updated_at = 7;
+	string   created_at = 5;
+	string   updated_at = 6;
 }
 
 message CommentUpdated {
 	int64    id = 1;
-	string   text = 2;
-	string   updated_at = 7;
+	int64    user_id = 2;
+	optional string text = 3;
+	string   updated_at = 4;
 }
 
 message CommentDeleted {
 	int64    id = 1;
+	int64    user_id = 2;
+}
+
+message MessageCommentsDeleted {
+	int64    message_id = 1;
 }

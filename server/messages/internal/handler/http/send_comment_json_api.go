@@ -11,7 +11,7 @@ import (
 	users "github.com/bd878/gallery/server/users/pkg/model"
 )
 
-func (h *Handler) SendMessageJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
+func (h *Handler) SendCommentJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
 	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
@@ -40,7 +40,7 @@ func (h *Handler) SendMessageJsonAPI(w http.ResponseWriter, req *http.Request) (
 		return
 	}
 
-	var request messages.SendRequest
+	var request messages.SendCommentRequest
 	if err = json.Unmarshal(data, &request); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -54,30 +54,61 @@ func (h *Handler) SendMessageJsonAPI(w http.ResponseWriter, req *http.Request) (
 		return
 	}
 
-	if request.FileIDs == nil && request.Text == "" && request.Title == "" {
+	if request.Text == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:  &server.ErrorCode{
 				Code:    messages.CodeNoText,
-				Explain: "file_ids or text or title required",
+				Explain: "text field required",
 			},
 		})
 
 		return
 	}
 
-	private := true
-	if user.ID == users.PublicUserID {
-		private = false
+	if request.MessageID == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status: "error",
+			Error:  &server.ErrorCode{
+				Code:    server.CodeNoID,
+				Explain: "message field required",
+			},
+		})
+
+		return
 	}
 
-	// TODO: generate id on application side, return as value
+	id := int64(utils.RandomID())
 
-	id := utils.RandomID()
-	name := utils.RandomString(8)
+	err = h.commentsController.SendComment(req.Context(), id, user.ID, request.MessageID, request.Text, request.Metadata)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(server.ServerResponse{
+			Status: "error",
+			Error: &server.ErrorCode{
+				Code:    messages.CodeSaveFailed,
+				Explain: "failed to save comment",
+			},
+		})
 
-	// TODO: check file by file_id exists
+		return err
+	}
 
-	return h.saveMessage(w, req, int64(id), request.Text, request.Title, request.FileIDs, request.ThreadID, user.ID, private, name)
+	response, err := json.Marshal(messages.SendCommentResponse{
+		ID:          id,
+		Description: "saved",
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return err
+	}
+
+	json.NewEncoder(w).Encode(server.ServerResponse{
+		Status:   "ok",
+		Response: json.RawMessage(response),
+	})
+
+	return nil
 }

@@ -30,6 +30,15 @@ type TranslationsController interface {
 	ListTranslations(ctx context.Context, userID, messageID int64, name string) (translations []*messages.Translation, err error)
 }
 
+type CommentsController interface {
+	SendComment(ctx context.Context, id, userID, messageID int64, text string, metadata []byte) (err error)
+	UpdateComment(ctx context.Context, id, userID int64, text *string) (err error)
+	DeleteComment(ctx context.Context, id, userID int64) (err error)
+	DeleteMessageComments(ctx context.Context, messageID int64) (err error)
+	ReadComment(ctx context.Context, id, userID int64) (comment *messages.Comment, err error)
+	ListComments(ctx context.Context, userID, messageID *int64, limit, offset int32, asc bool) (list *messages.CommentsList, err error)
+}
+
 // TODO: move on controller/service level
 type FilesGateway interface {
 	ReadBatchFiles(ctx context.Context, fileIDs []int64, userID int64) (files map[int64]*files.File, err error)
@@ -38,14 +47,17 @@ type FilesGateway interface {
 }
 
 type Handler struct {
-	controller     MessagesController
+	controller             MessagesController
 	translationsController TranslationsController
+	commentsController     CommentsController
 	filesGateway           FilesGateway
 }
 
-func New(messagesController MessagesController, translationsController TranslationsController, filesGateway FilesGateway) *Handler {
+func New(messagesController MessagesController, translationsController TranslationsController,
+	commentsController CommentsController, filesGateway FilesGateway) *Handler {
 	return &Handler{
 		controller:             messagesController,
+		commentsController:     commentsController,
 		translationsController: translationsController,
 		filesGateway:           filesGateway,
 	}

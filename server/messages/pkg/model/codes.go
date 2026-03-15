@@ -18,4 +18,6 @@ var (
 	CodePublishFailed     int = 215
 	CodePrivateFailed     int = 216
 	CodeDeleteFailed      int = 217
+
+	CodeNoCommentID       int = 218
 )

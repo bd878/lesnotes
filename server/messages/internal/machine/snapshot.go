@@ -96,6 +96,8 @@ func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
 			logger.Debugw("file snapshot", "file_id", v.File.FileId)
 		case *api.MessagesSnapshot_Translation:
 			logger.Debugw("translation snapshot", "message_id", v.Translation.MessageId)
+		case *api.MessagesSnapshot_Comment:
+			logger.Debugw("comment snapshot", "id", v.Comment.Id)
 		default:
 			logger.Debugln("unknown snapshot")
 			continue

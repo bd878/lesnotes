@@ -18,9 +18,6 @@ type Config struct {
 	RaftBootstrap        bool        `json:"raft_bootstrap"`
 	PGConn               string      `json:"pg_conn"`
 	// TODO ShutdownTimeout string     `json:"shutdown_timeout"`
-	TableName            string      `json:"table_name"`
-	FilesTableName       string      `json:"files_table_name"`
-	TranslationsTableName string      `json:"translations_table_name"`
 	GooseTableName       string      `json:"goose_table_name"`
 	DataPath             string      `json:"data_path"`
 }

@@ -17,7 +17,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CommentsClient interface {
-	SaveComment(ctx context.Context, in *SaveCommentRequest, opts ...grpc.CallOption) (*SaveCommentResponse, error)
+	SendComment(ctx context.Context, in *SendCommentRequest, opts ...grpc.CallOption) (*SendCommentResponse, error)
 	UpdateComment(ctx context.Context, in *UpdateCommentRequest, opts ...grpc.CallOption) (*UpdateCommentResponse, error)
 	DeleteComment(ctx context.Context, in *DeleteCommentRequest, opts ...grpc.CallOption) (*DeleteCommentResponse, error)
 	DeleteMessageComments(ctx context.Context, in *DeleteMessageCommentsRequest, opts ...grpc.CallOption) (*DeleteMessageCommentsResponse, error)
@@ -33,9 +33,9 @@ func NewCommentsClient(cc grpc.ClientConnInterface) CommentsClient {
 	return &commentsClient{cc}
 }
 
-func (c *commentsClient) SaveComment(ctx context.Context, in *SaveCommentRequest, opts ...grpc.CallOption) (*SaveCommentResponse, error) {
-	out := new(SaveCommentResponse)
-	err := c.cc.Invoke(ctx, "/comments.v1.Comments/SaveComment", in, out, opts...)
+func (c *commentsClient) SendComment(ctx context.Context, in *SendCommentRequest, opts ...grpc.CallOption) (*SendCommentResponse, error) {
+	out := new(SendCommentResponse)
+	err := c.cc.Invoke(ctx, "/comments.v1.Comments/SendComment", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func (c *commentsClient) ListComments(ctx context.Context, in *ListCommentsReque
 // All implementations must embed UnimplementedCommentsServer
 // for forward compatibility
 type CommentsServer interface {
-	SaveComment(context.Context, *SaveCommentRequest) (*SaveCommentResponse, error)
+	SendComment(context.Context, *SendCommentRequest) (*SendCommentResponse, error)
 	UpdateComment(context.Context, *UpdateCommentRequest) (*UpdateCommentResponse, error)
 	DeleteComment(context.Context, *DeleteCommentRequest) (*DeleteCommentResponse, error)
 	DeleteMessageComments(context.Context, *DeleteMessageCommentsRequest) (*DeleteMessageCommentsResponse, error)
@@ -104,8 +104,8 @@ type CommentsServer interface {
 type UnimplementedCommentsServer struct {
 }
 
-func (UnimplementedCommentsServer) SaveComment(context.Context, *SaveCommentRequest) (*SaveCommentResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SaveComment not implemented")
+func (UnimplementedCommentsServer) SendComment(context.Context, *SendCommentRequest) (*SendCommentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendComment not implemented")
 }
 func (UnimplementedCommentsServer) UpdateComment(context.Context, *UpdateCommentRequest) (*UpdateCommentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateComment not implemented")
@@ -135,20 +135,20 @@ func RegisterCommentsServer(s *grpc.Server, srv CommentsServer) {
 	s.RegisterService(&_Comments_serviceDesc, srv)
 }
 
-func _Comments_SaveComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SaveCommentRequest)
+func _Comments_SendComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendCommentRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CommentsServer).SaveComment(ctx, in)
+		return srv.(CommentsServer).SendComment(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/comments.v1.Comments/SaveComment",
+		FullMethod: "/comments.v1.Comments/SendComment",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CommentsServer).SaveComment(ctx, req.(*SaveCommentRequest))
+		return srv.(CommentsServer).SendComment(ctx, req.(*SendCommentRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -248,8 +248,8 @@ var _Comments_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*CommentsServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "SaveComment",
-			Handler:    _Comments_SaveComment_Handler,
+			MethodName: "SendComment",
+			Handler:    _Comments_SendComment_Handler,
 		},
 		{
 			MethodName: "UpdateComment",

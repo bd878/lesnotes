@@ -30,7 +30,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	dumper := postgres.NewDumper(svc.Pool(), "messages.messages", "messages.files",
 		"messages.translations", "messages.comments")
 
-	consensus, err := setupRaft(svc, cfg, messagesRepo, filesRepo, translationsRepo, dumper)
+	consensus, err := setupRaft(svc, cfg, messagesRepo, filesRepo, translationsRepo, commentsRepo, dumper)
 	if err != nil {
 		return err
 	}
@@ -42,17 +42,19 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
 	stream.RegisterDomainEventHandlers(dispatcher, stream.NewDomainEventHandlers(nats.NewStream(svc.Nats())))
 
-	controller := application.New(consensus, dispatcher, messagesRepo, filesRepo, translationsRepo, svc.Logger())
+	controller := application.New(consensus, dispatcher, messagesRepo, filesRepo, translationsRepo, commentsRepo, svc.Logger())
 
 	stream.RegisterIntegrationEventHandlers(nats.NewStream(svc.Nats()),
 		stream.NewIntegrationEventHandlers(controller))
 
 	messagesHandler := grpc.NewMessagesHandler(controller)
 	translationsHandler := grpc.NewTranslationsHandler(controller)
+	commentsHandler := grpc.NewCommentsHandler(controller)
 
 	api.RegisterMessagesServer(svc.RPC(), messagesHandler)
 	api.RegisterDistributedServer(svc.RPC(), messagesHandler)
 	api.RegisterTranslationsServer(svc.RPC(), translationsHandler)
+	api.RegisterCommentsServer(svc.RPC(), commentsHandler)
 
 	return nil
 }
@@ -95,8 +97,8 @@ func setupSerf(svc system.Service, cfg config.Config, handler serf.Handler, logg
 }
 
 func setupRaft(svc system.Service, cfg config.Config, messagesRepo *postgres.MessagesRepository, filesRepo *postgres.FilesRepository,
-	translationsRepo *postgres.TranslationsRepository, dumper *postgres.Dumper) (*raft.Distributed, error) {
-	fsm := machine.New(messagesRepo, filesRepo, translationsRepo, dumper, svc.Logger())
+	translationsRepo *postgres.TranslationsRepository, commentsRepo *postgres.CommentsRepository, dumper *postgres.Dumper) (*raft.Distributed, error) {
+	fsm := machine.New(messagesRepo, filesRepo, translationsRepo, commentsRepo, dumper, svc.Logger())
 
 	consensus, err := raft.New(raft.Config{
 		Bootstrap:      cfg.RaftBootstrap,

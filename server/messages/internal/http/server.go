@@ -45,13 +45,11 @@ func New(cfg Config) *Server {
 	threadsGateway := threadsgateway.New(cfg.ThreadsServiceAddr)
 	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
 
-	messagesController := controller.NewMessagesController(controller.MessagesConfig{
-		RpcAddr: cfg.RpcAddr,
-	}, threadsGateway)
-	translationsController := controller.NewTranslationsController(controller.TranslationsConfig{
-		RpcAddr: cfg.RpcAddr,
-	})
-	handler := httphandler.New(messagesController, translationsController, filesGateway)
+	messagesController := controller.NewMessagesController(controller.MessagesConfig{RpcAddr: cfg.RpcAddr}, threadsGateway)
+	translationsController := controller.NewTranslationsController(controller.TranslationsConfig{RpcAddr: cfg.RpcAddr})
+	commentsController := controller.NewCommentsController(controller.CommentsConfig{RpcAddr: cfg.RpcAddr})
+
+	handler := httphandler.New(messagesController, translationsController, commentsController, filesGateway)
 
 	mux.Handle("/messages/v1/send",        middleware.Build(handler.SendMessage))
 	mux.Handle("/messages/v1/read_path",   middleware.Build(handler.ReadPath))
@@ -79,6 +77,12 @@ func New(cfg Config) *Server {
 	mux.Handle("/translations/v2/delete",  middleware.Build(handler.DeleteTranslationJsonAPI))
 	mux.Handle("/translations/v2/read",    middleware.Build(handler.ReadTranslationJsonAPI))
 	mux.Handle("/translations/v2/list",    middleware.Build(handler.ListTranslationsJsonAPI))
+
+	mux.Handle("POST /comments/v2/send",   middleware.Build(handler.SendCommentJsonAPI))
+	mux.Handle("POST /comments/v2/update", middleware.Build(handler.UpdateCommentJsonAPI))
+	mux.Handle("POST /comments/v2/read",   middleware.Build(handler.ReadCommentJsonAPI))
+	mux.Handle("POST /comments/v2/delete", middleware.Build(handler.DeleteCommentsJsonAPI))
+	mux.Handle("POST /comments/v2/list",   middleware.Build(handler.ListCommentsJsonAPI))
 
 	server := &Server{
 		Server: &http.Server{

@@ -33,6 +33,11 @@ func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.Event], hand
 		domain.TranslationCreatedEvent,
 		domain.TranslationDeletedEvent,
 		domain.TranslationUpdatedEvent,
+
+		domain.CommentCreatedEvent,
+		domain.CommentDeletedEvent,
+		domain.CommentUpdatedEvent,
+		domain.MessageCommentsDeletedEvent,
 	)
 }
 
@@ -57,6 +62,15 @@ func (h domainHandler[T]) HandleEvent(ctx context.Context, event T) error {
 		return h.onTranslationUpdated(ctx, event)
 	case domain.TranslationDeletedEvent:
 		return h.onTranslationDeleted(ctx, event)
+	
+	case domain.CommentCreatedEvent:
+		return h.onCommentCreated(ctx, event)
+	case domain.CommentUpdatedEvent:
+		return h.onCommentUpdated(ctx, event)
+	case domain.CommentDeletedEvent:
+		return h.onCommentDeleted(ctx, event)
+	case domain.MessageCommentsDeletedEvent:
+		return h.onMessageCommentsDeleted(ctx, event)
 	}
 	return nil
 }
@@ -183,4 +197,61 @@ func (h domainHandler[T]) onTranslationUpdated(ctx context.Context, event ddd.Ev
 	}
 
 	return h.publisher.Publish(ctx, events.TranslationsChannel, am.NewRawMessage(event.ID(), events.TranslationUpdatedEvent, data))
+}
+
+func (h domainHandler[T]) onCommentCreated(ctx context.Context, event ddd.Event) error {
+	payload := event.Payload().(*domain.CommentCreated)
+	data, err := proto.Marshal(&api.CommentCreated{
+		MessageId:   payload.MessageID,
+		Id:          payload.ID,
+		UserId:      payload.UserID,
+		Text:        payload.Text,
+		CreatedAt:   payload.CreatedAt,
+		UpdatedAt:   payload.UpdatedAt,
+	})
+	if err != nil {
+		return err
+	}
+
+	return h.publisher.Publish(ctx, events.CommentsChannel, am.NewRawMessage(event.ID(), events.CommentCreatedEvent, data))
+}
+
+func (h domainHandler[T]) onCommentUpdated(ctx context.Context, event ddd.Event) error {
+	payload := event.Payload().(*domain.CommentUpdated)
+	data, err := proto.Marshal(&api.CommentUpdated{
+		Id:          payload.ID,
+		UserId:      payload.UserID,
+		Text:        payload.Text,
+		UpdatedAt:   payload.UpdatedAt,
+	})
+	if err != nil {
+		return err
+	}
+
+	return h.publisher.Publish(ctx, events.CommentsChannel, am.NewRawMessage(event.ID(), events.CommentUpdatedEvent, data))
+}
+
+func (h domainHandler[T]) onCommentDeleted(ctx context.Context, event ddd.Event) error {
+	payload := event.Payload().(*domain.CommentDeleted)
+	data, err := proto.Marshal(&api.CommentDeleted{
+		Id:          payload.ID,
+		UserId:      payload.UserID,
+	})
+	if err != nil {
+		return err
+	}
+
+	return h.publisher.Publish(ctx, events.CommentsChannel, am.NewRawMessage(event.ID(), events.CommentDeletedEvent, data))
+}
+
+func (h domainHandler[T]) onMessageCommentsDeleted(ctx context.Context, event ddd.Event) error {
+	payload := event.Payload().(*domain.MessageCommentsDeleted)
+	data, err := proto.Marshal(&api.MessageCommentsDeleted{
+		MessageId:   payload.MessageID,
+	})
+	if err != nil {
+		return err
+	}
+
+	return h.publisher.Publish(ctx, events.CommentsChannel, am.NewRawMessage(event.ID(), events.MessageCommentsDeletedEvent, data))
 }

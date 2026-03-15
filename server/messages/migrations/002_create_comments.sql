@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS messages.comments
 	metadata     bytea         DEFAULT NULL,
 	created_at   timestamptz   NOT NULL DEFAULT NOW(),
 	updated_at   timestamptz   NOT NULL DEFAULT NOW(),
-	PRIMARY KEY(id)
+	PRIMARY KEY(id, user_id)
 );
 
 -- +goose Down

@@ -18,18 +18,21 @@ type Dumper struct {
 	messagesTableName      string
 	filesTableName         string
 	translationsTableName  string
+	commentsTableName      string
 	ctx                    context.Context
 	cancel                 context.CancelCauseFunc
 	ch                     chan *api.MessagesSnapshot
 	wg                     sync.WaitGroup
 }
 
-func NewDumper(pool *pgxpool.Pool, messagesTableName, filesTableName, translationsTableName string) *Dumper {
+func NewDumper(pool *pgxpool.Pool, messagesTableName, filesTableName,
+	translationsTableName, commentsTableName string) *Dumper {
 	return &Dumper{
 		pool:                    pool,
 		messagesTableName:       messagesTableName,
 		filesTableName:          filesTableName,
 		translationsTableName:   translationsTableName,
+		commentsTableName:       commentsTableName,
 	}
 }
 
@@ -44,6 +47,8 @@ func (r *Dumper) Open(ctx context.Context) (ch chan *api.MessagesSnapshot, err e
 	go r.runFiles()
 	r.wg.Add(1)
 	go r.runTranslations()
+	r.wg.Add(1)
+	go r.runComments()
 
 	go func() {
 		r.wg.Wait()
@@ -198,6 +203,56 @@ func (r *Dumper) runTranslations() {
 	}
 }
 
+func (r *Dumper) runComments() {
+	query := "SELECT id, message_id, user_id, text, metadata, created_at, updated_at FROM %s"
+
+	defer r.wg.Done()
+	defer logger.Debugln("comments dump finished")
+
+	rows, err := r.pool.Query(r.ctx, r.commentsTable(query))
+	if err != nil {
+		logger.Errorln(err)
+		r.cancel(err)
+		return
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		comment := &api.CommentSnapshotItem{}
+
+		var createdAt, updatedAt time.Time
+		err = rows.Scan(&comment.Id, &comment.MessageId, &comment.UserId, &comment.Text,
+			&comment.Metadata, &createdAt, &updatedAt)
+		if err != nil {
+			logger.Errorln(err)
+			r.cancel(err)
+			return
+		}
+
+		comment.CreatedAt = createdAt.Format(time.RFC3339)
+		comment.UpdatedAt = updatedAt.Format(time.RFC3339)
+
+		select {
+		case <-r.ctx.Done():
+			return
+		default:
+		}
+
+		r.ch <- &api.MessagesSnapshot{
+			Item: &api.MessagesSnapshot_Comment{
+				Comment: comment,
+			},
+		}
+	}
+
+	if err := rows.Err(); err != nil {
+		logger.Errorln(err)
+		r.cancel(err)
+		return
+	}
+}
+
 func (r *Dumper) Close() (err error) {
 	logger.Debugln("close dumper")
 	r.cancel(nil)
@@ -233,6 +288,15 @@ func (r *Dumper) Restore(ctx context.Context, snapshot *api.MessagesSnapshot) (e
 
 		return
 
+	case *api.MessagesSnapshot_Comment:
+
+		query := "INSERT INTO %s(id, message_id, user_id, text, metadata, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7)"
+
+		_, err = r.pool.Exec(ctx, r.commentsTable(query), v.Comment.Id, v.Comment.MessageId, v.Comment.UserId, v.Comment.Text,
+			v.Comment.Metadata, v.Comment.CreatedAt, v.Comment.UpdatedAt)
+
+		return
+
 	default:
 		return errors.New("unknown snapshot item")
 	}
@@ -248,4 +312,8 @@ func (r Dumper) filesTable(query string) string {
 
 func (r Dumper) translationsTable(query string) string {
 	return fmt.Sprintf(query, r.translationsTableName)
+}
+
+func (r Dumper) commentsTable(query string) string {
+	return fmt.Sprintf(query, r.commentsTableName)
 }

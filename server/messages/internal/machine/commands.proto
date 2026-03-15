@@ -71,3 +71,30 @@ message DeleteTranslationCommand {
 	int64  message_id = 1;
 	string lang = 2;
 }
+
+message AppendCommentCommand {
+	int64     id = 1;
+	int64     message_id = 2;
+	int64     user_id = 3;
+	string    text = 4;
+	string    created_at = 5;
+	string    updated_at = 6;
+	optional bytes metadata = 7;
+}
+
+message UpdateCommentCommand {
+	int64      id = 1;
+	int64      user_id = 2;
+	optional string text = 3;
+	optional bytes  metadata = 4;
+	string     updated_at = 5;
+}
+
+message DeleteCommentCommand {
+	int64      id = 1;
+	int64      user_id = 2;
+}
+
+message DeleteMessageCommentsCommand {
+	int64      message_id = 1;
+}

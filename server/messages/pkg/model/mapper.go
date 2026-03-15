@@ -56,6 +56,30 @@ func TranslationToProto(translation *Translation) *api.Translation {
 	}
 }
 
+func CommentFromProto(proto *api.Comment) *Comment {
+	return &Comment{
+		MessageID:      proto.MessageId,
+		UserID:         proto.UserId,
+		ID:             proto.Id,
+		Text:           proto.Text,
+		Metadata:       proto.Metadata,
+		CreatedAt:      proto.CreatedAt,
+		UpdatedAt:      proto.UpdatedAt,
+	}
+}
+
+func CommentToProto(comment *Comment) *api.Comment {
+	return &api.Comment{
+		MessageId:     comment.MessageID,
+		UserId:        comment.UserID,
+		Id:            comment.ID,
+		Text:          comment.Text,
+		Metadata:      comment.Metadata,
+		CreatedAt:     comment.CreatedAt,
+		UpdatedAt:     comment.UpdatedAt,
+	}
+}
+
 func TranslationPreviewFromProto(proto *api.TranslationPreview) *TranslationPreview {
 	return &TranslationPreview{
 		MessageID:      proto.MessageId,
@@ -120,6 +144,22 @@ func MapTranslationPreviewsFromProto(mapper (func(*api.TranslationPreview) *Tran
 	res := make([]*TranslationPreview, len(previews))
 	for i, preview := range previews {
 		res[i] = mapper(preview)
+	}
+	return res
+}
+
+func MapCommentsFromProto(mapper (func(*api.Comment) *Comment), comments []*api.Comment) []*Comment {
+	res := make([]*Comment, len(comments))
+	for i, comment := range comments {
+		res[i] = mapper(comment)
+	}
+	return res
+}
+
+func MapCommentsToProto(mapper (func(*Comment) *api.Comment), comments []*Comment) []*api.Comment {
+	res := make([]*api.Comment, len(comments))
+	for i, comment := range comments {
+		res[i] = mapper(comment)
 	}
 	return res
 }

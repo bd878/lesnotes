@@ -4,14 +4,13 @@ import (
 	"net/http"
 	"encoding/json"
 
-	"github.com/bd878/gallery/server/internal/utils"
+	"github.com/bd878/gallery/server/messages/pkg/model"
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
-	messages "github.com/bd878/gallery/server/messages/pkg/model"
-	server "github.com/bd878/gallery/server/pkg/model"
 	users "github.com/bd878/gallery/server/users/pkg/model"
+	server "github.com/bd878/gallery/server/pkg/model"
 )
 
-func (h *Handler) SendMessageJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
+func (h *Handler) ListCommentsJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
 	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
@@ -40,7 +39,7 @@ func (h *Handler) SendMessageJsonAPI(w http.ResponseWriter, req *http.Request) (
 		return
 	}
 
-	var request messages.SendRequest
+	var request model.ListCommentsRequest
 	if err = json.Unmarshal(data, &request); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -54,30 +53,38 @@ func (h *Handler) SendMessageJsonAPI(w http.ResponseWriter, req *http.Request) (
 		return
 	}
 
-	if request.FileIDs == nil && request.Text == "" && request.Title == "" {
-		w.WriteHeader(http.StatusBadRequest)
+	list, err := h.commentsController.ListComments(req.Context(), &user.ID, request.MessageID,
+		request.Limit, request.Offset, request.Asc)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error:  &server.ErrorCode{
-				Code:    messages.CodeNoText,
-				Explain: "file_ids or text or title required",
+				Code:    model.CodeReadFailed,
+				Explain: "failed to list comment",
 			},
 		})
 
-		return
+		return err
 	}
 
-	private := true
-	if user.ID == users.PublicUserID {
-		private = false
+	response, err := json.Marshal(model.ListCommentsResponse{
+		Comments:     list.Comments,
+		IsLastPage:   list.IsLastPage,
+		IsFirstPage:  list.IsFirstPage,
+		Total:        list.Total,
+		Count:        list.Count,
+		Offset:       list.Offset,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return err
 	}
 
-	// TODO: generate id on application side, return as value
+	json.NewEncoder(w).Encode(server.ServerResponse{
+		Status:      "ok",
+		Response:    json.RawMessage(response),
+	})
 
-	id := utils.RandomID()
-	name := utils.RandomString(8)
-
-	// TODO: check file by file_id exists
-
-	return h.saveMessage(w, req, int64(id), request.Text, request.Title, request.FileIDs, request.ThreadID, user.ID, private, name)
+	return
 }

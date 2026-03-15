@@ -1,8 +1,9 @@
 package events
 
 const (
-	MessagesChannel = "gallery.messages.Message"
+	MessagesChannel     = "gallery.messages.Message"
 	TranslationsChannel = "gallery.messages.Translation"
+	CommentsChannel     = "gallery.messages.Comment"
 
 	MessageCreatedEvent   = "messagesapi.MessageCreated"
 	MessageDeletedEvent   = "messagesapi.MessageDeleted"
@@ -13,4 +14,9 @@ const (
 	TranslationCreatedEvent   = "messagesapi.TranslationCreated"
 	TranslationDeletedEvent   = "messagesapi.TranslationDeleted"
 	TranslationUpdatedEvent   = "messagesapi.TranslationUpdated"
+
+	CommentCreatedEvent         = "messagesapi.CommentCreated"
+	CommentUpdatedEvent         = "messagesapi.CommentUpdated"
+	CommentDeletedEvent         = "messagesapi.CommentDeleted"
+	MessageCommentsDeletedEvent = "messagesapi.MessageCommentsDeleted"
 )

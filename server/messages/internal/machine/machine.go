@@ -32,6 +32,13 @@ type TranslationsRepository interface {
 	DeleteMessage(ctx context.Context, messageID int64) (err error)
 }
 
+type CommentsRepository interface {
+	Create(ctx context.Context, id, userID, messageID int64, text string, metadata []byte, createdAt, updatedAt string) (err error)
+	Update(ctx context.Context, id, userID int64, text *string, updatedAt string) (err error)
+	Delete(ctx context.Context, id, userID int64) (err error)
+	DeleteMessageComments(ctx context.Context, messageID int64) (err error)
+}
+
 type Dumper interface {
 	Open(ctx context.Context) (ch chan *api.MessagesSnapshot, err error)
 	Restore(ctx context.Context, user *api.MessagesSnapshot) (err error)
@@ -44,15 +51,17 @@ type Machine struct {
 	log               *logger.Logger
 	dumper            Dumper
 	messagesRepo      MessagesRepository
+	commentsRepo      CommentsRepository
 	filesRepo         FilesRepository
 	translationsRepo  TranslationsRepository
 }
 
-func New(messagesRepo MessagesRepository, filesRepo FilesRepository,
-	translationsRepo TranslationsRepository, dumper Dumper, log *logger.Logger) *Machine {
+func New(messagesRepo MessagesRepository, filesRepo FilesRepository, translationsRepo TranslationsRepository,
+	commentsRepo CommentsRepository, dumper Dumper, log *logger.Logger) *Machine {
 	return &Machine{
 		log:              log,
 		dumper:           dumper,
+		commentsRepo:     commentsRepo,
 		messagesRepo:     messagesRepo,
 		filesRepo:        filesRepo,
 		translationsRepo: translationsRepo,
@@ -83,6 +92,14 @@ func (f *Machine) Apply(record *raft.Log) interface{} {
 		return f.applyUpdateTranslation(buf[1:])
 	case DeleteTranslationRequest:
 		return f.applyDeleteTranslation(buf[1:])
+	case AppendCommentRequest:
+		return f.applyAppendComment(buf[1:])
+	case UpdateCommentRequest:
+		return f.applyUpdateComment(buf[1:])
+	case DeleteCommentRequest:
+		return f.applyDeleteComment(buf[1:])
+	case DeleteMessageCommentsRequest:
+		return f.applyDeleteMessageComments(buf[1:])
 	default:
 		f.log.Errorw("unknown request type", "type", reqType)
 	}
@@ -183,4 +200,32 @@ func (f *Machine) applyDeleteTranslation(raw []byte) interface{} {
 	proto.Unmarshal(raw, &cmd)
 
 	return f.translationsRepo.DeleteTranslation(context.TODO(), cmd.MessageId, cmd.Lang)
+}
+
+func (f *Machine) applyAppendComment(raw []byte) interface{} {
+	var cmd AppendCommentCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.commentsRepo.Create(context.TODO(), cmd.Id, cmd.UserId, cmd.MessageId, cmd.Text, cmd.Metadata, cmd.CreatedAt, cmd.UpdatedAt)
+}
+
+func (f *Machine) applyUpdateComment(raw []byte) interface{} {
+	var cmd UpdateCommentCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.commentsRepo.Update(context.TODO(), cmd.Id, cmd.UserId, cmd.Text, cmd.UpdatedAt)
+}
+
+func (f *Machine) applyDeleteComment(raw []byte) interface{} {
+	var cmd DeleteCommentCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.commentsRepo.Delete(context.TODO(), cmd.Id, cmd.UserId)
+}
+
+func (f *Machine) applyDeleteMessageComments(raw []byte) interface{} {
+	var cmd DeleteMessageCommentsCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.commentsRepo.DeleteMessageComments(context.TODO(), cmd.MessageId)
 }

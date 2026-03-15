@@ -13,4 +13,9 @@ const (
 	AppendTranslationRequest
 	UpdateTranslationRequest
 	DeleteTranslationRequest
+
+	AppendCommentRequest
+	UpdateCommentRequest
+	DeleteCommentRequest
+	DeleteMessageCommentsRequest
 )
