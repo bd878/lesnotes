@@ -12,4 +12,4 @@ CREATE TABLE IF NOT EXISTS messages.comments
 );
 
 -- +goose Down
-DROP TABLE IS EXISTS messages.comments;
+DROP TABLE IF EXISTS messages.comments;

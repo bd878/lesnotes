@@ -68,8 +68,6 @@ type (
 		Total               *int32              `json:"total,omitempty"`
 		Offset              *int32              `json:"offset,omitempty"`
 		Description         string              `json:"description"`
-		CreatedAt           string              `json:"created_at"`
-		UpdatedAt           string              `json:"updated_at"`
 	}
 
 	ReadRequest struct {

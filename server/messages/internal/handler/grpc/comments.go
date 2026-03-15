@@ -12,7 +12,7 @@ type CommentsController interface {
 	DeleteMessageComments(ctx context.Context, messageID int64) (err error)
 	UpdateComment(ctx context.Context, id, userID int64, text *string, metadata []byte) (err error)
 	ReadComment(ctx context.Context, id, userID int64) (comment *api.Comment, err error)
-	ListComments(ctx context.Context, messageID, userID *int64, limit, offset int32) (list *api.CommentsList, err error)
+	ListComments(ctx context.Context, userID, messageID *int64, limit, offset int32) (list *api.CommentsList, err error)
 }
 
 type CommentsHandler struct {
@@ -71,7 +71,7 @@ func (h *CommentsHandler) ReadComment(ctx context.Context, req *api.ReadCommentR
 }
 
 func (h *CommentsHandler) ListComments(ctx context.Context, req *api.ListCommentsRequest) (resp *api.ListCommentsResponse, err error) {
-	list, err := h.controller.ListComments(ctx, req.MessageId, req.UserId, req.Limit, req.Offset)
+	list, err := h.controller.ListComments(ctx, req.UserId, req.MessageId, req.Limit, req.Offset)
 	if err != nil {
 		return nil, err
 	}

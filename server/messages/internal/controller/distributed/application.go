@@ -376,15 +376,16 @@ func (m *Distributed) SaveComment(ctx context.Context, id, userID, messageID int
 }
 
 func (m *Distributed) UpdateComment(ctx context.Context, id, userID int64, text *string, metadata []byte) (err error) {
-	m.log.Debugw("update comment", "id", id, "user_id", userID, "text", *text, "metadata", metadata)
+	m.log.Debugw("update comment", "id", id, "user_id", userID, "text", text, "metadata", metadata)
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
 	cmd, err := proto.Marshal(&machine.UpdateCommentCommand{
-		Id:       id,
-		UserId:   userID,
-		Text:     text,
-		Metadata: metadata,
+		Id:        id,
+		UserId:    userID,
+		Text:      text,
+		Metadata:  metadata,
+		UpdatedAt: updatedAt,
 	})
 	if err != nil {
 		return err
@@ -565,7 +566,7 @@ func (m *Distributed) ReadComment(ctx context.Context, id, userID int64) (commen
 	return m.commentsRepo.Read(ctx, id, userID)
 }
 
-func (m *Distributed) ListComments(ctx context.Context, messageID, userID *int64, limit, offset int32) (comments *api.CommentsList, err error) {
+func (m *Distributed) ListComments(ctx context.Context, userID, messageID *int64, limit, offset int32) (comments *api.CommentsList, err error) {
 	m.log.Debugw("list comments", "message_id", messageID)
 	if messageID != nil {
 		return m.commentsRepo.ListMessageComments(ctx, *messageID, limit, offset)

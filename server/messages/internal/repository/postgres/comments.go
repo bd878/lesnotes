@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/internal/logger"
 )
 
 type CommentsRepository struct {
@@ -34,6 +35,8 @@ func (r *CommentsRepository) Create(ctx context.Context, id, userID, messageID i
 
 func (r *CommentsRepository) Update(ctx context.Context, id, userID int64, text *string, updatedAt string) (err error) {
 	const query = "UPDATE %s SET text = $3, updated_at = $4 WHERE id = $1 AND user_id = $2"
+
+	logger.Debugw("update", "id", id, "user_id", userID, "text", *text, "updated_at", updatedAt)
 
 	_, err = r.pool.Exec(ctx, r.table(query), id, userID, text, updatedAt)
 
@@ -152,17 +155,13 @@ func (r *CommentsRepository) ListMessageComments(ctx context.Context, messageID 
 		isLastPage bool
 	)
 
-	if int32(len(comments)) < limit {
-		isLastPage = true
-	} else {
-		err = tx.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE message_id = $1"), messageID).Scan(&total)
-		if err != nil {
-			return
-		}
+	err = tx.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE message_id = $1"), messageID).Scan(&total)
+	if err != nil {
+		return
+	}
 
-		if total <= offset + limit {
-			isLastPage = true
-		}
+	if total <= offset + limit {
+		isLastPage = true
 	}
 
 	list = &api.CommentsList{
