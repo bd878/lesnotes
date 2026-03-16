@@ -24,8 +24,9 @@ async function updateMessageJson(token: string, id: number, text: string, title:
 			},
 		});
 
-		if (error.error)
+		if (error.error) {
 			result.error = models.error(error)
+		}
 	} catch (e) {
 		result.error.error    = true
 		result.error.status   = 500

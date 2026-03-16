@@ -53,7 +53,7 @@ func (h *Handler) ListCommentsJsonAPI(w http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	list, err := h.commentsController.ListComments(req.Context(), &user.ID, request.MessageID,
+	list, err := h.commentsController.ListComments(req.Context(), &user.ID, request.MessageID, request.Name,
 		request.Limit, request.Offset, request.Asc)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

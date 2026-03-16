@@ -13,6 +13,7 @@ import (
 	"github.com/bd878/gallery/server/messages/pkg/model"
 	"github.com/bd878/gallery/server/messages/internal/machine"
 	"github.com/bd878/gallery/server/messages/internal/domain"
+	users "github.com/bd878/gallery/server/users/pkg/model"
 )
 
 type MessagesRepository interface {
@@ -566,10 +567,26 @@ func (m *Distributed) ReadComment(ctx context.Context, id, userID int64) (commen
 	return m.commentsRepo.Read(ctx, id, userID)
 }
 
-func (m *Distributed) ListComments(ctx context.Context, userID, messageID *int64, limit, offset int32) (comments *api.CommentsList, err error) {
-	m.log.Debugw("list comments", "message_id", messageID)
+func (m *Distributed) ListComments(ctx context.Context, userID, messageID *int64, name *string, limit, offset int32) (comments *api.CommentsList, err error) {
+	m.log.Debugw("list comments", "message_id", messageID, "user_id", userID, "name", name, "limit", limit, "offset", offset)
+
 	if messageID != nil {
 		return m.commentsRepo.ListMessageComments(ctx, *messageID, limit, offset)
+	} else if name != nil {
+
+		var message *model.Message
+
+		if userID != nil {
+			message, err = m.messagesRepo.Read(ctx, []int64{*userID}, 0, *name)
+		} else {
+			message, err = m.messagesRepo.Read(ctx, []int64{users.PublicUserID}, 0, *name)
+		}
+		if err != nil {
+			return
+		}
+
+		return m.commentsRepo.ListMessageComments(ctx, message.ID, limit, offset)
+
 	} else {
 		return nil, errors.New("list users comments not implemented")
 	}

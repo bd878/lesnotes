@@ -3,7 +3,7 @@ import models from './models';
 
 const EmptyListTranslations = {
 	error:        models.error(),
-	translations: models.translation(),
+	translations: [],
 }
 
 async function listTranslationsJson(token: string, message: number, name?: string) {

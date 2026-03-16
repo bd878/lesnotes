@@ -163,18 +163,19 @@ func (s *CommentsController) ReadComment(ctx context.Context, id, userID int64) 
 	return
 }
 
-func (s *CommentsController) ListComments(ctx context.Context, userID, messageID *int64, limit, offset int32, asc bool) (list *model.CommentsList, err error) {
+func (s *CommentsController) ListComments(ctx context.Context, userID, messageID *int64, name *string, limit, offset int32, asc bool) (list *model.CommentsList, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
 		}
 	}
 
-	logger.Debugw("list comments", "message_id", messageID, "user_id", userID, "limit", limit, "offset", offset, "ascending", asc)
+	logger.Debugw("list comments", "message_id", messageID, "user_id", userID, "name", name, "limit", limit, "offset", offset, "ascending", asc)
 
 	res, err := s.client.ListComments(ctx, &api.ListCommentsRequest{
 		MessageId:     messageID,
 		UserId:        userID,
+		Name:          name,
 		Limit:         limit,
 		Offset:        offset,
 		Asc:           asc,

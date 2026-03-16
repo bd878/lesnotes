@@ -409,8 +409,8 @@ components:
             message:
               type: integer
               required: false
-            user:
-              type: integer
+            name:
+              type: string
               required: false
             limit:
               type: integer

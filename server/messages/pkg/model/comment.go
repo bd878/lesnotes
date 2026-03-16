@@ -58,6 +58,7 @@ type (
 
 	ListCommentsRequest struct {
 		MessageID    *int64          `json:"message,omitempty"`
+		Name         *string         `json:"name,omitempty"`
 		Limit        int32           `json:"limit"`
 		Offset       int32           `json:"offset"`
 		Asc          bool            `json:"asc"`

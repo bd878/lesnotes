@@ -36,7 +36,7 @@ type CommentsController interface {
 	DeleteComment(ctx context.Context, id, userID int64) (err error)
 	DeleteMessageComments(ctx context.Context, messageID int64) (err error)
 	ReadComment(ctx context.Context, id, userID int64) (comment *messages.Comment, err error)
-	ListComments(ctx context.Context, userID, messageID *int64, limit, offset int32, asc bool) (list *messages.CommentsList, err error)
+	ListComments(ctx context.Context, userID, messageID *int64, name *string, limit, offset int32, asc bool) (list *messages.CommentsList, err error)
 }
 
 // TODO: move on controller/service level

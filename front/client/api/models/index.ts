@@ -1,4 +1,5 @@
 import message, { EmptyMessage } from './message'
+import comment, { EmptyComment } from './comment'
 import translation, { EmptyTranslation } from './translation';
 import translationPreview, { EmptyTranslationPreview } from './translationPreview';
 import searchMessage, { EmptySearchMessage } from './searchMessage'
@@ -12,6 +13,7 @@ import error from './error'
 
 export default {
 	message,
+	comment,
 	searchMessage,
 	searchMessagePath,
 	threadMessages,
@@ -26,6 +28,7 @@ export default {
 	EmptyPaging,
 	EmptyThread,
 	EmptyMessage,
+	EmptyComment,
 	EmptyTranslation,
 	EmptyTranslationPreview,
 	EmptyThreadMessages,
@@ -36,6 +39,7 @@ export default {
 }
 
 export type { Thread } from './thread'
+export type { Comment } from './comment'
 export type { Message } from './message'
 export type { Translation } from './translation'
 export type { TranslationPreview } from './translationPreview'

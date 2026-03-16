@@ -58,6 +58,7 @@ message ListCommentsRequest {
 	bool      asc = 3;
 	optional int64 message_id = 4;
 	optional int64 user_id = 5;
+	optional string name = 6;
 }
 
 message ListCommentsResponse {

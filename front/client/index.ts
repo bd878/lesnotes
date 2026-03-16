@@ -16,6 +16,7 @@ import notAuthed from './handlers/notAuthed';
 import authed from './handlers/authed';
 import noCache from './handlers/noCache';
 import loadStack from './handlers/loadStack';
+import loadComments from './handlers/loadComments';
 import loadFiles from './handlers/loadFiles';
 import selectMessageFiles from './handlers/selectMessageFiles';
 import loadTranslation from './handlers/loadTranslation';
@@ -51,7 +52,6 @@ import getSearchQuery from './handlers/getSearchQuery';
 import parseMessageID from './handlers/parseMessageID';
 import parseMessageName from './handlers/parseMessageName';
 import parseThreadName from './handlers/parseThreadName';
-import listTranslations from './handlers/listTranslations';
 
 import assets from './routes/assets';
 import main from './routes/main';

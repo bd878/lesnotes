@@ -1,4 +1,5 @@
 import readMessages from './readMessages';
+import readComment from './readCommentJson';
 import readStackJson from './readStackJson';
 import readMessagesJson from './readMessagesJson';
 import readTranslationJson from './readTranslationJson';
@@ -10,20 +11,24 @@ import readThreadJson from './readThreadJson';
 import readMessageJson from './readMessageJson';
 import sendMessageJson from './sendMessageJson';
 import sendTranslationJson from './sendTranslationJson';
+import sendCommentJson from './sendCommentJson';
 import searchMessagesJson from './searchMessagesJson';
 import searchMessagesPathJson from './searchMessagesPathJson';
 import updateMessage from './updateMessage';
 import updateMessageJson from './updateMessageJson';
 import updateTranslationJson from './updateTranslationJson';
 import updateThreadJson from './updateThreadJson';
+import updateCommentJson from './updateCommentJson';
 import privateThread from './privateThread';
 import privateThreadJson from './privateThreadJson';
 import publishThread from './publishThread';
 import listFilesJson from './listFilesJson';
+import listComments from './listCommentsJson';
 import listTranslationsJson from './listTranslationsJson';
 import publishThreadJson from './publishThreadJson';
 import deleteMessage from './deleteMessage';
 import deleteMessageJson from './deleteMessageJson';
+import deleteCommentJson from './deleteCommentJson';
 import deleteMessages from './deleteMessages';
 import publishMessages from './publishMessages'
 import publishMessageJson from './publishMessageJson'
@@ -57,11 +62,13 @@ export default {
 	getMeJson,
 	readMessages,
 	readStackJson,
+	readCommentJson,
 	readMessagesJson,
 	readBatchMessagesJson,
 	readPathJson,
 	readMessageJson,
 	readTranslationJson,
+	deleteCommentJson,
 	deleteTranslationJson,
 	updateTranslationJson,
 	readMessage,
@@ -69,10 +76,13 @@ export default {
 	publishThreadJson,
 	privateThreadJson,
 	listFilesJson,
+	listCommentsJson,
 	listTranslationsJson,
 	sendMessageJson,
+	sendCommentJson,
 	sendTranslationJson,
 	updateMessage,
+	updateCommentJson,
 	updateMessageJson,
 	updateThreadJson,
 	deleteMessage,
