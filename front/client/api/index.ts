@@ -1,5 +1,5 @@
 import readMessages from './readMessages';
-import readComment from './readCommentJson';
+import readCommentJson from './readCommentJson';
 import readStackJson from './readStackJson';
 import readMessagesJson from './readMessagesJson';
 import readTranslationJson from './readTranslationJson';
@@ -23,7 +23,7 @@ import privateThread from './privateThread';
 import privateThreadJson from './privateThreadJson';
 import publishThread from './publishThread';
 import listFilesJson from './listFilesJson';
-import listComments from './listCommentsJson';
+import listCommentsJson from './listCommentsJson';
 import listTranslationsJson from './listTranslationsJson';
 import publishThreadJson from './publishThreadJson';
 import deleteMessage from './deleteMessage';

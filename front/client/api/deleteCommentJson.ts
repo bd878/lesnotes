@@ -1,0 +1,34 @@
+import api from './api';
+import models from './models';
+
+async function deleteCommentJson(token: string, id: number) {
+	let result = {
+		error:  models.error(),
+	}
+
+	console.log("deleteCommentJson", "token", token, "id", id)
+
+	try {
+		const [_1, error] = await api("/comments/v2/delete", {
+			method: "DELETE",
+			body: {
+				token: token,
+				req: {
+					id: id,
+				},
+			},
+		});
+
+		if (error.error) {
+			result.error = models.error(error)
+		}
+	} catch (e) {
+		result.error.error   = true
+		result.error.status  = 500
+		result.error.explain = e.toString()
+	}
+
+	return result
+}
+
+export default deleteCommentJson
