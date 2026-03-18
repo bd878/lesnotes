@@ -44,6 +44,7 @@ import privateMessage from './handlers/privateMessage';
 import publishThread from './handlers/publishThread';
 import privateThread from './handlers/privateThread';
 import sendMessage from './handlers/sendMessage';
+import sendComment from './handlers/sendComment';
 import sendTranslation from './handlers/sendTranslation';
 import updateMessage from './handlers/updateMessage';
 import updateThread from './handlers/updateThread';
@@ -120,6 +121,7 @@ router
 	.post("doPublishThread",       "/t/publish",                    getToken, authed, getState, publishThread)
 	.post("doPrivateThread",       "/t/private",                    getToken, authed, getState, privateThread)
 	.post("doUpdateThread",        "/t/update",                     getToken, authed, getState, updateThread)
+	.post("doSendComment",         "/comment/send",                 getToken, getState, sendComment)
 	.post("doSendMessage",         "/send",                         getToken, authed, getState, sendMessage)
 	.post("doSendTranslation",     "/translation/send",             getToken, authed, getState, sendTranslation)
 	.get("publicMessage",          "/m/:messageName",               etag, noCache, getState, getToken, getMe, loadMessage, loadComments, parseMessageName, formatView, publicMessage)

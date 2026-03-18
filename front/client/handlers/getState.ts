@@ -5,6 +5,7 @@ async function getState(ctx, next) {
 	ctx.state.lang = getLanguage(ctx)
 	ctx.state.theme = getTheme(ctx)
 	ctx.state.thread = getThread(ctx)
+	ctx.state.msg = getMessageView(ctx)
 
 	await next()
 
@@ -42,6 +43,17 @@ function getTheme(ctx) {
 		return "light"
 	default:
 		return "light"
+	}
+}
+
+function getMessageView(ctx) {
+	switch (ctx.query.msg) {
+	case "files":
+	case "comments":
+	// TODO: case "trans":
+		return ctx.query.msg
+	default:
+		return ""
 	}
 }
 

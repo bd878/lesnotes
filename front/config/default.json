@@ -4,6 +4,7 @@
 	"basedir": "",
 	"https": "1",
 	"domain": "dev.lesnotes.space",
+	"public_user_id": "9999999",
 	"backend_url": "stage.lesnotes.space",
 	"bot_username": "stage_les_notes_bot",
 	"bot_validate_url": "https://bot.lesnotes.space/validate",

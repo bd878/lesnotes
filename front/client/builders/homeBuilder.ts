@@ -1,4 +1,4 @@
-import type { File, Message, Thread, ThreadMessages } from '../api/models';
+import type { File, Message, Thread, Comment, ThreadMessages } from '../api/models';
 import type { FileWithMime } from '../types';
 import type { TranslationPreview } from '../api/models';
 import Config from 'config';
@@ -33,6 +33,10 @@ class HomeBuilder extends AbstractBuilder {
 	navigation           = undefined;
 	translations         = undefined;
 	newTranslation       = undefined;
+	messageNavigation    = undefined;
+	newComment           = undefined;
+	commentsList         = undefined;
+	comments             = undefined;
 
 	async addMessagesStack(stack: ThreadMessages[]) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
@@ -71,6 +75,58 @@ class HomeBuilder extends AbstractBuilder {
 		})
 	}
 
+	async addNewComment(message: number | string) {
+		const template = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/comments/mobile/new_comment.mustache' : 'templates/comments/desktop/new_comment.mustache'
+		)), { encoding: 'utf-8' });
+
+		this.newComment = mustache.render(template, {
+			commentPlaceholder:       this.i18n("commentPlaceholder"),
+			newComment:               this.i18n("newComment"),
+			message:                  message,
+			sendAction:               "/comment/send" + this.search,
+		})
+	}
+
+	async addCommentsList(comments: Comment[]) {
+		const template = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/comments/mobile/comments_list.mustache' : 'templates/comments/desktop/comments_list.mustache'
+		)), { encoding: 'utf-8' });
+
+		this.commentsList = mustache.render(template, {
+			comments: comments,
+		})
+	}
+
+	async addComments(message: number | string, comments: Comment[]) {
+		const template = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/comments/mobile/comments.mustache' : 'templates/comments/desktop/comments.mustache'
+		)), { encoding: 'utf-8' });
+
+		await this.addNewComment(message)
+		await this.addCommentsList(comments)
+
+		this.comments = mustache.render(template, {}, {
+			commentsList:  this.commentsList,
+			newComment:    this.newComment,
+		})
+	}
+
+	async addMessageNavigation() {
+		const template = await readFile(resolve(join(Config.get('basedir'),
+			this.isMobile ? 'templates/message_navigation/mobile/message_navigation.mustache' : 'templates/message_navigation/desktop/message_navigation.mustache'
+		)), { encoding: 'utf-8' });
+
+		const search = this.search
+
+		this.messageNavigation = mustache.render(template, {
+			attachments:      this.i18n("attachments"),
+			comments:         this.i18n("comments"),
+			attachmentsHref:  function() { const params = new URLSearchParams(search); params.set("msg", "files");     return "?" + params.toString(); },
+			commentsHref:     function() { const params = new URLSearchParams(search); params.set("msg", "comments");  return "?" + params.toString(); },
+		})
+	}
+
 	async addTranslations(message: number | string, previews: TranslationPreview[]) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
 			this.isMobile ? 'templates/translations/mobile/translations.mustache' : 'templates/translations/desktop/translations.mustache'
@@ -87,7 +143,7 @@ class HomeBuilder extends AbstractBuilder {
 			translations:          previews,
 			hasTranslations:       () => previews.length > 0,
 		}, {
-			newTranslation:   this.newTranslation,
+			newTranslation:        this.newTranslation,
 		})
 	}
 
@@ -246,6 +302,8 @@ class HomeBuilder extends AbstractBuilder {
 				controlPanel:         this.controlPanel,
 				navigation:           this.navigation,
 				translations:         this.translations,
+				comments:             this.comments,
+				messageNavigation:    this.messageNavigation,
 			}),
 		});
 	}

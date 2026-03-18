@@ -9,6 +9,7 @@ let ctx = await esbuild.context({
 	define: {
 		ENV: '"' + Config.get("env") + '"',
 		DOMAIN: '"' + Config.get("domain") + '"',
+		PUBLIC_USER_ID: Config.get("public_user_id"),
 		BACKEND_URL: '"' + Config.get("backend_url") + '"',
 		BOT_USERNAME: '"' + Config.get("bot_username") + '"',
 		BOT_VALIDATE_URL: '"' + Config.get("bot_validate_url") + '"',
