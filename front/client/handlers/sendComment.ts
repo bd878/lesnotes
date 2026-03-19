@@ -11,15 +11,9 @@ async function sendComment(ctx) {
 	}
 
 	const messageID = parseInt(form.message) || 0
+	const redirectUrl = form.redirectUrl
 
-	let response;
-	if (is.notEmpty(ctx.state.token)) {
-		response = await api.sendCommentJson(ctx.state.token, messageID, form.text)
-	} else {
-		ctx.body = "unimplemented"
-		ctx.status = 501
-		return
-	}
+	const response = await api.sendCommentJson(ctx.state.token, messageID, form.text)
 
 	if (response.error.error) {
 		console.log(response.error)
@@ -27,7 +21,11 @@ async function sendComment(ctx) {
 		ctx.body = "error"
 		return
 	} else {
-		ctx.redirect(ctx.router.url('home', {}, {query: ctx.query}))
+		if (is.notEmpty(redirectUrl)) {
+			ctx.redirect(redirectUrl)
+		} else {
+			ctx.redirect(ctx.router.url('home', {}, {query: ctx.query}))
+		}
 	}
 
 	console.log("<-- sendComment")

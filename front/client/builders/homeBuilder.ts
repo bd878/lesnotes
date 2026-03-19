@@ -83,6 +83,7 @@ class HomeBuilder extends AbstractBuilder {
 		this.newComment = mustache.render(template, {
 			commentPlaceholder:       this.i18n("commentPlaceholder"),
 			newComment:               this.i18n("newComment"),
+			redirectUrl:              this.path + this.search,
 			message:                  message,
 			sendAction:               "/comment/send" + this.search,
 		})
@@ -243,7 +244,7 @@ class HomeBuilder extends AbstractBuilder {
 
 	async addFilesView(files: FileWithMime[]) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/home/mobile/files_view.mustache' : 'templates/home/desktop/files_view.mustache'
+			this.isMobile ? 'templates/files_view/mobile/files_view.mustache' : 'templates/files_view/desktop/files_view.mustache'
 		)), { encoding: 'utf-8' });
 
 		this.filesView = mustache.render(template, {

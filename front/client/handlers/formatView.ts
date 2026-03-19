@@ -12,6 +12,9 @@ async function formatView(ctx, next) {
 	if (is.notEmpty(ctx.state.translation) && is.notEmpty(ctx.state.translation.text)) {
 		ctx.state.translation.text = ctx.state.translation.text.replaceAll("\r\n", "<br />")
 	}
+	if (is.notEmpty(ctx.state.comments) && is.array(ctx.state.comments)) {
+		ctx.state.comments = ctx.state.comments.map(comment => { comment.text = comment.text.replaceAll("\r\n", "<br />").replaceAll("\r", "<br />"); return comment })
+	}
 
 	await next()
 

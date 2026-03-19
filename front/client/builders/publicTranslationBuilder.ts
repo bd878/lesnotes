@@ -56,12 +56,14 @@ class PublicTranslationBuilder extends AbstractPublicBuilder {
 			content: mustache.render(content, {
 				translation:      translation,
 			}, {
-				signup:           this.signup,
-				logout:           this.logout,
-				sidebar:          this.sidebar,
-				translationView:  this.translationView,
-				translations:     this.translations,
-				filesView:        this.filesView,
+				signup:            this.signup,
+				logout:            this.logout,
+				sidebar:           this.sidebar,
+				translationView:   this.translationView,
+				translations:      this.translations,
+				filesView:         this.filesView,
+				comments:          this.comments,
+				messageNavigation: this.messageNavigation,
 			})
 		})
 	}

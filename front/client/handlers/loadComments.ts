@@ -8,7 +8,7 @@ async function loadComments(ctx, next) {
 	const name = ctx.params.messageName || ""
 	const token = ctx.state.token
 
-	console.log("--> loadComments", "id", id, "name", name)
+	console.log("--> loadComments", "id", id, "name", name, "token", token)
 
 	ctx.state.comments = await listCommentsJson(token, id, name, commentsLimit, 0)
 	if (is.notEmpty(ctx.state.comments)) {

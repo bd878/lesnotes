@@ -56,13 +56,15 @@ class PublicMessageBuilder extends AbstractPublicBuilder {
 			content: mustache.render(content, {
 				message:       message,
 			}, {
-				signup:           this.signup,
-				logout:           this.logout,
-				sidebar:          this.sidebar,
-				messagesList:     this.messagesList,
-				translations:     this.translations,
-				messageView:      this.messageView,
-				filesView:        this.filesView,
+				signup:            this.signup,
+				logout:            this.logout,
+				sidebar:           this.sidebar,
+				messagesList:      this.messagesList,
+				translations:      this.translations,
+				messageView:       this.messageView,
+				filesView:         this.filesView,
+				comments:          this.comments,
+				messageNavigation: this.messageNavigation,
 			})
 		})
 	}

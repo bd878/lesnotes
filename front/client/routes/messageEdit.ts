@@ -1,3 +1,4 @@
+import * as is from '../third_party/is';
 import MessageEditViewBuilder from '../builders/messageEditViewBuilder';
 
 async function messageEdit(ctx) {
@@ -8,7 +9,6 @@ async function messageEdit(ctx) {
 	await builder.addSettings()
 	await builder.addNavigation()
 	await builder.addControlPanel()
-	await builder.addFilesView(ctx.state.message.files)
 	await builder.addFilesSelector(ctx.state.files.files)
 	await builder.addMessagesStack(ctx.state.stack)
 	await builder.addMessageEditForm(ctx.state.message)

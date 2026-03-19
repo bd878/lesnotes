@@ -12,6 +12,9 @@ async function formatTextarea(ctx, next) {
 	if (is.notEmpty(ctx.state.translation) && is.notEmpty(ctx.state.translation.text)) {
 		ctx.state.translation.text = ctx.state.translation.text.replaceAll("\r\n", "&#13;&#10;")
 	}
+	if (is.notEmpty(ctx.state.comments) && is.array(ctx.state.comments)) {
+		ctx.state.comments = ctx.state.comments.map(comment => { comment.text = comment.text.replaceAll("\r\n", "&#13;&#10;").replaceAll("\r", "&#13;&#10;"); return comment })
+	}
 
 	await next()
 

@@ -20,10 +20,10 @@ async function listCommentsJson(token: string, message: number, name: string, li
 			body: {
 				token: token,
 				req:   {
-					message:  message,
-					name:     name,
-					limit:    limit,
-					offset:   offset,
+					message: message || undefined, // nil pointer on receiver side
+					name:    name || undefined,
+					limit:   limit,
+					offset:  offset,
 				},
 			},
 		});
@@ -31,6 +31,7 @@ async function listCommentsJson(token: string, message: number, name: string, li
 		if (error.error) {
 			result.error = models.error(error)
 		} else {
+			// response.comments.reverse() flex-col-reverse comments mustache
 			result.comments = response.comments.map(models.comment)
 		}
 	} catch (e) {

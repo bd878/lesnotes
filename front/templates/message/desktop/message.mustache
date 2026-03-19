@@ -15,7 +15,9 @@
 	{{/message}}
 
 
-	<div class="ml-8 mr-8 max-w-md min-w-md overflow-x-hidden overflow-y-auto">
-		{{>  filesView}}
+	<div class="ml-8 mr-8 max-w-md h-full flex flex-col min-w-md overflow-x-hidden">
+		{{> messageNavigation}}
+		{{> filesView}}
+		{{> comments}}
 	</div>
 </div>

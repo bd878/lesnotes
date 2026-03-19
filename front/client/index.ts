@@ -100,7 +100,7 @@ router
 	.get("message",                "/messages/:id",                 etag, noCache, getToken, authed, getMe, getState, loadStack, loadMessage, loadComments, formatView, messageView)
 	.get("translation",            "/messages/:id/:lang",           etag, noCache, getToken, authed, getMe, getState, loadStack, loadMessage, loadComments, loadTranslation, formatView, translationView)
 	.get("thread",                 "/threads/:id",                  etag, noCache, getToken, authed, getMe, getState, loadStack, loadThread, formatView, threadView)
-	.get("editMessage",            "/editor/messages/:id",          etag, noCache, getToken, authed, getMe, getState, loadStack, loadMessage, loadComments, loadFiles, selectMessageFiles, formatTextarea, messageEdit)
+	.get("editMessage",            "/editor/messages/:id",          etag, noCache, getToken, authed, getMe, getState, loadStack, loadMessage, loadFiles, selectMessageFiles, formatTextarea, messageEdit)
 	.get("newTranslation",         "/editor/messages/:id/new_lang", etag, noCache, getToken, authed, getMe, getState, loadStack, parseMessageID, newTranslation)
 	.get("editTranslation",        "/editor/messages/:id/:lang",    etag, noCache, getToken, authed, getMe, getState, loadStack, loadMessage, loadTranslation, formatTextarea, translationEdit)
 	.get("editThread",             "/editor/threads/:id",           etag, noCache, getToken, authed, getMe, getState, loadStack, loadThread, formatTextarea, threadEdit)
