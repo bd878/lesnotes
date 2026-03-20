@@ -6,110 +6,110 @@ import (
 
 type (
 	Message struct {
-		ID                  int64                       `json:"id"`
-		CreatedAt           string                      `json:"created_at,omitempty"`
-		UpdatedAt           string                      `json:"updated_at,omitempty"`
-		UserID              int64                       `json:"user_id"`         // TODO: load user, == 0 for public user
-		Name                string                      `json:"name"`
-		Count               int32                       `json:"count"`           // count messages in this message thread
-		FileIDs             []int64                     `json:"-"`
-		Files               []*files.File               `json:"files"`
-		Translations        []*TranslationPreview       `json:"translations"`
-		Text                string                      `json:"text"`
-		Title               string                      `json:"title"`
-		Private             bool                        `json:"private"`
+		ID           int64                 `json:"id"`
+		CreatedAt    string                `json:"created_at,omitempty"`
+		UpdatedAt    string                `json:"updated_at,omitempty"`
+		UserID       int64                 `json:"user_id"` // TODO: load user, == 0 for public user
+		Name         string                `json:"name"`
+		Count        int32                 `json:"count"` // count messages in this message thread
+		FileIDs      []int64               `json:"-"`
+		Files        []*files.File         `json:"files"`
+		Translations []*TranslationPreview `json:"translations"`
+		Text         string                `json:"text"`
+		Title        string                `json:"title"`
+		Private      bool                  `json:"private"`
 	}
 
 	List struct {
-		Messages            []*Message
-		IsLastPage          bool
-		IsFirstPage         bool
-		Total               int32
-		Count               int32
-		Offset              int32
+		Messages    []*Message
+		IsLastPage  bool
+		IsFirstPage bool
+		Total       int32
+		Count       int32
+		Offset      int32
 	}
 
 	SendRequest struct {
-		Text                string              `json:"text"`
-		Title               string              `json:"title"`
-		FileIDs             []int64             `json:"file_ids,omitempty"`
-		Private             bool                `json:"private"`
-		ThreadID            int64               `json:"thread"`
+		Text     string  `json:"text"`
+		Title    string  `json:"title"`
+		FileIDs  []int64 `json:"file_ids,omitempty"`
+		Private  bool    `json:"private"`
+		ThreadID int64   `json:"thread"`
 	}
 
 	SendResponse struct {
-		Message             *Message            `json:"message"`
+		Message *Message `json:"message"`
 	}
 
 	PublishRequest struct {
-		IDs                 []int64             `json:"ids"`
+		IDs []int64 `json:"ids"`
 	}
 
 	PublishResponse struct {
-		IDs                 []int64             `json:"ids"`
-		Description         string              `json:"description"`
+		IDs         []int64 `json:"ids"`
+		Description string  `json:"description"`
 	}
 
 	PrivateRequest struct {
-		IDs                 []int64             `json:"ids"`
+		IDs []int64 `json:"ids"`
 	}
 
 	PrivateResponse struct {
-		IDs                 []int64             `json:"ids"`
-		Description         string              `json:"description"`
+		IDs         []int64 `json:"ids"`
+		Description string  `json:"description"`
 	}
 
 	ReadResponse struct {
-		ThreadID            *int64              `json:"thread,omitempty"`
-		Messages            []*Message          `json:"messages"`
-		IsLastPage          *bool               `json:"is_last_page"`
-		IsFirstPage         *bool               `json:"is_first_page,omitempty"`
-		Count               *int32              `json:"count,omitempty"`
-		Total               *int32              `json:"total,omitempty"`
-		Offset              *int32              `json:"offset,omitempty"`
-		Description         string              `json:"description"`
+		ThreadID    *int64     `json:"thread,omitempty"`
+		Messages    []*Message `json:"messages"`
+		IsLastPage  *bool      `json:"is_last_page"`
+		IsFirstPage *bool      `json:"is_first_page,omitempty"`
+		Count       *int32     `json:"count,omitempty"`
+		Total       *int32     `json:"total,omitempty"`
+		Offset      *int32     `json:"offset,omitempty"`
+		Description string     `json:"description"`
 	}
 
 	ReadRequest struct {
-		UserID              int64               `json:"user"`
-		MessageID           int64               `json:"id"`
-		ThreadID            *int64              `json:"thread"`
-		Limit               int                 `json:"limit"`
-		Offset              int                 `json:"offset"`
-		Asc                 int                 `json:"asc"`
-		IDs                 []int64             `json:"ids"`
-		Name                string              `json:"name"`
+		UserID    int64   `json:"user"`
+		MessageID int64   `json:"id"`
+		ThreadID  *int64  `json:"thread"`
+		Limit     int     `json:"limit"`
+		Offset    int     `json:"offset"`
+		Asc       int     `json:"asc"`
+		IDs       []int64 `json:"ids"`
+		Name      string  `json:"name"`
 	}
 
 	ReadPathRequest struct {
-		ID                  int64               `json:"id"`
+		ID int64 `json:"id"`
 	}
 
 	ReadPathResponse struct {
-		Messages            []*Message          `json:"path"`
-		ThreadID            int64               `json:"thread"`
+		Messages []*Message `json:"path"`
+		ThreadID int64      `json:"thread"`
 	}
 
 	DeleteRequest struct {
-		IDs                 []int64             `json:"ids"`
+		IDs []int64 `json:"ids"`
 	}
 
 	DeleteResponse struct {
-		Description         string              `json:"description"`
-		IDs                 []int64             `json:"ids"`
+		Description string  `json:"description"`
+		IDs         []int64 `json:"ids"`
 	}
 
 	UpdateRequest struct {
-		MessageID           int64               `json:"id"`
-		Text                *string             `json:"text,omitempty"`
-		Title               *string             `json:"title,omitempty"`
-		Name                *string             `json:"name,omitempty"`
-		FileIDs             []int64             `json:"file_ids,omitempty"`
+		MessageID int64   `json:"id"`
+		Text      *string `json:"text,omitempty"`
+		Title     *string `json:"title,omitempty"`
+		Name      *string `json:"name,omitempty"`
+		FileIDs   []int64 `json:"file_ids,omitempty"`
 	}
 
 	UpdateResponse struct {
-		ID                  int64               `json:"id"`
-		UpdatedAt           int64               `json:"updated_at"`
-		Description         string              `json:"description"`
+		ID          int64  `json:"id"`
+		UpdatedAt   int64  `json:"updated_at"`
+		Description string `json:"description"`
 	}
 )

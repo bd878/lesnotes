@@ -3,10 +3,10 @@ package machine
 import (
 	"context"
 
-	"github.com/hashicorp/raft"
-	"google.golang.org/protobuf/proto"
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/logger"
+	"github.com/hashicorp/raft"
+	"google.golang.org/protobuf/proto"
 )
 
 type MessagesRepository interface {
@@ -48,12 +48,12 @@ type Dumper interface {
 var _ raft.FSM = (*Machine)(nil)
 
 type Machine struct {
-	log               *logger.Logger
-	dumper            Dumper
-	messagesRepo      MessagesRepository
-	commentsRepo      CommentsRepository
-	filesRepo         FilesRepository
-	translationsRepo  TranslationsRepository
+	log              *logger.Logger
+	dumper           Dumper
+	messagesRepo     MessagesRepository
+	commentsRepo     CommentsRepository
+	filesRepo        FilesRepository
+	translationsRepo TranslationsRepository
 }
 
 func New(messagesRepo MessagesRepository, filesRepo FilesRepository, translationsRepo TranslationsRepository,

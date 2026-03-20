@@ -1,17 +1,17 @@
 package postgres
 
 import (
-	"os"
-	"fmt"
 	"context"
+	"fmt"
+	"os"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type FilesRepository struct {
-	tableName        string
-	pool             *pgxpool.Pool
+	tableName string
+	pool      *pgxpool.Pool
 }
 
 func NewFilesRepository(pool *pgxpool.Pool, tableName string) *FilesRepository {

@@ -1,8 +1,8 @@
 package http
 
 import (
-	"net/http"
 	"encoding/json"
+	"net/http"
 
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
 	messages "github.com/bd878/gallery/server/messages/pkg/model"
@@ -60,7 +60,7 @@ func (h *Handler) PrivateMessages(w http.ResponseWriter, req *http.Request) (err
 	json.NewEncoder(w).Encode(server.ServerResponse{
 		Status: "error",
 		Error: &server.ErrorCode{
-			Code:  server.CodeWrongFormat,
+			Code:    server.CodeWrongFormat,
 			Explain: "empty ids",
 		},
 	})
@@ -74,7 +74,7 @@ func (h *Handler) privateMessages(w http.ResponseWriter, req *http.Request, user
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    messages.CodePrivateFailed,
 				Explain: "failed to private messages",
 			},
@@ -84,8 +84,8 @@ func (h *Handler) privateMessages(w http.ResponseWriter, req *http.Request, user
 	}
 
 	response, err := json.Marshal(messages.PrivateResponse{
-		IDs:           ids,
-		Description:   "private",
+		IDs:         ids,
+		Description: "private",
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -93,7 +93,7 @@ func (h *Handler) privateMessages(w http.ResponseWriter, req *http.Request, user
 	}
 
 	json.NewEncoder(w).Encode(server.ServerResponse{
-		Status: "ok",
+		Status:   "ok",
 		Response: json.RawMessage(response),
 	})
 

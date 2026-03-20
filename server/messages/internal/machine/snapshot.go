@@ -1,9 +1,9 @@
 package machine
 
 import (
+	"context"
 	"io"
 	"os"
-	"context"
 
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
@@ -14,10 +14,10 @@ import (
 )
 
 type snapshot struct {
-	store         *store.Store
-	dumper        Dumper
-	ctx           context.Context
-	ch            <-chan *api.MessagesSnapshot
+	store  *store.Store
+	dumper Dumper
+	ctx    context.Context
+	ch     <-chan *api.MessagesSnapshot
 }
 
 func (f *Machine) Snapshot() (raft.FSMSnapshot, error) {

@@ -1,16 +1,16 @@
 package http
 
 import (
-	"fmt"
 	"context"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
-	"encoding/json"
 
+	files "github.com/bd878/gallery/server/files/pkg/model"
 	"github.com/bd878/gallery/server/internal/logger"
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
 	messages "github.com/bd878/gallery/server/messages/pkg/model"
-	files "github.com/bd878/gallery/server/files/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
 	users "github.com/bd878/gallery/server/users/pkg/model"
 )
@@ -18,9 +18,9 @@ import (
 func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) (err error) {
 	var (
 		limit, offset, order int
-		threadID, messageID int64
-		ids []int64
-		name string
+		threadID, messageID  int64
+		ids                  []int64
+		name                 string
 	)
 
 	user, ok := req.Context().Value(middleware.UserContextKey{}).(*users.User)
@@ -77,7 +77,7 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) (err er
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(server.ServerResponse{
 				Status: "error",
-				Error:   &server.ErrorCode{
+				Error: &server.ErrorCode{
 					Code:    server.CodeNoID,
 					Explain: "invalid message id",
 				},
@@ -117,7 +117,7 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) (err er
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(server.ServerResponse{
 				Status: "error",
-				Error:  &server.ErrorCode{
+				Error: &server.ErrorCode{
 					Code:    server.CodeWrongQuery,
 					Explain: fmt.Sprintf("wrong \"%s\" query param", "asc"),
 				},
@@ -131,7 +131,7 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) (err er
 		if err := json.Unmarshal([]byte(values.Get("ids")), &ids); err != nil {
 			json.NewEncoder(w).Encode(server.ServerResponse{
 				Status: "error",
-				Error:  &server.ErrorCode{
+				Error: &server.ErrorCode{
 					Code:    server.CodeWrongQuery,
 					Explain: "wrong \"ids\" query field format",
 				},
@@ -179,9 +179,9 @@ func (h *Handler) readBatchMessages(ctx context.Context, w http.ResponseWriter, 
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
-				Code:     server.CodeReadFailed,
-				Explain:  "failed to read batch messages",
+			Error: &server.ErrorCode{
+				Code:    server.CodeReadFailed,
+				Explain: "failed to read batch messages",
 			},
 		})
 
@@ -220,7 +220,7 @@ func (h *Handler) readBatchMessages(ctx context.Context, w http.ResponseWriter, 
 	}
 
 	response, err := json.Marshal(messages.ReadResponse{
-		Messages:   list,
+		Messages: list,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -244,7 +244,7 @@ func (h *Handler) readMessageOrMessages(ctx context.Context, w http.ResponseWrit
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    messages.CodeMessagePublic,
 				Explain: "can not list public messages",
 			},
@@ -266,7 +266,7 @@ func (h *Handler) readMessageOrMessages(ctx context.Context, w http.ResponseWrit
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    server.CodeWrongQuery,
 				Explain: "both id and thread params are given,but limit is not set",
 			},
@@ -279,7 +279,7 @@ func (h *Handler) readMessageOrMessages(ctx context.Context, w http.ResponseWrit
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    server.CodeWrongQuery,
 				Explain: "both name and thread params are given",
 			},
@@ -291,8 +291,8 @@ func (h *Handler) readMessageOrMessages(ctx context.Context, w http.ResponseWrit
 	if messageID != 0 && name != "" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status:  "error",
-			Error:   &server.ErrorCode{
+			Status: "error",
+			Error: &server.ErrorCode{
 				Code:    server.CodeWrongQuery,
 				Explain: "both id and name params are given",
 			},
@@ -305,7 +305,7 @@ func (h *Handler) readMessageOrMessages(ctx context.Context, w http.ResponseWrit
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    server.CodeWrongQuery,
 				Explain: "both id/name and limit/offset params given",
 			},
@@ -337,7 +337,7 @@ func (h *Handler) readMessage(ctx context.Context, w http.ResponseWriter, userID
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    messages.CodeReadFailed,
 				Explain: "failed to read a message",
 			},
@@ -350,7 +350,7 @@ func (h *Handler) readMessage(ctx context.Context, w http.ResponseWriter, userID
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    messages.CodeReadFailed,
 				Explain: "cannot read private message",
 			},
@@ -369,12 +369,12 @@ func (h *Handler) readMessage(ctx context.Context, w http.ResponseWriter, userID
 
 		if !publicOnly || !file.Private {
 			list = append(list, &files.File{
-				Name:         file.Name,
-				ID:           file.ID,
-				Mime:         file.Mime,
-				Size:         file.Size,
-				Private:      file.Private,
-				Description:  file.Description,
+				Name:        file.Name,
+				ID:          file.ID,
+				Mime:        file.Mime,
+				Size:        file.Size,
+				Private:     file.Private,
+				Description: file.Description,
 			})
 		}
 	}
@@ -385,7 +385,7 @@ func (h *Handler) readMessage(ctx context.Context, w http.ResponseWriter, userID
 	}
 
 	response, err := json.Marshal(messages.ReadResponse{
-		Messages:   []*messages.Message{message},
+		Messages: []*messages.Message{message},
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -420,8 +420,8 @@ func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter,
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:   &server.ErrorCode{
-				Code:     server.CodeReadFailed,
+			Error: &server.ErrorCode{
+				Code:    server.CodeReadFailed,
 				Explain: "failed to read thread messages",
 			},
 		})
@@ -472,13 +472,13 @@ func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter,
 	}
 
 	response, err := json.Marshal(messages.ReadResponse{
-		ThreadID:     &threadID,
-		Messages:     list.Messages,
-		IsLastPage:   &list.IsLastPage,
-		IsFirstPage:  &list.IsFirstPage,
-		Count:        &list.Count,
-		Offset:       &list.Offset,
-		Total:        &list.Total,
+		ThreadID:    &threadID,
+		Messages:    list.Messages,
+		IsLastPage:  &list.IsLastPage,
+		IsFirstPage: &list.IsFirstPage,
+		Count:       &list.Count,
+		Offset:      &list.Offset,
+		Total:       &list.Total,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -501,7 +501,7 @@ func (h *Handler) readMessages(ctx context.Context, w http.ResponseWriter, userI
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    server.CodeWrongFormat,
 				Explain: "failed to read all messages",
 			},
@@ -534,12 +534,12 @@ func (h *Handler) readMessages(ctx context.Context, w http.ResponseWriter, userI
 				if file != nil {
 					if !publicOnly || !file.Private {
 						list = append(list, &files.File{
-							ID:           file.ID,
-							Name:         file.Name,
-							Mime:         file.Mime,
-							Size:         file.Size,
-							Private:      file.Private,
-							Description:  file.Description,
+							ID:          file.ID,
+							Name:        file.Name,
+							Mime:        file.Mime,
+							Size:        file.Size,
+							Private:     file.Private,
+							Description: file.Description,
 						})
 					}
 				}
@@ -553,12 +553,12 @@ func (h *Handler) readMessages(ctx context.Context, w http.ResponseWriter, userI
 	}
 
 	response, err := json.Marshal(messages.ReadResponse{
-		Messages:      list.Messages,
-		IsLastPage:    &list.IsLastPage,
-		IsFirstPage:   &list.IsFirstPage,
-		Count:         &list.Count,
-		Offset:        &list.Offset,
-		Total:         &list.Total,
+		Messages:    list.Messages,
+		IsLastPage:  &list.IsLastPage,
+		IsFirstPage: &list.IsFirstPage,
+		Count:       &list.Count,
+		Offset:      &list.Offset,
+		Total:       &list.Total,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

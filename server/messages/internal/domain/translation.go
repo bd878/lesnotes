@@ -6,9 +6,9 @@ import (
 )
 
 const (
-	TranslationCreatedEvent  = "messages.TranslationCreated"
-	TranslationDeletedEvent  = "messages.TranslationDeleted"
-	TranslationUpdatedEvent  = "messages.TranslationUpdated"
+	TranslationCreatedEvent = "messages.TranslationCreated"
+	TranslationDeletedEvent = "messages.TranslationDeleted"
+	TranslationUpdatedEvent = "messages.TranslationUpdated"
 )
 
 var (
@@ -16,13 +16,13 @@ var (
 )
 
 type TranslationCreated struct {
-	MessageID     int64
-	UserID        int64
-	Lang          string
-	Text          string
-	Title         string
-	CreatedAt     string
-	UpdatedAt     string
+	MessageID int64
+	UserID    int64
+	Lang      string
+	Text      string
+	Title     string
+	CreatedAt string
+	UpdatedAt string
 }
 
 func (TranslationCreated) Key() string { return TranslationCreatedEvent }
@@ -39,36 +39,36 @@ func CreateTranslation(userID, messageID int64, lang string, title, text, create
 	}
 
 	return ddd.NewEvent(TranslationCreatedEvent, &TranslationCreated{
-		MessageID:   messageID,
-		UserID:      userID,
-		Lang:        lang,
-		Text:        text,
-		Title:       title,
-		CreatedAt:   createdAt,
-		UpdatedAt:   updatedAt,
+		MessageID: messageID,
+		UserID:    userID,
+		Lang:      lang,
+		Text:      text,
+		Title:     title,
+		CreatedAt: createdAt,
+		UpdatedAt: updatedAt,
 	}), nil
 }
 
 type TranslationDeleted struct {
-	MessageID   int64
-	Lang        string
+	MessageID int64
+	Lang      string
 }
 
 func (TranslationDeleted) Key() string { return TranslationDeletedEvent }
 
 func DeleteTranslation(messageID int64, lang string) (ddd.Event, error) {
 	return ddd.NewEvent(TranslationDeletedEvent, &TranslationDeleted{
-		MessageID:     messageID,
-		Lang:          lang,
+		MessageID: messageID,
+		Lang:      lang,
 	}), nil
 }
 
 type TranslationUpdated struct {
-	MessageID    int64
-	Lang         string
-	Text         *string
-	Title        *string
-	UpdatedAt    string
+	MessageID int64
+	Lang      string
+	Text      *string
+	Title     *string
+	UpdatedAt string
 }
 
 func (TranslationUpdated) Key() string { return TranslationUpdatedEvent }
@@ -82,10 +82,10 @@ func UpdateTranslation(messageID int64, lang string, title, text *string, update
 	}
 
 	return ddd.NewEvent(TranslationUpdatedEvent, &TranslationUpdated{
-		MessageID:   messageID,
-		Lang:        lang,
-		Text:        text,
-		Title:       title,
-		UpdatedAt:   updatedAt,
+		MessageID: messageID,
+		Lang:      lang,
+		Text:      text,
+		Title:     title,
+		UpdatedAt: updatedAt,
 	}), nil
 }

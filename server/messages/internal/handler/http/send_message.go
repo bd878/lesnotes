@@ -1,35 +1,35 @@
 package http
 
 import (
-	"io"
 	"bytes"
-	"net/http"
-	"strconv"
-	"path/filepath"
 	"encoding/json"
+	"io"
+	"net/http"
+	"path/filepath"
+	"strconv"
 
-	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/internal/utils"
-	middleware "github.com/bd878/gallery/server/internal/middleware/http"
-	messages "github.com/bd878/gallery/server/messages/pkg/model"
 	files "github.com/bd878/gallery/server/files/pkg/model"
+	"github.com/bd878/gallery/server/internal/logger"
+	middleware "github.com/bd878/gallery/server/internal/middleware/http"
+	"github.com/bd878/gallery/server/internal/utils"
+	messages "github.com/bd878/gallery/server/messages/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
 	users "github.com/bd878/gallery/server/users/pkg/model"
 )
 
 func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) (err error) {
 	var (
-		threadID int64
-		fileIDs  []int64
+		threadID         int64
+		fileIDs          []int64
 		private, hasFile bool
 	)
 
-	if err = req.ParseMultipartForm(50 << 20) /* 50 MB */; err != nil {
+	if err = req.ParseMultipartForm(50 << 20); /* 50 MB */ err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code:     server.CodeNoForm,
+				Code:    server.CodeNoForm,
 				Explain: "failed to parse form",
 			},
 		})
@@ -57,7 +57,7 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) (err err
 	if req.PostFormValue("file_ids") != "" {
 		fileIDs = make([]int64, 0)
 
-		if err = json.Unmarshal([]byte(req.PostFormValue("file_ids")), &fileIDs); err != nil {		
+		if err = json.Unmarshal([]byte(req.PostFormValue("file_ids")), &fileIDs); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(server.ServerResponse{
 				Status: "error",
@@ -95,7 +95,7 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) (err err
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(server.ServerResponse{
 				Status: "error",
-				Error:  &server.ErrorCode{
+				Error: &server.ErrorCode{
 					Code:    messages.CodeWrongPublic,
 					Explain: "invalid public",
 				},
@@ -128,7 +128,7 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) (err err
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
-				Code:     server.CodeWrongFormat,
+				Code:    server.CodeWrongFormat,
 				Explain: "text or file_id or file or title required",
 			},
 		})
@@ -230,7 +230,7 @@ func (h *Handler) saveMessage(w http.ResponseWriter, req *http.Request, id int64
 	// TODO: load a user to message by UserID
 
 	response, err := json.Marshal(messages.SendResponse{
-		Message:   message,
+		Message: message,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

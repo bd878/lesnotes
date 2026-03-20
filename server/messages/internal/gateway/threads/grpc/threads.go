@@ -1,8 +1,8 @@
 package grpc
 
 import (
-	"fmt"
 	"context"
+	"fmt"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
@@ -15,9 +15,9 @@ import (
 )
 
 type Gateway struct {
-	addr    string
-	client  api.ThreadsClient
-	conn    *grpc.ClientConn
+	addr   string
+	client api.ThreadsClient
+	conn   *grpc.ClientConn
 }
 
 func New(addr string) *Gateway {
@@ -69,11 +69,11 @@ func (g *Gateway) CreateThread(ctx context.Context, id, userID, parentID int64, 
 	logger.Debugw("create thread", "id", id, "user_id", userID, "parent_id", parentID, "name", name, "private", private)
 
 	_, err = g.client.Create(ctx, &api.CreateRequest{
-		Id:        id,
-		UserId:    userID,
-		ParentId:  parentID,
-		Name:      name,
-		Private:   private,
+		Id:       id,
+		UserId:   userID,
+		ParentId: parentID,
+		Name:     name,
+		Private:  private,
 	})
 
 	return
@@ -106,8 +106,8 @@ func (g *Gateway) UpdateThread(ctx context.Context, id, userID int64) (err error
 	logger.Debugw("update thread", "id", id, "user_id", userID)
 
 	_, err = g.client.Update(ctx, &api.UpdateRequest{
-		Id:        id,
-		UserId:    userID,
+		Id:     id,
+		UserId: userID,
 	})
 
 	return
@@ -170,8 +170,8 @@ func (g *Gateway) ResolvePath(ctx context.Context, userID, id int64) (path []int
 	logger.Debugw("resolve path", "user_id", userID, "id", id)
 
 	resp, err := g.client.Resolve(ctx, &api.ResolveRequest{
-		UserId:  userID,
-		Id:      id,
+		UserId: userID,
+		Id:     id,
 	})
 	if err != nil {
 		return nil, err

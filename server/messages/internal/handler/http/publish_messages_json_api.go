@@ -1,13 +1,13 @@
 package http
 
 import (
-	"net/http"
 	"encoding/json"
+	"net/http"
 
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
-	users "github.com/bd878/gallery/server/users/pkg/model"
 	messages "github.com/bd878/gallery/server/messages/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
+	users "github.com/bd878/gallery/server/users/pkg/model"
 )
 
 func (h *Handler) PublishMessagesJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
@@ -30,7 +30,7 @@ func (h *Handler) PublishMessagesJsonAPI(w http.ResponseWriter, req *http.Reques
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    server.CodeNoBody,
 				Explain: "request required",
 			},
@@ -44,8 +44,8 @@ func (h *Handler) PublishMessagesJsonAPI(w http.ResponseWriter, req *http.Reques
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
-				Code:   server.CodeWrongFormat,
+			Error: &server.ErrorCode{
+				Code:    server.CodeWrongFormat,
 				Explain: "failed to parse request",
 			},
 		})

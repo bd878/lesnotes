@@ -1,13 +1,13 @@
 package http
 
 import (
-	"net/http"
 	"encoding/json"
+	"net/http"
 
-	"github.com/bd878/gallery/server/messages/pkg/model"
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
-	users "github.com/bd878/gallery/server/users/pkg/model"
+	"github.com/bd878/gallery/server/messages/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
+	users "github.com/bd878/gallery/server/users/pkg/model"
 )
 
 func (h *Handler) ListTranslationsJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
@@ -30,7 +30,7 @@ func (h *Handler) ListTranslationsJsonAPI(w http.ResponseWriter, req *http.Reque
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    server.CodeNoBody,
 				Explain: "request required",
 			},
@@ -44,7 +44,7 @@ func (h *Handler) ListTranslationsJsonAPI(w http.ResponseWriter, req *http.Reque
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    server.CodeWrongFormat,
 				Explain: "failed to parse request",
 			},
@@ -57,7 +57,7 @@ func (h *Handler) ListTranslationsJsonAPI(w http.ResponseWriter, req *http.Reque
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    model.CodeNoMessageID,
 				Explain: "message field is empty",
 			},
@@ -69,8 +69,8 @@ func (h *Handler) ListTranslationsJsonAPI(w http.ResponseWriter, req *http.Reque
 	if request.MessageID != 0 && request.Name != "" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status:  "error",
-			Error:   &server.ErrorCode{
+			Status: "error",
+			Error: &server.ErrorCode{
 				Code:    server.CodeWrongQuery,
 				Explain: "both message and name params are given",
 			},
@@ -84,7 +84,7 @@ func (h *Handler) ListTranslationsJsonAPI(w http.ResponseWriter, req *http.Reque
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    model.CodeReadFailed,
 				Explain: "failed to list translations",
 			},
@@ -102,7 +102,7 @@ func (h *Handler) ListTranslationsJsonAPI(w http.ResponseWriter, req *http.Reque
 	}
 
 	json.NewEncoder(w).Encode(server.ServerResponse{
-		Status: "ok",
+		Status:   "ok",
 		Response: json.RawMessage(response),
 	})
 	return

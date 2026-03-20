@@ -1,13 +1,13 @@
 package http
 
 import (
-	"net/http"
 	"encoding/json"
+	"net/http"
 
-	"github.com/bd878/gallery/server/messages/pkg/model"
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
-	users "github.com/bd878/gallery/server/users/pkg/model"
+	"github.com/bd878/gallery/server/messages/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
+	users "github.com/bd878/gallery/server/users/pkg/model"
 )
 
 func (h *Handler) ReadTranslationJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
@@ -30,7 +30,7 @@ func (h *Handler) ReadTranslationJsonAPI(w http.ResponseWriter, req *http.Reques
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    server.CodeNoBody,
 				Explain: "request required",
 			},
@@ -44,7 +44,7 @@ func (h *Handler) ReadTranslationJsonAPI(w http.ResponseWriter, req *http.Reques
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    server.CodeWrongFormat,
 				Explain: "failed to parse request",
 			},
@@ -57,7 +57,7 @@ func (h *Handler) ReadTranslationJsonAPI(w http.ResponseWriter, req *http.Reques
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    model.CodeNoMessageID,
 				Explain: "either message or name must be specified",
 			},
@@ -70,7 +70,7 @@ func (h *Handler) ReadTranslationJsonAPI(w http.ResponseWriter, req *http.Reques
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    model.CodeNoLang,
 				Explain: "lang field is empty",
 			},
@@ -85,7 +85,7 @@ func (h *Handler) ReadTranslationJsonAPI(w http.ResponseWriter, req *http.Reques
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    model.CodeReadFailed,
 				Explain: "failed to read translation",
 			},
@@ -103,7 +103,7 @@ func (h *Handler) ReadTranslationJsonAPI(w http.ResponseWriter, req *http.Reques
 	}
 
 	json.NewEncoder(w).Encode(server.ServerResponse{
-		Status: "ok",
+		Status:   "ok",
 		Response: json.RawMessage(response),
 	})
 	return

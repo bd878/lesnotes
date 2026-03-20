@@ -9,7 +9,7 @@ const (
 	MessageCreatedEvent = "messages.MessageCreated"
 	MessageDeletedEvent = "messages.MessageDeleted"
 	// TODO: user deleted: delete all messages
-	MessageUpdatedEvent = "messages.MessageUpdated"
+	MessageUpdatedEvent  = "messages.MessageUpdated"
 	MessagesPublishEvent = "messages.MessagesPublished"
 	MessagesPrivateEvent = "messages.MessagesPrivated"
 )
@@ -38,21 +38,21 @@ func CreateMessage(id int64, text, title string, fileIDs []int64, userID int64, 
 	/*TODO: other errors*/
 
 	return ddd.NewEvent(MessageCreatedEvent, &MessageCreated{
-		ID:         id,
-		UserID:     userID,
-		Text:       text,
-		Title:      title,
-		Name:       name,
-		Private:    private,
-		CreatedAt:  createdAt,
-		UpdatedAt:  updatedAt,
+		ID:        id,
+		UserID:    userID,
+		Text:      text,
+		Title:     title,
+		Name:      name,
+		Private:   private,
+		CreatedAt: createdAt,
+		UpdatedAt: updatedAt,
 	}), nil
 }
 
 type MessageDeleted struct {
-	ID        int64
-	UserID    int64
-	Name      string
+	ID     int64
+	UserID int64
+	Name   string
 }
 
 func (MessageDeleted) Key() string { return MessageDeletedEvent }
@@ -81,19 +81,19 @@ func UpdateMessage(id int64, text, title *string, fileIDs []int64, userID int64,
 	}
 
 	return ddd.NewEvent(MessageUpdatedEvent, &MessageUpdated{
-		ID:         id,
-		UserID:     userID,
-		Text:       text,
-		Title:      title,
-		Name:       name,
-		UpdatedAt:  updatedAt,
+		ID:        id,
+		UserID:    userID,
+		Text:      text,
+		Title:     title,
+		Name:      name,
+		UpdatedAt: updatedAt,
 	}), nil
 }
 
 type MessagesPublished struct {
-	IDs         []int64
-	UserID      int64
-	UpdatedAt   string
+	IDs       []int64
+	UserID    int64
+	UpdatedAt string
 }
 
 func (MessagesPublished) Key() string { return MessagesPublishEvent }
@@ -107,9 +107,9 @@ func PublishMessages(userID int64, ids []int64, updatedAt string) (ddd.Event, er
 }
 
 type MessagesPrivated struct {
-	IDs         []int64
-	UserID      int64
-	UpdatedAt   string
+	IDs       []int64
+	UserID    int64
+	UpdatedAt string
 }
 
 func (MessagesPrivated) Key() string { return MessagesPrivateEvent }

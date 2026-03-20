@@ -1,13 +1,13 @@
 package http
 
 import (
-	"net/http"
 	"encoding/json"
+	"net/http"
 
-	"github.com/bd878/gallery/server/messages/pkg/model"
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
-	users "github.com/bd878/gallery/server/users/pkg/model"
+	"github.com/bd878/gallery/server/messages/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
+	users "github.com/bd878/gallery/server/users/pkg/model"
 )
 
 func (h *Handler) UpdateCommentJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
@@ -30,7 +30,7 @@ func (h *Handler) UpdateCommentJsonAPI(w http.ResponseWriter, req *http.Request)
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    server.CodeNoBody,
 				Explain: "request required",
 			},
@@ -83,7 +83,7 @@ func (h *Handler) UpdateCommentJsonAPI(w http.ResponseWriter, req *http.Request)
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    model.CodeUpdateFailed,
 				Explain: "text is empty",
 			},
@@ -97,7 +97,7 @@ func (h *Handler) UpdateCommentJsonAPI(w http.ResponseWriter, req *http.Request)
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    model.CodeUpdateFailed,
 				Explain: "failed to update comment",
 			},
@@ -115,8 +115,8 @@ func (h *Handler) UpdateCommentJsonAPI(w http.ResponseWriter, req *http.Request)
 	}
 
 	json.NewEncoder(w).Encode(server.ServerResponse{
-		Status:     "ok",
-		Response:   json.RawMessage(response),
+		Status:   "ok",
+		Response: json.RawMessage(response),
 	})
 
 	return

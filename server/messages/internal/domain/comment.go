@@ -5,9 +5,9 @@ import (
 )
 
 const (
-	CommentCreatedEvent = "messages.CommentCreated"
-	CommentDeletedEvent = "messages.CommentDeleted"
-	CommentUpdatedEvent = "messages.CommentUpdated"
+	CommentCreatedEvent         = "messages.CommentCreated"
+	CommentDeletedEvent         = "messages.CommentDeleted"
+	CommentUpdatedEvent         = "messages.CommentUpdated"
 	MessageCommentsDeletedEvent = "messages.MessageCommentsDeleted"
 )
 
@@ -29,34 +29,34 @@ func CreateComment(id, userID, messageID int64, text string, createdAt, updatedA
 	/*TODO: other errors*/
 
 	return ddd.NewEvent(CommentCreatedEvent, &CommentCreated{
-		ID:           id,
-		UserID:       userID,
-		MessageID:    messageID,
-		Text:         text,
-		CreatedAt:    createdAt,
-		UpdatedAt:    updatedAt,
+		ID:        id,
+		UserID:    userID,
+		MessageID: messageID,
+		Text:      text,
+		CreatedAt: createdAt,
+		UpdatedAt: updatedAt,
 	}), nil
 }
 
 type CommentDeleted struct {
-	ID      int64
-	UserID  int64
+	ID     int64
+	UserID int64
 }
 
 func (CommentDeleted) Key() string { return CommentDeletedEvent }
 
 func DeleteComment(id, userID int64) (ddd.Event, error) {
 	return ddd.NewEvent(CommentDeletedEvent, &CommentDeleted{
-		ID:      id,
-		UserID:  userID,
+		ID:     id,
+		UserID: userID,
 	}), nil
 }
 
 type CommentUpdated struct {
-	ID         int64
-	UserID     int64
-	Text       *string
-	UpdatedAt  string
+	ID        int64
+	UserID    int64
+	Text      *string
+	UpdatedAt string
 }
 
 func (CommentUpdated) Key() string { return CommentUpdatedEvent }
@@ -83,6 +83,6 @@ func (MessageCommentsDeleted) Key() string { return MessageCommentsDeletedEvent 
 
 func DeleteMessageComments(messageID int64) (ddd.Event, error) {
 	return ddd.NewEvent(MessageCommentsDeletedEvent, &MessageCommentsDeleted{
-		MessageID:     messageID,
+		MessageID: messageID,
 	}), nil
 }

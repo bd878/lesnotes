@@ -1,25 +1,25 @@
 package messages
 
 import (
-	"os"
-	"fmt"
 	"context"
+	"fmt"
+	"os"
 
 	"golang.org/x/sync/errgroup"
 
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/internal/ddd"
-	"github.com/bd878/gallery/server/internal/nats"
-	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/internal/system"
-	"github.com/bd878/gallery/server/internal/discovery/serf"
 	"github.com/bd878/gallery/server/internal/consensus/raft"
+	"github.com/bd878/gallery/server/internal/ddd"
+	"github.com/bd878/gallery/server/internal/discovery/serf"
+	"github.com/bd878/gallery/server/internal/logger"
+	"github.com/bd878/gallery/server/internal/nats"
+	"github.com/bd878/gallery/server/internal/system"
 	"github.com/bd878/gallery/server/messages/config"
-	"github.com/bd878/gallery/server/messages/internal/repository/postgres"
-	"github.com/bd878/gallery/server/messages/internal/machine"
-	"github.com/bd878/gallery/server/messages/internal/handler/stream"
 	"github.com/bd878/gallery/server/messages/internal/controller/distributed"
 	"github.com/bd878/gallery/server/messages/internal/handler/grpc"
+	"github.com/bd878/gallery/server/messages/internal/handler/stream"
+	"github.com/bd878/gallery/server/messages/internal/machine"
+	"github.com/bd878/gallery/server/messages/internal/repository/postgres"
 )
 
 func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error) {
@@ -101,11 +101,11 @@ func setupRaft(svc system.Service, cfg config.Config, messagesRepo *postgres.Mes
 	fsm := machine.New(messagesRepo, filesRepo, translationsRepo, commentsRepo, dumper, svc.Logger())
 
 	consensus, err := raft.New(raft.Config{
-		Bootstrap:      cfg.RaftBootstrap,
-		NodeName:       cfg.NodeName,
-		RaftLogLevel:   cfg.RaftLogLevel,
-		DataDir:        cfg.DataPath,
-		Servers:        cfg.RaftServers,
+		Bootstrap:    cfg.RaftBootstrap,
+		NodeName:     cfg.NodeName,
+		RaftLogLevel: cfg.RaftLogLevel,
+		DataDir:      cfg.DataPath,
+		Servers:      cfg.RaftServers,
 	}, raft.NewStreamLayer(svc.RaftListener()), fsm, svc.Logger())
 	if err != nil {
 		return nil, err

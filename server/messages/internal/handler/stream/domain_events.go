@@ -4,9 +4,9 @@ import (
 	"context"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/bd878/gallery/server/internal/ddd"
-	"github.com/bd878/gallery/server/internal/am"
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/internal/am"
+	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/messages/internal/domain"
 	"github.com/bd878/gallery/server/messages/pkg/events"
@@ -62,7 +62,7 @@ func (h domainHandler[T]) HandleEvent(ctx context.Context, event T) error {
 		return h.onTranslationUpdated(ctx, event)
 	case domain.TranslationDeletedEvent:
 		return h.onTranslationDeleted(ctx, event)
-	
+
 	case domain.CommentCreatedEvent:
 		return h.onCommentCreated(ctx, event)
 	case domain.CommentUpdatedEvent:
@@ -78,14 +78,14 @@ func (h domainHandler[T]) HandleEvent(ctx context.Context, event T) error {
 func (h domainHandler[T]) onMessageCreated(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.MessageCreated)
 	data, err := proto.Marshal(&api.MessageCreated{
-		Id:          payload.ID,
-		UserId:      payload.UserID,
-		Text:        payload.Text,
-		Title:       payload.Title,
-		Name:        payload.Name,
-		Private:     payload.Private,
-		CreatedAt:   payload.CreatedAt,
-		UpdatedAt:   payload.UpdatedAt,
+		Id:        payload.ID,
+		UserId:    payload.UserID,
+		Text:      payload.Text,
+		Title:     payload.Title,
+		Name:      payload.Name,
+		Private:   payload.Private,
+		CreatedAt: payload.CreatedAt,
+		UpdatedAt: payload.UpdatedAt,
 	})
 	if err != nil {
 		return err
@@ -97,8 +97,8 @@ func (h domainHandler[T]) onMessageCreated(ctx context.Context, event ddd.Event)
 func (h domainHandler[T]) onMessageDeleted(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.MessageDeleted)
 	data, err := proto.Marshal(&api.MessageDeleted{
-		Id:          payload.ID,
-		UserId:      payload.UserID,
+		Id:     payload.ID,
+		UserId: payload.UserID,
 	})
 	if err != nil {
 		return err
@@ -110,12 +110,12 @@ func (h domainHandler[T]) onMessageDeleted(ctx context.Context, event ddd.Event)
 func (h domainHandler[T]) onMessageUpdated(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.MessageUpdated)
 	data, err := proto.Marshal(&api.MessageUpdated{
-		Id:          payload.ID,
-		UserId:      payload.UserID,
-		Text:        payload.Text,
-		Title:       payload.Title,
-		Name:        payload.Name,
-		UpdatedAt:   payload.UpdatedAt,
+		Id:        payload.ID,
+		UserId:    payload.UserID,
+		Text:      payload.Text,
+		Title:     payload.Title,
+		Name:      payload.Name,
+		UpdatedAt: payload.UpdatedAt,
 	})
 	if err != nil {
 		return err
@@ -127,9 +127,9 @@ func (h domainHandler[T]) onMessageUpdated(ctx context.Context, event ddd.Event)
 func (h domainHandler[T]) onMessagesPrivate(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.MessagesPrivated)
 	data, err := proto.Marshal(&api.MessagesPrivated{
-		Ids:         payload.IDs,
-		UserId:      payload.UserID,
-		UpdatedAt:   payload.UpdatedAt,
+		Ids:       payload.IDs,
+		UserId:    payload.UserID,
+		UpdatedAt: payload.UpdatedAt,
 	})
 	if err != nil {
 		return err
@@ -141,9 +141,9 @@ func (h domainHandler[T]) onMessagesPrivate(ctx context.Context, event ddd.Event
 func (h domainHandler[T]) onMessagesPublish(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.MessagesPublished)
 	data, err := proto.Marshal(&api.MessagesPublished{
-		Ids:         payload.IDs,
-		UserId:      payload.UserID,
-		UpdatedAt:   payload.UpdatedAt,
+		Ids:       payload.IDs,
+		UserId:    payload.UserID,
+		UpdatedAt: payload.UpdatedAt,
 	})
 	if err != nil {
 		return err
@@ -155,13 +155,13 @@ func (h domainHandler[T]) onMessagesPublish(ctx context.Context, event ddd.Event
 func (h domainHandler[T]) onTranslationCreated(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.TranslationCreated)
 	data, err := proto.Marshal(&api.TranslationCreated{
-		MessageId:   payload.MessageID,
-		UserId:      payload.UserID,
-		Lang:        payload.Lang,
-		Text:        payload.Text,
-		Title:       payload.Title,
-		CreatedAt:   payload.CreatedAt,
-		UpdatedAt:   payload.UpdatedAt,
+		MessageId: payload.MessageID,
+		UserId:    payload.UserID,
+		Lang:      payload.Lang,
+		Text:      payload.Text,
+		Title:     payload.Title,
+		CreatedAt: payload.CreatedAt,
+		UpdatedAt: payload.UpdatedAt,
 	})
 	if err != nil {
 		return err
@@ -173,8 +173,8 @@ func (h domainHandler[T]) onTranslationCreated(ctx context.Context, event ddd.Ev
 func (h domainHandler[T]) onTranslationDeleted(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.TranslationDeleted)
 	data, err := proto.Marshal(&api.TranslationDeleted{
-		MessageId:   payload.MessageID,
-		Lang:        payload.Lang,
+		MessageId: payload.MessageID,
+		Lang:      payload.Lang,
 	})
 	if err != nil {
 		return err
@@ -186,11 +186,11 @@ func (h domainHandler[T]) onTranslationDeleted(ctx context.Context, event ddd.Ev
 func (h domainHandler[T]) onTranslationUpdated(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.TranslationUpdated)
 	data, err := proto.Marshal(&api.TranslationUpdated{
-		MessageId:   payload.MessageID,
-		Lang:        payload.Lang,
-		Text:        payload.Text,
-		Title:       payload.Title,
-		UpdatedAt:   payload.UpdatedAt,
+		MessageId: payload.MessageID,
+		Lang:      payload.Lang,
+		Text:      payload.Text,
+		Title:     payload.Title,
+		UpdatedAt: payload.UpdatedAt,
 	})
 	if err != nil {
 		return err
@@ -202,12 +202,12 @@ func (h domainHandler[T]) onTranslationUpdated(ctx context.Context, event ddd.Ev
 func (h domainHandler[T]) onCommentCreated(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.CommentCreated)
 	data, err := proto.Marshal(&api.CommentCreated{
-		MessageId:   payload.MessageID,
-		Id:          payload.ID,
-		UserId:      payload.UserID,
-		Text:        payload.Text,
-		CreatedAt:   payload.CreatedAt,
-		UpdatedAt:   payload.UpdatedAt,
+		MessageId: payload.MessageID,
+		Id:        payload.ID,
+		UserId:    payload.UserID,
+		Text:      payload.Text,
+		CreatedAt: payload.CreatedAt,
+		UpdatedAt: payload.UpdatedAt,
 	})
 	if err != nil {
 		return err
@@ -219,10 +219,10 @@ func (h domainHandler[T]) onCommentCreated(ctx context.Context, event ddd.Event)
 func (h domainHandler[T]) onCommentUpdated(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.CommentUpdated)
 	data, err := proto.Marshal(&api.CommentUpdated{
-		Id:          payload.ID,
-		UserId:      payload.UserID,
-		Text:        payload.Text,
-		UpdatedAt:   payload.UpdatedAt,
+		Id:        payload.ID,
+		UserId:    payload.UserID,
+		Text:      payload.Text,
+		UpdatedAt: payload.UpdatedAt,
 	})
 	if err != nil {
 		return err
@@ -234,8 +234,8 @@ func (h domainHandler[T]) onCommentUpdated(ctx context.Context, event ddd.Event)
 func (h domainHandler[T]) onCommentDeleted(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.CommentDeleted)
 	data, err := proto.Marshal(&api.CommentDeleted{
-		Id:          payload.ID,
-		UserId:      payload.UserID,
+		Id:     payload.ID,
+		UserId: payload.UserID,
 	})
 	if err != nil {
 		return err
@@ -247,7 +247,7 @@ func (h domainHandler[T]) onCommentDeleted(ctx context.Context, event ddd.Event)
 func (h domainHandler[T]) onMessageCommentsDeleted(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.MessageCommentsDeleted)
 	data, err := proto.Marshal(&api.MessageCommentsDeleted{
-		MessageId:   payload.MessageID,
+		MessageId: payload.MessageID,
 	})
 	if err != nil {
 		return err

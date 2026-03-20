@@ -1,12 +1,12 @@
 package http
 
 import (
-	"io"
 	"context"
+	"io"
 	"net/http"
 
-	messages "github.com/bd878/gallery/server/messages/pkg/model"
 	files "github.com/bd878/gallery/server/files/pkg/model"
+	messages "github.com/bd878/gallery/server/messages/pkg/model"
 )
 
 type MessagesController interface {

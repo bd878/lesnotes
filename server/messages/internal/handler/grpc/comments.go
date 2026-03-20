@@ -27,8 +27,7 @@ func NewCommentsHandler(ctrl CommentsController) *CommentsHandler {
 func (h *CommentsHandler) SendComment(ctx context.Context, req *api.SendCommentRequest) (resp *api.SendCommentResponse, err error) {
 	err = h.controller.SaveComment(ctx, req.Id, req.UserId, req.MessageId, req.Text, req.Metadata)
 
-	resp = &api.SendCommentResponse{
-	}
+	resp = &api.SendCommentResponse{}
 
 	return
 }

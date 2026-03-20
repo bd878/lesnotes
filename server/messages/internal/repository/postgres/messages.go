@@ -1,11 +1,11 @@
 package postgres
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
 	"time"
-	"context"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -14,7 +14,7 @@ import (
 )
 
 type MessagesRepository struct {
-	tableName  string
+	tableName string
 	pool      *pgxpool.Pool
 }
 
@@ -78,7 +78,7 @@ func (r *MessagesRepository) Read(ctx context.Context, userIDs []int64, id int64
 
 func (r *MessagesRepository) ReadByID(ctx context.Context, userIDs []int64, id int64) (message *model.Message, err error) {
 	message = &model.Message{
-		ID:    id,
+		ID: id,
 	}
 
 	var createdAt, updatedAt *time.Time
@@ -94,7 +94,7 @@ func (r *MessagesRepository) ReadByID(ctx context.Context, userIDs []int64, id i
 	}
 
 	err = r.pool.QueryRow(ctx, r.table(`
-SELECT user_id, created_at, updated_at, text, private, name, title FROM %s WHERE id = $1 AND (user_id IN (` + ids + `) OR private = false)
+SELECT user_id, created_at, updated_at, text, private, name, title FROM %s WHERE id = $1 AND (user_id IN (`+ids+`) OR private = false)
 `), append([]interface{}{id}, list...)...).Scan(&message.UserID, &createdAt, &updatedAt, &message.Text, &message.Private, &message.Name, &message.Title)
 	if err != nil {
 		return
@@ -124,7 +124,7 @@ func (r *MessagesRepository) ReadByName(ctx context.Context, userIDs []int64, na
 	}
 
 	err = r.pool.QueryRow(ctx, r.table(`
-SELECT id, user_id, created_at, updated_at, text, private, title FROM %s WHERE name = $1 AND (user_id IN (` + ids + `) OR private = false)
+SELECT id, user_id, created_at, updated_at, text, private, title FROM %s WHERE name = $1 AND (user_id IN (`+ids+`) OR private = false)
 `), append([]interface{}{name}, list...)...).Scan(&message.ID, &message.UserID, &createdAt, &updatedAt, &message.Text, &message.Private, &message.Title)
 	if err != nil {
 		return
@@ -286,7 +286,7 @@ func (r *MessagesRepository) ReadMessages(ctx context.Context, userID int64, lim
 			return
 		}
 
-		if count <= offset + limit {
+		if count <= offset+limit {
 			isLastPage = true
 		}
 	}

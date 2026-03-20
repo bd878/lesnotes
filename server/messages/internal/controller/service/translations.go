@@ -10,8 +10,8 @@ import (
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/messages/pkg/model"
 	"github.com/bd878/gallery/server/messages/pkg/loadbalance"
+	"github.com/bd878/gallery/server/messages/pkg/model"
 )
 
 type TranslationsConfig struct {
@@ -19,9 +19,9 @@ type TranslationsConfig struct {
 }
 
 type TranslationsController struct {
-	conf       TranslationsConfig
-	client     api.TranslationsClient
-	conn       *grpc.ClientConn
+	conf   TranslationsConfig
+	client api.TranslationsClient
+	conn   *grpc.ClientConn
 }
 
 func NewTranslationsController(conf TranslationsConfig) *TranslationsController {
@@ -80,11 +80,11 @@ func (s *TranslationsController) SaveTranslation(ctx context.Context, userID, me
 	logger.Debugw("save translation", "user_id", userID, "message_id", messageID, "lang", lang, "title", title, "text", text)
 
 	_, err = s.client.SaveTranslation(ctx, &api.SaveTranslationRequest{
-		MessageId:    messageID,
-		UserId:       userID,
-		Lang:         lang,
-		Title:        title,
-		Text:         text,
+		MessageId: messageID,
+		UserId:    userID,
+		Lang:      lang,
+		Title:     title,
+		Text:      text,
 	})
 
 	return
@@ -100,10 +100,10 @@ func (s *TranslationsController) UpdateTranslation(ctx context.Context, messageI
 	logger.Debugw("update translation", "message_id", messageID, "lang", lang, "title", title, "text", text)
 
 	_, err = s.client.UpdateTranslation(ctx, &api.UpdateTranslationRequest{
-		MessageId:   messageID,
-		Lang:        lang,
-		Title:       title,
-		Text:        text,
+		MessageId: messageID,
+		Lang:      lang,
+		Title:     title,
+		Text:      text,
 	})
 
 	return
@@ -119,8 +119,8 @@ func (s *TranslationsController) DeleteTranslation(ctx context.Context, messageI
 	logger.Debugw("delete translation", "message_id", messageID, "lang", lang)
 
 	_, err = s.client.DeleteTranslation(ctx, &api.DeleteTranslationRequest{
-		MessageId:      messageID,
-		Lang:           lang,
+		MessageId: messageID,
+		Lang:      lang,
 	})
 
 	return
@@ -136,10 +136,10 @@ func (s *TranslationsController) ReadTranslation(ctx context.Context, userID, me
 	logger.Debugw("read translation", "user_id", userID, "message_id", messageID, "lang", lang, "name", name)
 
 	resp, err := s.client.ReadTranslation(ctx, &api.ReadTranslationRequest{
-		UserId:       userID,
-		MessageId:    messageID,
-		Lang:         lang,
-		Name:         name,
+		UserId:    userID,
+		MessageId: messageID,
+		Lang:      lang,
+		Name:      name,
 	})
 	if err != nil {
 		return nil, err

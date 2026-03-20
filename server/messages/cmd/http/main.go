@@ -1,18 +1,18 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
-	"context"
 	"os"
 
 	_ "github.com/bd878/gallery/server/messages/pkg/loadbalance"
-	_ "github.com/bd878/gallery/server/threads/pkg/loadbalance"
 	_ "github.com/bd878/gallery/server/sessions/pkg/loadbalance"
+	_ "github.com/bd878/gallery/server/threads/pkg/loadbalance"
 
+	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/messages/config"
 	"github.com/bd878/gallery/server/messages/internal/http"
-	"github.com/bd878/gallery/server/internal/logger"
 )
 
 func init() {
@@ -37,12 +37,12 @@ func main() {
 	}))
 
 	server := http.New(http.Config{
-		Addr:                  cfg.HttpAddr,
-		RpcAddr:               cfg.RpcAddr,
-		UsersServiceAddr:      cfg.UsersServiceAddr,
-		FilesServiceAddr:      cfg.FilesServiceAddr,
-		SessionsServiceAddr:   cfg.SessionsServiceAddr,
-		ThreadsServiceAddr:    cfg.ThreadsServiceAddr,
+		Addr:                cfg.HttpAddr,
+		RpcAddr:             cfg.RpcAddr,
+		UsersServiceAddr:    cfg.UsersServiceAddr,
+		FilesServiceAddr:    cfg.FilesServiceAddr,
+		SessionsServiceAddr: cfg.SessionsServiceAddr,
+		ThreadsServiceAddr:  cfg.ThreadsServiceAddr,
 	})
 
 	if err := server.Run(context.Background()); err != nil {

@@ -1,11 +1,11 @@
 package http
 
 import (
-	"net/http"
 	"encoding/json"
+	"net/http"
 
-	"github.com/bd878/gallery/server/internal/utils"
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
+	"github.com/bd878/gallery/server/internal/utils"
 	messages "github.com/bd878/gallery/server/messages/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
 	users "github.com/bd878/gallery/server/users/pkg/model"
@@ -31,7 +31,7 @@ func (h *Handler) SendCommentJsonAPI(w http.ResponseWriter, req *http.Request) (
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    server.CodeNoBody,
 				Explain: "request required",
 			},
@@ -45,7 +45,7 @@ func (h *Handler) SendCommentJsonAPI(w http.ResponseWriter, req *http.Request) (
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    server.CodeWrongFormat,
 				Explain: "failed to parse request",
 			},
@@ -58,7 +58,7 @@ func (h *Handler) SendCommentJsonAPI(w http.ResponseWriter, req *http.Request) (
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    messages.CodeNoText,
 				Explain: "text field required",
 			},
@@ -71,7 +71,7 @@ func (h *Handler) SendCommentJsonAPI(w http.ResponseWriter, req *http.Request) (
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    server.CodeNoID,
 				Explain: "message field required",
 			},

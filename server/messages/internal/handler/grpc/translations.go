@@ -53,7 +53,7 @@ func (h *TranslationsHandler) DeleteTranslation(ctx context.Context, req *api.De
 func (h *TranslationsHandler) ReadTranslation(ctx context.Context, req *api.ReadTranslationRequest) (resp *api.ReadTranslationResponse, err error) {
 	var name string
 	if req.Name != nil {
-		name = *req.Name 
+		name = *req.Name
 	}
 
 	translation, err := h.controller.ReadTranslation(ctx, req.UserId, req.MessageId, req.Lang, name)

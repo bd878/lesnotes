@@ -1,8 +1,8 @@
 package config
 
 import (
-	"os"
 	"encoding/json"
+	"os"
 )
 
 func Load(configPath string) Config {

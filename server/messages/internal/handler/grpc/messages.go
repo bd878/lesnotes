@@ -87,7 +87,7 @@ func (h *MessagesHandler) ReadBatchMessages(ctx context.Context, req *api.ReadBa
 	}
 
 	resp = &api.ReadBatchMessagesResponse{
-		Messages:   model.MapMessagesToProto(model.MessageToProto, list),
+		Messages: model.MapMessagesToProto(model.MessageToProto, list),
 	}
 
 	return

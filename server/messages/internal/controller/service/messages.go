@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/status"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/logger"
@@ -32,10 +32,10 @@ type ThreadsGateway interface {
 }
 
 type MessagesController struct {
-	conf       MessagesConfig
-	client     api.MessagesClient
-	conn       *grpc.ClientConn
-	threads    ThreadsGateway
+	conf    MessagesConfig
+	client  api.MessagesClient
+	conn    *grpc.ClientConn
+	threads ThreadsGateway
 }
 
 func NewMessagesController(conf MessagesConfig, threads ThreadsGateway) *MessagesController {
@@ -92,13 +92,13 @@ func (s *MessagesController) SaveMessage(ctx context.Context, id int64, text, ti
 	logger.Debugw("save message", "id", id, "text", text, "title", title, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private, "name", name)
 
 	_, err = s.client.SaveMessage(ctx, &api.SaveMessageRequest{
-		Id:       id,
-		Text:     text,
-		Title:    title,
-		FileIds:  fileIDs,
-		UserId:   userID,
-		Private:  private,
-		Name:     name,
+		Id:      id,
+		Text:    text,
+		Title:   title,
+		FileIds: fileIDs,
+		UserId:  userID,
+		Private: private,
+		Name:    name,
 	})
 	if err != nil {
 		return
@@ -119,13 +119,13 @@ func (s *MessagesController) SaveMessage(ctx context.Context, id int64, text, ti
 	}
 
 	message = &model.Message{
-		ID:       id,
-		Text:     text,
-		Title:    title,
-		Name:     name,
-		FileIDs:  fileIDs,
-		UserID:   userID,
-		Private:  private,
+		ID:      id,
+		Text:    text,
+		Title:   title,
+		Name:    name,
+		FileIDs: fileIDs,
+		UserID:  userID,
+		Private: private,
 	}
 
 	return
@@ -205,12 +205,12 @@ func (s *MessagesController) UpdateMessage(ctx context.Context, id int64, text, 
 	logger.Debugw("update message", "id", id, "text", text, "title", title, "name", name, "file_ids", fileIDs, "user_id", userID)
 
 	_, err = s.client.UpdateMessage(ctx, &api.UpdateMessageRequest{
-		Id:        id,
-		UserId:    userID,
-		FileIds:   fileIDs,
-		Text:      text,
-		Title:     title,
-		Name:      name,
+		Id:      id,
+		UserId:  userID,
+		FileIds: fileIDs,
+		Text:    text,
+		Title:   title,
+		Name:    name,
 	})
 
 	return
@@ -243,8 +243,8 @@ func (s *MessagesController) ReadThreadMessages(ctx context.Context, userID int6
 	}
 
 	res, err := s.client.ReadBatchMessages(ctx, &api.ReadBatchMessagesRequest{
-		UserId:   userID,
-		Ids:      ids,
+		UserId: userID,
+		Ids:    ids,
 	})
 	if err != nil {
 		logger.Debugw("failed to read batch messages", "error", err)
@@ -257,12 +257,12 @@ func (s *MessagesController) ReadThreadMessages(ctx context.Context, userID int6
 	}
 
 	list = &model.List{
-		Messages:      messages,
-		IsLastPage:    isLastPage,
-		IsFirstPage:   offset == 0,
-		Total:         total,
-		Count:         int32(len(ids)),
-		Offset:        offset,
+		Messages:    messages,
+		IsLastPage:  isLastPage,
+		IsFirstPage: offset == 0,
+		Total:       total,
+		Count:       int32(len(ids)),
+		Offset:      offset,
 	}
 
 	return
@@ -279,8 +279,8 @@ func (s *MessagesController) ReadBatchMessages(ctx context.Context, userID int64
 	logger.Debugw("read batch messages", "user_id", userID, "ids", ids)
 
 	res, err := s.client.ReadBatchMessages(ctx, &api.ReadBatchMessagesRequest{
-		UserId:   userID,
-		Ids:      ids,
+		UserId: userID,
+		Ids:    ids,
 	})
 	if err != nil {
 		return nil, err
@@ -302,22 +302,22 @@ func (s *MessagesController) ReadMessages(ctx context.Context, userID int64, lim
 	logger.Debugw("read messages", "user_id", userID, "limit", limit, "offset", offset, "ascending", ascending)
 
 	res, err := s.client.ReadMessages(ctx, &api.ReadMessagesRequest{
-		UserId:   userID,
-		Limit:    limit,
-		Offset:   offset,
-		Asc:      ascending,
+		UserId: userID,
+		Limit:  limit,
+		Offset: offset,
+		Asc:    ascending,
 	})
 	if err != nil {
 		return nil, err
 	}
 
 	list = &model.List{
-		Messages:     model.MapMessagesFromProto(model.MessageFromProto, res.Messages),
-		IsLastPage:   res.IsLastPage,
-		IsFirstPage:  offset == 0,
-		Offset:       offset,
+		Messages:    model.MapMessagesFromProto(model.MessageFromProto, res.Messages),
+		IsLastPage:  res.IsLastPage,
+		IsFirstPage: offset == 0,
+		Offset:      offset,
 		// TODO: Total:        total.Count threads.CountThreads,
-		Count:        int32(len(res.Messages)),
+		Count: int32(len(res.Messages)),
 	}
 
 	return

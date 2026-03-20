@@ -1,8 +1,8 @@
 package http
 
 import (
-	"net/http"
 	"encoding/json"
+	"net/http"
 
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
 	messages "github.com/bd878/gallery/server/messages/pkg/model"
@@ -29,8 +29,8 @@ func (h *Handler) DeleteMessages(w http.ResponseWriter, req *http.Request) (err 
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
-				Code:     messages.CodeMessagePublic,
+			Error: &server.ErrorCode{
+				Code:    messages.CodeMessagePublic,
 				Explain: "cannot delete public message",
 			},
 		})
@@ -44,7 +44,7 @@ func (h *Handler) DeleteMessages(w http.ResponseWriter, req *http.Request) (err 
 		if err = json.Unmarshal([]byte(values.Get("ids")), &ids); err != nil {
 			json.NewEncoder(w).Encode(server.ServerResponse{
 				Status: "error",
-				Error:  &server.ErrorCode{
+				Error: &server.ErrorCode{
 					Code:    server.CodeWrongQuery,
 					Explain: "wrong \"ids\" query field format",
 				},
@@ -59,7 +59,7 @@ func (h *Handler) DeleteMessages(w http.ResponseWriter, req *http.Request) (err 
 	w.WriteHeader(http.StatusBadRequest)
 	json.NewEncoder(w).Encode(server.ServerResponse{
 		Status: "error",
-		Error:   &server.ErrorCode{
+		Error: &server.ErrorCode{
 			Code:    server.CodeWrongFormat,
 			Explain: "empty ids",
 		},
@@ -74,7 +74,7 @@ func (h *Handler) deleteMessages(w http.ResponseWriter, req *http.Request, user 
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    messages.CodeDeleteFailed,
 				Explain: "failed to delete batch messages",
 			},
@@ -84,7 +84,7 @@ func (h *Handler) deleteMessages(w http.ResponseWriter, req *http.Request, user 
 	}
 
 	response, err := json.Marshal(messages.DeleteResponse{
-		IDs:          ids,
+		IDs:         ids,
 		Description: "deleted",
 	})
 	if err != nil {
@@ -93,7 +93,7 @@ func (h *Handler) deleteMessages(w http.ResponseWriter, req *http.Request, user 
 	}
 
 	json.NewEncoder(w).Encode(server.ServerResponse{
-		Status: "ok",
+		Status:   "ok",
 		Response: json.RawMessage(response),
 	})
 

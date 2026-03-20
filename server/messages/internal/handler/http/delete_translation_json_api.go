@@ -1,13 +1,13 @@
 package http
 
 import (
-	"net/http"
 	"encoding/json"
+	"net/http"
 
-	"github.com/bd878/gallery/server/messages/pkg/model"
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
-	users "github.com/bd878/gallery/server/users/pkg/model"
+	"github.com/bd878/gallery/server/messages/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
+	users "github.com/bd878/gallery/server/users/pkg/model"
 )
 
 func (h *Handler) DeleteTranslationJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
@@ -30,7 +30,7 @@ func (h *Handler) DeleteTranslationJsonAPI(w http.ResponseWriter, req *http.Requ
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    server.CodeNoBody,
 				Explain: "request required",
 			},
@@ -44,7 +44,7 @@ func (h *Handler) DeleteTranslationJsonAPI(w http.ResponseWriter, req *http.Requ
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    server.CodeWrongFormat,
 				Explain: "failed to parse request",
 			},
@@ -57,7 +57,7 @@ func (h *Handler) DeleteTranslationJsonAPI(w http.ResponseWriter, req *http.Requ
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    server.CodeProhibited,
 				Explain: "can delete translation of a user only",
 			},
@@ -70,7 +70,7 @@ func (h *Handler) DeleteTranslationJsonAPI(w http.ResponseWriter, req *http.Requ
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    model.CodeNoMessageID,
 				Explain: "message field is empty",
 			},
@@ -83,7 +83,7 @@ func (h *Handler) DeleteTranslationJsonAPI(w http.ResponseWriter, req *http.Requ
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    model.CodeNoLang,
 				Explain: "lang field is empty",
 			},
@@ -97,7 +97,7 @@ func (h *Handler) DeleteTranslationJsonAPI(w http.ResponseWriter, req *http.Requ
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    model.CodeDeleteFailed,
 				Explain: "failed to delete translation",
 			},
@@ -115,7 +115,7 @@ func (h *Handler) DeleteTranslationJsonAPI(w http.ResponseWriter, req *http.Requ
 	}
 
 	json.NewEncoder(w).Encode(server.ServerResponse{
-		Status: "ok",
+		Status:   "ok",
 		Response: json.RawMessage(response),
 	})
 

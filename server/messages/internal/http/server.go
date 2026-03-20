@@ -1,23 +1,23 @@
 package http
 
 import (
-	"os"
-	"fmt"
-	"time"
 	"context"
-	"net/http"
+	"fmt"
 	"golang.org/x/sync/errgroup"
+	"net/http"
+	"os"
+	"time"
 
-	"github.com/bd878/gallery/server/internal/waiter"
-	"github.com/bd878/gallery/server/internal/logger"
-	usermodel "github.com/bd878/gallery/server/users/pkg/model"
-	httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
-	httphandler "github.com/bd878/gallery/server/messages/internal/handler/http"
-	usersgateway "github.com/bd878/gallery/server/internal/gateway/users"
 	sessionsgateway "github.com/bd878/gallery/server/internal/gateway/sessions"
+	usersgateway "github.com/bd878/gallery/server/internal/gateway/users"
+	"github.com/bd878/gallery/server/internal/logger"
+	httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
+	"github.com/bd878/gallery/server/internal/waiter"
+	controller "github.com/bd878/gallery/server/messages/internal/controller/service"
 	filesgateway "github.com/bd878/gallery/server/messages/internal/gateway/files/grpc"
 	threadsgateway "github.com/bd878/gallery/server/messages/internal/gateway/threads/grpc"
-	controller "github.com/bd878/gallery/server/messages/internal/controller/service"
+	httphandler "github.com/bd878/gallery/server/messages/internal/handler/http"
+	usermodel "github.com/bd878/gallery/server/users/pkg/model"
 )
 
 type Config struct {
@@ -51,42 +51,42 @@ func New(cfg Config) *Server {
 
 	handler := httphandler.New(messagesController, translationsController, commentsController, filesGateway)
 
-	mux.Handle("/messages/v1/send",        middleware.Build(handler.SendMessage))
-	mux.Handle("/messages/v1/read_path",   middleware.Build(handler.ReadPath))
-	mux.Handle("/messages/v1/read",        middleware.Build(handler.ReadMessages))
-	mux.Handle("/messages/v1/update",      middleware.Build(handler.UpdateMessage))
-	mux.Handle("/messages/v1/publish",     middleware.Build(handler.PublishMessages))
-	mux.Handle("/messages/v1/private",     middleware.Build(handler.PrivateMessages))
-	mux.Handle("/messages/v1/delete",      middleware.Build(handler.DeleteMessages))
+	mux.Handle("/messages/v1/send", middleware.Build(handler.SendMessage))
+	mux.Handle("/messages/v1/read_path", middleware.Build(handler.ReadPath))
+	mux.Handle("/messages/v1/read", middleware.Build(handler.ReadMessages))
+	mux.Handle("/messages/v1/update", middleware.Build(handler.UpdateMessage))
+	mux.Handle("/messages/v1/publish", middleware.Build(handler.PublishMessages))
+	mux.Handle("/messages/v1/private", middleware.Build(handler.PrivateMessages))
+	mux.Handle("/messages/v1/delete", middleware.Build(handler.DeleteMessages))
 
 	middleware.NoAuth()
-	mux.Handle("/messages/v1/status",      middleware.Build(handler.GetStatus))
+	mux.Handle("/messages/v1/status", middleware.Build(handler.GetStatus))
 
 	middleware.WithAuth(httpmiddleware.TokenAuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
-	mux.Handle("/messages/v2/send",        middleware.Build(handler.SendMessageJsonAPI))
-	mux.Handle("/messages/v2/read",        middleware.Build(handler.ReadMessagesJsonAPI))
+	mux.Handle("/messages/v2/send", middleware.Build(handler.SendMessageJsonAPI))
+	mux.Handle("/messages/v2/read", middleware.Build(handler.ReadMessagesJsonAPI))
 	// TODO: /threads/v2/read
-	mux.Handle("/messages/v2/read_path",   middleware.Build(handler.ReadPathJsonAPI))
-	mux.Handle("/messages/v2/publish",     middleware.Build(handler.PublishMessagesJsonAPI))
-	mux.Handle("/messages/v2/private",     middleware.Build(handler.PrivateMessagesJsonAPI))
-	mux.Handle("/messages/v2/delete",      middleware.Build(handler.DeleteMessagesJsonAPI))
-	mux.Handle("/messages/v2/update",      middleware.Build(handler.UpdateMessageJsonAPI))
+	mux.Handle("/messages/v2/read_path", middleware.Build(handler.ReadPathJsonAPI))
+	mux.Handle("/messages/v2/publish", middleware.Build(handler.PublishMessagesJsonAPI))
+	mux.Handle("/messages/v2/private", middleware.Build(handler.PrivateMessagesJsonAPI))
+	mux.Handle("/messages/v2/delete", middleware.Build(handler.DeleteMessagesJsonAPI))
+	mux.Handle("/messages/v2/update", middleware.Build(handler.UpdateMessageJsonAPI))
 
-	mux.Handle("/translations/v2/send",    middleware.Build(handler.SendTranslationJsonAPI))
-	mux.Handle("/translations/v2/update",  middleware.Build(handler.UpdateTranslationJsonAPI))
-	mux.Handle("/translations/v2/delete",  middleware.Build(handler.DeleteTranslationJsonAPI))
-	mux.Handle("/translations/v2/read",    middleware.Build(handler.ReadTranslationJsonAPI))
-	mux.Handle("/translations/v2/list",    middleware.Build(handler.ListTranslationsJsonAPI))
+	mux.Handle("/translations/v2/send", middleware.Build(handler.SendTranslationJsonAPI))
+	mux.Handle("/translations/v2/update", middleware.Build(handler.UpdateTranslationJsonAPI))
+	mux.Handle("/translations/v2/delete", middleware.Build(handler.DeleteTranslationJsonAPI))
+	mux.Handle("/translations/v2/read", middleware.Build(handler.ReadTranslationJsonAPI))
+	mux.Handle("/translations/v2/list", middleware.Build(handler.ListTranslationsJsonAPI))
 
-	mux.Handle("POST /comments/v2/send",   middleware.Build(handler.SendCommentJsonAPI))
+	mux.Handle("POST /comments/v2/send", middleware.Build(handler.SendCommentJsonAPI))
 	mux.Handle("POST /comments/v2/update", middleware.Build(handler.UpdateCommentJsonAPI))
-	mux.Handle("POST /comments/v2/read",   middleware.Build(handler.ReadCommentJsonAPI))
+	mux.Handle("POST /comments/v2/read", middleware.Build(handler.ReadCommentJsonAPI))
 	mux.Handle("POST /comments/v2/delete", middleware.Build(handler.DeleteCommentsJsonAPI))
-	mux.Handle("POST /comments/v2/list",   middleware.Build(handler.ListCommentsJsonAPI))
+	mux.Handle("POST /comments/v2/list", middleware.Build(handler.ListCommentsJsonAPI))
 
 	server := &Server{
 		Server: &http.Server{
-			Addr: cfg.Addr,
+			Addr:    cfg.Addr,
 			Handler: mux,
 		},
 		config: cfg,

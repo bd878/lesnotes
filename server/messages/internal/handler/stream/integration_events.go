@@ -4,10 +4,10 @@ import (
 	"context"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/bd878/gallery/server/internal/am"
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/api"
 	filesevents "github.com/bd878/gallery/server/files/pkg/events"
+	"github.com/bd878/gallery/server/internal/am"
+	"github.com/bd878/gallery/server/internal/logger"
 )
 
 type FilesController interface {
@@ -15,7 +15,7 @@ type FilesController interface {
 }
 
 type integrationHandlers struct {
-	files       FilesController
+	files FilesController
 }
 
 var _ am.RawMessageHandler = (*integrationHandlers)(nil)

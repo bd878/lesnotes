@@ -1,10 +1,10 @@
 package postgres
 
 import (
+	"context"
+	"fmt"
 	"os"
 	"time"
-	"fmt"
-	"context"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -14,14 +14,14 @@ import (
 )
 
 type CommentsRepository struct {
-	tableName    string
-	pool         *pgxpool.Pool
+	tableName string
+	pool      *pgxpool.Pool
 }
 
 func NewCommentsRepository(pool *pgxpool.Pool, tableName string) *CommentsRepository {
 	return &CommentsRepository{
-		tableName:     tableName,
-		pool:          pool,
+		tableName: tableName,
+		pool:      pool,
 	}
 }
 
@@ -82,8 +82,8 @@ func (r *CommentsRepository) Read(ctx context.Context, id, userID int64) (commen
 	const query = "SELECT message_id, text, metadata, created_at, updated_at FROM %s WHERE id = $1 AND user_id = $2"
 
 	comment = &api.Comment{
-		Id:       id,
-		UserId:   userID,
+		Id:     id,
+		UserId: userID,
 	}
 
 	var createdAt, updatedAt time.Time
@@ -131,7 +131,7 @@ func (r *CommentsRepository) ListMessageComments(ctx context.Context, messageID 
 	comments := make([]*api.Comment, 0)
 	for rows.Next() {
 		comment := &api.Comment{
-			MessageId:    messageID,
+			MessageId: messageID,
 		}
 
 		var createdAt, updatedAt time.Time
@@ -151,7 +151,7 @@ func (r *CommentsRepository) ListMessageComments(ctx context.Context, messageID 
 	}
 
 	var (
-		total int32
+		total      int32
 		isLastPage bool
 	)
 
@@ -160,16 +160,16 @@ func (r *CommentsRepository) ListMessageComments(ctx context.Context, messageID 
 		return
 	}
 
-	if total <= offset + limit {
+	if total <= offset+limit {
 		isLastPage = true
 	}
 
 	list = &api.CommentsList{
-		Comments:     comments,
-		IsLastPage:   isLastPage,
-		IsFirstPage:  int32(offset) == 0,
-		Count:        int32(len(comments)),
-		Total:        total,
+		Comments:    comments,
+		IsLastPage:  isLastPage,
+		IsFirstPage: int32(offset) == 0,
+		Count:       int32(len(comments)),
+		Total:       total,
 	}
 
 	return

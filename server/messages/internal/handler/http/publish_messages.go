@@ -1,8 +1,8 @@
 package http
 
 import (
-	"net/http"
 	"encoding/json"
+	"net/http"
 
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
 	messages "github.com/bd878/gallery/server/messages/pkg/model"
@@ -29,7 +29,7 @@ func (h *Handler) PublishMessages(w http.ResponseWriter, req *http.Request) (err
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    messages.CodeMessagePublic,
 				Explain: "can publish messages of a user only",
 			},
@@ -45,7 +45,7 @@ func (h *Handler) PublishMessages(w http.ResponseWriter, req *http.Request) (err
 		if err := json.Unmarshal([]byte(values.Get("ids")), &ids); err != nil {
 			json.NewEncoder(w).Encode(server.ServerResponse{
 				Status: "error",
-				Error:  &server.ErrorCode{
+				Error: &server.ErrorCode{
 					Code:    server.CodeWrongQuery,
 					Explain: "wrong \"ids\" query field format",
 				},
@@ -85,8 +85,8 @@ func (h *Handler) publishMessages(w http.ResponseWriter, req *http.Request, user
 	}
 
 	response, err := json.Marshal(messages.PublishResponse{
-		IDs:           ids,
-		Description:   "published",
+		IDs:         ids,
+		Description: "published",
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

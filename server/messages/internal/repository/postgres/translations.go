@@ -1,9 +1,9 @@
 package postgres
 
 import (
+	"context"
 	"fmt"
 	"time"
-	"context"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -11,8 +11,8 @@ import (
 )
 
 type TranslationsRepository struct {
-	tableName        string
-	pool             *pgxpool.Pool
+	tableName string
+	pool      *pgxpool.Pool
 }
 
 func NewTranslationsRepository(pool *pgxpool.Pool, tableName string) *TranslationsRepository {

@@ -1,11 +1,11 @@
 package postgres
 
 import (
-	"fmt"
-	"time"
-	"sync"
-	"errors"
 	"context"
+	"errors"
+	"fmt"
+	"sync"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -14,25 +14,25 @@ import (
 )
 
 type Dumper struct {
-	pool                   *pgxpool.Pool
-	messagesTableName      string
-	filesTableName         string
-	translationsTableName  string
-	commentsTableName      string
-	ctx                    context.Context
-	cancel                 context.CancelCauseFunc
-	ch                     chan *api.MessagesSnapshot
-	wg                     sync.WaitGroup
+	pool                  *pgxpool.Pool
+	messagesTableName     string
+	filesTableName        string
+	translationsTableName string
+	commentsTableName     string
+	ctx                   context.Context
+	cancel                context.CancelCauseFunc
+	ch                    chan *api.MessagesSnapshot
+	wg                    sync.WaitGroup
 }
 
 func NewDumper(pool *pgxpool.Pool, messagesTableName, filesTableName,
 	translationsTableName, commentsTableName string) *Dumper {
 	return &Dumper{
-		pool:                    pool,
-		messagesTableName:       messagesTableName,
-		filesTableName:          filesTableName,
-		translationsTableName:   translationsTableName,
-		commentsTableName:       commentsTableName,
+		pool:                  pool,
+		messagesTableName:     messagesTableName,
+		filesTableName:        filesTableName,
+		translationsTableName: translationsTableName,
+		commentsTableName:     commentsTableName,
 	}
 }
 

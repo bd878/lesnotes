@@ -1,15 +1,15 @@
 package http
 
 import (
-	"net/http"
 	"encoding/json"
+	"net/http"
 
-	"github.com/bd878/gallery/server/internal/logger"
 	files "github.com/bd878/gallery/server/files/pkg/model"
+	"github.com/bd878/gallery/server/internal/logger"
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
-	users "github.com/bd878/gallery/server/users/pkg/model"
 	messages "github.com/bd878/gallery/server/messages/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
+	users "github.com/bd878/gallery/server/users/pkg/model"
 )
 
 func (h *Handler) ReadPathJsonAPI(w http.ResponseWriter, req *http.Request) (err error) {
@@ -32,7 +32,7 @@ func (h *Handler) ReadPathJsonAPI(w http.ResponseWriter, req *http.Request) (err
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    server.CodeNoBody,
 				Explain: "request required",
 			},
@@ -61,7 +61,7 @@ func (h *Handler) ReadPathJsonAPI(w http.ResponseWriter, req *http.Request) (err
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    server.CodeWrongFormat,
 				Explain: "failed to read messages path",
 			},
@@ -102,8 +102,8 @@ func (h *Handler) ReadPathJsonAPI(w http.ResponseWriter, req *http.Request) (err
 	}
 
 	response, err := json.Marshal(messages.ReadPathResponse{
-		Messages:   list,
-		ThreadID:   parentID,
+		Messages: list,
+		ThreadID: parentID,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

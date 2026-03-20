@@ -1,20 +1,20 @@
 package http
 
 import (
-	"net/http"
 	"context"
-	"strconv"
 	"encoding/json"
+	"net/http"
+	"strconv"
 
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
+	messages "github.com/bd878/gallery/server/messages/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
 	users "github.com/bd878/gallery/server/users/pkg/model"
-	messages "github.com/bd878/gallery/server/messages/pkg/model"
 )
 
 func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) (err error) {
 	var (
-		id int64
+		id      int64
 		fileIDs []int64
 	)
 
@@ -70,7 +70,7 @@ func (h *Handler) UpdateMessage(w http.ResponseWriter, req *http.Request) (err e
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(server.ServerResponse{
 				Status: "error",
-				Error:  &server.ErrorCode{
+				Error: &server.ErrorCode{
 					Code:    server.CodeWrongFormat,
 					Explain: "cannot parse file_ids",
 				},
@@ -115,7 +115,7 @@ func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, mess
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
-			Error:  &server.ErrorCode{
+			Error: &server.ErrorCode{
 				Code:    messages.CodeUpdateFailed,
 				Explain: "failed to update message",
 			},
@@ -125,7 +125,7 @@ func (h *Handler) updateMessage(ctx context.Context, w http.ResponseWriter, mess
 	}
 
 	response, err := json.Marshal(messages.UpdateResponse{
-		Description:   "updated",
+		Description: "updated",
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

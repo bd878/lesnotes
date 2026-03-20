@@ -1,16 +1,16 @@
 package grpc
 
 import (
-	"io"
 	"context"
+	"io"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/files/pkg/model"
+	"github.com/bd878/gallery/server/internal/logger"
 )
 
 type Gateway struct {

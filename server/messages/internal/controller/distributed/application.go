@@ -1,19 +1,19 @@
 package application
 
 import (
-	"time"
-	"errors"
-	"context"
 	"bytes"
+	"context"
+	"errors"
+	"time"
 
-	"google.golang.org/protobuf/proto"
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/messages/pkg/model"
-	"github.com/bd878/gallery/server/messages/internal/machine"
 	"github.com/bd878/gallery/server/messages/internal/domain"
+	"github.com/bd878/gallery/server/messages/internal/machine"
+	"github.com/bd878/gallery/server/messages/pkg/model"
 	users "github.com/bd878/gallery/server/users/pkg/model"
+	"google.golang.org/protobuf/proto"
 )
 
 type MessagesRepository interface {
@@ -43,13 +43,13 @@ type Consensus interface {
 }
 
 type Distributed struct {
-	consensus         Consensus
-	log               *logger.Logger
-	publisher         ddd.EventPublisher[ddd.Event]
-	commentsRepo      CommentsRepository
-	messagesRepo      MessagesRepository
-	filesRepo         FilesRepository
-	translationsRepo  TranslationsRepository
+	consensus        Consensus
+	log              *logger.Logger
+	publisher        ddd.EventPublisher[ddd.Event]
+	commentsRepo     CommentsRepository
+	messagesRepo     MessagesRepository
+	filesRepo        FilesRepository
+	translationsRepo TranslationsRepository
 }
 
 func New(consensus Consensus, publisher ddd.EventPublisher[ddd.Event], messagesRepo MessagesRepository, filesRepo FilesRepository,
@@ -92,15 +92,15 @@ func (m *Distributed) SaveMessage(ctx context.Context, id int64, text, title str
 	}
 
 	cmd, err := proto.Marshal(&machine.AppendCommand{
-		Id:         id,
-		Text:       text,
-		Title:      title,
-		FileIds:    fileIDs,
-		UserId:     userID,
-		Private:    private,
-		Name:       name,
-		CreatedAt:  createdAt,
-		UpdatedAt:  updatedAt,
+		Id:        id,
+		Text:      text,
+		Title:     title,
+		FileIds:   fileIDs,
+		UserId:    userID,
+		Private:   private,
+		Name:      name,
+		CreatedAt: createdAt,
+		UpdatedAt: updatedAt,
 	})
 	if err != nil {
 		return err
@@ -125,13 +125,13 @@ func (m *Distributed) UpdateMessage(ctx context.Context, id int64, text, title, 
 	}
 
 	cmd, err := proto.Marshal(&machine.UpdateCommand{
-		Id:          id,
-		UserId:      userID,
-		FileIds:     fileIDs,
-		Text:        text,
-		Name:        name,
-		Title:       title,
-		UpdatedAt:   updatedAt,
+		Id:        id,
+		UserId:    userID,
+		FileIds:   fileIDs,
+		Text:      text,
+		Name:      name,
+		Title:     title,
+		UpdatedAt: updatedAt,
 	})
 	if err != nil {
 		return err
@@ -164,8 +164,8 @@ func (m *Distributed) DeleteFile(ctx context.Context, id, userID int64) (err err
 	m.log.Debugw("delete file", "id", id, "user_id", userID)
 
 	cmd, err := proto.Marshal(&machine.DeleteFileCommand{
-		Id:      id,
-		UserId:  userID,
+		Id:     id,
+		UserId: userID,
 	})
 	if err != nil {
 		return err
@@ -212,9 +212,9 @@ func (m *Distributed) PublishMessages(ctx context.Context, ids []int64, userID i
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
 	cmd, err := proto.Marshal(&machine.PublishCommand{
-		Ids:           ids,
-		UserId:        userID,
-		UpdatedAt:     updatedAt,
+		Ids:       ids,
+		UserId:    userID,
+		UpdatedAt: updatedAt,
 	})
 	if err != nil {
 		return err
@@ -239,9 +239,9 @@ func (m *Distributed) PrivateMessages(ctx context.Context, ids []int64, userID i
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
 	cmd, err := proto.Marshal(&machine.PrivateCommand{
-		Ids:           ids,
-		UserId:        userID,
-		UpdatedAt:     updatedAt,
+		Ids:       ids,
+		UserId:    userID,
+		UpdatedAt: updatedAt,
 	})
 	if err != nil {
 		return err
@@ -267,12 +267,12 @@ func (m *Distributed) SaveTranslation(ctx context.Context, userID, messageID int
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
 	cmd, err := proto.Marshal(&machine.AppendTranslationCommand{
-		MessageId:      messageID,
-		Lang:           lang,
-		Title:          title,
-		Text:           text,
-		CreatedAt:      createdAt,
-		UpdatedAt:      updatedAt,
+		MessageId: messageID,
+		Lang:      lang,
+		Title:     title,
+		Text:      text,
+		CreatedAt: createdAt,
+		UpdatedAt: updatedAt,
 	})
 	if err != nil {
 		return err
@@ -297,11 +297,11 @@ func (m *Distributed) UpdateTranslation(ctx context.Context, messageID int64, la
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
 	cmd, err := proto.Marshal(&machine.UpdateTranslationCommand{
-		MessageId:     messageID,
-		Lang:          lang,
-		Title:         title,
-		Text:          text,
-		UpdatedAt:     updatedAt,
+		MessageId: messageID,
+		Lang:      lang,
+		Title:     title,
+		Text:      text,
+		UpdatedAt: updatedAt,
 	})
 	if err != nil {
 		return err
@@ -324,8 +324,8 @@ func (m *Distributed) DeleteTranslation(ctx context.Context, messageID int64, la
 	m.log.Debugw("delete translation", "message_id", messageID, "lang", lang)
 
 	cmd, err := proto.Marshal(&machine.DeleteTranslationCommand{
-		MessageId:  messageID,
-		Lang:       lang,
+		MessageId: messageID,
+		Lang:      lang,
 	})
 	if err != nil {
 		return err
@@ -351,13 +351,13 @@ func (m *Distributed) SaveComment(ctx context.Context, id, userID, messageID int
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
 	cmd, err := proto.Marshal(&machine.AppendCommentCommand{
-		Id:         id,
-		UserId:     userID,
-		MessageId:  messageID,
-		Text:       text,
-		Metadata:   metadata,
-		CreatedAt:  createdAt,
-		UpdatedAt:  updatedAt,
+		Id:        id,
+		UserId:    userID,
+		MessageId: messageID,
+		Text:      text,
+		Metadata:  metadata,
+		CreatedAt: createdAt,
+		UpdatedAt: updatedAt,
 	})
 	if err != nil {
 		return err
@@ -433,7 +433,7 @@ func (m *Distributed) DeleteMessageComments(ctx context.Context, messageID int64
 	m.log.Debugw("delete message comments", "message_id", messageID)
 
 	cmd, err := proto.Marshal(&machine.DeleteMessageCommentsCommand{
-		MessageId:    messageID,
+		MessageId: messageID,
 	})
 	if err != nil {
 		return err
@@ -559,7 +559,7 @@ func (m *Distributed) ListTranslations(ctx context.Context, userID, messageID in
 		return nil, err
 	}
 
-	return	
+	return
 }
 
 func (m *Distributed) ReadComment(ctx context.Context, id, userID int64) (comment *api.Comment, err error) {

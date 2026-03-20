@@ -10,8 +10,8 @@ import (
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/messages/pkg/model"
 	"github.com/bd878/gallery/server/messages/pkg/loadbalance"
+	"github.com/bd878/gallery/server/messages/pkg/model"
 )
 
 type CommentsConfig struct {
@@ -19,9 +19,9 @@ type CommentsConfig struct {
 }
 
 type CommentsController struct {
-	conf       CommentsConfig
-	client     api.CommentsClient
-	conn       *grpc.ClientConn
+	conf   CommentsConfig
+	client api.CommentsClient
+	conn   *grpc.ClientConn
 }
 
 func NewCommentsController(conf CommentsConfig) *CommentsController {
@@ -80,11 +80,11 @@ func (s *CommentsController) SendComment(ctx context.Context, id, userID, messag
 	logger.Debugw("save comment", "id", id, "user_id", userID, "message_id", messageID, "text", text, "metadata", metadata)
 
 	_, err = s.client.SendComment(ctx, &api.SendCommentRequest{
-		Id:         id,
-		UserId:     userID,
-		MessageId:  messageID,
-		Text:       text,
-		Metadata:   metadata,
+		Id:        id,
+		UserId:    userID,
+		MessageId: messageID,
+		Text:      text,
+		Metadata:  metadata,
 	})
 
 	return
@@ -100,9 +100,9 @@ func (s *CommentsController) UpdateComment(ctx context.Context, id, userID int64
 	logger.Debugw("update comment", "id", id, "user_id", userID, "text", text)
 
 	_, err = s.client.UpdateComment(ctx, &api.UpdateCommentRequest{
-		Id:       id,
-		UserId:   userID,
-		Text:     text,
+		Id:     id,
+		UserId: userID,
+		Text:   text,
 	})
 
 	return
@@ -151,8 +151,8 @@ func (s *CommentsController) ReadComment(ctx context.Context, id, userID int64) 
 	logger.Debugw("read comment", "id", id, "user_id", userID)
 
 	res, err := s.client.ReadComment(ctx, &api.ReadCommentRequest{
-		Id:      id,
-		UserId:  userID,
+		Id:     id,
+		UserId: userID,
 	})
 	if err != nil {
 		return
@@ -173,12 +173,12 @@ func (s *CommentsController) ListComments(ctx context.Context, userID, messageID
 	logger.Debugw("list comments", "message_id", messageID, "user_id", userID, "name", name, "limit", limit, "offset", offset, "ascending", asc)
 
 	res, err := s.client.ListComments(ctx, &api.ListCommentsRequest{
-		MessageId:     messageID,
-		UserId:        userID,
-		Name:          name,
-		Limit:         limit,
-		Offset:        offset,
-		Asc:           asc,
+		MessageId: messageID,
+		UserId:    userID,
+		Name:      name,
+		Limit:     limit,
+		Offset:    offset,
+		Asc:       asc,
 	})
 	if err != nil {
 		return
