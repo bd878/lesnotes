@@ -565,6 +565,8 @@ func (r *ThreadsRepository) ResolveThread(ctx context.Context, id, userID int64)
 		threadID = parentID
 	}
 
+	ids = append(ids, threadID)
+
 	return
 }
 
