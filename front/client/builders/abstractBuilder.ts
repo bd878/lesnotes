@@ -15,6 +15,7 @@ abstract class AbstractBuilder {
 
 	footer        = undefined;
 	settings      = undefined;
+	scripts       = [];
 
 	constructor(isMobile: boolean, lang: string = "en", theme: string = "light", fontSize: string = "medium", search: string = "", path: string = "") {
 		this.search = search

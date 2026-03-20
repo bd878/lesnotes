@@ -37,6 +37,7 @@ class HomeBuilder extends AbstractBuilder {
 	newComment           = undefined;
 	commentsList         = undefined;
 	comments             = undefined;
+	scripts              = ["/public/pages/home/homeScript.js"]
 
 	async addMessagesStack(stack: ThreadMessages[]) {
 		const template = await readFile(resolve(join(Config.get('basedir'),
@@ -263,6 +264,7 @@ class HomeBuilder extends AbstractBuilder {
 			this.isMobile ? 'templates/home/mobile/home.mustache' : 'templates/home/desktop/home.mustache'
 		)), { encoding: 'utf-8' });
 
+		const lang = this.lang
 		const theme = this.theme
 		const fontSize = this.fontSize
 
@@ -271,16 +273,16 @@ class HomeBuilder extends AbstractBuilder {
 				let html = "<html"
 
 				if (theme) html += ` class="${theme}"`;
-				if (this.lang) html += ` lang="${this.lang}"`;
+				if (lang) html += ` lang="${lang}"`;
 				if (fontSize) html += ` data-size="${fontSize}"`
 				html += ">"
 
 				return html + render(text) + "</html>"
 			},
-			scripts:  ["/public/pages/home/homeScript.js"],
+			scripts:  this.scripts,
 			manifest: "/public/manifest.json",
 			styles:   styles,
-			lang:     this.lang,
+			lang:     lang,
 			theme:    theme,
 		}, {
 			footer: this.footer,

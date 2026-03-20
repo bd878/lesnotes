@@ -9,6 +9,11 @@ import { resolve, join } from 'node:path';
 import HomeBuilder from './homeBuilder';
 
 class MessageEditViewBuilder extends HomeBuilder {
+	scripts = [
+		"/public/pages/home/homeScript.js",
+		"/public/pages/messageEdit/messageEditScript.js"
+	]
+
 	async addMessageEditForm(message?: Message) {
 		if (is.empty(message)) {
 			return

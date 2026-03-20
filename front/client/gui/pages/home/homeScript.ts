@@ -12,7 +12,7 @@ const elems = {
 }
 
 function init() {
-	console.log("loaded")
+	console.log("homeScript loaded")
 
 	elems.messagesListElem.addEventListener('dragstart',  e => onMessagesListDragStart(elems, e))
 	elems.messagesListElem.addEventListener('drop',       e => onMessagesListDrop(elems, e))
