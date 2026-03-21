@@ -396,6 +396,35 @@ paths:
 
 # END READ PATH
 
+# READ TREE
+  /messages/v2/read_tree:
+    post:
+      summary: Read tree of messages with pagination
+      description: |
+        Read message tree with given nodes unfolded with pagination
+      operationId: readMessageTreeJson
+      requestBody:
+        content:
+          application/json:
+            schema:
+              - $ref: '#/components/schemas/readTreeJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/readTreeOk'
+
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/serverError'
+
+# END READ TREE
+
 # STATUS
   /messages/v1/status:
     get:
@@ -654,30 +683,8 @@ components:
           type: string
           default: "ok"
         response:
-          type: object
-          properties:
-            description:
-              type: string
-              default: ""
-            is_last_page:
-              type: boolean
-            is_first_page:
-              type: boolean
-              required: false
-            offset:
-              type: integer
-              required: false
-            count:
-              type: integer
-              required: false
-            total:
-              type: integer
-              required: false
-            messages:
-              type: array
-              items:
-                allOf:
-                  - $ref: '#/components/schemas/message'
+          - $ref: "#/components/schemas/list"
+
 # END READ
 
 # READ PATH
@@ -712,6 +719,53 @@ components:
                   - $ref: '#/components/schemas/message'
 
 # END READ PATH
+
+# READ TREE
+    readTreeJson:
+      type: object
+      properties:
+        token:
+          type: string
+          required: true
+        req:
+          type: object
+          properties:
+            root:
+              type: integer
+              required: true
+            limit:
+              type: integer
+            offset:
+              type: integer
+            leaves:
+              type: array
+              items:
+                allOf:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      requried: true
+                    offset:
+                      type: integer
+                      required: true
+                    limit:
+                      type: integer
+                      required: true
+
+    readTreeOk:
+      type: object
+      properties:
+        status:
+          type: string
+          default: "ok"
+        responses:
+          type: object
+          properties:
+            list:
+              - $ref: '#/components/schemas/list'
+
+# END READ TREE
 
 # UPDATE
     updateJson:
@@ -912,6 +966,32 @@ components:
         updated_at:
           type: integer
 
+    list:
+      type: object
+      properties:
+        description:
+          type: string
+          default: ""
+        is_last_page:
+          type: boolean
+        is_first_page:
+          type: boolean
+          required: false
+        offset:
+          type: integer
+          required: false
+        count:
+          type: integer
+          required: false
+        total:
+          type: integer
+          required: false
+        messages:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/message'
+
     message:
       type: object
       properties:
@@ -933,6 +1013,12 @@ components:
           type: string
         private:
           type: boolean
+        messages:
+          type: array
+          required: false
+          items:
+            schema:
+              $ref: '#/components/schemas/list'
         files:
           type: array
           items:

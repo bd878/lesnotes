@@ -15,18 +15,19 @@ type (
 		FileIDs      []int64               `json:"-"`
 		Files        []*files.File         `json:"files"`
 		Translations []*TranslationPreview `json:"translations"`
+		Messages     *List                 `json:"messages,omitempty"`
 		Text         string                `json:"text"`
 		Title        string                `json:"title"`
 		Private      bool                  `json:"private"`
 	}
 
 	List struct {
-		Messages    []*Message
-		IsLastPage  bool
-		IsFirstPage bool
-		Total       int32
-		Count       int32
-		Offset      int32
+		Messages    []*Message   `json:"messages"`
+		IsLastPage  bool         `json:"is_last_page"`
+		IsFirstPage bool         `json:"is_first_page"`
+		Total       int32        `json:"total"`
+		Count       int32        `json:"count"`
+		Offset      int32        `json:"offset"`
 	}
 
 	SendRequest struct {
@@ -79,6 +80,23 @@ type (
 		Asc       int     `json:"asc"`
 		IDs       []int64 `json:"ids"`
 		Name      string  `json:"name"`
+	}
+
+	IDLimitOffset struct {
+		ID     int64  `json:"id"`
+		Limit  int32  `json:"limit"`
+		Offset int32  `json:"offset"`
+	}
+
+	ReadTreeRequest struct {
+		MessageID int64             `json:"root"`
+		Limit     int32             `json:"limit"`
+		Offset    int32             `json:"offset"`
+		Leaves    []*IDLimitOffset   `json:"leaves"`
+	}
+
+	ReadTreeResponse struct {
+		List      *List `json:"list"`
 	}
 
 	ReadPathRequest struct {

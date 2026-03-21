@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"fmt"
+	"sync"
+	"strings"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
@@ -377,6 +379,155 @@ func (s *MessagesController) ReadPath(ctx context.Context, userID, id int64) (pa
 	}
 
 	path = model.MapMessagesFromProto(model.MessageFromProto, res.Messages)
+
+	return
+}
+
+type limitOffsetMap struct {
+	dict map[int64]*model.IDLimitOffset
+	mu sync.RWMutex
+}
+
+func NewLimitOffsetMap(pairs []*model.IDLimitOffset) (s *limitOffsetMap) {
+	s = &limitOffsetMap{
+		dict: make(map[int64]*model.IDLimitOffset),
+	}
+
+	for _, pair := range pairs {
+		s.Add(pair)
+	}
+
+	return
+}
+
+func (ps *limitOffsetMap) Add(pair *model.IDLimitOffset) {
+	ps.mu.Lock()
+	defer ps.mu.Unlock()
+
+	_, ok := ps.dict[pair.ID]
+	if !ok {
+		ps.dict[pair.ID] = pair
+	}
+}
+
+func (ps *limitOffsetMap) Has(id int64) (ok bool) {
+	ps.mu.RLock()
+	defer ps.mu.RUnlock()
+
+	_, ok = ps.dict[id]
+
+	return
+}
+
+func (ps *limitOffsetMap) Get(id int64) (result *model.IDLimitOffset, ok bool) {
+	ps.mu.RLock()
+	defer ps.mu.RUnlock()
+
+	result, ok = ps.dict[id]
+
+	return
+}
+
+func (ps *limitOffsetMap) Iterator(ctx context.Context) (result chan *model.IDLimitOffset) {
+	result = make(chan *model.IDLimitOffset, 0)
+
+	go func(ctx context.Context, ch chan *model.IDLimitOffset) {
+
+		ps.mu.RLock()
+		defer ps.mu.RUnlock()
+		defer close(ch)
+
+		for _, pair := range ps.dict {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				ch <- pair
+			}
+		}
+
+	}(ctx, result)
+
+	return
+}
+
+func (ps *limitOffsetMap) Union(ctx context.Context, map2 *limitOffsetMap) {
+	for pair := range map2.Iterator(ctx) {
+		ps.Add(pair)
+	}
+}
+
+func (ps *limitOffsetMap) String() (result string) {
+	ps.mu.RLock()
+	defer ps.mu.RUnlock()
+
+	var b strings.Builder
+	for _, pair := range ps.dict {
+		fmt.Fprintf(&b, "{%d, %d, %d}", pair.ID, pair.Limit, pair.Offset)
+	}
+
+	return b.String()
+}
+
+const limitPathMessages = 10 /* any other number ? */
+
+func (s *MessagesController) ReadTree(ctx context.Context, userID, messageID int64, limit, offset int32, pairs []*model.IDLimitOffset) (list *model.List, err error) {
+	if s.isConnFailed() {
+		if err := s.setupConnection(); err != nil {
+			return nil, err
+		}
+	}
+
+	logger.Debugw("read tree", "user_id", userID, "message_id", messageID, "limit", limit, "offset", offset, "pairs", pairs)
+
+	map1 := NewLimitOffsetMap(pairs)
+	map2 := NewLimitOffsetMap(make([]*model.IDLimitOffset, 0))
+
+	for pair := range map1.Iterator(ctx) {
+		path, err := s.threads.ResolvePath(ctx, userID, pair.ID)
+		if err != nil {
+			continue
+		}
+
+		for _, id := range path {
+			// id == 0 included
+			// id is included in path, but filtered in map2
+			map2.Add(&model.IDLimitOffset{ID: id, Limit: limitPathMessages})
+		}
+	}
+
+	map1.Union(ctx, map2)
+
+	logger.Debugw("read_tree", "map1", map1.String())
+
+	list, err = s.ReadThreadMessages(ctx, userID, messageID, limit, offset, true)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.resolveTree(ctx, userID, list, map1)
+
+	return
+}
+
+func (s *MessagesController) resolveTree(ctx context.Context, userID int64, list *model.List, map1 *limitOffsetMap) (err error) {
+	for _, message := range list.Messages {
+		limitOffset, ok := map1.Get(message.ID)
+		if !ok {
+			// exit, when there are no more open threads
+			continue
+		}
+
+		message.Messages, err = s.ReadThreadMessages(ctx, userID, message.ID, limitOffset.Limit, limitOffset.Offset, true)
+		if err != nil {
+			return
+		}
+
+		err = s.resolveTree(ctx, userID, message.Messages, map1)
+		if err != nil {
+			return
+		}
+	}
 
 	return
 }

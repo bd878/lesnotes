@@ -20,6 +20,7 @@ type MessagesController interface {
 	ReadThreadMessages(ctx context.Context, userID int64, threadID int64, limit, offset int32, ascending bool) (list *messages.List, err error)
 	ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*messages.Message, err error)
 	ReadPath(ctx context.Context, userID int64, id int64) (messages []*messages.Message, parentID int64, err error)
+	ReadTree(ctx context.Context, userID, messageID int64, limit, offset int32, pairs []*messages.IDLimitOffset) (list *messages.List, err error)
 }
 
 type TranslationsController interface {
