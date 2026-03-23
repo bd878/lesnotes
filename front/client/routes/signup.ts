@@ -1,18 +1,26 @@
 import SignupBuilder from '../builders/signupBuilder'
+import LayoutBuilder from '../builders/layoutBuilder';
+import HeaderBuilder from '../builders/headerBuilder';
 
 async function signup(ctx) {
 	console.log("--> signup")
 
-	const builder = new SignupBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const content = new SignupBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
-	await builder.addSettings()
-	await builder.addUsername()
-	await builder.addPassword()
-	await builder.addSubmit()
-	await builder.addFooter()
-	await builder.addSidebar()
+	content.addUsername()
+	content.addPassword()
+	content.addSubmit()
 
-	ctx.body = await builder.build(ctx.state.error)
+	header.addSearch()
+
+	layout.addSettings()
+	layout.addFooter()
+	layout.addHeader(header)
+	layout.addContent(content)
+
+	ctx.body = layout.build()
 	ctx.status = 200;
 
 	console.log("<-- signup")

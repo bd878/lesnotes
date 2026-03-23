@@ -1,24 +1,31 @@
 import TranslationEditViewBuilder from '../builders/translationEditViewBuilder';
+import LayoutBuilder from '../builders/layoutBuilder';
+import HeaderBuilder from '../builders/headerBuilder';
 
 async function translationEdit(ctx) {
 	console.log("--> translationEdit")
 
-	const builder = new TranslationEditViewBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const content = new TranslationEditViewBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
-	await builder.addSettings()
-	await builder.addNavigation()
-	await builder.addControlPanel()
-	await builder.addMessagesStack(ctx.state.stack)
-	await builder.addFilesView(ctx.state.message.files)
-	await builder.addNewTranslation(ctx.state.message.ID)
-	await builder.addTranslations(ctx.state.message.ID, ctx.state.message.translations)
-	await builder.addTranslationEditForm(ctx.state.message.ID, ctx.state.translation)
-	await builder.addSearch()
-	await builder.addLogout()
-	await builder.addSidebar()
-	await builder.addFooter()
+	content.addNavigation()
+	content.addControlPanel()
+	content.addMessagesTree(ctx.state.stack)
+	content.addFilesView(ctx.state.message.files)
+	content.addNewTranslation(ctx.state.message.ID)
+	content.addTranslations(ctx.state.message.ID, ctx.state.message.translations)
+	content.addTranslationEditForm(ctx.state.message.ID, ctx.state.translation)
+	content.addLogout()
 
-	ctx.body = await builder.build()
+	header.addSearch()
+
+	layout.addSettings()
+	layout.addFooter()
+	layout.addHeader(header)
+	layout.addContent(content)
+
+	ctx.body = layout.build()
 	ctx.status = 200
 
 	console.log("<-- translationEdit")

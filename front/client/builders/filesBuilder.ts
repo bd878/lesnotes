@@ -2,17 +2,27 @@ import type { File, Paging } from '../api/models';
 import Config from 'config';
 import mustache from 'mustache';
 import * as is from '../third_party/is';
-import { readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import HomeBuilder from './homeBuilder';
 
-class FilesBuilder extends HomeBuilder {
-	async addFilesList(files: File[] = []) {
-		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/files/mobile/files_list.mustache' : 'templates/files/desktop/files_list.mustache'
-		)), { encoding: 'utf-8' });
+let filesListTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/files/desktop/files_list.mustache')), { encoding: 'utf-8' });
+let filesListTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/files/mobile/files_list.mustache')), { encoding: 'utf-8' });
 
-		this.filesList = mustache.render(template, {
+let paginationTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/files/desktop/pagination.mustache')), { encoding: 'utf-8' });
+let paginationTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/files/mobile/pagination.mustache')), { encoding: 'utf-8' });
+
+let filesFormTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/files/desktop/files_form.mustache')), { encoding: 'utf-8' });
+let filesFormTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/files/mobile/files_form.mustache')), { encoding: 'utf-8' });
+
+// TODO: home.addFiles(new FilesBuilder()) make it separate component like header
+class FilesBuilder extends HomeBuilder {
+	filesList = undefined;
+	pagination = undefined;
+	filesForm = undefined;
+
+	addFilesList(files: File[] = []) {
+		this.filesList = mustache.render(this.isMobile ? filesListTemplate : filesListTemplateMobile, {
 			noFiles:            this.i18n("noFiles"),
 			files:              files,
 			publishButton:      this.i18n("publish"),
@@ -25,17 +35,13 @@ class FilesBuilder extends HomeBuilder {
 		})
 	}
 
-	async addPagination(paging: Paging) {
-		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/files/mobile/pagination.mustache' : 'templates/files/desktop/pagination.mustache'
-		)), { encoding: 'utf-8' });
-
+	addPagination(paging: Paging) {
 		const search = this.search
 		const path = this.path
 
 		const limit = parseInt(LIMIT)
 
-		this.pagination = mustache.render(template, {
+		this.pagination = mustache.render(this.isMobile ? paginationTemplate : paginationTemplateMobile, {
 			prevPageHref:     function() { const params = new URLSearchParams(search); params.set("files", `${limit + this.offset}`); return path + "?" + params.toString(); },
 			nextPageHref:     function() { const params = new URLSearchParams(search); params.set("files", `${Math.max(0, this.offset - limit)}`); return path + "?" + params.toString(); },
 			isLastPage:       paging.isLastPage,
@@ -43,12 +49,8 @@ class FilesBuilder extends HomeBuilder {
 		})
 	}
 
-	async addFilesForm(files: File[] = []) {
-		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/files/mobile/files_form.mustache' : 'templates/files/desktop/files_form.mustache'
-		)), { encoding: 'utf-8' });
-
-		this.filesForm = mustache.render(template, {
+	addFilesForm(files: File[] = []) {
+		this.filesForm = mustache.render(this.isMobile ? filesFormTemplate : filesFormTemplateMobile, {
 			noFiles:            this.i18n("noFiles"),
 			files:              files,
 			sendButton:         this.i18n("sendButton"),

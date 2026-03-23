@@ -4,9 +4,15 @@ import Config from 'config';
 import mustache from 'mustache';
 import api from '../api';
 import * as is from '../third_party/is';
-import { readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import HomeBuilder from './homeBuilder';
+
+let messageEditFormTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/home/desktop/message_edit_form.mustache')), { encoding: 'utf-8' });
+let messageEditFormTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/home/mobile/message_edit_form.mustache')), { encoding: 'utf-8' });
+
+let filesSelectorTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/home/desktop/files_selector.mustache')), { encoding: 'utf-8' });
+let filesSelectorTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/home/mobile/files_selector.mustache')), { encoding: 'utf-8' });
 
 class MessageEditViewBuilder extends HomeBuilder {
 	scripts = [
@@ -14,16 +20,12 @@ class MessageEditViewBuilder extends HomeBuilder {
 		"/public/pages/messageEdit/messageEditScript.js"
 	]
 
-	async addMessageEditForm(message?: Message) {
+	addMessageEditForm(message?: Message) {
 		if (is.empty(message)) {
 			return
 		}
 
-		const template = await readFile(resolve(join(Config.get('basedir'), 
-			this.isMobile ? 'templates/home/mobile/message_edit_form.mustache' : 'templates/home/desktop/message_edit_form.mustache'
-		)), { encoding: 'utf-8' });
-
-		this.messageEditForm = mustache.render(template, {
+		this.messageEditForm = mustache.render(this.isMobile ? messageEditFormTemplate : messageEditFormTemplateMobile, {
 			ID:               message.ID,
 			private:          message.private,
 			name:             message.name,
@@ -43,12 +45,8 @@ class MessageEditViewBuilder extends HomeBuilder {
 		})
 	}
 
-	async addFilesSelector(files: SelectedFile[]) {
-		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/home/mobile/files_selector.mustache' : 'templates/home/desktop/files_selector.mustache'
-		)), { encoding: 'utf-8' });
-
-		this.filesSelector = mustache.render(template, {
+	addFilesSelector(files: SelectedFile[]) {
+		this.filesSelector = mustache.render(this.isMobile ? filesSelectorTemplate : filesSelectorTemplateMobile, {
 			files:             files,
 			defaultFile:       this.i18n("defaultFile"),
 		})

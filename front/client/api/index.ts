@@ -2,6 +2,7 @@ import readMessages from './readMessages';
 import readCommentJson from './readCommentJson';
 import readStackJson from './readStackJson';
 import readMessagesJson from './readMessagesJson';
+import readTreeJson from './readTreeJson';
 import readTranslationJson from './readTranslationJson';
 import deleteTranslationJson from './deleteTranslationJson';
 import readPathJson from './readPathJson';
@@ -106,4 +107,5 @@ export default {
 	searchMessagesJson,
 	searchMessagesPathJson,
 	reorderThread,
+	readTreeJson,
 }

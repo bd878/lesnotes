@@ -1,17 +1,16 @@
 import Config from 'config';
 import mustache from 'mustache';
 import * as is from '../third_party/is';
-import { readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import HomeBuilder from './homeBuilder';
 
-class NewTranslationBuilder extends HomeBuilder {
-	async addNewTranslationForm(messageID: number) {
-		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/home/mobile/new_translation_form.mustache' : 'templates/home/desktop/new_translation_form.mustache'
-		)), { encoding: 'utf-8' });
+let newTranslationFormTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/home/desktop/new_translation_form.mustache')), { encoding: 'utf-8' });
+let newTranslationFormTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/home/mobile/new_translation_form.mustache')), { encoding: 'utf-8' });
 
-		this.newTranslationForm = mustache.render(template, {
+class NewTranslationBuilder extends HomeBuilder {
+	addNewTranslationForm(messageID: number) {
+		this.newTranslationForm = mustache.render(this.isMobile ? newTranslationFormTemplate : newTranslationFormTemplateMobile, {
 			titlePlaceholder:    this.i18n("titlePlaceholder"),
 			textPlaceholder:     this.i18n("textPlaceholder"),
 			defaultLang:         this.i18n("defaultLang"),

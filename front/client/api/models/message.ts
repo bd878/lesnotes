@@ -1,10 +1,16 @@
 import type {File} from './file'
+import type {Paging} from './paging'
 import type {TranslationPreview} from './translationPreview'
+import paging, {EmptyPaging} from './paging'
 import file from './file';
 import translationPreview from './translationPreview';
 import * as is from '../../third_party/is'
 
 const ns_in_ms = 10**6
+
+export interface MessagesList extends Paging {
+	messages: Message[]
+}
 
 export interface Message {
 	ID:            number;
@@ -17,8 +23,14 @@ export interface Message {
 	count:         number;
 	files:         File[];
 	translations:  TranslationPreview[];
+	messages:      MessagesList;
 	private:       boolean;
 }
+
+const EmptyMessagesList: MessagesList = Object.freeze({
+	...EmptyPaging,
+	messages: [],
+})
 
 const EmptyMessage: Message = Object.freeze({
 	ID: 0,
@@ -31,8 +43,22 @@ const EmptyMessage: Message = Object.freeze({
 	name: "",
 	files:  [],
 	translations: [],
+	messages: EmptyMessagesList,
 	private: true,
 })
+
+function mapMessagesListFromProto(messagesList?: any): MessagesList {
+	if (!messagesList) {
+		return EmptyMessagesList
+	}
+
+	const res = {
+		...paging(messagesList),
+		messages: messagesList.messages.map(mapMessageFromProto),
+	}
+
+	return res
+}
 
 export default function mapMessageFromProto(message?: any): Message {
 	if (!message) {
@@ -49,6 +75,7 @@ export default function mapMessageFromProto(message?: any): Message {
 		title:       message.title,
 		count:       message.count,
 		private:     Boolean(message.private),
+		messages:    EmptyMessagesList,
 		files:       [],
 		translations: [],
 	}
@@ -61,7 +88,16 @@ export default function mapMessageFromProto(message?: any): Message {
 		res.translations = message.translations.map(translationPreview)
 	}
 
+	if (is.notEmpty(message.messages)) {
+		message.messages = {
+			...paging(message.messages),
+			messages: message.messages.map(mapMessageFromProto), /* recursive */
+		}
+	}
+
 	return res
 }
 
+export { mapMessagesListFromProto as messagesList }
 export { EmptyMessage }
+export { EmptyMessagesList }

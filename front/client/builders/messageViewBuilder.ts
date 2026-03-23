@@ -3,23 +3,22 @@ import Config from 'config';
 import mustache from 'mustache';
 import api from '../api';
 import * as is from '../third_party/is';
-import { readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import HomeBuilder from './homeBuilder';
 
+let messageViewTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/home/desktop/message_view.mustache')), { encoding: 'utf-8' });
+let messageViewTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/home/mobile/message_view.mustache')), { encoding: 'utf-8' });
+
 class MessageViewBuilder extends HomeBuilder {
-	async addMessageView(userID: number, message?: Message) {
+	addMessageView(userID: number, message?: Message) {
 		if (is.empty(message)) {
 			return
 		}
 
-		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/home/mobile/message_view.mustache' : 'templates/home/desktop/message_view.mustache'
-		)), { encoding: 'utf-8' });
-
 		const search = this.search
 
-		this.messageView = mustache.render(template, {
+		this.messageView = mustache.render(this.isMobile ? messageViewTemplate : messageViewTemplateMobile, {
 			ID:               message.ID,
 			title:            message.title,
 			text:             message.text,

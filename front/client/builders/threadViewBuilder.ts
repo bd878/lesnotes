@@ -3,19 +3,18 @@ import Config from 'config';
 import mustache from 'mustache';
 import api from '../api';
 import * as is from '../third_party/is';
-import { readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import HomeBuilder from './homeBuilder';
 
-class ThreadViewBuilder extends HomeBuilder {
-	async addThreadView(thread: Thread) {
-		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/home/mobile/thread_view.mustache' : 'templates/home/desktop/thread_view.mustache'
-		)), { encoding: 'utf-8' });
+let threadViewTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/home/desktop/thread_view.mustache')), { encoding: 'utf-8' });
+let threadViewTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/home/mobile/thread_view.mustache')), { encoding: 'utf-8' });
 
+class ThreadViewBuilder extends HomeBuilder {
+	addThreadView(thread: Thread) {
 		const search = this.search
 
-		this.threadView = mustache.render(template, {
+		this.threadView = mustache.render(this.isMobile ? threadViewTemplate : threadViewTemplateMobile, {
 			ID:               thread.ID,
 			description:      thread.description,
 			name:             thread.name,

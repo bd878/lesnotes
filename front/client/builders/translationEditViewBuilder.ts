@@ -4,17 +4,16 @@ import Config from 'config';
 import mustache from 'mustache';
 import api from '../api';
 import * as is from '../third_party/is';
-import { readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import HomeBuilder from './homeBuilder';
 
-class TranslationEditViewBuilder extends HomeBuilder {
-	async addTranslationEditForm(messageID: number, translation: Translation) {
-		const template = await readFile(resolve(join(Config.get('basedir'), 
-			this.isMobile ? 'templates/home/mobile/translation_edit_form.mustache' : 'templates/home/desktop/translation_edit_form.mustache'
-		)), { encoding: 'utf-8' });
+let translationEditViewTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/home/desktop/translation_edit_form.mustache')), { encoding: 'utf-8' });
+let translationEditViewTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/home/mobile/translation_edit_form.mustache')), { encoding: 'utf-8' });
 
-		this.translationEditForm = mustache.render(template, {
+class TranslationEditViewBuilder extends HomeBuilder {
+	addTranslationEditForm(messageID: number, translation: Translation) {
+		this.translationEditForm = mustache.render(this.isMobile ? translationEditViewTemplate : translationEditViewTemplateMobile, {
 			message:            messageID,
 			translation:        translation,
 			titlePlaceholder:   this.i18n("titlePlaceholder"),

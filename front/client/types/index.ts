@@ -13,4 +13,10 @@ interface SelectedFile extends File {
 	isSelected: boolean;
 }
 
-export type { FileWithMime, SelectedFile }
+interface IDLimitOffset {
+	id:     number;
+	limit:  number;
+	offset: number;
+}
+
+export type { FileWithMime, SelectedFile, IDLimitOffset }

@@ -1,21 +1,28 @@
 import ThreadEditBuilder from '../builders/threadEditBuilder'
+import LayoutBuilder from '../builders/layoutBuilder';
+import HeaderBuilder from '../builders/headerBuilder';
 
 async function threadEdit(ctx) {
 	console.log("--> threadEdit")
 
-	const builder = new ThreadEditBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const content = new ThreadEditBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
-	await builder.addNavigation()
-	await builder.addControlPanel()
-	await builder.addThreadEditForm(ctx.state.thread)
-	await builder.addMessagesStack(ctx.state.stack)
-	await builder.addSettings()
-	await builder.addSearch()
-	await builder.addLogout()
-	await builder.addSidebar()
-	await builder.addFooter()
+	content.addNavigation()
+	content.addControlPanel()
+	content.addThreadEditForm(ctx.state.thread)
+	content.addMessagesTree(ctx.state.stack)
+	content.addLogout()
 
-	ctx.body = await builder.build()
+	header.addSearch()
+
+	layout.addSettings()
+	layout.addFooter()
+	layout.addHeader(header)
+	layout.addContent(content)
+
+	ctx.body = layout.build()
 	ctx.status = 200
 
 	console.log("<-- threadEdit")

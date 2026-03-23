@@ -1,21 +1,28 @@
 import ThreadViewBuilder from '../builders/threadViewBuilder';
+import LayoutBuilder from '../builders/layoutBuilder';
+import HeaderBuilder from '../builders/headerBuilder';
 
 async function threadView(ctx) {
 	console.log("--> threadView")
 
-	const builder = new ThreadViewBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const content = new ThreadViewBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
-	await builder.addNavigation()
-	await builder.addControlPanel()
-	await builder.addThreadView(ctx.state.thread)
-	await builder.addSettings()
-	await builder.addMessagesStack(ctx.state.stack)
-	await builder.addSearch()
-	await builder.addLogout()
-	await builder.addSidebar()
-	await builder.addFooter()
+	content.addNavigation()
+	content.addControlPanel()
+	content.addThreadView(ctx.state.thread)
+	content.addMessagesTree(ctx.state.stack)
+	content.addLogout()
 
-	ctx.body = await builder.build()
+	header.addSearch()
+
+	layout.addSettings()
+	layout.addFooter()
+	layout.addHeader(header)
+	layout.addContent(content)
+
+	ctx.body = layout.build()
 	ctx.status = 200
 
 	console.log("<-- threadView")

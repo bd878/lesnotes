@@ -1,3 +1,5 @@
+import type {IDLimitOffset} from '../types'
+
 async function getState(ctx, next) {
 	console.log("--> getState")
 
@@ -6,11 +8,18 @@ async function getState(ctx, next) {
 	ctx.state.theme = getTheme(ctx)
 	ctx.state.thread = getThread(ctx)
 	ctx.state.msg = getMessageView(ctx)
+	ctx.state.cwd = getCwd(ctx)
+	ctx.state.leaves = getLeaves(ctx)
+	ctx.state.token = getToken(ctx)
 
 	await next()
 
 	console.log("<-- getState")
 }
+
+function getToken(ctx): string {
+	return ctx.cookies.get("token")
+} 
 
 function getFontSize(ctx) {
 	switch (ctx.query.size) {
@@ -55,6 +64,40 @@ function getMessageView(ctx) {
 	default:
 		return ""
 	}
+}
+
+const defaultCwd = {
+	id:     0,
+	limit:  10,
+	offset: 0,
+}
+
+function idLimitOffset(numbers: number[]): IDLimitOffset {
+	const [id = 0, limit = 10, offset = 0] = numbers
+	return {id, limit, offset}
+}
+
+function getCwd(ctx) {
+	const params = new URLSearchParams(ctx.request.search)
+
+	if (!params.has("cwd")) {
+		return defaultCwd
+	}
+
+	return idLimitOffset((params.get("cwd") || "").split(",").map(parseFloat).filter(v => !isNaN(v)))
+}
+
+function getLeaves(ctx): IDLimitOffset[] {
+	const result = []
+
+	for (const [key, value] of new URLSearchParams(ctx.request.search)) {
+		const threadID = parseInt(key)
+		if (!isNaN(threadID)) {
+			result.push(idLimitOffset((value || "").split(",").map(parseFloat).filter(v => !isNaN(v))))
+		}
+	}
+
+	return result
 }
 
 function getThread(ctx) {

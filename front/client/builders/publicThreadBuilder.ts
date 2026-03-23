@@ -1,50 +1,22 @@
 import Config from 'config';
 import mustache from 'mustache';
-import api from '../api';
-import * as is from '../third_party/is';
-import { readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import AbstractPublicBuilder from './abstractPublicBuilder';
 
+let threadTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/thread/desktop/thread.mustache')), { encoding: 'utf-8' });
+let threadTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/thread/mobile/thread.mustache')), { encoding: 'utf-8' });
+
 class PublicThreadBuilder extends AbstractPublicBuilder {
 
-	async build() {
-		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
-		const layout = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/layout/mobile/layout.mustache' : 'templates/layout/desktop/layout.mustache'
-		)), { encoding: 'utf-8' });
-		const content = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/thread/mobile/thread.mustache' : 'templates/thread/desktop/thread.mustache'
-		)), { encoding: 'utf-8' });
-
-		const theme = this.theme
-		const fontSize = this.fontSize
-
-		return mustache.render(layout, {
-			html: () => (text, render) => {
-				let html = "<html"
-
-				if (theme) html += ` class="${theme}"`;
-				if (this.lang) html += ` lang="${this.lang}"`;
-				if (fontSize) html += ` data-size="${fontSize}"`
-				html += ">"
-
-				return html + render(text) + "</html>"
-			},
-			manifest: "/public/manifest.json",
-			styles:   styles,
-			lang:     this.lang,
-			theme:    this.theme,
+	build() {
+		return mustache.render(this.isMobile ? threadTemplate : threadTemplateMobile, {
 		}, {
-			footer: this.footer,
-			content: mustache.render(content, {
-			}, {
-				signup:           this.signup,
-				logout:           this.logout,
-				sidebar:          this.sidebar,
-				searchForm:       this.searchForm,
-				messagesList:     this.messagesList,
-			})
+			signup:           this.signup,
+			logout:           this.logout,
+			sidebar:          this.sidebar,
+			searchForm:       this.searchForm,
+			messagesList:     this.messagesList,
 		})
 	}
 

@@ -1,98 +1,61 @@
 import Config from 'config';
 import i18n from '../i18n';
 import mustache from 'mustache';
-import { readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import AbstractBuilder from './abstractBuilder';
 
+let usernameTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/login/desktop/username.mustache')), { encoding: 'utf-8' });
+let usernameTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/login/mobile/username.mustache')), { encoding: 'utf-8' });
+
+let passwordTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/login/desktop/password.mustache')), { encoding: 'utf-8' });
+let passwordTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/login/mobile/password.mustache')), { encoding: 'utf-8' });
+
+let submitTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/login/desktop/submit.mustache')), { encoding: 'utf-8' });
+let submitTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/login/mobile/submit.mustache')), { encoding: 'utf-8' });
+
+let loginTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/login/desktop/login.mustache')), { encoding: 'utf-8' });
+let loginTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/login/mobile/login.mustache')), { encoding: 'utf-8' });
+
 class LoginBuilder extends AbstractBuilder {
 	username = undefined;
-	async addUsername() {
-		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/login/mobile/username.mustache' : 'templates/login/desktop/username.mustache'
-		)), { encoding: 'utf-8' });
+	password = undefined;
+	submit = undefined;
+	sidebar = undefined;
 
-		this.username = mustache.render(template, {
+	addUsername() {
+		this.username = mustache.render(this.isMobile ? usernameTemplate : usernameTemplateMobile, {
 			usernamePlaceholder: this.i18n("username"),
 		})
 	}
 
-	password = undefined;
-	async addPassword() {
-		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/login/mobile/password.mustache' : 'templates/login/desktop/password.mustache'
-		)), { encoding: 'utf-8' });
-
-		this.password = mustache.render(template, {
+	addPassword() {
+		this.password = mustache.render(this.isMobile ? passwordTemplate : passwordTemplateMobile, {
 			passwordPlaceholder: this.i18n("password"),
 		})
 	}
 
-	submit = undefined;
-	async addSubmit() {
-		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/login/mobile/submit.mustache' : 'templates/login/desktop/submit.mustache'
-		)), { encoding: 'utf-8' });
-
-		this.submit = mustache.render(template, {
+	addSubmit() {
+		this.submit = mustache.render(this.isMobile ? submitTemplate : submitTemplateMobile, {
 			signupHref: "/signup" + this.search,
 			signup:   this.i18n("signup"),
 			login:    this.i18n("login"),
 		})
 	}
 
-	sidebar = undefined;
-	async addSidebar() {
-		const template = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/sidebar_horizontal/mobile/sidebar_horizontal.mustache' : 'templates/sidebar_horizontal/desktop/sidebar_horizontal.mustache'
-		)), { encoding: 'utf-8' });
-
-		this.sidebar = mustache.render(template, {mainHref: "/" + this.search, settingsHeader: this.i18n("settingsHeader")}, {
-			settings:       this.settings,
-		})
-	}
-
-	async build(error?: string) {
-		const styles = await readFile(resolve(join(Config.get('basedir'), 'public/styles/styles.css')), { encoding: 'utf-8' });
-		const layout = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/layout/mobile/layout.mustache' : 'templates/layout/desktop/layout.mustache'
-		)), { encoding: 'utf-8' });
-		const login = await readFile(resolve(join(Config.get('basedir'),
-			this.isMobile ? 'templates/login/mobile/login.mustache' : 'templates/login/desktop/login.mustache'
-		)), { encoding: 'utf-8' });
-
+	build() {
 		const search = this.search
-		const theme = this.theme
-		const fontSize = this.fontSize
 
-		return mustache.render(layout, {
-			html:     () => (text, render) => {
-				let html = "<html"
-
-				if (theme) html += ` class="${theme}"`;
-				if (this.lang) html += ` lang="${this.lang}"`;
-				if (fontSize) html += ` data-size="${fontSize}"`
-				html += ">"
-
-				return html + render(text) + "</html>"
-			},
-			manifest: "/public/manifest.json",
-			styles:   styles,
-			lang:     this.lang,
+		return mustache.render(this.isMobile ? loginTemplate : loginTemplateMobile, {
+			action:        function() { return "/login" + search },
+			botUsername:   `${BOT_USERNAME}`,
+			authUrl:       `https://${BACKEND_URL}/tg_auth`,
 		}, {
-			footer:  this.footer,
-			content: mustache.render(login, {
-				action:        function() { return "/login" + search },
-				error:         error,
-				botUsername:   `${BOT_USERNAME}`,
-				authUrl:       `https://${BACKEND_URL}/tg_auth`,
-			}, {
-				username:      this.username,
-				password:      this.password,
-				submit:        this.submit,
-				sidebar:       this.sidebar,
-			}),
-		});
+			username:      this.username,
+			password:      this.password,
+			submit:        this.submit,
+			sidebar:       this.sidebar,
+		})
 	}
 }
 

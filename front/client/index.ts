@@ -3,18 +3,18 @@ import './node_fetch'
 import Koa from 'koa';
 import Router from '@koa/router';
 import Config from 'config';
-import helmet from './handlers/helmet.js';
-import errors from './handlers/errors.js';
-import logger from './handlers/logger.js';
-import bodyParser from './handlers/bodyParser.js';
-import useragent from './handlers/useragent.js';
-import favicon from './handlers/favicon.js';
-import etag from './handlers/etag.js';
-import getMe from './handlers/getMe.js';
-import getToken from './handlers/getToken.js';
+import helmet from './handlers/helmet';
+import errors from './handlers/errors';
+import logger from './handlers/logger';
+import bodyParser from './handlers/bodyParser';
+import useragent from './handlers/useragent';
+import favicon from './handlers/favicon';
+import etag from './handlers/etag';
+import getMe from './handlers/getMe';
 import notAuthed from './handlers/notAuthed';
 import authed from './handlers/authed';
 import noCache from './handlers/noCache';
+import loadTree from './handlers/loadTree';
 import loadStack from './handlers/loadStack';
 import loadComments from './handlers/loadComments';
 import loadFiles from './handlers/loadFiles';
@@ -91,43 +91,43 @@ router
 		ctx.redirect('/')
 		ctx.status = 301
 	})
-	.get("main",                   "/",                             etag, noCache, getState, getToken, notAuthed, main)
-	.get("login",                  "/login",                        etag, noCache, getState, getToken, notAuthed, login)
+	.get("main",                   "/",                             etag, noCache, getState, notAuthed, main)
+	.get("login",                  "/login",                        etag, noCache, getState, notAuthed, login)
 	.get("logout",                 "/logout",                       etag, noCache, getState, expireToken, redirectLogin)
-	.get("signup",                 "/signup",                       etag, noCache, getState, getToken, notAuthed, signup)
-	.get("home",                   "/home",                         etag, noCache, getToken, authed, getMe, getState, loadStack, loadFiles, newMessage)
-	.get("files",                  "/files",                        etag, noCache, getToken, authed, getMe, getState, loadStack, loadFiles, files)
-	.get("message",                "/messages/:id",                 etag, noCache, getToken, authed, getMe, getState, loadStack, loadMessage, loadComments, formatView, messageView)
-	.get("translation",            "/messages/:id/:lang",           etag, noCache, getToken, authed, getMe, getState, loadStack, loadMessage, loadComments, loadTranslation, formatView, translationView)
-	.get("thread",                 "/threads/:id",                  etag, noCache, getToken, authed, getMe, getState, loadStack, loadThread, formatView, threadView)
-	.get("editMessage",            "/editor/messages/:id",          etag, noCache, getToken, authed, getMe, getState, loadStack, loadMessage, loadFiles, selectMessageFiles, formatTextarea, messageEdit)
-	.get("newTranslation",         "/editor/messages/:id/new_lang", etag, noCache, getToken, authed, getMe, getState, loadStack, parseMessageID, newTranslation)
-	.get("editTranslation",        "/editor/messages/:id/:lang",    etag, noCache, getToken, authed, getMe, getState, loadStack, loadMessage, loadTranslation, formatTextarea, translationEdit)
-	.get("editThread",             "/editor/threads/:id",           etag, noCache, getToken, authed, getMe, getState, loadStack, loadThread, formatTextarea, threadEdit)
+	.get("signup",                 "/signup",                       etag, noCache, getState, notAuthed, signup)
+	.get("home",                   "/home",                         etag, noCache, getState, authed, getMe, loadTree, loadStack, loadFiles, newMessage)
+	.get("files",                  "/files",                        etag, noCache, getState, authed, getMe, loadTree, loadStack, loadFiles, files)
+	.get("message",                "/messages/:id",                 etag, noCache, getState, authed, getMe, loadTree, loadStack, loadMessage, loadComments, formatView, messageView)
+	.get("translation",            "/messages/:id/:lang",           etag, noCache, getState, authed, getMe, loadTree, loadStack, loadMessage, loadComments, loadTranslation, formatView, translationView)
+	.get("thread",                 "/threads/:id",                  etag, noCache, getState, authed, getMe, loadTree, loadStack, loadThread, formatView, threadView)
+	.get("editMessage",            "/editor/messages/:id",          etag, noCache, getState, authed, getMe, loadTree, loadStack, loadMessage, loadFiles, selectMessageFiles, formatTextarea, messageEdit)
+	.get("newTranslation",         "/editor/messages/:id/new_lang", etag, noCache, getState, authed, getMe, loadTree, loadStack, parseMessageID, newTranslation)
+	.get("editTranslation",        "/editor/messages/:id/:lang",    etag, noCache, getState, authed, getMe, loadTree, loadStack, loadMessage, loadTranslation, formatTextarea, translationEdit)
+	.get("editThread",             "/editor/threads/:id",           etag, noCache, getState, authed, getMe, loadTree, loadStack, loadThread, formatTextarea, threadEdit)
 	.get("status",                 "/status",                       status, noCache, getState)
-	.get("search",                 "/search",                       etag, noCache, getToken, authed, getState, getMe, getSearchQuery, loadSearch, loadSearchPath, search)
+	.get("search",                 "/search",                       etag, noCache, getState, authed, getMe, getSearchQuery, loadSearch, loadSearchPath, search)
 	.post("doLogin",               "/login",                        etag, getState, validateLogin, redirectHome)
 	.post("doSignup",              "/signup",                       etag, getState, validateSignup, redirectHome)
-	.post("doSearch",              "/search",                       etag, getToken, authed, getState, getMe, getSearchForm, loadSearch, loadSearchPath, search)
-	.post("doDeleteFile",          "/f/delete",                     getToken, authed, getState, deleteFile)
-	.post("doPublishFile",         "/f/publish",                    getToken, authed, getState, publishFile)
-	.post("doPrivateFile",         "/f/private",                    getToken, authed, getState, privateFile)
-	.post("doDeleteMessage",       "/m/delete",                     getToken, authed, getState, deleteMessage)
-	.post("doDeleteTranslation",   "/translation/delete",           getToken, authed, getState, deleteTranslation)
-	.post("doPublishMessage",      "/m/publish",                    getToken, authed, getState, publishMessage)
-	.post("doPrivateMessage",      "/m/private",                    getToken, authed, getState, privateMessage)
-	.post("doUpdateMessage",       "/m/update",                     getToken, authed, getState, updateMessage)
-	.post("doUpdateTranslation",   "/translation/update",           getToken, authed, getState, updateTranslation)
-	.post("doPublishThread",       "/t/publish",                    getToken, authed, getState, publishThread)
-	.post("doPrivateThread",       "/t/private",                    getToken, authed, getState, privateThread)
-	.post("doUpdateThread",        "/t/update",                     getToken, authed, getState, updateThread)
-	.post("doSendComment",         "/comment/send",                 getToken, getState, sendComment)
-	.post("doSendMessage",         "/send",                         getToken, authed, getState, sendMessage)
-	.post("doSendTranslation",     "/translation/send",             getToken, authed, getState, sendTranslation)
-	.get("publicMessage",          "/m/:messageName",               etag, noCache, getState, getToken, getMe, loadMessage, loadComments, parseMessageName, formatView, publicMessage)
-	.get("publicTranslation",      "/m/:messageName/:lang",         etag, noCache, getState, getToken, getMe, loadMessage, loadComments, parseMessageName, loadTranslation, formatView, publicTranslation)
-	.get("publicThread",           "/t/:threadName",                etag, noCache, getState, getToken, getMe, loadThread, parseThreadName, loadThreadMessages, formatView, publicThread)
-	.get("publicThreadMessage",    "/t/:threadName/:messageName",   etag, noCache, getState, getToken, getMe, loadThread, loadComments, parseThreadName, parseMessageName, loadThreadMessages, loadMessage, formatView, publicThreadMessage)
+	.post("doSearch",              "/search",                       etag, getState, authed, getMe, getSearchForm, loadSearch, loadSearchPath, search)
+	.post("doDeleteFile",          "/f/delete",                     getState, authed, deleteFile)
+	.post("doPublishFile",         "/f/publish",                    getState, authed, publishFile)
+	.post("doPrivateFile",         "/f/private",                    getState, authed, privateFile)
+	.post("doDeleteMessage",       "/m/delete",                     getState, authed, deleteMessage)
+	.post("doDeleteTranslation",   "/translation/delete",           getState, authed, deleteTranslation)
+	.post("doPublishMessage",      "/m/publish",                    getState, authed, publishMessage)
+	.post("doPrivateMessage",      "/m/private",                    getState, authed, privateMessage)
+	.post("doUpdateMessage",       "/m/update",                     getState, authed, updateMessage)
+	.post("doUpdateTranslation",   "/translation/update",           getState, authed, updateTranslation)
+	.post("doPublishThread",       "/t/publish",                    getState, authed, publishThread)
+	.post("doPrivateThread",       "/t/private",                    getState, authed, privateThread)
+	.post("doUpdateThread",        "/t/update",                     getState, authed, updateThread)
+	.post("doSendComment",         "/comment/send",                 getState, sendComment)
+	.post("doSendMessage",         "/send",                         getState, authed, sendMessage)
+	.post("doSendTranslation",     "/translation/send",             getState, authed, sendTranslation)
+	.get("publicMessage",          "/m/:messageName",               etag, noCache, getState, getMe, loadMessage, loadComments, parseMessageName, formatView, publicMessage)
+	.get("publicTranslation",      "/m/:messageName/:lang",         etag, noCache, getState, getMe, loadMessage, loadComments, parseMessageName, loadTranslation, formatView, publicTranslation)
+	.get("publicThread",           "/t/:threadName",                etag, noCache, getState, getMe, loadThread, parseThreadName, loadThreadMessages, formatView, publicThread)
+	.get("publicThreadMessage",    "/t/:threadName/:messageName",   etag, noCache, getState, getMe, loadThread, loadComments, parseThreadName, parseMessageName, loadThreadMessages, loadMessage, formatView, publicThreadMessage)
 	.get("any",                    "/:any*",                        getState, xxx)
 
 app.use(router.routes());

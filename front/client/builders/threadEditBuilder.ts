@@ -3,17 +3,16 @@ import Config from 'config';
 import mustache from 'mustache';
 import api from '../api';
 import * as is from '../third_party/is';
-import { readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import HomeBuilder from './homeBuilder';
 
-class ThreadEditBuilder extends HomeBuilder {
-	async addThreadEditForm(thread: Thread) {
-		const template = await readFile(resolve(join(Config.get('basedir'), 
-			this.isMobile ? 'templates/home/mobile/thread_edit_form.mustache' : 'templates/home/desktop/thread_edit_form.mustache'
-		)), { encoding: 'utf-8' });
+let threadEditFormTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/home/desktop/thread_edit_form.mustache')), { encoding: 'utf-8' });
+let threadEditFormTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/home/mobile/thread_edit_form.mustache')), { encoding: 'utf-8' });
 
-		this.threadEditForm = mustache.render(template, {
+class ThreadEditBuilder extends HomeBuilder {
+	addThreadEditForm(thread: Thread) {
+		this.threadEditForm = mustache.render(this.isMobile ? threadEditFormTemplate : threadEditFormTemplateMobile, {
 			ID:               thread.ID,
 			private:          thread.private,
 			name:             thread.name,

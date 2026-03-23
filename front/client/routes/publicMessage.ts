@@ -1,33 +1,41 @@
 import * as is from '../third_party/is';
 import PublicMessageBuilder from '../builders/publicMessageBuilder';
+import LayoutBuilder from '../builders/layoutBuilder';
+import HeaderBuilder from '../builders/headerBuilder';
 
 async function publicMessage(ctx) {
 	console.log("--> publicMessage")
 
-	const builder = new PublicMessageBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const content = new PublicMessageBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
 	if (ctx.state.msg == "comments") {
-		await builder.addMessageNavigation()
-		await builder.addComments(ctx.state.message.ID, ctx.state.comments)
+		content.addMessageNavigation()
+		content.addComments(ctx.state.message.ID, ctx.state.comments)
 	} else if (ctx.state.msg == "files") {
-		await builder.addMessageNavigation()
-		await builder.addFilesView(ctx.state.message.files)
+		content.addMessageNavigation()
+		content.addFilesView(ctx.state.message.files)
 	} else {
 		if (is.array(ctx.state.message.files) && ctx.state.message.files.length > 0) {
-			await builder.addMessageNavigation()
-			await builder.addFilesView(ctx.state.message.files)
+			content.addMessageNavigation()
+			content.addFilesView(ctx.state.message.files)
 		} else {
-			await builder.addComments(ctx.state.message.ID, ctx.state.comments)
+			content.addComments(ctx.state.message.ID, ctx.state.comments)
 		}
 	}
 
-	await builder.addTranslations(ctx.state.messageName, ctx.state.message.translations)
-	await builder.addMessageView(ctx.state.message)
-	await builder.addSettings()
-	await builder.addSidebar()
-	await builder.addFooter()
+	content.addTranslations(ctx.state.messageName, ctx.state.message.translations)
+	content.addMessageView(ctx.state.message)
 
-	ctx.body = await builder.build(ctx.state.message)
+	header.addSearch()
+
+	layout.addSettings()
+	layout.addFooter()
+	layout.addHeader(header)
+	layout.addContent(content)
+
+	ctx.body = layout.build()
 	ctx.status = 200;
 
 	console.log("<-- publicMessage")

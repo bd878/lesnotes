@@ -1,26 +1,33 @@
 import * as is from '../third_party/is';
 import FilesBuilder from '../builders/filesBuilder';
+import LayoutBuilder from '../builders/layoutBuilder';
+import HeaderBuilder from '../builders/headerBuilder';
 
 async function files(ctx) {
 	console.log("--> files")
 
-	const builder = new FilesBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const content = new FilesBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
-	await builder.addSettings()
-	await builder.addNavigation()
-	await builder.addControlPanel()
-	await builder.addMessagesStack(ctx.state.stack)
-	await builder.addFilesForm()
+	content.addNavigation()
+	content.addControlPanel()
+	content.addMessagesTree(ctx.state.stack)
+	content.addFilesForm()
 	if (is.notEmpty(ctx.state.files)) {
-		await builder.addFilesList(ctx.state.files.files)
-		await builder.addPagination(ctx.state.files.paging)
+		content.addFilesList(ctx.state.files.files)
+		content.addPagination(ctx.state.files.paging)
 	}
-	await builder.addSearch() // TODO: addFilesSearch
-	await builder.addLogout()
-	await builder.addSidebar()
-	await builder.addFooter()
+	content.addLogout()
 
-	ctx.body = await builder.build()
+	header.addSearch()
+
+	layout.addSettings()
+	layout.addFooter()
+	layout.addHeader(header)
+	layout.addContent(content)
+
+	ctx.body = layout.build()
 	ctx.status = 200;
 
 	console.log("<-- files")
