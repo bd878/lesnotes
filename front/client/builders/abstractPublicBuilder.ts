@@ -60,7 +60,7 @@ abstract class AbstractPublicBuilder extends AbstractBuilder {
 	addSignup() {
 		const search = this.search
 
-		this.signup = mustache.render(this.isMobile ? signupTemplate : signupTemplateMobile, {
+		this.signup = mustache.render(this.isMobile ? signupTemplateMobile : signupTemplate, {
 			signup:           this.i18n("signup"),
 			signupHref:       function() { const params = new URLSearchParams(search); params.delete("cwd"); params.delete("id"); /* TODO: delete pagination */ return "/signup?" + params.toString() },
 		})
@@ -69,7 +69,7 @@ abstract class AbstractPublicBuilder extends AbstractBuilder {
 	addLogout() {
 		const search = this.search
 
-		this.logout = mustache.render(this.isMobile ? logoutTemplate : logoutTemplateMobile, {
+		this.logout = mustache.render(this.isMobile ? logoutTemplateMobile : logoutTemplate, {
 			logout:           this.i18n("logout"),
 			logoutHref:       function() { const params = new URLSearchParams(search); params.delete("cwd"); params.delete("id"); /* TODO: delete pagination */ return "/logout?" + params.toString() },
 		})
@@ -78,7 +78,7 @@ abstract class AbstractPublicBuilder extends AbstractBuilder {
 	addMessageNavigation() {
 		const search = this.search
 
-		this.messageNavigation = mustache.render(this.isMobile ? messageNavigationTemplate : messageNavigationTemplateMobile, {
+		this.messageNavigation = mustache.render(this.isMobile ? messageNavigationTemplateMobile : messageNavigationTemplate, {
 			attachments:      this.i18n("attachments"),
 			comments:         this.i18n("comments"),
 			attachmentsHref:  function() { const params = new URLSearchParams(search); params.set("msg", "files");     return "?" + params.toString(); },
@@ -87,7 +87,7 @@ abstract class AbstractPublicBuilder extends AbstractBuilder {
 	}
 
 	addNewComment(message: number | string) {
-		this.newComment = mustache.render(this.isMobile ? newCommentTemplate : newCommentTemplateMobile, {
+		this.newComment = mustache.render(this.isMobile ? newCommentTemplateMobile : newCommentTemplate, {
 			commentPlaceholder:       this.i18n("commentPlaceholder"),
 			newComment:               this.i18n("newComment"),
 			redirectUrl:              this.path + this.search,
@@ -97,7 +97,7 @@ abstract class AbstractPublicBuilder extends AbstractBuilder {
 	}
 
 	addCommentsList(comments: Comment[]) {
-		this.commentsList = mustache.render(this.isMobile ? commentsListTemplate : commentsListTemplateMobile, {
+		this.commentsList = mustache.render(this.isMobile ? commentsListTemplateMobile : commentsListTemplate, {
 			comments: comments,
 		})
 	}
@@ -106,14 +106,14 @@ abstract class AbstractPublicBuilder extends AbstractBuilder {
 		this.addNewComment(message)
 		this.addCommentsList(comments)
 
-		this.comments = mustache.render(this.isMobile ? commentsTemplate : commentsTemplateMobile, {}, {
+		this.comments = mustache.render(this.isMobile ? commentsTemplateMobile : commentsTemplate, {}, {
 			commentsList:  this.commentsList,
 			newComment:    this.newComment,
 		})
 	}
 
 	addFilesView(files: FileWithMime[]) {
-		this.filesView = mustache.render(this.isMobile ? filesViewTemplate : filesViewTemplateMobile, {
+		this.filesView = mustache.render(this.isMobile ? filesViewTemplateMobile : filesViewTemplate, {
 			files:    files,
 			imgSrc:   function() { return `/files/v1/read/${this.name}` },
 			fileHref: function() { return `/files/v1/download?id=${this.ID}` },
@@ -126,7 +126,7 @@ abstract class AbstractPublicBuilder extends AbstractBuilder {
 
 		const limit = parseInt(LIMIT)
 
-		this.messagesList = mustache.render(this.isMobile ? messagesListTemplate : messagesListTemplateMobile, {
+		this.messagesList = mustache.render(this.isMobile ? messagesListTemplateMobile : messagesListTemplate, {
 			messages:         unwrapPaging(messages),
 			limit:            limit,
 			isSingle:         () => messages.messages.length == 1,
@@ -137,19 +137,19 @@ abstract class AbstractPublicBuilder extends AbstractBuilder {
 	}
 
 	addMessageView(message: Message) {
-		this.messageView = mustache.render(this.isMobile ? messageViewTemplate : messageViewTemplateMobile, {
+		this.messageView = mustache.render(this.isMobile ? messageViewTemplateMobile : messageViewTemplate, {
 			message: message,
 		})
 	}
 
 	addTranslationView(translation: Translation) {
-		this.translationView = mustache.render(this.isMobile ? translationViewTemplate : translationViewTemplateMobile, {
+		this.translationView = mustache.render(this.isMobile ? translationViewTemplateMobile : translationViewTemplate, {
 			translation:      translation,
 		})
 	}
 
 	addSearch() {
-		this.searchForm = mustache.render(this.isMobile ? searchTemplate : searchTemplateMobile, {
+		this.searchForm = mustache.render(this.isMobile ? searchTemplateMobile : searchTemplate, {
 			action:              "/search" + this.search,
 			searchPlaceholder:   this.i18n("searchPlaceholder"),
 			searchMessages:      this.i18n("search"),

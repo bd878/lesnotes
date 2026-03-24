@@ -9,9 +9,6 @@ import AbstractBuilder from './abstractBuilder';
 let footerTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/footer/desktop/footer.mustache')), { encoding: 'utf-8' });
 let footerTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/footer/mobile/footer.mustache')), { encoding: 'utf-8' });
 
-let settingsTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/settings/desktop/settings.mustache')), { encoding: 'utf-8' });
-let settingsTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/settings/mobile/settings.mustache')), { encoding: 'utf-8' });
-
 let layoutTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/layout/desktop/layout.mustache')), { encoding: 'utf-8' });
 let layoutTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/layout/mobile/layout.mustache')), { encoding: 'utf-8' });
 
@@ -30,7 +27,7 @@ class LayoutBuilder extends AbstractBuilder {
 	}
 
 	addFooter() {
-		this.footer = mustache.render(this.isMobile ? footerTemplate : footerTemplateMobile, {
+		this.footer = mustache.render(this.isMobile ? footerTemplateMobile : footerTemplate, {
 			terms:            this.i18n("terms"),
 			contact:          this.i18n("contact"),
 			docs:             this.i18n("docs"),
@@ -41,30 +38,8 @@ class LayoutBuilder extends AbstractBuilder {
 		this.content = content.build()
 	}
 
-	addSettings() {
-		const search = this.search
-		const theme = this.theme
-		const fontSize = this.fontSize
-		const lang = this.lang
-
-		this.settings = mustache.render(this.isMobile ? settingsTemplate : settingsTemplateMobile, {
-			fontSizeHeader:  this.i18n("fontSizeHeader"),
-			updateButton:    this.i18n("updateButton"),
-			langHeader:      this.i18n("langHeader"),
-			themeHeader:     this.i18n("themeHeader"),
-			themes:          [{theme: "dark", label: this.i18n("darkTheme")}, {theme: "light", label: this.i18n("lightTheme")}],
-			fonts:           [{font: "small", label: "aA", css: "text-sm"}, {font: "medium", label: "aA", css: "text-lg"}, {font: "large", label: "aA", css: "text-xl"}],
-			langs:           [{lang: "de", label: this.i18n("deLang")}, {lang: "en", label: this.i18n("enLang")}, {lang: "fr", label: this.i18n("frLang")}, {lang: "ru", label: this.i18n("ruLang")}],
-			myTheme:         function() { return this.theme == theme },
-			myLang:          function() { return this.lang == lang },
-			myFont:          function() { return is.notEmpty(fontSize) ? this.font == fontSize : false },
-			font:            fontSize,
-			theme:           theme,
-			lang:            lang,
-			fontHref:        function() { const params = new URLSearchParams(search); params.set("size",  this.font);  return "?" + params.toString(); },
-			themeHref:       function() { const params = new URLSearchParams(search); params.set("theme", this.theme); return "?" + params.toString(); },
-			langHref:        function() { const params = new URLSearchParams(search); params.set("lang",  this.lang);  return "?" + params.toString(); },
-		})
+	addSettings(settings: Builder) {
+		this.settings = settings.build()
 	}
 
 	build() {
@@ -75,7 +50,7 @@ class LayoutBuilder extends AbstractBuilder {
 		const header = this.header ? this.header : ""
 		const content = this.content ? this.content : ""
 
-		return mustache.render(this.isMobile ? layoutTemplate : layoutTemplateMobile, {
+		return mustache.render(this.isMobile ? layoutTemplateMobile : layoutTemplate, {
 			html: () => (text, render) => {
 				let html = "<html"
 

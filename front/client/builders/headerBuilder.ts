@@ -5,15 +5,16 @@ import { resolve, join } from 'node:path';
 import AbstractBuilder from './abstractBuilder';
 
 let searchTemplate = readFileSync(resolve(join(Config.get("basedir"), 'templates/header/desktop/search_form.mustache')), { encoding: 'utf-8' })
-let searchMobileTemplate = readFileSync(resolve(join(Config.get("basedir"), 'templates/header/mobile/search_form.mustache')), { encoding: 'utf-8' })
+let searchTemplateMobile = readFileSync(resolve(join(Config.get("basedir"), 'templates/header/mobile/search_form.mustache')), { encoding: 'utf-8' })
+
 let headerTemplate = readFileSync(resolve(join(Config.get("basedir"), 'templates/header/desktop/header.mustache')), { encoding: 'utf-8' })
-let headerMobileTemplate = readFileSync(resolve(join(Config.get("basedir"), 'templates/header/mobile/header.mustache')), { encoding: 'utf-8' })
+let headerTemplateMobile = readFileSync(resolve(join(Config.get("basedir"), 'templates/header/mobile/header.mustache')), { encoding: 'utf-8' })
 
 class HeaderBuilder extends AbstractBuilder {
 	search = undefined;
 
 	addSearch() {
-		this.search = mustache.render(this.isMobile ? searchTemplate : searchMobileTemplate, {
+		this.search = mustache.render(this.isMobile ? searchTemplateMobile : searchTemplate, {
 			action:              "/search" + this.search,
 			searchPlaceholder:   this.i18n("searchPlaceholder"),
 			searchMessages:      this.i18n("search"),
@@ -21,7 +22,7 @@ class HeaderBuilder extends AbstractBuilder {
 	}
 
 	build() {
-		return mustache.render(this.isMobile ? headerMobileTemplate : headerTemplate, {
+		return mustache.render(this.isMobile ? headerTemplateMobile : headerTemplate, {
 			mainHref:   "/" + this.search,
 		}, {
 			searchForm: this.search,

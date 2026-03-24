@@ -11,7 +11,6 @@ async function login(ctx) {
 	content.addPassword()
 	content.addSubmit()
 
-	layout.addSettings()
 	layout.addFooter()
 	layout.addContent(content)
 
