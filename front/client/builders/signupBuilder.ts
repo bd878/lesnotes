@@ -1,3 +1,4 @@
+import type {Builder} from './builder'
 import Config from 'config';
 import mustache from 'mustache';
 import { readFileSync } from 'node:fs';
@@ -40,6 +41,10 @@ class SignupBuilder extends AbstractBuilder {
 			signup:   this.i18n("signup"),
 			login:    this.i18n("login"),
 		})
+	}
+
+	addSidebar(sidebar: Builder) {
+		this.sidebar = sidebar.build()
 	}
 
 	build() {

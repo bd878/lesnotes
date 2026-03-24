@@ -1,3 +1,4 @@
+import type {Builder} from './builder'
 import Config from 'config';
 import i18n from '../i18n';
 import mustache from 'mustache';
@@ -41,6 +42,10 @@ class LoginBuilder extends AbstractBuilder {
 			signup:   this.i18n("signup"),
 			login:    this.i18n("login"),
 		})
+	}
+
+	addSidebar(sidebar: Builder) {
+		this.sidebar = sidebar.build()
 	}
 
 	build() {
