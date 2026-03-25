@@ -19,9 +19,9 @@ async function newMessage(ctx) {
 	content.addNewMessageForm(ctx.state.thread)
 	content.addLogout(logout)
 	content.addControlPanel()
+	content.addHeader(header)
 
 	layout.addFooter()
-	layout.addHeader(header)
 	layout.addContent(content)
 
 	ctx.body = layout.build()

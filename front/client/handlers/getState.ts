@@ -11,6 +11,7 @@ async function getState(ctx, next) {
 	ctx.state.thread = getThread(ctx)
 	ctx.state.msg = getMessageView(ctx)
 	ctx.state.cwd = getCwd(ctx)
+	ctx.state.messageID = getMessageID(ctx)
 	ctx.state.leaves = getLeaves(ctx)
 	ctx.state.token = getToken(ctx)
 
@@ -21,7 +22,11 @@ async function getState(ctx, next) {
 
 function getToken(ctx): string {
 	return ctx.cookies.get("token")
-} 
+}
+
+function getMessageID(ctx): number {
+	return parseInt(ctx.params.id) || 0
+}
 
 function getFontSize(ctx) {
 	switch (ctx.query.size) {
@@ -68,12 +73,6 @@ function getMessageView(ctx) {
 	}
 }
 
-const defaultCwd = {
-	id:     0,
-	limit:  defaultLimit,
-	offset: 0,
-}
-
 function idLimitOffset(numbers: number[]): IDLimitOffset {
 	const [id = 0, limit = defaultLimit, offset = 0] = numbers
 	return {id, limit, offset}
@@ -82,11 +81,7 @@ function idLimitOffset(numbers: number[]): IDLimitOffset {
 function getCwd(ctx) {
 	const params = new URLSearchParams(ctx.request.search)
 
-	if (!params.has("cwd")) {
-		return defaultCwd
-	}
-
-	return idLimitOffset([parseInt(params.get("cwd")) || 0, ...(params.get("cwd") || "").split(",").map(parseFloat).filter(v => !isNaN(v))])
+	return idLimitOffset([parseInt(params.get("cwd")) || 0, ...(params.get(params.get("cwd") || "0") || "").split(",").map(parseFloat).filter(v => !isNaN(v))])
 }
 
 function getLeaves(ctx): IDLimitOffset[] {

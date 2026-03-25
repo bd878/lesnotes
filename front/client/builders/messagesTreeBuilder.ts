@@ -23,21 +23,24 @@ class MessagesTreeBuilder extends AbstractBuilder {
 		const limit = parseInt(LIMIT)
 
 		this.list = mustache.render(this.isMobile ? messagesListTemplateMobile : messagesListTemplate, {
-			isLastPage:       tree.isLastPage,
-			isFirstPage:      tree.isFirstPage,
-			total:            tree.total,
-			count:            tree.count,
-			messages:         tree.messages,
+			isLastPage:        tree.isLastPage,
+			isFirstPage:       tree.isFirstPage,
+			total:             tree.total,
+			offset:            tree.offset,
+			count:             tree.count,
+			messages:          tree.messages,
 
-			hasMessages:      function() { return this.messages.messages.length > 0 },
-			hasPagination:    function() { return !(this.isLastPage && this.isFirstPage) },
-			noMessagesText:   this.i18n("noMessagesText"),
+			hasMessages:       function() { return this.messages.messages.length > 0 },
+			isOpen:            function() { return this.messages.messages.length > 0 },
+			hasPagination:     function() { return !(this.isLastPage && this.isFirstPage) },
+			noMessagesText:    this.i18n("noMessagesText"),
 
-			messageHref:      function() { return `/messages/${this.ID}` + search; },
-			messageThreadHref: function() { const params = new URLSearchParams(search); params.set(this.ID || 0, `${limit},0`); return path + "?" + params.toString(); },
-			viewThreadHref:   function() { return `/threads/${this}` + search; /*context is ID, not thread*/ },
-			prevPageHref:     function() { const params = new URLSearchParams(search); params.set(this.ID || 0, `${limit},${limit + this.offset}`); return path + "?" + params.toString(); },
-			nextPageHref:     function() { const params = new URLSearchParams(search); params.set(this.ID || 0, `${limit},${Math.max(0, this.offset - limit)}`); return path + "?" + params.toString(); },
+			messageHref:       function() { return `/messages/${this.ID}` + search; },
+			threadHref:        function() { return `/threads/${this}` + search; /*context is ID, not thread*/ },
+			openThreadHref:    function() { const params = new URLSearchParams(search); params.set(this.ID || 0, `${limit},0`); return path + "?" + params.toString(); },
+			closeThreadHref:   function() { const params = new URLSearchParams(search); params.delete(this.ID || 0); return path + "?" + params.toString(); },
+			prevPageHref:      function() { const params = new URLSearchParams(search); params.set(this.ID || 0, `${limit},${limit + this.offset}`); return path + "?" + params.toString(); },
+			nextPageHref:      function() { const params = new URLSearchParams(search); params.set(this.ID || 0, `${limit},${Math.max(0, this.offset - limit)}`); return path + "?" + params.toString(); },
 		}, {
 			list: this.isMobile ? messagesListTemplateMobile : messagesListTemplate,
 		})

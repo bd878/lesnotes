@@ -12,10 +12,10 @@ let headerTemplate = readFileSync(resolve(join(Config.get("basedir"), 'templates
 let headerTemplateMobile = readFileSync(resolve(join(Config.get("basedir"), 'templates/header/mobile/header.mustache')), { encoding: 'utf-8' })
 
 class HeaderBuilder extends AbstractBuilder {
-	search = undefined;
+	searchForm = undefined;
 
 	addSearch() {
-		this.search = mustache.render(this.isMobile ? searchTemplateMobile : searchTemplate, {
+		this.searchForm = mustache.render(this.isMobile ? searchTemplateMobile : searchTemplate, {
 			action:              "/search" + this.search,
 			searchPlaceholder:   this.i18n("searchPlaceholder"),
 			searchMessages:      this.i18n("search"),
@@ -26,7 +26,7 @@ class HeaderBuilder extends AbstractBuilder {
 		return mustache.render(this.isMobile ? headerTemplateMobile : headerTemplate, {
 			mainHref:   "/" + this.search,
 		}, {
-			searchForm: this.search,
+			searchForm: this.searchForm,
 		})
 	}
 }

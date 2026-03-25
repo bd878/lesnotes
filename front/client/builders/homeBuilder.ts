@@ -42,6 +42,9 @@ let filesSelectorTemplateMobile = readFileSync(resolve(join(Config.get('basedir'
 let filesViewTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/files_view/desktop/files_view.mustache')), { encoding: 'utf-8' });
 let filesViewTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/files_view/mobile/files_view.mustache')), { encoding: 'utf-8' });
 
+let messagePathTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/home/desktop/message_path.mustache')), { encoding: 'utf-8' });
+let messagePathTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/home/mobile/message_path.mustache')), { encoding: 'utf-8' });
+
 let homeTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/home/desktop/home.mustache')), { encoding: 'utf-8' });
 let homeTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/home/mobile/home.mustache')), { encoding: 'utf-8' });
 
@@ -54,11 +57,13 @@ class HomeBuilder extends AbstractBuilder {
 	translationView      = undefined;
 	threadView           = undefined;
 	threadEditForm       = undefined;
+	messagePath          = undefined;
 	pagination           = undefined;
 	filesSelector        = undefined;
 	filesForm            = undefined;
 	filesView            = undefined;
 	filesList            = undefined;
+	header               = undefined;
 	messagesTree         = undefined;
 	sidebar              = undefined;
 	controlPanel         = undefined;
@@ -74,6 +79,12 @@ class HomeBuilder extends AbstractBuilder {
 
 	addMessagesTree(tree: Builder) {
 		this.messagesTree = tree.build()
+	}
+
+	addMessagePath(path: string) {
+		this.messagePath = mustache.render(this.isMobile ? messagePathTemplateMobile : messagePathTemplate, {
+			path: path,
+		})
 	}
 
 	addNewComment(message: number | string) {
@@ -141,13 +152,8 @@ class HomeBuilder extends AbstractBuilder {
 	addControlPanel() {
 		const search = this.search;
 
-		this.controlPanel = mustache.render(this.isMobile ? controlPanelTemplateMobile : controlPanelTemplate, {
-			newNoteHref:      function() { return "/home" + search; },
-			newNoteButton:    this.i18n("newNote"),
-			newFileHref:      function() { return "/files" + search; },
-			newFileButton:    this.i18n("newFile"),
-		}, {
-			logout:     this.logout,
+		this.controlPanel = mustache.render(this.isMobile ? controlPanelTemplateMobile : controlPanelTemplate, {}, {
+			logout:           this.logout,
 		})
 	}
 
@@ -181,17 +187,23 @@ class HomeBuilder extends AbstractBuilder {
 		})
 	}
 
+	addHeader(header: Builder) {
+		this.header = header.build()
+	}
+
 	build() {
 		return mustache.render(this.isMobile ? homeTemplateMobile : homeTemplate, {}, {
 			messageEditForm:      this.messageEditForm,
 			messageView:          this.messageView,
 			threadView:           this.threadView,
+			header:               this.header,
 			threadEditForm:       this.threadEditForm,
 			newMessageForm:       this.newMessageForm,
 			newTranslationForm:   this.newTranslationForm,
 			translationEditForm:  this.translationEditForm,
 			translationView:      this.translationView,
-			messagesTree:        this.messagesTree,
+			messagesTree:         this.messagesTree,
+			messagePath:          this.messagePath,
 			sidebar:              this.sidebar,
 			pagination:           this.pagination,
 			filesList:            this.filesList,

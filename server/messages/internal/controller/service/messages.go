@@ -469,49 +469,92 @@ func (ps *limitOffsetMap) String() (result string) {
 	return b.String()
 }
 
+type idMap struct {
+	dict map[int64]struct{}
+	mu sync.RWMutex
+}
+
+func NewIDMap(list []*model.Message) (m *idMap) {
+	m = &idMap{
+		dict: make(map[int64]struct{}),
+	}
+
+	for _, v := range list {
+		m.Add(v)
+	}
+
+	return m
+}
+
+func (m *idMap) Add(value *model.Message) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	_, ok := m.dict[value.ID]
+	if !ok {
+		m.dict[value.ID] = struct{}{}
+	}
+}
+
+func (m *idMap) Has(id int64) (ok bool) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	_, ok = m.dict[id]
+
+	return
+}
+
+func (m *idMap) String() (result string) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	var b strings.Builder
+	for k, _ := range m.dict {
+		fmt.Fprintf(&b, "{%d}", k)
+	}
+
+	return b.String()
+}
+
 const limitPathMessages = 10 /* any other number ? */
 
-func (s *MessagesController) ReadTree(ctx context.Context, userID, messageID int64, limit, offset int32, pairs []*model.IDLimitOffset) (list *model.List, err error) {
+func (s *MessagesController) ReadTree(ctx context.Context, userID, highlightID, rootID int64, limit, offset int32, pairs []*model.IDLimitOffset) (list *model.List, err error) {
 	if s.isConnFailed() {
 		if err := s.setupConnection(); err != nil {
 			return nil, err
 		}
 	}
 
-	logger.Debugw("read tree", "user_id", userID, "message_id", messageID, "limit", limit, "offset", offset, "pairs", pairs)
+	logger.Debugw("read tree", "user_id", userID, "highlight_id", highlightID, "message_id", rootID, "limit", limit, "offset", offset, "pairs", pairs)
 
 	map1 := NewLimitOffsetMap(pairs)
-	map2 := NewLimitOffsetMap(make([]*model.IDLimitOffset, 0))
-
-	for pair := range map1.Iterator(ctx) {
-		path, err := s.threads.ResolvePath(ctx, userID, pair.ID)
-		if err != nil {
-			continue
-		}
-
-		for _, id := range path {
-			// id == 0 included
-			// id is included in path, but filtered in map2
-			map2.Add(&model.IDLimitOffset{ID: id, Limit: limitPathMessages})
-		}
-	}
-
-	map1.Union(ctx, map2)
 
 	logger.Debugw("read_tree", "map1", map1.String())
 
-	list, err = s.ReadThreadMessages(ctx, userID, messageID, limit, offset, true)
+	highlightPath, _, err := s.ReadPath(ctx, userID, highlightID)
 	if err != nil {
 		return nil, err
 	}
 
-	err = s.resolveTree(ctx, userID, list, map1)
+	highlightMap := NewIDMap(highlightPath)
+
+	list, err = s.ReadThreadMessages(ctx, userID, rootID, limit, offset, true)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.resolveTree(ctx, userID, highlightMap, list, map1)
 
 	return
 }
 
-func (s *MessagesController) resolveTree(ctx context.Context, userID int64, list *model.List, map1 *limitOffsetMap) (err error) {
+func (s *MessagesController) resolveTree(ctx context.Context, userID int64, highlightMap *idMap, list *model.List, map1 *limitOffsetMap) (err error) {
 	for _, message := range list.Messages {
+		if highlightMap.Has(message.ID) {
+			message.Highlight = true
+		}
+
 		limitOffset, ok := map1.Get(message.ID)
 		if !ok {
 			// exit, when there are no more open threads
@@ -523,7 +566,7 @@ func (s *MessagesController) resolveTree(ctx context.Context, userID int64, list
 			return
 		}
 
-		err = s.resolveTree(ctx, userID, message.Messages, map1)
+		err = s.resolveTree(ctx, userID, highlightMap, message.Messages, map1)
 		if err != nil {
 			return
 		}

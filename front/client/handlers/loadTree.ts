@@ -4,7 +4,7 @@ import * as is from '../third_party/is';
 async function loadTree(ctx, next) {
 	console.log("--> loadTree")
 
-	ctx.state.tree = await api.readTreeJson(ctx.state.token, ctx.state.cwd.id, ctx.state.cwd.limit, ctx.state.cwd.offset, ctx.state.leaves)
+	ctx.state.tree = await api.readTreeJson(ctx.state.token, ctx.state.messageID, ctx.state.cwd.id, ctx.state.cwd.limit, ctx.state.cwd.offset, ctx.state.leaves)
 
 	if (is.notEmpty(ctx.state.tree)) {
 		if (ctx.state.tree.error.error) {

@@ -1,6 +1,5 @@
 import readMessages from './readMessages';
 import readCommentJson from './readCommentJson';
-import readStackJson from './readStackJson';
 import readMessagesJson from './readMessagesJson';
 import readTreeJson from './readTreeJson';
 import readTranslationJson from './readTranslationJson';
@@ -62,7 +61,6 @@ export default {
 	getMe,
 	getMeJson,
 	readMessages,
-	readStackJson,
 	readCommentJson,
 	readMessagesJson,
 	readBatchMessagesJson,

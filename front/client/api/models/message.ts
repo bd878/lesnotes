@@ -22,6 +22,7 @@ export interface Message {
 	title:         string;
 	count:         number;
 	files:         File[];
+	highlight:     boolean;
 	translations:  TranslationPreview[];
 	messages:      MessagesList;
 	private:       boolean;
@@ -42,6 +43,7 @@ const EmptyMessage: Message = Object.freeze({
 	count: 0,
 	name: "",
 	files:  [],
+	highlight: false,
 	translations: [],
 	messages: EmptyMessagesList,
 	private: true,
@@ -76,6 +78,7 @@ export default function mapMessageFromProto(message?: any): Message {
 		name:        message.name,
 		title:       message.title,
 		count:       message.count,
+		highlight:   message.highlight,
 		private:     Boolean(message.private),
 		messages:    EmptyMessagesList,
 		files:       [],

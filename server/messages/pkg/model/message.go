@@ -18,6 +18,7 @@ type (
 		Messages     *List                 `json:"messages,omitempty"`
 		Text         string                `json:"text"`
 		Title        string                `json:"title"`
+		Highlight    bool                  `json:"highlight"`
 		Private      bool                  `json:"private"`
 	}
 
@@ -89,10 +90,11 @@ type (
 	}
 
 	ReadTreeRequest struct {
-		MessageID int64             `json:"root"`
-		Limit     int32             `json:"limit"`
-		Offset    int32             `json:"offset"`
-		Leaves    []*IDLimitOffset   `json:"leaves"`
+		HighlightID int64             `json:"highlight"`
+		MessageID   int64             `json:"root"`
+		Limit       int32             `json:"limit"`
+		Offset      int32             `json:"offset"`
+		Leaves      []*IDLimitOffset   `json:"leaves"`
 	}
 
 	ReadTreeResponse struct {

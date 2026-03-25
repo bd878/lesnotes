@@ -16,6 +16,7 @@ import authed from './handlers/authed';
 import noCache from './handlers/noCache';
 import loadTree from './handlers/loadTree';
 import loadComments from './handlers/loadComments';
+import loadPath from './handlers/loadPath';
 import loadFiles from './handlers/loadFiles';
 import selectMessageFiles from './handlers/selectMessageFiles';
 import loadTranslation from './handlers/loadTranslation';
@@ -96,12 +97,12 @@ router
 	.get("signup",                 "/signup",                       etag, noCache, getState, notAuthed, signup)
 	.get("home",                   "/home",                         etag, noCache, getState, authed, getMe, loadTree, loadFiles, newMessage)
 	.get("files",                  "/files",                        etag, noCache, getState, authed, getMe, loadTree, loadFiles, files)
-	.get("message",                "/messages/:id",                 etag, noCache, getState, authed, getMe, loadTree, loadMessage, loadComments, formatView, messageView)
-	.get("translation",            "/messages/:id/:lang",           etag, noCache, getState, authed, getMe, loadTree, loadMessage, loadComments, loadTranslation, formatView, translationView)
+	.get("message",                "/messages/:id",                 etag, noCache, getState, authed, getMe, loadTree, loadPath, loadMessage, loadComments, formatView, messageView)
+	.get("translation",            "/messages/:id/:lang",           etag, noCache, getState, authed, getMe, loadTree, loadPath, loadMessage, loadComments, loadTranslation, formatView, translationView)
 	.get("thread",                 "/threads/:id",                  etag, noCache, getState, authed, getMe, loadTree, loadThread, formatView, threadView)
-	.get("editMessage",            "/editor/messages/:id",          etag, noCache, getState, authed, getMe, loadTree, loadMessage, loadFiles, selectMessageFiles, formatTextarea, messageEdit)
+	.get("editMessage",            "/editor/messages/:id",          etag, noCache, getState, authed, getMe, loadTree, loadPath, loadMessage, loadFiles, selectMessageFiles, formatTextarea, messageEdit)
 	.get("newTranslation",         "/editor/messages/:id/new_lang", etag, noCache, getState, authed, getMe, loadTree, parseMessageID, newTranslation)
-	.get("editTranslation",        "/editor/messages/:id/:lang",    etag, noCache, getState, authed, getMe, loadTree, loadMessage, loadTranslation, formatTextarea, translationEdit)
+	.get("editTranslation",        "/editor/messages/:id/:lang",    etag, noCache, getState, authed, getMe, loadTree, loadPath, loadMessage, loadTranslation, formatTextarea, translationEdit)
 	.get("editThread",             "/editor/threads/:id",           etag, noCache, getState, authed, getMe, loadTree, loadThread, formatTextarea, threadEdit)
 	.get("status",                 "/status",                       status, noCache, getState)
 	.get("search",                 "/search",                       etag, noCache, getState, authed, getMe, getSearchQuery, loadSearch, loadSearchPath, search)

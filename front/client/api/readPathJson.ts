@@ -47,3 +47,4 @@ async function readPathJson(token: string, id: number): Promise<ReadPathResponse
 }
 
 export default readPathJson;
+export type { ReadPathResponse };
