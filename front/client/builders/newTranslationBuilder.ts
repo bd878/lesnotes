@@ -10,7 +10,7 @@ let newTranslationFormTemplateMobile = readFileSync(resolve(join(Config.get('bas
 
 class NewTranslationBuilder extends HomeBuilder {
 	addNewTranslationForm(messageID: number) {
-		this.newTranslationForm = mustache.render(this.isMobile ? newTranslationFormTemplate : newTranslationFormTemplateMobile, {
+		this.newTranslationForm = mustache.render(this.isMobile ? newTranslationFormTemplateMobile : newTranslationFormTemplate, {
 			titlePlaceholder:    this.i18n("titlePlaceholder"),
 			textPlaceholder:     this.i18n("textPlaceholder"),
 			defaultLang:         this.i18n("defaultLang"),

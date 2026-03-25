@@ -28,19 +28,16 @@ async function publicThreadMessage(ctx) {
 	}
 
 	content.addMessagesList(ctx.params.threadName /* TODO: use from load_path, it is message now, thread required */, ctx.state.messages)
-	content.addSearch()
+
 	content.addTranslations(ctx.state.messageName, ctx.state.threadName, ctx.state.message.translations)
 	content.addMessageView(ctx.state.message)
 
 	if (ctx.state.me.ID) {
-		content.addLogout()
+		// header.addLogout(logout)
 	} else {
 		content.addSignup()
 	}
 
-	header.addSearch()
-
-	layout.addSettings(settings)
 	layout.addFooter()
 	layout.addHeader(header)
 	layout.addContent(content)

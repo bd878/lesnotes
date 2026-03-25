@@ -10,7 +10,7 @@ let newMessageFormTemplateMobile = readFileSync(resolve(join(Config.get('basedir
 
 class NewMessageBuilder extends HomeBuilder {
 	addNewMessageForm(thread?: number) {
-		this.newMessageForm = mustache.render(this.isMobile ? newMessageFormTemplate : newMessageFormTemplateMobile, {
+		this.newMessageForm = mustache.render(this.isMobile ? newMessageFormTemplateMobile : newMessageFormTemplate, {
 			filesSummary:     this.i18n("filesSummary"),
 			titlePlaceholder: this.i18n("titlePlaceholder"),
 			textPlaceholder:  this.i18n("textPlaceholder"),

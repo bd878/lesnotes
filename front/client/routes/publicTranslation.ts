@@ -30,9 +30,9 @@ async function publicTranslation(ctx) {
 	content.addTranslations(ctx.state.messageName, ctx.state.message.translations)
 	content.addTranslationView(ctx.state.translation)
 
-	header.addSearch()
 
-	layout.addSettings(settings)
+
+	
 	layout.addFooter()
 	layout.addHeader(header)
 	layout.addContent(content)

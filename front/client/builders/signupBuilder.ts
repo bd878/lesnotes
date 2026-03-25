@@ -24,19 +24,19 @@ class SignupBuilder extends AbstractBuilder {
 	sidebar = undefined;
 
 	addUsername() {
-		this.username = mustache.render(this.isMobile ? usernameTemplate : usernameTemplateMobile, {
+		this.username = mustache.render(this.isMobile ? usernameTemplateMobile : usernameTemplate, {
 			usernamePlaceholder: this.i18n("username"),
 		})
 	}
 
 	addPassword() {
-		this.password = mustache.render(this.isMobile ? passwordTemplate : passwordTemplateMobile, {
+		this.password = mustache.render(this.isMobile ? passwordTemplateMobile : passwordTemplate, {
 			passwordPlaceholder: this.i18n("password"),
 		})
 	}
 
 	addSubmit() {
-		this.submit = mustache.render(this.isMobile ? submitTemplate : submitTemplateMobile, {
+		this.submit = mustache.render(this.isMobile ? submitTemplateMobile : submitTemplate, {
 			loginHref: "/login" + this.search,
 			signup:   this.i18n("signup"),
 			login:    this.i18n("login"),
@@ -50,7 +50,7 @@ class SignupBuilder extends AbstractBuilder {
 	build() {
 		const search = this.search
 
-		return mustache.render(this.isMobile ? signupTemplate : signupTemplateMobile, {
+		return mustache.render(this.isMobile ? signupTemplateMobile : signupTemplate, {
 			action:         function() { return "/signup" + search },
 			botUsername:    `${BOT_USERNAME}`,
 			authUrl:        `https://${BACKEND_URL}/tg_auth`,

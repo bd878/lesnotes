@@ -14,14 +14,11 @@ async function publicThread(ctx) {
 	content.addMessagesList(ctx.params.threadName /* TODO: use from load_path, ctx.thread.name is message name now, but thread name required */, ctx.state.messages)
 
 	if (ctx.state.me.ID) {
-		content.addLogout()
+		// header.addLogout(logout)
 	} else {
 		content.addSignup()
 	}
 
-	header.addSearch()
-
-	layout.addSettings(settings)
 	layout.addFooter()
 	layout.addHeader(header)
 	layout.addContent(content)

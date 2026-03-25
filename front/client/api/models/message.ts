@@ -47,14 +47,16 @@ const EmptyMessage: Message = Object.freeze({
 	private: true,
 })
 
-function mapMessagesListFromProto(messagesList?: any): MessagesList {
-	if (!messagesList) {
+function mapMessagesListFromProto(list?: any): MessagesList {
+	if (!list) {
 		return EmptyMessagesList
 	}
 
+	list.messages.reverse()
+
 	const res = {
-		...paging(messagesList),
-		messages: messagesList.messages.map(mapMessageFromProto),
+		...paging(list),
+		messages: list.messages.map(mapMessageFromProto),
 	}
 
 	return res
@@ -89,10 +91,7 @@ export default function mapMessageFromProto(message?: any): Message {
 	}
 
 	if (is.notEmpty(message.messages)) {
-		message.messages = {
-			...paging(message.messages),
-			messages: message.messages.map(mapMessageFromProto), /* recursive */
-		}
+		res.messages = mapMessagesListFromProto(message.messages)
 	}
 
 	return res

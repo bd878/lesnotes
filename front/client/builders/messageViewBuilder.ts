@@ -18,7 +18,7 @@ class MessageViewBuilder extends HomeBuilder {
 
 		const search = this.search
 
-		this.messageView = mustache.render(this.isMobile ? messageViewTemplate : messageViewTemplateMobile, {
+		this.messageView = mustache.render(this.isMobile ? messageViewTemplateMobile : messageViewTemplate, {
 			ID:               message.ID,
 			title:            message.title,
 			text:             message.text,

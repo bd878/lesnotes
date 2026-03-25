@@ -14,7 +14,7 @@ class ThreadViewBuilder extends HomeBuilder {
 	addThreadView(thread: Thread) {
 		const search = this.search
 
-		this.threadView = mustache.render(this.isMobile ? threadViewTemplate : threadViewTemplateMobile, {
+		this.threadView = mustache.render(this.isMobile ? threadViewTemplateMobile : threadViewTemplate, {
 			ID:               thread.ID,
 			description:      thread.description,
 			name:             thread.name,

@@ -34,7 +34,7 @@ class SearchBuilder extends AbstractBuilder {
 	addMessagesList(list: Message[]) {
 		const search = this.search
 
-		this.messagesList = mustache.render(this.isMobile ? messagesListTemplate : messagesListTemplateMobile, {
+		this.messagesList = mustache.render(this.isMobile ? messagesListTemplateMobile : messagesListTemplate, {
 			list:             list,
 			isEmpty:          () => list.length == 0,
 			isSingle:         () => list.length == 1,
@@ -54,20 +54,20 @@ class SearchBuilder extends AbstractBuilder {
 			options.files = list
 		}
 
-		this.filesList = mustache.render(this.isMobile ? filesListTemplate : filesListTemplateMobile, options)
+		this.filesList = mustache.render(this.isMobile ? filesListTemplateMobile : filesListTemplate, options)
 	}
 
 	addLogout() {
 		const search = this.search
 
-		this.logout = mustache.render(this.isMobile ? logoutTemplate : logoutTemplateMobile, {
+		this.logout = mustache.render(this.isMobile ? logoutTemplateMobile : logoutTemplate, {
 			logout:           this.i18n("logout"),
 			logoutHref:       function() { const params = new URLSearchParams(search); params.delete("cwd"); params.delete("id"); /* TODO: delete pagination */ return "/logout?" + params.toString() },
 		})
 	}
 
 	addSearch() {
-		this.searchForm = mustache.render(this.isMobile ? searchFormTemplate : searchFormTemplateMobile, {
+		this.searchForm = mustache.render(this.isMobile ? searchFormTemplateMobile : searchFormTemplate, {
 			action:              "/search" + this.search,
 			searchPlaceholder:   this.i18n("searchPlaceholder"),
 			searchMessages:      this.i18n("search"),
@@ -75,7 +75,7 @@ class SearchBuilder extends AbstractBuilder {
 	}
 
 	build() {
-		return mustache.render(this.isMobile ? searchTemplate : searchTemplateMobile, {}, {
+		return mustache.render(this.isMobile ? searchTemplateMobile : searchTemplate, {}, {
 			messagesList:    this.messagesList,
 			filesList:       this.filesList,
 			sidebar:         this.sidebar,

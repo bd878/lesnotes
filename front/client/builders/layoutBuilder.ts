@@ -17,7 +17,6 @@ let stylesTemplate = readFileSync(resolve(join(Config.get('basedir'),'public/sty
 class LayoutBuilder extends AbstractBuilder {
 	footer        = undefined;
 	header        = undefined;
-	settings      = undefined;
 	content       = undefined;
 
 	scripts       = [];
@@ -36,10 +35,6 @@ class LayoutBuilder extends AbstractBuilder {
 
 	addContent(content: Builder) {
 		this.content = content.build()
-	}
-
-	addSettings(settings: Builder) {
-		this.settings = settings.build()
 	}
 
 	build() {

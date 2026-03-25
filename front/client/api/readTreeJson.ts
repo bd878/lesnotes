@@ -5,13 +5,13 @@ import models from './models';
 
 interface ReadTreeResponse {
 	error:    Error;
-	messages: MessagesList;
+	list:     MessagesList;
 }
 
-async function readTreeJson(token: string, rootID: number, limit: number, offset: number, ...leaves: IDLimitOffset[]): Promise<ReadTreeResponse> {
+async function readTreeJson(token: string, rootID: number, limit: number, offset: number, leaves: IDLimitOffset[]): Promise<ReadTreeResponse> {
 	let result: ReadTreeResponse = {
 		error:     models.error(),
-		messages:  models.EmptyMessagesList,
+		list:  models.EmptyMessagesList,
 	}
 
 	console.log("readTreeJson", "token", token, "root_id", rootID, "limit", limit, "offset", offset, "leaves", ...leaves)
@@ -32,9 +32,9 @@ async function readTreeJson(token: string, rootID: number, limit: number, offset
 		});
 
 		if (error.error) {
-			result.error = models.error(error.error)
+			result.error = models.error(error)
 		} else {
-			result.messages = response.list.map(models.messagesList)
+			result.list = models.messagesList(response.list)
 		}
 
 	} catch (e) {

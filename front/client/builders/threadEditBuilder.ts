@@ -12,7 +12,7 @@ let threadEditFormTemplateMobile = readFileSync(resolve(join(Config.get('basedir
 
 class ThreadEditBuilder extends HomeBuilder {
 	addThreadEditForm(thread: Thread) {
-		this.threadEditForm = mustache.render(this.isMobile ? threadEditFormTemplate : threadEditFormTemplateMobile, {
+		this.threadEditForm = mustache.render(this.isMobile ? threadEditFormTemplateMobile : threadEditFormTemplate, {
 			ID:               thread.ID,
 			private:          thread.private,
 			name:             thread.name,

@@ -13,11 +13,7 @@ async function search(ctx) {
 
 	content.addMessagesList(ctx.state.messages)
 	content.addFilesList()
-	content.addLogout()
 
-	header.addSearch()
-
-	layout.addSettings(settings)
 	layout.addFooter()
 	layout.addHeader(header)
 	layout.addContent(content)

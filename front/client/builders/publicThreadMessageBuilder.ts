@@ -15,7 +15,7 @@ class PublicThreadMessageBuilder extends AbstractPublicBuilder {
 	addTranslations(message: number | string, thread: string, previews: TranslationPreview[]) {
 		const search = this.search
 
-		this.translations = mustache.render(this.isMobile ? translationsTemplate : translationsTemplateMobile, {
+		this.translations = mustache.render(this.isMobile ? translationsTemplateMobile : translationsTemplate, {
 			mainMessage:           this.i18n("mainMessage"),
 			mainMessageHref:       function() { return `/t/${thread}/${message}` + search },
 			translationHref:       function() { return `/t/${thread}/${message}/${this.lang}` + search },
@@ -25,7 +25,7 @@ class PublicThreadMessageBuilder extends AbstractPublicBuilder {
 	}
 
 	build(message?: Message) {
-		return mustache.render(this.isMobile ? threadMessageTemplate : threadMessageTemplateMobile, {
+		return mustache.render(this.isMobile ? threadMessageTemplateMobile : threadMessageTemplate, {
 			message:       message,
 		}, {
 			signup:            this.signup,

@@ -1,7 +1,8 @@
 import NewMessageBuilder from '../builders/newMessageBuilder'
 import LayoutBuilder from '../builders/layoutBuilder';
+import LogoutBuilder from '../builders/logoutBuilder';
 import HeaderBuilder from '../builders/headerBuilder';
-import SettingsBuilder from '../builders/settingsBuilder';
+import MessagesTreeBuilder from '../builders/messagesTreeBuilder';
 
 async function newMessage(ctx) {
 	console.log("--> newMessage")
@@ -9,16 +10,16 @@ async function newMessage(ctx) {
 	const content = new NewMessageBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
-	const settings = new SettingsBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const logout = new LogoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const tree = new MessagesTreeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
-	content.addFilesSelector(ctx.state.files.files)
-	content.addMessagesTree(ctx.state.stack)
+	tree.addList(ctx.state.tree)
+
+	content.addMessagesTree(tree)
 	content.addNewMessageForm(ctx.state.thread)
-	content.addLogout()
+	content.addLogout(logout)
+	content.addControlPanel()
 
-	header.addSearch()
-
-	layout.addSettings(settings)
 	layout.addFooter()
 	layout.addHeader(header)
 	layout.addContent(content)

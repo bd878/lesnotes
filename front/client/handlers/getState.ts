@@ -1,5 +1,7 @@
 import type {IDLimitOffset} from '../types'
 
+const defaultLimit = parseInt(LIMIT) || 10
+
 async function getState(ctx, next) {
 	console.log("--> getState")
 
@@ -68,12 +70,12 @@ function getMessageView(ctx) {
 
 const defaultCwd = {
 	id:     0,
-	limit:  10,
+	limit:  defaultLimit,
 	offset: 0,
 }
 
 function idLimitOffset(numbers: number[]): IDLimitOffset {
-	const [id = 0, limit = 10, offset = 0] = numbers
+	const [id = 0, limit = defaultLimit, offset = 0] = numbers
 	return {id, limit, offset}
 }
 
@@ -84,7 +86,7 @@ function getCwd(ctx) {
 		return defaultCwd
 	}
 
-	return idLimitOffset((params.get("cwd") || "").split(",").map(parseFloat).filter(v => !isNaN(v)))
+	return idLimitOffset([parseInt(params.get("cwd")) || 0, ...(params.get("cwd") || "").split(",").map(parseFloat).filter(v => !isNaN(v))])
 }
 
 function getLeaves(ctx): IDLimitOffset[] {
@@ -93,7 +95,7 @@ function getLeaves(ctx): IDLimitOffset[] {
 	for (const [key, value] of new URLSearchParams(ctx.request.search)) {
 		const threadID = parseInt(key)
 		if (!isNaN(threadID)) {
-			result.push(idLimitOffset((value || "").split(",").map(parseFloat).filter(v => !isNaN(v))))
+			result.push(idLimitOffset([threadID, ...(value || "").split(",").map(parseFloat).filter(v => !isNaN(v))]))
 		}
 	}
 

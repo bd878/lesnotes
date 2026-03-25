@@ -22,7 +22,7 @@ class FilesBuilder extends HomeBuilder {
 	filesForm = undefined;
 
 	addFilesList(files: File[] = []) {
-		this.filesList = mustache.render(this.isMobile ? filesListTemplate : filesListTemplateMobile, {
+		this.filesList = mustache.render(this.isMobile ? filesListTemplateMobile : filesListTemplate, {
 			noFiles:            this.i18n("noFiles"),
 			files:              files,
 			publishButton:      this.i18n("publish"),
@@ -41,7 +41,7 @@ class FilesBuilder extends HomeBuilder {
 
 		const limit = parseInt(LIMIT)
 
-		this.pagination = mustache.render(this.isMobile ? paginationTemplate : paginationTemplateMobile, {
+		this.pagination = mustache.render(this.isMobile ? paginationTemplateMobile : paginationTemplate, {
 			prevPageHref:     function() { const params = new URLSearchParams(search); params.set("files", `${limit + this.offset}`); return path + "?" + params.toString(); },
 			nextPageHref:     function() { const params = new URLSearchParams(search); params.set("files", `${Math.max(0, this.offset - limit)}`); return path + "?" + params.toString(); },
 			isLastPage:       paging.isLastPage,
@@ -50,7 +50,7 @@ class FilesBuilder extends HomeBuilder {
 	}
 
 	addFilesForm(files: File[] = []) {
-		this.filesForm = mustache.render(this.isMobile ? filesFormTemplate : filesFormTemplateMobile, {
+		this.filesForm = mustache.render(this.isMobile ? filesFormTemplateMobile : filesFormTemplate, {
 			noFiles:            this.i18n("noFiles"),
 			files:              files,
 			sendButton:         this.i18n("sendButton"),

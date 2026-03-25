@@ -3,6 +3,7 @@ import TranslationViewBuilder from '../builders/translationViewBuilder';
 import LayoutBuilder from '../builders/layoutBuilder';
 import HeaderBuilder from '../builders/headerBuilder';
 import SettingsBuilder from '../builders/settingsBuilder';
+import MessagesTreeBuilder from '../builders/messagesTreeBuilder';
 
 async function translationView(ctx) {
 	console.log("--> translationView")
@@ -11,6 +12,7 @@ async function translationView(ctx) {
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const settings = new SettingsBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const tree = new MessagesTreeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
 	if (ctx.state.msg == "comments") {
 		content.addMessageNavigation()
@@ -27,17 +29,15 @@ async function translationView(ctx) {
 		}
 	}
 
+	tree.addList(ctx.state.tree)
+
+	content.addMessagesTree(tree)
 	content.addNavigation()
 	content.addControlPanel()
-	content.addMessagesTree(ctx.state.stack)
 	content.addNewTranslation(ctx.state.message.ID)
 	content.addTranslations(ctx.state.message.ID, ctx.state.message.translations)
 	content.addTranslationView(ctx.state.message.ID, ctx.state.translation)
-	content.addLogout()
 
-	header.addSearch()
-
-	layout.addSettings(settings)
 	layout.addFooter()
 	layout.addHeader(header)
 	layout.addContent(content)

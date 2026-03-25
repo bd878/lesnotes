@@ -1,3 +1,4 @@
+import type {Builder} from './builder'
 import Config from 'config';
 import mustache from 'mustache';
 import { readFileSync } from 'node:fs';

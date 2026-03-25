@@ -16,6 +16,7 @@ class SettingsBuilder extends AbstractBuilder {
 		const lang = this.lang
 
 		return mustache.render(this.isMobile ? settingsTemplateMobile : settingsTemplate, {
+			settingsHeader:  this.i18n("settingsHeader"),
 			fontSizeHeader:  this.i18n("fontSizeHeader"),
 			updateButton:    this.i18n("updateButton"),
 			langHeader:      this.i18n("langHeader"),

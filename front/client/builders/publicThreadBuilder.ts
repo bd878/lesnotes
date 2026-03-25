@@ -10,7 +10,7 @@ let threadTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'temp
 class PublicThreadBuilder extends AbstractPublicBuilder {
 
 	build() {
-		return mustache.render(this.isMobile ? threadTemplate : threadTemplateMobile, {
+		return mustache.render(this.isMobile ? threadTemplateMobile : threadTemplate, {
 		}, {
 			signup:           this.signup,
 			logout:           this.logout,

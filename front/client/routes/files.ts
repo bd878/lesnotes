@@ -20,11 +20,7 @@ async function files(ctx) {
 		content.addFilesList(ctx.state.files.files)
 		content.addPagination(ctx.state.files.paging)
 	}
-	content.addLogout()
 
-	header.addSearch()
-
-	layout.addSettings(settings)
 	layout.addFooter()
 	layout.addHeader(header)
 	layout.addContent(content)

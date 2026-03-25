@@ -25,7 +25,7 @@ class MessageEditViewBuilder extends HomeBuilder {
 			return
 		}
 
-		this.messageEditForm = mustache.render(this.isMobile ? messageEditFormTemplate : messageEditFormTemplateMobile, {
+		this.messageEditForm = mustache.render(this.isMobile ? messageEditFormTemplateMobile : messageEditFormTemplate, {
 			ID:               message.ID,
 			private:          message.private,
 			name:             message.name,
@@ -46,7 +46,7 @@ class MessageEditViewBuilder extends HomeBuilder {
 	}
 
 	addFilesSelector(files: SelectedFile[]) {
-		this.filesSelector = mustache.render(this.isMobile ? filesSelectorTemplate : filesSelectorTemplateMobile, {
+		this.filesSelector = mustache.render(this.isMobile ? filesSelectorTemplateMobile : filesSelectorTemplate, {
 			files:             files,
 			defaultFile:       this.i18n("defaultFile"),
 		})

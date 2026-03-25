@@ -17,7 +17,7 @@ class PublicMessageBuilder extends AbstractPublicBuilder {
 	addTranslations(message: number | string, previews: TranslationPreview[]) {
 		const search = this.search
 
-		this.translations = mustache.render(this.isMobile ? translationsTemplate : translationsTemplateMobile, {
+		this.translations = mustache.render(this.isMobile ? translationsTemplateMobile : translationsTemplate, {
 			mainMessage:           this.i18n("mainMessage"),
 			mainMessageHref:       function() { return `/m/${message}` + search },
 			translationHref:       function() { return `/m/${message}/${this.lang}` + search },
@@ -27,7 +27,7 @@ class PublicMessageBuilder extends AbstractPublicBuilder {
 	}
 
 	build() {
-		return mustache.render(this.isMobile ? messageTemplate : messageTemplateMobile, {}, {
+		return mustache.render(this.isMobile ? messageTemplateMobile : messageTemplate, {}, {
 			signup:            this.signup,
 			logout:            this.logout,
 			sidebar:           this.sidebar,

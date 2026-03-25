@@ -30,9 +30,9 @@ async function publicMessage(ctx) {
 	content.addTranslations(ctx.state.messageName, ctx.state.message.translations)
 	content.addMessageView(ctx.state.message)
 
-	header.addSearch()
 
-	layout.addSettings(settings)
+
+	
 	layout.addFooter()
 	layout.addHeader(header)
 	layout.addContent(content)

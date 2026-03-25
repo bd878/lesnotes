@@ -14,7 +14,7 @@ class TranslationViewBuilder extends HomeBuilder {
 	addTranslationView(messageID: number, translation: Translation) {
 		const search = this.search
 
-		this.translationView = mustache.render(this.isMobile ? translationViewTemplate: translationViewTemplateMobile, {
+		this.translationView = mustache.render(this.isMobile ? translationViewTemplateMobile : translationViewTemplate, {
 			messageID:        messageID,
 			translation:      translation,
 			editHref:         function() { return `/editor/messages/${messageID}/${this.lang}` + search; },

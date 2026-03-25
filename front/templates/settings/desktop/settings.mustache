@@ -1,40 +1,45 @@
-<div class="flex flex-col items-start">
-	{{#theme}}
-		<div class="flex flex-row mb-1">
-			{{#themes}}
-				{{#myTheme}}
-					<a target="_self" href="{{themeHref}}" class="hover:text-blue-600 flex items-center dark:hover:text-white underline cursor-pointer mr-2">{{label}}</a>
-				{{/myTheme}}
-				{{^myTheme}}
-					<a target="_self" href="{{themeHref}}" class="hover:text-blue-600 flex items-center dark:hover:text-white cursor-pointer mr-2">{{label}}</a>
-				{{/myTheme}}
-			{{/themes}}
-		</div>
-	{{/theme}}
+<details>
+	<summary class="cursor-pointer mb-2">{{settingsHeader}}</summary>
 
-	{{#lang}}
-		<div class="flex flex-row mb-1">
-			{{#langs}}
-				{{#myLang}}
-					<a target="_self" href="{{langHref}}" class="hover:text-blue-600 flex items-center dark:hover:text-white underline cursor-pointer mr-2">{{label}}</a>
-				{{/myLang}}
-				{{^myLang}}
-					<a target="_self" href="{{langHref}}" class="hover:text-blue-600 flex items-center dark:hover:text-white cursor-pointer mr-2">{{label}}</a>
-				{{/myLang}}
-			{{/langs}}
-		</div>
-	{{/lang}}
+	<div class="flex flex-col items-start">
+		{{#theme}}
+			<div class="flex flex-row mb-1">
+				{{#themes}}
+					{{#myTheme}}
+						<a target="_self" href="{{themeHref}}" class="hover:text-blue-600 flex items-center dark:hover:text-white underline cursor-pointer mr-2">{{label}}</a>
+					{{/myTheme}}
+					{{^myTheme}}
+						<a target="_self" href="{{themeHref}}" class="hover:text-blue-600 flex items-center dark:hover:text-white cursor-pointer mr-2">{{label}}</a>
+					{{/myTheme}}
+				{{/themes}}
+			</div>
+		{{/theme}}
 
-	{{#font}}
-		<div class="flex flex-row">
-			{{#fonts}}
-				{{#myFont}}
-					<a target="_self" href="{{fontHref}}" class="{{css}} hover:text-blue-600 flex items-center dark:hover:text-white underline cursor-pointer mr-2">{{label}}</a>
-				{{/myFont}}
-				{{^myFont}}
-					<a target="_self" href="{{fontHref}}" class="{{css}} hover:text-blue-600 flex items-center dark:hover:text-white cursor-pointer mr-2">{{label}}</a>
-				{{/myFont}}
-			{{/fonts}}
-		</div>
-	{{/font}}
-</div>
+		{{#lang}}
+			<div class="flex flex-row mb-1">
+				{{#langs}}
+					{{#myLang}}
+						<a target="_self" href="{{langHref}}" class="hover:text-blue-600 flex items-center dark:hover:text-white underline cursor-pointer mr-2">{{label}}</a>
+					{{/myLang}}
+					{{^myLang}}
+						<a target="_self" href="{{langHref}}" class="hover:text-blue-600 flex items-center dark:hover:text-white cursor-pointer mr-2">{{label}}</a>
+					{{/myLang}}
+				{{/langs}}
+			</div>
+		{{/lang}}
+
+		{{#font}}
+			<div class="flex flex-row">
+				{{#fonts}}
+					{{#myFont}}
+						<a target="_self" href="{{fontHref}}" class="{{css}} hover:text-blue-600 flex items-center dark:hover:text-white underline cursor-pointer mr-2">{{label}}</a>
+					{{/myFont}}
+					{{^myFont}}
+						<a target="_self" href="{{fontHref}}" class="{{css}} hover:text-blue-600 flex items-center dark:hover:text-white cursor-pointer mr-2">{{label}}</a>
+					{{/myFont}}
+				{{/fonts}}
+			</div>
+		{{/font}}
+	</div>
+
+</details>

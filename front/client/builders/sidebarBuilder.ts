@@ -17,9 +17,8 @@ class SidebarBuilder extends AbstractBuilder {
 	}
 
 	build() {
-		return mustache.render(this.isMobile ? sidebarTemplate : sidebarTemplateMobile, {
+		return mustache.render(this.isMobile ? sidebarTemplateMobile : sidebarTemplate, {
 			mainHref:        "/" + this.search,
-			settingsHeader:  this.i18n("settingsHeader"),
 		}, {
 			settings: this.settings,
 		})

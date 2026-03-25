@@ -8,17 +8,15 @@ async function loadTree(ctx, next) {
 
 	if (is.notEmpty(ctx.state.tree)) {
 		if (ctx.state.tree.error.error) {
-			console.error(ctx.state.tree.error.error)
+			console.error(ctx.state.tree.error)
 			ctx.body = "error"
 			ctx.status = 400;
 			return;
 		}
-		ctx.state.tree = ctx.state.tree.messages
+		ctx.state.tree = ctx.state.tree.list
 	} else {
 		ctx.state.tree = {}
 	}
-
-	console.log(ctx.state.tree)
 
 	await next()
 

@@ -13,7 +13,7 @@ let translationEditViewTemplateMobile = readFileSync(resolve(join(Config.get('ba
 
 class TranslationEditViewBuilder extends HomeBuilder {
 	addTranslationEditForm(messageID: number, translation: Translation) {
-		this.translationEditForm = mustache.render(this.isMobile ? translationEditViewTemplate : translationEditViewTemplateMobile, {
+		this.translationEditForm = mustache.render(this.isMobile ? translationEditViewTemplateMobile : translationEditViewTemplate, {
 			message:            messageID,
 			translation:        translation,
 			titlePlaceholder:   this.i18n("titlePlaceholder"),
