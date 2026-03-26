@@ -31,6 +31,7 @@ async function messageView(ctx) {
 		}
 	}
 
+	header.addNewNote()
 	tree.addList(ctx.state.tree)
 
 	content.addMessagesTree(tree)

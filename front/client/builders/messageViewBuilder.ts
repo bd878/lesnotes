@@ -19,20 +19,20 @@ class MessageViewBuilder extends HomeBuilder {
 		const search = this.search
 
 		this.messageView = mustache.render(this.isMobile ? messageViewTemplateMobile : messageViewTemplate, {
-			ID:               message.ID,
-			title:            message.title,
-			text:             message.text,
-			name:             message.name,
-			private:          message.private,
-			filesSummary:     this.i18n("filesSummary"),
-			newNoteHref:      function() { return "/home" + search; },
-			editHref:         function() { return `/editor/messages/${message.ID}` + search; },
-			deleteAction:     "/m/delete" + search,
-			publishAction:    "/m/publish" + search,
-			privateAction:    "/m/private" + search,
-			newNoteButton:    this.i18n("newNote"),
-			userID:           userID,
-			domain:           Config.get("domain"),
+			ID:                    message.ID,
+			title:                 message.title,
+			text:                  message.text,
+			name:                  message.name,
+			private:               message.private,
+			filesSummary:          this.i18n("filesSummary"),
+			editHref:              `/editor/messages/${message.ID}` + search,
+			threadHref:            `/editor/threads/${message.ID}` + search,
+			deleteAction:          "/m/delete" + search,
+			publishAction:         "/m/publish" + search,
+			privateAction:         "/m/private" + search,
+			newNoteButton:         this.i18n("newNote"),
+			userID:                userID,
+			domain:                Config.get("domain"),
 		})
 	}
 }

@@ -101,6 +101,7 @@ router
 	.get("translation",            "/messages/:id/:lang",           etag, noCache, getState, authed, getMe, loadTree, loadPath, loadMessage, loadComments, loadTranslation, formatView, translationView)
 	.get("thread",                 "/threads/:id",                  etag, noCache, getState, authed, getMe, loadTree, loadThread, formatView, threadView)
 	.get("editMessage",            "/editor/messages/:id",          etag, noCache, getState, authed, getMe, loadTree, loadPath, loadMessage, loadFiles, selectMessageFiles, formatTextarea, messageEdit)
+	.get("newThreadMessage",       "/editor/messages/:id/new",      etag, noCache, getState, authed, getMe, loadTree, loadPath, newMessage)
 	.get("newTranslation",         "/editor/messages/:id/new_lang", etag, noCache, getState, authed, getMe, loadTree, parseMessageID, newTranslation)
 	.get("editTranslation",        "/editor/messages/:id/:lang",    etag, noCache, getState, authed, getMe, loadTree, loadPath, loadMessage, loadTranslation, formatTextarea, translationEdit)
 	.get("editThread",             "/editor/threads/:id",           etag, noCache, getState, authed, getMe, loadTree, loadThread, formatTextarea, threadEdit)

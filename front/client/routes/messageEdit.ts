@@ -14,6 +14,7 @@ async function messageEdit(ctx) {
 	const settings = new SettingsBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const tree = new MessagesTreeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
+	header.addNewNote()
 	tree.addList(ctx.state.tree)
 
 	content.addMessagesTree(tree)

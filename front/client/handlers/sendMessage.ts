@@ -1,6 +1,8 @@
 import * as is from '../third_party/is'
 import api from '../api'
 
+const limit = parseInt(LIMIT)
+
 async function sendMessage(ctx) {
 	// TODO: proxy send message to messages service, /send
 	console.log("--> sendMessage")
@@ -28,8 +30,11 @@ async function sendMessage(ctx) {
 		console.log(response.error)
 		ctx.state.error = response.error.human
 		ctx.body = "error"
+		return
 	} else {
-		ctx.redirect(ctx.router.url('home', {}, {query: ctx.query}))
+		const params = new URLSearchParams(ctx.query)
+		params.set(form.thread, `${limit},0`)
+		ctx.redirect(ctx.router.url('message', {id: response.message.ID}, {query: params.toString()}))
 	}
 
 	console.log("<-- sendMessage")

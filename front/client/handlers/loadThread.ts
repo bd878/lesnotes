@@ -4,7 +4,7 @@ import * as is from '../third_party/is';
 async function loadThread(ctx, next) {
 	const token = ctx.state.token
 	const userID = parseInt(ctx.params.user) || 0
-	const id = parseInt(ctx.query.id) || parseInt(ctx.params.id) || 0
+	const id = ctx.state.threadID
 	const name = ctx.params.threadName || ""
 
 	console.log("--> loadThread")

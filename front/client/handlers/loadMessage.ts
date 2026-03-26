@@ -8,7 +8,7 @@ interface MessageWithFilesMime extends Message {
 }
 
 async function loadMessage(ctx, next) {
-	const id = parseInt(ctx.query.id) || parseInt(ctx.params.id) || 0
+	const id = ctx.state.messageID
 	const name = ctx.params.messageName || ""
 	const userID = parseInt(ctx.params.user) || 0
 	const token = ctx.state.token

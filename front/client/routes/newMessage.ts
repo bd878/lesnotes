@@ -13,10 +13,12 @@ async function newMessage(ctx) {
 	const logout = new LogoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const tree = new MessagesTreeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
+	header.addNewNote()
 	tree.addList(ctx.state.tree)
 
 	content.addMessagesTree(tree)
-	content.addNewMessageForm(ctx.state.thread)
+	content.addNewMessageForm(ctx.state.messageID)
+	content.addMessagePath(ctx.state.messagePath)
 	content.addLogout(logout)
 	content.addControlPanel()
 	content.addHeader(header)

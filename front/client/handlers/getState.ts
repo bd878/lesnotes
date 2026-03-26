@@ -12,6 +12,7 @@ async function getState(ctx, next) {
 	ctx.state.msg = getMessageView(ctx)
 	ctx.state.cwd = getCwd(ctx)
 	ctx.state.messageID = getMessageID(ctx)
+	ctx.state.threadID = getThreadID(ctx)
 	ctx.state.leaves = getLeaves(ctx)
 	ctx.state.token = getToken(ctx)
 
@@ -25,6 +26,10 @@ function getToken(ctx): string {
 }
 
 function getMessageID(ctx): number {
+	return parseInt(ctx.params.id) || 0
+}
+
+function getThreadID(ctx): number {
 	return parseInt(ctx.params.id) || 0
 }
 

@@ -37,6 +37,7 @@ class MessagesTreeBuilder extends AbstractBuilder {
 
 			messageHref:       function() { return `/messages/${this.ID}` + search; },
 			threadHref:        function() { return `/threads/${this}` + search; /*context is ID, not thread*/ },
+			newMessageHref:    function() { return `/editor/messages/${this.ID}/new` + search; },
 			openThreadHref:    function() { const params = new URLSearchParams(search); params.set(this.ID || 0, `${limit},0`); return path + "?" + params.toString(); },
 			closeThreadHref:   function() { const params = new URLSearchParams(search); params.delete(this.ID || 0); return path + "?" + params.toString(); },
 			prevPageHref:      function() { const params = new URLSearchParams(search); params.set(this.ID || 0, `${limit},${limit + this.offset}`); return path + "?" + params.toString(); },
