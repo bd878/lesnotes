@@ -5,6 +5,7 @@ import LayoutBuilder from '../builders/layoutBuilder';
 import LogoutBuilder from '../builders/logoutBuilder';
 import HeaderBuilder from '../builders/headerBuilder';
 import MessageHeaderBuilder from '../builders/messageHeaderBuilder';
+import MessageNavigationBuilder from '../builders/messageNavigationBuilder';
 import SettingsBuilder from '../builders/settingsBuilder';
 
 async function messageView(ctx) {
@@ -16,21 +17,26 @@ async function messageView(ctx) {
 	const settings = new SettingsBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const logout = new LogoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const messageHeader = new MessageHeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const messageNavigation = new MessageNavigationBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const tree = new MessagesTreeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
 	if (ctx.state.msg == "comments") {
-		content.addMessageNavigation()
+		messageNavigation.addTranslations()
 		content.addComments(ctx.state.message.ID, ctx.state.comments)
 	} else if (ctx.state.msg == "files") {
-		content.addMessageNavigation()
+		messageNavigation.addAttachments()
 		content.addFilesView(ctx.state.message.files)
+	} else if (ctx.state.msg == "translations") {
+		messageNavigation.addComments()
 	} else {
 		if (is.array(ctx.state.message.files) && ctx.state.message.files.length > 0) {
-			content.addMessageNavigation()
+			messageNavigation.addAttachments()
+			messageNavigation.addComments()
 			content.addFilesView(ctx.state.message.files)
-		} else {
-			content.addComments(ctx.state.message.ID, ctx.state.comments)
 		}
+		messageNavigation.addTranslations()
+
+		content.addComments(ctx.state.message.ID, ctx.state.comments)
 	}
 
 	header.addNewNote()
@@ -40,6 +46,7 @@ async function messageView(ctx) {
 	messageHeader.addThreadLink(ctx.state.message.ID)
 
 	content.addMessagesTree(tree)
+	content.addMessageNavigation(messageNavigation)
 	content.addMessageView(ctx.state.me.ID, ctx.state.message)
 	content.addLogout(logout)
 	content.addMessageHeader(messageHeader)

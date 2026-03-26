@@ -4,6 +4,7 @@ import LayoutBuilder from '../builders/layoutBuilder';
 import HeaderBuilder from '../builders/headerBuilder';
 import SettingsBuilder from '../builders/settingsBuilder';
 import MessagesTreeBuilder from '../builders/messagesTreeBuilder';
+import MessageNavigationBuilder from '../builders/messageNavigationBuilder';
 
 async function translationView(ctx) {
 	console.log("--> translationView")
@@ -13,16 +14,14 @@ async function translationView(ctx) {
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const settings = new SettingsBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const tree = new MessagesTreeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const messageNavigation = new MessageNavigationBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
 	if (ctx.state.msg == "comments") {
-		content.addMessageNavigation()
 		content.addComments(ctx.state.message.ID, ctx.state.comments)
 	} else if (ctx.state.msg == "files") {
-		content.addMessageNavigation()
 		content.addFilesView(ctx.state.message.files)
 	} else {
 		if (is.array(ctx.state.message.files) && ctx.state.message.files.length > 0) {
-			content.addMessageNavigation()
 			content.addFilesView(ctx.state.message.files)
 		} else {
 			content.addComments(ctx.state.message.ID, ctx.state.comments)
@@ -35,6 +34,7 @@ async function translationView(ctx) {
 	content.addNavigation()
 	content.addControlPanel()
 	content.addNewTranslation(ctx.state.message.ID)
+	content.addMessageNavigation(messageNavigation)
 	content.addTranslations(ctx.state.message.ID, ctx.state.message.translations)
 	content.addTranslationView(ctx.state.message.ID, ctx.state.translation)
 

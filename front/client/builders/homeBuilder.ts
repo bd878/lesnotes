@@ -108,15 +108,8 @@ class HomeBuilder extends AbstractBuilder {
 		})
 	}
 
-	addMessageNavigation() {
-		const search = this.search
-
-		this.messageNavigation = mustache.render(this.isMobile ? messageNavigationTemplateMobile : messageNavigationTemplate, {
-			attachments:      this.i18n("attachments"),
-			comments:         this.i18n("comments"),
-			attachmentsHref:  function() { const params = new URLSearchParams(search); params.set("msg", "files");     return "?" + params.toString(); },
-			commentsHref:     function() { const params = new URLSearchParams(search); params.set("msg", "comments");  return "?" + params.toString(); },
-		})
+	addMessageNavigation(nav: Builder) {
+		this.messageNavigation = nav.build()
 	}
 
 	addTranslations(message: number | string, previews: TranslationPreview[]) {

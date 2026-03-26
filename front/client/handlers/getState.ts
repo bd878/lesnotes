@@ -68,11 +68,12 @@ function getTheme(ctx) {
 }
 
 function getMessageView(ctx) {
-	switch (ctx.query.msg) {
+	switch (ctx.query.nav) {
 	case "files":
 	case "comments":
+	case "translations":
 	// TODO: case "trans":
-		return ctx.query.msg
+		return ctx.query.nav
 	default:
 		return ""
 	}
