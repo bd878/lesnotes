@@ -13,6 +13,7 @@ message AppendCommand {
 	string  description = 8;
 	string  created_at = 9;
 	string  updated_at = 10;
+	string  title = 11;
 }
 
 message UpdateCommand {
@@ -20,7 +21,8 @@ message UpdateCommand {
 	int64   user_id = 2;
 	optional string  name = 3;
 	optional string  description = 4;
-	string  updated_at = 5;
+	optional string  title = 5;
+	string  updated_at = 6;
 }
 
 message ReorderCommand {

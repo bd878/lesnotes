@@ -53,7 +53,7 @@ func (h *Handler) UpdateThreadJsonAPI(w http.ResponseWriter, req *http.Request) 
 		return err
 	}
 
-	err = h.controller.UpdateThread(req.Context(), request.ID, user.ID, request.Name, request.Description)
+	err = h.controller.UpdateThread(req.Context(), request.ID, user.ID, request.Name, request.Description, request.Title)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

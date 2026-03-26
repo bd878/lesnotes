@@ -34,7 +34,8 @@ message ThreadSnapshotItem {
 	int32    count = 8;
 	string   description = 9;
 	string   created_at = 10;
-	string   updated_at = 11;	
+	string   updated_at = 11;
+	string   title = 12;	
 }
 
 message Thread {
@@ -49,6 +50,7 @@ message Thread {
 	string   description = 9;
 	string   created_at = 10;
 	string   updated_at = 11;
+	string   title = 12;
 }
 
 message ListRequest {
@@ -92,6 +94,7 @@ message UpdateRequest {
 	int64     user_id = 2;
 	optional string    name = 3;
 	optional string    description = 4;
+	optional string    title = 5;
 }
 
 message UpdateResponse {}
@@ -115,6 +118,7 @@ message CreateRequest {
 	int64     next_id = 6;
 	int64     prev_id = 7;
 	string    description = 8;
+	string    title = 9;
 }
 
 message CreateResponse {

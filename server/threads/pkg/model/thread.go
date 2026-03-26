@@ -13,7 +13,7 @@ type (
 		Description      string       `json:"description"`
 		CreatedAt        string       `json:"created_at"`
 		UpdatedAt        string       `json:"updated_at"`
-// TODO: add title, is_root
+		Title            string       `json:"title"`
 	}
 
 	ListThreadsRequest struct {
@@ -39,6 +39,7 @@ type (
 		Name             string       `json:"name"`
 		Private          bool         `json:"private"`
 		Description      string       `json:"description"`
+		Title            string       `json:"title"`
 	}
 
 	ReadThreadRequest struct {
@@ -52,6 +53,7 @@ type (
 		UserID           int64        `json:"user_id"`
 		Name             *string      `json:"name,omitempty"`
 		Description      *string      `json:"description,omitempty"`
+		Title            *string      `json:"title,omitempty"`
 	}
 
 	DeleteThreadRequest struct {

@@ -58,15 +58,15 @@ func (m *Distributed) apply(ctx context.Context, reqType machine.RequestType, cm
 	return m.consensus.Apply(buf.Bytes(), 10*time.Second)
 }
 
-func (m *Distributed) CreateThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name, description string, private bool) (err error) {
+func (m *Distributed) CreateThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name, description, title string, private bool) (err error) {
 	m.log.Debugw("create thread", "id", id, "user_id", userID, "parent_id", parentID,
-		"next_id", nextID, "prev_id", prevID, "name", name, "description", description, "private", private)
+		"next_id", nextID, "prev_id", prevID, "name", name, "description", description, "title", title, "private", private)
 
 
 	createdAt := time.Now().UTC().Format(time.RFC3339)
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
-	event, err := domain.CreateThread(id, userID, parentID, name, description, private, createdAt, updatedAt)
+	event, err := domain.CreateThread(id, userID, parentID, name, description, title, private, createdAt, updatedAt)
 	if err != nil {
 		return err
 	}
@@ -82,6 +82,7 @@ func (m *Distributed) CreateThread(ctx context.Context, id, userID, parentID, ne
 		Description:   description,
 		CreatedAt:     createdAt,
 		UpdatedAt:     updatedAt,
+		Title:         title,
 	})
 	if err != nil {
 		return err
@@ -95,12 +96,12 @@ func (m *Distributed) CreateThread(ctx context.Context, id, userID, parentID, ne
 	return m.publisher.Publish(context.TODO(), event)
 }
 
-func (m *Distributed) UpdateThread(ctx context.Context, id, userID int64, name, description *string) (err error) {
-	m.log.Debugw("update thread", "id", id, "user_id", userID, "name", name, "description", description)
+func (m *Distributed) UpdateThread(ctx context.Context, id, userID int64, name, description, title *string) (err error) {
+	m.log.Debugw("update thread", "id", id, "user_id", userID, "name", name, "description", description, "title", title)
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
-	event, err := domain.UpdateThread(id, userID, name, description, updatedAt)
+	event, err := domain.UpdateThread(id, userID, name, description, title, updatedAt)
 	if err != nil {
 		return err
 	}
@@ -110,6 +111,7 @@ func (m *Distributed) UpdateThread(ctx context.Context, id, userID int64, name, 
 		UserId:        userID,
 		Name:          name,
 		Description:   description,
+		Title:         title,
 		UpdatedAt:     updatedAt,
 	})
 	if err != nil {

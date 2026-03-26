@@ -13,8 +13,8 @@ type Controller interface {
 	ResolveThread(ctx context.Context, id, userID int64) (ids []int64, err error)
 	PublishThread(ctx context.Context, id, userID int64) (err error)
 	PrivateThread(ctx context.Context, id, userID int64) (err error)
-	CreateThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name, description string, private bool) (err error)
-	UpdateThread(ctx context.Context, id, userID int64, name, description *string) (err error)
+	CreateThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name, description, title string, private bool) (err error)
+	UpdateThread(ctx context.Context, id, userID int64, name, description, title *string) (err error)
 	DeleteThread(ctx context.Context, id, userID int64) (err error)
 	ReorderThread(ctx context.Context, id, userID, parentID, nextID, prevID int64) (err error)
 }

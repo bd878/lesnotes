@@ -23,7 +23,7 @@ func NewThreadsRepository(pool *pgxpool.Pool, tableName string) *ThreadsReposito
 }
 
 func (r *ThreadsRepository) ReadThreadByID(ctx context.Context, id, userID int64/*may be public*/) (thread *model.Thread, err error) {
-	query := "SELECT user_id, parent_id, next_id, prev_id, name, description, private, created_at, updated_at FROM %s WHERE id = $1 AND (user_id = $2 OR private = false)"
+	query := "SELECT user_id, parent_id, next_id, prev_id, name, description, title, private, created_at, updated_at FROM %s WHERE id = $1 AND (user_id = $2 OR private = false)"
 
 	thread = &model.Thread{
 		ID:     id,
@@ -32,7 +32,7 @@ func (r *ThreadsRepository) ReadThreadByID(ctx context.Context, id, userID int64
 	var createdAt, updatedAt *time.Time
 
 	err = r.pool.QueryRow(ctx, r.table(query), id, userID).Scan(&thread.UserID, &thread.ParentID, &thread.NextID, &thread.PrevID,
-		&thread.Name, &thread.Description, &thread.Private, &createdAt, &updatedAt)
+		&thread.Name, &thread.Description, &thread.Title, &thread.Private, &createdAt, &updatedAt)
 	if err != nil {
 		return
 	}
@@ -46,7 +46,7 @@ func (r *ThreadsRepository) ReadThreadByID(ctx context.Context, id, userID int64
 }
 
 func (r *ThreadsRepository) ReadThreadByName(ctx context.Context, name string, userID int64 /*may be public*/) (thread *model.Thread, err error) {
-	query := "SELECT user_id, id, parent_id, next_id, prev_id, description, private, created_at, updated_at FROM %s WHERE name = $1 AND (user_id = $2 OR private = false)"
+	query := "SELECT user_id, id, parent_id, next_id, prev_id, description, title, private, created_at, updated_at FROM %s WHERE name = $1 AND (user_id = $2 OR private = false)"
 
 	thread = &model.Thread{
 		Name:     name,
@@ -55,7 +55,7 @@ func (r *ThreadsRepository) ReadThreadByName(ctx context.Context, name string, u
 	var createdAt, updatedAt *time.Time
 
 	err = r.pool.QueryRow(ctx, r.table(query), name, userID).Scan(&thread.UserID, &thread.ID, &thread.ParentID, &thread.NextID, &thread.PrevID,
-		&thread.Description, &thread.Private, &createdAt, &updatedAt)
+		&thread.Description, &thread.Title, &thread.Private, &createdAt, &updatedAt)
 	if err != nil {
 		return
 	}
@@ -334,7 +334,7 @@ func (r *ThreadsRepository) ReorderThread(ctx context.Context, id, userID, paren
 	return
 }
 
-func (r *ThreadsRepository) AppendThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name, description string, private bool, createdAt, updatedAt string) (err error) {
+func (r *ThreadsRepository) AppendThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name, description, title string, private bool, createdAt, updatedAt string) (err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -354,7 +354,7 @@ func (r *ThreadsRepository) AppendThread(ctx context.Context, id, userID, parent
 		}
 	}()
 
-	const insert = "INSERT INTO %s(id, user_id, parent_id, name, description, private, next_id, prev_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
+	const insert = "INSERT INTO %s(id, user_id, parent_id, name, description, title, private, next_id, prev_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)"
 	const selectLastThread = "SELECT id FROM %s WHERE user_id = $1 AND parent_id = $2 AND next_id = 0"
 	const updateLastThread = "UPDATE %s SET next_id = $4 WHERE user_id = $1 AND id = $2 AND parent_id = $3"
 
@@ -366,7 +366,7 @@ func (r *ThreadsRepository) AppendThread(ctx context.Context, id, userID, parent
 
 	if err == pgx.ErrNoRows {
 		// new thread
-		_, err = tx.Exec(ctx, r.table(insert), id, userID, parentID, name, description, private, 0, 0, createdAt, updatedAt)
+		_, err = tx.Exec(ctx, r.table(insert), id, userID, parentID, name, description, title, private, 0, 0, createdAt, updatedAt)
 		return
 	}
 
@@ -375,15 +375,15 @@ func (r *ThreadsRepository) AppendThread(ctx context.Context, id, userID, parent
 		return
 	}
 
-	_, err = tx.Exec(ctx, r.table(insert), id, userID, parentID, name, description, private, 0 /* next_id */, lastThreadID, createdAt, updatedAt)
+	_, err = tx.Exec(ctx, r.table(insert), id, userID, parentID, name, description, title, private, 0 /* next_id */, lastThreadID, createdAt, updatedAt)
 
 	return
 }
 
-func (r *ThreadsRepository) UpdateThread(ctx context.Context, id, userID int64, name, description *string, updatedAt string) (err error) {
-	const query = "UPDATE %s SET name = $3, description = $4, updated_at = $5 WHERE user_id = $1 AND id = $2"
+func (r *ThreadsRepository) UpdateThread(ctx context.Context, id, userID int64, name, description, title *string, updatedAt string) (err error) {
+	const query = "UPDATE %s SET name = $3, description = $4, title = $5, updated_at = $6 WHERE user_id = $1 AND id = $2"
 
-	_, err = r.pool.Exec(ctx, r.table(query), userID, id, name, description, updatedAt)
+	_, err = r.pool.Exec(ctx, r.table(query), userID, id, name, description, title, updatedAt)
 
 	return
 }

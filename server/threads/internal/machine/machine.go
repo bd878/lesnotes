@@ -10,8 +10,8 @@ import (
 )
 
 type ThreadsRepository interface {
-	AppendThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name, description string, private bool, createdAt, updatedAt string) (err error)
-	UpdateThread(ctx context.Context, id, userID int64, name, description *string, updatedAt string) (err error)
+	AppendThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name, description, title string, private bool, createdAt, updatedAt string) (err error)
+	UpdateThread(ctx context.Context, id, userID int64, name, description, title *string, updatedAt string) (err error)
 	PrivateThread(ctx context.Context, id, userID int64, updatedAt string) error
 	PublishThread(ctx context.Context, id, userID int64, updatedAt string) error
 	DeleteThread(ctx context.Context, id, userID int64) error
@@ -67,7 +67,7 @@ func (f *Machine) applyAppend(raw []byte) interface{} {
 	proto.Unmarshal(raw, &cmd)
 
 	return f.threadsRepo.AppendThread(context.TODO(), cmd.Id, cmd.UserId, cmd.ParentId, cmd.NextId,
-		cmd.PrevId, cmd.Name, cmd.Description, cmd.Private, cmd.CreatedAt, cmd.UpdatedAt)
+		cmd.PrevId, cmd.Name, cmd.Description, cmd.Title, cmd.Private, cmd.CreatedAt, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyReorder(raw []byte) interface{} {
@@ -81,7 +81,7 @@ func (f *Machine) applyUpdate(raw []byte) interface{} {
 	var cmd UpdateCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.threadsRepo.UpdateThread(context.TODO(), cmd.Id, cmd.UserId, cmd.Name, cmd.Description, cmd.UpdatedAt)
+	return f.threadsRepo.UpdateThread(context.TODO(), cmd.Id, cmd.UserId, cmd.Name, cmd.Description, cmd.Title, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyDelete(raw []byte) interface{} {

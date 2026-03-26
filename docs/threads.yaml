@@ -566,6 +566,9 @@ components:
           description:
             type: string
             required: false
+          title:
+            type: string
+            required: false
 
     createOK:
       type: object
@@ -597,6 +600,9 @@ components:
           type: string
           required: false
         description:
+          type: string
+          required: false
+        title:
           type: string
           required: false
 
@@ -718,4 +724,6 @@ components:
           private:
             type: boolean
           description:
+            type: string
+          title:
             type: string

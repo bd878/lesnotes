@@ -11,8 +11,8 @@ type Controller interface {
 	ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (ids []*threads.Thread, isLastPage bool, err error)
 	ReadThread(ctx context.Context, id, userID int64, name string) (thread *threads.Thread, err error)
 	ResolveThread(ctx context.Context, id, userID int64) (ids []int64, err error)
-	CreateThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name, description string, private bool) (err error)
-	UpdateThread(ctx context.Context, id, userID int64, name, description *string) (err error)
+	CreateThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name, description, title string, private bool) (err error)
+	UpdateThread(ctx context.Context, id, userID int64, name, description, title *string) (err error)
 	ReorderThread(ctx context.Context, id, userID, parentID, nextID, prevID int64) (err error)
 	DeleteThread(ctx context.Context, id, userID int64) (err error)
 	PublishThread(ctx context.Context, id, userID int64) (err error)
@@ -78,7 +78,8 @@ func (h *Handler) Resolve(ctx context.Context, req *api.ResolveRequest) (resp *a
 func (h *Handler) Create(ctx context.Context, req *api.CreateRequest) (resp *api.CreateResponse, err error) {
 	// TODO: validate that parent thread exists
 
-	err = h.controller.CreateThread(ctx, req.Id, req.UserId, req.ParentId, req.NextId, req.PrevId, req.Name, req.Description, req.Private)
+	err = h.controller.CreateThread(ctx, req.Id, req.UserId, req.ParentId, req.NextId, req.PrevId,
+		req.Name, req.Description, req.Title, req.Private)
 	if err != nil {
 		return
 	}
@@ -89,7 +90,7 @@ func (h *Handler) Create(ctx context.Context, req *api.CreateRequest) (resp *api
 }
 
 func (h *Handler) Update(ctx context.Context, req *api.UpdateRequest) (resp *api.UpdateResponse, err error) {
-	err = h.controller.UpdateThread(ctx, req.Id, req.UserId, req.Name, req.Description)
+	err = h.controller.UpdateThread(ctx, req.Id, req.UserId, req.Name, req.Description, req.Title)
 	if err != nil {
 		return
 	}

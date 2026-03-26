@@ -58,6 +58,7 @@ func (h domainHandler[T]) onThreadCreated(ctx context.Context, event ddd.Event) 
 		ParentId:    payload.ParentID,
 		Name:        payload.Name,
 		Description: payload.Description,
+		Title:       payload.Title,
 		Private:     payload.Private,
 		CreatedAt:   payload.CreatedAt,
 		UpdatedAt:   payload.UpdatedAt,
@@ -103,6 +104,7 @@ func (h domainHandler[T]) onThreadUpdated(ctx context.Context, event ddd.Event) 
 		UserId:      payload.UserID,
 		Name:        payload.Name,
 		Description: payload.Description,
+		Title:       payload.Title,
 		UpdatedAt:   payload.UpdatedAt,
 	})
 	if err != nil {

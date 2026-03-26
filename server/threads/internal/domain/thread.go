@@ -24,6 +24,7 @@ type ThreadCreated struct {
 	ParentID       int64
 	Name           string
 	Description    string
+	Title          string
 	Private        bool
 	CreatedAt      string
 	UpdatedAt      string
@@ -31,7 +32,7 @@ type ThreadCreated struct {
 
 func (ThreadCreated) Key() string { return ThreadCreatedEvent }
 
-func CreateThread(id, userID, parentID int64, name, description string, private bool, createdAt, updatedAt string) (ddd.Event, error) {
+func CreateThread(id, userID, parentID int64, name, description, title string, private bool, createdAt, updatedAt string) (ddd.Event, error) {
 	if id == 0 {
 		return nil, ErrIDRequired
 	}
@@ -43,6 +44,7 @@ func CreateThread(id, userID, parentID int64, name, description string, private 
 		ParentID:    parentID,
 		Name:        name,
 		Description: description,
+		Title:       title,
 		Private:     private,
 		CreatedAt:   createdAt,
 		UpdatedAt:   updatedAt,
@@ -54,12 +56,13 @@ type ThreadUpdated struct {
 	UserID      int64
 	Name        *string
 	Description *string
+	Title       *string
 	UpdatedAt   string
 }
 
 func (ThreadUpdated) Key() string { return ThreadUpdatedEvent }
 
-func UpdateThread(id, userID int64, name, description *string, updatedAt string) (ddd.Event, error) {
+func UpdateThread(id, userID int64, name, description, title *string, updatedAt string) (ddd.Event, error) {
 	if id == 0 {
 		return nil, ErrIDRequired
 	}
@@ -70,6 +73,7 @@ func UpdateThread(id, userID int64, name, description *string, updatedAt string)
 		UserID:         userID,
 		Name:           name,
 		Description:    description,
+		Title:          title,
 		UpdatedAt:      updatedAt,
 	}), nil
 }
