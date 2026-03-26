@@ -17,6 +17,7 @@ class ThreadViewBuilder extends HomeBuilder {
 		this.threadView = mustache.render(this.isMobile ? threadViewTemplateMobile : threadViewTemplate, {
 			ID:               thread.ID,
 			description:      thread.description,
+			title:            thread.title,
 			name:             thread.name,
 			private:          thread.private,
 			newNoteHref:      function() { return "/home" + search; },

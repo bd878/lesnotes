@@ -2,12 +2,12 @@ import api from './api';
 import * as is from '../third_party/is'
 import models from './models';
 
-async function updateThreadJson(token: string, id: number, description: string, name?: string) {
+async function updateThreadJson(token: string, id: number, description: string, title: string, name?: string) {
 	let result = {
 		error:   models.error(),
 	}
 
-	console.log("updateThreadJson", "token", token, "id", id, "description", description, "name", name)
+	console.log("updateThreadJson", "token", token, "id", id, "description", description, "title", title, "name", name)
 
 	try {
 		const [_1, error] = await api("/threads/v2/update", {
@@ -17,6 +17,7 @@ async function updateThreadJson(token: string, id: number, description: string, 
 				req: {
 					id:           id,
 					description:  description,
+					title:        title,
 					name:         name,
 				}
 			},

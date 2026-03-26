@@ -26,7 +26,6 @@ class MessageViewBuilder extends HomeBuilder {
 			private:               message.private,
 			filesSummary:          this.i18n("filesSummary"),
 			editHref:              `/editor/messages/${message.ID}` + search,
-			threadHref:            `/editor/threads/${message.ID}` + search,
 			deleteAction:          "/m/delete" + search,
 			publishAction:         "/m/publish" + search,
 			privateAction:         "/m/private" + search,

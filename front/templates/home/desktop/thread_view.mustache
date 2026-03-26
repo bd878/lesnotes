@@ -5,6 +5,9 @@
 
 	<div class="flex flex-col justify-between grow overflow-x-hidden">
 		<div class="flex flex-col h-full">
+			{{#title}}
+				<div class="text-lg small:text-base large:text-xl mb-2 px-1">{{title}}</div>
+			{{/title}}
 			<p class="w-full small:text-sm large:text-lg mb-1 px-1 resize-none overflow-y-auto text-start h-full">{{{description}}}</p>
 
 			<div class="flex flex-row justify-between items-end">

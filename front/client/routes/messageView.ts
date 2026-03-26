@@ -4,6 +4,7 @@ import MessagesTreeBuilder from '../builders/messagesTreeBuilder';
 import LayoutBuilder from '../builders/layoutBuilder';
 import LogoutBuilder from '../builders/logoutBuilder';
 import HeaderBuilder from '../builders/headerBuilder';
+import MessageHeaderBuilder from '../builders/messageHeaderBuilder';
 import SettingsBuilder from '../builders/settingsBuilder';
 
 async function messageView(ctx) {
@@ -14,6 +15,7 @@ async function messageView(ctx) {
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const settings = new SettingsBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const logout = new LogoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const messageHeader = new MessageHeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const tree = new MessagesTreeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
 	if (ctx.state.msg == "comments") {
@@ -34,10 +36,13 @@ async function messageView(ctx) {
 	header.addNewNote()
 	tree.addList(ctx.state.tree)
 
+	messageHeader.addMessagePath(ctx.state.messagePath)
+	messageHeader.addThreadLink(ctx.state.message.ID)
+
 	content.addMessagesTree(tree)
-	content.addMessagePath(ctx.state.messagePath)
 	content.addMessageView(ctx.state.me.ID, ctx.state.message)
 	content.addLogout(logout)
+	content.addMessageHeader(messageHeader)
 	content.addHeader(header)
 	content.addControlPanel()
 

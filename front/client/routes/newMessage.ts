@@ -3,6 +3,7 @@ import LayoutBuilder from '../builders/layoutBuilder';
 import LogoutBuilder from '../builders/logoutBuilder';
 import HeaderBuilder from '../builders/headerBuilder';
 import MessagesTreeBuilder from '../builders/messagesTreeBuilder';
+import MessageHeaderBuilder from '../builders/messageHeaderBuilder';
 
 async function newMessage(ctx) {
 	console.log("--> newMessage")
@@ -11,14 +12,17 @@ async function newMessage(ctx) {
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const logout = new LogoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const messageHeader = new MessageHeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const tree = new MessagesTreeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
 	header.addNewNote()
 	tree.addList(ctx.state.tree)
 
+	messageHeader.addMessagePath(ctx.state.messagePath)
+
 	content.addMessagesTree(tree)
 	content.addNewMessageForm(ctx.state.messageID)
-	content.addMessagePath(ctx.state.messagePath)
+	content.addMessageHeader(messageHeader)
 	content.addLogout(logout)
 	content.addControlPanel()
 	content.addHeader(header)

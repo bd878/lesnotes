@@ -10,12 +10,13 @@ async function updateThread(ctx) {
 		form = {}
 	}
 
-	const response = await api.updateThreadJson(ctx.state.token, parseInt(form.id) || 0, form.description, form.name)
+	const response = await api.updateThreadJson(ctx.state.token, parseInt(form.id) || 0, form.description, form.title, form.name)
 
 	if (response.error.error) {
 		console.log(response.error)
 		ctx.state.error = response.error.human
 		ctx.body = "error"
+		return
 	} else {
 		ctx.redirect(ctx.router.url('thread', {id: form.id}, {query: ctx.query}))
 	}

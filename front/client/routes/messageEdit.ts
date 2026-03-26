@@ -2,7 +2,9 @@ import * as is from '../third_party/is';
 import MessageEditViewBuilder from '../builders/messageEditViewBuilder';
 import MessagesTreeBuilder from '../builders/messagesTreeBuilder';
 import LayoutBuilder from '../builders/layoutBuilder';
+import LogoutBuilder from '../builders/logoutBuilder';
 import HeaderBuilder from '../builders/headerBuilder';
+import MessageHeaderBuilder from '../builders/messageHeaderBuilder';
 import SettingsBuilder from '../builders/settingsBuilder';
 
 async function messageEdit(ctx) {
@@ -12,19 +14,24 @@ async function messageEdit(ctx) {
 	const content = new MessageEditViewBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const settings = new SettingsBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const logout = new LogoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const messageHeader = new MessageHeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const tree = new MessagesTreeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
 	header.addNewNote()
 	tree.addList(ctx.state.tree)
 
+	messageHeader.addMessagePath(ctx.state.messagePath)
+	messageHeader.addThreadLink(ctx.state.message.ID)
+
 	content.addMessagesTree(tree)
-	content.addFilesSelector(ctx.state.files.files)
 	content.addMessageEditForm(ctx.state.message)
-	content.addNewTranslation(ctx.state.message.ID)
-	content.addTranslations(ctx.state.message.ID, ctx.state.message.translations)
+	content.addLogout(logout)
+	content.addMessageHeader(messageHeader)
+	content.addHeader(header)
+	content.addControlPanel()
 
 	layout.addFooter()
-	layout.addHeader(header)
 	layout.addContent(content)
 
 	ctx.body = layout.build()
