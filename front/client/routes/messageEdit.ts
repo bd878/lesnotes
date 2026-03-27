@@ -5,7 +5,6 @@ import LayoutBuilder from '../builders/layoutBuilder';
 import LogoutBuilder from '../builders/logoutBuilder';
 import HeaderBuilder from '../builders/headerBuilder';
 import MessageHeaderBuilder from '../builders/messageHeaderBuilder';
-import SettingsBuilder from '../builders/settingsBuilder';
 
 async function messageEdit(ctx) {
 	console.log("--> messageEdit")
@@ -13,7 +12,6 @@ async function messageEdit(ctx) {
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const content = new MessageEditViewBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
-	const settings = new SettingsBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const logout = new LogoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const messageHeader = new MessageHeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const tree = new MessagesTreeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
@@ -26,6 +24,7 @@ async function messageEdit(ctx) {
 
 	content.addMessagesTree(tree)
 	content.addMessageEditForm(ctx.state.message)
+	content.addMessageFeatures(ctx.state.messageFeatures)
 	content.addLogout(logout)
 	content.addMessageHeader(messageHeader)
 	content.addHeader(header)

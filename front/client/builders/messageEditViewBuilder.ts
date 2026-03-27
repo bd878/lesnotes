@@ -11,9 +11,6 @@ import HomeBuilder from './homeBuilder';
 let messageEditFormTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/home/desktop/message_edit_form.mustache')), { encoding: 'utf-8' });
 let messageEditFormTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/home/mobile/message_edit_form.mustache')), { encoding: 'utf-8' });
 
-let filesSelectorTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/home/desktop/files_selector.mustache')), { encoding: 'utf-8' });
-let filesSelectorTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/home/mobile/files_selector.mustache')), { encoding: 'utf-8' });
-
 class MessageEditViewBuilder extends HomeBuilder {
 	scripts = [
 		"/public/pages/home/homeScript.js",
@@ -42,13 +39,6 @@ class MessageEditViewBuilder extends HomeBuilder {
 			domain:           Config.get("domain"),
 		}, {
 			filesSelector:    this.filesSelector,
-		})
-	}
-
-	addFilesSelector(files: SelectedFile[]) {
-		this.filesSelector = mustache.render(this.isMobile ? filesSelectorTemplateMobile : filesSelectorTemplate, {
-			files:             files,
-			defaultFile:       this.i18n("defaultFile"),
 		})
 	}
 }

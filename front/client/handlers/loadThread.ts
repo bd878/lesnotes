@@ -33,7 +33,7 @@ async function loadThread(ctx, next) {
 
 		ctx.state.thread = ctx.state.thread.thread
 	} else {
-		ctx.state.thread = undefined
+		ctx.state.thread = {}
 	}
 
 	await next()

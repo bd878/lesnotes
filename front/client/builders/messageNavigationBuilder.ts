@@ -37,7 +37,7 @@ class MessageNavigationBuilder extends AbstractBuilder {
 			translations:     this.i18n("translations"),
 			attachmentsHref:  function() { const params = new URLSearchParams(search); params.set("nav", "files");     return "?" + params.toString(); },
 			commentsHref:     function() { const params = new URLSearchParams(search); params.set("nav", "comments");  return "?" + params.toString(); },
-			translationsHref: function() { const params = new URLSearchParams(search); params.set("nav", "translations");  return "?" + params.toString(); },
+			translationsHref: function() { const params = new URLSearchParams(search); params.set("nav", "trans");     return "?" + params.toString(); },
 		}, {})
 	}
 }

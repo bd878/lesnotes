@@ -16,6 +16,8 @@ import authed from './handlers/authed';
 import noCache from './handlers/noCache';
 import loadTree from './handlers/loadTree';
 import loadComments from './handlers/loadComments';
+import messageFeatures from './handlers/messageFeatures'
+import messageTranslations from './handlers/messageTranslations'
 import loadPath from './handlers/loadPath';
 import loadFiles from './handlers/loadFiles';
 import selectMessageFiles from './handlers/selectMessageFiles';
@@ -50,7 +52,6 @@ import updateMessage from './handlers/updateMessage';
 import updateThread from './handlers/updateThread';
 import getSearchForm from './handlers/getSearchForm';
 import getSearchQuery from './handlers/getSearchQuery';
-import parseMessageID from './handlers/parseMessageID';
 import parseMessageName from './handlers/parseMessageName';
 import parseThreadName from './handlers/parseThreadName';
 
@@ -59,8 +60,6 @@ import main from './routes/main';
 import login from './routes/login';
 import signup from './routes/signup';
 import newMessage from './routes/newMessage';
-import newTranslation from './routes/newTranslation';
-import files from './routes/files';
 import search from './routes/search';
 import xxx from './routes/xxx';
 import publicMessage from './routes/publicMessage';
@@ -69,10 +68,8 @@ import publicThread from './routes/publicThread';
 import publicThreadMessage from './routes/publicThreadMessage';
 import threadEdit from './routes/threadEdit';
 import messageView from './routes/messageView';
-import translationView from './routes/translationView';
 import threadView from './routes/threadView';
 import messageEdit from './routes/messageEdit';
-import translationEdit from './routes/translationEdit';
 import status from './routes/status';
 
 const app = new Koa();
@@ -96,14 +93,10 @@ router
 	.get("logout",                 "/logout",                       etag, noCache, getState, expireToken, redirectLogin)
 	.get("signup",                 "/signup",                       etag, noCache, getState, notAuthed, signup)
 	.get("home",                   "/home",                         etag, noCache, getState, authed, getMe, loadTree, loadFiles, newMessage)
-	.get("files",                  "/files",                        etag, noCache, getState, authed, getMe, loadTree, loadFiles, files)
-	.get("message",                "/messages/:id",                 etag, noCache, getState, authed, getMe, loadTree, loadPath, loadMessage, loadComments, formatView, messageView)
-	.get("translation",            "/messages/:id/:lang",           etag, noCache, getState, authed, getMe, loadTree, loadPath, loadMessage, loadComments, loadTranslation, formatView, translationView)
+	.get("message",                "/messages/:id",                 etag, noCache, getState, authed, getMe, loadTree, loadPath, loadThread, loadMessage, loadComments, loadTranslation, formatView, messageFeatures, messageTranslations, messageView)
+	.get("editMessage",            "/editor/messages/:id",          etag, noCache, getState, authed, getMe, loadTree, loadPath, loadMessage, loadFiles, loadComments, selectMessageFiles, loadTranslation, formatTextarea, messageFeatures, messageTranslations, messageEdit)
 	.get("thread",                 "/threads/:id",                  etag, noCache, getState, authed, getMe, loadTree, loadPath, loadThread, formatView, threadView)
-	.get("editMessage",            "/editor/messages/:id",          etag, noCache, getState, authed, getMe, loadTree, loadPath, loadMessage, loadFiles, selectMessageFiles, formatTextarea, messageEdit)
 	.get("newThreadMessage",       "/editor/messages/:id/new",      etag, noCache, getState, authed, getMe, loadTree, loadPath, newMessage)
-	.get("newTranslation",         "/editor/messages/:id/new_lang", etag, noCache, getState, authed, getMe, loadTree, parseMessageID, newTranslation)
-	.get("editTranslation",        "/editor/messages/:id/:lang",    etag, noCache, getState, authed, getMe, loadTree, loadPath, loadMessage, loadTranslation, formatTextarea, translationEdit)
 	.get("editThread",             "/editor/threads/:id",           etag, noCache, getState, authed, getMe, loadTree, loadPath, loadThread, formatTextarea, threadEdit)
 	.get("status",                 "/status",                       status, noCache, getState)
 	.get("search",                 "/search",                       etag, noCache, getState, authed, getMe, getSearchQuery, loadSearch, loadSearchPath, search)

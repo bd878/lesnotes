@@ -9,9 +9,11 @@ async function getState(ctx, next) {
 	ctx.state.lang = getLanguage(ctx)
 	ctx.state.theme = getTheme(ctx)
 	ctx.state.thread = getThread(ctx)
-	ctx.state.msg = getMessageView(ctx)
+	ctx.state.nav = getMessageView(ctx)
+	ctx.state.trans = getTranslation(ctx)
 	ctx.state.cwd = getCwd(ctx)
 	ctx.state.messageID = getMessageID(ctx)
+	ctx.state.messageName = ctx.params.messageName || ""
 	ctx.state.threadID = getThreadID(ctx)
 	ctx.state.leaves = getLeaves(ctx)
 	ctx.state.token = getToken(ctx)
@@ -67,11 +69,37 @@ function getTheme(ctx) {
 	}
 }
 
+function getTranslation(ctx) {
+	const [lang = "", mode = ""] = ((new URLSearchParams(ctx.request.search)).get("trans") || "").split(",")
+	const result = { lang: "", mode: "new" }
+
+	switch (lang) {
+	case "ru":
+	case "en":
+	case "fr":
+	case "de":
+		result.lang = lang
+		break
+	case "new":
+		result.mode = "new"
+		break;
+	}
+
+	switch (mode) {
+	case "edit":
+	case "view":
+		result.mode = mode
+		break
+	}
+
+	return result
+}
+
 function getMessageView(ctx) {
 	switch (ctx.query.nav) {
 	case "files":
 	case "comments":
-	case "translations":
+	case "trans":
 	// TODO: case "trans":
 		return ctx.query.nav
 	default:

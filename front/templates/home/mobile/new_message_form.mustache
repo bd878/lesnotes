@@ -8,14 +8,6 @@
 		<textarea name="text" type="input" class="mb-2 focus:outline-none w-full px-1 overflow-y-auto resize-none placeholder:italic placeholder:text-gray-600 text-sm small:placeholder:text-sm large:placeholder:text-lg small:text-sm large:text-lg h-full" placeholder="{{textPlaceholder}}"></textarea>
 		<input type="hidden" name="thread" value="{{thread}}" />
 
-		<details class="mb-2 cursor-pointer">
-			<summary class="mb-1">
-				{{filesSummary}}
-			</summary>
-
-			{{> filesSelector}}
-		</details>
-
 		<div class="flex flex-row">
 			<button formaction="{{sendAction}}" type="submit" class="rounded-md border-1 px-2 border-solid text-left cursor-pointer">
 				{{sendButton}}

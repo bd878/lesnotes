@@ -38,6 +38,13 @@ class MessageHeaderBuilder extends AbstractBuilder {
 		})
 	}
 
+	addEditThreadLink(threadID: number) {
+		this.switcher = mustache.render(this.isMobile ? messageThreadSwitcherTemplateMobile : messageThreadSwitcherTemplate, {
+			href: `/editor/threads/${threadID}` + this.search,
+			title: this.i18n("thread"),
+		})
+	}
+
 	build() {
 		return mustache.render(this.isMobile ? messageHeaderTemplateMobile : messageHeaderTemplate, {}, {
 			messagePath: this.messagePath,
