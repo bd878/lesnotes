@@ -20,7 +20,7 @@ func NewTranslationsRepository(pool *pgxpool.Pool, tableName string) *Translatio
 }
 
 func (r *TranslationsRepository) SaveTranslation(ctx context.Context, messageID int64, lang, title, text, createdAt, updatedAt string) (err error) {
-	const query = "INSERT INTO %s(message_id, lang, text, title, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)"
+	const query = "INSERT INTO %s(message_id, lang, title, text, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)"
 
 	_, err = r.pool.Exec(ctx, r.table(query), messageID, lang, title, text, createdAt, updatedAt)
 

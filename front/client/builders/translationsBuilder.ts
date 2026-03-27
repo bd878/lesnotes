@@ -41,7 +41,6 @@ class TranslationsBuilder extends AbstractBuilder {
 			newTranslationHref:    function() { const params = new URLSearchParams(search); params.set("trans", "new"); return path + "?" + params.toString() },
 			translationHref:       function() { const params = new URLSearchParams(search); params.set("trans", this.lang + ",view"); return path + "?" + params.toString() },
 			translations:          previews,
-			hasTranslations:       () => previews.length > 0,
 		})
 	}
 
@@ -62,6 +61,7 @@ class TranslationsBuilder extends AbstractBuilder {
 			translation:        translation,
 			titlePlaceholder:   this.i18n("titlePlaceholder"),
 			textPlaceholder:    this.i18n("textPlaceholder"),
+			redirectUrl:        function() { const params = new URLSearchParams(search); params.set("trans", this.lang + ",view"); return path + "?" + params.toString() },
 			cancelEditHref:     function() { const params = new URLSearchParams(search); params.set("trans", this.lang + ",view"); return path + "?" + params.toString() },
 			updateButton:       this.i18n("updateButton"),
 			cancelButton:       this.i18n("cancelButton"),
@@ -76,25 +76,34 @@ class TranslationsBuilder extends AbstractBuilder {
 		this.translationView = mustache.render(this.isMobile ? translationViewTemplateMobile : translationViewTemplate, {
 			messageID:        messageID,
 			translation:      translation,
+			redirectUrl:      function() { const params = new URLSearchParams(search); params.delete("trans"); return path + "?" + params.toString(); },
 			editHref:         function() { const params = new URLSearchParams(search); params.set("trans", this.lang + ",edit"); return path + "?" + params.toString() },
 			deleteAction:     "/translation/delete" + search,
 		})
 	}
 
-	addTranslationForm(messageID: number) {
+	addTranslationNewForm(messageID: number) {
+		const search = this.search
+		const path = this.path
 		this.newTranslationForm = mustache.render(this.isMobile ? newTranslationTemplateMobile : newTranslationTemplate, {
 			titlePlaceholder:    this.i18n("titlePlaceholder"),
-			textPlaceholder:     this.i18n("textPlaceholder"),
+			textPlaceholder:     this.i18n("translationPlaceholder"),
 			defaultLang:         this.i18n("defaultLang"),
 			sendButton:          this.i18n("sendButton"),
+			cancelButton:        this.i18n("cancelButton"),
 			sendAction:          "/translation/send" + this.search,
+			redirectUrl:         function() { const params = new URLSearchParams(search); params.delete("trans"); return path + "?" + params.toString(); },
+			cancelHref:          function() { const params = new URLSearchParams(search); params.delete("trans"); return path + "?" + params.toString(); },
 			messageID:           messageID,
 			langs:               [{lang: "de", label: this.i18n("deLang")}, {lang: "en", label: this.i18n("enLang")}, {lang: "fr", label: this.i18n("frLang")}, {lang: "ru", label: this.i18n("ruLang")}],
 		})
 	}
 
 	build() {
-		return mustache.render(this.isMobile ? translationsTemplateMobile : translationsTemplate, {}, {
+		const hasContent = this.translationEditForm || this.newTranslationForm || this.translationView
+		return mustache.render(this.isMobile ? translationsTemplateMobile : translationsTemplate, {
+			hasContent: hasContent,
+		}, {
 			translationsList:    this.translationsList,
 			addTranslation:      this.addTranslation,
 			translationEditForm: this.translationEditForm,

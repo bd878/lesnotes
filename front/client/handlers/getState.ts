@@ -71,7 +71,7 @@ function getTheme(ctx) {
 
 function getTranslation(ctx) {
 	const [lang = "", mode = ""] = ((new URLSearchParams(ctx.request.search)).get("trans") || "").split(",")
-	const result = { lang: "", mode: "new" }
+	const result = { lang: "", mode: "" }
 
 	switch (lang) {
 	case "ru":

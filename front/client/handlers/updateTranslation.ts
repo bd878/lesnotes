@@ -11,6 +11,7 @@ async function updateTranslation(ctx) {
 	}
 
 	const messageID = parseInt(form.message) || 0
+	const redirectUrl = form.redirectUrl
 
 	const response = await updateTranslationJson(ctx.state.token, messageID, form.lang, form.title, form.text)
 
@@ -19,7 +20,11 @@ async function updateTranslation(ctx) {
 		ctx.state.error = response.error.human
 		ctx.body = "error"
 	} else {
-		ctx.redirect(ctx.router.url("translation", {id: messageID, lang: form.lang}, {query: ctx.query}))
+		if (is.notEmpty(redirectUrl)) {
+			ctx.redirect(redirectUrl)
+		} else {
+			ctx.redirect(ctx.router.url('home', {}, {query: ctx.query}))
+		}
 	}
 
 	console.log("<-- updateTranslation")

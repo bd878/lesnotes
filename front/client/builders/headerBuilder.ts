@@ -35,7 +35,7 @@ class HeaderBuilder extends AbstractBuilder {
 
 	build() {
 		return mustache.render(this.isMobile ? headerTemplateMobile : headerTemplate, {
-			mainHref:   "/" + this.search,
+			mainHref:   "/",
 		}, {
 			searchForm: this.searchForm,
 			newNote:    this.newNote,

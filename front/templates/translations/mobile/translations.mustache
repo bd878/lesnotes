@@ -1,6 +1,10 @@
-<div>
-	{{> translationsList}}
-	{{> translationView}}
-	{{> translationEdit}}
-	{{> translationNew}}
-</div>
+{{> translationsList}}
+<div>{{> addTranslation}}</div>
+
+{{#hasContent}}
+	<div class="flex flex-col grow p-2 border border-1 border-solid rounded-md h-full">
+		{{> translationView}}
+		{{> translationEditForm}}
+		{{> newTranslationForm}}
+	</div>
+{{/hasContent}}

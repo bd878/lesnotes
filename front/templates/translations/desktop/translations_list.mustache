@@ -1,1 +1,11 @@
-<ul><li>list</li></ul>
+<ul class="flex flex-col mb-2">
+	{{#translations}}
+		<li>
+			<a href="{{translationHref}}" target="_self" class="flex flex-row">
+				<div class="mr-2">{{lang}}</div>
+				—
+				<div class="ml-2">{{title}}</div>
+			</a>
+		</li>
+	{{/translations}}
+</ul>

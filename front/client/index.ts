@@ -17,7 +17,6 @@ import noCache from './handlers/noCache';
 import loadTree from './handlers/loadTree';
 import loadComments from './handlers/loadComments';
 import messageFeatures from './handlers/messageFeatures'
-import messageTranslations from './handlers/messageTranslations'
 import loadPath from './handlers/loadPath';
 import loadFiles from './handlers/loadFiles';
 import selectMessageFiles from './handlers/selectMessageFiles';
@@ -93,8 +92,8 @@ router
 	.get("logout",                 "/logout",                       etag, noCache, getState, expireToken, redirectLogin)
 	.get("signup",                 "/signup",                       etag, noCache, getState, notAuthed, signup)
 	.get("home",                   "/home",                         etag, noCache, getState, authed, getMe, loadTree, loadFiles, newMessage)
-	.get("message",                "/messages/:id",                 etag, noCache, getState, authed, getMe, loadTree, loadPath, loadThread, loadMessage, loadComments, loadTranslation, formatView, messageFeatures, messageTranslations, messageView)
-	.get("editMessage",            "/editor/messages/:id",          etag, noCache, getState, authed, getMe, loadTree, loadPath, loadMessage, loadFiles, loadComments, selectMessageFiles, loadTranslation, formatTextarea, messageFeatures, messageTranslations, messageEdit)
+	.get("message",                "/messages/:id",                 etag, noCache, getState, authed, getMe, loadTree, loadPath, loadThread, loadMessage, loadComments, loadTranslation, formatView, messageFeatures, messageView)
+	.get("editMessage",            "/editor/messages/:id",          etag, noCache, getState, authed, getMe, loadTree, loadPath, loadMessage, loadFiles, loadComments, selectMessageFiles, loadTranslation, formatTextarea, messageFeatures, messageEdit)
 	.get("thread",                 "/threads/:id",                  etag, noCache, getState, authed, getMe, loadTree, loadPath, loadThread, formatView, threadView)
 	.get("newThreadMessage",       "/editor/messages/:id/new",      etag, noCache, getState, authed, getMe, loadTree, loadPath, newMessage)
 	.get("editThread",             "/editor/threads/:id",           etag, noCache, getState, authed, getMe, loadTree, loadPath, loadThread, formatTextarea, threadEdit)

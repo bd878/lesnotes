@@ -23,7 +23,6 @@ class HomeBuilder extends AbstractBuilder {
 	threadView           = undefined;
 	threadEditForm       = undefined;
 	pagination           = undefined;
-	filesSelector        = undefined;
 	header               = undefined;
 	messagesTree         = undefined;
 	messageFeatures      = undefined;
@@ -57,13 +56,6 @@ class HomeBuilder extends AbstractBuilder {
 		this.logout = logout.build()
 	}
 
-	addFilesSelector(files: File[]) {
-		this.filesSelector = mustache.render(this.isMobile ? filesSelectorTemplateMobile : filesSelectorTemplate, {
-			files:             files,
-			defaultFile:       this.i18n("defaultFile"),
-		})
-	}
-
 	addHeader(header: Builder) {
 		this.header = header.build()
 	}
@@ -74,7 +66,6 @@ class HomeBuilder extends AbstractBuilder {
 			messageView:          this.messageView,
 			threadView:           this.threadView,
 			header:               this.header,
-			filesSelector:        this.filesSelector,
 			messageFeatures:      this.messageFeatures,
 			threadEditForm:       this.threadEditForm,
 			newMessageForm:       this.newMessageForm,
