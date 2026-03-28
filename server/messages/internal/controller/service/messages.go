@@ -244,16 +244,12 @@ func (s *MessagesController) ReadThreadMessages(ctx context.Context, userID int6
 		ids = append(ids, thread.ID)
 	}
 
-	res, err := s.client.ReadBatchMessages(ctx, &api.ReadBatchMessagesRequest{
-		UserId: userID,
-		Ids:    ids,
-	})
+	messages, err := s.ReadBatchMessages(ctx, userID, ids)
 	if err != nil {
 		logger.Debugw("failed to read batch messages", "error", err)
 		return nil, err
 	}
 
-	messages := model.MapMessagesFromProto(model.MessageFromProto, res.Messages)
 	for i, message := range messages {
 		message.Count = threadsList[i].Count
 	}
@@ -370,15 +366,10 @@ func (s *MessagesController) ReadPath(ctx context.Context, userID, id int64) (pa
 		parentID = thread.ParentID
 	}
 
-	res, err := s.client.ReadBatchMessages(ctx, &api.ReadBatchMessagesRequest{
-		UserId: userID,
-		Ids:    ids,
-	})
+	path, err = s.ReadBatchMessages(ctx, userID, ids)
 	if err != nil {
 		return nil, 0, err
 	}
-
-	path = model.MapMessagesFromProto(model.MessageFromProto, res.Messages)
 
 	return
 }
