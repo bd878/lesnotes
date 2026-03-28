@@ -5,7 +5,7 @@ import * as is from '../../../third_party/is';
 
 const limit = parseInt(LIMIT)
 
-async function onFormSubmit(elems, e) {
+async function onNewMessageFormSubmit(elems, e) {
 	e.preventDefault()
 
 	if (either(elems.newMessageFormElem.text, elems.filesInputElem.files.length > 0)) {
@@ -17,7 +17,7 @@ async function onFormSubmit(elems, e) {
 	let fileID = 0;
 
 	const params = new URL(location.toString()).searchParams
-	const threadID = parseInt(params.get("cwd")) || 0
+	const threadID = parseInt(elems.newMessageFormElem.thread.value) || 0
 
 	const fileIDs = []
 
@@ -41,13 +41,10 @@ async function onFormSubmit(elems, e) {
 		}
 	}
 
-	let response
-	if (elems.newMessageFormElem.text) {
-		response = await sendMessage(elems.newMessageFormElem.text.value, elems.newMessageFormElem.title.value, fileIDs, threadID)
-		if (response.error.error) {
-			console.log("[onFormSubmit]: cannot send message:", response)
-			return
-		}
+	const response = await sendMessage(elems.newMessageFormElem.text.value, elems.newMessageFormElem.title.value, fileIDs, threadID)
+	if (response.error.error) {
+		console.log("[onFormSubmit]: cannot send message:", response)
+		return
 	}
 
 	elems.newMessageFormElem.reset()
@@ -60,4 +57,4 @@ function either(st1: boolean, st2: boolean): boolean {
 	return (!st1 && !st2)
 }
 
-export default onFormSubmit
+export default onNewMessageFormSubmit

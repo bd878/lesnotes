@@ -21,7 +21,7 @@ async function newMessage(ctx) {
 	messageHeader.addMessagePath(ctx.state.messagePath)
 
 	content.addMessagesTree(tree)
-	content.addFilesSelector()
+	content.addFilesSelector([])
 	content.addNewMessageForm(ctx.state.messageID)
 	content.addMessageHeader(messageHeader)
 	content.addLogout(logout)

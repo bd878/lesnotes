@@ -25,7 +25,7 @@ async function messageEdit(ctx) {
 	messageHeader.addThreadLink(ctx.state.message.ID)
 
 	content.addMessagesTree(tree)
-	content.addFilesSelector()
+	content.addFilesSelector(ctx.state.message.files)
 	content.addMessageEditForm(ctx.state.message)
 	content.addMessageFeatures(ctx.state.messageFeatures)
 	content.addLogout(logout)

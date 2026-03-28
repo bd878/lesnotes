@@ -1,5 +1,6 @@
 import type {Builder} from './builder';
 import type {File, Message} from '../api/models';
+import type {FileWithMime} from '../types';
 import Config from 'config';
 import mustache from 'mustache';
 import api from '../api';
@@ -48,8 +49,10 @@ class HomeBuilder extends AbstractBuilder {
 		this.messageFeatures = features.build()
 	}
 
-	addFilesSelector() {
-		this.filesSelector = mustache.render(this.isMobile ? filesSelectorTemplateMobile : filesSelectorTemplate, {}, {})
+	addFilesSelector(files: FileWithMime[]) {
+		this.filesSelector = mustache.render(this.isMobile ? filesSelectorTemplateMobile : filesSelectorTemplate, {
+			files: files,
+		}, {})
 	}
 
 	addControlPanel() {

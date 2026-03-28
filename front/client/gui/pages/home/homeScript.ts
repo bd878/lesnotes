@@ -11,7 +11,7 @@ const elems = {
 	button: document.createElement("button"),
 	input:  document.createElement("input"),
 
-	get newMessageFormElem():    HTMLFormElement     { return getByID("new-message-form",          this.form) as HTMLFormElement },
+	get newMessageFormElem():    HTMLFormElement     { return getByID("new-message-form",      this.form) as HTMLFormElement },
 	get messagesListElem():      HTMLDivElement      { return getByID("messages-list",         this.div) as HTMLDivElement },
 	get filesInputElem():        HTMLInputElement    { return getByID("files-input",           this.input) as HTMLInputElement },
 	get filesListElem():         HTMLDivElement      { return getByID("files-list",            this.button) as HTMLDivElement },

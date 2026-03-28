@@ -35,9 +35,9 @@ class MessagesTreeBuilder extends AbstractBuilder {
 			hasPagination:     function() { return !(this.isLastPage && this.isFirstPage) },
 			noMessagesText:    this.i18n("noMessagesText"),
 
-			messageHref:       function() { return `/messages/${this.ID}` + search; },
+			messageHref:       function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); return `/messages/${this.ID}?` + params.toString(); },
 			threadHref:        function() { return `/threads/${this}` + search; /*context is ID, not thread*/ },
-			newMessageHref:    function() { return `/editor/messages/${this.ID}/new` + search; },
+			newMessageHref:    function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); return `/editor/messages/${this.ID}/new?` + params.toString(); },
 			openThreadHref:    function() { const params = new URLSearchParams(search); params.set(this.ID || 0, `${limit},0`); return path + "?" + params.toString(); },
 			closeThreadHref:   function() { const params = new URLSearchParams(search); params.delete(this.ID || 0); return path + "?" + params.toString(); },
 			prevPageHref:      function() { const params = new URLSearchParams(search); params.set(this.ID || 0, `${limit},${limit + this.offset}`); return path + "?" + params.toString(); },

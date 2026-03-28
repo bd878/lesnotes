@@ -19,8 +19,6 @@ class LayoutBuilder extends AbstractBuilder {
 	header        = undefined;
 	content       = undefined;
 
-	scripts       = [];
-
 	addHeader(header: Builder) {
 		this.header = header.build()
 	}
