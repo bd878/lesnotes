@@ -9,14 +9,16 @@ async function uploadFile(file: any) {
 	}
 
 	const form = new FormData()
-	if (file)
+	if (file) {
 		form.append('file', file, file.name);
+	}
 
 	try {
 		const [response, error] = await api("/files/v1/upload", {
 			method: "POST",
 			credentials: "include",
 			body: form,
+			referrer: "",
 		});
 
 		if (error.error) {

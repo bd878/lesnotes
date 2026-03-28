@@ -13,6 +13,9 @@ import AbstractBuilder from './abstractBuilder'
 let controlPanelTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/home/desktop/control_panel.mustache')), { encoding: 'utf-8' });
 let controlPanelTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/home/mobile/control_panel.mustache')), { encoding: 'utf-8' });
 
+let filesSelectorTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/home/desktop/files_selector.mustache')), { encoding: 'utf-8' });
+let filesSelectorTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/home/mobile/files_selector.mustache')), { encoding: 'utf-8' });
+
 let homeTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/home/desktop/home.mustache')), { encoding: 'utf-8' });
 let homeTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/home/mobile/home.mustache')), { encoding: 'utf-8' });
 
@@ -29,6 +32,7 @@ class HomeBuilder extends AbstractBuilder {
 	sidebar              = undefined;
 	controlPanel         = undefined;
 	logout               = undefined;
+	filesSelector        = undefined;
 	messageHeader        = undefined;
 	scripts              = ["/public/pages/home/homeScript.js"]
 
@@ -42,6 +46,10 @@ class HomeBuilder extends AbstractBuilder {
 
 	addMessageFeatures(features: Builder) {
 		this.messageFeatures = features.build()
+	}
+
+	addFilesSelector() {
+		this.filesSelector = mustache.render(this.isMobile ? filesSelectorTemplateMobile : filesSelectorTemplate, {}, {})
 	}
 
 	addControlPanel() {
@@ -66,6 +74,7 @@ class HomeBuilder extends AbstractBuilder {
 			messageView:          this.messageView,
 			threadView:           this.threadView,
 			header:               this.header,
+			filesSelector:        this.filesSelector,
 			messageFeatures:      this.messageFeatures,
 			threadEditForm:       this.threadEditForm,
 			newMessageForm:       this.newMessageForm,

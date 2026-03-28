@@ -1,4 +1,4 @@
-import type {Builder} from './builder';
+import type {Builder, ScriptsBuilder} from './builder';
 import Config from 'config';
 import mustache from 'mustache';
 import * as is from '../third_party/is';
@@ -33,8 +33,9 @@ class LayoutBuilder extends AbstractBuilder {
 		})
 	}
 
-	addContent(content: Builder) {
+	addContent(content: ScriptsBuilder) {
 		this.content = content.build()
+		this.scripts = content.scripts
 	}
 
 	build() {

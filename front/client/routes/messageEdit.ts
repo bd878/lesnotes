@@ -16,7 +16,6 @@ async function messageEdit(ctx) {
 	const messageHeader = new MessageHeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const tree = new MessagesTreeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
-	ctx.state.messageNavigation.addAttachments()
 	ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation)
 
 	header.addNewNote()
@@ -26,6 +25,7 @@ async function messageEdit(ctx) {
 	messageHeader.addThreadLink(ctx.state.message.ID)
 
 	content.addMessagesTree(tree)
+	content.addFilesSelector()
 	content.addMessageEditForm(ctx.state.message)
 	content.addMessageFeatures(ctx.state.messageFeatures)
 	content.addLogout(logout)

@@ -52,6 +52,8 @@ function getOptions(props): any {
 		body,
 		method,
 		credentials,
+		referrer,
+		referrerPolicy,
 	} = props;
 
 	return {
@@ -59,6 +61,8 @@ function getOptions(props): any {
 		body: prepareBody(body, method),
 		method,
 		credentials,
+		referrer,
+		referrerPolicy,
 	};
 }
 

@@ -32,6 +32,7 @@ let ctx = await esbuild.context({
 		BOT_VALIDATE_AUTH_URL: '"' + Config.get("bot_validate_auth_url") + '"',
 		ENV: '"' + Config.get("env") + '"',
 		HTTPS: '"' + Config.get("https") + '"',
+		LIMIT: "24"
 	},
 	sourcemap: true,
 	bundle: true,

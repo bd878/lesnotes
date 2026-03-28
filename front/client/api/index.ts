@@ -10,6 +10,7 @@ import readMessage from './readMessage';
 import readThreadJson from './readThreadJson';
 import readMessageJson from './readMessageJson';
 import sendMessageJson from './sendMessageJson';
+import sendMessage from './sendMessage';
 import sendTranslationJson from './sendTranslationJson';
 import sendCommentJson from './sendCommentJson';
 import searchMessagesJson from './searchMessagesJson';
@@ -77,6 +78,7 @@ export default {
 	listFilesJson,
 	listCommentsJson,
 	listTranslationsJson,
+	sendMessage,
 	sendMessageJson,
 	sendCommentJson,
 	sendTranslationJson,

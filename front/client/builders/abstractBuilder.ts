@@ -9,6 +9,8 @@ abstract class AbstractBuilder implements Builder {
 	theme:         string = "";
 	fontSize:      string = "";
 
+	scripts:       string[] = [];
+
 	constructor(isMobile: boolean, lang: string = "en", theme: string = "light", fontSize: string = "medium", search: string = "", path: string = "") {
 		this.search = search
 		this.isMobile = isMobile
