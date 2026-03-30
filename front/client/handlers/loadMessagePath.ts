@@ -1,12 +1,13 @@
 import type { Message } from '../api/models';
 import * as is from '../third_party/is';
+import crop from '../utils/crop';
 import readPathJson from '../api/readPathJson';
 
-async function loadPath(ctx, next) {
+async function loadMessagePath(ctx, next) {
 	const token = ctx.state.token
 	const id = ctx.state.messageID
 
-	console.log("--> loadPath")
+	console.log("--> loadMessagePath")
 
 	if (is.notEmpty(token) && is.notEmpty(id)) {
 		const result = await readPathJson(token, id)
@@ -29,10 +30,10 @@ async function loadPath(ctx, next) {
 
 	await next()
 
-	console.log("<-- loadPath")
+	console.log("<-- loadMessagePath")
 }
 
-export default loadPath
+export default loadMessagePath
 
 function composePath(path: Message[]): string {
 	let result = "/"
@@ -52,12 +53,4 @@ function composePath(path: Message[]): string {
 	result = result.slice(0, -1)
 
 	return result
-}
-
-function crop(str: string, size: number): string {
-	if (str.length > size) {
-		return `${str.slice(0, size)}...`
-	} else if (str.length <= size) {
-		return str
-	}
 }

@@ -20,7 +20,6 @@ async function threadView(ctx) {
 	tree.addList(ctx.state.tree)
 
 	messageHeader.addMessagePath(ctx.state.messagePath)
-	messageHeader.addMessageLink(ctx.state.thread.ID)
 
 	header.addNewNote()
 

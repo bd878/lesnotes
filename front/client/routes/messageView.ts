@@ -20,14 +20,10 @@ async function messageView(ctx) {
 	ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation)
 
 	header.addNewNote()
+	tree.addThreadPath(ctx.state.cwdPath)
 	tree.addList(ctx.state.tree)
 
 	messageHeader.addMessagePath(ctx.state.messagePath)
-	if (is.notEmpty(ctx.state.thread) && is.notEmpty(ctx.state.thread.ID)) {
-		messageHeader.addThreadLink(ctx.state.message.ID)
-	} else {
-		messageHeader.addEditThreadLink(ctx.state.message.ID)
-	}
 
 	content.addMessagesTree(tree)
 	content.addMessageView(ctx.state.me.ID, ctx.state.message)

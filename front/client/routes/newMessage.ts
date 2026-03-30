@@ -16,13 +16,14 @@ async function newMessage(ctx) {
 	const tree = new MessagesTreeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
 	header.addNewNote()
+	tree.addThreadPath(ctx.state.cwdPath)
 	tree.addList(ctx.state.tree)
 
 	messageHeader.addMessagePath(ctx.state.messagePath)
 
 	content.addMessagesTree(tree)
 	content.addFilesSelector([])
-	content.addNewMessageForm(ctx.state.messageID)
+	content.addNewMessageForm(ctx.state.cwd.id)
 	content.addMessageHeader(messageHeader)
 	content.addLogout(logout)
 	content.addControlPanel()

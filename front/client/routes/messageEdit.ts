@@ -19,10 +19,10 @@ async function messageEdit(ctx) {
 	ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation)
 
 	header.addNewNote()
+	tree.addThreadPath(ctx.state.cwdPath)
 	tree.addList(ctx.state.tree)
 
 	messageHeader.addMessagePath(ctx.state.messagePath)
-	messageHeader.addThreadLink(ctx.state.message.ID)
 
 	content.addMessagesTree(tree)
 	content.addFilesSelector(ctx.state.message.files)
