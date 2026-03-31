@@ -17,6 +17,7 @@ async function threadView(ctx) {
 	const messageHeader = new MessageHeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const tree = new MessagesTreeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
+	tree.addThreadPath(ctx.state.cwdPath)
 	tree.addList(ctx.state.tree)
 
 	messageHeader.addMessagePath(ctx.state.messagePath)

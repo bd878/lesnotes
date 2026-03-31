@@ -26,10 +26,16 @@
 						</a>
 
 						{{#isFolded}}
-							<a href="{{foldHref}}" target="_self" data-thread-id="{{ID}}" class="px-2 dark:hover:text-white hover:text-blue-600 select-text cursor-pointer text-end">{{count}} v </a>
+							<a href="{{foldHref}}" target="_self" data-thread-id="{{ID}}" class="relative flex flex-row px-2 dark:hover:text-white hover:text-blue-600 select-text cursor-pointer text-end">
+								<span class="mr-2">{{count}}</span>
+								<span class="absolute right-[4px]">v</span>
+							</a>
 						{{/isFolded}}
 						{{^isFolded}}
-							<a href="{{unfoldHref}}" target="_self" data-thread-id="{{ID}}" class="px-2 dark:hover:text-white hover:text-blue-600 select-text cursor-pointer text-end">{{count}} > </a>
+							<a href="{{unfoldHref}}" target="_self" data-thread-id="{{ID}}" class="relative flex flex-row px-2 dark:hover:text-white hover:text-blue-600 select-text cursor-pointer text-end">
+								<span class="mr-2">{{count}}</span>
+								<span class="absolute right-[4px]">></span>
+							</a>
 						{{/isFolded}}
 					</div>
 

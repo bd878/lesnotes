@@ -56,7 +56,10 @@ class MessagesTreeBuilder extends AbstractBuilder {
 		const path = this.path
 
 		this.threadPath = mustache.render(this.isMobile ? threadPathTemplateMobile : threadPathTemplate, {
-			path: threadPath,
+			path:     threadPath.slice(0, -1),
+			thread:   threadPath.slice(-1),
+			editThreadHref:  function() { return `/editor/threads/${this.ID}` + search },
+			editThreadTitle: "<-- " + this.i18n("thread").toLowerCase(),
 			threadTitle: function() { return `/${crop(this.title || this.text, 15)}` },
 			threadHref: function() {
 				const params = new URLSearchParams(search);
