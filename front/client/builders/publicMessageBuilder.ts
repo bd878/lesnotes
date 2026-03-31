@@ -1,3 +1,4 @@
+import type {Builder} from './builder'
 import type { Message, TranslationPreview } from '../api/models';
 import Config from 'config';
 import mustache from 'mustache';
@@ -5,38 +6,42 @@ import api from '../api';
 import * as is from '../third_party/is';
 import { readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
-import AbstractPublicBuilder from './abstractPublicBuilder'
-
-let translationsTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/translations/desktop/translations.mustache')), { encoding: 'utf-8' });
-let translationsTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/translations/mobile/translations.mustache')), { encoding: 'utf-8' });
+import AbstractBuilder from './abstractBuilder'
 
 let messageTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/message/desktop/message.mustache')), { encoding: 'utf-8' });
 let messageTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/message/mobile/message.mustache')), { encoding: 'utf-8' });
 
-class PublicMessageBuilder extends AbstractPublicBuilder {
-	addTranslations(message: number | string, previews: TranslationPreview[]) {
-		const search = this.search
+let messageViewTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/message/desktop/message_view.mustache')), { encoding: 'utf-8' });
+let messageViewTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/message/mobile/message_view.mustache')), { encoding: 'utf-8' });
 
-		this.translations = mustache.render(this.isMobile ? translationsTemplateMobile : translationsTemplate, {
-			mainMessage:           this.i18n("mainMessage"),
-			mainMessageHref:       function() { return `/m/${message}` + search },
-			translationHref:       function() { return `/m/${message}/${this.lang}` + search },
-			translations:          previews,
-			hasTranslations:       () => previews.length > 0,
-		})
+class PublicMessageBuilder extends AbstractBuilder {
+	auth               = undefined;
+	messageFeatures    = undefined;
+	messageView        = undefined;
+	header             = undefined;
+
+	addAuth(auth: Builder) {
+		this.auth = auth.build()
+	}
+
+	addMessageFeatures(features: Builder) {
+		this.messageFeatures = features.build()
+	}
+
+	addMessageView(userID: number, message: Message) {
+
+	}
+
+	addHeader(header: Builder) {
+		this.header = header.build()
 	}
 
 	build() {
 		return mustache.render(this.isMobile ? messageTemplateMobile : messageTemplate, {}, {
-			signup:            this.signup,
-			logout:            this.logout,
-			sidebar:           this.sidebar,
-			messagesList:      this.messagesList,
-			translations:      this.translations,
+			auth:              this.auth,
 			messageView:       this.messageView,
-			filesView:         this.filesView,
-			comments:          this.comments,
-			messageNavigation: this.messageNavigation,
+			messageFeatures:   this.messageFeatures,
+			header:            this.header,
 		})
 	}
 

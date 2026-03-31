@@ -1,7 +1,7 @@
 import PublicThreadBuilder from '../builders/publicThreadBuilder'
 import LayoutBuilder from '../builders/layoutBuilder';
+import AuthBuilder from '../builders/authBuilder';
 import HeaderBuilder from '../builders/headerBuilder';
-import SettingsBuilder from '../builders/settingsBuilder';
 
 async function publicThread(ctx) {
 	console.log("--> publicThread")
@@ -9,18 +9,18 @@ async function publicThread(ctx) {
 	const content = new PublicThreadBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
-	const settings = new SettingsBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
-	content.addMessagesList(ctx.params.threadName /* TODO: use from load_path, ctx.thread.name is message name now, but thread name required */, ctx.state.messages)
-
-	if (ctx.state.me.ID) {
-		// header.addLogout(logout)
+	if (ctx.state.isAuthed) {
+		auth.addLogout()
 	} else {
-		content.addSignup()
+		auth.addSignup()
 	}
 
+	header.addAuth(auth)
+	content.addHeader(header)
+
 	layout.addFooter()
-	layout.addHeader(header)
 	layout.addContent(content)
 
 	ctx.body = layout.build()

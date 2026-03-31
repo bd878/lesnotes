@@ -1,8 +1,7 @@
 import ThreadViewBuilder from '../builders/threadViewBuilder';
 import LayoutBuilder from '../builders/layoutBuilder';
-import LogoutBuilder from '../builders/logoutBuilder';
+import AuthBuilder from '../builders/authBuilder';
 import HeaderBuilder from '../builders/headerBuilder';
-import SettingsBuilder from '../builders/settingsBuilder';
 import MessageHeaderBuilder from '../builders/messageHeaderBuilder';
 import MessagesTreeBuilder from '../builders/messagesTreeBuilder';
 
@@ -12,8 +11,7 @@ async function threadView(ctx) {
 	const content = new ThreadViewBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
-	const settings = new SettingsBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
-	const logout = new LogoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const messageHeader = new MessageHeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const tree = new MessagesTreeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
@@ -28,7 +26,8 @@ async function threadView(ctx) {
 	content.addThreadView(ctx.state.thread)
 	content.addMessageHeader(messageHeader)
 	content.addHeader(header)
-	content.addLogout(logout)
+	auth.addLogout()
+	content.addAuth(auth)
 	content.addControlPanel()
 
 	layout.addFooter()

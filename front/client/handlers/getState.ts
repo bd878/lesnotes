@@ -17,6 +17,7 @@ async function getState(ctx, next) {
 	ctx.state.threadID = getThreadID(ctx)
 	ctx.state.leaves = getLeaves(ctx)
 	ctx.state.token = getToken(ctx)
+	ctx.state.isAuthed = getIsAuthed(ctx)
 
 	await next()
 
@@ -25,6 +26,10 @@ async function getState(ctx, next) {
 
 function getToken(ctx): string {
 	return ctx.cookies.get("token")
+}
+
+function getIsAuthed(ctx): boolean {
+	return ctx.state.me && ctx.state.me.ID != 0
 }
 
 function getMessageID(ctx): number {

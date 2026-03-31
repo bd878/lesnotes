@@ -1,6 +1,6 @@
 import NewMessageBuilder from '../builders/newMessageBuilder'
 import LayoutBuilder from '../builders/layoutBuilder';
-import LogoutBuilder from '../builders/logoutBuilder';
+import AuthBuilder from '../builders/authBuilder';
 import HeaderBuilder from '../builders/headerBuilder';
 import MessagesTreeBuilder from '../builders/messagesTreeBuilder';
 import MessageHeaderBuilder from '../builders/messageHeaderBuilder';
@@ -11,7 +11,7 @@ async function newMessage(ctx) {
 	const content = new NewMessageBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
-	const logout = new LogoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const messageHeader = new MessageHeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const tree = new MessagesTreeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
@@ -25,7 +25,8 @@ async function newMessage(ctx) {
 	content.addFilesSelector([])
 	content.addNewMessageForm(ctx.state.cwd.id)
 	content.addMessageHeader(messageHeader)
-	content.addLogout(logout)
+	auth.addLogout()
+	content.addAuth(auth)
 	content.addControlPanel()
 	content.addHeader(header)
 

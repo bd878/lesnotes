@@ -32,7 +32,7 @@ class HomeBuilder extends AbstractBuilder {
 	messageFeatures      = undefined;
 	sidebar              = undefined;
 	controlPanel         = undefined;
-	logout               = undefined;
+	auth               = undefined;
 	filesSelector        = undefined;
 	messageHeader        = undefined;
 	scripts              = ["/public/pages/home/homeScript.js"]
@@ -59,12 +59,12 @@ class HomeBuilder extends AbstractBuilder {
 		const search = this.search;
 
 		this.controlPanel = mustache.render(this.isMobile ? controlPanelTemplateMobile : controlPanelTemplate, {}, {
-			logout:           this.logout,
+			logout:           this.auth,
 		})
 	}
 
-	addLogout(logout: Builder) {
-		this.logout = logout.build()
+	addAuth(auth: Builder) {
+		this.auth = auth.build()
 	}
 
 	addHeader(header: Builder) {

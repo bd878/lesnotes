@@ -15,9 +15,6 @@ let messagesListTemplateMobile = readFileSync(resolve(join(Config.get('basedir')
 let filesListTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/search/desktop/files_list.mustache')), { encoding: 'utf-8' });
 let filesListTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/search/mobile/files_list.mustache')), { encoding: 'utf-8' });
 
-let logoutTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/sidebar_vertical/desktop/logout.mustache')), { encoding: 'utf-8' });
-let logoutTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/sidebar_vertical/mobile/logout.mustache')), { encoding: 'utf-8' });
-
 let searchFormTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/search/desktop/search_form.mustache')), { encoding: 'utf-8' });
 let searchFormTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/search/mobile/search_form.mustache')), { encoding: 'utf-8' });
 
@@ -27,7 +24,6 @@ let searchTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'temp
 class SearchBuilder extends AbstractBuilder {
 	messagesList = undefined;
 	filesList = undefined;
-	logout = undefined;
 	searchForm = undefined;
 	sidebar = undefined;
 
@@ -55,15 +51,6 @@ class SearchBuilder extends AbstractBuilder {
 		}
 
 		this.filesList = mustache.render(this.isMobile ? filesListTemplateMobile : filesListTemplate, options)
-	}
-
-	addLogout() {
-		const search = this.search
-
-		this.logout = mustache.render(this.isMobile ? logoutTemplateMobile : logoutTemplate, {
-			logout:           this.i18n("logout"),
-			logoutHref:       function() { const params = new URLSearchParams(search); params.delete("cwd"); params.delete("id"); /* TODO: delete pagination */ return "/logout?" + params.toString() },
-		})
 	}
 
 	addSearch() {

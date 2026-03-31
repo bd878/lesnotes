@@ -12,6 +12,7 @@ import favicon from './handlers/favicon';
 import etag from './handlers/etag';
 import getMe from './handlers/getMe';
 import notAuthed from './handlers/notAuthed';
+import isAuthed from './handlers/isAuthed';
 import authed from './handlers/authed';
 import noCache from './handlers/noCache';
 import loadTree from './handlers/loadTree';
@@ -92,12 +93,12 @@ router
 	.get("login",                  "/login",                        etag, noCache, getState, notAuthed, login)
 	.get("logout",                 "/logout",                       etag, noCache, getState, expireToken, redirectLogin)
 	.get("signup",                 "/signup",                       etag, noCache, getState, notAuthed, signup)
-	.get("home",                   "/home",                         etag, noCache, getState, authed, getMe, loadTree, loadCwdPath, loadFiles, newMessage)
-	.get("message",                "/messages/:id",                 etag, noCache, getState, authed, getMe, loadTree, loadMessagePath, loadCwdPath, loadThread, loadMessage, loadComments, loadTranslation, formatView, messageFeatures, messageView)
-	.get("editMessage",            "/editor/messages/:id",          etag, noCache, getState, authed, getMe, loadTree, loadMessagePath, loadCwdPath, loadMessage, loadFiles, loadComments, selectMessageFiles, loadTranslation, formatTextarea, messageFeatures, messageEdit)
-	.get("thread",                 "/threads/:id",                  etag, noCache, getState, authed, getMe, loadTree, loadMessagePath, loadCwdPath, loadThread, formatView, threadView)
+	.get("home",                   "/home",                         etag, noCache, getMe, getState, authed, loadTree, loadCwdPath, loadFiles, newMessage)
+	.get("message",                "/messages/:id",                 etag, noCache, getMe, getState, authed, loadTree, loadMessagePath, loadCwdPath, loadThread, loadMessage, loadComments, loadTranslation, formatView, messageFeatures, messageView)
+	.get("editMessage",            "/editor/messages/:id",          etag, noCache, getMe, getState, authed, loadTree, loadMessagePath, loadCwdPath, loadMessage, loadFiles, loadComments, selectMessageFiles, loadTranslation, formatTextarea, messageFeatures, messageEdit)
+	.get("thread",                 "/threads/:id",                  etag, noCache, getMe, getState, authed, loadTree, loadMessagePath, loadCwdPath, loadThread, formatView, threadView)
 	// .get("newThreadMessage",       "/editor/messages/:id/new",      etag, noCache, getState, authed, getMe, loadTree, loadMessagePath, loadCwdPath, newMessage)
-	.get("editThread",             "/editor/threads/:id",           etag, noCache, getState, authed, getMe, loadTree, loadMessagePath, loadCwdPath, loadThread, formatTextarea, threadEdit)
+	.get("editThread",             "/editor/threads/:id",           etag, noCache, getMe, getState, authed, loadTree, loadMessagePath, loadCwdPath, loadThread, formatTextarea, threadEdit)
 	.get("status",                 "/status",                       status, noCache, getState)
 	// .get("search",                 "/search",                       etag, noCache, getState, authed, getMe, getSearchQuery, loadSearch, loadSearchPath, search)
 	.post("doLogin",               "/login",                        etag, getState, validateLogin, redirectHome)
@@ -118,10 +119,10 @@ router
 	.post("doSendComment",         "/comment/send",                 getState, sendComment)
 	// .post("doSendMessage",         "/send",                         getState, authed, sendMessage)
 	.post("doSendTranslation",     "/translation/send",             getState, authed, sendTranslation)
-	.get("publicMessage",          "/m/:messageName",               etag, noCache, getState, getMe, loadMessage, loadComments, parseMessageName, formatView, publicMessage)
-	.get("publicTranslation",      "/m/:messageName/:lang",         etag, noCache, getState, getMe, loadMessage, loadComments, parseMessageName, loadTranslation, formatView, publicTranslation)
-	.get("publicThread",           "/t/:threadName",                etag, noCache, getState, getMe, loadThread, parseThreadName, loadThreadMessages, formatView, publicThread)
-	.get("publicThreadMessage",    "/t/:threadName/:messageName",   etag, noCache, getState, getMe, loadThread, loadComments, parseThreadName, parseMessageName, loadThreadMessages, loadMessage, formatView, publicThreadMessage)
+	.get("publicMessage",          "/m/:messageName",               etag, noCache, getMe, getState, loadMessage, isAuthed(loadMessagePath), loadComments, parseMessageName, formatView, messageFeatures, publicMessage)
+	.get("publicTranslation",      "/m/:messageName/:lang",         etag, noCache, getMe, getState, loadMessage, loadComments, parseMessageName, loadTranslation, formatView, publicTranslation)
+	.get("publicThread",           "/t/:threadName",                etag, noCache, getMe, getState, loadThread, parseThreadName, loadThreadMessages, formatView, publicThread)
+	.get("publicThreadMessage",    "/t/:threadName/:messageName",   etag, noCache, getMe, getState, loadThread, loadComments, parseThreadName, parseMessageName, loadThreadMessages, loadMessage, formatView, publicThreadMessage)
 	.get("any",                    "/:any*",                        getState, xxx)
 
 app.use(router.routes());

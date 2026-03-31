@@ -17,6 +17,7 @@ let headerTemplateMobile = readFileSync(resolve(join(Config.get("basedir"), 'tem
 class HeaderBuilder extends AbstractBuilder {
 	searchForm = undefined;
 	newNote = undefined;
+	auth = undefined;
 
 	addSearch() {
 		this.searchForm = mustache.render(this.isMobile ? searchTemplateMobile : searchTemplate, {
@@ -33,12 +34,17 @@ class HeaderBuilder extends AbstractBuilder {
 		})
 	}
 
+	addAuth(auth: Builder) {
+		this.auth = auth.build()
+	}
+
 	build() {
 		return mustache.render(this.isMobile ? headerTemplateMobile : headerTemplate, {
 			mainHref:   "/",
 		}, {
 			searchForm: this.searchForm,
 			newNote:    this.newNote,
+			auth:       this.auth,
 		})
 	}
 }

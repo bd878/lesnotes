@@ -1,8 +1,7 @@
 import ThreadEditBuilder from '../builders/threadEditBuilder'
 import LayoutBuilder from '../builders/layoutBuilder';
 import HeaderBuilder from '../builders/headerBuilder';
-import LogoutBuilder from '../builders/logoutBuilder';
-import SettingsBuilder from '../builders/settingsBuilder';
+import AuthBuilder from '../builders/authBuilder';
 import MessageHeaderBuilder from '../builders/messageHeaderBuilder';
 import MessagesTreeBuilder from '../builders/messagesTreeBuilder';
 
@@ -12,8 +11,7 @@ async function threadEdit(ctx) {
 	const content = new ThreadEditBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
-	const settings = new SettingsBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
-	const logout = new LogoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const messageHeader = new MessageHeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const tree = new MessagesTreeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
@@ -22,10 +20,11 @@ async function threadEdit(ctx) {
 
 	messageHeader.addMessagePath(ctx.state.messagePath)
 
+	auth.addLogout()
 	header.addNewNote()
 
 	content.addMessagesTree(tree)
-	content.addLogout(logout)
+	content.addAuth(auth)
 	content.addThreadEditForm(ctx.state.thread)
 	content.addMessageHeader(messageHeader)
 	content.addHeader(header)

@@ -1,23 +1,15 @@
 <div class="h-full max-w-full flex flex-row">
-	<div class="min-w-fit max-w-fit ml-8">
-		{{> sidebar}}
-	</div>
+	<div class="mr-8 w-full min-w-sm max-w-xl h-full">
+		<div class="flex flex-col w-full h-full">
+			{{> header}}
 
-	{{#message}}
-		<div class="min-w-lg max-w-lg flex flex-row ml-8">
-			<div class="flex flex-col w-full">
-				{{> translations}}
-				<div class="h-full flex flex-col grow p-2 border border-1 border-solid rounded-md">
-					{{> messageView}}
-				</div>
+			<div class="h-full flex flex-col grow p-2 border border-1 border-solid rounded-md">
+				{{> messageView}}
 			</div>
 		</div>
-	{{/message}}
+	</div>
 
-
-	<div class="ml-8 mr-8 max-w-md h-full flex flex-col min-w-md overflow-x-hidden">
-		{{> messageNavigation}}
-		{{> filesView}}
-		{{> comments}}
+	<div class="h-full flex flex-col max-w-xl min-w-sm w-full overflow-x-hidden">
+		{{> messageFeatures}}
 	</div>
 </div>

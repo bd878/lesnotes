@@ -10,11 +10,7 @@ function log(f) {
 }
 
 async function getMe(ctx, next) {
-	ctx.state.me = await api.getMeJson(ctx.state.token)
-	if (ctx.state.me.error.error) {
-		console.log(ctx.state.me.error)
-	}
-
+	ctx.state.me = await api.getMeJson(ctx.cookies.get("token"))
 	ctx.state.me = ctx.state.me.user
 
 	await next()
