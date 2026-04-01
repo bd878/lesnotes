@@ -26,7 +26,7 @@ async function messageView(ctx) {
 	messageHeader.addMessagePath(ctx.state.messagePath)
 
 	content.addMessagesTree(tree)
-	content.addMessageView(ctx.state.me.ID, ctx.state.message)
+	content.addMessageView(ctx.state.message)
 	content.addMessageFeatures(ctx.state.messageFeatures)
 	auth.addLogout()
 	content.addAuth(auth)

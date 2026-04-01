@@ -24,6 +24,8 @@ async function loadComments(ctx, next) {
 		ctx.state.comments = EmptyListComments.comments
 	}
 
+	ctx.state.comments.reverse()
+
 	await next()
 
 	console.log("<-- loadComments")

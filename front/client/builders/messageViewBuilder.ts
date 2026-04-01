@@ -11,7 +11,7 @@ let messageViewTemplate = readFileSync(resolve(join(Config.get('basedir'),'templ
 let messageViewTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/home/mobile/message_view.mustache')), { encoding: 'utf-8' });
 
 class MessageViewBuilder extends HomeBuilder {
-	addMessageView(userID: number, message?: Message) {
+	addMessageView(message?: Message) {
 		if (is.empty(message)) {
 			return
 		}
@@ -24,13 +24,11 @@ class MessageViewBuilder extends HomeBuilder {
 			text:                  message.text,
 			name:                  message.name,
 			private:               message.private,
-			filesSummary:          this.i18n("filesSummary"),
 			editHref:              `/editor/messages/${message.ID}` + search,
 			deleteAction:          "/m/delete" + search,
 			publishAction:         "/m/publish" + search,
 			privateAction:         "/m/private" + search,
 			newNoteButton:         this.i18n("newNote"),
-			userID:                userID,
 			domain:                Config.get("domain"),
 		})
 	}

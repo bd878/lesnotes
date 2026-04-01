@@ -8,18 +8,18 @@ async function publicMessage(ctx) {
 	console.log("--> publicMessage")
 
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
-	const content = new PublicMessageBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const content = new PublicMessageBuilder(ctx.state.isAuthed, ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
 	ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation)
 
-	content.addMessageView(ctx.state.me.ID, ctx.state.message)
+	content.addMessageView(ctx.state.message)
 
 	if (ctx.state.isAuthed) {
 		auth.addLogout()
 	} else {
-		auth.addSignup()
+		auth.addLogin()
 	}
 
 	header.addAuth(auth)

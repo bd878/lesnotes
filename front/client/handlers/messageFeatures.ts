@@ -15,7 +15,10 @@ async function messageFeatures(ctx, next) {
 	}
 
 	messageNavigation.addComments()
-	messageNavigation.addTranslations()
+
+	if (ctx.state.isAuthed || ctx.state.message.translations.length > 0) {
+		messageNavigation.addTranslations()
+	}
 
 	if (ctx.state.nav == "comments") {
 		messageFeatures.addComments(ctx.state.message.ID, ctx.state.comments)
