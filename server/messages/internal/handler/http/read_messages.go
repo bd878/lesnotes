@@ -415,7 +415,7 @@ func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter,
 
 	logger.Debugw("read thread messages", "user_id", userID, "thread_id", threadID, "limit", limit, "offset", offset, "ascending", ascending, "public", publicOnly)
 
-	list, err := h.controller.ReadThreadMessages(ctx, userID, threadID, limit, offset, ascending)
+	list, err := h.controller.ReadThreadMessages(ctx, userID, threadID, "", limit, offset, ascending)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

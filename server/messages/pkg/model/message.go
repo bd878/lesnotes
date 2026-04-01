@@ -91,7 +91,9 @@ type (
 
 	ReadTreeRequest struct {
 		HighlightID int64             `json:"highlight"`
+		HighlightName string          `json:"highlight_name"`
 		MessageID   int64             `json:"root"`
+		Name        string            `json:"name"`
 		Limit       int32             `json:"limit"`
 		Offset      int32             `json:"offset"`
 		Leaves      []*IDLimitOffset   `json:"leaves"`

@@ -53,7 +53,8 @@ func (h *Handler) ReadTreeJsonAPI(w http.ResponseWriter, req *http.Request) (err
 		return
 	}
 
-	tree, err := h.controller.ReadTree(req.Context(), user.ID, request.HighlightID, request.MessageID, request.Limit, request.Offset, request.Leaves)
+	tree, err := h.controller.ReadTree(req.Context(), user.ID, request.HighlightID, request.HighlightName, request.MessageID, request.Name,
+		request.Limit, request.Offset, request.Leaves)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

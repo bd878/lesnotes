@@ -50,7 +50,7 @@ func (h *Handler) ReadPath(w http.ResponseWriter, req *http.Request) (err error)
 		messageID = int64(id)
 	}
 
-	list, parentID, err := h.controller.ReadPath(req.Context(), user.ID, messageID)
+	list, parentID, err := h.controller.ReadPath(req.Context(), user.ID, messageID, "")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
