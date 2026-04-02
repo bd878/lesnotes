@@ -14,6 +14,7 @@ async function getState(ctx, next) {
 	ctx.state.cwd = getCwd(ctx)
 	ctx.state.messageID = getMessageID(ctx)
 	ctx.state.messageName = ctx.params.messageName || ""
+	ctx.state.threadName = ctx.params.threadName || ""
 	ctx.state.threadID = getThreadID(ctx)
 	ctx.state.leaves = getLeaves(ctx)
 	ctx.state.token = getToken(ctx)

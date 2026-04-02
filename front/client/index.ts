@@ -29,7 +29,7 @@ import loadSearch from './handlers/loadSearch';
 import formatTextarea from './handlers/formatTextarea';
 import formatView from './handlers/formatView';
 import loadSearchPath from './handlers/loadSearchPath';
-import loadThreadMessages from './handlers/loadThreadMessages';
+// import loadThreadMessages from './handlers/loadThreadMessages';
 import getState from './handlers/getState';
 import expireToken from './handlers/expireToken';
 import redirectHome from './handlers/redirectHome';
@@ -53,8 +53,6 @@ import updateMessage from './handlers/updateMessage';
 import updateThread from './handlers/updateThread';
 import getSearchForm from './handlers/getSearchForm';
 import getSearchQuery from './handlers/getSearchQuery';
-import parseMessageName from './handlers/parseMessageName';
-import parseThreadName from './handlers/parseThreadName';
 
 import assets from './routes/assets';
 import main from './routes/main';
@@ -119,10 +117,10 @@ router
 	.post("doSendComment",         "/comment/send",                 getState, sendComment)
 	// .post("doSendMessage",         "/send",                         getState, authed, sendMessage)
 	.post("doSendTranslation",     "/translation/send",             getState, authed, sendTranslation)
-	.get("publicMessage",          "/m/:messageName",               etag, noCache, getMe, getState, loadMessage, isAuthed(loadMessagePath), loadComments, parseMessageName, formatView, messageFeatures, publicMessage)
-	.get("publicTranslation",      "/m/:messageName/:lang",         etag, noCache, getMe, getState, loadMessage, loadComments, parseMessageName, loadTranslation, formatView, publicTranslation)
-	.get("publicThread",           "/t/:threadName",                etag, noCache, getMe, getState, loadThread, parseThreadName, loadThreadMessages, formatView, publicThread)
-	.get("publicThreadMessage",    "/t/:threadName/:messageName",   etag, noCache, getMe, getState, loadThread, loadComments, parseThreadName, parseMessageName, loadThreadMessages, loadMessage, formatView, publicThreadMessage)
+	.get("publicMessage",          "/m/:messageName",               etag, noCache, getMe, getState, loadMessage, isAuthed(loadMessagePath), loadComments, formatView, messageFeatures, publicMessage)
+	.get("publicTranslation",      "/m/:messageName/:lang",         etag, noCache, getMe, getState, loadMessage, loadComments, loadTranslation, formatView, publicTranslation)
+	.get("publicThread",           "/t/:threadName",                etag, noCache, getMe, getState, loadThread, loadTree, formatView, publicThread)
+	.get("publicThreadMessage",    "/t/:threadName/:messageName",   etag, noCache, getMe, getState, loadThread, loadComments, loadTree, loadMessage, isAuthed(loadMessagePath), formatView, publicThreadMessage)
 	.get("any",                    "/:any*",                        getState, xxx)
 
 app.use(router.routes());
