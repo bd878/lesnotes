@@ -50,3 +50,13 @@ message PrivateCommand {
 	int64   user_id = 2;
 	string  updated_at = 3;
 }
+
+message PublishMessagesCommand {
+	repeated int64   ids = 1;
+	int64   user_id = 2;
+}
+
+message PrivateMessagesCommand {
+	repeated int64 ids = 1;
+	int64   user_id = 2;
+}

@@ -730,15 +730,22 @@ components:
         req:
           type: object
           properties:
+            # one of
             root:
               type: integer
-              required: true
+              required: false
+            name:
+              type: string
+              required: false
             limit:
               type: integer
             offset:
               type: integer
             highlight:
               type: integer
+              required: false
+            highlight_name:
+              type: string
               required: false
             leaves:
               type: array

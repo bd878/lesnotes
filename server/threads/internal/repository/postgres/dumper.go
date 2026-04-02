@@ -46,7 +46,7 @@ func (r *Dumper) Open(ctx context.Context) (ch chan *api.ThreadsSnapshot, err er
 }
 
 func (r *Dumper) runThreads() {
-	query := "SELECT id, name, private, user_id, parent_id, next_id, prev_id, created_at, updated_at, description, title FROM %s"
+	query := "SELECT id, name, private, user_id, parent_id, next_id, prev_id, created_at, updated_at, description, title, private_message FROM %s"
 
 	defer r.wg.Done()
 	defer logger.Debugln("threads dump finished")
@@ -65,7 +65,7 @@ func (r *Dumper) runThreads() {
 
 		var createdAt, updatedAt *time.Time
 		err = rows.Scan(&thread.Id, &thread.Name, &thread.Private, &thread.UserId, &thread.ParentId,
-			&thread.NextId, &thread.PrevId, &createdAt, &updatedAt, &thread.Description, &thread.Title)
+			&thread.NextId, &thread.PrevId, &createdAt, &updatedAt, &thread.Description, &thread.Title, &thread.PrivateMessage)
 		if err != nil {
 			logger.Errorln(err)
 			r.cancel(err)
@@ -106,10 +106,10 @@ func (r *Dumper) Restore(ctx context.Context, snapshot *api.ThreadsSnapshot) (er
 	switch v := snapshot.Item.(type) {
 	case *api.ThreadsSnapshot_Thread:
 
-		query := "INSERT INTO %s(id, name, private, user_id, parent_id, next_id, prev_id, created_at, updated_at, description, title) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)"
+		query := "INSERT INTO %s(id, name, private, user_id, parent_id, next_id, prev_id, created_at, updated_at, description, title, private_message) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)"
 
 		_, err = r.pool.Exec(ctx, r.threadsTable(query), v.Thread.Id, v.Thread.Name, v.Thread.Private, v.Thread.UserId, v.Thread.ParentId,
-			v.Thread.NextId, v.Thread.PrevId, v.Thread.CreatedAt, v.Thread.UpdatedAt, v.Thread.Description, v.Thread.Title)
+			v.Thread.NextId, v.Thread.PrevId, v.Thread.CreatedAt, v.Thread.UpdatedAt, v.Thread.Description, v.Thread.Title, v.Thread.PrivateMessage)
 
 		return
 

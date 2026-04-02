@@ -24,13 +24,15 @@ type MessagesConfig struct {
 
 type ThreadsGateway interface {
 	ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32) (list []*threads.Thread, isLastPage bool, err error)
+	ListMessages(ctx context.Context, userID, parentID int64, limit, offset int32, privateMessage *bool) (list []*threads.Thread, isLastPage bool, err error)
 	// TODO: fix params order
 	CountThreads(ctx context.Context, id, userID int64) (total int32, err error)
+	CountMessages(ctx context.Context, id, userID int64, privateMessage *bool) (total int32, err error)
 	CreateThread(ctx context.Context, id, userID, parentID int64, name string, private bool) (err error)
 	DeleteThread(ctx context.Context, id, userID int64) (err error)
 	UpdateThread(ctx context.Context, id, userID int64) (err error)
 	ResolvePath(ctx context.Context, userID, id int64) (path []int64, err error)
-	ReadThread(ctx context.Context, userID, id int64) (thread *threads.Thread, err error)
+	ReadThread(ctx context.Context, userID, id int64, name string) (thread *threads.Thread, err error)
 }
 
 type MessagesController struct {
@@ -219,34 +221,41 @@ func (s *MessagesController) UpdateMessage(ctx context.Context, id int64, text, 
 }
 
 // Get messages in order
-func (s *MessagesController) ReadThreadMessages(ctx context.Context, userID, threadID int64, threadName string, limit, offset int32, ascending bool) (list *model.List, err error) {
+func (s *MessagesController) ReadThreadMessages(ctx context.Context, userID, threadID int64, threadName string,
+	limit, offset int32, ascending bool, privateMessage *bool) (list *model.List, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
 		}
 	}
 
-	logger.Debugw("read thread messages", "user_id", userID, "thread_id", threadID, "thread_name", threadName, "limit", limit, "offset", offset, "ascending", ascending)
+	logger.Debugw("read thread messages", "user_id", userID, "thread_id", threadID, "thread_name",
+		threadName, "limit", limit, "offset", offset, "ascending", ascending, "private_message", privateMessage)
 
 	if threadName != "" && threadID == 0 {
-		message, err := s.ReadMessage(ctx, threadID, threadName, []int64{userID})
+		thread, err := s.threads.ReadThread(ctx, userID, threadID, threadName)
 		if err != nil {
 			return nil, err
 		}
 
-		threadID = message.ID
+		threadID = thread.ID
+		userID = thread.UserID
 	}
 
-	total, err := s.threads.CountThreads(ctx, threadID, userID)
+	total, err := s.threads.CountMessages(ctx, threadID, userID, privateMessage)
 	if err != nil {
 		return nil, err
 	}
 
-	threadsList, isLastPage, err := s.threads.ListThreads(ctx, userID, threadID, limit, offset)
+	logger.Debugw("read thread messages", "count total", total)
+
+	threadsList, isLastPage, err := s.threads.ListMessages(ctx, userID, threadID, limit, offset, privateMessage)
 	if err != nil {
-		logger.Debugw("failed to list threads", "error", err)
+		logger.Debugw("failed to list messages", "error", err)
 		return nil, err
 	}
+
+	logger.Debugw("read thread messages", "threads_list", threadsList)
 
 	ids := make([]int64, 0)
 	for _, thread := range threadsList {
@@ -371,6 +380,7 @@ func (s *MessagesController) ReadPath(ctx context.Context, userID, id int64, nam
 		}
 
 		id = message.ID
+		logger.Debugw("read path", "message", message)
 	}
 
 	ids, err := s.threads.ResolvePath(ctx, userID, id)
@@ -379,7 +389,7 @@ func (s *MessagesController) ReadPath(ctx context.Context, userID, id int64, nam
 	}
 
 	// TODO: log error, falls if error 0
-	thread, _ := s.threads.ReadThread(ctx, userID, id)
+	thread, _ := s.threads.ReadThread(ctx, userID, id, "")
 	if thread != nil {
 		parentID = thread.ParentID
 	}
@@ -528,14 +538,16 @@ func (m *idMap) String() (result string) {
 
 const limitPathMessages = 10 /* any other number ? */
 
-func (s *MessagesController) ReadTree(ctx context.Context, userID, highlightID int64, highlightName string, rootID int64, rootName string, limit, offset int32, pairs []*model.IDLimitOffset) (list *model.List, err error) {
+func (s *MessagesController) ReadTree(ctx context.Context, userID, highlightID int64, highlightName string,
+	rootID int64, rootName string, limit, offset int32, privateMessage *bool, pairs []*model.IDLimitOffset) (list *model.List, err error) {
 	if s.isConnFailed() {
 		if err := s.setupConnection(); err != nil {
 			return nil, err
 		}
 	}
 
-	logger.Debugw("read tree", "user_id", userID, "highlight_id", highlightID, "highlight_name", highlightName, "message_id", rootID, "name", rootName, "limit", limit, "offset", offset, "pairs", pairs)
+	logger.Debugw("read tree", "user_id", userID, "highlight_id", highlightID, "highlight_name", highlightName, "message_id",
+		rootID, "name", rootName, "limit", limit, "offset", offset, "private_message", privateMessage, "pairs", pairs)
 
 	map1 := NewLimitOffsetMap(pairs)
 
@@ -546,19 +558,21 @@ func (s *MessagesController) ReadTree(ctx context.Context, userID, highlightID i
 		return nil, err
 	}
 
+	logger.Debugw("read_tree", "highlight path", highlightPath)
+
 	highlightMap := NewIDMap(highlightPath)
 
-	list, err = s.ReadThreadMessages(ctx, userID, rootID, rootName, limit, offset, true)
+	list, err = s.ReadThreadMessages(ctx, userID, rootID, rootName, limit, offset, true, privateMessage)
 	if err != nil {
 		return nil, err
 	}
 
-	err = s.resolveTree(ctx, userID, highlightMap, list, map1)
+	err = s.resolveTree(ctx, highlightMap, list, map1, privateMessage)
 
 	return
 }
 
-func (s *MessagesController) resolveTree(ctx context.Context, userID int64, highlightMap *idMap, list *model.List, map1 *limitOffsetMap) (err error) {
+func (s *MessagesController) resolveTree(ctx context.Context, highlightMap *idMap, list *model.List, map1 *limitOffsetMap, privateMessage *bool) (err error) {
 	for _, message := range list.Messages {
 		if highlightMap.Has(message.ID) {
 			message.Highlight = true
@@ -570,12 +584,12 @@ func (s *MessagesController) resolveTree(ctx context.Context, userID int64, high
 			continue
 		}
 
-		message.Messages, err = s.ReadThreadMessages(ctx, userID, message.ID, "", limitOffset.Limit, limitOffset.Offset, true)
+		message.Messages, err = s.ReadThreadMessages(ctx, message.UserID, message.ID, "", limitOffset.Limit, limitOffset.Offset, true, privateMessage)
 		if err != nil {
 			return
 		}
 
-		err = s.resolveTree(ctx, userID, highlightMap, message.Messages, map1)
+		err = s.resolveTree(ctx, highlightMap, message.Messages, map1, privateMessage)
 		if err != nil {
 			return
 		}

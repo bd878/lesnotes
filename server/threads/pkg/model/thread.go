@@ -14,6 +14,7 @@ type (
 		CreatedAt        string       `json:"created_at"`
 		UpdatedAt        string       `json:"updated_at"`
 		Title            string       `json:"title"`
+		PrivateMessage   bool         `json:"private_message"`
 	}
 
 	ListThreadsRequest struct {

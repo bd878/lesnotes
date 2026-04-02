@@ -138,6 +138,32 @@ func (g *Gateway) ListThreads(ctx context.Context, userID, parentID int64, limit
 	return
 }
 
+func (g *Gateway) ListMessages(ctx context.Context, userID, parentID int64, limit, offset int32, privateMessage *bool) (list []*model.Thread, isLastPage bool, err error) {
+	if g.isConnFailed() {
+		if err = g.setupConnection(); err != nil {
+			return
+		}
+	}
+
+	logger.Debugw("list messages", "user_id", userID, "parent_id", parentID, "limit", limit, "offset", offset, "private_message", privateMessage)
+
+	resp, err := g.client.ListMessages(ctx, &api.ListMessagesRequest{
+		UserId:   userID,
+		ParentId: parentID,
+		Limit:    limit,
+		Offset:   offset,
+		Private:  privateMessage,
+	})
+	if err != nil {
+		return nil, false, err
+	}
+
+	isLastPage = resp.IsLastPage
+	list = model.MapThreadsFromProto(model.ThreadFromProto, resp.List)
+
+	return
+}
+
 func (g *Gateway) CountThreads(ctx context.Context, id, userID int64) (total int32, err error) {
 	if g.isConnFailed() {
 		if err = g.setupConnection(); err != nil {
@@ -150,6 +176,29 @@ func (g *Gateway) CountThreads(ctx context.Context, id, userID int64) (total int
 	resp, err := g.client.Count(ctx, &api.CountRequest{
 		UserId: userID,
 		Id:     id,
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	total = resp.Total
+
+	return
+}
+
+func (g *Gateway) CountMessages(ctx context.Context, id, userID int64, privateMessage *bool) (total int32, err error) {
+	if g.isConnFailed() {
+		if err = g.setupConnection(); err != nil {
+			return
+		}
+	}
+
+	logger.Debugw("count messages", "id", id, "user_id", userID, "private_message", privateMessage)
+
+	resp, err := g.client.CountMessages(ctx, &api.CountMessagesRequest{
+		UserId:         userID,
+		Id:             id,
+		PrivateMessage: privateMessage,
 	})
 	if err != nil {
 		return 0, err
@@ -182,18 +231,19 @@ func (g *Gateway) ResolvePath(ctx context.Context, userID, id int64) (path []int
 	return
 }
 
-func (g *Gateway) ReadThread(ctx context.Context, userID, id int64) (thread *model.Thread, err error) {
+func (g *Gateway) ReadThread(ctx context.Context, userID, id int64, name string) (thread *model.Thread, err error) {
 	if g.isConnFailed() {
 		if err = g.setupConnection(); err != nil {
 			return
 		}
 	}
 
-	logger.Debugw("read thread", "user_id", userID, "id", id)
+	logger.Debugw("read thread", "user_id", userID, "id", id, "name", name)
 
 	resp, err := g.client.Read(ctx, &api.ReadRequest{
 		Id:     id,
 		UserId: userID,
+		Name:   name,
 	})
 	if err != nil {
 		return nil, err

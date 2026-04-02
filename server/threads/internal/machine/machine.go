@@ -16,6 +16,8 @@ type ThreadsRepository interface {
 	PublishThread(ctx context.Context, id, userID int64, updatedAt string) error
 	DeleteThread(ctx context.Context, id, userID int64) error
 	ReorderThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, updatedAt string) (err error)
+	PrivateMessages(ctx context.Context, ids []int64, userID int64) error
+	PublishMessages(ctx context.Context, ids []int64, userID int64) error
 }
 
 type Dumper interface {
@@ -56,6 +58,10 @@ func (f *Machine) Apply(record *raft.Log) interface{} {
 		return f.applyPrivate(buf[1:])
 	case ReorderRequest:
 		return f.applyReorder(buf[1:])
+	case PublishMessagesRequest:
+		return f.applyPublishMessages(buf[1:])
+	case PrivateMessagesRequest:
+		return f.applyPrivateMessages(buf[1:])
 	default:
 		f.log.Errorw("unknown request type", "type", reqType)
 	}
@@ -103,4 +109,18 @@ func (f *Machine) applyPrivate(raw []byte) interface{} {
 	proto.Unmarshal(raw, &cmd)
 
 	return f.threadsRepo.PrivateThread(context.TODO(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
+}
+
+func (f *Machine) applyPublishMessages(raw []byte) interface{} {
+	var cmd PublishMessagesCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.threadsRepo.PublishMessages(context.TODO(), cmd.Ids, cmd.UserId)
+}
+
+func (f *Machine) applyPrivateMessages(raw []byte) interface{} {
+	var cmd PrivateMessagesCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.threadsRepo.PrivateMessages(context.TODO(), cmd.Ids, cmd.UserId)
 }

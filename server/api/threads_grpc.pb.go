@@ -18,6 +18,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ThreadsClient interface {
 	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
+	ListMessages(ctx context.Context, in *ListMessagesRequest, opts ...grpc.CallOption) (*ListMessagesResponse, error)
 	Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*Thread, error)
 	Resolve(ctx context.Context, in *ResolveRequest, opts ...grpc.CallOption) (*ResolveResponse, error)
 	Publish(ctx context.Context, in *PublishRequest, opts ...grpc.CallOption) (*PublishResponse, error)
@@ -27,6 +28,7 @@ type ThreadsClient interface {
 	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
 	Count(ctx context.Context, in *CountRequest, opts ...grpc.CallOption) (*CountResponse, error)
+	CountMessages(ctx context.Context, in *CountMessagesRequest, opts ...grpc.CallOption) (*CountMessagesResponse, error)
 }
 
 type threadsClient struct {
@@ -40,6 +42,15 @@ func NewThreadsClient(cc grpc.ClientConnInterface) ThreadsClient {
 func (c *threadsClient) List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error) {
 	out := new(ListResponse)
 	err := c.cc.Invoke(ctx, "/threads.v1.Threads/List", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *threadsClient) ListMessages(ctx context.Context, in *ListMessagesRequest, opts ...grpc.CallOption) (*ListMessagesResponse, error) {
+	out := new(ListMessagesResponse)
+	err := c.cc.Invoke(ctx, "/threads.v1.Threads/ListMessages", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -127,11 +138,21 @@ func (c *threadsClient) Count(ctx context.Context, in *CountRequest, opts ...grp
 	return out, nil
 }
 
+func (c *threadsClient) CountMessages(ctx context.Context, in *CountMessagesRequest, opts ...grpc.CallOption) (*CountMessagesResponse, error) {
+	out := new(CountMessagesResponse)
+	err := c.cc.Invoke(ctx, "/threads.v1.Threads/CountMessages", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ThreadsServer is the server API for Threads service.
 // All implementations must embed UnimplementedThreadsServer
 // for forward compatibility
 type ThreadsServer interface {
 	List(context.Context, *ListRequest) (*ListResponse, error)
+	ListMessages(context.Context, *ListMessagesRequest) (*ListMessagesResponse, error)
 	Read(context.Context, *ReadRequest) (*Thread, error)
 	Resolve(context.Context, *ResolveRequest) (*ResolveResponse, error)
 	Publish(context.Context, *PublishRequest) (*PublishResponse, error)
@@ -141,6 +162,7 @@ type ThreadsServer interface {
 	Create(context.Context, *CreateRequest) (*CreateResponse, error)
 	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
 	Count(context.Context, *CountRequest) (*CountResponse, error)
+	CountMessages(context.Context, *CountMessagesRequest) (*CountMessagesResponse, error)
 	mustEmbedUnimplementedThreadsServer()
 }
 
@@ -150,6 +172,9 @@ type UnimplementedThreadsServer struct {
 
 func (UnimplementedThreadsServer) List(context.Context, *ListRequest) (*ListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
+}
+func (UnimplementedThreadsServer) ListMessages(context.Context, *ListMessagesRequest) (*ListMessagesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListMessages not implemented")
 }
 func (UnimplementedThreadsServer) Read(context.Context, *ReadRequest) (*Thread, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Read not implemented")
@@ -178,6 +203,9 @@ func (UnimplementedThreadsServer) Delete(context.Context, *DeleteRequest) (*Dele
 func (UnimplementedThreadsServer) Count(context.Context, *CountRequest) (*CountResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Count not implemented")
 }
+func (UnimplementedThreadsServer) CountMessages(context.Context, *CountMessagesRequest) (*CountMessagesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CountMessages not implemented")
+}
 func (UnimplementedThreadsServer) mustEmbedUnimplementedThreadsServer() {}
 
 // UnsafeThreadsServer may be embedded to opt out of forward compatibility for this service.
@@ -205,6 +233,24 @@ func _Threads_List_Handler(srv interface{}, ctx context.Context, dec func(interf
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ThreadsServer).List(ctx, req.(*ListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Threads_ListMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListMessagesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ThreadsServer).ListMessages(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/threads.v1.Threads/ListMessages",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ThreadsServer).ListMessages(ctx, req.(*ListMessagesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -371,6 +417,24 @@ func _Threads_Count_Handler(srv interface{}, ctx context.Context, dec func(inter
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Threads_CountMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CountMessagesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ThreadsServer).CountMessages(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/threads.v1.Threads/CountMessages",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ThreadsServer).CountMessages(ctx, req.(*CountMessagesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Threads_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "threads.v1.Threads",
 	HandlerType: (*ThreadsServer)(nil),
@@ -378,6 +442,10 @@ var _Threads_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "List",
 			Handler:    _Threads_List_Handler,
+		},
+		{
+			MethodName: "ListMessages",
+			Handler:    _Threads_ListMessages_Handler,
 		},
 		{
 			MethodName: "Read",
@@ -414,6 +482,10 @@ var _Threads_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Count",
 			Handler:    _Threads_Count_Handler,
+		},
+		{
+			MethodName: "CountMessages",
+			Handler:    _Threads_CountMessages_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

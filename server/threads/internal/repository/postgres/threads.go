@@ -23,7 +23,7 @@ func NewThreadsRepository(pool *pgxpool.Pool, tableName string) *ThreadsReposito
 }
 
 func (r *ThreadsRepository) ReadThreadByID(ctx context.Context, id, userID int64/*may be public*/) (thread *model.Thread, err error) {
-	query := "SELECT user_id, parent_id, next_id, prev_id, name, description, title, private, created_at, updated_at FROM %s WHERE id = $1 AND (user_id = $2 OR private = false)"
+	query := "SELECT user_id, parent_id, next_id, prev_id, name, description, title, private, private_message, created_at, updated_at FROM %s WHERE id = $1 AND (user_id = $2 OR private = false)"
 
 	thread = &model.Thread{
 		ID:     id,
@@ -32,7 +32,7 @@ func (r *ThreadsRepository) ReadThreadByID(ctx context.Context, id, userID int64
 	var createdAt, updatedAt *time.Time
 
 	err = r.pool.QueryRow(ctx, r.table(query), id, userID).Scan(&thread.UserID, &thread.ParentID, &thread.NextID, &thread.PrevID,
-		&thread.Name, &thread.Description, &thread.Title, &thread.Private, &createdAt, &updatedAt)
+		&thread.Name, &thread.Description, &thread.Title, &thread.Private, &thread.PrivateMessage, &createdAt, &updatedAt)
 	if err != nil {
 		return
 	}
@@ -46,7 +46,7 @@ func (r *ThreadsRepository) ReadThreadByID(ctx context.Context, id, userID int64
 }
 
 func (r *ThreadsRepository) ReadThreadByName(ctx context.Context, name string, userID int64 /*may be public*/) (thread *model.Thread, err error) {
-	query := "SELECT user_id, id, parent_id, next_id, prev_id, description, title, private, created_at, updated_at FROM %s WHERE name = $1 AND (user_id = $2 OR private = false)"
+	query := "SELECT user_id, id, parent_id, next_id, prev_id, description, title, private, private_message, created_at, updated_at FROM %s WHERE name = $1 AND (user_id = $2 OR private = false)"
 
 	thread = &model.Thread{
 		Name:     name,
@@ -55,7 +55,7 @@ func (r *ThreadsRepository) ReadThreadByName(ctx context.Context, name string, u
 	var createdAt, updatedAt *time.Time
 
 	err = r.pool.QueryRow(ctx, r.table(query), name, userID).Scan(&thread.UserID, &thread.ID, &thread.ParentID, &thread.NextID, &thread.PrevID,
-		&thread.Description, &thread.Title, &thread.Private, &createdAt, &updatedAt)
+		&thread.Description, &thread.Title, &thread.Private, &thread.PrivateMessage, &createdAt, &updatedAt)
 	if err != nil {
 		return
 	}
@@ -87,7 +87,7 @@ func (r *ThreadsRepository) ListThreads(ctx context.Context, userID, parentID in
 		}
 	}()
 
-	const selectThreads = "SELECT id, name, private, next_id, prev_id, created_at, updated_at FROM %s WHERE user_id = $1 AND parent_id = $2"
+	const selectThreads = "SELECT id, name, private, private_message, next_id, prev_id, created_at, updated_at FROM %s WHERE user_id = $1 AND parent_id = $2"
 
 	var rows pgx.Rows
 	rows, err = tx.Query(ctx, r.table(selectThreads), userID, parentID)
@@ -105,7 +105,8 @@ func (r *ThreadsRepository) ListThreads(ctx context.Context, userID, parentID in
 
 		var createdAt, updatedAt *time.Time
 
-		err = rows.Scan(&thread.ID, &thread.Name, &thread.Private, &thread.NextID, &thread.PrevID, &createdAt, &updatedAt)
+		err = rows.Scan(&thread.ID, &thread.Name, &thread.Private, &thread.PrivateMessage,
+			&thread.NextID, &thread.PrevID, &createdAt, &updatedAt)
 		if err != nil {
 			return
 		}
@@ -150,10 +151,159 @@ func (r *ThreadsRepository) ListThreads(ctx context.Context, userID, parentID in
 	return
 }
 
+func (r *ThreadsRepository) ListMessages(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool /* TODO: use asc */, privateMessage *bool) (list []*model.Thread, isLastPage bool, err error) {
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			tx.Rollback(ctx)
+		default:
+			tx.Commit(ctx)
+		}
+	}()
+
+	/* TODO: use limit, offset in query */
+
+	query := "SELECT id, name, private, private_message, next_id, prev_id, created_at, updated_at FROM %s WHERE user_id = $1 AND parent_id = $2"
+
+	logger.Debugw("list messages", "user_id", userID, "parentID", parentID, "limit", limit, "offset", offset)
+
+	var rows pgx.Rows
+	rows, err = tx.Query(ctx, r.table(query), userID, parentID)
+	defer rows.Close()
+	if err != nil {
+		return
+	}
+
+	unordered := make([]*model.Thread, 0)
+	for rows.Next() {
+		thread := &model.Thread{
+			ParentID: parentID,
+			UserID:   userID,
+		}
+
+		var createdAt, updatedAt *time.Time
+
+		err = rows.Scan(&thread.ID, &thread.Name, &thread.Private, &thread.PrivateMessage,
+			&thread.NextID, &thread.PrevID, &createdAt, &updatedAt)
+		if err != nil {
+			return
+		}
+
+		thread.CreatedAt = createdAt.Format(time.RFC3339)
+		thread.UpdatedAt = updatedAt.Format(time.RFC3339)
+
+		unordered = append(unordered, thread)
+	}
+
+	logger.Debugw("list messages", "unordered", unordered)
+
+	/* create list from root in reverse order */
+	var nextID int64
+	list = make([]*model.Thread, 0)
+	for range unordered {
+		for _, thread := range unordered {
+			if thread.NextID == nextID {
+				if privateMessage == nil {
+					list = append(list, thread)
+				} else if *privateMessage == true && thread.PrivateMessage == true {
+					list = append(list, thread)
+				} else if *privateMessage == false && thread.PrivateMessage == false {
+					list = append(list, thread)
+				}
+
+				nextID = thread.ID
+				break
+			}
+		}
+	}
+
+	logger.Debugw("list messages", "list", list)
+
+	if err = rows.Err(); err != nil {
+		return
+	}
+
+	for _, thread := range list {
+		var countQuery string
+		if privateMessage == nil {
+			countQuery = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2"
+		} else if *privateMessage == true {
+			countQuery = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2 AND private_message = true"
+		} else if *privateMessage == false {
+			countQuery = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2 AND private_message = false"
+		}
+
+		err = tx.QueryRow(ctx, r.table(countQuery), userID, thread.ID).Scan(&thread.Count)
+		if err != nil {
+			return
+		}
+	}
+
+	if int32(len(list)) <= offset+limit {
+		isLastPage = true
+	}
+
+	end := min(int32(len(list)), offset+limit)
+
+	list = list[offset:end]
+
+	return
+}
+
+func (r *ThreadsRepository) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+	for _, id := range ids {
+		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private_message = false WHERE user_id = $1 AND id = $2"), userID, id)
+		if err != nil {
+			logger.Errorln(err)
+		}
+	}
+
+	return
+}
+
+func (r *ThreadsRepository) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+	for _, id := range ids {
+		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private_message = true WHERE user_id = $1 AND id = $2"), userID, id)
+		if err != nil {
+			logger.Errorln(err)
+		}
+	}
+
+	return
+}
+
 func (r *ThreadsRepository) CountThreads(ctx context.Context, id, userID int64) (total int32, err error) {
 	const query = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2"
 
 	err = r.pool.QueryRow(ctx, r.table(query), userID, id).Scan(&total)
+
+	return
+}
+
+func (r *ThreadsRepository) CountMessages(ctx context.Context, id, userID int64, privateMessage *bool) (total int32, err error) {
+	var query string
+	if privateMessage == nil {
+		query = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2"
+	} else if *privateMessage == true {
+		query = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2 AND private_message = true"
+	} else if *privateMessage == false {
+		query = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2 AND private_message = false"
+	}
+
+	logger.Debugw("count messages", "id", id, "user_id", userID, "query", query)
+
+	err = r.pool.QueryRow(ctx, r.table(query), userID, id).Scan(&total)
+
+	logger.Debugw("count messages", "total", total)
 
 	return
 }

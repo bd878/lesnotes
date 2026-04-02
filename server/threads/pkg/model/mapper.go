@@ -18,6 +18,7 @@ func ThreadFromProto(proto *api.Thread) *Thread {
 		CreatedAt:      proto.CreatedAt,
 		UpdatedAt:      proto.UpdatedAt,
 		Title:          proto.Title,
+		PrivateMessage: proto.PrivateMessage,
 	}
 }
 
@@ -35,6 +36,7 @@ func ThreadToProto(msg *Thread) *api.Thread {
 		CreatedAt:      msg.CreatedAt,
 		UpdatedAt:      msg.UpdatedAt,
 		Title:          msg.Title,
+		PrivateMessage: msg.PrivateMessage,
 	}
 }
 

@@ -110,6 +110,30 @@ func (s *Controller) ListThreads(ctx context.Context, userID, parentID int64, li
 	return model.MapThreadsFromProto(model.ThreadFromProto, resp.List), resp.IsLastPage, err
 }
 
+func (s *Controller) ListMessages(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool, privateMessage *bool) (list []*model.Thread, isLastPage bool, err error) {
+	if s.isConnFailed() {
+		if err = s.setupConnection(); err != nil {
+			return
+		}
+	}
+
+	logger.Debugw("list messages", "user_id", userID, "parent_id", parentID, "limit", limit, "offset", offset, "asc", asc, "private_message", privateMessage)
+
+	resp, err := s.client.ListMessages(ctx, &api.ListMessagesRequest{
+		UserId:   userID,
+		ParentId: parentID,
+		Limit:    limit,
+		Offset:   offset,
+		Asc:      asc,
+		Private:  privateMessage,
+	})
+	if err != nil {
+		return nil, false, err
+	}
+
+	return model.MapThreadsFromProto(model.ThreadFromProto, resp.List), resp.IsLastPage, err
+}
+
 func (s *Controller) ResolveThread(ctx context.Context, id, userID int64) (path []int64, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {

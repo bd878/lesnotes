@@ -16,10 +16,12 @@ import (
 
 type ThreadsRepository interface {
 	ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (ids []*model.Thread, isLastPage bool, err error)
+	ListMessages(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool, privateMessage *bool) (ids []*model.Thread, isLastPage bool, err error)
 	ReadThreadByID(ctx context.Context, id, userID int64) (thread *model.Thread, err error)
 	ReadThreadByName(ctx context.Context, name string, userID int64) (thread *model.Thread, err error)
 	ResolveThread(ctx context.Context, id, userID int64) (ids []int64, err error)
 	CountThreads(ctx context.Context, id, userID int64) (total int32, err error)
+	CountMessages(ctx context.Context, id, userID int64, privateMessage *bool) (total int32, err error)
 }
 
 type Consensus interface {
@@ -212,6 +214,34 @@ func (m *Distributed) PublishThread(ctx context.Context, id int64, userID int64)
 	return m.publisher.Publish(context.TODO(), event)
 }
 
+func (m *Distributed) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+	m.log.Debugw("publish thread messages", "ids", ids, "user_id", userID)
+
+	cmd, err := proto.Marshal(&machine.PublishMessagesCommand{
+		Ids:       ids,
+		UserId:    userID,
+	})
+	if err != nil {
+		return err
+	}
+
+	return m.apply(ctx, machine.PublishMessagesRequest, cmd)
+}
+
+func (m *Distributed) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+	m.log.Debugw("private thread messages", "ids", ids, "user_id", userID)
+
+	cmd, err := proto.Marshal(&machine.PrivateMessagesCommand{
+		Ids:         ids,
+		UserId:      userID,
+	})
+	if err != nil {
+		return err
+	}
+
+	return m.apply(ctx, machine.PrivateMessagesRequest, cmd)
+}
+
 func (m *Distributed) DeleteThread(ctx context.Context, id, userID int64) error {
 	m.log.Debugw("delete thread", "id", id, "user_id", userID)
 
@@ -254,9 +284,19 @@ func (m *Distributed) ListThreads(ctx context.Context, userID, parentID int64, l
 	return m.threadsRepo.ListThreads(ctx, userID, parentID, limit, offset, asc)
 }
 
+func (m *Distributed) ListMessages(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool, private *bool) (list []*model.Thread, isLastPage bool, err error) {
+	m.log.Debugw("list messages", "user_id", userID, "parent_id", parentID, "limit", limit, "offset", "asc", asc, "private_message", private)
+	return m.threadsRepo.ListMessages(ctx, userID, parentID, limit, offset, asc, private)
+}
+
 func (m *Distributed) CountThreads(ctx context.Context, id, userID int64) (total int32, err error) {
 	m.log.Debugw("count threads", "user_id", userID, "id", id)
 	return m.threadsRepo.CountThreads(ctx, id, userID)
+}
+
+func (m *Distributed) CountMessages(ctx context.Context, id, userID int64, privateMessage *bool) (total int32, err error) {
+	m.log.Debugw("count messages", "user_id", userID, "id", id, "private_message", privateMessage)
+	return m.threadsRepo.CountMessages(ctx, id, userID, privateMessage)
 }
 
 func (m *Distributed) GetServers(ctx context.Context) ([]*api.Server, error) {

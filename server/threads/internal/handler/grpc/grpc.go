@@ -9,6 +9,7 @@ import (
 
 type Controller interface {
 	ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (ids []*threads.Thread, isLastPage bool, err error)
+	ListMessages(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool, privateMessage *bool) (ids []*threads.Thread, isLastPage bool, err error)
 	ReadThread(ctx context.Context, id, userID int64, name string) (thread *threads.Thread, err error)
 	ResolveThread(ctx context.Context, id, userID int64) (ids []int64, err error)
 	CreateThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name, description, title string, private bool) (err error)
@@ -18,6 +19,7 @@ type Controller interface {
 	PublishThread(ctx context.Context, id, userID int64) (err error)
 	PrivateThread(ctx context.Context, id, userID int64) (err error)
 	CountThreads(ctx context.Context, id, userID int64) (total int32, err error)
+	CountMessages(ctx context.Context, id, userID int64, privateMessage *bool) (total int32, err error)
 	GetServers(ctx context.Context) (servers []*api.Server, err error)
 }
 
@@ -54,6 +56,21 @@ func (h *Handler) List(ctx context.Context, req *api.ListRequest) (resp *api.Lis
 	// But it should list all threads (public and private) of a public thread.
 
 	resp = &api.ListResponse{
+		List:       threads.MapThreadsToProto(threads.ThreadToProto, list),
+		IsLastPage: isLastPage,
+		Count:      int32(len(list)),
+	}
+
+	return
+}
+
+func (h *Handler) ListMessages(ctx context.Context, req *api.ListMessagesRequest) (resp *api.ListMessagesResponse, err error) {
+	list, isLastPage, err := h.controller.ListMessages(ctx, req.UserId, req.ParentId, req.Limit, req.Offset, req.Asc, req.Private)
+	if err != nil {
+		return nil, err
+	}
+
+	resp = &api.ListMessagesResponse{
 		List:       threads.MapThreadsToProto(threads.ThreadToProto, list),
 		IsLastPage: isLastPage,
 		Count:      int32(len(list)),
@@ -151,6 +168,19 @@ func (h *Handler) Count(ctx context.Context, req *api.CountRequest) (resp *api.C
 	}
 
 	resp = &api.CountResponse{
+		Total: total,
+	}
+
+	return
+}
+
+func (h *Handler) CountMessages(ctx context.Context, req *api.CountMessagesRequest) (resp *api.CountMessagesResponse, err error) {
+	total, err := h.controller.CountMessages(ctx, req.Id, req.UserId, req.PrivateMessage)
+	if err != nil {
+		return nil, err
+	}
+
+	resp = &api.CountMessagesResponse{
 		Total: total,
 	}
 

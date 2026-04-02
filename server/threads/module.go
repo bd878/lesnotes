@@ -40,6 +40,9 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 
 	controller := application.New(consensus, dispatcher, threadsRepo, svc.Logger())
 
+	stream.RegisterIntegrationEventHandlers(nats.NewStream(svc.Nats()),
+		stream.NewIntegrationEventHandlers(controller, svc.Logger()))
+
 	handler := grpc.New(controller)
 
 	api.RegisterThreadsServer(svc.RPC(), handler)

@@ -6,6 +6,7 @@ option go_package = "github.com/bd878/gallery/server/api";
 
 service Threads {
 	rpc List(ListRequest) returns (ListResponse) {}
+	rpc ListMessages(ListMessagesRequest) returns (ListMessagesResponse) {}
 	rpc Read(ReadRequest) returns (Thread) {}
 	rpc Resolve(ResolveRequest) returns (ResolveResponse) {}
 	rpc Publish(PublishRequest) returns (PublishResponse) {}
@@ -15,6 +16,7 @@ service Threads {
 	rpc Create(CreateRequest) returns (CreateResponse) {}
 	rpc Delete(DeleteRequest) returns (DeleteResponse) {}
 	rpc Count(CountRequest) returns (CountResponse) {}
+	rpc CountMessages(CountMessagesRequest) returns (CountMessagesResponse) {}
 }
 
 message ThreadsSnapshot {
@@ -36,6 +38,7 @@ message ThreadSnapshotItem {
 	string   created_at = 10;
 	string   updated_at = 11;
 	string   title = 12;	
+	bool     private_message = 13;
 }
 
 message Thread {
@@ -51,6 +54,7 @@ message Thread {
 	string   created_at = 10;
 	string   updated_at = 11;
 	string   title = 12;
+	bool     private_message = 13;
 }
 
 message ListRequest {
@@ -61,7 +65,22 @@ message ListRequest {
 	bool  asc = 5;
 }
 
+message ListMessagesRequest {
+	int64 user_id = 1;
+	int64 parent_id = 2;
+	int32 limit = 3;
+	int32 offset = 4;
+	bool  asc = 5;
+	optional bool private = 6;
+}
+
 message ListResponse {
+	repeated Thread list = 1;
+	bool  is_last_page = 2;
+	int32 count = 3;
+}
+
+message ListMessagesResponse {
 	repeated Thread list = 1;
 	bool  is_last_page = 2;
 	int32 count = 3;
@@ -146,6 +165,16 @@ message CountRequest {
 	int64     user_id = 2;
 }
 
+message CountMessagesRequest {
+	int64     id = 1;
+	int64     user_id = 2;
+	optional bool private_message = 3;
+}
+
 message CountResponse {
+	int32     total = 1;
+}
+
+message CountMessagesResponse {
 	int32     total = 1;
 }
