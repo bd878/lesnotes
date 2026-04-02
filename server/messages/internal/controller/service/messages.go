@@ -222,7 +222,7 @@ func (s *MessagesController) UpdateMessage(ctx context.Context, id int64, text, 
 
 // Get messages in order
 func (s *MessagesController) ReadThreadMessages(ctx context.Context, userID, threadID int64, threadName string,
-	limit, offset int32, ascending bool, privateMessage *bool) (list *model.List, err error) {
+	limit, offset int32, ascending bool, privateMessage *bool) (list *model.MessagesList, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -233,13 +233,20 @@ func (s *MessagesController) ReadThreadMessages(ctx context.Context, userID, thr
 		threadName, "limit", limit, "offset", offset, "ascending", ascending, "private_message", privateMessage)
 
 	if threadName != "" && threadID == 0 {
-		thread, err := s.threads.ReadThread(ctx, userID, threadID, threadName)
+		thread, err := s.threads.ReadThread(ctx, userID, 0, threadName)
 		if err != nil {
 			return nil, err
 		}
 
 		threadID = thread.ID
 		userID = thread.UserID
+	} else {
+		thread, err := s.threads.ReadThread(ctx, userID, threadID, "")
+		if err != nil {
+			return nil, err
+		}
+
+		threadName = thread.Name
 	}
 
 	total, err := s.threads.CountMessages(ctx, threadID, userID, privateMessage)
@@ -272,8 +279,9 @@ func (s *MessagesController) ReadThreadMessages(ctx context.Context, userID, thr
 		message.Count = threadsList[i].Count
 	}
 
-	list = &model.List{
+	list = &model.MessagesList{
 		Messages:    messages,
+		Name:        threadName,
 		IsLastPage:  isLastPage,
 		IsFirstPage: offset == 0,
 		Total:       total,
@@ -308,7 +316,7 @@ func (s *MessagesController) ReadBatchMessages(ctx context.Context, userID int64
 }
 
 // read all messages not concerning thread
-func (s *MessagesController) ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (list *model.List, err error) {
+func (s *MessagesController) ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (list *model.MessagesList, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -327,7 +335,7 @@ func (s *MessagesController) ReadMessages(ctx context.Context, userID int64, lim
 		return nil, err
 	}
 
-	list = &model.List{
+	list = &model.MessagesList{
 		Messages:    model.MapMessagesFromProto(model.MessageFromProto, res.Messages),
 		IsLastPage:  res.IsLastPage,
 		IsFirstPage: offset == 0,
@@ -539,7 +547,7 @@ func (m *idMap) String() (result string) {
 const limitPathMessages = 10 /* any other number ? */
 
 func (s *MessagesController) ReadTree(ctx context.Context, userID, highlightID int64, highlightName string,
-	rootID int64, rootName string, limit, offset int32, privateMessage *bool, pairs []*model.IDLimitOffset) (list *model.List, err error) {
+	rootID int64, rootName string, limit, offset int32, privateMessage *bool, pairs []*model.IDLimitOffset) (list *model.MessagesList, err error) {
 	if s.isConnFailed() {
 		if err := s.setupConnection(); err != nil {
 			return nil, err
@@ -572,7 +580,7 @@ func (s *MessagesController) ReadTree(ctx context.Context, userID, highlightID i
 	return
 }
 
-func (s *MessagesController) resolveTree(ctx context.Context, highlightMap *idMap, list *model.List, map1 *limitOffsetMap, privateMessage *bool) (err error) {
+func (s *MessagesController) resolveTree(ctx context.Context, highlightMap *idMap, list *model.MessagesList, map1 *limitOffsetMap, privateMessage *bool) (err error) {
 	for _, message := range list.Messages {
 		if highlightMap.Has(message.ID) {
 			message.Highlight = true

@@ -15,15 +15,16 @@ type (
 		FileIDs      []int64               `json:"-"`
 		Files        []*files.File         `json:"files"`
 		Translations []*TranslationPreview `json:"translations"`
-		Messages     *List                 `json:"messages,omitempty"`
+		Messages     *MessagesList         `json:"messages,omitempty"`
 		Text         string                `json:"text"`
 		Title        string                `json:"title"`
 		Highlight    bool                  `json:"highlight"`
 		Private      bool                  `json:"private"`
 	}
 
-	List struct {
+	MessagesList struct {
 		Messages    []*Message   `json:"messages"`
+		Name        string       `json:"name"`
 		IsLastPage  bool         `json:"is_last_page"`
 		IsFirstPage bool         `json:"is_first_page"`
 		Total       int32        `json:"total"`
@@ -100,7 +101,7 @@ type (
 	}
 
 	ReadTreeResponse struct {
-		List      *List `json:"list"`
+		List      *MessagesList `json:"list"`
 	}
 
 	ReadPathRequest struct {

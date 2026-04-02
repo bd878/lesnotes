@@ -16,11 +16,11 @@ type MessagesController interface {
 	PublishMessages(ctx context.Context, ids []int64, userID int64) (err error)
 	PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error)
 	ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *messages.Message, err error)
-	ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (list *messages.List, err error)
-	ReadThreadMessages(ctx context.Context, userID, threadID int64, threadName string, limit, offset int32, ascending bool, privateMessage *bool) (list *messages.List, err error)
+	ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (list *messages.MessagesList, err error)
+	ReadThreadMessages(ctx context.Context, userID, threadID int64, threadName string, limit, offset int32, ascending bool, privateMessage *bool) (list *messages.MessagesList, err error)
 	ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*messages.Message, err error)
 	ReadPath(ctx context.Context, userID, id int64, name string) (messages []*messages.Message, parentID int64, err error)
-	ReadTree(ctx context.Context, userID, highlightID int64, highlightName string, messageID int64, name string, limit, offset int32, privateMessage *bool, pairs []*messages.IDLimitOffset) (list *messages.List, err error)
+	ReadTree(ctx context.Context, userID, highlightID int64, highlightName string, messageID int64, name string, limit, offset int32, privateMessage *bool, pairs []*messages.IDLimitOffset) (list *messages.MessagesList, err error)
 }
 
 type TranslationsController interface {
