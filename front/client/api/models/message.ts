@@ -10,6 +10,7 @@ const ns_in_ms = 10**6
 
 export interface MessagesList extends Paging {
 	messages: Message[]
+	name: string
 }
 
 export interface Message {
@@ -30,6 +31,7 @@ export interface Message {
 
 const EmptyMessagesList: MessagesList = Object.freeze({
 	...EmptyPaging,
+	name: "",
 	messages: [],
 })
 
@@ -58,6 +60,7 @@ function mapMessagesListFromProto(list?: any): MessagesList {
 
 	const res = {
 		...paging(list),
+		name: list.name,
 		messages: list.messages.map(mapMessageFromProto),
 	}
 

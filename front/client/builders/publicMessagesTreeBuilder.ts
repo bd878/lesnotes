@@ -3,8 +3,7 @@ import Config from 'config';
 import mustache from 'mustache';
 import { readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
-import AbstractBuilder from './abstractBuilder';
-import crop from '../utils/crop';
+import AbstractPublicBuilder from './abstractPublicBuilder'
 
 let messagesTreeTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/messages_tree/desktop/messages_tree.mustache')), { encoding: 'utf-8' });
 let messagesTreeTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/messages_tree/mobile/messages_tree.mustache')), { encoding: 'utf-8' });
@@ -12,16 +11,13 @@ let messagesTreeTemplateMobile = readFileSync(resolve(join(Config.get('basedir')
 let messagesListTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/messages_tree/desktop/messages_list.mustache')), { encoding: 'utf-8' });
 let messagesListTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/messages_tree/mobile/messages_list.mustache')), { encoding: 'utf-8' });
 
-let threadPathTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/messages_tree/desktop/thread_path.mustache')), { encoding: 'utf-8' });
-let threadPathTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/messages_tree/mobile/thread_path.mustache')), { encoding: 'utf-8' });
-
-class MessagesTreeBuilder extends AbstractBuilder {
+class PublicMessagesTreeBuilder extends AbstractPublicBuilder {
 	list = undefined
-	threadPath = undefined
 
 	addList(tree: MessagesList) {
 		const search = this.search
 		const path = this.path
+		const threadName = this.threadName
 
 		const close = ((new URLSearchParams(search)).get("close") || "").split(",").map(parseFloat).filter(v => !isNaN(v))
 
@@ -34,15 +30,15 @@ class MessagesTreeBuilder extends AbstractBuilder {
 			offset:            tree.offset,
 			count:             tree.count,
 			messages:          tree.messages,
-			isAuthed:          true,
+			isAuthed:          this.isAuthed,
 
 			hasMessages:       function() { return this.messages.messages.length > 0 },
 			isFolded:          function() { return this.messages.messages.length > 0 },
 			hasPagination:     function() { return !(this.isLastPage && this.isFirstPage) },
 			noMessagesText:    this.i18n("noMessagesText"),
 
-			messageHref:       function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); return `/messages/${this.ID}?` + params.toString(); },
-			openThreadHref:    function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); params.set("cwd", this.ID); params.set(`${this.ID}`, `${limit},0`); return "/home?" + params.toString(); },
+			messageHref:       function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); return `/t/${threadName}/${this.name}?` + params.toString(); },
+			openThreadHref:    function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); return "/t/${this.name}?" + params.toString(); },
 			unfoldHref:        function() { const params = new URLSearchParams(search); params.set(this.ID || 0, `${limit},0`); return path + "?" + params.toString(); },
 			foldHref:          function() { const params = new URLSearchParams(search); params.delete(this.ID || 0); return path + "?" + params.toString(); },
 			prevPageHref:      function() { const params = new URLSearchParams(search); params.set(this.ID || 0, `${limit},${limit + this.offset}`); return path + "?" + params.toString(); },
@@ -52,36 +48,12 @@ class MessagesTreeBuilder extends AbstractBuilder {
 		})
 	}
 
-	addThreadPath(threadPath: Message[]) {
-		const search = this.search
-		const path = this.path
-
-		this.threadPath = mustache.render(this.isMobile ? threadPathTemplateMobile : threadPathTemplate, {
-			path:     threadPath.slice(0, -1),
-			thread:   threadPath.slice(-1),
-			editThreadHref:  function() { return `/editor/threads/${this.ID}` + search },
-			editThreadTitle: "<-- " + this.i18n("thread").toLowerCase(),
-			threadTitle: function() { return `/${crop(this.title || this.text, 15)}` },
-			threadHref: function() {
-				const params = new URLSearchParams(search);
-				switch (this.ID) {
-				case 0:
-					params.delete("cwd")
-					return path + "?" + params.toString()
-				default:
-					params.set("cwd", this.ID)
-					return path + "?" + params.toString()
-				}
-			},
-		})
-	}
 
 	build() {
 		return mustache.render(this.isMobile ? messagesTreeTemplateMobile : messagesTreeTemplate, {}, {
 			list:       this.list,
-			threadPath: this.threadPath,
 		})
-	}
+	}	
 }
 
-export default MessagesTreeBuilder
+export default PublicMessagesTreeBuilder

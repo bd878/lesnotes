@@ -4,12 +4,12 @@ import Config from 'config';
 import mustache from 'mustache';
 import { readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
-import AbstractBuilder from './abstractBuilder'
+import AbstractPublicBuilder from './abstractPublicBuilder'
 
 let threadMessageTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/thread/desktop/thread.mustache')), { encoding: 'utf-8' });
 let threadMessageTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/thread/mobile/thread.mustache')), { encoding: 'utf-8' });
 
-class PublicThreadMessageBuilder extends AbstractBuilder {
+class PublicThreadMessageBuilder extends AbstractPublicBuilder {
 	auth               = undefined;
 	messageFeatures    = undefined;
 	messageView        = undefined;
