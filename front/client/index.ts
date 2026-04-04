@@ -120,7 +120,8 @@ router
 	.get("publicMessage",          "/m/:messageName",               etag, noCache, getMe, getState, loadMessage, isAuthed(loadMessagePath), loadComments, formatView, messageFeatures, publicMessage)
 	.get("publicTranslation",      "/m/:messageName/:lang",         etag, noCache, getMe, getState, loadMessage, loadComments, loadTranslation, formatView, publicTranslation)
 	.get("publicThread",           "/t/:threadName",                etag, noCache, getMe, getState, loadThread, loadTree, formatView, publicThread)
-	.get("publicThreadMessage",    "/t/:threadName/:messageName",   etag, noCache, getMe, getState, loadThread, loadComments, loadTree, loadMessage, isAuthed(loadMessagePath), formatView, publicThreadMessage)
+	.get("publicThreadMessage",    "/t/:threadName/:messageName",   etag, noCache, getMe, getState, loadMessage, isAuthed(loadMessagePath), loadComments, loadThread, loadTree, formatView, messageFeatures, publicThreadMessage)
+	// .get("publicThreadMessageTranslation", "/t/:threadName/:messageName/:lang", etag, noCache, getMe, getState, loadMessage, isAuthed(loadMessagePath), loadComments, loadTranslation, loadThread, loadTree, formatView, messageFeatures, publicThreadMessageTranslation)
 	.get("any",                    "/:any*",                        getState, xxx)
 
 app.use(router.routes());

@@ -32,7 +32,7 @@ class HomeBuilder extends AbstractBuilder {
 	messageFeatures      = undefined;
 	sidebar              = undefined;
 	controlPanel         = undefined;
-	auth               = undefined;
+	auth                 = undefined;
 	filesSelector        = undefined;
 	messageHeader        = undefined;
 	scripts              = ["/public/pages/home/homeScript.js"]
@@ -47,6 +47,10 @@ class HomeBuilder extends AbstractBuilder {
 
 	addMessageFeatures(features: Builder) {
 		this.messageFeatures = features.build()
+	}
+
+	addMessageView(view: Builder) {
+		this.messageView = view.build()
 	}
 
 	addFilesSelector(files: FileWithMime[]) {

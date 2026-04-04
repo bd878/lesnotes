@@ -1,5 +1,4 @@
 import type {Builder} from './builder'
-import type { Message, TranslationPreview } from '../api/models';
 import Config from 'config';
 import mustache from 'mustache';
 import { readFileSync } from 'node:fs';
@@ -10,23 +9,33 @@ let threadMessageTemplate = readFileSync(resolve(join(Config.get('basedir'),'tem
 let threadMessageTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/thread/mobile/thread.mustache')), { encoding: 'utf-8' });
 
 class PublicThreadMessageBuilder extends AbstractPublicBuilder {
-	auth               = undefined;
+	header             = undefined;
+	tree               = undefined;
 	messageFeatures    = undefined;
 	messageView        = undefined;
 
-	addAuth(auth: Builder) {
-		this.auth = auth.build()
+	addHeader(header: Builder) {
+		this.header = header.build()
 	}
 
 	addMessageFeatures(features: Builder) {
 		this.messageFeatures = features.build()
 	}
 
-	build(message?: Message) {
+	addMessagesTree(tree: Builder) {
+		this.tree = tree.build()
+	}
+
+	addMessageView(view: Builder) {
+		this.messageView = view.build()
+	}
+
+	build() {
 		return mustache.render(this.isMobile ? threadMessageTemplateMobile : threadMessageTemplate, {
-			message:       message,
+			hasMessage:        this.messageView != undefined,
 		}, {
-			auth:              this.auth,
+			header:            this.header,
+			messagesTree:      this.tree,
 			messageView:       this.messageView,
 			messageFeatures:   this.messageFeatures,
 		})

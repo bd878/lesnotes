@@ -5,32 +5,40 @@ import api from '../api';
 import * as is from '../third_party/is';
 import { readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
-import HomeBuilder from './homeBuilder';
+import AbstractPublicBuilder from './abstractPublicBuilder';
 
-let messageViewTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/home/desktop/message_view.mustache')), { encoding: 'utf-8' });
-let messageViewTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/home/mobile/message_view.mustache')), { encoding: 'utf-8' });
+let messageViewTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/message/desktop/message_view.mustache')), { encoding: 'utf-8' });
+let messageViewTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/message/mobile/message_view.mustache')), { encoding: 'utf-8' });
 
-class MessageViewBuilder extends HomeBuilder {
-	addMessageView(message?: Message) {
-		if (is.empty(message)) {
-			return
-		}
+class MessageViewBuilder extends AbstractPublicBuilder {
+	messageView = undefined
+	redirectUrl = ""
+	deleteRedirectUrl = ""
 
-		const search = this.search
+	addRedirectUrl(redirectUrl: string) {
+		this.redirectUrl = redirectUrl
+	}
 
+	addDeleteRedirectUrl(deleteRedirectUrl: string) {
+		this.deleteRedirectUrl = deleteRedirectUrl
+	}
+
+	addMessage(message: Message) {
 		this.messageView = mustache.render(this.isMobile ? messageViewTemplateMobile : messageViewTemplate, {
-			ID:                    message.ID,
-			title:                 message.title,
-			text:                  message.text,
-			name:                  message.name,
-			private:               message.private,
-			editHref:              `/editor/messages/${message.ID}` + search,
-			deleteAction:          "/m/delete" + search,
-			publishAction:         "/m/publish" + search,
-			privateAction:         "/m/private" + search,
-			newNoteButton:         this.i18n("newNote"),
+			isAuthed:              this.isAuthed,
+			message:               message,
+			editHref:              `/editor/messages/${message.ID}` + this.search,
+			deleteAction:          "/m/delete" + this.search,
+			publishAction:         "/m/publish" + this.search,
+			privateAction:         "/m/private" + this.search,
+			redirectUrl:           this.redirectUrl || (this.path + this.search),
+			deleteRedirectUrl:     this.deleteRedirectUrl,
 			domain:                Config.get("domain"),
 		})
+	}
+
+	build() {
+		return this.messageView
 	}
 }
 

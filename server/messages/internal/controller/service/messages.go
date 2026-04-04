@@ -232,20 +232,15 @@ func (s *MessagesController) ReadThreadMessages(ctx context.Context, userID, thr
 	logger.Debugw("read thread messages", "user_id", userID, "thread_id", threadID, "thread_name",
 		threadName, "limit", limit, "offset", offset, "ascending", ascending, "private_message", privateMessage)
 
-	if threadName != "" && threadID == 0 {
-		thread, err := s.threads.ReadThread(ctx, userID, 0, threadName)
+	// read thread that is not root
+	if threadName != "" || threadID != 0 {
+		thread, err := s.threads.ReadThread(ctx, userID, threadID, threadName)
 		if err != nil {
 			return nil, err
 		}
 
 		threadID = thread.ID
 		userID = thread.UserID
-	} else {
-		thread, err := s.threads.ReadThread(ctx, userID, threadID, "")
-		if err != nil {
-			return nil, err
-		}
-
 		threadName = thread.Name
 	}
 
