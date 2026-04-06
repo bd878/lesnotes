@@ -16,12 +16,16 @@
 		<title>Les notes</title>
 	</head>
 	<body class="large:text-xl small:text-sm dark:bg-gray-900 dark:text-gray-400 text-gray-950">
-		<div data-is-mobile="true" class="py-5 h-screen flex flex-col items-start relative">
-			<div class="w-full grow">
+		<div data-is-mobile="true" class="h-screen flex flex-col items-start relative">
+			<div class="small:px-3 px-5 w-full pt-5">
+				{{> header}}
+			</div>
+
+			<div class="w-full small:px-3 px-5 grow">
 				{{> content}}
 			</div>
 
-			<div class="pt-5 pb-5 w-full">
+			<div class="py-5 small:px-3 px-5 w-full">
 				{{> footer}}
 			</div>
 		</div>

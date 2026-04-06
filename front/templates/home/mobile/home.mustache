@@ -1,34 +1,32 @@
-<div class="flex flex-col">
-	<div class="w-full max-w-5xl mb-3 px-5 small:px-3">
-		{{> sidebar}}
+<div class="h-full">
+	<div class="flex flex-col overflow-x-hidden mb-5 small:mb-3 w-full max-w-md">
+		{{> header}}
 	</div>
 
-	<div class="px-5 small:px-3 mb-4 small:mb-2 max-w-5xl w-full flex flex-row">
-		<div class="flex flex-col w-full">
-			{{> translations}}
-			<div class="small:mb-2 h-[300px] flex flex-col grow small:p-1 p-2 border border-1 border-solid rounded-md">
+	<div class="w-full h-full max-w-md max-h-[300px] flex flex-row mb-5 small:mb-3">
+		<div class="flex flex-col grow-2 w-full h-full">
+			{{> messageHeader}}
+			<div class="w-full overflow-x-hidden border border-1 border-solid rounded-md h-full">
 				{{> messageEditForm}}
 				{{> messageView}}
 				{{> newMessageForm}}
 				{{> threadEditForm}}
 				{{> threadView}}
-				{{> filesList}}
-				{{! comments }}
-				{{> pagination}}
-				{{> filesForm}}
 			</div>
 		</div>
 	</div>
 
-	<div class="mb-3 px-5 small:px-3">
+	{{# hasFeatures}}
+		<div class="mb-5 small:mb-3">
+			{{> messageFeatures}}
+		</div>
+	{{/ hasFeatures}}
+
+	<div>
+		{{> messagesTree}}
+	</div>
+
+	<div class="mb-5 small:mb-3">
 		{{> controlPanel}}
-	</div>
-
-	<div class="px-5 small:px-3">
-		<div class="w-full h-full">
-			<div id="messages-list" ondragover="event.preventDefault()" class="flex flex-col">
-				{{> messagesTree}}
-			</div>
-		</div>
 	</div>
 </div>

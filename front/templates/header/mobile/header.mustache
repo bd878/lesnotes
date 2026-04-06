@@ -1,7 +1,9 @@
 <div class="flex flex-row items-center justify-between">
-	<a class="italic text-2xl small:text-lg large:text-3xl mr-4 inline-block dark:hover:text-white hover:text-blue-600" href="{{mainHref}}" target="_self">Les Notes</a>
-
 	<div>
+		<a class="italic text-xl small:text-lg large:text-2xl mr-6 inline-block cursor-pointer dark:hover:text-white hover:text-blue-600" href="{{mainHref}}" target="_self">Les Notes</a>
 		{{> searchForm}}
 	</div>
+
+	{{> newNote}}
+	{{> auth}}
 </div>

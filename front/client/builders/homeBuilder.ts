@@ -1,4 +1,4 @@
-import type {Builder} from './builder';
+import type {Builder, ScriptsBuilder} from './builder';
 import type {File, Message} from '../api/models';
 import type {FileWithMime} from '../types';
 import Config from 'config';
@@ -14,9 +14,6 @@ import AbstractBuilder from './abstractBuilder'
 let controlPanelTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/home/desktop/control_panel.mustache')), { encoding: 'utf-8' });
 let controlPanelTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/home/mobile/control_panel.mustache')), { encoding: 'utf-8' });
 
-let filesSelectorTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/home/desktop/files_selector.mustache')), { encoding: 'utf-8' });
-let filesSelectorTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/home/mobile/files_selector.mustache')), { encoding: 'utf-8' });
-
 let homeTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/home/desktop/home.mustache')), { encoding: 'utf-8' });
 let homeTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/home/mobile/home.mustache')), { encoding: 'utf-8' });
 
@@ -26,14 +23,11 @@ class HomeBuilder extends AbstractBuilder {
 	newMessageForm       = undefined;
 	threadView           = undefined;
 	threadEditForm       = undefined;
-	pagination           = undefined;
 	header               = undefined;
 	messagesTree         = undefined;
 	messageFeatures      = undefined;
-	sidebar              = undefined;
 	controlPanel         = undefined;
 	auth                 = undefined;
-	filesSelector        = undefined;
 	messageHeader        = undefined;
 	scripts              = ["/public/pages/home/homeScript.js"]
 
@@ -53,15 +47,16 @@ class HomeBuilder extends AbstractBuilder {
 		this.messageView = view.build()
 	}
 
-	addFilesSelector(files: FileWithMime[]) {
-		this.filesSelector = mustache.render(this.isMobile ? filesSelectorTemplateMobile : filesSelectorTemplate, {
-			files: files,
-		}, {})
+	addNewMessageForm(form: Builder) {
+		this.newMessageForm = form.build()
+	}
+
+	addMessageEditForm(form: ScriptsBuilder) {
+		this.messageEditForm = form.build()
+		this.scripts.push(...form.scripts)
 	}
 
 	addControlPanel() {
-		const search = this.search;
-
 		this.controlPanel = mustache.render(this.isMobile ? controlPanelTemplateMobile : controlPanelTemplate, {}, {
 			logout:           this.auth,
 		})
@@ -76,18 +71,17 @@ class HomeBuilder extends AbstractBuilder {
 	}
 
 	build() {
-		return mustache.render(this.isMobile ? homeTemplateMobile : homeTemplate, {}, {
+		return mustache.render(this.isMobile ? homeTemplateMobile : homeTemplate, {
+			hasFeatures:          this.messageFeatures != undefined,
+		}, {
 			messageEditForm:      this.messageEditForm,
 			messageView:          this.messageView,
 			threadView:           this.threadView,
 			header:               this.header,
-			filesSelector:        this.filesSelector,
 			messageFeatures:      this.messageFeatures,
 			threadEditForm:       this.threadEditForm,
 			newMessageForm:       this.newMessageForm,
 			messagesTree:         this.messagesTree,
-			sidebar:              this.sidebar,
-			pagination:           this.pagination,
 			controlPanel:         this.controlPanel,
 			messageHeader:        this.messageHeader,
 		});

@@ -11,7 +11,7 @@ let messageViewTemplate = readFileSync(resolve(join(Config.get('basedir'),'templ
 let messageViewTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/message/mobile/message_view.mustache')), { encoding: 'utf-8' });
 
 class MessageViewBuilder extends AbstractPublicBuilder {
-	messageView = undefined
+	message = undefined
 	redirectUrl = ""
 	deleteRedirectUrl = ""
 
@@ -24,10 +24,14 @@ class MessageViewBuilder extends AbstractPublicBuilder {
 	}
 
 	addMessage(message: Message) {
-		this.messageView = mustache.render(this.isMobile ? messageViewTemplateMobile : messageViewTemplate, {
+		this.message = message
+	}
+
+	build() {
+		return mustache.render(this.isMobile ? messageViewTemplateMobile : messageViewTemplate, {
 			isAuthed:              this.isAuthed,
-			message:               message,
-			editHref:              `/editor/messages/${message.ID}` + this.search,
+			message:               this.message,
+			editHref:              `/editor/messages/${this.message.ID}` + this.search,
 			deleteAction:          "/m/delete" + this.search,
 			publishAction:         "/m/publish" + this.search,
 			privateAction:         "/m/private" + this.search,
@@ -35,10 +39,6 @@ class MessageViewBuilder extends AbstractPublicBuilder {
 			deleteRedirectUrl:     this.deleteRedirectUrl,
 			domain:                Config.get("domain"),
 		})
-	}
-
-	build() {
-		return this.messageView
 	}
 }
 
