@@ -1,22 +1,15 @@
 <div class="flex flex-col">
-	<div class="w-full max-w-5xl mb-3 px-5 small:px-3">
-		{{> sidebar}}
-	</div>
+	<div class="mb-5 small:mb-3">
+		<div class="flex flex-col w-full h-full">
+			{{> header}}
 
-	{{#message}}
-		<div class="w-full flex px-5 flex-row mb-3">
-			<div class="flex flex-col grow-2 w-full">
-				{{> translations}}
-				<div class="flex flex-col grow p-2 border border-1 border-solid rounded-md">
-					{{> messageView}}
-				</div>
+			<div class="h-full flex flex-col grow p-2 border border-1 border-solid rounded-md">
+				{{> messageView}}
 			</div>
 		</div>
+	</div>
 
-		<div class="px-5 flex flex-col">
-			{{> messageNavigation}}
-			{{> filesView}}
-			{{> comments}}
-		</div>
-	{{/message}}
+	<div class="h-full w-full flex flex-col overflow-x-hidden">
+		{{> messageFeatures}}
+	</div>
 </div>

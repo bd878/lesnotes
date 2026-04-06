@@ -3,10 +3,10 @@
 		{{> header}}
 	</div>
 
-	<div class="w-full h-full max-w-md max-h-[300px] flex flex-row mb-5 small:mb-3">
+	<div class="w-full h-[300px] flex flex-row mb-5 small:mb-3">
 		<div class="flex flex-col grow-2 w-full h-full">
 			{{> messageHeader}}
-			<div class="w-full overflow-x-hidden border border-1 border-solid rounded-md h-full">
+			<div class="w-full h-full overflow-x-hidden border border-1 border-solid rounded-md">
 				{{> messageEditForm}}
 				{{> messageView}}
 				{{> newMessageForm}}
@@ -16,17 +16,17 @@
 		</div>
 	</div>
 
-	{{# hasFeatures}}
-		<div class="mb-5 small:mb-3">
+	{{#hasFeatures}}
+		<div class="mb-5 h-full small:mb-3">
 			{{> messageFeatures}}
 		</div>
-	{{/ hasFeatures}}
+	{{/hasFeatures}}
 
-	<div>
+	<div class="mb-5 small:mb-3">
 		{{> messagesTree}}
 	</div>
 
-	<div class="mb-5 small:mb-3">
+	<div class="mb-5 small:mb-3 ">
 		{{> controlPanel}}
 	</div>
 </div>

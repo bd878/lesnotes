@@ -1,9 +1,9 @@
-{{#ID}}
+{{#thread}}
 	{{^private}}
 		<a class="italic text-blue-600 text-sm small:text-xs large:text-base mb-2" href="/t/{{name}}" target="_blank">https://{{domain}}/t/{{name}}</a>
 	{{/private}}
 
-	<div class="flex flex-col justify-between grow">
+	<div class="h-full flex flex-col justify-between grow">
 		<div class="flex flex-col h-full">
 			{{#title}}
 				<div class="text-lg small:text-base large:text-xl mb-2 px-1">{{title}}</div>
@@ -13,7 +13,7 @@
 			</p>
 		</div>
 
-		<div class="flex flex-row justify-between items-end">
+		<div class="px-1 mb-1 flex flex-row justify-between items-end">
 			<form
 				method="POST"
 				autocomplete="off"
@@ -59,7 +59,4 @@
 			</form>
 		</div>
 	</div>
-{{/ID}}
-{{^ID}}
-	<div>No thread</div>
-{{/ID}}
+{{/thread}}

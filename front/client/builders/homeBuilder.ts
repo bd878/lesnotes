@@ -56,6 +56,16 @@ class HomeBuilder extends AbstractBuilder {
 		this.scripts.push(...form.scripts)
 	}
 
+	addThreadEditForm(form: ScriptsBuilder) {
+		this.threadEditForm = form.build()
+		this.scripts.push(...form.scripts)
+	}
+
+	addThreadView(view: ScriptsBuilder) {
+		this.threadView = view.build()
+		this.scripts.push(...view.scripts)
+	}
+
 	addControlPanel() {
 		this.controlPanel = mustache.render(this.isMobile ? controlPanelTemplateMobile : controlPanelTemplate, {}, {
 			logout:           this.auth,

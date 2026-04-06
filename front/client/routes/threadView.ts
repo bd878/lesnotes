@@ -1,4 +1,5 @@
 import ThreadViewBuilder from '../builders/threadViewBuilder';
+import HomeBuilder from '../builders/homeBuilder';
 import LayoutBuilder from '../builders/layoutBuilder';
 import AuthBuilder from '../builders/authBuilder';
 import HeaderBuilder from '../builders/headerBuilder';
@@ -8,7 +9,8 @@ import MessagesTreeBuilder from '../builders/messagesTreeBuilder';
 async function threadView(ctx) {
 	console.log("--> threadView")
 
-	const content = new ThreadViewBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const thread = new ThreadViewBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const content = new HomeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
@@ -22,8 +24,10 @@ async function threadView(ctx) {
 
 	header.addNewNote()
 
+	thread.addThread(ctx.state.thread)
+
 	content.addMessagesTree(tree)
-	content.addThreadView(ctx.state.thread)
+	content.addThreadView(thread)
 	content.addMessageHeader(messageHeader)
 	content.addHeader(header)
 	auth.addLogout()

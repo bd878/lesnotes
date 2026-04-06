@@ -1,11 +1,11 @@
-<div class="flex flex-row mb-5">
+<div class="flex flex-row mb-5 small:mb-3">
 	{{#isAttachments}}
-		<a href="{{attachmentsHref}}" target="_self" class="hover:text-blue-600 flex items-center dark:hover:text-white underline cursor-pointer mr-2">{{attachments}}</a>
+		<a href="{{attachmentsHref}}" target="_self" class="mr-4 last:mr-0 hover:text-blue-600 flex items-center dark:hover:text-white underline cursor-pointer">{{attachments}}</a>
 	{{/isAttachments}}
 	{{#isComments}}
-		<a href="{{commentsHref}}" target="_self" class="hover:text-blue-600 flex items-center dark:hover:text-white underline cursor-pointer ml-2">{{comments}}</a>
+		<a href="{{commentsHref}}" target="_self" class="mr-4 last:mr-0 hover:text-blue-600 flex items-center dark:hover:text-white underline cursor-pointer">{{comments}}</a>
 	{{/isComments}}
 	{{#isTranslations}}
-		<a href="{{translationsHref}}" target="_self" class="hover:text-blue-600 flex items-center dark:hover:text-white underline cursor-pointer ml-2">{{translations}}</a>
+		<a href="{{translationsHref}}" target="_self" class="hover:text-blue-600 flex items-center dark:hover:text-white underline cursor-pointer">{{translations}}</a>
 	{{/isTranslations}}
 </div>

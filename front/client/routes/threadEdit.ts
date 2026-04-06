@@ -1,4 +1,5 @@
 import ThreadEditBuilder from '../builders/threadEditBuilder'
+import HomeBuilder from '../builders/homeBuilder'
 import LayoutBuilder from '../builders/layoutBuilder';
 import HeaderBuilder from '../builders/headerBuilder';
 import AuthBuilder from '../builders/authBuilder';
@@ -8,7 +9,8 @@ import MessagesTreeBuilder from '../builders/messagesTreeBuilder';
 async function threadEdit(ctx) {
 	console.log("--> threadEdit")
 
-	const content = new ThreadEditBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const thread = new ThreadEditBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const content = new HomeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
@@ -23,9 +25,11 @@ async function threadEdit(ctx) {
 	auth.addLogout()
 	header.addNewNote()
 
+	thread.addThread(ctx.state.thread)
+
 	content.addMessagesTree(tree)
 	content.addAuth(auth)
-	content.addThreadEditForm(ctx.state.thread)
+	content.addThreadEditForm(thread)
 	content.addMessageHeader(messageHeader)
 	content.addHeader(header)
 	content.addControlPanel()
