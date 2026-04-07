@@ -94,7 +94,7 @@ router
 	.get("home",                   "/home",                         etag, noCache, getMe, getState, authed, loadTree, loadCwdPath, loadFiles, newMessage)
 	.get("message",                "/messages/:id",                 etag, noCache, getMe, getState, authed, loadTree, loadMessagePath, loadCwdPath, loadThread, loadMessage, loadComments, loadTranslation, formatView, messageFeatures, messageView)
 	.get("editMessage",            "/editor/messages/:id",          etag, noCache, getMe, getState, authed, loadTree, loadMessagePath, loadCwdPath, loadMessage, loadFiles, loadComments, selectMessageFiles, loadTranslation, formatTextarea, messageFeatures, messageEdit)
-	.get("thread",                 "/threads/:id",                  etag, noCache, getMe, getState, authed, loadTree, loadMessagePath, loadCwdPath, loadThread, formatView, threadView)
+	.get("thread",                 "/threads/:id", /* TODO: :idOrName*/    etag, noCache, getMe, getState, authed, loadTree, loadMessagePath, loadCwdPath, loadThread, formatView, threadView)
 	// .get("newThreadMessage",       "/editor/messages/:id/new",      etag, noCache, getState, authed, getMe, loadTree, loadMessagePath, loadCwdPath, newMessage)
 	.get("editThread",             "/editor/threads/:id",           etag, noCache, getMe, getState, authed, loadTree, loadMessagePath, loadCwdPath, loadThread, formatTextarea, threadEdit)
 	.get("status",                 "/status",                       status, noCache, getState)

@@ -1,13 +1,15 @@
 <ul>
 	{{#path}}
 		<li>
-			<a href="{{threadHref}}" target="_self" class="hover:text-blue-600 flex items-center dark:hover:text-white underline cursor-pointer">{{threadTitle}}</a>
+			<a href="{{pathThreadHref}}" target="_self" class="hover:text-blue-600 flex items-center dark:hover:text-white underline cursor-pointer">{{threadTitle}}</a>
 		</li>
 	{{/path}}
 	{{#thread}}
 		<li class="flex flex-row justify-between">
-			<a href="{{threadHref}}" target="_self" class="grow-1 hover:text-blue-600 flex items-center dark:hover:text-white underline cursor-pointer">{{threadTitle}}</a>
-			<a href="{{editThreadHref}}" target="_self" class="px-2 italic dark:hover:text-white hover:text-blue-600 select-text cursor-pointer text-end">{{editThreadTitle}}</a>
+			<a href="{{lastThreadHref}}" target="_self" class="grow-1 hover:text-blue-600 flex items-center dark:hover:text-white underline cursor-pointer">{{threadTitle}}</a>
+			{{^private}}
+				<a href="{{publicThreadHref}}" target="_blank" class="px-2 italic dark:hover:text-white hover:text-blue-600 select-text cursor-pointer text-end">{{publicThreadTitle}}</a>
+			{{/private}}
 		</li>
 	{{/thread}}
 </ul>

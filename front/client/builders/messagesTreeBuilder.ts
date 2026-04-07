@@ -3,7 +3,7 @@ import Config from 'config';
 import mustache from 'mustache';
 import { readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
-import AbstractBuilder from './abstractBuilder';
+import AbstractPublicBuilder from './abstractPublicBuilder';
 import crop from '../utils/crop';
 
 let messagesTreeTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/messages_tree/desktop/messages_tree.mustache')), { encoding: 'utf-8' });
@@ -15,7 +15,7 @@ let messagesListTemplateMobile = readFileSync(resolve(join(Config.get('basedir')
 let threadPathTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/messages_tree/desktop/thread_path.mustache')), { encoding: 'utf-8' });
 let threadPathTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/messages_tree/mobile/thread_path.mustache')), { encoding: 'utf-8' });
 
-class MessagesTreeBuilder extends AbstractBuilder {
+class MessagesTreeBuilder extends AbstractPublicBuilder {
 	list = undefined
 	threadPath = undefined
 
@@ -55,14 +55,17 @@ class MessagesTreeBuilder extends AbstractBuilder {
 	addThreadPath(threadPath: Message[]) {
 		const search = this.search
 		const path = this.path
+		const isAuthed = this.isAuthed
 
 		this.threadPath = mustache.render(this.isMobile ? threadPathTemplateMobile : threadPathTemplate, {
 			path:     threadPath.slice(0, -1),
 			thread:   threadPath.slice(-1),
-			editThreadHref:  function() { return `/editor/threads/${this.ID}` + search },
-			editThreadTitle: "<-- " + this.i18n("thread").toLowerCase(),
+			showPublicThread: function() { return isAuthed || this.thread.private == false },
+			publicThreadHref:  function() { return `/t/${this.thread.name}` },
+			publicThreadTitle: "<-- " + this.i18n("thread").toLowerCase(),
 			threadTitle: function() { return `/${crop(this.title || this.text, 15)}` },
-			threadHref: function() {
+			lastThreadHref:  function() { return `/threads/${this.ID}` + search },
+			pathThreadHref: function() {
 				const params = new URLSearchParams(search);
 				switch (this.ID) {
 				case 0:

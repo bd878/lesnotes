@@ -23,16 +23,27 @@ export interface Message {
 	title:         string;
 	count:         number;
 	files:         File[];
+	thread:        ThreadIdentity;
 	highlight:     boolean;
 	translations:  TranslationPreview[];
 	messages:      MessagesList;
 	private:       boolean;
 }
 
+export interface ThreadIdentity {
+	name: string;
+	private: boolean;
+}
+
 const EmptyMessagesList: MessagesList = Object.freeze({
 	...EmptyPaging,
 	name: "",
 	messages: [],
+})
+
+const EmptyThreadIdentity: ThreadIdentity = Object.freeze({
+	name: "",
+	private: true,
 })
 
 const EmptyMessage: Message = Object.freeze({
@@ -46,6 +57,7 @@ const EmptyMessage: Message = Object.freeze({
 	name: "",
 	files:  [],
 	highlight: false,
+	thread: EmptyThreadIdentity,
 	translations: [],
 	messages: EmptyMessagesList,
 	private: true,
@@ -67,6 +79,17 @@ function mapMessagesListFromProto(list?: any): MessagesList {
 	return res
 }
 
+function mapThreadIdentityFromProto(identity?: any): ThreadIdentity {
+	if (!identity) {
+		return EmptyThreadIdentity
+	}
+
+	return {
+		name: identity.name,
+		private: identity.private,
+	}
+}
+
 export default function mapMessageFromProto(message?: any): Message {
 	if (!message) {
 		return EmptyMessage
@@ -80,8 +103,9 @@ export default function mapMessageFromProto(message?: any): Message {
 		text:        message.text,
 		name:        message.name,
 		title:       message.title,
-		count:       message.count,
+		count:       message.count, // TODO: mv count under thread
 		highlight:   message.highlight,
+		thread:      mapThreadIdentityFromProto(message.thread),
 		private:     Boolean(message.private),
 		messages:    EmptyMessagesList,
 		files:       [],
