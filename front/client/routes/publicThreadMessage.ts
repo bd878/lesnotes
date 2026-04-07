@@ -1,5 +1,6 @@
 import * as is from '../third_party/is';
 import MessageViewBuilder from '../builders/messageViewBuilder';
+import ControlPanelBuilder from '../builders/controlPanelBuilder';
 import PublicThreadMessageBuilder from '../builders/publicThreadMessageBuilder'
 import LayoutBuilder from '../builders/layoutBuilder';
 import AuthBuilder from '../builders/authBuilder';
@@ -9,6 +10,7 @@ import PublicMessagesTreeBuilder from '../builders/publicMessagesTreeBuilder';
 async function publicThreadMessage(ctx) {
 	console.log("--> publicThreadMessage")
 
+	const panel = new ControlPanelBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const content = new PublicThreadMessageBuilder(ctx.state.isAuthed, ctx.state.threadName, ctx.state.messageName,
 		ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const view = new MessageViewBuilder(ctx.state.isAuthed, ctx.state.threadName, ctx.state.messageName, ctx.userAgent.isMobile,
@@ -23,11 +25,8 @@ async function publicThreadMessage(ctx) {
 		.addFooter()
 		.addContent(
 			content
-				.addHeader(
-					header.addAuth(
-						ctx.state.isAuthed ? auth.addLogout() : auth.addLogin()
-					)
-				)
+				.addControlPanel(panel.addAuth(ctx.state.isAuthed ? auth.addLogout() : auth.addLogin()))
+				.addHeader(header)
 				.addMessageView(
 					view
 						.addDeleteRedirectUrl("/t/" + ctx.state.threadName + ctx.search)

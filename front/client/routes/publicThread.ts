@@ -1,3 +1,4 @@
+import ControlPanelBuilder from '../builders/controlPanelBuilder';
 import PublicThreadBuilder from '../builders/publicThreadBuilder'
 import LayoutBuilder from '../builders/layoutBuilder';
 import AuthBuilder from '../builders/authBuilder';
@@ -7,6 +8,7 @@ import PublicMessagesTreeBuilder from '../builders/publicMessagesTreeBuilder';
 async function publicThread(ctx) {
 	console.log("--> publicThread")
 
+	const panel = new ControlPanelBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const content = new PublicThreadBuilder(ctx.state.isAuthed, ctx.state.threadName, ctx.state.messageName, ctx.userAgent.isMobile,
 		ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
@@ -24,9 +26,8 @@ async function publicThread(ctx) {
 						.addList(ctx.state.tree)
 						.addThread(ctx.state.thread)
 				)
-				.addHeader(
-					header.addAuth(ctx.state.isAuthed ? auth.addLogout() : auth.addLogin())
-				)
+				.addControlPanel(panel.addAuth(ctx.state.isAuthed ? auth.addLogout() : auth.addLogin()))
+				.addHeader(header)
 		)
 
 	ctx.body = layout.build()

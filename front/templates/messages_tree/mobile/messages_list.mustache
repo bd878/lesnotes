@@ -4,6 +4,21 @@
 			{{#messages}}
 				<li id="list-{{ID}}" data-message-id="{{ID}}" draggable="true" class="grow-1 max-w-full flex flex-col">
 					<div class="flex flex-row max-w-full whitespace-nowrap justify-between">
+						{{#showCounter}}
+							{{#isFolded}}
+								<a href="{{foldHref}}" target="_self" data-thread-id="{{ID}}" class="mr-2 relative justify-end flex flex-row px-2 dark:hover:text-white hover:text-blue-600 select-text cursor-pointer text-end">
+									<span class="mr-4">{{count}}</span>
+									<span class="absolute left-[10px]">v</span>
+								</a>
+							{{/isFolded}}
+							{{^isFolded}}
+								<a href="{{unfoldHref}}" target="_self" data-thread-id="{{ID}}" class="mr-2 relative justify-end flex flex-row px-2 dark:hover:text-white hover:text-blue-600 select-text cursor-pointer text-end">
+									<span class="mr-4">{{count}}</span>
+									<span class="absolute left-[10px]">></span>
+								</a>
+							{{/isFolded}}
+						{{/showCounter}}
+
 						{{#highlight}}
 							<a href="{{messageHref}}" target="_self" data-message-id="{{ID}}" class="flex flex-row justify-between overflow-hidden select-text dark:hover:bg-slate-600 dark:hover:text-white bg-blue-100 cursor-pointer text-left w-full z-1">
 						{{/highlight}}
@@ -21,24 +36,13 @@
 							</div>
 						</a>
 
-						{{#isAuthed}}
-							<a href="{{openThreadHref}}" target="_blank" class="dark:hover:text-white px-4 cursor-pointer hover:bg-blue-100 dark:hover:bg-slate-600">
-								>>
-							</a>
-						{{/isAuthed}}
-
-						{{#isFolded}}
-							<a href="{{foldHref}}" target="_self" data-thread-id="{{ID}}" class="relative flex flex-row px-2 dark:hover:text-white hover:text-blue-600 select-text cursor-pointer text-end">
-								<span class="mr-2">{{count}}</span>
-								<span class="absolute right-[4px]">v</span>
-							</a>
-						{{/isFolded}}
-						{{^isFolded}}
-							<a href="{{unfoldHref}}" target="_self" data-thread-id="{{ID}}" class="relative flex flex-row px-2 dark:hover:text-white hover:text-blue-600 select-text cursor-pointer text-end">
-								<span class="mr-2">{{count}}</span>
-								<span class="absolute right-[4px]">></span>
-							</a>
-						{{/isFolded}}
+						<div class="flex">
+							{{#isAuthed}}
+								<a href="{{openThreadHref}}" target="_blank" class="dark:hover:text-white px-4 cursor-pointer hover:bg-blue-100 dark:hover:bg-slate-600">
+									>>
+								</a>
+							{{/isAuthed}}
+						</div>
 					</div>
 
 					{{#hasMessages}}

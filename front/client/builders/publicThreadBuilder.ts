@@ -9,8 +9,9 @@ let threadTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/
 let threadTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/thread/mobile/thread.mustache')), { encoding: 'utf-8' });
 
 class PublicThreadBuilder extends AbstractPublicBuilder {
-	header = undefined
-	tree   = undefined
+	header        = undefined
+	tree          = undefined
+	controlPanel  = undefined
 
 	addHeader(header: Builder) {
 		this.header = header.build()
@@ -22,11 +23,17 @@ class PublicThreadBuilder extends AbstractPublicBuilder {
 		return this
 	}
 
+	addControlPanel(panel: Builder) {
+		this.controlPanel = panel.build()
+		return this
+	}
+
 	build() {
 		return mustache.render(this.isMobile ? threadTemplateMobile : threadTemplate, {
 		}, {
-			header: this.header,
+			header:        this.header,
 			messagesTree:  this.tree,
+			controlPanel:  this.controlPanel
 		})
 	}
 

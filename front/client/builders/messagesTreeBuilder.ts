@@ -40,6 +40,7 @@ class MessagesTreeBuilder extends AbstractPublicBuilder {
 			isFolded:          function() { return this.messages.messages.length > 0 },
 			hasPagination:     function() { return !(this.isLastPage && this.isFirstPage) },
 			noMessagesText:    this.i18n("noMessagesText"),
+			showCounter:       function() { return this.count > 0 },
 
 			messageHref:       function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); return `/messages/${this.ID}?` + params.toString(); },
 			openThreadHref:    function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); params.set("cwd", this.ID); params.set(`${this.ID}`, `${limit},0`); return "/home?" + params.toString(); },
