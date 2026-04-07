@@ -409,8 +409,8 @@ func (s *MessagesController) ReadPath(ctx context.Context, userID, id int64, nam
 
 	for i, message := range path {
 		message.Thread = &model.Thread{
-			Name: path[i].Name,
-			Private: path[i].Private,
+			Name: threads[i].Name,
+			Private: threads[i].Private,
 		}
 	}
 
