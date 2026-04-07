@@ -17,6 +17,12 @@ type (
 		PrivateMessage   bool         `json:"private_message"`
 	}
 
+	PathStep struct {
+		ID               int64        `json:"id"`
+		Name             string       `json:"name"`
+		Private          bool         `json:"private"`
+	}
+
 	ListThreadsRequest struct {
 		UserID           int64        `json:"user_id"`
 		ParentID         int64        `json:"parent"`
@@ -87,7 +93,7 @@ type (
 	}
 
 	ResolveThreadResponse struct {
-		Path        []int64 `json:"path"`
+		Path        []*PathStep `json:"path"`
 	}
 
 	ReorderThreadResponse struct {

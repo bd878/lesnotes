@@ -134,7 +134,7 @@ func (s *Controller) ListMessages(ctx context.Context, userID, parentID int64, l
 	return model.MapThreadsFromProto(model.ThreadFromProto, resp.List), resp.IsLastPage, err
 }
 
-func (s *Controller) ResolveThread(ctx context.Context, id, userID int64) (path []int64, err error) {
+func (s *Controller) ResolveThread(ctx context.Context, id, userID int64) (path []*model.PathStep, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -148,7 +148,7 @@ func (s *Controller) ResolveThread(ctx context.Context, id, userID int64) (path 
 		return nil, err
 	}
 
-	path = resp.Path
+	path = model.PathFromProto(resp.Path)
 
 	return
 }

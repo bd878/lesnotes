@@ -209,7 +209,7 @@ func (g *Gateway) CountMessages(ctx context.Context, id, userID int64, privateMe
 	return
 }
 
-func (g *Gateway) ResolvePath(ctx context.Context, userID, id int64) (path []int64, err error) {
+func (g *Gateway) ResolvePath(ctx context.Context, userID, id int64) (path []*api.PathStep, err error) {
 	if g.isConnFailed() {
 		if err = g.setupConnection(); err != nil {
 			return

@@ -11,7 +11,7 @@ type Controller interface {
 	ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (ids []*threads.Thread, isLastPage bool, err error)
 	ListMessages(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool, privateMessage *bool) (ids []*threads.Thread, isLastPage bool, err error)
 	ReadThread(ctx context.Context, id, userID int64, name string) (thread *threads.Thread, err error)
-	ResolveThread(ctx context.Context, id, userID int64) (ids []int64, err error)
+	ResolveThread(ctx context.Context, id, userID int64) (path []*api.PathStep, err error)
 	CreateThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name, description, title string, private bool) (err error)
 	UpdateThread(ctx context.Context, id, userID int64, name, description, title *string) (err error)
 	ReorderThread(ctx context.Context, id, userID, parentID, nextID, prevID int64) (err error)
@@ -80,13 +80,13 @@ func (h *Handler) ListMessages(ctx context.Context, req *api.ListMessagesRequest
 }
 
 func (h *Handler) Resolve(ctx context.Context, req *api.ResolveRequest) (resp *api.ResolveResponse, err error) {
-	ids, err := h.controller.ResolveThread(ctx, req.Id, req.UserId)
+	path, err := h.controller.ResolveThread(ctx, req.Id, req.UserId)
 	if err != nil {
 		return nil, err
 	}
 
 	resp = &api.ResolveResponse{
-		Path: ids,
+		Path: path,
 	}
 
 	return

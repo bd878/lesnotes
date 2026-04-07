@@ -19,7 +19,7 @@ type ThreadsRepository interface {
 	ListMessages(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool, privateMessage *bool) (ids []*model.Thread, isLastPage bool, err error)
 	ReadThreadByID(ctx context.Context, id, userID int64) (thread *model.Thread, err error)
 	ReadThreadByName(ctx context.Context, name string, userID int64) (thread *model.Thread, err error)
-	ResolveThread(ctx context.Context, id, userID int64) (ids []int64, err error)
+	ResolveThread(ctx context.Context, id, userID int64) (path []*api.PathStep, err error)
 	CountThreads(ctx context.Context, id, userID int64) (total int32, err error)
 	CountMessages(ctx context.Context, id, userID int64, privateMessage *bool) (total int32, err error)
 }
@@ -266,7 +266,7 @@ func (m *Distributed) DeleteThread(ctx context.Context, id, userID int64) error 
 	return m.publisher.Publish(context.TODO(), event)
 }
 
-func (m *Distributed) ResolveThread(ctx context.Context, id, userID int64) (ids []int64, err error) {
+func (m *Distributed) ResolveThread(ctx context.Context, id, userID int64) (path []*api.PathStep, err error) {
 	m.log.Debugw("resolve thread", "id", id, "user_id", userID)
 	return m.threadsRepo.ResolveThread(ctx, id, userID)
 }

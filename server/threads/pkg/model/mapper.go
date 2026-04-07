@@ -40,6 +40,18 @@ func ThreadToProto(msg *Thread) *api.Thread {
 	}
 }
 
+func PathFromProto(path []*api.PathStep) []*PathStep {
+	res := make([]*PathStep, len(path))
+	for i, step := range path {
+		res[i] = &PathStep{
+			ID: step.Id,
+			Name: step.Name,
+			Private: step.Private,
+		}
+	}
+	return res
+}
+
 func MapThreadsToProto(mapper (func(*Thread) *api.Thread), msgs []*Thread) []*api.Thread {
 	res := make([]*api.Thread, len(msgs))
 	for i, msg := range msgs {

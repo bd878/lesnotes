@@ -31,7 +31,7 @@ type ThreadsGateway interface {
 	CreateThread(ctx context.Context, id, userID, parentID int64, name string, private bool) (err error)
 	DeleteThread(ctx context.Context, id, userID int64) (err error)
 	UpdateThread(ctx context.Context, id, userID int64) (err error)
-	ResolvePath(ctx context.Context, userID, id int64) (path []int64, err error)
+	ResolvePath(ctx context.Context, userID, id int64) (path []*api.PathStep, err error)
 	ReadThread(ctx context.Context, userID, id int64, name string) (thread *threads.Thread, err error)
 }
 
@@ -386,7 +386,7 @@ func (s *MessagesController) ReadPath(ctx context.Context, userID, id int64, nam
 		logger.Debugw("read path", "message", message)
 	}
 
-	ids, err := s.threads.ResolvePath(ctx, userID, id)
+	threads, err := s.threads.ResolvePath(ctx, userID, id)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -397,9 +397,21 @@ func (s *MessagesController) ReadPath(ctx context.Context, userID, id int64, nam
 		parentID = thread.ParentID
 	}
 
+	ids := make([]int64, len(threads))
+	for _, step := range threads {
+		ids = append(ids, step.Id)
+	}
+
 	path, err = s.ReadBatchMessages(ctx, userID, ids)
 	if err != nil {
 		return nil, 0, err
+	}
+
+	for i, message := range path {
+		message.Thread = &model.Thread{
+			Name: path[i].Name,
+			Private: path[i].Private,
+		}
 	}
 
 	return

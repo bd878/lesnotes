@@ -156,8 +156,14 @@ message ResolveRequest {
 	int64     user_id = 2;
 }
 
+message PathStep {
+	int64     id = 1;
+	string    name = 2;
+	bool      private = 3;
+}
+
 message ResolveResponse {
-	repeated int64 path = 1;
+	repeated PathStep path = 1;
 }
 
 message CountRequest {

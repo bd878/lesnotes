@@ -1444,18 +1444,81 @@ func (x *ResolveRequest) GetUserId() int64 {
 	return 0
 }
 
+type PathStep struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id      int64  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name    string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Private bool   `protobuf:"varint,3,opt,name=private,proto3" json:"private,omitempty"`
+}
+
+func (x *PathStep) Reset() {
+	*x = PathStep{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_protos_threads_proto_msgTypes[21]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PathStep) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PathStep) ProtoMessage() {}
+
+func (x *PathStep) ProtoReflect() protoreflect.Message {
+	mi := &file_protos_threads_proto_msgTypes[21]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PathStep.ProtoReflect.Descriptor instead.
+func (*PathStep) Descriptor() ([]byte, []int) {
+	return file_protos_threads_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *PathStep) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *PathStep) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *PathStep) GetPrivate() bool {
+	if x != nil {
+		return x.Private
+	}
+	return false
+}
+
 type ResolveResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Path []int64 `protobuf:"varint,1,rep,packed,name=path,proto3" json:"path,omitempty"`
+	Path []*PathStep `protobuf:"bytes,1,rep,name=path,proto3" json:"path,omitempty"`
 }
 
 func (x *ResolveResponse) Reset() {
 	*x = ResolveResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_protos_threads_proto_msgTypes[21]
+		mi := &file_protos_threads_proto_msgTypes[22]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1468,7 +1531,7 @@ func (x *ResolveResponse) String() string {
 func (*ResolveResponse) ProtoMessage() {}
 
 func (x *ResolveResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_proto_msgTypes[21]
+	mi := &file_protos_threads_proto_msgTypes[22]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1481,10 +1544,10 @@ func (x *ResolveResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResolveResponse.ProtoReflect.Descriptor instead.
 func (*ResolveResponse) Descriptor() ([]byte, []int) {
-	return file_protos_threads_proto_rawDescGZIP(), []int{21}
+	return file_protos_threads_proto_rawDescGZIP(), []int{22}
 }
 
-func (x *ResolveResponse) GetPath() []int64 {
+func (x *ResolveResponse) GetPath() []*PathStep {
 	if x != nil {
 		return x.Path
 	}
@@ -1503,7 +1566,7 @@ type CountRequest struct {
 func (x *CountRequest) Reset() {
 	*x = CountRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_protos_threads_proto_msgTypes[22]
+		mi := &file_protos_threads_proto_msgTypes[23]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1516,7 +1579,7 @@ func (x *CountRequest) String() string {
 func (*CountRequest) ProtoMessage() {}
 
 func (x *CountRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_proto_msgTypes[22]
+	mi := &file_protos_threads_proto_msgTypes[23]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1529,7 +1592,7 @@ func (x *CountRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CountRequest.ProtoReflect.Descriptor instead.
 func (*CountRequest) Descriptor() ([]byte, []int) {
-	return file_protos_threads_proto_rawDescGZIP(), []int{22}
+	return file_protos_threads_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *CountRequest) GetId() int64 {
@@ -1559,7 +1622,7 @@ type CountMessagesRequest struct {
 func (x *CountMessagesRequest) Reset() {
 	*x = CountMessagesRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_protos_threads_proto_msgTypes[23]
+		mi := &file_protos_threads_proto_msgTypes[24]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1572,7 +1635,7 @@ func (x *CountMessagesRequest) String() string {
 func (*CountMessagesRequest) ProtoMessage() {}
 
 func (x *CountMessagesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_proto_msgTypes[23]
+	mi := &file_protos_threads_proto_msgTypes[24]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1585,7 +1648,7 @@ func (x *CountMessagesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CountMessagesRequest.ProtoReflect.Descriptor instead.
 func (*CountMessagesRequest) Descriptor() ([]byte, []int) {
-	return file_protos_threads_proto_rawDescGZIP(), []int{23}
+	return file_protos_threads_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *CountMessagesRequest) GetId() int64 {
@@ -1620,7 +1683,7 @@ type CountResponse struct {
 func (x *CountResponse) Reset() {
 	*x = CountResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_protos_threads_proto_msgTypes[24]
+		mi := &file_protos_threads_proto_msgTypes[25]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1633,7 +1696,7 @@ func (x *CountResponse) String() string {
 func (*CountResponse) ProtoMessage() {}
 
 func (x *CountResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_proto_msgTypes[24]
+	mi := &file_protos_threads_proto_msgTypes[25]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1646,7 +1709,7 @@ func (x *CountResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CountResponse.ProtoReflect.Descriptor instead.
 func (*CountResponse) Descriptor() ([]byte, []int) {
-	return file_protos_threads_proto_rawDescGZIP(), []int{24}
+	return file_protos_threads_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *CountResponse) GetTotal() int32 {
@@ -1667,7 +1730,7 @@ type CountMessagesResponse struct {
 func (x *CountMessagesResponse) Reset() {
 	*x = CountMessagesResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_protos_threads_proto_msgTypes[25]
+		mi := &file_protos_threads_proto_msgTypes[26]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1680,7 +1743,7 @@ func (x *CountMessagesResponse) String() string {
 func (*CountMessagesResponse) ProtoMessage() {}
 
 func (x *CountMessagesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_proto_msgTypes[25]
+	mi := &file_protos_threads_proto_msgTypes[26]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1693,7 +1756,7 @@ func (x *CountMessagesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CountMessagesResponse.ProtoReflect.Descriptor instead.
 func (*CountMessagesResponse) Descriptor() ([]byte, []int) {
-	return file_protos_threads_proto_rawDescGZIP(), []int{25}
+	return file_protos_threads_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *CountMessagesResponse) GetTotal() int32 {
@@ -1855,9 +1918,15 @@ var file_protos_threads_proto_rawDesc = []byte{
 	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20,
 	0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f,
 	0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64,
-	0x22, 0x25, 0x0a, 0x0f, 0x52, 0x65, 0x73, 0x6f, 0x6c, 0x76, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f,
-	0x6e, 0x73, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x70, 0x61, 0x74, 0x68, 0x18, 0x01, 0x20, 0x03, 0x28,
-	0x03, 0x52, 0x04, 0x70, 0x61, 0x74, 0x68, 0x22, 0x37, 0x0a, 0x0c, 0x43, 0x6f, 0x75, 0x6e, 0x74,
+	0x22, 0x48, 0x0a, 0x08, 0x50, 0x61, 0x74, 0x68, 0x53, 0x74, 0x65, 0x70, 0x12, 0x0e, 0x0a, 0x02,
+	0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x12, 0x12, 0x0a, 0x04,
+	0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65,
+	0x12, 0x18, 0x0a, 0x07, 0x70, 0x72, 0x69, 0x76, 0x61, 0x74, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28,
+	0x08, 0x52, 0x07, 0x70, 0x72, 0x69, 0x76, 0x61, 0x74, 0x65, 0x22, 0x3b, 0x0a, 0x0f, 0x52, 0x65,
+	0x73, 0x6f, 0x6c, 0x76, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x28, 0x0a,
+	0x04, 0x70, 0x61, 0x74, 0x68, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x74, 0x68,
+	0x72, 0x65, 0x61, 0x64, 0x73, 0x2e, 0x76, 0x31, 0x2e, 0x50, 0x61, 0x74, 0x68, 0x53, 0x74, 0x65,
+	0x70, 0x52, 0x04, 0x70, 0x61, 0x74, 0x68, 0x22, 0x37, 0x0a, 0x0c, 0x43, 0x6f, 0x75, 0x6e, 0x74,
 	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20,
 	0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f,
 	0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64,
@@ -1945,7 +2014,7 @@ func file_protos_threads_proto_rawDescGZIP() []byte {
 	return file_protos_threads_proto_rawDescData
 }
 
-var file_protos_threads_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
+var file_protos_threads_proto_msgTypes = make([]protoimpl.MessageInfo, 27)
 var file_protos_threads_proto_goTypes = []interface{}{
 	(*ThreadsSnapshot)(nil),       // 0: threads.v1.ThreadsSnapshot
 	(*ThreadSnapshotItem)(nil),    // 1: threads.v1.ThreadSnapshotItem
@@ -1968,45 +2037,47 @@ var file_protos_threads_proto_goTypes = []interface{}{
 	(*DeleteRequest)(nil),         // 18: threads.v1.DeleteRequest
 	(*DeleteResponse)(nil),        // 19: threads.v1.DeleteResponse
 	(*ResolveRequest)(nil),        // 20: threads.v1.ResolveRequest
-	(*ResolveResponse)(nil),       // 21: threads.v1.ResolveResponse
-	(*CountRequest)(nil),          // 22: threads.v1.CountRequest
-	(*CountMessagesRequest)(nil),  // 23: threads.v1.CountMessagesRequest
-	(*CountResponse)(nil),         // 24: threads.v1.CountResponse
-	(*CountMessagesResponse)(nil), // 25: threads.v1.CountMessagesResponse
+	(*PathStep)(nil),              // 21: threads.v1.PathStep
+	(*ResolveResponse)(nil),       // 22: threads.v1.ResolveResponse
+	(*CountRequest)(nil),          // 23: threads.v1.CountRequest
+	(*CountMessagesRequest)(nil),  // 24: threads.v1.CountMessagesRequest
+	(*CountResponse)(nil),         // 25: threads.v1.CountResponse
+	(*CountMessagesResponse)(nil), // 26: threads.v1.CountMessagesResponse
 }
 var file_protos_threads_proto_depIdxs = []int32{
 	1,  // 0: threads.v1.ThreadsSnapshot.thread:type_name -> threads.v1.ThreadSnapshotItem
 	2,  // 1: threads.v1.ListResponse.list:type_name -> threads.v1.Thread
 	2,  // 2: threads.v1.ListMessagesResponse.list:type_name -> threads.v1.Thread
-	3,  // 3: threads.v1.Threads.List:input_type -> threads.v1.ListRequest
-	4,  // 4: threads.v1.Threads.ListMessages:input_type -> threads.v1.ListMessagesRequest
-	7,  // 5: threads.v1.Threads.Read:input_type -> threads.v1.ReadRequest
-	20, // 6: threads.v1.Threads.Resolve:input_type -> threads.v1.ResolveRequest
-	8,  // 7: threads.v1.Threads.Publish:input_type -> threads.v1.PublishRequest
-	10, // 8: threads.v1.Threads.Private:input_type -> threads.v1.PrivateRequest
-	14, // 9: threads.v1.Threads.Reorder:input_type -> threads.v1.ReorderRequest
-	12, // 10: threads.v1.Threads.Update:input_type -> threads.v1.UpdateRequest
-	16, // 11: threads.v1.Threads.Create:input_type -> threads.v1.CreateRequest
-	18, // 12: threads.v1.Threads.Delete:input_type -> threads.v1.DeleteRequest
-	22, // 13: threads.v1.Threads.Count:input_type -> threads.v1.CountRequest
-	23, // 14: threads.v1.Threads.CountMessages:input_type -> threads.v1.CountMessagesRequest
-	5,  // 15: threads.v1.Threads.List:output_type -> threads.v1.ListResponse
-	6,  // 16: threads.v1.Threads.ListMessages:output_type -> threads.v1.ListMessagesResponse
-	2,  // 17: threads.v1.Threads.Read:output_type -> threads.v1.Thread
-	21, // 18: threads.v1.Threads.Resolve:output_type -> threads.v1.ResolveResponse
-	9,  // 19: threads.v1.Threads.Publish:output_type -> threads.v1.PublishResponse
-	11, // 20: threads.v1.Threads.Private:output_type -> threads.v1.PrivateResponse
-	15, // 21: threads.v1.Threads.Reorder:output_type -> threads.v1.ReorderResponse
-	13, // 22: threads.v1.Threads.Update:output_type -> threads.v1.UpdateResponse
-	17, // 23: threads.v1.Threads.Create:output_type -> threads.v1.CreateResponse
-	19, // 24: threads.v1.Threads.Delete:output_type -> threads.v1.DeleteResponse
-	24, // 25: threads.v1.Threads.Count:output_type -> threads.v1.CountResponse
-	25, // 26: threads.v1.Threads.CountMessages:output_type -> threads.v1.CountMessagesResponse
-	15, // [15:27] is the sub-list for method output_type
-	3,  // [3:15] is the sub-list for method input_type
-	3,  // [3:3] is the sub-list for extension type_name
-	3,  // [3:3] is the sub-list for extension extendee
-	0,  // [0:3] is the sub-list for field type_name
+	21, // 3: threads.v1.ResolveResponse.path:type_name -> threads.v1.PathStep
+	3,  // 4: threads.v1.Threads.List:input_type -> threads.v1.ListRequest
+	4,  // 5: threads.v1.Threads.ListMessages:input_type -> threads.v1.ListMessagesRequest
+	7,  // 6: threads.v1.Threads.Read:input_type -> threads.v1.ReadRequest
+	20, // 7: threads.v1.Threads.Resolve:input_type -> threads.v1.ResolveRequest
+	8,  // 8: threads.v1.Threads.Publish:input_type -> threads.v1.PublishRequest
+	10, // 9: threads.v1.Threads.Private:input_type -> threads.v1.PrivateRequest
+	14, // 10: threads.v1.Threads.Reorder:input_type -> threads.v1.ReorderRequest
+	12, // 11: threads.v1.Threads.Update:input_type -> threads.v1.UpdateRequest
+	16, // 12: threads.v1.Threads.Create:input_type -> threads.v1.CreateRequest
+	18, // 13: threads.v1.Threads.Delete:input_type -> threads.v1.DeleteRequest
+	23, // 14: threads.v1.Threads.Count:input_type -> threads.v1.CountRequest
+	24, // 15: threads.v1.Threads.CountMessages:input_type -> threads.v1.CountMessagesRequest
+	5,  // 16: threads.v1.Threads.List:output_type -> threads.v1.ListResponse
+	6,  // 17: threads.v1.Threads.ListMessages:output_type -> threads.v1.ListMessagesResponse
+	2,  // 18: threads.v1.Threads.Read:output_type -> threads.v1.Thread
+	22, // 19: threads.v1.Threads.Resolve:output_type -> threads.v1.ResolveResponse
+	9,  // 20: threads.v1.Threads.Publish:output_type -> threads.v1.PublishResponse
+	11, // 21: threads.v1.Threads.Private:output_type -> threads.v1.PrivateResponse
+	15, // 22: threads.v1.Threads.Reorder:output_type -> threads.v1.ReorderResponse
+	13, // 23: threads.v1.Threads.Update:output_type -> threads.v1.UpdateResponse
+	17, // 24: threads.v1.Threads.Create:output_type -> threads.v1.CreateResponse
+	19, // 25: threads.v1.Threads.Delete:output_type -> threads.v1.DeleteResponse
+	25, // 26: threads.v1.Threads.Count:output_type -> threads.v1.CountResponse
+	26, // 27: threads.v1.Threads.CountMessages:output_type -> threads.v1.CountMessagesResponse
+	16, // [16:28] is the sub-list for method output_type
+	4,  // [4:16] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_protos_threads_proto_init() }
@@ -2268,7 +2339,7 @@ func file_protos_threads_proto_init() {
 			}
 		}
 		file_protos_threads_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ResolveResponse); i {
+			switch v := v.(*PathStep); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2280,7 +2351,7 @@ func file_protos_threads_proto_init() {
 			}
 		}
 		file_protos_threads_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CountRequest); i {
+			switch v := v.(*ResolveResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2292,7 +2363,7 @@ func file_protos_threads_proto_init() {
 			}
 		}
 		file_protos_threads_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CountMessagesRequest); i {
+			switch v := v.(*CountRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2304,7 +2375,7 @@ func file_protos_threads_proto_init() {
 			}
 		}
 		file_protos_threads_proto_msgTypes[24].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CountResponse); i {
+			switch v := v.(*CountMessagesRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2316,6 +2387,18 @@ func file_protos_threads_proto_init() {
 			}
 		}
 		file_protos_threads_proto_msgTypes[25].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CountResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_protos_threads_proto_msgTypes[26].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*CountMessagesResponse); i {
 			case 0:
 				return &v.state
@@ -2333,14 +2416,14 @@ func file_protos_threads_proto_init() {
 	}
 	file_protos_threads_proto_msgTypes[4].OneofWrappers = []interface{}{}
 	file_protos_threads_proto_msgTypes[12].OneofWrappers = []interface{}{}
-	file_protos_threads_proto_msgTypes[23].OneofWrappers = []interface{}{}
+	file_protos_threads_proto_msgTypes[24].OneofWrappers = []interface{}{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_protos_threads_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   26,
+			NumMessages:   27,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

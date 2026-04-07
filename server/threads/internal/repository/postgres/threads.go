@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/threads/pkg/model"
 )
@@ -676,8 +677,8 @@ func (r *ThreadsRepository) DeleteThread(ctx context.Context, id, userID int64) 
 	return
 }
 
-func (r *ThreadsRepository) ResolveThread(ctx context.Context, id, userID int64) (ids []int64, err error) {
-	const query = "SELECT parent_id FROM %s WHERE user_id = $1 AND id = $2"
+func (r *ThreadsRepository) ResolveThread(ctx context.Context, id, userID int64) (path []*api.PathStep, err error) {
+	const query = "SELECT name, private, parent_id FROM %s WHERE user_id = $1 AND id = $2"
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
@@ -700,22 +701,27 @@ func (r *ThreadsRepository) ResolveThread(ctx context.Context, id, userID int64)
 
 	threadID := id
 
-	ids = make([]int64, 0)
+	path = make([]*api.PathStep, 0)
 
 	for threadID != 0 {
 		var parentID int64
 
-		err = tx.QueryRow(ctx, r.table(query), userID, threadID).Scan(&parentID)
+		step := &api.PathStep{Id: threadID}
+
+		err = tx.QueryRow(ctx, r.table(query), userID, threadID).Scan(&step.Name, &step.Private, &parentID)
 		if err != nil {
 			return
 		}
 
-		ids = append(ids, threadID)
+		path = append(path, step)
 
 		threadID = parentID
 	}
 
-	ids = append(ids, threadID)
+	path = append(path, &api.PathStep{
+		Id:      threadID, // root
+		Private: true,
+	})
 
 	return
 }

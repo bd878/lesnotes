@@ -16,15 +16,21 @@ type (
 		Files        []*files.File         `json:"files"`
 		Translations []*TranslationPreview `json:"translations"`
 		Messages     *MessagesList         `json:"messages,omitempty"`
+		Thread       *Thread               `json:"thread,omitempty"`
 		Text         string                `json:"text"`
 		Title        string                `json:"title"`
 		Highlight    bool                  `json:"highlight"`
 		Private      bool                  `json:"private"`
 	}
 
+	Thread struct {
+		Name         string                `json:"name"`
+		Private      bool                  `json:"private"`
+	}
+
 	MessagesList struct {
 		Messages    []*Message   `json:"messages"`
-		Name        string       `json:"name"`
+		Name        string       `json:"name"` // thread name
 		IsLastPage  bool         `json:"is_last_page"`
 		IsFirstPage bool         `json:"is_first_page"`
 		Total       int32        `json:"total"`

@@ -10,7 +10,7 @@ import (
 type Controller interface {
 	ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (list []*threads.Thread, isLastPage bool, err error)
 	ReadThread(ctx context.Context, id, userID int64, name string) (thread *threads.Thread, err error)
-	ResolveThread(ctx context.Context, id, userID int64) (ids []int64, err error)
+	ResolveThread(ctx context.Context, id, userID int64) (ids []*threads.PathStep, err error)
 	PublishThread(ctx context.Context, id, userID int64) (err error)
 	PrivateThread(ctx context.Context, id, userID int64) (err error)
 	CreateThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name, description, title string, private bool) (err error)
