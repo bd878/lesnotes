@@ -11,9 +11,6 @@ import { readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import AbstractBuilder from './abstractBuilder'
 
-let controlPanelTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/home/desktop/control_panel.mustache')), { encoding: 'utf-8' });
-let controlPanelTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/home/mobile/control_panel.mustache')), { encoding: 'utf-8' });
-
 let homeTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/home/desktop/home.mustache')), { encoding: 'utf-8' });
 let homeTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/home/mobile/home.mustache')), { encoding: 'utf-8' });
 
@@ -27,57 +24,60 @@ class HomeBuilder extends AbstractBuilder {
 	messagesTree         = undefined;
 	messageFeatures      = undefined;
 	controlPanel         = undefined;
-	auth                 = undefined;
 	messageHeader        = undefined;
 	scripts              = ["/public/pages/home/homeScript.js"]
 
 	addMessagesTree(tree: Builder) {
 		this.messagesTree = tree.build()
+		return this
 	}
 
 	addMessageHeader(header: Builder) {
 		this.messageHeader = header.build()
+		return this
 	}
 
 	addMessageFeatures(features: Builder) {
 		this.messageFeatures = features.build()
+		return this
 	}
 
 	addMessageView(view: Builder) {
 		this.messageView = view.build()
+		return this
 	}
 
 	addNewMessageForm(form: Builder) {
 		this.newMessageForm = form.build()
+		return this
 	}
 
 	addMessageEditForm(form: ScriptsBuilder) {
 		this.messageEditForm = form.build()
 		this.scripts.push(...form.scripts)
+		return this
 	}
 
 	addThreadEditForm(form: ScriptsBuilder) {
 		this.threadEditForm = form.build()
 		this.scripts.push(...form.scripts)
+		return this
 	}
 
 	addThreadView(view: ScriptsBuilder) {
 		this.threadView = view.build()
 		this.scripts.push(...view.scripts)
+		return this
 	}
 
-	addControlPanel() {
-		this.controlPanel = mustache.render(this.isMobile ? controlPanelTemplateMobile : controlPanelTemplate, {}, {
-			logout:           this.auth,
-		})
-	}
-
-	addAuth(auth: Builder) {
-		this.auth = auth.build()
+	addControlPanel(panel: Builder) {
+		this.controlPanel = panel.build()
+		return this
 	}
 
 	addHeader(header: Builder) {
 		this.header = header.build()
+		return this
 	}
 
 	build() {

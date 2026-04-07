@@ -17,14 +17,17 @@ class MessageViewBuilder extends AbstractPublicBuilder {
 
 	addRedirectUrl(redirectUrl: string) {
 		this.redirectUrl = redirectUrl
+		return this
 	}
 
 	addDeleteRedirectUrl(deleteRedirectUrl: string) {
 		this.deleteRedirectUrl = deleteRedirectUrl
+		return this
 	}
 
 	addMessage(message: Message) {
 		this.message = message
+		return this
 	}
 
 	build() {

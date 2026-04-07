@@ -19,28 +19,29 @@ async function publicThreadMessage(ctx) {
 	const tree = new PublicMessagesTreeBuilder(ctx.state.isAuthed, ctx.state.threadName, ctx.state.messageName, ctx.userAgent.isMobile,
 		ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
-	ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation)
-
-	const url = "/t/" + ctx.state.threadName + ctx.search
-	console.log("url", url)
-	view.addDeleteRedirectUrl(url)
-	view.addMessage(ctx.state.message)
-	tree.addList(ctx.state.tree)
-
-	if (ctx.state.isAuthed) {
-		auth.addLogout()
-	} else {
-		auth.addLogin()
-	}
-
-	header.addAuth(auth)
-	content.addHeader(header)
-	content.addMessageView(view)
-	content.addMessagesTree(tree)
-	content.addMessageFeatures(ctx.state.messageFeatures)
-
-	layout.addFooter()
-	layout.addContent(content)
+	layout
+		.addFooter()
+		.addContent(
+			content
+				.addHeader(
+					header.addAuth(
+						ctx.state.isAuthed ? auth.addLogout() : auth.addLogin()
+					)
+				)
+				.addMessageView(
+					view
+						.addDeleteRedirectUrl("/t/" + ctx.state.threadName + ctx.search)
+						.addMessage(ctx.state.message)
+				)
+				.addMessagesTree(
+					tree
+						.addList(ctx.state.tree)
+						.addThread(ctx.state.thread)
+				)
+				.addMessageFeatures(
+					ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation)
+				)
+		)
 
 	ctx.body = layout.build()
 	ctx.status = 200

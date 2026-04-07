@@ -16,18 +16,22 @@ class PublicThreadMessageBuilder extends AbstractPublicBuilder {
 
 	addHeader(header: Builder) {
 		this.header = header.build()
+		return this
 	}
 
 	addMessageFeatures(features: Builder) {
 		this.messageFeatures = features.build()
+		return this
 	}
 
 	addMessagesTree(tree: Builder) {
 		this.tree = tree.build()
+		return this
 	}
 
 	addMessageView(view: Builder) {
 		this.messageView = view.build()
+		return this
 	}
 
 	build() {

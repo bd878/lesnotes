@@ -14,6 +14,7 @@ class SidebarBuilder extends AbstractBuilder {
 
 	addSettings(settings: Builder) {
 		this.settings = settings.build()
+		return this
 	}
 
 	build() {

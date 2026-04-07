@@ -11,13 +11,13 @@ async function main(ctx) {
 	const content = new MainBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const sidebar = new SidebarBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
-	sidebar.addSettings(settings)
-
-	content.addAuthorization()
-	content.addSidebar(sidebar)
-
-	layout.addFooter()
-	layout.addContent(content)
+	layout
+		.addFooter()
+		.addContent(
+			content
+				.addAuthorization()
+				.addSidebar(sidebar.addSettings(settings))
+		)
 
 	ctx.body = layout.build()
 	ctx.status = 200;

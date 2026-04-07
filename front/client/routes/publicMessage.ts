@@ -16,26 +16,22 @@ async function publicMessage(ctx) {
 	const content = new PublicMessageBuilder(ctx.state.isAuthed, ctx.state.threadName, ctx.state.messageName, ctx.userAgent.isMobile,
 		ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
-	ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation)
-
-	const url = "/t/" + ctx.state.threadName + ctx.search
-	console.log("url", url)
-	view.addDeleteRedirectUrl(url)
-	view.addMessage(ctx.state.message)
-	content.addMessageView(view)
-
-	if (ctx.state.isAuthed) {
-		auth.addLogout()
-	} else {
-		auth.addLogin()
-	}
-
-	header.addAuth(auth)
-	content.addHeader(header)
-	content.addMessageFeatures(ctx.state.messageFeatures)
-
-	layout.addFooter()
-	layout.addContent(content)
+	layout
+		.addFooter()
+		.addContent(
+			content
+				.addMessageView(
+					view
+						.addDeleteRedirectUrl("/t/" + ctx.state.threadName + ctx.search)
+						.addMessage(ctx.state.message)
+				)
+				.addHeader(
+					header.addAuth(ctx.state.isAuthed ? auth.addLogout() : auth.addLogin())
+				)
+				.addMessageFeatures(
+					ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation)
+				)
+		)
 
 	ctx.body = layout.build()
 	ctx.status = 200;

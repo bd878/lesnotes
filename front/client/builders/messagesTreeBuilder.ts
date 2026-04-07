@@ -50,6 +50,7 @@ class MessagesTreeBuilder extends AbstractPublicBuilder {
 		}, {
 			list: this.isMobile ? messagesListTemplateMobile : messagesListTemplate,
 		})
+		return this
 	}
 
 	addThreadPath(threadPath: Message[]) {
@@ -77,6 +78,7 @@ class MessagesTreeBuilder extends AbstractPublicBuilder {
 				}
 			},
 		})
+		return this
 	}
 
 	build() {

@@ -28,12 +28,14 @@ class LoginBuilder extends AbstractBuilder {
 		this.username = mustache.render(this.isMobile ? usernameTemplateMobile : usernameTemplate, {
 			usernamePlaceholder: this.i18n("username"),
 		})
+		return this
 	}
 
 	addPassword() {
 		this.password = mustache.render(this.isMobile ? passwordTemplateMobile : passwordTemplate, {
 			passwordPlaceholder: this.i18n("password"),
 		})
+		return this
 	}
 
 	addSubmit() {
@@ -42,10 +44,12 @@ class LoginBuilder extends AbstractBuilder {
 			signup:   this.i18n("signup"),
 			login:    this.i18n("login"),
 		})
+		return this
 	}
 
 	addSidebar(sidebar: Builder) {
 		this.sidebar = sidebar.build()
+		return this
 	}
 
 	build() {

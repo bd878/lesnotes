@@ -29,7 +29,6 @@ import loadSearch from './handlers/loadSearch';
 import formatTextarea from './handlers/formatTextarea';
 import formatView from './handlers/formatView';
 import loadSearchPath from './handlers/loadSearchPath';
-// import loadThreadMessages from './handlers/loadThreadMessages';
 import getState from './handlers/getState';
 import expireToken from './handlers/expireToken';
 import redirectHome from './handlers/redirectHome';
@@ -95,13 +94,10 @@ router
 	.get("message",                "/messages/:id",                 etag, noCache, getMe, getState, authed, loadTree, loadMessagePath, loadCwdPath, loadThread, loadMessage, loadComments, loadTranslation, formatView, messageFeatures, messageView)
 	.get("editMessage",            "/editor/messages/:id",          etag, noCache, getMe, getState, authed, loadTree, loadMessagePath, loadCwdPath, loadMessage, loadFiles, loadComments, selectMessageFiles, loadTranslation, formatTextarea, messageFeatures, messageEdit)
 	.get("thread",                 "/threads/:id", /* TODO: :idOrName*/    etag, noCache, getMe, getState, authed, loadTree, loadMessagePath, loadCwdPath, loadThread, formatView, threadView)
-	// .get("newThreadMessage",       "/editor/messages/:id/new",      etag, noCache, getState, authed, getMe, loadTree, loadMessagePath, loadCwdPath, newMessage)
 	.get("editThread",             "/editor/threads/:id",           etag, noCache, getMe, getState, authed, loadTree, loadMessagePath, loadCwdPath, loadThread, formatTextarea, threadEdit)
 	.get("status",                 "/status",                       status, noCache, getState)
-	// .get("search",                 "/search",                       etag, noCache, getState, authed, getMe, getSearchQuery, loadSearch, loadSearchPath, search)
 	.post("doLogin",               "/login",                        etag, getState, validateLogin, redirectHome)
 	.post("doSignup",              "/signup",                       etag, getState, validateSignup, redirectHome)
-	// .post("doSearch",              "/search",                       etag, getState, authed, getMe, getSearchForm, loadSearch, loadSearchPath, search)
 	.post("doDeleteFile",          "/f/delete",                     getState, authed, deleteFile)
 	.post("doPublishFile",         "/f/publish",                    getState, authed, publishFile)
 	.post("doPrivateFile",         "/f/private",                    getState, authed, privateFile)
@@ -109,19 +105,16 @@ router
 	.post("doDeleteTranslation",   "/translation/delete",           getState, authed, deleteTranslation)
 	.post("doPublishMessage",      "/m/publish",                    getState, authed, publishMessage)
 	.post("doPrivateMessage",      "/m/private",                    getState, authed, privateMessage)
-	// .post("doUpdateMessage",       "/m/update",                     getState, authed, updateMessage)
 	.post("doUpdateTranslation",   "/translation/update",           getState, authed, updateTranslation)
 	.post("doPublishThread",       "/t/publish",                    getState, authed, publishThread)
 	.post("doPrivateThread",       "/t/private",                    getState, authed, privateThread)
 	.post("doUpdateThread",        "/t/update",                     getState, authed, updateThread)
 	.post("doSendComment",         "/comment/send",                 getState, sendComment)
-	// .post("doSendMessage",         "/send",                         getState, authed, sendMessage)
 	.post("doSendTranslation",     "/translation/send",             getState, authed, sendTranslation)
 	.get("publicMessage",          "/m/:messageName",               etag, noCache, getMe, getState, loadMessage, isAuthed(loadMessagePath), loadComments, formatView, messageFeatures, publicMessage)
 	.get("publicTranslation",      "/m/:messageName/:lang",         etag, noCache, getMe, getState, loadMessage, loadComments, loadTranslation, formatView, publicTranslation)
 	.get("publicThread",           "/t/:threadName",                etag, noCache, getMe, getState, loadThread, loadTree, formatView, publicThread)
 	.get("publicThreadMessage",    "/t/:threadName/:messageName",   etag, noCache, getMe, getState, loadMessage, isAuthed(loadMessagePath), loadComments, loadThread, loadTree, formatView, messageFeatures, publicThreadMessage)
-	// .get("publicThreadMessageTranslation", "/t/:threadName/:messageName/:lang", etag, noCache, getMe, getState, loadMessage, isAuthed(loadMessagePath), loadComments, loadTranslation, loadThread, loadTree, formatView, messageFeatures, publicThreadMessageTranslation)
 	.get("any",                    "/:any*",                        getState, xxx)
 
 app.use(router.routes());

@@ -37,6 +37,7 @@ class SearchBuilder extends AbstractBuilder {
 			emptyListText:    this.i18n("emptyListText"),
 			messageHref:      function() { const params = new URLSearchParams(search); params.delete("query"); return `/messages/${this.ID}?` + params.toString(); },
 		})
+		return this
 	}
 
 	addFilesList(list?: File[]) {
@@ -51,6 +52,7 @@ class SearchBuilder extends AbstractBuilder {
 		}
 
 		this.filesList = mustache.render(this.isMobile ? filesListTemplateMobile : filesListTemplate, options)
+		return this
 	}
 
 	addSearch() {
@@ -59,6 +61,7 @@ class SearchBuilder extends AbstractBuilder {
 			searchPlaceholder:   this.i18n("searchPlaceholder"),
 			searchMessages:      this.i18n("search"),
 		})
+		return this
 	}
 
 	build() {

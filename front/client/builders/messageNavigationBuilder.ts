@@ -15,14 +15,17 @@ class MessageNavigationBuilder extends AbstractBuilder {
 
 	addAttachments() {
 		this.attachments = true
+		return this
 	}
 
 	addComments() {
 		this.comments = true
+		return this
 	}
 
 	addTranslations() {
 		this.translations = true
+		return this
 	}
 
 	build() {

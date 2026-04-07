@@ -11,15 +11,16 @@ async function login(ctx) {
 	const content = new LoginBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const sidebar = new SidebarBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
-	sidebar.addSettings(settings)
+	layout
+		.addFooter()
+		.addContent(
+			content
+				.addUsername()
+				.addPassword()
+				.addSubmit()
+				.addSidebar(sidebar.addSettings(settings))
 
-	content.addUsername()
-	content.addPassword()
-	content.addSubmit()
-	content.addSidebar(sidebar)
-
-	layout.addFooter()
-	layout.addContent(content)
+		)
 
 	ctx.body = layout.build()
 	ctx.status = 200;

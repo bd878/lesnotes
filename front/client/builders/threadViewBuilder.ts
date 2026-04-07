@@ -15,6 +15,7 @@ class ThreadViewBuilder extends AbstractBuilder {
 
 	addThread(thread: Thread) {
 		this.thread = thread
+		return this
 	}
 
 	build() {

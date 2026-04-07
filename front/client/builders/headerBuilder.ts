@@ -25,6 +25,7 @@ class HeaderBuilder extends AbstractBuilder {
 			searchPlaceholder:   this.i18n("searchPlaceholder"),
 			searchMessages:      this.i18n("search"),
 		})
+		return this
 	}
 
 	addNewNote() {
@@ -32,10 +33,12 @@ class HeaderBuilder extends AbstractBuilder {
 			newNoteButton:       this.i18n("newNote"),
 			newNoteHref:         "/home" + this.search,
 		})
+		return this
 	}
 
 	addAuth(auth: Builder) {
 		this.auth = auth.build()
+		return this
 	}
 
 	build() {

@@ -17,14 +17,17 @@ class PublicMessageBuilder extends AbstractPublicBuilder {
 
 	addMessageFeatures(features: Builder) {
 		this.messageFeatures = features.build()
+		return this
 	}
 
 	addMessageView(message: Builder) {
 		this.messageView = message.build()
+		return this
 	}
 
 	addHeader(header: Builder) {
 		this.header = header.build()
+		return this
 	}
 
 	build() {

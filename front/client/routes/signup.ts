@@ -11,15 +11,15 @@ async function signup(ctx) {
 	const sidebar = new SidebarBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const settings = new SettingsBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
-	sidebar.addSettings(settings)
-
-	content.addUsername()
-	content.addPassword()
-	content.addSubmit()
-	content.addSidebar(sidebar)
-
-	layout.addFooter()
-	layout.addContent(content)
+	layout
+		.addFooter()
+		.addContent(
+			content
+				.addUsername()
+				.addPassword()
+				.addSubmit()
+				.addSidebar(sidebar.addSettings(settings))
+		)
 
 	ctx.body = layout.build()
 	ctx.status = 200;

@@ -23,10 +23,12 @@ class MainBuilder extends AbstractBuilder {
 			login:     this.i18n("login"),
 			signup:    this.i18n("signup"),
 		})
+		return this
 	}
 
 	addSidebar(sidebar: Builder) {
 		this.sidebar = sidebar.build()
+		return this
 	}
 
 	build() {

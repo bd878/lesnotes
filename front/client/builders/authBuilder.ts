@@ -33,7 +33,8 @@ class AuthBuilder extends AbstractBuilder {
 				params.delete("id"); /* TODO: delete pagination */
 				return "/logout?" + params.toString()
 			},
-		})		
+		})
+		return this
 	}
 
 	addSignup() {
@@ -48,6 +49,7 @@ class AuthBuilder extends AbstractBuilder {
 				return "/signup?" + params.toString()
 			},
 		})
+		return this
 	}
 
 	addLogin() {
@@ -62,6 +64,7 @@ class AuthBuilder extends AbstractBuilder {
 				return "/login?" + params.toString()
 			},
 		})
+		return this
 	}
 
 	build() {

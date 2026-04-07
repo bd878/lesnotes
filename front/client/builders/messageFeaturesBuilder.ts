@@ -32,16 +32,19 @@ class MessageFeaturesBuilder extends AbstractBuilder {
 
 	addNavigation(nav: Builder) {
 		this.navigation = nav.build()
+		return this
 	}
 
 	addTranslations(translations: Builder) {
 		this.translations = translations.build()
+		return this
 	}
 
 	addCommentsList(comments: Comment[]) {
 		this.commentsList = mustache.render(this.isMobile ? commentsListTemplateMobile : commentsListTemplate, {
 			comments: comments,
 		})
+		return this
 	}
 
 	addNewComment(message: number | string) {
@@ -52,6 +55,7 @@ class MessageFeaturesBuilder extends AbstractBuilder {
 			message:                  message,
 			sendAction:               "/comment/send" + this.search,
 		})
+		return this
 	}
 
 	addComments(message: number | string, comments: Comment[]) {
@@ -62,6 +66,7 @@ class MessageFeaturesBuilder extends AbstractBuilder {
 			commentsList:  this.commentsList,
 			newComment:    this.newComment,
 		})
+		return this
 	}
 
 	addFilesView(files: FileWithMime[]) {
@@ -70,6 +75,7 @@ class MessageFeaturesBuilder extends AbstractBuilder {
 			imgSrc:   function() { return `/files/v1/read/${this.name}` },
 			fileHref: function() { return `/files/v1/download?id=${this.ID}` },
 		})
+		return this
 	}
 
 	build() {

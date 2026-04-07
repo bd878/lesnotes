@@ -7,9 +7,9 @@
 	{{#thread}}
 		<li class="flex flex-row justify-between">
 			<a href="{{lastThreadHref}}" target="_self" class="grow-1 hover:text-blue-600 flex items-center dark:hover:text-white underline cursor-pointer">{{threadTitle}}</a>
-			{{^private}}
+			{{#showPublicThread}}
 				<a href="{{publicThreadHref}}" target="_blank" class="px-2 italic dark:hover:text-white hover:text-blue-600 select-text cursor-pointer text-end">{{publicThreadTitle}}</a>
-			{{/private}}
+			{{/showPublicThread}}
 		</li>
 	{{/thread}}
 </ul>

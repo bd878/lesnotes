@@ -12,9 +12,7 @@ async function publicTranslation(ctx) {
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const messageNavigation = new MessageNavigationBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
-	layout.addFooter()
-	layout.addHeader(header)
-	layout.addContent(content)
+	layout.addFooter().addHeader(header).addContent(content)
 
 	ctx.body = layout.build()
 	ctx.status = 200;

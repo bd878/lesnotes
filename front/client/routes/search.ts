@@ -11,12 +11,14 @@ async function search(ctx) {
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const settings = new SettingsBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
-	content.addMessagesList(ctx.state.messages)
-	content.addFilesList()
-
-	layout.addFooter()
-	layout.addHeader(header)
-	layout.addContent(content)
+	layout
+		.addFooter()
+		.addHeader(header)
+		.addContent(
+			content
+				.addMessagesList(ctx.state.messages)
+				.addFilesList()
+		)
 
 	ctx.body = layout.build()
 	ctx.status = 200

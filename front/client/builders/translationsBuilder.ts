@@ -42,6 +42,7 @@ class TranslationsBuilder extends AbstractBuilder {
 			translationHref:       function() { const params = new URLSearchParams(search); params.set("trans", this.lang + ",view"); return path + "?" + params.toString() },
 			translations:          previews,
 		})
+		return this
 	}
 
 	addNewTranslation(message: number | string) {
@@ -51,6 +52,7 @@ class TranslationsBuilder extends AbstractBuilder {
 			newTranslation:        this.i18n("newTranslation"),
 			newTranslationHref:    function() { const params = new URLSearchParams(search); params.set("trans", "new"); return path + "?" + params.toString() },
 		})
+		return this
 	}
 
 	addTranslationEditForm(messageID: number, translation: Translation) {
@@ -68,6 +70,7 @@ class TranslationsBuilder extends AbstractBuilder {
 			updateAction:       "/translation/update" + this.search,
 			domain:             Config.get("domain"),
 		})
+		return this
 	}
 
 	addTranslationView(messageID: number, translation: Translation) {
@@ -80,6 +83,7 @@ class TranslationsBuilder extends AbstractBuilder {
 			editHref:         function() { const params = new URLSearchParams(search); params.set("trans", this.lang + ",edit"); return path + "?" + params.toString() },
 			deleteAction:     "/translation/delete" + search,
 		})
+		return this
 	}
 
 	addTranslationNewForm(messageID: number) {
@@ -97,6 +101,7 @@ class TranslationsBuilder extends AbstractBuilder {
 			messageID:           messageID,
 			langs:               [{lang: "de", label: this.i18n("deLang")}, {lang: "en", label: this.i18n("enLang")}, {lang: "fr", label: this.i18n("frLang")}, {lang: "ru", label: this.i18n("ruLang")}],
 		})
+		return this
 	}
 
 	build() {

@@ -18,6 +18,7 @@ class MessageHeaderBuilder extends AbstractBuilder {
 		this.messagePath = mustache.render(this.isMobile ? messagePathTemplateMobile : messagePathTemplate, {
 			path: path,
 		})
+		return this
 	}
 
 	build() {

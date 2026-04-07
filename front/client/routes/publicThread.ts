@@ -15,20 +15,19 @@ async function publicThread(ctx) {
 	const tree = new PublicMessagesTreeBuilder(ctx.state.isAuthed, ctx.state.threadName, ctx.state.messageName, ctx.userAgent.isMobile,
 		ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
-	tree.addList(ctx.state.tree)
-
-	if (ctx.state.isAuthed) {
-		auth.addLogout()
-	} else {
-		auth.addLogin()
-	}
-
-	header.addAuth(auth)
-	content.addMessagesTree(tree)
-	content.addHeader(header)
-
-	layout.addFooter()
-	layout.addContent(content)
+	layout
+		.addFooter()
+		.addContent(
+			content
+				.addMessagesTree(
+					tree
+						.addList(ctx.state.tree)
+						.addThread(ctx.state.thread)
+				)
+				.addHeader(
+					header.addAuth(ctx.state.isAuthed ? auth.addLogout() : auth.addLogin())
+				)
+		)
 
 	ctx.body = layout.build()
 	ctx.status = 200

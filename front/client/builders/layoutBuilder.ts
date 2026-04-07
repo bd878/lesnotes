@@ -21,6 +21,7 @@ class LayoutBuilder extends AbstractBuilder {
 
 	addHeader(header: Builder) {
 		this.header = header.build()
+		return this
 	}
 
 	addFooter() {
@@ -29,11 +30,13 @@ class LayoutBuilder extends AbstractBuilder {
 			contact:          this.i18n("contact"),
 			docs:             this.i18n("docs"),
 		})
+		return this
 	}
 
 	addContent(content: ScriptsBuilder) {
 		this.content = content.build()
 		this.scripts = content.scripts
+		return this
 	}
 
 	build() {

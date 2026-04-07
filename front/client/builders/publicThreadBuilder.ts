@@ -14,10 +14,12 @@ class PublicThreadBuilder extends AbstractPublicBuilder {
 
 	addHeader(header: Builder) {
 		this.header = header.build()
+		return this
 	}
 
 	addMessagesTree(tree: Builder) {
 		this.tree = tree.build()
+		return this
 	}
 
 	build() {
