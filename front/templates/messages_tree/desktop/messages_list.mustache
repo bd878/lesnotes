@@ -1,20 +1,20 @@
-<div class="flex flex-col w-full max-w-xl">
-	<div class="overflow-y-auto">
+<div class="flex flex-col w-full max-w-lg">
+	<div class="grow overflow-y-auto">
 		<ul class="flex flex-col">
 			{{#messages}}
 				<li id="list-{{ID}}" data-message-id="{{ID}}" draggable="true" class="grow-1 max-w-full flex flex-col">
 					<div class="flex flex-row max-w-full whitespace-nowrap justify-between">
 						{{#showCounter}}
 							{{#isFolded}}
-								<a href="{{foldHref}}" target="_self" data-thread-id="{{ID}}" class="mr-2 relative flex flex-row dark:hover:text-white hover:text-blue-600 select-text cursor-pointer text-end">
-									<span class="mr-4">{{count}}</span>
-									<span class="absolute left-[10px]">v</span>
+								<a href="{{foldHref}}" target="_self" data-thread-id="{{ID}}" class="mr-4 flex flex-row dark:hover:text-white hover:text-blue-600 select-text cursor-pointer text-end">
+									<span class="mr-1">{{count}}</span>
+									<span class="">v</span>
 								</a>
 							{{/isFolded}}
 							{{^isFolded}}
-								<a href="{{unfoldHref}}" target="_self" data-thread-id="{{ID}}" class="mr-2 relative flex flex-row dark:hover:text-white hover:text-blue-600 select-text cursor-pointer text-end">
-									<span class="mr-4">{{count}}</span>
-									<span class="absolute left-[10px]">></span>
+								<a href="{{unfoldHref}}" target="_self" data-thread-id="{{ID}}" class="mr-4 flex flex-row dark:hover:text-white hover:text-blue-600 select-text cursor-pointer text-end">
+									<span class="mr-1">{{count}}</span>
+									<span class="">></span>
 								</a>
 							{{/isFolded}}
 						{{/showCounter}}
@@ -38,7 +38,7 @@
 
 						<div class="flex">
 							{{#isAuthed}}
-								<a href="{{openThreadHref}}" target="_blank" class="dark:hover:text-white px-4 cursor-pointer hover:bg-blue-100 dark:hover:bg-slate-600">
+								<a href="{{openThreadHref}}" target="_self" class="dark:hover:text-white px-4 cursor-pointer hover:bg-blue-100 dark:hover:bg-slate-600">
 									>>
 								</a>
 							{{/isAuthed}}
@@ -61,13 +61,13 @@
 	</div>
 
 	{{#hasPagination}}
-		<div class="flex flex-row mt-2 odd:ml-[4px]">
+		<div class="flex flex-row my-2">
 			{{^isLastPage}}
-				<a href="{{prevPageHref}}" target="_self" class="flex justify-center grow cursor-pointer dark:bg-slate-600 dark:hover:text-white bg-gray-300 last:mr-0"><-</a>
+				<a href="{{prevPageHref}}" target="_self" class="odd:mr-[4px] text-sm/6 text-center grow cursor-pointer dark:bg-slate-600 dark:hover:text-white bg-gray-300 last:mr-0"><-</a>
 			{{/isLastPage}}
 
 			{{^isFirstPage}}
-				<a href="{{nextPageHref}}" target="_self" class="flex justify-center grow cursor-pointer dark:bg-slate-600 dark:hover:text-white bg-gray-300">-></a>
+				<a href="{{nextPageHref}}" target="_self" class="text-center text-sm/6 grow cursor-pointer dark:bg-slate-600 dark:hover:text-white bg-gray-300">-></a>
 			{{/isFirstPage}}
 		</div>
 	{{/hasPagination}}

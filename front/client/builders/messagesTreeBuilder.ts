@@ -65,7 +65,7 @@ class MessagesTreeBuilder extends AbstractPublicBuilder {
 			showPublicThread: function() { return isAuthed || this.thread.private == false },
 			publicThreadHref:  function() { return `/t/${this.thread.name}` },
 			publicThreadTitle: "<-- " + this.i18n("thread").toLowerCase(),
-			threadTitle: function() { return `/${crop(this.title || this.text, 15)}` },
+			threadTitle: function() { return `/${crop(this.title || this.text, 30)}` },
 			lastThreadHref:  function() { return `/threads/${this.ID}` + search },
 			pathThreadHref: function() {
 				const params = new URLSearchParams(search);

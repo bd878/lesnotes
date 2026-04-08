@@ -4,11 +4,11 @@
 	{{/private}}
 
 	<div class="flex flex-col justify-between grow h-full">
-		<div class="flex flex-col h-full">
+		<div class="flex flex-col space-between h-full">
 			{{#title}}
 				<div class="text-lg small:text-base large:text-xl mb-2 px-1">{{title}}</div>
 			{{/title}}
-			<p class="w-full h-full overflow-y-auto small:text-sm large:text-lg mb-1 px-1 resize-none text-start h-full">{{{text}}}</p>
+			<p class="w-full grow overflow-y-auto small:text-sm large:text-lg mb-1 px-1 resize-none text-start h-0">{{{text}}}</p>
 
 			{{#isAuthed}}
 				<div class="flex flex-row justify-between items-end">

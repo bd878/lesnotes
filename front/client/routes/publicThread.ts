@@ -17,6 +17,9 @@ async function publicThread(ctx) {
 	const tree = new PublicMessagesTreeBuilder(ctx.state.isAuthed, ctx.state.threadName, ctx.state.messageName, ctx.userAgent.isMobile,
 		ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
+	const params = new URLSearchParams(ctx.search)
+	params.set("cwd", ctx.state.thread.ID)
+
 	layout
 		.addFooter()
 		.addContent(
@@ -27,7 +30,7 @@ async function publicThread(ctx) {
 						.addThread(ctx.state.thread)
 				)
 				.addControlPanel(panel.addAuth(ctx.state.isAuthed ? auth.addLogout() : auth.addLogin()))
-				.addHeader(header)
+				.addHeader(ctx.state.isAuthed ? header.addNewNote("/home?" + params.toString()) : header)
 		)
 
 	ctx.body = layout.build()

@@ -61,7 +61,7 @@ class PublicMessagesTreeBuilder extends AbstractPublicBuilder {
 		this.threadPath = mustache.render(this.isMobile ? threadPathTemplateMobile : threadPathTemplate, {
 			thread:   thread,
 			lastThreadHref: function() { return `/t/${this.name}` + search },
-			threadTitle: function() { return `/${crop(this.title || this.description, 15)}` },
+			threadTitle: function() { return `/${crop(this.title || this.description, 30)}` },
 		})
 
 		return this

@@ -31,7 +31,7 @@ async function threadView(ctx) {
 				)
 				.addThreadView(thread.addThread(ctx.state.thread))
 				.addMessageHeader(messageHeader.addMessagePath(ctx.state.messagePath))
-				.addHeader(header.addNewNote())
+				.addHeader(header.addNewNote("/home" + ctx.search))
 				.addControlPanel(panel.addAuth(auth.addLogout()))
 		)
 

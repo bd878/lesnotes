@@ -28,10 +28,10 @@ class HeaderBuilder extends AbstractBuilder {
 		return this
 	}
 
-	addNewNote() {
+	addNewNote(href?: string) {
 		this.newNote = mustache.render(this.isMobile ? newNoteTemplateMobile : newNoteTemplate, {
 			newNoteButton:       this.i18n("newNote"),
-			newNoteHref:         "/home" + this.search,
+			newNoteHref:         href || "/home" + this.search,
 		})
 		return this
 	}

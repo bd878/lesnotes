@@ -40,7 +40,7 @@ async function newMessage(ctx) {
 				.addControlPanel(
 					panel.addAuth(auth.addLogout())
 				)
-				.addHeader(header.addNewNote())
+				.addHeader(header.addNewNote("/home" + ctx.search))
 		)
 
 	ctx.body = layout.build()
