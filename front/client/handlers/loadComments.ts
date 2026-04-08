@@ -4,8 +4,8 @@ import * as is from '../third_party/is';
 const commentsLimit = 1_000
 
 async function loadComments(ctx, next) {
-	const id = parseInt(ctx.query.id) || parseInt(ctx.params.id) || 0
-	const name = ctx.params.messageName || ""
+	const id = ctx.state.messageID || 0
+	const name = ctx.state.messageName || ""
 	const token = ctx.state.token
 
 	console.log("--> loadComments", "id", id, "name", name, "token", token)

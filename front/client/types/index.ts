@@ -14,7 +14,8 @@ interface SelectedFile extends File {
 }
 
 interface IDLimitOffset {
-	id:     number;
+	id?:    number;
+	name?:  string;
 	limit:  number;
 	offset: number;
 }

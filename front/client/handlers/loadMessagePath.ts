@@ -10,7 +10,7 @@ async function loadMessagePath(ctx, next) {
 	console.log("--> loadMessagePath")
 
 	if (is.notEmpty(token) && is.notEmpty(id)) {
-		const result = await readPathJson(token, id)
+		const result = await readPathJson(token, id, "")
 
 		if (is.notEmpty(result)) {
 			if (result.error.error) {

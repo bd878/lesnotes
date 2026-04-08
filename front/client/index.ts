@@ -20,6 +20,7 @@ import loadComments from './handlers/loadComments';
 import messageFeatures from './handlers/messageFeatures'
 import loadMessagePath from './handlers/loadMessagePath';
 import loadCwdPath from './handlers/loadCwdPath';
+import loadCwdThread from './handlers/loadCwdThread';
 import loadFiles from './handlers/loadFiles';
 import selectMessageFiles from './handlers/selectMessageFiles';
 import loadTranslation from './handlers/loadTranslation';
@@ -28,7 +29,6 @@ import loadThread from './handlers/loadThread';
 import loadSearch from './handlers/loadSearch';
 import formatTextarea from './handlers/formatTextarea';
 import formatView from './handlers/formatView';
-import loadSearchPath from './handlers/loadSearchPath';
 import getState from './handlers/getState';
 import expireToken from './handlers/expireToken';
 import redirectHome from './handlers/redirectHome';
@@ -90,11 +90,11 @@ router
 	.get("login",                  "/login",                        etag, noCache, getState, notAuthed, login)
 	.get("logout",                 "/logout",                       etag, noCache, getState, expireToken, redirectLogin)
 	.get("signup",                 "/signup",                       etag, noCache, getState, notAuthed, signup)
-	.get("home",                   "/home",                         etag, noCache, getMe, getState, authed, loadTree, loadCwdPath, loadFiles, newMessage)
-	.get("message",                "/messages/:id",                 etag, noCache, getMe, getState, authed, loadTree, loadMessagePath, loadCwdPath, loadThread, loadMessage, loadComments, loadTranslation, formatView, messageFeatures, messageView)
-	.get("editMessage",            "/editor/messages/:id",          etag, noCache, getMe, getState, authed, loadTree, loadMessagePath, loadCwdPath, loadMessage, loadFiles, loadComments, selectMessageFiles, loadTranslation, formatTextarea, messageFeatures, messageEdit)
-	.get("thread",                 "/threads/:id", /* TODO: :idOrName*/    etag, noCache, getMe, getState, authed, loadTree, loadMessagePath, loadCwdPath, loadThread, formatView, threadView)
-	.get("editThread",             "/editor/threads/:id",           etag, noCache, getMe, getState, authed, loadTree, loadMessagePath, loadCwdPath, loadThread, formatTextarea, threadEdit)
+	.get("home",                   "/home",                         etag, noCache, getMe, getState, authed, loadCwdThread, loadTree, loadCwdPath, loadFiles, newMessage)
+	.get("message",                "/messages/:idOrName",           etag, noCache, getMe, getState, authed, loadCwdThread, loadTree, loadMessagePath, loadCwdPath, loadThread, loadMessage, loadComments, loadTranslation, formatView, messageFeatures, messageView)
+	.get("editMessage",            "/editor/messages/:idOrName",    etag, noCache, getMe, getState, authed, loadCwdThread, loadTree, loadMessagePath, loadCwdPath, loadMessage, loadFiles, loadComments, selectMessageFiles, loadTranslation, formatTextarea, messageFeatures, messageEdit)
+	.get("thread",                 "/threads/:idOrName",            etag, noCache, getMe, getState, authed, loadCwdThread, loadTree, loadMessagePath, loadCwdPath, loadThread, formatView, threadView)
+	.get("editThread",             "/editor/threads/:idOrName",     etag, noCache, getMe, getState, authed, loadCwdThread, loadTree, loadMessagePath, loadCwdPath, loadThread, formatTextarea, threadEdit)
 	.get("status",                 "/status",                       status, noCache, getState)
 	.post("doLogin",               "/login",                        etag, getState, validateLogin, redirectHome)
 	.post("doSignup",              "/signup",                       etag, getState, validateSignup, redirectHome)

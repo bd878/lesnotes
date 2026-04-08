@@ -1,4 +1,5 @@
 import type {IDLimitOffset} from '../types'
+import * as is from '../third_party/is';
 
 const defaultLimit = parseInt(LIMIT) || 10
 
@@ -13,12 +14,14 @@ async function getState(ctx, next) {
 	ctx.state.trans = getTranslation(ctx)
 	ctx.state.cwd = getCwd(ctx)
 	ctx.state.messageID = getMessageID(ctx)
-	ctx.state.messageName = ctx.params.messageName || ""
-	ctx.state.threadName = ctx.params.threadName || ""
+	ctx.state.messageName = getMessageName(ctx)
+	ctx.state.threadName = getThreadName(ctx)
 	ctx.state.threadID = getThreadID(ctx)
 	ctx.state.leaves = getLeaves(ctx)
 	ctx.state.token = getToken(ctx)
 	ctx.state.isAuthed = getIsAuthed(ctx)
+
+	console.log("cwd", ctx.state.cwd)
 
 	await next()
 
@@ -34,11 +37,19 @@ function getIsAuthed(ctx): boolean {
 }
 
 function getMessageID(ctx): number {
-	return parseInt(ctx.params.id) || 0
+	return parseInt(ctx.params.idOrName) || 0
+}
+
+function getMessageName(ctx): string {
+	return ctx.params.messageName || ""
+}
+
+function getThreadName(ctx): string {
+	return ctx.params.threadName || ""
 }
 
 function getThreadID(ctx): number {
-	return parseInt(ctx.params.id) || 0
+	return parseInt(ctx.params.idOrName) || 0
 }
 
 function getFontSize(ctx) {
@@ -106,22 +117,21 @@ function getMessageView(ctx) {
 	case "files":
 	case "comments":
 	case "trans":
-	// TODO: case "trans":
 		return ctx.query.nav
 	default:
 		return ""
 	}
 }
 
-function idLimitOffset(numbers: number[]): IDLimitOffset {
-	const [id = 0, limit = defaultLimit, offset = 0] = numbers
-	return {id, limit, offset}
+function idLimitOffset(numbers: [IDOrName, ...number[]]): IDLimitOffset {
+	const [{name: name, id: id}, limit = defaultLimit, offset = 0] = numbers
+	return {id, name, limit, offset}
 }
 
 function getCwd(ctx) {
 	const params = new URLSearchParams(ctx.request.search)
 
-	return idLimitOffset([parseInt(params.get("cwd")) || 0, ...(params.get(params.get("cwd") || "0") || "").split(",").map(parseFloat).filter(v => !isNaN(v))])
+	return idLimitOffset([idOrName(params.get("cwd")), ...(params.get(params.get("cwd") || "0") || "").split(",").map(parseFloat).filter(v => !isNaN(v))])
 }
 
 function getLeaves(ctx): IDLimitOffset[] {
@@ -130,11 +140,32 @@ function getLeaves(ctx): IDLimitOffset[] {
 	for (const [key, value] of new URLSearchParams(ctx.request.search)) {
 		const threadID = parseInt(key)
 		if (!isNaN(threadID)) {
-			result.push(idLimitOffset([threadID, ...(value || "").split(",").map(parseFloat).filter(v => !isNaN(v))]))
+			result.push(idLimitOffset([{id: threadID}, ...(value || "").split(",").map(parseFloat).filter(v => !isNaN(v))]))
 		}
 	}
 
 	return result
+}
+
+interface IDOrName {
+	id?: number;
+	name?: string;
+}
+
+const EmptyIdOrName = {id: 0, name: ""}
+
+function idOrName(str: string): { id?: number; name?: string } {
+	if (is.empty(str)) {
+		return EmptyIdOrName
+	}
+
+	const maybeID = parseInt(str)
+
+	if (isNaN(maybeID)) {
+		return {name: str}
+	}
+
+	return {id: maybeID}
 }
 
 function getThread(ctx) {

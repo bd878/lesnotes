@@ -8,13 +8,16 @@ interface ReadTreeResponse {
 	list:     MessagesList;
 }
 
-async function readTreeJson(token: string, highlight: number, highlightName: string, rootID: number, rootName: string, limit: number, offset: number, leaves: IDLimitOffset[]): Promise<ReadTreeResponse> {
+async function readTreeJson(token: string, highlight: number, highlightName: string,
+	rootID: number, rootName: string, limit: number, offset: number, leaves: IDLimitOffset[]
+): Promise<ReadTreeResponse> {
 	let result: ReadTreeResponse = {
 		error: models.error(),
 		list:  models.EmptyMessagesList,
 	}
 
-	console.log("readTreeJson", "token", token, "highlight", highlight, "highlight_name", highlightName, "root_id", rootID, "root_name", rootName, "limit", limit, "offset", offset, "leaves", ...leaves)
+	console.log("readTreeJson", "token", token, "highlight", highlight, "highlight_name", highlightName,
+		"root_id", rootID, "root_name", rootName, "limit", limit, "offset", offset, "leaves", ...leaves)
 
 	try {
 

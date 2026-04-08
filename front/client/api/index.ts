@@ -14,7 +14,6 @@ import sendMessage from './sendMessage';
 import sendTranslationJson from './sendTranslationJson';
 import sendCommentJson from './sendCommentJson';
 import searchMessagesJson from './searchMessagesJson';
-import searchMessagesPathJson from './searchMessagesPathJson';
 import updateMessage from './updateMessage';
 import updateMessageJson from './updateMessageJson';
 import updateTranslationJson from './updateTranslationJson';
@@ -105,7 +104,6 @@ export default {
 	validateMiniappData,
 	validateTgAuthData,
 	searchMessagesJson,
-	searchMessagesPathJson,
 	reorderThread,
 	readTreeJson,
 }

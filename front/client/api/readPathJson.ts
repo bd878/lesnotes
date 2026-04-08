@@ -9,7 +9,7 @@ interface ReadPathResponse {
 }
 
 // id = 0 : path = []
-async function readPathJson(token: string, id: number /* TODO: name: string */): Promise<ReadPathResponse> {
+async function readPathJson(token: string, id: number, name: string): Promise<ReadPathResponse> {
 	let result: ReadPathResponse = {
 		error:       models.error(),
 		path:        [],
@@ -25,6 +25,7 @@ async function readPathJson(token: string, id: number /* TODO: name: string */):
 				token: token,
 				req:   {
 					id: id,
+					name: name,
 				},
 			},
 		});

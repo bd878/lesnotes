@@ -7,8 +7,8 @@ async function loadCwdPath(ctx, next) {
 
 	console.log("--> loadCwdPath")
 
-	if (is.notEmpty(ctx.state.cwd) && ctx.state.cwd.id != 0 /* not root */) {
-		const result = await readPathJson(token, ctx.state.cwd.id)
+	if (is.notEmpty(ctx.state.cwd) && (ctx.state.cwd.id != 0) /* not root */) {
+		const result = await readPathJson(token, ctx.state.cwd.id, "")
 
 		if (is.notEmpty(result)) {
 			if (result.error.error) {
