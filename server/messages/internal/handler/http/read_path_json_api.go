@@ -55,8 +55,7 @@ func (h *Handler) ReadPathJsonAPI(w http.ResponseWriter, req *http.Request) (err
 		return err
 	}
 
-	// TODO: add "thread" to list, front expects it in loadStack
-	list, parentID, err := h.controller.ReadPath(req.Context(), user.ID, request.ID, "")
+	list, parentID, err := h.controller.ReadPath(req.Context(), user.ID, request.ID, request.Name)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{
