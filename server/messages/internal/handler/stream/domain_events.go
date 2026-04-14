@@ -80,6 +80,7 @@ func (h domainHandler[T]) onMessageCreated(ctx context.Context, event ddd.Event)
 	data, err := proto.Marshal(&api.MessageCreated{
 		Id:        payload.ID,
 		UserId:    payload.UserID,
+		FileIds:   payload.FileIDs,
 		Text:      payload.Text,
 		Title:     payload.Title,
 		Name:      payload.Name,
@@ -112,6 +113,7 @@ func (h domainHandler[T]) onMessageUpdated(ctx context.Context, event ddd.Event)
 	data, err := proto.Marshal(&api.MessageUpdated{
 		Id:        payload.ID,
 		UserId:    payload.UserID,
+		FileIds:   payload.FileIDs,
 		Text:      payload.Text,
 		Title:     payload.Title,
 		Name:      payload.Name,

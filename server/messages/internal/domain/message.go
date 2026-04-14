@@ -27,6 +27,7 @@ type MessageCreated struct {
 	Private   bool
 	CreatedAt string
 	UpdatedAt string
+	FileIDs   []int64
 }
 
 func (MessageCreated) Key() string { return MessageCreatedEvent }
@@ -46,6 +47,7 @@ func CreateMessage(id int64, text, title string, fileIDs []int64, userID int64, 
 		Private:   private,
 		CreatedAt: createdAt,
 		UpdatedAt: updatedAt,
+		FileIDs:   fileIDs,
 	}), nil
 }
 
@@ -71,6 +73,7 @@ type MessageUpdated struct {
 	Title     *string
 	Name      *string
 	UpdatedAt string
+	FileIDs   []int64
 }
 
 func (MessageUpdated) Key() string { return MessageUpdatedEvent }
@@ -87,6 +90,7 @@ func UpdateMessage(id int64, text, title *string, fileIDs []int64, userID int64,
 		Title:     title,
 		Name:      name,
 		UpdatedAt: updatedAt,
+		FileIDs:   fileIDs,
 	}), nil
 }
 

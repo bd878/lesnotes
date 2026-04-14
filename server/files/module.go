@@ -16,12 +16,13 @@ import (
 
 func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error) {
 	filesRepo := postgres.NewFilesRepository(svc.Pool(), "files.files")
+	messagesRepo := postgres.NewMessagesRepository(svc.Pool(), "files.messages")
 
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
 	stream.RegisterDomainEventHandlers(dispatcher,
 		stream.NewDomainEventHandlers(nats.NewStream(svc.Nats())))
 
-	controller := application.New(dispatcher, filesRepo, svc.Logger())
+	controller := application.New(dispatcher, filesRepo, messagesRepo, svc.Logger())
 
 	stream.RegisterIntegrationEventHandlers(nats.NewStream(svc.Nats()),
 		stream.NewIntegrationEventHandlers(controller))

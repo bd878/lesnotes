@@ -23,18 +23,101 @@ type FilesRepository interface {
 	PrivateFiles(ctx context.Context, userID int64, ids []int64, updatedAt string) (err error)
 }
 
+type MessagesRepository interface {
+	SaveMessageFiles(ctx context.Context, id, userID int64, fileIDs []int64) (err error)
+	UpdateMessageFiles(ctx context.Context, id, userID int64, fileIDs []int64) (err error)
+	ReadMessageFiles(ctx context.Context, id int64, userIDs []int64) (fileIDs []int64, err error)
+	DeleteFiles(ctx context.Context, ids []int64) (err error)
+	DeleteMessage(ctx context.Context, id, userID int64) (err error)
+}
+
 type Application struct {
 	log              *logger.Logger
 	publisher        ddd.EventPublisher[ddd.Event]
 	filesRepo        FilesRepository
+	messagesRepo     MessagesRepository
 }
 
-func New(publisher ddd.EventPublisher[ddd.Event], filesRepo FilesRepository, log *logger.Logger) *Application {
+func New(publisher ddd.EventPublisher[ddd.Event],
+	filesRepo FilesRepository, messagesRepo MessagesRepository, log *logger.Logger) *Application {
 	return &Application{
-		log:        log,
-		publisher:  publisher,
-		filesRepo:  filesRepo,
+		log:           log,
+		publisher:     publisher,
+		filesRepo:     filesRepo,
+		messagesRepo:  messagesRepo,
 	}
+}
+
+func (a *Application) SaveMessageFiles(ctx context.Context, id, userID int64, fileIDs []int64) (err error) {
+	a.log.Debugw("save message files", "id", id, "user_id", userID, "file_ids", fileIDs)
+
+	return a.messagesRepo.SaveMessageFiles(ctx, id, userID, fileIDs)
+}
+
+func (a *Application) DeleteMessageFiles(ctx context.Context, id, userID int64) (err error) {
+	a.log.Debugw("delete message files", "id", id, "user_id", userID)
+
+	fileIDs, err := a.messagesRepo.ReadMessageFiles(ctx, id, []int64{userID})
+	if err != nil {
+		return err
+	}
+
+	if len(fileIDs) == 0 {
+		a.log.Debugln("no files")
+		return nil
+	}
+
+	return a.DeleteFiles(ctx, userID, fileIDs)
+}
+
+func (a *Application) UpdateMessageFiles(ctx context.Context, id, userID int64, fileIDs []int64) (err error) {
+	a.log.Debugw("update message files", "id", id, "user_id", userID, "file_ids", fileIDs)
+
+	return a.messagesRepo.UpdateMessageFiles(ctx, id, userID, fileIDs)
+}
+
+func (a *Application) PublishMessageFiles(ctx context.Context, userID int64, messageIDs []int64) (err error) {
+	a.log.Debugw("publish message files", "user_id", userID, "message_ids", messageIDs)
+
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
+	for _, messageID := range messageIDs {
+		fileIDs, err := a.messagesRepo.ReadMessageFiles(ctx, messageID, []int64{userID})
+		if err != nil {
+			logger.Errorln(err)
+			continue
+		}
+
+		err = a.filesRepo.PublishFiles(ctx, userID, fileIDs, updatedAt)
+		if err != nil {
+			logger.Errorln(err)
+			continue
+		} 
+	}
+
+	return nil
+}
+
+func (a *Application) PrivateMessageFiles(ctx context.Context, userID int64, messageIDs []int64) (err error) {
+	a.log.Debugw("private message files", "user_id", userID, "message_ids", messageIDs)
+
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
+	for _, messageID := range messageIDs {
+		fileIDs, err := a.messagesRepo.ReadMessageFiles(ctx, messageID, []int64{userID})
+		if err != nil {
+			logger.Errorln(err)
+			continue
+		}
+
+		err = a.filesRepo.PrivateFiles(ctx, userID, fileIDs, updatedAt)
+		if err != nil {
+			logger.Errorln(err)
+			continue
+		} 
+	}
+
+	return nil
 }
 
 func (a *Application) ReadBatchFiles(ctx context.Context, userID int64, ids []int64) (files map[int64]*api.File, err error) {
@@ -156,6 +239,11 @@ func (a *Application) DeleteFiles(ctx context.Context, userID int64, ids []int64
 	}
 
 	err = a.filesRepo.DeleteFiles(ctx, userID, ids)
+	if err != nil {
+		return
+	}
+
+	err = a.messagesRepo.DeleteFiles(ctx, ids)
 	if err != nil {
 		return
 	}

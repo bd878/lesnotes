@@ -11,7 +11,11 @@ import (
 )
 
 type FilesController interface {
-
+	SaveMessageFiles(ctx context.Context, id, userID int64, fileIDs []int64) error
+	DeleteMessageFiles(ctx context.Context, id, userID int64) error
+	UpdateMessageFiles(ctx context.Context, id, userID int64, fileIDs []int64) error
+	PublishMessageFiles(ctx context.Context, userID int64, messageIDs []int64) error
+	PrivateMessageFiles(ctx context.Context, userID int64, messageIDs []int64) error
 }
 
 type integrationHandlers struct {
@@ -39,6 +43,12 @@ func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingM
 	logger.Debugw("handle message", "name", msg.MessageName(), "subject", msg.Subject())
 
 	switch msg.MessageName() {
+	case messagesevents.MessageCreatedEvent:
+		return h.handleMessageCreated(ctx, msg)
+	case messagesevents.MessageUpdatedEvent:
+		return h.handleMessageUpdated(ctx, msg)
+	case messagesevents.MessageDeletedEvent:
+		return h.handleMessageDeleted(ctx, msg)
 	case messagesevents.MessagesPublishEvent:
 		return h.handleMessagesPublished(ctx, msg)
 	case messagesevents.MessagesPrivateEvent:
@@ -48,14 +58,40 @@ func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingM
 	return nil
 }
 
+func (h integrationHandlers) handleMessageCreated(ctx context.Context, msg am.IncomingMessage) error {
+	m := &api.MessageCreated{}
+	if err := proto.Unmarshal(msg.Data(), m); err != nil {
+		return err
+	}
+
+	return h.files.SaveMessageFiles(ctx, m.GetId(), m.GetUserId(), m.GetFileIds())
+}
+
+func (h integrationHandlers) handleMessageDeleted(ctx context.Context, msg am.IncomingMessage) error {
+	m := &api.MessageDeleted{}
+	if err := proto.Unmarshal(msg.Data(), m); err != nil {
+		return err
+	}
+
+	return h.files.DeleteMessageFiles(ctx, m.GetId(), m.GetUserId())
+}
+
+func (h integrationHandlers) handleMessageUpdated(ctx context.Context, msg am.IncomingMessage) error {
+	m := &api.MessageUpdated{}
+	if err := proto.Unmarshal(msg.Data(), m); err != nil {
+		return err
+	}
+
+	return h.files.UpdateMessageFiles(ctx, m.GetId(), m.GetUserId(), m.GetFileIds())
+}
+
 func (h integrationHandlers) handleMessagesPublished(ctx context.Context, msg am.IncomingMessage) error {
 	m := &api.MessagesPublished{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}
 
-	// TODO: implement
-	return nil
+	return h.files.PublishMessageFiles(ctx, m.GetUserId(), m.GetIds())
 }
 
 func (h integrationHandlers) handleMessagesPrivated(ctx context.Context, msg am.IncomingMessage) error {
@@ -64,6 +100,5 @@ func (h integrationHandlers) handleMessagesPrivated(ctx context.Context, msg am.
 		return err
 	}
 
-	// TODO: implement
-	return nil
+	return h.files.PrivateMessageFiles(ctx, m.GetUserId(), m.GetIds())
 }
