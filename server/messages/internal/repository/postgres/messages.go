@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/bd878/gallery/server/messages/pkg/model"
+	"github.com/bd878/gallery/server/api"
 )
 
 type MessagesRepository struct {
@@ -69,16 +69,16 @@ func (r *MessagesRepository) Private(ctx context.Context, userID int64, ids []in
 	return
 }
 
-func (r *MessagesRepository) Read(ctx context.Context, userIDs []int64, id int64, name string) (message *model.Message, err error) {
+func (r *MessagesRepository) Read(ctx context.Context, userIDs []int64, id int64, name string) (message *api.Message, err error) {
 	if name != "" {
 		return r.ReadByName(ctx, userIDs, name)
 	}
 	return r.ReadByID(ctx, userIDs, id)
 }
 
-func (r *MessagesRepository) ReadByID(ctx context.Context, userIDs []int64, id int64) (message *model.Message, err error) {
-	message = &model.Message{
-		ID: id,
+func (r *MessagesRepository) ReadByID(ctx context.Context, userIDs []int64, id int64) (message *api.Message, err error) {
+	message = &api.Message{
+		Id: id,
 	}
 
 	var createdAt, updatedAt *time.Time
@@ -95,7 +95,7 @@ func (r *MessagesRepository) ReadByID(ctx context.Context, userIDs []int64, id i
 
 	err = r.pool.QueryRow(ctx, r.table(`
 SELECT user_id, created_at, updated_at, text, private, name, title FROM %s WHERE id = $1 AND (user_id IN (`+ids+`) OR private = false)
-`), append([]interface{}{id}, list...)...).Scan(&message.UserID, &createdAt, &updatedAt, &message.Text, &message.Private, &message.Name, &message.Title)
+`), append([]interface{}{id}, list...)...).Scan(&message.UserId, &createdAt, &updatedAt, &message.Text, &message.Private, &message.Name, &message.Title)
 	if err != nil {
 		return
 	}
@@ -106,8 +106,8 @@ SELECT user_id, created_at, updated_at, text, private, name, title FROM %s WHERE
 	return
 }
 
-func (r *MessagesRepository) ReadByName(ctx context.Context, userIDs []int64, name string) (message *model.Message, err error) {
-	message = &model.Message{
+func (r *MessagesRepository) ReadByName(ctx context.Context, userIDs []int64, name string) (message *api.Message, err error) {
+	message = &api.Message{
 		Name: name,
 	}
 
@@ -125,7 +125,7 @@ func (r *MessagesRepository) ReadByName(ctx context.Context, userIDs []int64, na
 
 	err = r.pool.QueryRow(ctx, r.table(`
 SELECT id, user_id, created_at, updated_at, text, private, title FROM %s WHERE name = $1 AND (user_id IN (`+ids+`) OR private = false)
-`), append([]interface{}{name}, list...)...).Scan(&message.ID, &message.UserID, &createdAt, &updatedAt, &message.Text, &message.Private, &message.Title)
+`), append([]interface{}{name}, list...)...).Scan(&message.Id, &message.UserId, &createdAt, &updatedAt, &message.Text, &message.Private, &message.Title)
 	if err != nil {
 		return
 	}
@@ -136,7 +136,7 @@ SELECT id, user_id, created_at, updated_at, text, private, title FROM %s WHERE n
 	return
 }
 
-func (r *MessagesRepository) ReadBatchMessages(ctx context.Context, userID int64, messageIDs []int64) (messages []*model.Message, err error) {
+func (r *MessagesRepository) ReadBatchMessages(ctx context.Context, userID int64, messageIDs []int64) (messages []*api.Message, err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -156,7 +156,7 @@ func (r *MessagesRepository) ReadBatchMessages(ctx context.Context, userID int64
 		}
 	}()
 
-	messages = make([]*model.Message, 0)
+	messages = make([]*api.Message, 0)
 	if len(messageIDs) == 0 {
 		return
 	}
@@ -180,11 +180,11 @@ func (r *MessagesRepository) ReadBatchMessages(ctx context.Context, userID int64
 	}
 
 	for rows.Next() {
-		message := &model.Message{}
+		message := &api.Message{}
 
 		var createdAt, updatedAt *time.Time
 
-		err = rows.Scan(&message.ID, &message.UserID, &message.Name, &message.Text, &message.Private, &createdAt, &updatedAt, &message.Title)
+		err = rows.Scan(&message.Id, &message.UserId, &message.Name, &message.Text, &message.Private, &createdAt, &updatedAt, &message.Title)
 		if err != nil {
 			return
 		}
@@ -226,7 +226,7 @@ func (r *MessagesRepository) DeleteUserMessages(ctx context.Context, userID int6
 	return
 }
 
-func (r *MessagesRepository) ReadMessages(ctx context.Context, userID int64, limit, offset int32) (messages []*model.Message, isLastPage bool, err error) {
+func (r *MessagesRepository) ReadMessages(ctx context.Context, userID int64, limit, offset int32) (messages []*api.Message, isLastPage bool, err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -256,13 +256,13 @@ func (r *MessagesRepository) ReadMessages(ctx context.Context, userID int64, lim
 		return
 	}
 
-	messages = make([]*model.Message, 0)
+	messages = make([]*api.Message, 0)
 	for rows.Next() {
-		message := &model.Message{}
+		message := &api.Message{}
 
 		var createdAt, updatedAt time.Time
 
-		err = rows.Scan(&message.ID, &message.UserID, &message.Name, &message.Text, &message.Private, &createdAt, &updatedAt, &message.Title)
+		err = rows.Scan(&message.Id, &message.UserId, &message.Name, &message.Text, &message.Private, &createdAt, &updatedAt, &message.Title)
 		if err != nil {
 			return
 		}

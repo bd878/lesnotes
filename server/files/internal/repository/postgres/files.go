@@ -7,6 +7,7 @@ import (
 	"time"
 	"errors"
 	"context"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -186,6 +187,73 @@ func (r *FilesRepository) ListFiles(ctx context.Context, userID int64, limit, of
 		if count <= offset + limit {
 			isLastPage = true
 		}
+	}
+
+	return
+}
+
+func (r *FilesRepository) ReadBatchFiles(ctx context.Context, fileIDs []int64) (files []*api.File, err error) {
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			fmt.Fprintf(os.Stderr, "[ReadBatchFiles]: rollback with error: %v\n", err)
+			err = tx.Rollback(ctx)
+		default:
+			err = tx.Commit(ctx)
+		}
+	}()
+
+	files = make([]*api.File, 0)
+	if len(fileIDs) == 0 {
+		return
+	}
+
+	var rows pgx.Rows
+
+	var order string
+	pairs := make([]string, len(fileIDs))
+	for i, fileID := range fileIDs {
+		pairs[i] = fmt.Sprintf("(%d, %d)", fileID, i)
+	}
+	order = strings.Join(pairs, ",")
+
+	query := r.table(`SELECT m.id, m.owner_id, m.name, m.private, m.created_at, m.updated_at, m.size, m.mime, m.description FROM %s m `) +
+		fmt.Sprintf(` JOIN (VALUES %s) AS x(id, ordering) ON m.id = x.id ORDER BY x.ordering ASC`, order)
+
+	rows, err = tx.Query(ctx, query)
+	defer rows.Close()
+	if err != nil {
+		return
+	}
+
+	for rows.Next() {
+		file := &api.File{}
+
+		var createdAt, updatedAt *time.Time
+
+		err = rows.Scan(&file.Id, &file.UserId, &file.Name, &file.Private, &createdAt, &updatedAt,
+			 &file.Size, &file.Mime, &file.Description)
+		if err != nil {
+			return
+		}
+
+		file.CreatedAt = createdAt.Format(time.RFC3339)
+		file.UpdatedAt = updatedAt.Format(time.RFC3339)
+
+		files = append(files, file)
+	}
+
+	if err = rows.Err(); err != nil {
+		return
 	}
 
 	return

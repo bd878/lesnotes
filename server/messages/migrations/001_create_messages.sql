@@ -17,14 +17,6 @@ CREATE TABLE IF NOT EXISTS messages.messages
 	PRIMARY KEY(id)
 );
 
-CREATE TABLE IF NOT EXISTS messages.files
-(
-	file_id       bigint       NOT NULL,
-	message_id    bigint       NOT NULL,
-	user_id       bigint       NOT NULL,
-	PRIMARY KEY(file_id, message_id)
-);
-
 CREATE TABLE IF NOT EXISTS messages.translations
 (
 	message_id    bigint        NOT NULL,

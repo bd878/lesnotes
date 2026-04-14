@@ -92,8 +92,6 @@ func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
 		switch v := snapshot.Item.(type) {
 		case *api.MessagesSnapshot_Message:
 			logger.Debugw("message snapshot", "id", v.Message.Id)
-		case *api.MessagesSnapshot_File:
-			logger.Debugw("file snapshot", "file_id", v.File.FileId)
 		case *api.MessagesSnapshot_Translation:
 			logger.Debugw("translation snapshot", "message_id", v.Translation.MessageId)
 		case *api.MessagesSnapshot_Comment:

@@ -9,7 +9,6 @@ const (
 	PublishRequest
 	PrivateRequest
 	DeleteUserMessagesRequest
-	DeleteFileRequest
 	AppendTranslationRequest
 	UpdateTranslationRequest
 	DeleteTranslationRequest

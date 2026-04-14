@@ -13,6 +13,7 @@ service Files {
 	rpc PublishFiles(PublishFilesRequest) returns (PublishFilesResponse) {}
 	rpc PrivateFiles(PrivateFilesRequest) returns (PrivateFilesResponse) {}
 	rpc DeleteFiles(DeleteFilesRequest) returns (DeleteFilesResponse) {}
+	rpc ReadMessageFiles(ReadMessageFilesRequest) returns (ReadMessageFilesResponse) {}
 }
 
 message File {
@@ -70,6 +71,15 @@ message ReadFileRequest {
 	int64    id = 1;
 	string   name = 2;
 	bool     public = 3;
+}
+
+message ReadMessageFilesRequest {
+	int64    id = 1;
+	repeated int64 user_ids = 2;
+}
+
+message ReadMessageFilesResponse {
+	repeated File files = 1;
 }
 
 message ListFilesResponse {

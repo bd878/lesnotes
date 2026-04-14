@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"strconv"
 
-	files "github.com/bd878/gallery/server/files/pkg/model"
 	"github.com/bd878/gallery/server/internal/logger"
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
 	messages "github.com/bd878/gallery/server/messages/pkg/model"
@@ -188,37 +187,6 @@ func (h *Handler) readBatchMessages(ctx context.Context, w http.ResponseWriter, 
 		return err
 	}
 
-	fileIDs := make([]int64, 0)
-	for _, message := range list {
-		if message.FileIDs != nil {
-			// TODO: fileIDs set
-			fileIDs = append(fileIDs, message.FileIDs...)
-		}
-	}
-
-	filesRes, err := h.filesGateway.ReadBatchFiles(ctx, fileIDs, userID)
-	if err != nil {
-		logger.Errorw("failed to read batch files", "user_id", userID, "error", err)
-	} else {
-		for _, message := range list {
-			var list []*files.File
-			for _, id := range message.FileIDs {
-				file := filesRes[id]
-				if file != nil {
-					list = append(list, &files.File{
-						ID:   file.ID,
-						Name: file.Name,
-					})
-				}
-			}
-			message.Files = list
-
-			if message.UserID == users.PublicUserID {
-				message.UserID = 0
-			}
-		}
-	}
-
 	response, err := json.Marshal(messages.ReadResponse{
 		Messages: list,
 	})
@@ -359,27 +327,6 @@ func (h *Handler) readMessage(ctx context.Context, w http.ResponseWriter, userID
 		return
 	}
 
-	var list []*files.File
-	for _, id := range message.FileIDs {
-		file, err := h.filesGateway.ReadFile(ctx, message.UserID, id)
-		if err != nil {
-			logger.Errorw("failed to read file for a message", "user_id", message.UserID, "file_id", id, "message_id", message.ID)
-			continue
-		}
-
-		if !publicOnly || !file.Private {
-			list = append(list, &files.File{
-				Name:        file.Name,
-				ID:          file.ID,
-				Mime:        file.Mime,
-				Size:        file.Size,
-				Private:     file.Private,
-				Description: file.Description,
-			})
-		}
-	}
-	message.Files = list
-
 	if message.UserID == users.PublicUserID {
 		message.UserID = 0
 	}
@@ -434,43 +381,6 @@ func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter,
 		list.Messages = filterPublicMessages(list.Messages)
 	}
 
-	fileIDs := make([]int64, 0)
-	for _, message := range list.Messages {
-		if message.FileIDs != nil {
-			// TODO: fileIDs set
-			fileIDs = append(fileIDs, message.FileIDs...)
-		}
-	}
-
-	filesRes, err := h.filesGateway.ReadBatchFiles(ctx, fileIDs, userID)
-	if err != nil {
-		logger.Errorw("failed to read batch files", "user_id", userID, "error", err)
-	} else {
-		for _, message := range list.Messages {
-			var list []*files.File
-			for _, id := range message.FileIDs {
-				file := filesRes[id]
-				if file != nil {
-					if !publicOnly || !file.Private {
-						list = append(list, &files.File{
-							ID:          file.ID,
-							Name:        file.Name,
-							Mime:        file.Mime,
-							Size:        file.Size,
-							Private:     file.Private,
-							Description: file.Description,
-						})
-					}
-				}
-			}
-			message.Files = list
-
-			if message.UserID == users.PublicUserID {
-				message.UserID = 0
-			}
-		}
-	}
-
 	response, err := json.Marshal(messages.ReadResponse{
 		ThreadID:    &threadID,
 		Messages:    list.Messages,
@@ -512,44 +422,6 @@ func (h *Handler) readMessages(ctx context.Context, w http.ResponseWriter, userI
 
 	if publicOnly {
 		list.Messages = filterPublicMessages(list.Messages)
-	}
-
-	// TODO: derive readBatchFiles to separate function
-	fileIDs := make([]int64, 0)
-	for _, message := range list.Messages {
-		if message.FileIDs != nil {
-			// TODO: fileIDs set
-			fileIDs = append(fileIDs, message.FileIDs...)
-		}
-	}
-
-	filesRes, err := h.filesGateway.ReadBatchFiles(ctx, fileIDs, userID)
-	if err != nil {
-		logger.Errorw("failed to read batch files", "user_id", userID, "error", err)
-	} else {
-		for _, message := range list.Messages {
-			var list []*files.File
-			for _, id := range message.FileIDs {
-				file := filesRes[id]
-				if file != nil {
-					if !publicOnly || !file.Private {
-						list = append(list, &files.File{
-							ID:          file.ID,
-							Name:        file.Name,
-							Mime:        file.Mime,
-							Size:        file.Size,
-							Private:     file.Private,
-							Description: file.Description,
-						})
-					}
-				}
-			}
-			message.Files = list
-
-			if message.UserID == users.PublicUserID {
-				message.UserID = 0
-			}
-		}
 	}
 
 	response, err := json.Marshal(messages.ReadResponse{

@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	files "github.com/bd878/gallery/server/files/pkg/model"
-	"github.com/bd878/gallery/server/internal/logger"
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
 	messages "github.com/bd878/gallery/server/messages/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
@@ -67,37 +65,6 @@ func (h *Handler) ReadPathJsonAPI(w http.ResponseWriter, req *http.Request) (err
 		})
 
 		return err
-	}
-
-	fileIDs := make([]int64, 0)
-	for _, message := range list {
-		if message.FileIDs != nil {
-			// TODO: fileIDs set
-			fileIDs = append(fileIDs, message.FileIDs...)
-		}
-	}
-
-	filesRes, err := h.filesGateway.ReadBatchFiles(req.Context(), fileIDs, user.ID)
-	if err != nil {
-		logger.Errorw("failed to read batch files", "user_id", user.ID, "error", err)
-	} else {
-		for _, message := range list {
-			var list []*files.File
-			for _, id := range message.FileIDs {
-				file := filesRes[id]
-				if file != nil {
-					list = append(list, &files.File{
-						ID:   file.ID,
-						Name: file.Name,
-					})
-				}
-			}
-			message.Files = list
-
-			if message.UserID == users.PublicUserID {
-				message.UserID = 0
-			}
-		}
 	}
 
 	response, err := json.Marshal(messages.ReadPathResponse{

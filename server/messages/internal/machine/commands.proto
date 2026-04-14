@@ -45,11 +45,6 @@ message PrivateCommand {
 	string  updated_at = 3;
 }
 
-message DeleteFileCommand {
-	int64  id         = 1;
-	int64  user_id    = 3;
-}
-
 message AppendTranslationCommand {
 	int64  message_id = 1;
 	string lang = 2;

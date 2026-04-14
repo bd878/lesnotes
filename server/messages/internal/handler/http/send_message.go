@@ -1,15 +1,10 @@
 package http
 
 import (
-	"bytes"
 	"encoding/json"
-	"io"
 	"net/http"
-	"path/filepath"
 	"strconv"
 
-	files "github.com/bd878/gallery/server/files/pkg/model"
-	"github.com/bd878/gallery/server/internal/logger"
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
 	"github.com/bd878/gallery/server/internal/utils"
 	messages "github.com/bd878/gallery/server/messages/pkg/model"
@@ -21,7 +16,7 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) (err err
 	var (
 		threadID         int64
 		fileIDs          []int64
-		private, hasFile bool
+		private          bool
 	)
 
 	if err = req.ParseMultipartForm(50 << 20); /* 50 MB */ err != nil {
@@ -119,11 +114,7 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) (err err
 		private = false
 	}
 
-	if _, ok := req.MultipartForm.File["file"]; ok {
-		hasFile = true
-	}
-
-	if fileIDs == nil && !hasFile && text == "" && title == "" {
+	if fileIDs == nil && text == "" && title == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
@@ -134,61 +125,6 @@ func (h *Handler) SendMessage(w http.ResponseWriter, req *http.Request) (err err
 		})
 
 		return
-	}
-
-	if fileIDs != nil && hasFile {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status: "error",
-			Error: &server.ErrorCode{
-				Code:    server.CodeWrongFormat,
-				Explain: "should be either file_id or file, not both",
-			},
-		})
-
-		return nil
-	}
-
-	// TODO: move file saving logic in controller
-	if hasFile {
-		f, fh, err := req.FormFile("file")
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(server.ServerResponse{
-				Status: "error",
-				Error: &server.ErrorCode{
-					Code:    messages.CodeNoFile,
-					Explain: "cannot read file",
-				},
-			})
-
-			return err
-		}
-
-		fileName := filepath.Base(fh.Filename)
-
-		var buf bytes.Buffer
-		io.CopyN(&buf, f, 512)
-		mime := http.DetectContentType(buf.Bytes())
-		f.Seek(0, io.SeekStart)
-
-		id := int64(utils.RandomID())
-
-		err = h.filesGateway.SaveFile(req.Context(), f, id, user.ID, fileName, private, mime)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(server.ServerResponse{
-				Status: "error",
-				Error: &server.ErrorCode{
-					Code:    messages.CodeSaveFileFailed,
-					Explain: "cannot save file",
-				},
-			})
-
-			return err
-		}
-
-		fileIDs = append(fileIDs, id)
 	}
 
 	id := utils.RandomID()
@@ -211,21 +147,6 @@ func (h *Handler) saveMessage(w http.ResponseWriter, req *http.Request, id int64
 
 		return err
 	}
-
-	var list []*files.File
-	for _, id := range message.FileIDs {
-		file, err := h.filesGateway.ReadFile(req.Context(), message.UserID, id)
-		if err != nil {
-			logger.Errorw("failed to read file for a message", "user_id", message.UserID, "file_id", id, "message_id", message.ID)
-			continue
-		}
-
-		list = append(list, &files.File{
-			Name: file.Name,
-			ID:   file.ID,
-		})
-	}
-	message.Files = list
 
 	// TODO: load a user to message by UserID
 

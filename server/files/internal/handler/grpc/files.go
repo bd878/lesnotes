@@ -19,6 +19,7 @@ type FilesController interface {
 	PublishFiles(ctx context.Context, userID int64, ids []int64) (err error)
 	PrivateFiles(ctx context.Context, userID int64, ids []int64) (err error)
 	DeleteFiles(ctx context.Context, userID int64, ids []int64) (err error)
+	ReadMessageFiles(ctx context.Context, id int64, userIDs []int64) (list []*api.File, err error)
 }
 
 type Handler struct {
@@ -195,6 +196,19 @@ func (h *Handler) DeleteFiles(ctx context.Context, req *api.DeleteFilesRequest) 
 	}
 
 	resp = &api.DeleteFilesResponse{}
+
+	return
+}
+
+func (h *Handler) ReadMessageFiles(ctx context.Context, req *api.ReadMessageFilesRequest) (resp *api.ReadMessageFilesResponse, err error) {
+	list, err := h.controller.ReadMessageFiles(ctx, req.Id, req.UserIds)
+	if err != nil {
+		return nil, err
+	}
+
+	resp = &api.ReadMessageFilesResponse{
+		Files: list,
+	}
 
 	return
 }

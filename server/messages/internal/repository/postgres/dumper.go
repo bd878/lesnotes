@@ -16,7 +16,6 @@ import (
 type Dumper struct {
 	pool                  *pgxpool.Pool
 	messagesTableName     string
-	filesTableName        string
 	translationsTableName string
 	commentsTableName     string
 	ctx                   context.Context
@@ -25,12 +24,11 @@ type Dumper struct {
 	wg                    sync.WaitGroup
 }
 
-func NewDumper(pool *pgxpool.Pool, messagesTableName, filesTableName,
+func NewDumper(pool *pgxpool.Pool, messagesTableName,
 	translationsTableName, commentsTableName string) *Dumper {
 	return &Dumper{
 		pool:                  pool,
 		messagesTableName:     messagesTableName,
-		filesTableName:        filesTableName,
 		translationsTableName: translationsTableName,
 		commentsTableName:     commentsTableName,
 	}
@@ -43,8 +41,6 @@ func (r *Dumper) Open(ctx context.Context) (ch chan *api.MessagesSnapshot, err e
 
 	r.wg.Add(1)
 	go r.runMessages()
-	r.wg.Add(1)
-	go r.runFiles()
 	r.wg.Add(1)
 	go r.runTranslations()
 	r.wg.Add(1)
@@ -97,51 +93,6 @@ func (r *Dumper) runMessages() {
 		r.ch <- &api.MessagesSnapshot{
 			Item: &api.MessagesSnapshot_Message{
 				Message: message,
-			},
-		}
-	}
-
-	if err := rows.Err(); err != nil {
-		logger.Errorln(err)
-		r.cancel(err)
-		return
-	}
-}
-
-func (r *Dumper) runFiles() {
-	query := "SELECT file_id, message_id, user_id FROM %s"
-
-	defer r.wg.Done()
-	defer logger.Debugln("files dump finished")
-
-	rows, err := r.pool.Query(r.ctx, r.filesTable(query))
-	if err != nil {
-		logger.Errorln(err)
-		r.cancel(err)
-		return
-	}
-
-	defer rows.Close()
-
-	for rows.Next() {
-		file := &api.FileSnapshotItem{}
-
-		err = rows.Scan(&file.FileId, &file.MessageId, &file.UserId)
-		if err != nil {
-			logger.Errorln(err)
-			r.cancel(err)
-			return
-		}
-
-		select {
-		case <-r.ctx.Done():
-			return
-		default:
-		}
-
-		r.ch <- &api.MessagesSnapshot{
-			Item: &api.MessagesSnapshot_File{
-				File: file,
 			},
 		}
 	}
@@ -271,14 +222,6 @@ func (r *Dumper) Restore(ctx context.Context, snapshot *api.MessagesSnapshot) (e
 
 		return
 
-	case *api.MessagesSnapshot_File:
-
-		query := "INSERT INTO %s(file_id, message_id, user_id) VALUES ($1,$2,$3)"
-
-		_, err = r.pool.Exec(ctx, r.filesTable(query), v.File.FileId, v.File.MessageId, v.File.UserId)
-
-		return
-
 	case *api.MessagesSnapshot_Translation:
 
 		query := "INSERT INTO %s(message_id, lang, text, title, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6)"
@@ -304,10 +247,6 @@ func (r *Dumper) Restore(ctx context.Context, snapshot *api.MessagesSnapshot) (e
 
 func (r Dumper) messagesTable(query string) string {
 	return fmt.Sprintf(query, r.messagesTableName)
-}
-
-func (r Dumper) filesTable(query string) string {
-	return fmt.Sprintf(query, r.filesTableName)
 }
 
 func (r Dumper) translationsTable(query string) string {

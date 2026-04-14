@@ -18,6 +18,7 @@ type FilesRepository interface {
 	GetMetaByName(ctx context.Context, fileName string) (file *api.File, err error)
 	DeleteFiles(ctx context.Context, userID int64, ids []int64) (err error)
 	ReadFile(ctx context.Context, oid int32, writer io.Writer) (err error)
+	ReadBatchFiles(ctx context.Context, ids []int64) (list []*api.File, err error)
 	ListFiles(ctx context.Context, userID int64, limit, offset int32, ascending, private bool) (list []*api.File, isLastPage bool, err error)
 	PublishFiles(ctx context.Context, userID int64, ids []int64, updatedAt string) (err error)
 	PrivateFiles(ctx context.Context, userID int64, ids []int64, updatedAt string) (err error)
@@ -74,6 +75,17 @@ func (a *Application) UpdateMessageFiles(ctx context.Context, id, userID int64, 
 	a.log.Debugw("update message files", "id", id, "user_id", userID, "file_ids", fileIDs)
 
 	return a.messagesRepo.UpdateMessageFiles(ctx, id, userID, fileIDs)
+}
+
+func (a *Application) ReadMessageFiles(ctx context.Context, id int64, userIDs []int64) (list []*api.File, err error) {
+	a.log.Debugw("read message files", "id", id, "user_ids", userIDs)
+
+	fileIDs, err := a.messagesRepo.ReadMessageFiles(ctx, id, userIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	return a.filesRepo.ReadBatchFiles(ctx, fileIDs)
 }
 
 func (a *Application) PublishMessageFiles(ctx context.Context, userID int64, messageIDs []int64) (err error) {

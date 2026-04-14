@@ -7,7 +7,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/bd878/gallery/server/messages/pkg/model"
+	"github.com/bd878/gallery/server/api"
 )
 
 type TranslationsRepository struct {
@@ -43,13 +43,13 @@ func (r *TranslationsRepository) DeleteTranslation(ctx context.Context, messageI
 	return
 }
 
-func (r *TranslationsRepository) ReadTranslation(ctx context.Context, messageID int64, lang string) (translation *model.Translation, err error) {
+func (r *TranslationsRepository) ReadTranslation(ctx context.Context, messageID int64, lang string) (translation *api.Translation, err error) {
 	const query = "SELECT title, text, created_at, updated_at FROM %s WHERE message_id = $1 AND lang = $2"
 
 	var createdAt, updatedAt time.Time
 
-	translation = &model.Translation{
-		MessageID: messageID,
+	translation = &api.Translation{
+		MessageId: messageID,
 		Lang:      lang,
 	}
 
@@ -64,7 +64,7 @@ func (r *TranslationsRepository) ReadTranslation(ctx context.Context, messageID 
 	return
 }
 
-func (r *TranslationsRepository) ListTranslations(ctx context.Context, messageID int64) (translations []*model.Translation, err error) {
+func (r *TranslationsRepository) ListTranslations(ctx context.Context, messageID int64) (translations []*api.Translation, err error) {
 	const query = "SELECT lang, title, text, created_at, updated_at FROM %s WHERE message_id = $1"
 
 	rows, err := r.pool.Query(ctx, r.table(query), messageID)
@@ -73,10 +73,10 @@ func (r *TranslationsRepository) ListTranslations(ctx context.Context, messageID
 		return nil, err
 	}
 
-	translations = make([]*model.Translation, 0)
+	translations = make([]*api.Translation, 0)
 	for rows.Next() {
-		translation := &model.Translation{
-			MessageID: messageID,
+		translation := &api.Translation{
+			MessageId: messageID,
 		}
 
 		var createdAt, updatedAt time.Time
@@ -97,7 +97,7 @@ func (r *TranslationsRepository) ListTranslations(ctx context.Context, messageID
 	return
 }
 
-func (r *TranslationsRepository) ReadMessageTranslations(ctx context.Context, messageID int64) (previews []*model.TranslationPreview, err error) {
+func (r *TranslationsRepository) ReadMessageTranslations(ctx context.Context, messageID int64) (previews []*api.TranslationPreview, err error) {
 	const query = "SELECT lang, title, created_at, updated_at FROM %s WHERE message_id = $1"
 
 	rows, err := r.pool.Query(ctx, r.table(query), messageID)
@@ -106,10 +106,10 @@ func (r *TranslationsRepository) ReadMessageTranslations(ctx context.Context, me
 		return nil, err
 	}
 
-	previews = make([]*model.TranslationPreview, 0)
+	previews = make([]*api.TranslationPreview, 0)
 	for rows.Next() {
-		preview := &model.TranslationPreview{
-			MessageID: messageID,
+		preview := &api.TranslationPreview{
+			MessageId: messageID,
 		}
 
 		var createdAt, updatedAt time.Time

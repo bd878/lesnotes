@@ -14,7 +14,6 @@ import (
 	httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
 	"github.com/bd878/gallery/server/internal/waiter"
 	controller "github.com/bd878/gallery/server/messages/internal/controller/service"
-	filesgateway "github.com/bd878/gallery/server/messages/internal/gateway/files/grpc"
 	threadsgateway "github.com/bd878/gallery/server/messages/internal/gateway/threads/grpc"
 	httphandler "github.com/bd878/gallery/server/messages/internal/handler/http"
 	usermodel "github.com/bd878/gallery/server/users/pkg/model"
@@ -24,7 +23,6 @@ type Config struct {
 	Addr                string
 	RpcAddr             string
 	UsersServiceAddr    string
-	FilesServiceAddr    string
 	SessionsServiceAddr string
 	ThreadsServiceAddr  string
 }
@@ -40,7 +38,6 @@ func New(cfg Config) *Server {
 	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log)
 
 	usersGateway := usersgateway.New(cfg.UsersServiceAddr)
-	filesGateway := filesgateway.New(cfg.FilesServiceAddr)
 	sessionsGateway := sessionsgateway.New(cfg.SessionsServiceAddr)
 	threadsGateway := threadsgateway.New(cfg.ThreadsServiceAddr)
 	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
@@ -49,7 +46,7 @@ func New(cfg Config) *Server {
 	translationsController := controller.NewTranslationsController(controller.TranslationsConfig{RpcAddr: cfg.RpcAddr})
 	commentsController := controller.NewCommentsController(controller.CommentsConfig{RpcAddr: cfg.RpcAddr})
 
-	handler := httphandler.New(messagesController, translationsController, commentsController, filesGateway)
+	handler := httphandler.New(messagesController, translationsController, commentsController)
 
 	mux.Handle("/messages/v1/send", middleware.Build(handler.SendMessage))
 	mux.Handle("/messages/v1/read_path", middleware.Build(handler.ReadPath))

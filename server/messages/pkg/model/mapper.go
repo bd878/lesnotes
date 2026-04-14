@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/bd878/gallery/server/api"
+	files "github.com/bd878/gallery/server/files/pkg/model"
 )
 
 func MessageFromProto(proto *api.Message) *Message {
@@ -13,6 +14,7 @@ func MessageFromProto(proto *api.Message) *Message {
 		Text:         proto.Text,
 		Title:        proto.Title,
 		FileIDs:      proto.FileIds,
+		Files:        files.MapFilesFromProto(files.FileFromProto, proto.Files),
 		Private:      proto.Private,
 		Name:         proto.Name,
 		Translations: MapTranslationPreviewsFromProto(TranslationPreviewFromProto, proto.Translations),
@@ -28,6 +30,7 @@ func MessageToProto(msg *Message) *api.Message {
 		Text:         msg.Text,
 		Title:        msg.Title,
 		FileIds:      msg.FileIDs,
+		Files:        files.MapFilesToProto(files.FileToProto, msg.Files),
 		Private:      msg.Private,
 		Name:         msg.Name,
 		Translations: MapTranslationPreviewsToProto(TranslationPreviewToProto, msg.Translations),

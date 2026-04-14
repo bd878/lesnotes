@@ -4,15 +4,14 @@ import (
 	"context"
 
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/messages/pkg/model"
 )
 
 type TranslationsController interface {
 	SaveTranslation(ctx context.Context, userID, messageID int64, lang, title, text string) (err error)
 	UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string) (err error)
 	DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error)
-	ReadTranslation(ctx context.Context, userID, messageID int64, lang string, name string) (result *model.Translation, err error)
-	ListTranslations(ctx context.Context, userID, messageID int64, name string) (result []*model.Translation, err error)
+	ReadTranslation(ctx context.Context, userID, messageID int64, lang string, name string) (result *api.Translation, err error)
+	ListTranslations(ctx context.Context, userID, messageID int64, name string) (result []*api.Translation, err error)
 }
 
 type TranslationsHandler struct {
@@ -61,8 +60,9 @@ func (h *TranslationsHandler) ReadTranslation(ctx context.Context, req *api.Read
 		return nil, err
 	}
 
-	resp = &api.ReadTranslationResponse{}
-	resp.Translation = model.TranslationToProto(translation)
+	resp = &api.ReadTranslationResponse{
+		Translation: translation,
+	}
 
 	return
 }
@@ -73,8 +73,7 @@ func (h *TranslationsHandler) ListTranslations(ctx context.Context, req *api.Lis
 		return nil, err
 	}
 
-	resp = &api.ListTranslationsResponse{}
-	resp.Translations = model.MapTranslationsToProto(model.TranslationToProto, translations)
+	resp = &api.ListTranslationsResponse{Translations: translations}
 
 	return
 }

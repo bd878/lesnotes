@@ -2,14 +2,12 @@ package grpc
 
 import (
 	"context"
-	"io"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/files/pkg/model"
 	"github.com/bd878/gallery/server/internal/logger"
 )
 
@@ -25,14 +23,15 @@ func New(filesAddr string) *Gateway {
 	return g
 }
 
-func (g *Gateway) setupConnection() {
+func (g *Gateway) setupConnection() (err error) {
 	conn, err := grpc.NewClient(g.filesAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	g.conn = conn
 	g.client = api.NewFilesClient(conn)
+	return nil
 }
 
 func (g *Gateway) isConnFailed() bool {
@@ -44,91 +43,25 @@ func (g *Gateway) isConnFailed() bool {
 	return false
 }
 
-func (g *Gateway) ReadBatchFiles(ctx context.Context, fileIDs []int64, userID int64) (result map[int64]*model.File, err error) {
+func (g *Gateway) ReadMessageFiles(ctx context.Context, messageID int64, userIDs []int64) (list []*api.File, err error) {
 	if g.isConnFailed() {
 		logger.Info("conn failed, setup new connection")
-		g.setupConnection()
+		if err := g.setupConnection(); err != nil {
+			return nil, err
+		}
 	}
 
-	logger.Debugw("read batch files", "file_ids", fileIDs, "user_id", userID)
+	logger.Debugw("read message files", "message_id", messageID, "user_ids", userIDs)
 
-	batch, err := g.client.ReadBatchFiles(ctx, &api.ReadBatchFilesRequest{
-		UserId: userID,
-		Ids:    fileIDs,
+	resp, err := g.client.ReadMessageFiles(ctx, &api.ReadMessageFilesRequest{
+		Id: messageID,
+		UserIds: userIDs,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	result = model.MapFilesDictFromProto(model.FileFromProto, batch.Files)
-
-	return
-}
-
-func (g *Gateway) ReadFile(ctx context.Context, userID, fileID int64) (resp *model.File, err error) {
-	logger.Debugw("read file", "user_id", userID, "file_id", fileID)
-
-	file, err := g.client.ReadFile(ctx, &api.ReadFileRequest{
-		Id:     fileID,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	resp = model.FileFromProto(file)
-
-	return
-}
-
-// copied from files/internal/controller/service
-func (g *Gateway) SaveFile(ctx context.Context, fileStream io.Reader, id, userID int64, fileName string, private bool, mime string) (err error) {
-	if g.isConnFailed() {
-		g.setupConnection()
-	}
-
-	logger.Debugw("save file", "id", id, "user_id", userID, "file_name", fileName, "private", private, "mime", mime)
-
-	stream, err := g.client.SaveFileStream(ctx)
-	if err != nil {
-		return err
-	}
-
-	err = stream.Send(&api.FileData{
-		Data: &api.FileData_File{
-			File: &api.File{
-				Id:      id,
-				Private: private,
-				Mime:    mime,
-				Name:    fileName,
-				UserId:  userID,
-			},
-		},
-	})
-	if err != nil {
-		return
-	}
-
-	buffer := make([]byte, 1024)
-	for {
-		n, err := fileStream.Read(buffer)
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return err
-		}
-
-		err = stream.Send(&api.FileData{
-			Data: &api.FileData_Chunk{
-				Chunk: buffer[:n],
-			},
-		})
-		if err != nil {
-			return err
-		}
-	}
-
-	_, err = stream.CloseAndRecv()
+	list = resp.Files
 
 	return
 }

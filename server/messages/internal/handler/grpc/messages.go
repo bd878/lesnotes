@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/messages/pkg/model"
 )
 
 type MessagesController interface {
@@ -14,9 +13,9 @@ type MessagesController interface {
 	DeleteUserMessages(ctx context.Context, userID int64) (err error)
 	PublishMessages(ctx context.Context, ids []int64, userID int64) (err error)
 	PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error)
-	ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *model.Message, err error)
-	ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (messages []*model.Message, isLastPage bool, err error)
-	ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*model.Message, err error)
+	ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *api.Message, err error)
+	ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (messages []*api.Message, isLastPage bool, err error)
+	ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*api.Message, err error)
 	GetServers(ctx context.Context) (servers []*api.Server, err error)
 }
 
@@ -87,7 +86,7 @@ func (h *MessagesHandler) ReadBatchMessages(ctx context.Context, req *api.ReadBa
 	}
 
 	resp = &api.ReadBatchMessagesResponse{
-		Messages: model.MapMessagesToProto(model.MessageToProto, list),
+		Messages: list,
 	}
 
 	return
@@ -100,7 +99,7 @@ func (h *MessagesHandler) ReadMessages(ctx context.Context, req *api.ReadMessage
 	}
 
 	resp = &api.ReadMessagesResponse{
-		Messages:   model.MapMessagesToProto(model.MessageToProto, list),
+		Messages:   list,
 		IsLastPage: isLastPage,
 	}
 
@@ -121,12 +120,5 @@ func (h *MessagesHandler) GetServers(ctx context.Context, _ *api.GetServersReque
 }
 
 func (h *MessagesHandler) ReadMessage(ctx context.Context, req *api.ReadMessageRequest) (resp *api.Message, err error) {
-	message, err := h.controller.ReadMessage(ctx, req.Id, req.Name, req.UserIds)
-	if err != nil {
-		return nil, err
-	}
-
-	resp = model.MessageToProto(message)
-
-	return
+	return h.controller.ReadMessage(ctx, req.Id, req.Name, req.UserIds)
 }

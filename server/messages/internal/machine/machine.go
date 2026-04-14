@@ -18,13 +18,6 @@ type MessagesRepository interface {
 	DeleteUserMessages(ctx context.Context, userID int64) (err error)
 }
 
-type FilesRepository interface {
-	DeleteFile(ctx context.Context, id, userID int64) (err error)
-	SaveMessageFiles(ctx context.Context, messageID, userID int64, fileIDs []int64) (err error)
-	UpdateMessageFiles(ctx context.Context, messageID, userID int64, fileIDs []int64) (err error)
-	DeleteMessage(ctx context.Context, messageID, userID int64) (err error)
-}
-
 type TranslationsRepository interface {
 	SaveTranslation(ctx context.Context, messageID int64, lang, text, title, createdAt, updatedAt string) (err error)
 	UpdateTranslation(ctx context.Context, messageID int64, lang string, text, title *string, updatedAt string) (err error)
@@ -52,18 +45,16 @@ type Machine struct {
 	dumper           Dumper
 	messagesRepo     MessagesRepository
 	commentsRepo     CommentsRepository
-	filesRepo        FilesRepository
 	translationsRepo TranslationsRepository
 }
 
-func New(messagesRepo MessagesRepository, filesRepo FilesRepository, translationsRepo TranslationsRepository,
+func New(messagesRepo MessagesRepository, translationsRepo TranslationsRepository,
 	commentsRepo CommentsRepository, dumper Dumper, log *logger.Logger) *Machine {
 	return &Machine{
 		log:              log,
 		dumper:           dumper,
 		commentsRepo:     commentsRepo,
 		messagesRepo:     messagesRepo,
-		filesRepo:        filesRepo,
 		translationsRepo: translationsRepo,
 	}
 }
@@ -84,8 +75,6 @@ func (f *Machine) Apply(record *raft.Log) interface{} {
 		return f.applyPublish(buf[1:])
 	case PrivateRequest:
 		return f.applyPrivate(buf[1:])
-	case DeleteFileRequest:
-		return f.applyDeleteFile(buf[1:])
 	case AppendTranslationRequest:
 		return f.applyAppendTranslation(buf[1:])
 	case UpdateTranslationRequest:
@@ -111,24 +100,14 @@ func (f *Machine) applyAppend(raw []byte) interface{} {
 	proto.Unmarshal(raw, &cmd)
 
 	// Put does not put message with same id twice
-	err := f.messagesRepo.Create(context.TODO(), cmd.Id, cmd.Text, cmd.Title, cmd.UserId, cmd.Private, cmd.Name, cmd.CreatedAt, cmd.UpdatedAt)
-	if err != nil {
-		return err
-	}
-
-	return f.filesRepo.SaveMessageFiles(context.TODO(), cmd.Id, cmd.UserId, cmd.FileIds)
+	return f.messagesRepo.Create(context.TODO(), cmd.Id, cmd.Text, cmd.Title, cmd.UserId, cmd.Private, cmd.Name, cmd.CreatedAt, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyUpdate(raw []byte) interface{} {
 	var cmd UpdateCommand
 	proto.Unmarshal(raw, &cmd)
 
-	err := f.messagesRepo.Update(context.TODO(), cmd.UserId, cmd.Id, cmd.Text, cmd.Title, cmd.Name, cmd.UpdatedAt)
-	if err != nil {
-		return err
-	}
-
-	return f.filesRepo.UpdateMessageFiles(context.TODO(), cmd.Id, cmd.UserId, cmd.FileIds)
+	return f.messagesRepo.Update(context.TODO(), cmd.UserId, cmd.Id, cmd.Text, cmd.Title, cmd.Name, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyDeleteUserMessages(raw []byte) interface{} {
@@ -143,11 +122,6 @@ func (f *Machine) applyDelete(raw []byte) interface{} {
 	proto.Unmarshal(raw, &cmd)
 
 	err := f.messagesRepo.DeleteMessage(context.TODO(), cmd.UserId, cmd.Id)
-	if err != nil {
-		return err
-	}
-
-	err = f.filesRepo.DeleteMessage(context.TODO(), cmd.Id, cmd.UserId)
 	if err != nil {
 		return err
 	}
@@ -172,13 +146,6 @@ func (f *Machine) applyPrivate(raw []byte) interface{} {
 	proto.Unmarshal(raw, &cmd)
 
 	return f.messagesRepo.Private(context.TODO(), cmd.UserId, cmd.Ids, cmd.UpdatedAt)
-}
-
-func (f *Machine) applyDeleteFile(raw []byte) interface{} {
-	var cmd DeleteFileCommand
-	proto.Unmarshal(raw, &cmd)
-
-	return f.filesRepo.DeleteFile(context.TODO(), cmd.Id, cmd.UserId)
 }
 
 func (f *Machine) applyAppendTranslation(raw []byte) interface{} {

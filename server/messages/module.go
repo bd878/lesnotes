@@ -20,17 +20,18 @@ import (
 	"github.com/bd878/gallery/server/messages/internal/handler/stream"
 	"github.com/bd878/gallery/server/messages/internal/machine"
 	"github.com/bd878/gallery/server/messages/internal/repository/postgres"
+	filesgateway "github.com/bd878/gallery/server/messages/internal/gateway/files/grpc"
 )
 
 func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error) {
 	messagesRepo := postgres.NewMessagesRepository(svc.Pool(), "messages.messages")
-	filesRepo := postgres.NewFilesRepository(svc.Pool(), "messages.files")
 	translationsRepo := postgres.NewTranslationsRepository(svc.Pool(), "messages.translations")
 	commentsRepo := postgres.NewCommentsRepository(svc.Pool(), "messages.comments")
-	dumper := postgres.NewDumper(svc.Pool(), "messages.messages", "messages.files",
-		"messages.translations", "messages.comments")
+	dumper := postgres.NewDumper(svc.Pool(), "messages.messages", "messages.translations", "messages.comments")
 
-	consensus, err := setupRaft(svc, cfg, messagesRepo, filesRepo, translationsRepo, commentsRepo, dumper)
+	filesGateway := filesgateway.New(cfg.FilesServiceAddr)
+
+	consensus, err := setupRaft(svc, cfg, messagesRepo, translationsRepo, commentsRepo, dumper)
 	if err != nil {
 		return err
 	}
@@ -42,10 +43,8 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
 	stream.RegisterDomainEventHandlers(dispatcher, stream.NewDomainEventHandlers(nats.NewStream(svc.Nats())))
 
-	controller := application.New(consensus, dispatcher, messagesRepo, filesRepo, translationsRepo, commentsRepo, svc.Logger())
-
-	stream.RegisterIntegrationEventHandlers(nats.NewStream(svc.Nats()),
-		stream.NewIntegrationEventHandlers(controller))
+	controller := application.New(consensus, dispatcher, messagesRepo,
+		translationsRepo, commentsRepo, filesGateway, svc.Logger())
 
 	messagesHandler := grpc.NewMessagesHandler(controller)
 	translationsHandler := grpc.NewTranslationsHandler(controller)
@@ -96,9 +95,9 @@ func setupSerf(svc system.Service, cfg config.Config, handler serf.Handler, logg
 	return nil
 }
 
-func setupRaft(svc system.Service, cfg config.Config, messagesRepo *postgres.MessagesRepository, filesRepo *postgres.FilesRepository,
+func setupRaft(svc system.Service, cfg config.Config, messagesRepo *postgres.MessagesRepository,
 	translationsRepo *postgres.TranslationsRepository, commentsRepo *postgres.CommentsRepository, dumper *postgres.Dumper) (*raft.Distributed, error) {
-	fsm := machine.New(messagesRepo, filesRepo, translationsRepo, commentsRepo, dumper, svc.Logger())
+	fsm := machine.New(messagesRepo, translationsRepo, commentsRepo, dumper, svc.Logger())
 
 	consensus, err := raft.New(raft.Config{
 		Bootstrap:    cfg.RaftBootstrap,

@@ -40,7 +40,6 @@ func main() {
 		Addr:                cfg.HttpAddr,
 		RpcAddr:             cfg.RpcAddr,
 		UsersServiceAddr:    cfg.UsersServiceAddr,
-		FilesServiceAddr:    cfg.FilesServiceAddr,
 		SessionsServiceAddr: cfg.SessionsServiceAddr,
 		ThreadsServiceAddr:  cfg.ThreadsServiceAddr,
 	})

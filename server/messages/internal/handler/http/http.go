@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 
-	files "github.com/bd878/gallery/server/files/pkg/model"
 	messages "github.com/bd878/gallery/server/messages/pkg/model"
 )
 
@@ -40,27 +39,18 @@ type CommentsController interface {
 	ListComments(ctx context.Context, userID, messageID *int64, name *string, limit, offset int32, asc bool) (list *messages.CommentsList, err error)
 }
 
-// TODO: move on controller/service level
-type FilesGateway interface {
-	ReadBatchFiles(ctx context.Context, fileIDs []int64, userID int64) (files map[int64]*files.File, err error)
-	ReadFile(ctx context.Context, userID, fileID int64) (file *files.File, err error)
-	SaveFile(ctx context.Context, stream io.Reader, id, userID int64, name string, private bool, mime string) (err error)
-}
-
 type Handler struct {
 	controller             MessagesController
 	translationsController TranslationsController
 	commentsController     CommentsController
-	filesGateway           FilesGateway
 }
 
 func New(messagesController MessagesController, translationsController TranslationsController,
-	commentsController CommentsController, filesGateway FilesGateway) *Handler {
+	commentsController CommentsController) *Handler {
 	return &Handler{
 		controller:             messagesController,
 		commentsController:     commentsController,
 		translationsController: translationsController,
-		filesGateway:           filesGateway,
 	}
 }
 

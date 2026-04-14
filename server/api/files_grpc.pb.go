@@ -25,6 +25,7 @@ type FilesClient interface {
 	PublishFiles(ctx context.Context, in *PublishFilesRequest, opts ...grpc.CallOption) (*PublishFilesResponse, error)
 	PrivateFiles(ctx context.Context, in *PrivateFilesRequest, opts ...grpc.CallOption) (*PrivateFilesResponse, error)
 	DeleteFiles(ctx context.Context, in *DeleteFilesRequest, opts ...grpc.CallOption) (*DeleteFilesResponse, error)
+	ReadMessageFiles(ctx context.Context, in *ReadMessageFilesRequest, opts ...grpc.CallOption) (*ReadMessageFilesResponse, error)
 }
 
 type filesClient struct {
@@ -155,6 +156,15 @@ func (c *filesClient) DeleteFiles(ctx context.Context, in *DeleteFilesRequest, o
 	return out, nil
 }
 
+func (c *filesClient) ReadMessageFiles(ctx context.Context, in *ReadMessageFilesRequest, opts ...grpc.CallOption) (*ReadMessageFilesResponse, error) {
+	out := new(ReadMessageFilesResponse)
+	err := c.cc.Invoke(ctx, "/files.v1.Files/ReadMessageFiles", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FilesServer is the server API for Files service.
 // All implementations must embed UnimplementedFilesServer
 // for forward compatibility
@@ -167,6 +177,7 @@ type FilesServer interface {
 	PublishFiles(context.Context, *PublishFilesRequest) (*PublishFilesResponse, error)
 	PrivateFiles(context.Context, *PrivateFilesRequest) (*PrivateFilesResponse, error)
 	DeleteFiles(context.Context, *DeleteFilesRequest) (*DeleteFilesResponse, error)
+	ReadMessageFiles(context.Context, *ReadMessageFilesRequest) (*ReadMessageFilesResponse, error)
 	mustEmbedUnimplementedFilesServer()
 }
 
@@ -197,6 +208,9 @@ func (UnimplementedFilesServer) PrivateFiles(context.Context, *PrivateFilesReque
 }
 func (UnimplementedFilesServer) DeleteFiles(context.Context, *DeleteFilesRequest) (*DeleteFilesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteFiles not implemented")
+}
+func (UnimplementedFilesServer) ReadMessageFiles(context.Context, *ReadMessageFilesRequest) (*ReadMessageFilesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReadMessageFiles not implemented")
 }
 func (UnimplementedFilesServer) mustEmbedUnimplementedFilesServer() {}
 
@@ -366,6 +380,24 @@ func _Files_DeleteFiles_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Files_ReadMessageFiles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReadMessageFilesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FilesServer).ReadMessageFiles(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/files.v1.Files/ReadMessageFiles",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FilesServer).ReadMessageFiles(ctx, req.(*ReadMessageFilesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Files_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "files.v1.Files",
 	HandlerType: (*FilesServer)(nil),
@@ -393,6 +425,10 @@ var _Files_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteFiles",
 			Handler:    _Files_DeleteFiles_Handler,
+		},
+		{
+			MethodName: "ReadMessageFiles",
+			Handler:    _Files_ReadMessageFiles_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
