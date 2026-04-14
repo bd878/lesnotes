@@ -115,6 +115,7 @@ func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingM
 	case threadsevents.ThreadPrivatedEvent:
 		return h.handleThreadPrivated(ctx, msg)
 
+	// TODO: file events are changed
 	case filesevents.FileUploadedEvent:
 		return h.handleFileUploaded(ctx, msg)
 	case filesevents.FileDeletedEvent:

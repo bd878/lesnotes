@@ -1,4 +1,4 @@
-package repository
+package postgres
 
 import (
 	"fmt"
@@ -11,23 +11,23 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/files/pkg/model"
 )
 
-type Repository struct {
+type FilesRepository struct {
 	tableName  string
 	pool      *pgxpool.Pool
 }
 
-func New(pool *pgxpool.Pool) *Repository {
-	return &Repository{
-		tableName: "files.files",
+func NewFilesRepository(pool *pgxpool.Pool, tableName string) *FilesRepository {
+	return &FilesRepository{
+		tableName: tableName,
 		pool:      pool,
 	}
 }
 
-func (r *Repository) SaveFile(ctx context.Context, reader io.Reader, id, userID int64, private bool, name, description, mime, createdAt, updatedAt string) (size int64, err error) {
+func (r *FilesRepository) SaveFile(ctx context.Context, reader io.Reader, id, userID int64, private bool, name, description, mime, createdAt, updatedAt string) (size int64, err error) {
 	const query = "INSERT INTO %s(id, owner_id, name, description, private, oid, mime, size, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
 	const createdAtQuery = "SELECT created_at FROM %s WHERE id = $1"
 
@@ -74,16 +74,16 @@ func (r *Repository) SaveFile(ctx context.Context, reader io.Reader, id, userID 
 	return
 }
 
-func (r *Repository) GetMetaByID(ctx context.Context, id int64) (file *model.File, err error) {
+func (r *FilesRepository) GetMetaByID(ctx context.Context, id int64) (file *api.File, err error) {
 	query := "SELECT owner_id, name, description, private, oid, mime, size, created_at, updated_at FROM %s WHERE id = $1"
 
-	file = &model.File{
-		ID:   id,
+	file = &api.File{
+		Id:   id,
 	}
 
 	var createdAt, updatedAt *time.Time
-	err = r.pool.QueryRow(ctx, r.table(query), id).Scan(&file.UserID, &file.Name, &file.Description,
-		&file.Private, &file.OID, &file.Mime, &file.Size, &createdAt, &updatedAt)
+	err = r.pool.QueryRow(ctx, r.table(query), id).Scan(&file.UserId, &file.Name, &file.Description,
+		&file.Private, &file.Oid, &file.Mime, &file.Size, &createdAt, &updatedAt)
 	if err != nil {
 		return
 	}
@@ -94,16 +94,16 @@ func (r *Repository) GetMetaByID(ctx context.Context, id int64) (file *model.Fil
 	return
 }
 
-func (r *Repository) GetMetaByName(ctx context.Context, fileName string) (file *model.File, err error) {
+func (r *FilesRepository) GetMetaByName(ctx context.Context, fileName string) (file *api.File, err error) {
 	query := "SELECT owner_id, id, description, private, oid, mime, size, created_at, updated_at FROM %s WHERE name = $1"
 
-	file = &model.File{
+	file = &api.File{
 		Name:  fileName,
 	}
 
 	var createdAt, updatedAt *time.Time
-	err = r.pool.QueryRow(ctx, r.table(query), fileName).Scan(&file.UserID, &file.ID,
-		&file.Description, &file.Private, &file.OID, &file.Mime, &file.Size, &createdAt, &updatedAt)
+	err = r.pool.QueryRow(ctx, r.table(query), fileName).Scan(&file.UserId, &file.Id,
+		&file.Description, &file.Private, &file.Oid, &file.Mime, &file.Size, &createdAt, &updatedAt)
 	if err != nil {
 		return
 	}
@@ -115,7 +115,7 @@ func (r *Repository) GetMetaByName(ctx context.Context, fileName string) (file *
 }
 
 
-func (r *Repository) ListFiles(ctx context.Context, userID int64, limit, offset int32, ascending, private bool) (list []*model.File, isLastPage bool, err error) {
+func (r *FilesRepository) ListFiles(ctx context.Context, userID int64, limit, offset int32, ascending, private bool) (list []*api.File, isLastPage bool, err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -151,15 +151,15 @@ func (r *Repository) ListFiles(ctx context.Context, userID int64, limit, offset 
 		return
 	}
 
-	list = make([]*model.File, 0)
+	list = make([]*api.File, 0)
 	for rows.Next() {
 		var createdAt, updatedAt time.Time
 
-		file := &model.File{
-			UserID:   userID,
+		file := &api.File{
+			UserId:   userID,
 		}
 
-		err = rows.Scan(&file.ID, &file.Name, &file.Description, &file.Private, &file.Mime, &file.Size, &createdAt, &updatedAt)
+		err = rows.Scan(&file.Id, &file.Name, &file.Description, &file.Private, &file.Mime, &file.Size, &createdAt, &updatedAt)
 		if err != nil {
 			return
 		}
@@ -191,7 +191,7 @@ func (r *Repository) ListFiles(ctx context.Context, userID int64, limit, offset 
 	return
 }
 
-func (r *Repository) ReadFile(ctx context.Context, oid int32, writer io.Writer) (err error) {
+func (r *FilesRepository) ReadFile(ctx context.Context, oid int32, writer io.Writer) (err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -219,14 +219,11 @@ func (r *Repository) ReadFile(ctx context.Context, oid int32, writer io.Writer) 
 	}
 
 	_, err = io.Copy(writer, object)
-	if err != nil {
-		return err
-	}
 
 	return
 }
 
-func (r *Repository) DeleteFile(ctx context.Context, ownerID, id int64) (err error) {
+func (r *FilesRepository) DeleteFiles(ctx context.Context, ownerID int64, ids []int64) (err error) {
 	const query = "SELECT oid FROM %s WHERE owner_id = $1 AND id = $2"
 	const deleteQuery = "DELETE FROM %s WHERE owner_id = $1 AND id = $2"
 
@@ -245,7 +242,7 @@ func (r *Repository) DeleteFile(ctx context.Context, ownerID, id int64) (err err
 			if errors.Is(err, pgx.ErrNoRows) {
 				return
 			} else {
-				fmt.Fprintf(os.Stderr, "[DeleteFile]: rollback with error: %v\n", err)
+				fmt.Fprintf(os.Stderr, "[DeleteFiles]: rollback with error: %v\n", err)
 				err = tx.Rollback(ctx)
 			}
 		default:
@@ -253,42 +250,54 @@ func (r *Repository) DeleteFile(ctx context.Context, ownerID, id int64) (err err
 		}
 	}()
 
-	var oid int
-	err = tx.QueryRow(ctx, r.table(query), ownerID, id).Scan(&oid)
-	if err != nil {
-		return
-	}
+	for _, id := range ids {
+		var oid int
+		err = tx.QueryRow(ctx, r.table(query), ownerID, id).Scan(&oid)
+		if err != nil {
+			return
+		}
 
-	lb := tx.LargeObjects()
-	err = lb.Unlink(ctx, uint32(oid))
-	if err != nil {
-		return
-	}
+		lb := tx.LargeObjects()
+		err = lb.Unlink(ctx, uint32(oid))
+		if err != nil {
+			return
+		}
 
-	result, err := tx.Exec(ctx, r.table(deleteQuery), ownerID, id)
-	if err != nil {
-		return err
-	}
+		result, err := tx.Exec(ctx, r.table(deleteQuery), ownerID, id)
+		if err != nil {
+			return err
+		}
 
-	if result.RowsAffected() != 1 {
-		return fmt.Errorf("no rows owner_id %d id %d\n", ownerID, id)
+		if result.RowsAffected() != 1 {
+			return fmt.Errorf("no rows owner_id %d id %d\n", ownerID, id)
+		}
 	}
 
 	return
 }
 
-func (r *Repository) PrivateFile(ctx context.Context, id, userID int64, updatedAt string) (err error) {
-	_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = true, updated_at = $3 WHERE owner_id = $1 AND id = $2"), userID, id, updatedAt)
+func (r *FilesRepository) PrivateFiles(ctx context.Context, userID int64, ids []int64, updatedAt string) (err error) {
+	for _, id := range ids {
+		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = true, updated_at = $3 WHERE owner_id = $1 AND id = $2"), userID, id, updatedAt)
+		if err != nil {
+			return
+		}
+	}
 
 	return
 }
 
-func (r *Repository) PublishFile(ctx context.Context, id, userID int64, updatedAt string) (err error) {
-	_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = false, updated_at = $3 WHERE owner_id = $1 AND id = $2"), userID, id, updatedAt)
+func (r *FilesRepository) PublishFiles(ctx context.Context, userID int64, ids []int64, updatedAt string) (err error) {
+	for _, id := range ids {
+		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = false, updated_at = $3 WHERE owner_id = $1 AND id = $2"), userID, id, updatedAt)
+		if err != nil {
+			return
+		}
+	}
 
 	return
 }
 
-func (r Repository) table(query string) string {
+func (r FilesRepository) table(query string) string {
 	return fmt.Sprintf(query, r.tableName)
 }

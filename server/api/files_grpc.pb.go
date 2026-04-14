@@ -22,9 +22,9 @@ type FilesClient interface {
 	SaveFileStream(ctx context.Context, opts ...grpc.CallOption) (Files_SaveFileStreamClient, error)
 	ReadFileStream(ctx context.Context, in *ReadFileStreamRequest, opts ...grpc.CallOption) (Files_ReadFileStreamClient, error)
 	ListFiles(ctx context.Context, in *ListFilesRequest, opts ...grpc.CallOption) (*ListFilesResponse, error)
-	PublishFile(ctx context.Context, in *PublishFileRequest, opts ...grpc.CallOption) (*PublishFileResponse, error)
-	PrivateFile(ctx context.Context, in *PrivateFileRequest, opts ...grpc.CallOption) (*PrivateFileResponse, error)
-	DeleteFile(ctx context.Context, in *DeleteFileRequest, opts ...grpc.CallOption) (*DeleteFileResponse, error)
+	PublishFiles(ctx context.Context, in *PublishFilesRequest, opts ...grpc.CallOption) (*PublishFilesResponse, error)
+	PrivateFiles(ctx context.Context, in *PrivateFilesRequest, opts ...grpc.CallOption) (*PrivateFilesResponse, error)
+	DeleteFiles(ctx context.Context, in *DeleteFilesRequest, opts ...grpc.CallOption) (*DeleteFilesResponse, error)
 }
 
 type filesClient struct {
@@ -128,27 +128,27 @@ func (c *filesClient) ListFiles(ctx context.Context, in *ListFilesRequest, opts 
 	return out, nil
 }
 
-func (c *filesClient) PublishFile(ctx context.Context, in *PublishFileRequest, opts ...grpc.CallOption) (*PublishFileResponse, error) {
-	out := new(PublishFileResponse)
-	err := c.cc.Invoke(ctx, "/files.v1.Files/PublishFile", in, out, opts...)
+func (c *filesClient) PublishFiles(ctx context.Context, in *PublishFilesRequest, opts ...grpc.CallOption) (*PublishFilesResponse, error) {
+	out := new(PublishFilesResponse)
+	err := c.cc.Invoke(ctx, "/files.v1.Files/PublishFiles", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *filesClient) PrivateFile(ctx context.Context, in *PrivateFileRequest, opts ...grpc.CallOption) (*PrivateFileResponse, error) {
-	out := new(PrivateFileResponse)
-	err := c.cc.Invoke(ctx, "/files.v1.Files/PrivateFile", in, out, opts...)
+func (c *filesClient) PrivateFiles(ctx context.Context, in *PrivateFilesRequest, opts ...grpc.CallOption) (*PrivateFilesResponse, error) {
+	out := new(PrivateFilesResponse)
+	err := c.cc.Invoke(ctx, "/files.v1.Files/PrivateFiles", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *filesClient) DeleteFile(ctx context.Context, in *DeleteFileRequest, opts ...grpc.CallOption) (*DeleteFileResponse, error) {
-	out := new(DeleteFileResponse)
-	err := c.cc.Invoke(ctx, "/files.v1.Files/DeleteFile", in, out, opts...)
+func (c *filesClient) DeleteFiles(ctx context.Context, in *DeleteFilesRequest, opts ...grpc.CallOption) (*DeleteFilesResponse, error) {
+	out := new(DeleteFilesResponse)
+	err := c.cc.Invoke(ctx, "/files.v1.Files/DeleteFiles", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -164,9 +164,9 @@ type FilesServer interface {
 	SaveFileStream(Files_SaveFileStreamServer) error
 	ReadFileStream(*ReadFileStreamRequest, Files_ReadFileStreamServer) error
 	ListFiles(context.Context, *ListFilesRequest) (*ListFilesResponse, error)
-	PublishFile(context.Context, *PublishFileRequest) (*PublishFileResponse, error)
-	PrivateFile(context.Context, *PrivateFileRequest) (*PrivateFileResponse, error)
-	DeleteFile(context.Context, *DeleteFileRequest) (*DeleteFileResponse, error)
+	PublishFiles(context.Context, *PublishFilesRequest) (*PublishFilesResponse, error)
+	PrivateFiles(context.Context, *PrivateFilesRequest) (*PrivateFilesResponse, error)
+	DeleteFiles(context.Context, *DeleteFilesRequest) (*DeleteFilesResponse, error)
 	mustEmbedUnimplementedFilesServer()
 }
 
@@ -189,14 +189,14 @@ func (UnimplementedFilesServer) ReadFileStream(*ReadFileStreamRequest, Files_Rea
 func (UnimplementedFilesServer) ListFiles(context.Context, *ListFilesRequest) (*ListFilesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListFiles not implemented")
 }
-func (UnimplementedFilesServer) PublishFile(context.Context, *PublishFileRequest) (*PublishFileResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method PublishFile not implemented")
+func (UnimplementedFilesServer) PublishFiles(context.Context, *PublishFilesRequest) (*PublishFilesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PublishFiles not implemented")
 }
-func (UnimplementedFilesServer) PrivateFile(context.Context, *PrivateFileRequest) (*PrivateFileResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method PrivateFile not implemented")
+func (UnimplementedFilesServer) PrivateFiles(context.Context, *PrivateFilesRequest) (*PrivateFilesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PrivateFiles not implemented")
 }
-func (UnimplementedFilesServer) DeleteFile(context.Context, *DeleteFileRequest) (*DeleteFileResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteFile not implemented")
+func (UnimplementedFilesServer) DeleteFiles(context.Context, *DeleteFilesRequest) (*DeleteFilesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteFiles not implemented")
 }
 func (UnimplementedFilesServer) mustEmbedUnimplementedFilesServer() {}
 
@@ -312,56 +312,56 @@ func _Files_ListFiles_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Files_PublishFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PublishFileRequest)
+func _Files_PublishFiles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PublishFilesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FilesServer).PublishFile(ctx, in)
+		return srv.(FilesServer).PublishFiles(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/files.v1.Files/PublishFile",
+		FullMethod: "/files.v1.Files/PublishFiles",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FilesServer).PublishFile(ctx, req.(*PublishFileRequest))
+		return srv.(FilesServer).PublishFiles(ctx, req.(*PublishFilesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Files_PrivateFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PrivateFileRequest)
+func _Files_PrivateFiles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PrivateFilesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FilesServer).PrivateFile(ctx, in)
+		return srv.(FilesServer).PrivateFiles(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/files.v1.Files/PrivateFile",
+		FullMethod: "/files.v1.Files/PrivateFiles",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FilesServer).PrivateFile(ctx, req.(*PrivateFileRequest))
+		return srv.(FilesServer).PrivateFiles(ctx, req.(*PrivateFilesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Files_DeleteFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteFileRequest)
+func _Files_DeleteFiles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteFilesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FilesServer).DeleteFile(ctx, in)
+		return srv.(FilesServer).DeleteFiles(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/files.v1.Files/DeleteFile",
+		FullMethod: "/files.v1.Files/DeleteFiles",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FilesServer).DeleteFile(ctx, req.(*DeleteFileRequest))
+		return srv.(FilesServer).DeleteFiles(ctx, req.(*DeleteFilesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -383,16 +383,16 @@ var _Files_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Files_ListFiles_Handler,
 		},
 		{
-			MethodName: "PublishFile",
-			Handler:    _Files_PublishFile_Handler,
+			MethodName: "PublishFiles",
+			Handler:    _Files_PublishFiles_Handler,
 		},
 		{
-			MethodName: "PrivateFile",
-			Handler:    _Files_PrivateFile_Handler,
+			MethodName: "PrivateFiles",
+			Handler:    _Files_PrivateFiles_Handler,
 		},
 		{
-			MethodName: "DeleteFile",
-			Handler:    _Files_DeleteFile_Handler,
+			MethodName: "DeleteFiles",
+			Handler:    _Files_DeleteFiles_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

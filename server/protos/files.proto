@@ -10,9 +10,9 @@ service Files {
 	rpc SaveFileStream(stream FileData) returns (SaveFileStreamResponse) {}
 	rpc ReadFileStream(ReadFileStreamRequest) returns (stream FileData) {}
 	rpc ListFiles(ListFilesRequest) returns (ListFilesResponse) {}
-	rpc PublishFile(PublishFileRequest) returns (PublishFileResponse) {}
-	rpc PrivateFile(PrivateFileRequest) returns (PrivateFileResponse) {}
-	rpc DeleteFile(DeleteFileRequest) returns (DeleteFileResponse) {}
+	rpc PublishFiles(PublishFilesRequest) returns (PublishFilesResponse) {}
+	rpc PrivateFiles(PrivateFilesRequest) returns (PrivateFilesResponse) {}
+	rpc DeleteFiles(DeleteFilesRequest) returns (DeleteFilesResponse) {}
 }
 
 message File {
@@ -26,6 +26,7 @@ message File {
 	bool          private = 8;
 	string        mime = 9;
 	string        description = 10;
+	int32         oid = 11;
 }
 
 message FileChunk {
@@ -67,7 +68,7 @@ message ReadBatchFilesResponse {
 
 message ReadFileRequest {
 	int64    id = 1;
-	int64    user_id = 2;
+	string   name = 2;
 	bool     public = 3;
 }
 
@@ -76,26 +77,26 @@ message ListFilesResponse {
 	bool          is_last_page = 2;
 }
 
-message PublishFileRequest {
-	int64 id = 1;
-	int64 user_id = 2;
+message PublishFilesRequest {
+	int64 user_id = 1;
+	repeated int64 ids = 2;
 }
 
-message PublishFileResponse {
+message PublishFilesResponse {
 }
 
-message PrivateFileRequest {
-	int64 id = 1;
-	int64 user_id = 2;
+message PrivateFilesRequest {
+	int64 user_id = 1;
+	repeated int64 ids = 2;
 }
 
-message PrivateFileResponse {
+message PrivateFilesResponse {
 }
 
-message DeleteFileRequest {
-	int64 id = 1;
-	int64 user_id = 2;
+message DeleteFilesRequest {
+	int64 user_id = 1;
+	repeated int64 ids = 2;
 }
 
-message DeleteFileResponse {
+message DeleteFilesResponse {
 }

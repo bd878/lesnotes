@@ -4,7 +4,7 @@ const (
 	FilesChannel = "gallery.files.File"
 
 	FileUploadedEvent   = "filesapi.FileUploaded"
-	FileDeletedEvent    = "filesapi.FileDeleted"
-	FilePublishedEvent  = "filesapi.FilePublished"
-	FilePrivatedEvent   = "filesapi.FilePrivated"
+	FilesDeletedEvent    = "filesapi.FilesDeleted"
+	FilesPublishedEvent  = "filesapi.FilesPublished"
+	FilesPrivatedEvent   = "filesapi.FilesPrivated"
 )

@@ -1,5 +1,8 @@
-\c lesnotes
+-- +goose Up
 CREATE SCHEMA IF NOT EXISTS files;
+
+GRANT USAGE ON SCHEMA files TO lesnotes_admin;
+GRANT INSERT, UPDATE, DELETE, SELECT ON ALL TABLES IN SCHEMA files TO lesnotes_admin;
 
 CREATE TABLE IF NOT EXISTS files.files
 (
@@ -18,5 +21,13 @@ CREATE TABLE IF NOT EXISTS files.files
 
 CREATE INDEX IF NOT EXISTS files_id ON files.files(id);
 
-GRANT USAGE ON SCHEMA files TO lesnotes_admin;
-GRANT INSERT, UPDATE, DELETE, SELECT ON ALL TABLES IN SCHEMA files TO lesnotes_admin;
+CREATE TABLE IF NOT EXISTS files.messages
+(
+	file_id       bigint       NOT NULL,
+	message_id    bigint       NOT NULL,
+	user_id       bigint       NOT NULL,
+	PRIMARY KEY(file_id, message_id)
+);
+
+-- +goose Down
+DROP SCHEMA IF EXISTS files CASCADE;

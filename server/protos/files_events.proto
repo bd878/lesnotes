@@ -16,19 +16,19 @@ message FileUploaded {
 	string    updated_at = 9;
 }
 
-message FileDeleted {
-	int64     id = 1;
-	int64     user_id = 2;
+message FilesDeleted {
+	int64     user_id = 1;
+	repeated int64 ids = 2;
 }
 
-message FilePublished {
-	int64     id = 1;
-	int64     user_id = 2;
-	string    updated_at = 3;
+message FilesPublished {
+	int64     user_id = 1;
+	string    updated_at = 2;
+	repeated int64 ids = 3;
 }
 
-message FilePrivated {
-	int64     id = 1;
-	int64     user_id = 2;
-	string    updated_at = 3;
+message FilesPrivated {
+	int64     user_id = 1;
+	string    updated_at = 2;
+	repeated int64 ids = 3;
 }

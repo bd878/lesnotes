@@ -143,7 +143,6 @@ func (f *Files) ReadFileMeta(ctx context.Context, id, userID int64, public bool)
 
 	resp, err := f.client.ReadFile(ctx, &api.ReadFileRequest{
 		Id:     id,
-		UserId: userID,
 		Public: public,
 	})
 	if err != nil {
@@ -253,7 +252,7 @@ func (f *Files) PublishFile(ctx context.Context, id, userID int64) (err error) {
 		}
 	}
 
-	_, err = f.client.PublishFile(ctx, &api.PublishFileRequest{Id: id, UserId: userID})
+	_, err = f.client.PublishFiles(ctx, &api.PublishFilesRequest{Ids: []int64{id}, UserId: userID})
 
 	return
 }
@@ -266,7 +265,7 @@ func (f *Files) PrivateFile(ctx context.Context, id, userID int64) (err error) {
 		}
 	}
 
-	_, err = f.client.PrivateFile(ctx, &api.PrivateFileRequest{Id: id, UserId: userID})
+	_, err = f.client.PrivateFiles(ctx, &api.PrivateFilesRequest{Ids: []int64{id}, UserId: userID})
 
 	return
 }
@@ -279,7 +278,7 @@ func (f *Files) DeleteFile(ctx context.Context, id, userID int64) (err error) {
 		}
 	}
 
-	_, err = f.client.DeleteFile(ctx, &api.DeleteFileRequest{Id: id, UserId: userID})
+	_, err = f.client.DeleteFiles(ctx, &api.DeleteFilesRequest{Ids: []int64{id}, UserId: userID})
 
 	return
 }

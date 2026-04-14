@@ -184,6 +184,8 @@ func (s *System) initRPC() {
 		grpc.ChainUnaryInterceptor(
 			grpcmiddleware.UnaryServerInterceptor(grpcmiddleware.LogBuilder()),
 		),
+		grpc.MaxRecvMsgSize(1024*1024*50), // TODO: for files, parametrize with options
+		grpc.MaxSendMsgSize(1024*1024*50),
 	)
 }
 

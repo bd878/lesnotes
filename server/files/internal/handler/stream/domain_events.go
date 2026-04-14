@@ -24,9 +24,9 @@ func NewDomainEventHandlers(publisher am.MessagePublisher[am.Message]) *domainHa
 func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.Event], handler ddd.EventHandler[ddd.Event]) {
 	subscriber.Subscribe(handler,
 		domain.FileUploadedEvent,
-		domain.FileDeletedEvent,
-		domain.FilePublishedEvent,
-		domain.FilePrivatedEvent,
+		domain.FilesDeletedEvent,
+		domain.FilesPublishedEvent,
+		domain.FilesPrivatedEvent,
 	)
 }
 
@@ -34,12 +34,12 @@ func (h domainHandler[T]) HandleEvent(ctx context.Context, event T) error {
 	switch event.EventName() {
 	case domain.FileUploadedEvent:
 		return h.onFileUploaded(ctx, event)
-	case domain.FileDeletedEvent:
-		return h.onFileDeleted(ctx, event)
-	case domain.FilePrivatedEvent:
-		return h.onFilePrivated(ctx, event)
-	case domain.FilePublishedEvent:
-		return h.onFilePublished(ctx, event)
+	case domain.FilesDeletedEvent:
+		return h.onFilesDeleted(ctx, event)
+	case domain.FilesPrivatedEvent:
+		return h.onFilesPrivated(ctx, event)
+	case domain.FilesPublishedEvent:
+		return h.onFilesPublished(ctx, event)
 	}
 	return nil
 }
@@ -64,23 +64,23 @@ func (h domainHandler[T]) onFileUploaded(ctx context.Context, event ddd.Event) e
 	return h.publisher.Publish(ctx, events.FilesChannel, am.NewRawMessage(event.ID(), events.FileUploadedEvent, data))
 }
 
-func (h domainHandler[T]) onFileDeleted(ctx context.Context, event ddd.Event) error {
-	payload := event.Payload().(*domain.FileDeleted)
-	data, err := proto.Marshal(&api.FileDeleted{
-		Id:          payload.ID,
+func (h domainHandler[T]) onFilesDeleted(ctx context.Context, event ddd.Event) error {
+	payload := event.Payload().(*domain.FilesDeleted)
+	data, err := proto.Marshal(&api.FilesDeleted{
+		Ids:         payload.IDs,
 		UserId:      payload.UserID,
 	})
 	if err != nil {
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.FilesChannel, am.NewRawMessage(event.ID(), events.FileDeletedEvent, data))
+	return h.publisher.Publish(ctx, events.FilesChannel, am.NewRawMessage(event.ID(), events.FilesDeletedEvent, data))
 }
 
-func (h domainHandler[T]) onFilePrivated(ctx context.Context, event ddd.Event) error {
-	payload := event.Payload().(*domain.FilePrivated)
-	data, err := proto.Marshal(&api.FilePrivated{
-		Id:          payload.ID,
+func (h domainHandler[T]) onFilesPrivated(ctx context.Context, event ddd.Event) error {
+	payload := event.Payload().(*domain.FilesPrivated)
+	data, err := proto.Marshal(&api.FilesPrivated{
+		Ids:         payload.IDs,
 		UserId:      payload.UserID,
 		UpdatedAt:   payload.UpdatedAt,
 	})
@@ -88,13 +88,13 @@ func (h domainHandler[T]) onFilePrivated(ctx context.Context, event ddd.Event) e
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.FilesChannel, am.NewRawMessage(event.ID(), events.FilePrivatedEvent, data))
+	return h.publisher.Publish(ctx, events.FilesChannel, am.NewRawMessage(event.ID(), events.FilesPrivatedEvent, data))
 }
 
-func (h domainHandler[T]) onFilePublished(ctx context.Context, event ddd.Event) error {
-	payload := event.Payload().(*domain.FilePublished)
-	data, err := proto.Marshal(&api.FilePublished{
-		Id:          payload.ID,
+func (h domainHandler[T]) onFilesPublished(ctx context.Context, event ddd.Event) error {
+	payload := event.Payload().(*domain.FilesPublished)
+	data, err := proto.Marshal(&api.FilesPublished{
+		Ids:         payload.IDs,
 		UserId:      payload.UserID,
 		UpdatedAt:   payload.UpdatedAt,
 	})
@@ -102,5 +102,5 @@ func (h domainHandler[T]) onFilePublished(ctx context.Context, event ddd.Event) 
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.FilesChannel, am.NewRawMessage(event.ID(), events.FilePublishedEvent, data))
+	return h.publisher.Publish(ctx, events.FilesChannel, am.NewRawMessage(event.ID(), events.FilesPublishedEvent, data))
 }

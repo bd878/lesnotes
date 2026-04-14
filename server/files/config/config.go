@@ -7,6 +7,8 @@ type Config struct {
 	UsersServiceAddr     string      `json:"users_service_addr"`
 	SessionsServiceAddr  string      `json:"sessions_service_addr"`
 	NatsAddr             string      `json:"nats_addr"`
+	LogLevel             string      `json:"log_level"`
 
 	PGConn               string      `json:"pg_conn"`
+	GooseTableName       string      `json:"goose_table_name"`
 }

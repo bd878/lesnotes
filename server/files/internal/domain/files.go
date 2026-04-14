@@ -6,10 +6,10 @@ import (
 )
 
 const (
-	FileUploadedEvent   = "files.FileUploaded"
-	FileDeletedEvent    = "files.FileDeleted"
-	FilePublishedEvent  = "files.FilePublished"
-	FilePrivatedEvent   = "files.FilePrivated"
+	FileUploadedEvent    = "files.FileUploaded"
+	FilesDeletedEvent    = "files.FilesDeleted"
+	FilesPublishedEvent  = "files.FilesPublished"
+	FilesPrivatedEvent   = "files.FilesPrivated"
 )
 
 var (
@@ -49,48 +49,52 @@ func UploadFile(id int64, name, description string, userID int64, private bool, 
 	}), nil
 }
 
-type FileDeleted struct {
-	ID      int64
-	UserID  int64
+type FilesDeleted struct {
+	IDs      []int64
+	UserID   int64
 }
 
-func (FileDeleted) Key() string { return FileDeletedEvent }
+func (FilesDeleted) Key() string { return FilesDeletedEvent }
 
-func DeleteFile(id, userID int64) (ddd.Event, error) {
-	return ddd.NewEvent(FileDeletedEvent, &FileDeleted{
-		ID:       id,
-		UserID:   userID,
+func DeleteFiles(userID int64, ids []int64) (ddd.Event, error) {
+	if len(ids) == 0 {
+		return nil, ErrIDRequired
+	}
+
+	return ddd.NewEvent(FilesDeletedEvent, &FilesDeleted{
+		IDs:       ids,
+		UserID:    userID,
 	}), nil
 }
 
-type FilePublished struct {
-	ID         int64
+type FilesPublished struct {
+	IDs        []int64
 	UserID     int64
 	UpdatedAt  string
 }
 
-func (FilePublished) Key() string { return FilePublishedEvent }
+func (FilesPublished) Key() string { return FilesPublishedEvent }
 
-func PublishFile(userID, id int64, updatedAt string) (ddd.Event, error) {
-	if id == 0 {
+func PublishFiles(userID int64, ids []int64, updatedAt string) (ddd.Event, error) {
+	if len(ids) == 0 {
 		return nil, ErrIDRequired
 	}
 
-	return ddd.NewEvent(FilePublishedEvent, &FilePublished{ID: id, UserID: userID, UpdatedAt: updatedAt}), nil
+	return ddd.NewEvent(FilesPublishedEvent, &FilesPublished{IDs: ids, UserID: userID, UpdatedAt: updatedAt}), nil
 }
 
-type FilePrivated struct {
-	ID         int64
+type FilesPrivated struct {
+	IDs        []int64
 	UserID     int64
 	UpdatedAt  string
 }
 
-func (FilePrivated) Key() string { return FilePrivatedEvent}
+func (FilesPrivated) Key() string { return FilesPrivatedEvent}
 
-func PrivateFile(userID, id int64, updatedAt string) (ddd.Event, error) {
-	if id == 0 {
+func PrivateFiles(userID int64, ids []int64, updatedAt string) (ddd.Event, error) {
+	if len(ids) == 0 {
 		return nil, ErrIDRequired
 	}
 
-	return ddd.NewEvent(FilePrivatedEvent, &FilePrivated{ID: id, UserID: userID, UpdatedAt: updatedAt}), nil
+	return ddd.NewEvent(FilesPrivatedEvent, &FilesPrivated{IDs: ids, UserID: userID, UpdatedAt: updatedAt}), nil
 }
