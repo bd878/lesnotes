@@ -19,9 +19,9 @@ type MessagesRepository interface {
 
 type FilesRepository interface {
 	SaveFile(ctx context.Context, id, userID int64, name, description, mime string, private bool, size int64, createdAt, updatedAt string) (err error)
-	DeleteFile(ctx context.Context, id, userID int64) (err error)
-	PublishFile(ctx context.Context, id, userID int64, updatedAt string) (err error)
-	PrivateFile(ctx context.Context, id, userID int64, updatedAt string) (err error)
+	DeleteFiles(ctx context.Context, id []int64, userID int64) (err error)
+	PublishFiles(ctx context.Context, id []int64, userID int64, updatedAt string) (err error)
+	PrivateFiles(ctx context.Context, id []int64, userID int64, updatedAt string) (err error)
 }
 
 type ThreadsRepository interface {
@@ -96,12 +96,12 @@ func (f *Machine) Apply(record *raft.Log) interface{} {
 		return f.applyPrivateThread(buf[1:])
 	case AppendFileRequest:
 		return f.applyAppendFile(buf[1:])
-	case DeleteFileRequest:
-		return f.applyDeleteFile(buf[1:])
-	case PublishFileRequest:
-		return f.applyPublishFile(buf[1:])
-	case PrivateFileRequest:
-		return f.applyPrivateFile(buf[1:])
+	case DeleteFilesRequest:
+		return f.applyDeleteFiles(buf[1:])
+	case PublishFilesRequest:
+		return f.applyPublishFiles(buf[1:])
+	case PrivateFilesRequest:
+		return f.applyPrivateFiles(buf[1:])
 	case AppendTranslationRequest:
 		return f.applyAppendTranslation(buf[1:])
 	case DeleteTranslationRequest:
@@ -198,25 +198,25 @@ func (f *Machine) applyAppendFile(raw []byte) interface{} {
 	return f.filesRepo.SaveFile(context.TODO(), cmd.Id, cmd.UserId, cmd.Name, cmd.Description, cmd.Mime, cmd.Private, cmd.Size, cmd.CreatedAt, cmd.UpdatedAt)
 }
 
-func (f *Machine) applyDeleteFile(raw []byte) interface{} {
-	var cmd DeleteFileCommand
+func (f *Machine) applyDeleteFiles(raw []byte) interface{} {
+	var cmd DeleteFilesCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.filesRepo.DeleteFile(context.TODO(), cmd.Id, cmd.UserId)
+	return f.filesRepo.DeleteFiles(context.TODO(), cmd.Ids, cmd.UserId)
 }
 
-func (f *Machine) applyPublishFile(raw []byte) interface{} {
-	var cmd PublishFileCommand
+func (f *Machine) applyPublishFiles(raw []byte) interface{} {
+	var cmd PublishFilesCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.filesRepo.PublishFile(context.TODO(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
+	return f.filesRepo.PublishFiles(context.TODO(), cmd.Ids, cmd.UserId, cmd.UpdatedAt)
 }
 
-func (f *Machine) applyPrivateFile(raw []byte) interface{} {
-	var cmd PrivateFileCommand
+func (f *Machine) applyPrivateFiles(raw []byte) interface{} {
+	var cmd PrivateFilesCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.filesRepo.PrivateFile(context.TODO(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
+	return f.filesRepo.PrivateFiles(context.TODO(), cmd.Ids, cmd.UserId, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyAppendTranslation(raw []byte) interface{} {

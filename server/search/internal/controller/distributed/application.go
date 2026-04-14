@@ -302,11 +302,11 @@ func (m *Distributed) SaveFile(ctx context.Context, id, userID int64, name, desc
 	return m.apply(ctx, machine.AppendFileRequest, cmd)
 }
 
-func (m *Distributed) PublishFile(ctx context.Context, id, userID int64, updatedAt string) (err error) {
-	m.log.Debugw("publish file", "id", id, "user_id", userID)
+func (m *Distributed) PublishFiles(ctx context.Context, ids []int64, userID int64, updatedAt string) (err error) {
+	m.log.Debugw("publish files", "ids", ids, "user_id", userID)
 
-	cmd, err := proto.Marshal(&machine.PublishFileCommand{
-		Id:          id,
+	cmd, err := proto.Marshal(&machine.PublishFilesCommand{
+		Ids:         ids,
 		UserId:      userID,
 		UpdatedAt:   updatedAt,
 	})
@@ -314,14 +314,14 @@ func (m *Distributed) PublishFile(ctx context.Context, id, userID int64, updated
 		return err
 	}
 
-	return m.apply(ctx, machine.PublishFileRequest, cmd)
+	return m.apply(ctx, machine.PublishFilesRequest, cmd)
 }
 
-func (m *Distributed) PrivateFile(ctx context.Context, id, userID int64, updatedAt string) (err error) {
-	m.log.Debugw("private file", "id", id, "user_id", userID)
+func (m *Distributed) PrivateFiles(ctx context.Context, ids []int64, userID int64, updatedAt string) (err error) {
+	m.log.Debugw("private files", "ids", ids, "user_id", userID)
 
-	cmd, err := proto.Marshal(&machine.PrivateFileCommand{
-		Id:          id,
+	cmd, err := proto.Marshal(&machine.PrivateFilesCommand{
+		Ids:         ids,
 		UserId:      userID,
 		UpdatedAt:   updatedAt,
 	})
@@ -329,21 +329,21 @@ func (m *Distributed) PrivateFile(ctx context.Context, id, userID int64, updated
 		return err
 	}
 
-	return m.apply(ctx, machine.PrivateFileRequest, cmd)
+	return m.apply(ctx, machine.PrivateFilesRequest, cmd)
 }
 
-func (m *Distributed) DeleteFile(ctx context.Context, id, userID int64) (err error) {
-	m.log.Debugw("delete file", "id", id, "user_id", userID)
+func (m *Distributed) DeleteFiles(ctx context.Context, ids []int64, userID int64) (err error) {
+	m.log.Debugw("delete files", "id", ids, "user_id", userID)
 
-	cmd, err := proto.Marshal(&machine.DeleteFileCommand{
-		Id:          id,
+	cmd, err := proto.Marshal(&machine.DeleteFilesCommand{
+		Ids:         ids,
 		UserId:      userID,
 	})
 	if err != nil {
 		return err
 	}
 
-	return m.apply(ctx, machine.DeleteFileRequest, cmd)
+	return m.apply(ctx, machine.DeleteFilesRequest, cmd)
 }
 
 func (m *Distributed) SaveTranslation(ctx context.Context, userID, messageID int64, lang string, title, text string, createdAt, updatedAt string) (err error) {

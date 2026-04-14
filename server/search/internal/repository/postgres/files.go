@@ -25,22 +25,37 @@ func (r *FilesRepository) SaveFile(ctx context.Context, id, userID int64, name, 
 	return
 }
 
-func (r *FilesRepository) DeleteFile(ctx context.Context, id, userID int64) (err error) {
+func (r *FilesRepository) DeleteFiles(ctx context.Context, ids []int64, userID int64) (err error) {
 	const query = "DELETE FROM %s WHERE id = $1 AND owner_id = $2"
 
-	_, err = r.pool.Exec(ctx, r.table(query), id, userID)
+	for _, id := range ids {
+		_, err = r.pool.Exec(ctx, r.table(query), id, userID)
+		if err != nil {
+			return
+		}
+	}
 
 	return
 }
 
-func (r *FilesRepository) PublishFile(ctx context.Context, id, userID int64, updatedAt string) (err error) {
-	_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = false, updated_at = $3 WHERE owner_id = $1 AND id = $2"), userID, id, updatedAt)
+func (r *FilesRepository) PublishFiles(ctx context.Context, ids []int64, userID int64, updatedAt string) (err error) {
+	for _, id := range ids {
+		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = false, updated_at = $3 WHERE owner_id = $1 AND id = $2"), userID, id, updatedAt)
+		if err != nil {
+			return
+		}
+	}
 
 	return
 }
 
-func (r *FilesRepository) PrivateFile(ctx context.Context, id, userID int64, updatedAt string) (err error) {
-	_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = true, updated_at = $3 WHERE owner_id = $1 AND id = $2"), userID, id, updatedAt)
+func (r *FilesRepository) PrivateFiles(ctx context.Context, ids []int64, userID int64, updatedAt string) (err error) {
+	for _, id := range ids {
+		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = true, updated_at = $3 WHERE owner_id = $1 AND id = $2"), userID, id, updatedAt)
+		if err != nil {
+			return
+		}
+	}
 
 	return
 }

@@ -15,9 +15,9 @@ const (
 	PublishThreadRequest
 	PrivateThreadRequest
 	AppendFileRequest
-	DeleteFileRequest
-	PublishFileRequest
-	PrivateFileRequest
+	DeleteFilesRequest
+	PublishFilesRequest
+	PrivateFilesRequest
 	AppendTranslationRequest
 	DeleteTranslationRequest
 	UpdateTranslationRequest

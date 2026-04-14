@@ -31,9 +31,9 @@ type ThreadsController interface {
 
 type FilesController interface {
 	SaveFile(ctx context.Context, id, userID int64, name, description, mime string, private bool, size int64, createdAt, updatedAt string) error
-	PublishFile(ctx context.Context, id, userID int64, updatedAt string) error
-	PrivateFile(ctx context.Context, id, userID int64, updatedAt string) error
-	DeleteFile(ctx context.Context, id, userID int64) error
+	PublishFiles(ctx context.Context, ids []int64, userID int64, updatedAt string) error
+	PrivateFiles(ctx context.Context, ids []int64, userID int64, updatedAt string) error
+	DeleteFiles(ctx context.Context, ids []int64, userID int64) error
 }
 
 type TranslationsController interface {
@@ -115,15 +115,14 @@ func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingM
 	case threadsevents.ThreadPrivatedEvent:
 		return h.handleThreadPrivated(ctx, msg)
 
-	// TODO: file events are changed
 	case filesevents.FileUploadedEvent:
 		return h.handleFileUploaded(ctx, msg)
-	case filesevents.FileDeletedEvent:
-		return h.handleFileDeleted(ctx, msg)
-	case filesevents.FilePublishedEvent:
-		return h.handleFilePublished(ctx, msg)
-	case filesevents.FilePrivatedEvent:
-		return h.handleFilePrivated(ctx, msg)
+	case filesevents.FilesDeletedEvent:
+		return h.handleFilesDeleted(ctx, msg)
+	case filesevents.FilesPublishedEvent:
+		return h.handleFilesPublished(ctx, msg)
+	case filesevents.FilesPrivatedEvent:
+		return h.handleFilesPrivated(ctx, msg)
 
 	case messageevents.TranslationCreatedEvent:
 		return h.handleTranslationCreated(ctx, msg)
@@ -247,31 +246,31 @@ func (h integrationHandlers) handleFileUploaded(ctx context.Context, msg am.Inco
 		m.GetDescription(), m.GetMime(), m.GetPrivate(), m.GetSize(), m.GetCreatedAt(), m.GetUpdatedAt())
 }
 
-func (h integrationHandlers) handleFileDeleted(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.FileDeleted{}
+func (h integrationHandlers) handleFilesDeleted(ctx context.Context, msg am.IncomingMessage) error {
+	m := &api.FilesDeleted{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}
 
-	return h.files.DeleteFile(ctx, m.GetId(), m.GetUserId())
+	return h.files.DeleteFiles(ctx, m.GetIds(), m.GetUserId())
 }
 
-func (h integrationHandlers) handleFilePublished(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.FilePublished{}
+func (h integrationHandlers) handleFilesPublished(ctx context.Context, msg am.IncomingMessage) error {
+	m := &api.FilesPublished{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}
 
-	return h.files.PublishFile(ctx, m.GetId(), m.GetUserId(), m.GetUpdatedAt())
+	return h.files.PublishFiles(ctx, m.GetIds(), m.GetUserId(), m.GetUpdatedAt())
 }
 
-func (h integrationHandlers) handleFilePrivated(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.FilePrivated{}
+func (h integrationHandlers) handleFilesPrivated(ctx context.Context, msg am.IncomingMessage) error {
+	m := &api.FilesPrivated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}
 
-	return h.files.PrivateFile(ctx, m.GetId(), m.GetUserId(), m.GetUpdatedAt())
+	return h.files.PrivateFiles(ctx, m.GetIds(), m.GetUserId(), m.GetUpdatedAt())
 }
 
 func (h integrationHandlers) handleTranslationCreated(ctx context.Context, msg am.IncomingMessage) error {

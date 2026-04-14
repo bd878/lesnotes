@@ -93,19 +93,19 @@ message AppendFileCommand {
 	string    updated_at = 9;
 }
 
-message DeleteFileCommand {
-	int64     id = 1;
+message DeleteFilesCommand {
+	repeated int64  ids = 1;
 	int64     user_id = 2;
 }
 
-message PublishFileCommand {
-	int64     id = 1;
+message PublishFilesCommand {
+	repeated int64  ids = 1;
 	int64     user_id = 2;
 	string    updated_at = 3;
 }
 
-message PrivateFileCommand {
-	int64     id = 1;
+message PrivateFilesCommand {
+	repeated int64 ids = 1;
 	int64     user_id = 2;
 	string    updated_at = 3;
 }
