@@ -2,6 +2,7 @@
 CREATE SCHEMA IF NOT EXISTS files;
 
 GRANT USAGE ON SCHEMA files TO lesnotes_admin;
+GRANT CREATE ON SCHEMA files TO lesnotes_admin;
 GRANT INSERT, UPDATE, DELETE, SELECT ON ALL TABLES IN SCHEMA files TO lesnotes_admin;
 
 CREATE TABLE IF NOT EXISTS files.files
@@ -19,8 +20,6 @@ CREATE TABLE IF NOT EXISTS files.files
 	PRIMARY KEY(id)
 );
 
-CREATE INDEX IF NOT EXISTS files_id ON files.files(id);
-
 CREATE TABLE IF NOT EXISTS files.messages
 (
 	file_id       bigint       NOT NULL,
@@ -30,4 +29,3 @@ CREATE TABLE IF NOT EXISTS files.messages
 );
 
 -- +goose Down
-DROP SCHEMA IF EXISTS files CASCADE;

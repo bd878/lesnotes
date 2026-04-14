@@ -32,11 +32,11 @@ message MessageUpdated {
 message MessagesPublished {
 	repeated int64 ids = 1;
 	int64   user_id = 2;
-	string  updated_at = 6;
+	string  updated_at = 3;
 }
 
 message MessagesPrivated {
 	repeated int64 ids = 1;
 	int64   user_id = 2;
-	string  updated_at = 6;
+	string  updated_at = 3;
 }

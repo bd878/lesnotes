@@ -69,7 +69,6 @@ func (g *Gateway) ReadFile(ctx context.Context, userID, fileID int64) (resp *mod
 	logger.Debugw("read file", "user_id", userID, "file_id", fileID)
 
 	file, err := g.client.ReadFile(ctx, &api.ReadFileRequest{
-		UserId: userID,
 		Id:     fileID,
 	})
 	if err != nil {

@@ -27,7 +27,7 @@ func NewFilesRepository(pool *pgxpool.Pool, tableName string) *FilesRepository {
 	}
 }
 
-func (r *FilesRepository) SaveFile(ctx context.Context, reader io.Reader, id, userID int64, private bool, name, description, mime, createdAt, updatedAt string) (size int64, err error) {
+func (r *FilesRepository) SaveFile(ctx context.Context, reader io.Reader, userID, id int64, private bool, name, description, mime, createdAt, updatedAt string) (size int64, err error) {
 	const query = "INSERT INTO %s(id, owner_id, name, description, private, oid, mime, size, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
 	const createdAtQuery = "SELECT created_at FROM %s WHERE id = $1"
 

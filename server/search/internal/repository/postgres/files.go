@@ -5,6 +5,8 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	"github.com/bd878/gallery/server/internal/logger"
 )
 
 type FilesRepository struct {
@@ -17,7 +19,7 @@ func NewFilesRepository(pool *pgxpool.Pool, tableName string) *FilesRepository {
 }
 
 func (r *FilesRepository) SaveFile(ctx context.Context, id, userID int64, name, description, mime string, private bool, size int64, createdAt, updatedAt string) (err error) {
-	const query = "INSERT INTO %s(id, owner_id, name, description, mime, size, private, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $0)"
+	const query = "INSERT INTO %s(id, owner_id, name, description, mime, size, private, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
 
 	_, err = r.pool.Exec(ctx, r.table(query), id, userID, name, description,
 		mime, size, private, createdAt, updatedAt)
@@ -31,7 +33,7 @@ func (r *FilesRepository) DeleteFiles(ctx context.Context, ids []int64, userID i
 	for _, id := range ids {
 		_, err = r.pool.Exec(ctx, r.table(query), id, userID)
 		if err != nil {
-			return
+			logger.Errorln(err)
 		}
 	}
 
@@ -42,7 +44,7 @@ func (r *FilesRepository) PublishFiles(ctx context.Context, ids []int64, userID 
 	for _, id := range ids {
 		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = false, updated_at = $3 WHERE owner_id = $1 AND id = $2"), userID, id, updatedAt)
 		if err != nil {
-			return
+			logger.Errorln(err)
 		}
 	}
 
@@ -53,7 +55,7 @@ func (r *FilesRepository) PrivateFiles(ctx context.Context, ids []int64, userID 
 	for _, id := range ids {
 		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = true, updated_at = $3 WHERE owner_id = $1 AND id = $2"), userID, id, updatedAt)
 		if err != nil {
-			return
+			logger.Errorln(err)
 		}
 	}
 

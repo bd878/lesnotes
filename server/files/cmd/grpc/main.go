@@ -9,7 +9,7 @@ import (
 	"github.com/bd878/gallery/server/internal/system"
 	"github.com/bd878/gallery/server/files"
 	"github.com/bd878/gallery/server/files/config"
-	"github.com/bd878/gallery/server/messages/migrations"
+	"github.com/bd878/gallery/server/files/migrations"
 )
 
 func init() {

@@ -13,7 +13,7 @@ import (
 )
 
 type FilesRepository interface {
-	SaveFile(ctx context.Context, reader io.Reader, id, userID int64, private bool, name, description, mime, createdAt, updatedAt string) (size int64, err error)
+	SaveFile(ctx context.Context, reader io.Reader, userID, id int64, private bool, name, description, mime, createdAt, updatedAt string) (size int64, err error)
 	GetMetaByID(ctx context.Context, id int64) (file *api.File, err error)
 	GetMetaByName(ctx context.Context, fileName string) (file *api.File, err error)
 	DeleteFiles(ctx context.Context, userID int64, ids []int64) (err error)

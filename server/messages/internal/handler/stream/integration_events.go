@@ -2,9 +2,9 @@ package stream
 
 import (
 	"context"
-	"google.golang.org/protobuf/proto"
+	// "google.golang.org/protobuf/proto"
 
-	"github.com/bd878/gallery/server/api"
+	// "github.com/bd878/gallery/server/api"
 	filesevents "github.com/bd878/gallery/server/files/pkg/events"
 	"github.com/bd878/gallery/server/internal/am"
 	"github.com/bd878/gallery/server/internal/logger"
@@ -38,19 +38,20 @@ func RegisterIntegrationEventHandlers(subscriber am.RawMessageSubscriber, handle
 func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingMessage) error {
 	logger.Debugw("handle message", "name", msg.MessageName(), "subject", msg.Subject())
 
-	switch msg.MessageName() {
-	case filesevents.FileDeletedEvent:
-		return h.handleFileDeleted(ctx, msg)
-	}
+	// switch msg.MessageName() {
+	// case filesevents.FileDeletedEvent:
+	// 	return h.handleFileDeleted(ctx, msg)
+	// }
 
 	return nil
 }
 
 func (h integrationHandlers) handleFileDeleted(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.FileDeleted{}
-	if err := proto.Unmarshal(msg.Data(), m); err != nil {
-		return err
-	}
+	// m := &api.FileDeleted{}
+	// if err := proto.Unmarshal(msg.Data(), m); err != nil {
+	// 	return err
+	// }
 
-	return h.files.DeleteFile(ctx, m.GetId(), m.GetUserId())
+	// return h.files.DeleteFile(ctx, m.GetId(), m.GetUserId())
+	return nil
 }

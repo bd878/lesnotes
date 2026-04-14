@@ -122,7 +122,7 @@ func (m *Distributed) UpdateMessage(ctx context.Context, id, userID int64, name,
 }
 
 func (m *Distributed) PublishMessages(ctx context.Context, ids []int64, userID int64, updatedAt string) (err error) {
-	m.log.Debugw("publish search messages", "ids", ids, "user_id", userID)
+	m.log.Debugw("publish search messages", "ids", ids, "user_id", userID, "updated_at", updatedAt)
 
 	cmd, err := proto.Marshal(&machine.PublishMessagesCommand{
 		Ids:       ids,
@@ -137,7 +137,7 @@ func (m *Distributed) PublishMessages(ctx context.Context, ids []int64, userID i
 }
 
 func (m *Distributed) PrivateMessages(ctx context.Context, ids []int64, userID int64, updatedAt string) (err error) {
-	m.log.Debugw("private search messages", "ids", ids, "user_id", userID)
+	m.log.Debugw("private search messages", "ids", ids, "user_id", userID, "updated_at", updatedAt)
 
 	cmd, err := proto.Marshal(&machine.PrivateMessagesCommand{
 		Ids:         ids,
