@@ -51,8 +51,6 @@ func (g *Gateway) ReadMessageFiles(ctx context.Context, messageID int64, userIDs
 		}
 	}
 
-	logger.Debugw("read message files", "message_id", messageID, "user_ids", userIDs)
-
 	resp, err := g.client.ReadMessageFiles(ctx, &api.ReadMessageFilesRequest{
 		Id: messageID,
 		UserIds: userIDs,

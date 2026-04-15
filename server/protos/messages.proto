@@ -23,6 +23,7 @@ service Messages {
 message MessagesSnapshot {
 	oneof Item {
 		MessageSnapshotItem message = 1;
+		// FileSnapshotItem file = 2;
 		translations.v1.TranslationSnapshotItem translation = 3;
 		comments.v1.CommentSnapshotItem comment = 4;
 	}

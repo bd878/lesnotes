@@ -10,7 +10,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/internal/logger"
 )
 
 type CommentsRepository struct {
@@ -35,8 +34,6 @@ func (r *CommentsRepository) Create(ctx context.Context, id, userID, messageID i
 
 func (r *CommentsRepository) Update(ctx context.Context, id, userID int64, text *string, updatedAt string) (err error) {
 	const query = "UPDATE %s SET text = $3, updated_at = $4 WHERE id = $1 AND user_id = $2"
-
-	logger.Debugw("update", "id", id, "user_id", userID, "text", *text, "updated_at", updatedAt)
 
 	_, err = r.pool.Exec(ctx, r.table(query), id, userID, text, updatedAt)
 

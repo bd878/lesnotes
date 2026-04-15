@@ -101,6 +101,7 @@ type MessagesSnapshot_Message struct {
 }
 
 type MessagesSnapshot_Translation struct {
+	// FileSnapshotItem file = 2;
 	Translation *TranslationSnapshotItem `protobuf:"bytes,3,opt,name=translation,proto3,oneof"`
 }
 

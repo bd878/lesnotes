@@ -465,6 +465,7 @@ func (m *Distributed) ReadMessages(ctx context.Context, userID int64, limit, off
 		return
 	}
 
+	// TODO: do not load files on each message in a list
 	for _, message := range messages {
 		message.Files, err = m.filesGateway.ReadMessageFiles(ctx, message.Id, []int64{userID, message.UserId})
 		if err != nil {

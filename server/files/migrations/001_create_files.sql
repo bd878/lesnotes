@@ -1,6 +1,8 @@
 -- +goose Up
 CREATE SCHEMA IF NOT EXISTS files;
 
+GRANT CREATE ON DATABASE lesnotes TO lesnotes_admin;
+GRANT CREATE ON SCHEMA public TO lesnotes_admin;
 GRANT USAGE ON SCHEMA files TO lesnotes_admin;
 GRANT CREATE ON SCHEMA files TO lesnotes_admin;
 GRANT INSERT, UPDATE, DELETE, SELECT ON ALL TABLES IN SCHEMA files TO lesnotes_admin;
