@@ -11,6 +11,7 @@ import (
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/threads/internal/domain"
 	"github.com/bd878/gallery/server/threads/internal/machine"
+	"github.com/bd878/gallery/server/threads/internal/controller"
 	"github.com/bd878/gallery/server/threads/pkg/model"
 )
 
@@ -277,6 +278,21 @@ func (m *Distributed) ReadThread(ctx context.Context, id, userID int64, name str
 		return m.threadsRepo.ReadThreadByName(ctx, name, userID)
 	}
 	return m.threadsRepo.ReadThreadByID(ctx, id, userID)
+}
+
+func (m *Distributed) ReadParent(ctx context.Context, id, userID int64) (parent *model.Thread, err error) {
+	m.log.Debugw("read parent", "id", id, "user_id", userID)
+
+	thread, err := m.threadsRepo.ReadThreadByID(ctx, id, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	if thread.ParentID == 0 {
+		return nil, controller.ErrParentIsRoot
+	}
+
+	return m.threadsRepo.ReadThreadByID(ctx, thread.ParentID, userID)
 }
 
 func (m *Distributed) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (list []*model.Thread, isLastPage bool, err error) {

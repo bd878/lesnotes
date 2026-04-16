@@ -22,7 +22,7 @@ async function publishMessage(ctx, next) {
 		if (is.notEmpty(redirectUrl)) {
 			ctx.redirect(redirectUrl)
 		} else {
-			ctx.redirect(ctx.router.url('message', {id: form.id}, {query: ctx.query}))
+			ctx.redirect(ctx.router.url('message', {idOrName: form.id}, {query: ctx.query}))
 		}
 	}
 

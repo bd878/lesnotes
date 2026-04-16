@@ -3,6 +3,7 @@ package http
 import (
 	"io"
 	"fmt"
+	"strconv"
 	"encoding/json"
 	"net/http"
 
@@ -14,12 +15,25 @@ import (
 
 func (h *Handler) ReadFile(w http.ResponseWriter, req *http.Request) (err error) {
 	var (
-		fileName    string
+		fileID   int64
 		isPublic bool
 	)
 
-	if req.PathValue("name") != "" {
-		fileName = req.PathValue("name")
+	if req.PathValue("id") != "" {
+		value, err := strconv.Atoi(req.PathValue("id"))
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(server.ServerResponse{
+				Status: "error",
+				Error: &server.ErrorCode{
+					Code:    server.CodeWrongQuery,
+					Explain: "wrong id param",
+				},
+			})
+			return err
+		}
+
+		fileID = int64(value)
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{
@@ -52,7 +66,7 @@ func (h *Handler) ReadFile(w http.ResponseWriter, req *http.Request) (err error)
 		isPublic = false
 	}
 
-	file, stream, err := h.controller.ReadFileStream(req.Context(), 0, fileName, isPublic)
+	file, stream, err := h.controller.ReadFileStream(req.Context(), fileID, "", isPublic)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

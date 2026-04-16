@@ -14,6 +14,7 @@ class PublicMessageBuilder extends AbstractPublicBuilder {
 	messageFeatures    = undefined;
 	messageView        = undefined;
 	header             = undefined;
+	messageHeader      = undefined;
 
 	addMessageFeatures(features: Builder) {
 		this.messageFeatures = features.build()
@@ -30,11 +31,17 @@ class PublicMessageBuilder extends AbstractPublicBuilder {
 		return this
 	}
 
+	addMessageHeader(header: Builder) {
+		this.messageHeader = header.build()
+		return this
+	}
+
 	build() {
 		return mustache.render(this.isMobile ? messageTemplateMobile : messageTemplate, {}, {
 			messageView:       this.messageView,
 			messageFeatures:   this.messageFeatures,
 			header:            this.header,
+			messageHeader:     this.messageHeader,
 		})
 	}
 

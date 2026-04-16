@@ -72,7 +72,7 @@ class MessageFeaturesBuilder extends AbstractBuilder {
 	addFilesView(files: FileWithMime[]) {
 		this.filesView = mustache.render(this.isMobile ? filesViewTemplateMobile : filesViewTemplate, {
 			files:    files,
-			imgSrc:   function() { return `/files/v1/read/${this.name}` },
+			imgSrc:   function() { return `/files/v1/read/${this.ID}` },
 			fileHref: function() { return `/files/v1/download?id=${this.ID}` },
 		})
 		return this

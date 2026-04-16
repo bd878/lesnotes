@@ -1,9 +1,11 @@
 package grpc
 
 import (
+	"errors"
 	"context"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/threads/internal/controller"
 	threads "github.com/bd878/gallery/server/threads/pkg/model"
 )
 
@@ -11,6 +13,7 @@ type Controller interface {
 	ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (ids []*threads.Thread, isLastPage bool, err error)
 	ListMessages(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool, privateMessage *bool) (ids []*threads.Thread, isLastPage bool, err error)
 	ReadThread(ctx context.Context, id, userID int64, name string) (thread *threads.Thread, err error)
+	ReadParent(ctx context.Context, id, userID int64) (thread *threads.Thread, err error)
 	ResolveThread(ctx context.Context, id, userID int64) (path []*api.PathStep, err error)
 	CreateThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name, description, title string, private bool) (err error)
 	UpdateThread(ctx context.Context, id, userID int64, name, description, title *string) (err error)
@@ -102,6 +105,21 @@ func (h *Handler) Create(ctx context.Context, req *api.CreateRequest) (resp *api
 	}
 
 	resp = &api.CreateResponse{}
+
+	return
+}
+
+func (h *Handler) ReadParent(ctx context.Context, req *api.ReadParentRequest) (resp *api.ReadParentResponse, err error) {
+	parent, err := h.controller.ReadParent(ctx, req.Id, req.UserId)
+	if err != nil {
+		if errors.Is(err, controller.ErrParentIsRoot) {
+			return &api.ReadParentResponse{IsRoot: true}, nil
+		} else {
+			return nil, err
+		}
+	}
+
+	resp = &api.ReadParentResponse{Parent: threads.ThreadToProto(parent), IsRoot: false}
 
 	return
 }

@@ -253,3 +253,33 @@ func (g *Gateway) ReadThread(ctx context.Context, userID, id int64, name string)
 
 	return
 }
+
+func (g *Gateway) ReadParent(ctx context.Context, userID, id int64) (thread *model.Thread, err error) {
+	if g.isConnFailed() {
+		if err = g.setupConnection(); err != nil {
+			return
+		}
+	}
+
+	logger.Debugw("read parent", "user_id", userID, "id", id)
+
+	resp, err := g.client.ReadParent(ctx, &api.ReadParentRequest{
+		UserId: userID,
+		Id: id,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.IsRoot {
+		return &model.Thread{
+			ID: 0,
+			Name: "",
+			Private: true,
+		}, nil
+	}
+
+	thread = model.ThreadFromProto(resp.Parent)
+
+	return
+}

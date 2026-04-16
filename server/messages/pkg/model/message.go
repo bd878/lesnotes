@@ -17,6 +17,7 @@ type (
 		Translations []*TranslationPreview `json:"translations"`
 		Messages     *MessagesList         `json:"messages,omitempty"`
 		Thread       *Thread               `json:"thread,omitempty"`
+		ParentThread *Thread               `json:"parent_thread,omitempty"`
 		Text         string                `json:"text"`
 		Title        string                `json:"title"`
 		Highlight    bool                  `json:"highlight"`
@@ -24,6 +25,8 @@ type (
 	}
 
 	Thread struct {
+		ID           int64                 `json:"id"`
+		Title        string                `json:"title"`
 		Name         string                `json:"name"`
 		Private      bool                  `json:"private"`
 	}

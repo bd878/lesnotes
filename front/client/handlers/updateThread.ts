@@ -18,7 +18,7 @@ async function updateThread(ctx) {
 		ctx.body = "error"
 		return
 	} else {
-		ctx.redirect(ctx.router.url('thread', {id: form.id}, {query: ctx.query}))
+		ctx.redirect(ctx.router.url('thread', {idOrName: `${form.id}`}, {query: ctx.query}))
 	}
 
 	console.log("<-- updateThread")

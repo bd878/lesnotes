@@ -57,6 +57,7 @@ func (b *authBuilder) Handle(w http.ResponseWriter, req *http.Request) (err erro
 		user, err = b.restorePublicUser(req)
 	case nil:
 		user, err = b.restoreAuthorizedUser(req, cookie)
+		// TODO: if token is wrong, restore public user (i.e. .lesnotes.space token for stage.lesnotes.space)
 	default:
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(server.ServerResponse{

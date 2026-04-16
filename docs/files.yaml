@@ -223,12 +223,12 @@ paths:
 # END DOWNLOAD
 
 # READ
-  /files/v1/read/{name}:
+  /files/v1/read/{id}:
     parameters:
-      name:
+      id:
         in: path
         required: true
-        type: string
+        type: integer
     get:
       summary: Read file by link
       description: |

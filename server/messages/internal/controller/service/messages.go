@@ -33,6 +33,7 @@ type ThreadsGateway interface {
 	UpdateThread(ctx context.Context, id, userID int64) (err error)
 	ResolvePath(ctx context.Context, userID, id int64) (path []*api.PathStep, err error)
 	ReadThread(ctx context.Context, userID, id int64, name string) (thread *threads.Thread, err error)
+	ReadParent(ctx context.Context, userID, id int64) (thread *threads.Thread, err error)
 }
 
 type MessagesController struct {
@@ -364,6 +365,18 @@ func (s *MessagesController) ReadMessage(ctx context.Context, id int64, name str
 
 	message = model.MessageFromProto(res)
 
+	parent, err := s.threads.ReadParent(ctx, message.UserID, message.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	message.ParentThread = &model.Thread{
+		ID:  parent.ID,
+		Title: parent.Title,
+		Name: parent.Name,
+		Private: parent.Private,
+	}
+
 	return
 }
 
@@ -409,6 +422,8 @@ func (s *MessagesController) ReadPath(ctx context.Context, userID, id int64, nam
 
 	for i, message := range path {
 		message.Thread = &model.Thread{
+			ID: threads[i].Id,
+			Title: threads[i].Title,
 			Name: threads[i].Name,
 			Private: threads[i].Private,
 		}

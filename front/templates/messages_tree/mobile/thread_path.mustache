@@ -5,11 +5,23 @@
 		</li>
 	{{/path}}
 	{{#thread}}
-		<li class="mb-2 flex flex-row justify-between">
-			<a href="{{lastThreadHref}}" target="_self" class="hover:text-blue-600 flex items-center dark:hover:text-white underline cursor-pointer">{{threadTitle}}</a>
-			{{#showPublicThread}}
-				<a href="{{publicThreadHref}}" target="_blank" class="hover:text-blue-600 italic flex items-center dark:hover:text-white cursor-pointer">{{publicThreadTitle}}</a>
-			{{/showPublicThread}}
+		{{#lastThreadExternal}}
+			<li class="flex flex-row justify-between bg-gray-300 dark:bg-slate-600">
+				<a href="{{lastThreadHref}}" target="{{lastThreadTarget}}" class="grow-1 hover:text-blue-600 flex items-center dark:hover:text-white cursor-pointer">
+					{{threadTitle}}
+					<div class="ml-2">↗</div>
+				</a>
+		{{/lastThreadExternal}}
+		{{^lastThreadExternal}}
+			<li class="flex flex-row justify-between">
+				<a href="{{lastThreadHref}}" target="{{lastThreadTarget}}" class="grow-1 hover:text-blue-600 hover:stroke-blue-600 flex items-center dark:hover:text-white underline cursor-pointer">
+					{{threadTitle}}
+				</a>
+		{{/lastThreadExternal}}
+
+			{{#editPublicThread}}
+				<a href="{{editThreadHref}}" target="_self" class="hover:text-blue-600 italic flex items-center dark:hover:text-white cursor-pointer">{{editThreadTitle}}</a>
+			{{/editPublicThread}}
 		</li>
 	{{/thread}}
 </ul>

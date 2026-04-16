@@ -34,7 +34,7 @@ async function sendMessage(ctx) {
 	} else {
 		const params = new URLSearchParams(ctx.query)
 		params.set(form.thread, `${limit},0`)
-		ctx.redirect(ctx.router.url('message', {id: response.message.ID}, {query: params.toString()}))
+		ctx.redirect(ctx.router.url('message', {idOrName: response.message.ID}, {query: params.toString()}))
 	}
 
 	console.log("<-- sendMessage")

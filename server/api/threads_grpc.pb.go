@@ -20,6 +20,7 @@ type ThreadsClient interface {
 	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
 	ListMessages(ctx context.Context, in *ListMessagesRequest, opts ...grpc.CallOption) (*ListMessagesResponse, error)
 	Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*Thread, error)
+	ReadParent(ctx context.Context, in *ReadParentRequest, opts ...grpc.CallOption) (*ReadParentResponse, error)
 	Resolve(ctx context.Context, in *ResolveRequest, opts ...grpc.CallOption) (*ResolveResponse, error)
 	Publish(ctx context.Context, in *PublishRequest, opts ...grpc.CallOption) (*PublishResponse, error)
 	Private(ctx context.Context, in *PrivateRequest, opts ...grpc.CallOption) (*PrivateResponse, error)
@@ -60,6 +61,15 @@ func (c *threadsClient) ListMessages(ctx context.Context, in *ListMessagesReques
 func (c *threadsClient) Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*Thread, error) {
 	out := new(Thread)
 	err := c.cc.Invoke(ctx, "/threads.v1.Threads/Read", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *threadsClient) ReadParent(ctx context.Context, in *ReadParentRequest, opts ...grpc.CallOption) (*ReadParentResponse, error) {
+	out := new(ReadParentResponse)
+	err := c.cc.Invoke(ctx, "/threads.v1.Threads/ReadParent", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -154,6 +164,7 @@ type ThreadsServer interface {
 	List(context.Context, *ListRequest) (*ListResponse, error)
 	ListMessages(context.Context, *ListMessagesRequest) (*ListMessagesResponse, error)
 	Read(context.Context, *ReadRequest) (*Thread, error)
+	ReadParent(context.Context, *ReadParentRequest) (*ReadParentResponse, error)
 	Resolve(context.Context, *ResolveRequest) (*ResolveResponse, error)
 	Publish(context.Context, *PublishRequest) (*PublishResponse, error)
 	Private(context.Context, *PrivateRequest) (*PrivateResponse, error)
@@ -178,6 +189,9 @@ func (UnimplementedThreadsServer) ListMessages(context.Context, *ListMessagesReq
 }
 func (UnimplementedThreadsServer) Read(context.Context, *ReadRequest) (*Thread, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Read not implemented")
+}
+func (UnimplementedThreadsServer) ReadParent(context.Context, *ReadParentRequest) (*ReadParentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReadParent not implemented")
 }
 func (UnimplementedThreadsServer) Resolve(context.Context, *ResolveRequest) (*ResolveResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Resolve not implemented")
@@ -269,6 +283,24 @@ func _Threads_Read_Handler(srv interface{}, ctx context.Context, dec func(interf
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ThreadsServer).Read(ctx, req.(*ReadRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Threads_ReadParent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReadParentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ThreadsServer).ReadParent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/threads.v1.Threads/ReadParent",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ThreadsServer).ReadParent(ctx, req.(*ReadParentRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -450,6 +482,10 @@ var _Threads_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Read",
 			Handler:    _Threads_Read_Handler,
+		},
+		{
+			MethodName: "ReadParent",
+			Handler:    _Threads_ReadParent_Handler,
 		},
 		{
 			MethodName: "Resolve",

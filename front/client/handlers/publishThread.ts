@@ -17,7 +17,7 @@ async function publishThread(ctx, next) {
 		ctx.state.error = response.error.human
 		ctx.body = "error"
 	} else {
-		ctx.redirect(ctx.router.url('thread', {id: form.id}, {query: ctx.query}))
+		ctx.redirect(ctx.router.url('thread', {idOrName: form.id}, {query: ctx.query}))
 	}
 
 	console.log("<-- publishThread")

@@ -62,11 +62,13 @@ class MessagesTreeBuilder extends AbstractPublicBuilder {
 		this.threadPath = mustache.render(this.isMobile ? threadPathTemplateMobile : threadPathTemplate, {
 			path:     threadPath.slice(0, -1),
 			thread:   threadPath.slice(-1),
-			showPublicThread: function() { return isAuthed || this.thread.private == false },
-			publicThreadHref:  function() { return `/t/${this.thread.name}` },
-			publicThreadTitle: "<-- " + this.i18n("thread").toLowerCase(),
+			editPublicThread: function() { return isAuthed || this.thread.private == false },
+			editThreadHref: function() { return `/editor/threads/${this.ID}` + search },
+			editThreadTitle: this.i18n("thread").toLowerCase(),
 			threadTitle: function() { return `/${crop(this.title || this.text, 30)}` },
-			lastThreadHref:  function() { return `/threads/${this.ID}` + search },
+			lastThreadTarget: "_blank",
+			lastThreadExternal: true,
+			lastThreadHref:  function() { return `/t/${this.thread.name}` },
 			pathThreadHref: function() {
 				const params = new URLSearchParams(search);
 				switch (this.ID) {

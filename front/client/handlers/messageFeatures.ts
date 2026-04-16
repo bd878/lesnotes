@@ -44,7 +44,11 @@ async function messageFeatures(ctx, next) {
 		}
 
 	} else {
-		messageFeatures.addComments(ctx.state.message.ID, ctx.state.comments)
+		if (is.array(ctx.state.message.files) && ctx.state.message.files.length > 0) {
+			messageFeatures.addFilesView(ctx.state.message.files)
+		} else {
+			messageFeatures.addComments(ctx.state.message.ID, ctx.state.comments)
+		}
 	}
 
 	ctx.state.messageFeatures = messageFeatures

@@ -46,7 +46,7 @@ func New(cfg Config) *Server {
 	handler := httphandler.New(grpcCtrl)
 
 	mux.Handle("GET /files/v1/download",         middleware.Build(handler.DownloadFile))
-	mux.Handle("GET /files/v1/read/{name}",      middleware.Build(handler.ReadFile))
+	mux.Handle("GET /files/v1/read/{id}",        middleware.Build(handler.ReadFile))
 	mux.Handle("POST /files/v1/upload",          middleware.Build(handler.UploadFile))
 
 	middleware.NoAuth()

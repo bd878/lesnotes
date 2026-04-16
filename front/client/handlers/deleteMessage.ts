@@ -22,7 +22,7 @@ async function deleteMessage(ctx) {
 		if (is.notEmpty(redirectUrl)) {
 			ctx.redirect(redirectUrl)
 		} else {
-			ctx.redirect(ctx.router.url('home', {id: form.id}, {query: ctx.query}))
+			ctx.redirect(ctx.router.url('home', {idOrName: form.id}, {query: ctx.query}))
 		}
 	}
 

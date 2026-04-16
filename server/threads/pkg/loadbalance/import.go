@@ -8,7 +8,8 @@ func init() {
 		Name,
 		[]string{"Create", "Delete", "Publish",
 			"Private", "Update", "Reorder"},
-		[]string{"Resolve", "Read", "Count", "List"},
+		[]string{"Resolve", "Read", "Count", "CountMessages",
+			"List", "ListMessages", "ReadParent"},
 	)
 }
 

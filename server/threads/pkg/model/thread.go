@@ -19,6 +19,7 @@ type (
 
 	PathStep struct {
 		ID               int64        `json:"id"`
+		Title            string       `json:"title"`
 		Name             string       `json:"name"`
 		Private          bool         `json:"private"`
 	}

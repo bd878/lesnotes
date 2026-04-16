@@ -44,6 +44,8 @@ async function loadMessage(ctx, next) {
 		ctx.state.message = EmptyReadMessage.message
 	}
 
+	console.log("message", ctx.state.message)
+
 	await next()
 
 	console.log("<-- loadMessage")

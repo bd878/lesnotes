@@ -27,7 +27,7 @@ async function updateMessage(ctx) {
 		ctx.state.error = response.error.human
 		ctx.body = "error"
 	} else {
-		ctx.redirect(ctx.router.url('message', {id: form.id}, {query: ctx.query}))
+		ctx.redirect(ctx.router.url('message', {idOrName: form.id}, {query: ctx.query}))
 	}
 
 	console.log("<-- updateMessage")

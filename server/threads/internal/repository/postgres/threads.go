@@ -678,7 +678,7 @@ func (r *ThreadsRepository) DeleteThread(ctx context.Context, id, userID int64) 
 }
 
 func (r *ThreadsRepository) ResolveThread(ctx context.Context, id, userID int64) (path []*api.PathStep, err error) {
-	const query = "SELECT name, private, parent_id FROM %s WHERE user_id = $1 AND id = $2"
+	const query = "SELECT name, private, parent_id, title FROM %s WHERE user_id = $1 AND id = $2"
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
@@ -708,7 +708,7 @@ func (r *ThreadsRepository) ResolveThread(ctx context.Context, id, userID int64)
 
 		step := &api.PathStep{Id: threadID}
 
-		err = tx.QueryRow(ctx, r.table(query), userID, threadID).Scan(&step.Name, &step.Private, &parentID)
+		err = tx.QueryRow(ctx, r.table(query), userID, threadID).Scan(&step.Name, &step.Private, &parentID, &step.Title)
 		if err != nil {
 			return
 		}
