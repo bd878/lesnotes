@@ -42,7 +42,7 @@ class PublicThreadMessageBuilder extends AbstractPublicBuilder {
 
 	build() {
 		return mustache.render(this.isMobile ? threadMessageTemplateMobile : threadMessageTemplate, {
-			hasMessage:        this.messageView != undefined,
+			hasContent:        this.messageView != undefined,
 		}, {
 			header:            this.header,
 			messagesTree:      this.tree,

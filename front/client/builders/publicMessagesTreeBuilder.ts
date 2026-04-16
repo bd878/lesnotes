@@ -23,6 +23,7 @@ class PublicMessagesTreeBuilder extends AbstractPublicBuilder {
 		const search = this.search
 		const path = this.path
 		const threadName = this.threadName
+		const isAuthed = this.isAuthed
 
 		const close = ((new URLSearchParams(search)).get("close") || "").split(",").map(parseFloat).filter(v => !isNaN(v))
 
@@ -35,7 +36,7 @@ class PublicMessagesTreeBuilder extends AbstractPublicBuilder {
 			offset:            tree.offset,
 			count:             tree.count,
 			messages:          tree.messages,
-			isAuthed:          this.isAuthed,
+			showThreadLink:    function() { return isAuthed || !this.thread.private },
 
 			hasMessages:       function() { return this.messages.messages.length > 0 },
 			isFolded:          function() { return this.messages.messages.length > 0 },
@@ -44,7 +45,7 @@ class PublicMessagesTreeBuilder extends AbstractPublicBuilder {
 			showCounter:       function() { return this.count > 0 },
 
 			messageHref:       function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); return `/t/${threadName}/${this.name}?` + params.toString(); },
-			openThreadHref:    function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); return `/t/${this.name}?` + params.toString(); },
+			openThreadHref:    function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); return `/t/${this.thread.name}?` + params.toString(); },
 			unfoldHref:        function() { const params = new URLSearchParams(search); params.set(this.ID || 0, `${limit},0`); return path + "?" + params.toString(); },
 			foldHref:          function() { const params = new URLSearchParams(search); params.delete(this.ID || 0); return path + "?" + params.toString(); },
 			prevPageHref:      function() { const params = new URLSearchParams(search); params.set(this.ID || 0, `${limit},${limit + this.offset}`); return path + "?" + params.toString(); },

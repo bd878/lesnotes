@@ -3,6 +3,7 @@ import PublicThreadBuilder from '../builders/publicThreadBuilder'
 import LayoutBuilder from '../builders/layoutBuilder';
 import AuthBuilder from '../builders/authBuilder';
 import HeaderBuilder from '../builders/headerBuilder';
+import ThreadViewBuilder from '../builders/threadViewBuilder';
 import PublicMessagesTreeBuilder from '../builders/publicMessagesTreeBuilder';
 
 async function publicThread(ctx) {
@@ -16,6 +17,8 @@ async function publicThread(ctx) {
 	const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const tree = new PublicMessagesTreeBuilder(ctx.state.isAuthed, ctx.state.threadName, ctx.state.messageName, ctx.userAgent.isMobile,
 		ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const view = new ThreadViewBuilder(ctx.state.isAuthed, ctx.state.threadName, ctx.state.messageName,
+		ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
 	const params = new URLSearchParams(ctx.search)
 	params.set("cwd", ctx.state.thread.ID)
@@ -27,6 +30,10 @@ async function publicThread(ctx) {
 				.addMessagesTree(
 					tree
 						.addList(ctx.state.tree)
+						.addThread(ctx.state.thread)
+				)
+				.addThreadView(
+					view
 						.addThread(ctx.state.thread)
 				)
 				.addControlPanel(panel.addAuth(ctx.state.isAuthed ? auth.addLogout() : auth.addLogin()))

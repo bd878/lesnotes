@@ -273,6 +273,19 @@ func (s *MessagesController) ReadThreadMessages(ctx context.Context, userID, thr
 
 	for i, message := range messages {
 		message.Count = threadsList[i].Count
+
+		thread, err := s.threads.ReadThread(ctx, message.UserID, message.ID, "")
+		if err != nil {
+			return nil, err
+		}
+
+		// TODO: move to message mapper, this mapping is duplicated here
+		message.Thread = &model.Thread{
+			ID: thread.ID,
+			Title: thread.Title,
+			Private: thread.Private,
+			Name: thread.Name,
+		}
 	}
 
 	list = &model.MessagesList{
@@ -619,9 +632,21 @@ func (s *MessagesController) resolveTree(ctx context.Context, highlightMap *idMa
 			return
 		}
 
+		thread, err := s.threads.ReadThread(ctx, message.UserID, message.ID, "")
+		if err != nil {
+			return err
+		}
+
+		message.Thread = &model.Thread{
+			ID: thread.ID,
+			Title: thread.Title,
+			Private: thread.Private,
+			Name: thread.Name,
+		}
+
 		err = s.resolveTree(ctx, highlightMap, message.Messages, map1, privateMessage)
 		if err != nil {
-			return
+			return err
 		}
 	}
 

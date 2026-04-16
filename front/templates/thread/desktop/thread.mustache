@@ -7,17 +7,20 @@
 		{{> controlPanel}}
 	</div>
 
-	{{#hasMessage}}
+	{{#hasContent}}
 		<div class="w-full min-w-md max-w-2xl flex flex-row mr-8">
 			<div class="flex flex-col grow-2 w-full">
 				<div class="flex flex-col grow p-2 border border-1 border-solid rounded-md h-full">
 					{{> messageView}}
+					{{> threadView}}
 				</div>
 			</div>
 		</div>
-	{{/hasMessage}}
+	{{/hasContent}}
 
-	<div class="h-full flex flex-col max-w-2xl min-w-md w-full overflow-x-hidden">
-		{{> messageFeatures}}
-	</div>
+	{{#messageView}}
+		<div class="h-full flex flex-col max-w-2xl min-w-md w-full overflow-x-hidden">
+			{{> messageFeatures}}
+		</div>
+	{{/messageView}}
 </div>

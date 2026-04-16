@@ -34,7 +34,7 @@ class MessagesTreeBuilder extends AbstractPublicBuilder {
 			offset:            tree.offset,
 			count:             tree.count,
 			messages:          tree.messages,
-			isAuthed:          true,
+			showThreadLink:    true,
 
 			hasMessages:       function() { return this.messages.messages.length > 0 },
 			isFolded:          function() { return this.messages.messages.length > 0 },

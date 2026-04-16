@@ -11,7 +11,8 @@ async function threadView(ctx) {
 	console.log("--> threadView")
 
 	const panel = new ControlPanelBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
-	const thread = new ThreadViewBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const view = new ThreadViewBuilder(ctx.state.isAuthed, ctx.state.threadName, ctx.state.messageName,
+		ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const content = new HomeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
@@ -29,7 +30,7 @@ async function threadView(ctx) {
 						.addThreadPath(ctx.state.cwdPath)
 						.addList(ctx.state.tree)
 				)
-				.addThreadView(thread.addThread(ctx.state.thread))
+				.addThreadView(view.addThread(ctx.state.thread))
 				.addMessageHeader(messageHeader.addMessagePath(ctx.state.messagePath))
 				.addHeader(header.addNewNote("/home" + ctx.search))
 				.addControlPanel(panel.addAuth(auth.addLogout()))

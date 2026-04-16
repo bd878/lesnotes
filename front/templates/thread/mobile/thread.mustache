@@ -3,22 +3,25 @@
 		{{> sidebar}}
 	</div>
 
-	{{#message}}
+	{{#hasContent}}
 		<div class="w-full flex px-5 flex-row mb-3">
 			<div class="flex flex-col grow-2 w-full">
 				{{> translations}}
 				<div class="flex flex-col grow p-2 mb-2 border border-1 border-solid rounded-md">
 					{{> messageView}}
+					{{> threadView}}
 				</div>
 			</div>
 		</div>
 
-		<div class="px-5 flex flex-col">
-			{{> messageNavigation}}
-			{{> filesView}}
-			{{> comments}}
-		</div>
-	{{/message}}
+		{{#messageView}}
+			<div class="px-5 flex flex-col">
+				{{> messageNavigation}}
+				{{> filesView}}
+				{{> comments}}
+			</div>
+		{{/messageView}}
+	{{/hasContent}}
 
 	<div class="flex flex-col px-5 overflow-x-hidden w-full">
 		<div class="flex flex-col overflow-x-hidden">
