@@ -49,9 +49,9 @@ import logout from './logout';
 import getMe from './getMe';
 import getMeJson from './getMeJson';
 import signup from './signup';
-import {getFileDownloadUrl, getMessageLinkUrl} from './api';
+import {getFileDownloadUrl} from './api';
 
-export {getFileDownloadUrl, getMessageLinkUrl}
+export {getFileDownloadUrl}
 export default {
 	signup,
 	login,
@@ -100,7 +100,6 @@ export default {
 	moveMessage,
 	uploadFile,
 	getFileDownloadUrl,
-	getMessageLinkUrl,
 	validateMiniappData,
 	validateTgAuthData,
 	searchMessagesJson,

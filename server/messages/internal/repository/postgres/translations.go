@@ -49,7 +49,7 @@ func (r *TranslationsRepository) ReadTranslation(ctx context.Context, messageID 
 	var createdAt, updatedAt time.Time
 
 	translation = &api.Translation{
-		MessageId: messageID,
+		Id:        messageID,
 		Lang:      lang,
 	}
 
@@ -76,7 +76,7 @@ func (r *TranslationsRepository) ListTranslations(ctx context.Context, messageID
 	translations = make([]*api.Translation, 0)
 	for rows.Next() {
 		translation := &api.Translation{
-			MessageId: messageID,
+			Id:  messageID,
 		}
 
 		var createdAt, updatedAt time.Time
@@ -109,7 +109,7 @@ func (r *TranslationsRepository) ReadMessageTranslations(ctx context.Context, me
 	previews = make([]*api.TranslationPreview, 0)
 	for rows.Next() {
 		preview := &api.TranslationPreview{
-			MessageId: messageID,
+			Id: messageID,
 		}
 
 		var createdAt, updatedAt time.Time

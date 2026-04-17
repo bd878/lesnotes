@@ -123,7 +123,7 @@ func (r *Dumper) runTranslations() {
 		translation := &api.TranslationSnapshotItem{}
 
 		var createdAt, updatedAt *time.Time
-		err = rows.Scan(&translation.MessageId, &translation.Lang, &translation.Text,
+		err = rows.Scan(&translation.Id, &translation.Lang, &translation.Text,
 			&translation.Title, &createdAt, &updatedAt)
 		if err != nil {
 			logger.Errorln(err)
@@ -226,7 +226,7 @@ func (r *Dumper) Restore(ctx context.Context, snapshot *api.MessagesSnapshot) (e
 
 		query := "INSERT INTO %s(message_id, lang, text, title, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6)"
 
-		_, err = r.pool.Exec(ctx, r.translationsTable(query), v.Translation.MessageId, v.Translation.Lang, v.Translation.Text,
+		_, err = r.pool.Exec(ctx, r.translationsTable(query), v.Translation.Id, v.Translation.Lang, v.Translation.Text,
 			v.Translation.Title, v.Translation.CreatedAt, v.Translation.UpdatedAt)
 
 		return

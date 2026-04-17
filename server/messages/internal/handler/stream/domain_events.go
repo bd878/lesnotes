@@ -157,7 +157,7 @@ func (h domainHandler[T]) onMessagesPublish(ctx context.Context, event ddd.Event
 func (h domainHandler[T]) onTranslationCreated(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.TranslationCreated)
 	data, err := proto.Marshal(&api.TranslationCreated{
-		MessageId: payload.MessageID,
+		Id:        payload.MessageID,
 		UserId:    payload.UserID,
 		Lang:      payload.Lang,
 		Text:      payload.Text,
@@ -175,7 +175,7 @@ func (h domainHandler[T]) onTranslationCreated(ctx context.Context, event ddd.Ev
 func (h domainHandler[T]) onTranslationDeleted(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.TranslationDeleted)
 	data, err := proto.Marshal(&api.TranslationDeleted{
-		MessageId: payload.MessageID,
+		Id:        payload.MessageID,
 		Lang:      payload.Lang,
 	})
 	if err != nil {
@@ -188,7 +188,7 @@ func (h domainHandler[T]) onTranslationDeleted(ctx context.Context, event ddd.Ev
 func (h domainHandler[T]) onTranslationUpdated(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.TranslationUpdated)
 	data, err := proto.Marshal(&api.TranslationUpdated{
-		MessageId: payload.MessageID,
+		Id:        payload.MessageID,
 		Lang:      payload.Lang,
 		Text:      payload.Text,
 		Title:     payload.Title,

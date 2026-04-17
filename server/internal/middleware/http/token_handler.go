@@ -97,6 +97,12 @@ func (b *tokenAuthBuilder) handleJson(w http.ResponseWriter, req *http.Request) 
 
 	if request.Token != "" {
 		user, err = b.restoreAuthorizedUser(w, req, request.Token)
+		// if token is wrong, restore public user (i.e. .lesnotes.space token for stage.lesnotes.space)
+		// TODO: precise error
+		if err != nil {
+			logger.Errorln(err)
+			user, err = b.restorePublicUser(w, req)
+		}
 	} else {
 		user, err = b.restorePublicUser(w, req)
 	}

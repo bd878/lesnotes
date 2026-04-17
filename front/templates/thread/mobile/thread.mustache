@@ -14,13 +14,11 @@
 			</div>
 		</div>
 
-		{{#messageView}}
-			<div class="px-5 flex flex-col">
-				{{> messageNavigation}}
-				{{> filesView}}
-				{{> comments}}
-			</div>
-		{{/messageView}}
+		<div class="px-5 flex flex-col">
+			{{> messageNavigation}}
+			{{> filesView}}
+			{{> comments}}
+		</div>
 	{{/hasContent}}
 
 	<div class="flex flex-col px-5 overflow-x-hidden w-full">

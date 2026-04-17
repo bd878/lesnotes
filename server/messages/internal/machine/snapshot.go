@@ -93,7 +93,7 @@ func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
 		case *api.MessagesSnapshot_Message:
 			logger.Debugw("message snapshot", "id", v.Message.Id)
 		case *api.MessagesSnapshot_Translation:
-			logger.Debugw("translation snapshot", "message_id", v.Translation.MessageId)
+			logger.Debugw("translation snapshot", "message_id", v.Translation.Id)
 		case *api.MessagesSnapshot_Comment:
 			logger.Debugw("comment snapshot", "id", v.Comment.Id)
 		default:

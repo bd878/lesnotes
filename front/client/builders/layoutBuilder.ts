@@ -29,6 +29,9 @@ class LayoutBuilder extends AbstractBuilder {
 			terms:            this.i18n("terms"),
 			contact:          this.i18n("contact"),
 			docs:             this.i18n("docs"),
+			termsHref:        "/terms" + this.search,
+			contactHref:      "/contact" + this.search,
+			docsHref:         "/docs" + this.search,
 		})
 		return this
 	}

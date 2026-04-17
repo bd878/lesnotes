@@ -61,10 +61,16 @@ class PublicMessagesTreeBuilder extends AbstractPublicBuilder {
 		const search = this.search
 		const isAuthed = this.isAuthed
 		this.threadPath = mustache.render(this.isMobile ? threadPathTemplateMobile : threadPathTemplate, {
-			thread:   thread,
+			lastMessage:   thread,
+			threadPrivate: function() { return this.private },
 			editPublicThread: function() { return isAuthed },
-			editThreadHref: function() { return `/editor/threads/${this.ID}` + search },
-			editThreadTitle: this.i18n("thread").toLowerCase(),
+			editThreadHref: function() { return `/editor/messages/${this.ID}` + search },
+
+			publishThreadAction: "/t/publish" + this.search,
+			privateThreadAction: "/t/private" + this.search,
+			publishThreadTitle: this.i18n("publishThread"),
+			privateThreadTitle: this.i18n("privateThread"),
+
 			lastThreadTarget: "_self",
 			lastThreadExternal: false,
 			lastThreadHref: function() { return `/t/${this.name}` + search },

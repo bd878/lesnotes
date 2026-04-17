@@ -21,10 +21,6 @@ function getFileDownloadUrl(url: string) {
 	return getFullUrl(url, false);
 }
 
-function getMessageLinkUrl(userId: string, id: string) {
-	return getFullUrl(`/m/${userId}/${id}`, false)
-}
-
 function appendQueryParams(url: string, queryParams): string {
 	if (!queryParams)
 		return url;
@@ -66,7 +62,7 @@ function getOptions(props): any {
 	};
 }
 
-export {getFileDownloadUrl, getMessageLinkUrl};
+export {getFileDownloadUrl};
 
 export default function api(url, props: any = {}): Promise<any> {
 	const { isFullUrl = false, queryParams } = props;

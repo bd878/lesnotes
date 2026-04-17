@@ -13,7 +13,7 @@ service Translations {
 }
 
 message TranslationSnapshotItem {
-	int64     message_id = 1;
+	int64     id = 1;
 	string    lang = 2;
 	string    text = 3;
 	string    title = 4;
@@ -22,7 +22,7 @@ message TranslationSnapshotItem {
 }
 
 message Translation {
-	int64     message_id = 1;
+	int64     id = 1;
 	string    lang = 2;
 	string    text = 3;
 	string    title = 4;
@@ -31,7 +31,7 @@ message Translation {
 }
 
 message TranslationPreview {
-	int64     message_id = 1;
+	int64     id = 1;
 	string    lang = 2;
 	string    title = 3;
 	string    created_at = 4;
@@ -39,7 +39,7 @@ message TranslationPreview {
 }
 
 message SaveTranslationRequest {
-	int64     message_id = 1;
+	int64     id = 1;
 	string    lang = 2;
 	string    text = 3;
 	string    title = 4;
@@ -49,7 +49,7 @@ message SaveTranslationRequest {
 message SaveTranslationResponse {}
 
 message UpdateTranslationRequest {
-	int64     message_id = 1;
+	int64     id = 1;
 	string    lang = 2;
 	optional string text = 3;
 	optional string title = 4;
@@ -58,7 +58,7 @@ message UpdateTranslationRequest {
 message UpdateTranslationResponse {}
 
 message DeleteTranslationRequest {
-	int64     message_id = 1;
+	int64     id = 1;
 	string    lang = 2;
 }
 
@@ -66,7 +66,7 @@ message DeleteTranslationResponse {}
 
 message ReadTranslationRequest {
 	int64     user_id = 1;
-	int64     message_id = 2;
+	int64     id = 2;
 	string    lang = 3;
 	optional string  name = 4;
 }
@@ -76,7 +76,7 @@ message ReadTranslationResponse {
 }
 
 message ListTranslationsRequest {
-	int64     message_id = 1;
+	int64     id = 1;
 	string    name = 2;
 	int64     user_id = 3;
 }

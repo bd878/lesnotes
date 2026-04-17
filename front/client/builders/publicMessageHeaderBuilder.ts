@@ -18,6 +18,10 @@ class PublicMessageHeaderBuilder extends AbstractPublicBuilder {
 			return this
 		}
 
+		if (identity.id == 0) {
+			return this
+		}
+
 		this.threadLink = "/t/" + identity.name + this.search
 		this.threadTitle = identity.title
 

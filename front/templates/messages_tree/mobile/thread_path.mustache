@@ -4,7 +4,7 @@
 			<a href="{{pathThreadHref}}" target="_self" class="hover:text-blue-600 flex items-center dark:hover:text-white underline cursor-pointer">{{threadTitle}}</a>
 		</li>
 	{{/path}}
-	{{#thread}}
+	{{#lastMessage}}
 		{{#lastThreadExternal}}
 			<li class="flex flex-row justify-between bg-gray-300 dark:bg-slate-600">
 				<a href="{{lastThreadHref}}" target="{{lastThreadTarget}}" class="grow-1 hover:text-blue-600 flex items-center dark:hover:text-white cursor-pointer">
@@ -23,5 +23,5 @@
 				<a href="{{editThreadHref}}" target="_self" class="hover:text-blue-600 italic flex items-center dark:hover:text-white cursor-pointer">{{editThreadTitle}}</a>
 			{{/editPublicThread}}
 		</li>
-	{{/thread}}
+	{{/lastMessage}}
 </ul>

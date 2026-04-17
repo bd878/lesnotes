@@ -26,7 +26,7 @@ func NewTranslationsHandler(ctrl TranslationsController) *TranslationsHandler {
 }
 
 func (h *TranslationsHandler) SaveTranslation(ctx context.Context, req *api.SaveTranslationRequest) (resp *api.SaveTranslationResponse, err error) {
-	err = h.controller.SaveTranslation(ctx, req.UserId, req.MessageId, req.Lang, req.Title, req.Text)
+	err = h.controller.SaveTranslation(ctx, req.UserId, req.Id, req.Lang, req.Title, req.Text)
 
 	resp = &api.SaveTranslationResponse{}
 
@@ -34,7 +34,7 @@ func (h *TranslationsHandler) SaveTranslation(ctx context.Context, req *api.Save
 }
 
 func (h *TranslationsHandler) UpdateTranslation(ctx context.Context, req *api.UpdateTranslationRequest) (resp *api.UpdateTranslationResponse, err error) {
-	err = h.controller.UpdateTranslation(ctx, req.MessageId, req.Lang, req.Title, req.Text)
+	err = h.controller.UpdateTranslation(ctx, req.Id, req.Lang, req.Title, req.Text)
 
 	resp = &api.UpdateTranslationResponse{}
 
@@ -42,7 +42,7 @@ func (h *TranslationsHandler) UpdateTranslation(ctx context.Context, req *api.Up
 }
 
 func (h *TranslationsHandler) DeleteTranslation(ctx context.Context, req *api.DeleteTranslationRequest) (resp *api.DeleteTranslationResponse, err error) {
-	err = h.controller.DeleteTranslation(ctx, req.MessageId, req.Lang)
+	err = h.controller.DeleteTranslation(ctx, req.Id, req.Lang)
 
 	resp = &api.DeleteTranslationResponse{}
 
@@ -55,7 +55,7 @@ func (h *TranslationsHandler) ReadTranslation(ctx context.Context, req *api.Read
 		name = *req.Name
 	}
 
-	translation, err := h.controller.ReadTranslation(ctx, req.UserId, req.MessageId, req.Lang, name)
+	translation, err := h.controller.ReadTranslation(ctx, req.UserId, req.Id, req.Lang, name)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func (h *TranslationsHandler) ReadTranslation(ctx context.Context, req *api.Read
 }
 
 func (h *TranslationsHandler) ListTranslations(ctx context.Context, req *api.ListTranslationsRequest) (resp *api.ListTranslationsResponse, err error) {
-	translations, err := h.controller.ListTranslations(ctx, req.UserId, req.MessageId, req.Name)
+	translations, err := h.controller.ListTranslations(ctx, req.UserId, req.Id, req.Name)
 	if err != nil {
 		return nil, err
 	}

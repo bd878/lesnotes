@@ -80,7 +80,7 @@ func (s *TranslationsController) SaveTranslation(ctx context.Context, userID, me
 	logger.Debugw("save translation", "user_id", userID, "message_id", messageID, "lang", lang, "title", title, "text", text)
 
 	_, err = s.client.SaveTranslation(ctx, &api.SaveTranslationRequest{
-		MessageId: messageID,
+		Id:        messageID,
 		UserId:    userID,
 		Lang:      lang,
 		Title:     title,
@@ -100,7 +100,7 @@ func (s *TranslationsController) UpdateTranslation(ctx context.Context, messageI
 	logger.Debugw("update translation", "message_id", messageID, "lang", lang, "title", title, "text", text)
 
 	_, err = s.client.UpdateTranslation(ctx, &api.UpdateTranslationRequest{
-		MessageId: messageID,
+		Id:        messageID,
 		Lang:      lang,
 		Title:     title,
 		Text:      text,
@@ -119,7 +119,7 @@ func (s *TranslationsController) DeleteTranslation(ctx context.Context, messageI
 	logger.Debugw("delete translation", "message_id", messageID, "lang", lang)
 
 	_, err = s.client.DeleteTranslation(ctx, &api.DeleteTranslationRequest{
-		MessageId: messageID,
+		Id:        messageID,
 		Lang:      lang,
 	})
 
@@ -137,7 +137,7 @@ func (s *TranslationsController) ReadTranslation(ctx context.Context, userID, me
 
 	resp, err := s.client.ReadTranslation(ctx, &api.ReadTranslationRequest{
 		UserId:    userID,
-		MessageId: messageID,
+		Id:        messageID,
 		Lang:      lang,
 		Name:      name,
 	})
@@ -161,7 +161,7 @@ func (s *TranslationsController) ListTranslations(ctx context.Context, userID, m
 
 	resp, err := s.client.ListTranslations(ctx, &api.ListTranslationsRequest{
 		UserId:    userID,
-		MessageId: messageID,
+		Id:        messageID,
 		Name:      name,
 	})
 	if err != nil {

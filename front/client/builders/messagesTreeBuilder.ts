@@ -56,28 +56,31 @@ class MessagesTreeBuilder extends AbstractPublicBuilder {
 
 	addThreadPath(threadPath: Message[]) {
 		const search = this.search
-		const path = this.path
+		const urlPath = this.path
 		const isAuthed = this.isAuthed
 
 		this.threadPath = mustache.render(this.isMobile ? threadPathTemplateMobile : threadPathTemplate, {
 			path:     threadPath.slice(0, -1),
-			thread:   threadPath.slice(-1),
-			editPublicThread: function() { return isAuthed || this.thread.private == false },
-			editThreadHref: function() { return `/editor/threads/${this.ID}` + search },
-			editThreadTitle: this.i18n("thread").toLowerCase(),
+			lastMessage:   threadPath.slice(-1),
+			editPublicThread: this.isAuthed,
+			threadPrivate: function() { return this.thread.private },
+			publishThreadAction: "/t/publish" + this.search,
+			privateThreadAction: "/t/private" + this.search,
+			publishThreadTitle: this.i18n("publishThread"),
+			privateThreadTitle: this.i18n("privateThread"),
 			threadTitle: function() { return `/${crop(this.title || this.text, 30)}` },
 			lastThreadTarget: "_blank",
-			lastThreadExternal: true,
+			lastThreadExternal: function() { return !this.thread.private },
 			lastThreadHref:  function() { return `/t/${this.thread.name}` },
 			pathThreadHref: function() {
 				const params = new URLSearchParams(search);
 				switch (this.ID) {
 				case 0:
 					params.delete("cwd")
-					return path + "?" + params.toString()
+					return urlPath + "?" + params.toString()
 				default:
 					params.set("cwd", this.ID)
-					return path + "?" + params.toString()
+					return urlPath + "?" + params.toString()
 				}
 			},
 		})

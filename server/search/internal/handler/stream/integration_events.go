@@ -279,7 +279,7 @@ func (h integrationHandlers) handleTranslationCreated(ctx context.Context, msg a
 		return err
 	}
 
-	return h.translations.SaveTranslation(ctx, m.GetUserId(), m.GetMessageId(),
+	return h.translations.SaveTranslation(ctx, m.GetUserId(), m.GetId(),
 		m.GetLang(), m.GetTitle(), m.GetText(), m.GetCreatedAt(), m.GetUpdatedAt())
 }
 
@@ -289,7 +289,7 @@ func (h integrationHandlers) handleTranslationDeleted(ctx context.Context, msg a
 		return err
 	}
 
-	return h.translations.DeleteTranslation(ctx, m.GetMessageId(), m.GetLang())
+	return h.translations.DeleteTranslation(ctx, m.GetId(), m.GetLang())
 }
 
 func (h integrationHandlers) handleTranslationUpdated(ctx context.Context, msg am.IncomingMessage) error {
@@ -298,5 +298,5 @@ func (h integrationHandlers) handleTranslationUpdated(ctx context.Context, msg a
 		return err
 	}
 
-	return h.translations.UpdateTranslation(ctx, m.GetMessageId(), m.GetLang(), m.Title, m.Text, m.GetUpdatedAt())
+	return h.translations.UpdateTranslation(ctx, m.GetId(), m.GetLang(), m.Title, m.Text, m.GetUpdatedAt())
 }

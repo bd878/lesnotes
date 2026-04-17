@@ -39,7 +39,7 @@ func MessageToProto(msg *Message) *api.Message {
 
 func TranslationFromProto(proto *api.Translation) *Translation {
 	return &Translation{
-		MessageID: proto.MessageId,
+		MessageID: proto.Id,
 		Lang:      proto.Lang,
 		Title:     proto.Title,
 		Text:      proto.Text,
@@ -50,7 +50,7 @@ func TranslationFromProto(proto *api.Translation) *Translation {
 
 func TranslationToProto(translation *Translation) *api.Translation {
 	return &api.Translation{
-		MessageId: translation.MessageID,
+		Id:        translation.MessageID,
 		Lang:      translation.Lang,
 		Title:     translation.Title,
 		Text:      translation.Text,
@@ -85,7 +85,7 @@ func CommentToProto(comment *Comment) *api.Comment {
 
 func TranslationPreviewFromProto(proto *api.TranslationPreview) *TranslationPreview {
 	return &TranslationPreview{
-		MessageID: proto.MessageId,
+		MessageID: proto.Id,
 		Lang:      proto.Lang,
 		Title:     proto.Title,
 		CreatedAt: proto.CreatedAt,
@@ -95,7 +95,7 @@ func TranslationPreviewFromProto(proto *api.TranslationPreview) *TranslationPrev
 
 func TranslationPreviewToProto(preview *TranslationPreview) *api.TranslationPreview {
 	return &api.TranslationPreview{
-		MessageId: preview.MessageID,
+		Id:        preview.MessageID,
 		Lang:      preview.Lang,
 		Title:     preview.Title,
 		CreatedAt: preview.CreatedAt,
