@@ -23,7 +23,7 @@ type MessagesClient interface {
 	PublishMessages(ctx context.Context, in *PublishMessagesRequest, opts ...grpc.CallOption) (*PublishMessagesResponse, error)
 	PrivateMessages(ctx context.Context, in *PrivateMessagesRequest, opts ...grpc.CallOption) (*PrivateMessagesResponse, error)
 	UpdateMessage(ctx context.Context, in *UpdateMessageRequest, opts ...grpc.CallOption) (*UpdateMessageResponse, error)
-	ReadMessage(ctx context.Context, in *ReadMessageRequest, opts ...grpc.CallOption) (*Message, error)
+	ReadMessage(ctx context.Context, in *ReadMessageRequest, opts ...grpc.CallOption) (*ReadMessageResponse, error)
 	ReadMessages(ctx context.Context, in *ReadMessagesRequest, opts ...grpc.CallOption) (*ReadMessagesResponse, error)
 	ReadBatchMessages(ctx context.Context, in *ReadBatchMessagesRequest, opts ...grpc.CallOption) (*ReadBatchMessagesResponse, error)
 }
@@ -90,8 +90,8 @@ func (c *messagesClient) UpdateMessage(ctx context.Context, in *UpdateMessageReq
 	return out, nil
 }
 
-func (c *messagesClient) ReadMessage(ctx context.Context, in *ReadMessageRequest, opts ...grpc.CallOption) (*Message, error) {
-	out := new(Message)
+func (c *messagesClient) ReadMessage(ctx context.Context, in *ReadMessageRequest, opts ...grpc.CallOption) (*ReadMessageResponse, error) {
+	out := new(ReadMessageResponse)
 	err := c.cc.Invoke(ctx, "/messages.v1.Messages/ReadMessage", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -127,7 +127,7 @@ type MessagesServer interface {
 	PublishMessages(context.Context, *PublishMessagesRequest) (*PublishMessagesResponse, error)
 	PrivateMessages(context.Context, *PrivateMessagesRequest) (*PrivateMessagesResponse, error)
 	UpdateMessage(context.Context, *UpdateMessageRequest) (*UpdateMessageResponse, error)
-	ReadMessage(context.Context, *ReadMessageRequest) (*Message, error)
+	ReadMessage(context.Context, *ReadMessageRequest) (*ReadMessageResponse, error)
 	ReadMessages(context.Context, *ReadMessagesRequest) (*ReadMessagesResponse, error)
 	ReadBatchMessages(context.Context, *ReadBatchMessagesRequest) (*ReadBatchMessagesResponse, error)
 	mustEmbedUnimplementedMessagesServer()
@@ -155,7 +155,7 @@ func (UnimplementedMessagesServer) PrivateMessages(context.Context, *PrivateMess
 func (UnimplementedMessagesServer) UpdateMessage(context.Context, *UpdateMessageRequest) (*UpdateMessageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateMessage not implemented")
 }
-func (UnimplementedMessagesServer) ReadMessage(context.Context, *ReadMessageRequest) (*Message, error) {
+func (UnimplementedMessagesServer) ReadMessage(context.Context, *ReadMessageRequest) (*ReadMessageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadMessage not implemented")
 }
 func (UnimplementedMessagesServer) ReadMessages(context.Context, *ReadMessagesRequest) (*ReadMessagesResponse, error) {

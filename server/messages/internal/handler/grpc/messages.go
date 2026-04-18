@@ -2,8 +2,10 @@ package grpc
 
 import (
 	"context"
+	"errors"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/messages/internal/controller"
 )
 
 type MessagesController interface {
@@ -119,6 +121,15 @@ func (h *MessagesHandler) GetServers(ctx context.Context, _ *api.GetServersReque
 	return
 }
 
-func (h *MessagesHandler) ReadMessage(ctx context.Context, req *api.ReadMessageRequest) (resp *api.Message, err error) {
-	return h.controller.ReadMessage(ctx, req.Id, req.Name, req.UserIds)
+func (h *MessagesHandler) ReadMessage(ctx context.Context, req *api.ReadMessageRequest) (resp *api.ReadMessageResponse, err error) {
+	message, err := h.controller.ReadMessage(ctx, req.Id, req.Name, req.UserIds)
+	if err != nil {
+		if errors.Is(err, controller.ErrMessageIsRoot) {
+			return &api.ReadMessageResponse{IsRoot: true}, nil
+		}
+
+		return nil, err
+	}
+
+	return &api.ReadMessageResponse{Message: message}, nil
 }

@@ -15,7 +15,7 @@ service Messages {
 	rpc PublishMessages(PublishMessagesRequest) returns (PublishMessagesResponse) {}
 	rpc PrivateMessages(PrivateMessagesRequest) returns (PrivateMessagesResponse) {}
 	rpc UpdateMessage(UpdateMessageRequest) returns (UpdateMessageResponse) {}
-	rpc ReadMessage(ReadMessageRequest) returns (Message) {}
+	rpc ReadMessage(ReadMessageRequest) returns (ReadMessageResponse) {}
 	rpc ReadMessages(ReadMessagesRequest) returns (ReadMessagesResponse) {}
 	rpc ReadBatchMessages(ReadBatchMessagesRequest) returns (ReadBatchMessagesResponse) {}
 }
@@ -136,4 +136,9 @@ message ReadMessageRequest {
 	int64  id = 1;
 	repeated int64  user_ids = 2;
 	string name = 3;
+}
+
+message ReadMessageResponse {
+	optional Message message = 1;
+	bool is_root = 2;
 }

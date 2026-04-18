@@ -376,7 +376,7 @@ func (s *MessagesController) ReadMessage(ctx context.Context, id int64, name str
 
 	// TODO: add threads count
 
-	message = model.MessageFromProto(res)
+	message = model.MessageFromProto(res.Message)
 
 	parent, err := s.threads.ReadParent(ctx, message.UserID, message.ID)
 	if err != nil {
@@ -398,11 +398,20 @@ func (s *MessagesController) ReadMessage(ctx context.Context, id int64, name str
 		return nil, err
 	}
 
-	message.ParentMessage = &model.Identity{
-		ID: parentMessage.Id,
-		Title: parentMessage.Title,
-		Name: parentMessage.Name,
-		Private: parentMessage.Private,
+	if parentMessage.IsRoot {
+		message.ParentMessage = &model.Identity{
+			ID: 0,
+			Title: "",
+			Name: "",
+			Private: true,
+		}
+	} else {
+		message.ParentMessage = &model.Identity{
+			ID: parentMessage.Message.Id,
+			Title: parentMessage.Message.Title,
+			Name: parentMessage.Message.Name,
+			Private: parentMessage.Message.Private,
+		}
 	}
 
 	return

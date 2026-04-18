@@ -11,6 +11,7 @@ import (
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/messages/internal/domain"
 	"github.com/bd878/gallery/server/messages/internal/machine"
+	"github.com/bd878/gallery/server/messages/internal/controller"
 	users "github.com/bd878/gallery/server/users/pkg/model"
 	"google.golang.org/protobuf/proto"
 )
@@ -438,6 +439,10 @@ func (m *Distributed) DeleteMessageComments(ctx context.Context, messageID int64
 // TODO: pass one userID only, for public messages create ReadPublicMessage request
 func (m *Distributed) ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *api.Message, err error) {
 	m.log.Debugw("read message", "id", id, "name", name, "user_ids", userIDs)
+
+	if id == 0 && name == "" {
+		return nil, controller.ErrMessageIsRoot
+	}
 
 	message, err = m.messagesRepo.Read(ctx, userIDs, id, name)
 	if err != nil {
