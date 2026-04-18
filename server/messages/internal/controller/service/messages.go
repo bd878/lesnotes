@@ -280,7 +280,7 @@ func (s *MessagesController) ReadThreadMessages(ctx context.Context, userID, thr
 		}
 
 		// TODO: move to message mapper, this mapping is duplicated here
-		message.Thread = &model.Thread{
+		message.Thread = &model.Identity{
 			ID: thread.ID,
 			Title: thread.Title,
 			Private: thread.Private,
@@ -383,11 +383,26 @@ func (s *MessagesController) ReadMessage(ctx context.Context, id int64, name str
 		return nil, err
 	}
 
-	message.ParentThread = &model.Thread{
+	message.ParentThread = &model.Identity{
 		ID:  parent.ID,
 		Title: parent.Title,
 		Name: parent.Name,
 		Private: parent.Private,
+	}
+
+	parentMessage, err := s.client.ReadMessage(ctx, &api.ReadMessageRequest{
+		Id: parent.ID,
+		UserIds: userIDs,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	message.ParentMessage = &model.Identity{
+		ID: parentMessage.Id,
+		Title: parentMessage.Title,
+		Name: parentMessage.Name,
+		Private: parentMessage.Private,
 	}
 
 	return
@@ -434,7 +449,7 @@ func (s *MessagesController) ReadPath(ctx context.Context, userID, id int64, nam
 	}
 
 	for i, message := range path {
-		message.Thread = &model.Thread{
+		message.Thread = &model.Identity{
 			ID: threads[i].Id,
 			Title: threads[i].Title,
 			Name: threads[i].Name,
@@ -637,7 +652,7 @@ func (s *MessagesController) resolveTree(ctx context.Context, highlightMap *idMa
 			return err
 		}
 
-		message.Thread = &model.Thread{
+		message.Thread = &model.Identity{
 			ID: thread.ID,
 			Title: thread.Title,
 			Private: thread.Private,

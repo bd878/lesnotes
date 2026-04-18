@@ -16,15 +16,16 @@ type (
 		Files        []*files.File         `json:"files"`
 		Translations []*TranslationPreview `json:"translations"`
 		Messages     *MessagesList         `json:"messages,omitempty"`
-		Thread       *Thread               `json:"thread,omitempty"`
-		ParentThread *Thread               `json:"parent_thread,omitempty"`
+		Thread       *Identity             `json:"thread,omitempty"`
+		ParentThread *Identity             `json:"parent_thread,omitempty"`
+		ParentMessage *Identity            `json:"parent_message,omitempty"`
 		Text         string                `json:"text"`
 		Title        string                `json:"title"`
 		Highlight    bool                  `json:"highlight"`
 		Private      bool                  `json:"private"`
 	}
 
-	Thread struct {
+	Identity struct {
 		ID           int64                 `json:"id"`
 		Title        string                `json:"title"`
 		Name         string                `json:"name"`
