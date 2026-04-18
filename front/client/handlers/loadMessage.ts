@@ -3,10 +3,6 @@ import type { FileWithMime } from '../types'
 import readMessageJson, { EmptyReadMessage } from '../api/readMessageJson';
 import * as is from '../third_party/is';
 
-interface MessageWithFilesMime extends Message {
-	files: FileWithMime[];
-}
-
 async function loadMessage(ctx, next) {
 	const id = ctx.state.messageID
 	const name = ctx.state.messageName || ""
@@ -44,15 +40,12 @@ async function loadMessage(ctx, next) {
 		ctx.state.message = EmptyReadMessage.message
 	}
 
-	console.log("message", ctx.state.message)
-
 	await next()
 
 	console.log("<-- loadMessage")
 }
 
 export default loadMessage
-export type { FileWithMime }
 
 function fileWithMime(file: File, index: number, arr: File[]): FileWithMime {
 	const result = {

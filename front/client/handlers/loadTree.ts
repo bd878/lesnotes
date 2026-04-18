@@ -5,7 +5,7 @@ async function loadTree(ctx, next) {
 	console.log("--> loadTree")
 
 	ctx.state.tree = await api.readTreeJson(ctx.state.token, ctx.state.messageID, ctx.state.messageName,
-		ctx.state.cwd.id, ctx.state.threadName, ctx.state.cwd.limit, ctx.state.cwd.offset, ctx.state.leaves)
+		ctx.state.cwd.id, ctx.state.parentName, ctx.state.cwd.limit, ctx.state.cwd.offset, ctx.state.leaves)
 
 	if (is.notEmpty(ctx.state.tree)) {
 		if (ctx.state.tree.error.error) {

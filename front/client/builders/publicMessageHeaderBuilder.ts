@@ -1,5 +1,5 @@
 import type {Builder} from './builder'
-import type { ThreadIdentity } from '../api/models'
+import type { Identity } from '../api/models'
 import Config from 'config';
 import mustache from 'mustache';
 import { readFileSync } from 'node:fs';
@@ -13,16 +13,12 @@ class PublicMessageHeaderBuilder extends AbstractPublicBuilder {
 	threadLink = undefined
 	threadTitle = undefined
 
-	addThreadLink(identity: ThreadIdentity) {
+	addThreadLink(identity: Identity) {
 		if (!this.isAuthed && identity.private) {
 			return this
 		}
 
-		if (identity.id == 0) {
-			return this
-		}
-
-		this.threadLink = "/t/" + identity.name + this.search
+		this.threadLink = "/" + identity.name + this.search
 		this.threadTitle = identity.title
 
 		return this

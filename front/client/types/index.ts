@@ -20,4 +20,8 @@ interface IDLimitOffset {
 	offset: number;
 }
 
-export type { FileWithMime, SelectedFile, IDLimitOffset }
+interface MessageWithFilesMime extends Message {
+	files: FileWithMime[];
+}
+
+export type { FileWithMime, MessageWithFilesMime, SelectedFile, IDLimitOffset }

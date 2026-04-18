@@ -19,22 +19,6 @@
 				</a>
 		{{/lastThreadExternal}}
 
-			{{#editPublicThread}}
-				<form
-					method="POST"
-					autocomplete="off"
-					class="flex flex-row"
-				>
-					<input type="hidden" name="id" value="{{ID}}" />
-
-					{{#threadPrivate}}
-						<button formaction="{{publishThreadAction}}" type="submit" class="px-2 italic underline dark:hover:text-white hover:text-blue-600 select-text cursor-pointer text-end">{{publishThreadTitle}}</button>
-					{{/threadPrivate}}
-					{{^threadPrivate}}
-						<button formaction="{{privateThreadAction}}" type="submit" class="px-2 italic underline dark:hover:text-white hover:text-blue-600 select-text cursor-pointer text-end">{{privateThreadTitle}}</button>
-					{{/threadPrivate}}
-				</form>
-			{{/editPublicThread}}
 		</li>
 	{{/lastMessage}}
 </ul>

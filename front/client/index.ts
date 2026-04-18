@@ -26,7 +26,6 @@ import selectMessageFiles from './handlers/selectMessageFiles';
 import loadTranslation from './handlers/loadTranslation';
 import loadMessage from './handlers/loadMessage';
 import loadThread from './handlers/loadThread';
-import loadSearch from './handlers/loadSearch';
 import formatTextarea from './handlers/formatTextarea';
 import formatView from './handlers/formatView';
 import getState from './handlers/getState';
@@ -35,38 +34,25 @@ import redirectHome from './handlers/redirectHome';
 import redirectLogin from './handlers/redirectLogin';
 import validateLogin from './handlers/validateLogin'
 import validateSignup from './handlers/validateSignup';
-import deleteFile from './handlers/deleteFile';
-import publishFile from './handlers/publishFile';
-import privateFile from './handlers/privateFile';
 import deleteMessage from './handlers/deleteMessage';
 import deleteTranslation from './handlers/deleteTranslation';
 import updateTranslation from './handlers/updateTranslation';
 import publishMessage from './handlers/publishMessage';
 import privateMessage from './handlers/privateMessage';
-import publishThread from './handlers/publishThread';
-import privateThread from './handlers/privateThread';
 import sendMessage from './handlers/sendMessage';
 import sendComment from './handlers/sendComment';
 import sendTranslation from './handlers/sendTranslation';
-import updateMessage from './handlers/updateMessage';
-import updateThread from './handlers/updateThread';
-import getSearchForm from './handlers/getSearchForm';
-import getSearchQuery from './handlers/getSearchQuery';
+import loadParentMessage from './handlers/loadParentMessage';
 
 import assets from './routes/assets';
 import main from './routes/main';
 import login from './routes/login';
 import signup from './routes/signup';
 import newMessage from './routes/newMessage';
-import search from './routes/search';
 import xxx from './routes/xxx';
-import publicMessage from './routes/publicMessage';
-import publicTranslation from './routes/publicTranslation';
-import publicThread from './routes/publicThread';
+import publicThreadOrMessage from './routes/publicThreadOrMessage'
 import publicThreadMessage from './routes/publicThreadMessage';
-import threadEdit from './routes/threadEdit';
 import messageView from './routes/messageView';
-import threadView from './routes/threadView';
 import messageEdit from './routes/messageEdit';
 import status from './routes/status';
 
@@ -93,28 +79,18 @@ router
 	.get("home",                   "/home",                         etag, noCache, getMe, getState, authed, loadCwdThread, loadTree, loadCwdPath, loadFiles, newMessage)
 	.get("message",                "/messages/:idOrName",           etag, noCache, getMe, getState, authed, loadCwdThread, loadTree, loadMessagePath, loadCwdPath, loadThread, loadMessage, loadComments, loadTranslation, formatView, messageFeatures, messageView)
 	.get("editMessage",            "/editor/messages/:idOrName",    etag, noCache, getMe, getState, authed, loadCwdThread, loadTree, loadMessagePath, loadCwdPath, loadMessage, loadFiles, loadComments, selectMessageFiles, loadTranslation, formatTextarea, messageFeatures, messageEdit)
-	.get("thread",                 "/threads/:idOrName",            etag, noCache, getMe, getState, authed, loadCwdThread, loadTree, loadMessagePath, loadCwdPath, loadThread, formatView, threadView)
-	.get("editThread",             "/editor/threads/:idOrName",     etag, noCache, getMe, getState, authed, loadCwdThread, loadTree, loadMessagePath, loadCwdPath, loadThread, formatTextarea, threadEdit)
 	.get("status",                 "/status",                       status, noCache, getState)
 	.post("doLogin",               "/login",                        etag, getState, validateLogin, redirectHome)
 	.post("doSignup",              "/signup",                       etag, getState, validateSignup, redirectHome)
-	.post("doDeleteFile",          "/f/delete",                     getState, authed, deleteFile)
-	.post("doPublishFile",         "/f/publish",                    getState, authed, publishFile)
-	.post("doPrivateFile",         "/f/private",                    getState, authed, privateFile)
-	.post("doDeleteMessage",       "/m/delete",                     getState, authed, deleteMessage)
+	.post("doDeleteMessage",       "/message/delete",               getState, authed, deleteMessage)
+	.post("doPublishMessage",      "/message/publish",              getState, authed, publishMessage)
+	.post("doPrivateMessage",      "/message/private",              getState, authed, privateMessage)
 	.post("doDeleteTranslation",   "/translation/delete",           getState, authed, deleteTranslation)
-	.post("doPublishMessage",      "/m/publish",                    getState, authed, publishMessage)
-	.post("doPrivateMessage",      "/m/private",                    getState, authed, privateMessage)
 	.post("doUpdateTranslation",   "/translation/update",           getState, authed, updateTranslation)
-	.post("doPublishThread",       "/t/publish",                    getState, authed, publishThread)
-	.post("doPrivateThread",       "/t/private",                    getState, authed, privateThread)
-	.post("doUpdateThread",        "/t/update",                     getState, authed, updateThread)
 	.post("doSendComment",         "/comment/send",                 getState, sendComment)
 	.post("doSendTranslation",     "/translation/send",             getState, authed, sendTranslation)
-	.get("publicMessage",          "/m/:messageName",               etag, noCache, getMe, getState, loadMessage, isAuthed(loadMessagePath), loadComments, formatView, messageFeatures, publicMessage)
-	.get("publicTranslation",      "/m/:messageName/:lang",         etag, noCache, getMe, getState, loadMessage, loadComments, loadTranslation, formatView, publicTranslation)
-	.get("publicThread",           "/t/:threadName",                etag, noCache, getMe, getState, loadThread, loadTree, formatView, publicThread)
-	.get("publicThreadMessage",    "/t/:threadName/:messageName",   etag, noCache, getMe, getState, loadMessage, isAuthed(loadMessagePath), loadComments, loadThread, loadTree, formatView, messageFeatures, publicThreadMessage)
+	.get("publicMessage",          "/:messageOrParentName",         etag, noCache, getMe, getState, loadMessage, isAuthed(loadMessagePath), loadComments, loadTree, formatView, messageFeatures, publicThreadOrMessage)
+	.get("publicThreadMessage",    "/:parentName/:messageName",     etag, noCache, getMe, getState, loadMessage, isAuthed(loadMessagePath), loadComments, loadParentMessage, loadTree, formatView, messageFeatures, publicThreadMessage)
 	.get("any",                    "/:any*",                        getState, xxx)
 
 app.use(router.routes());

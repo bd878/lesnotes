@@ -46,7 +46,7 @@ class MessageEditViewBuilder extends AbstractBuilder {
 			textPlaceholder:  this.i18n("textPlaceholder"),
 			updateButton:     this.i18n("updateButton"),
 			cancelButton:     this.i18n("cancelButton"),
-			updateAction:     "/m/update" + this.search,
+			updateAction:     "/message/update" + this.search,
 			domain:           Config.get("domain"),
 		}, {
 			filesList:        this.filesList,

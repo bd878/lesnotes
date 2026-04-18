@@ -42,7 +42,7 @@ export default {
 
 export type { Thread } from './thread'
 export type { Comment } from './comment'
-export type { MessagesList, ThreadIdentity } from './message';
+export type { MessagesList, Identity } from './message';
 export type { Message } from './message'
 export type { Translation } from './translation'
 export type { TranslationPreview } from './translationPreview'

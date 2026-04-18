@@ -19,7 +19,6 @@ class HomeBuilder extends AbstractBuilder {
 	messageView          = undefined;
 	newMessageForm       = undefined;
 	threadView           = undefined;
-	threadEditForm       = undefined;
 	header               = undefined;
 	messagesTree         = undefined;
 	messageFeatures      = undefined;
@@ -58,12 +57,6 @@ class HomeBuilder extends AbstractBuilder {
 		return this
 	}
 
-	addThreadEditForm(form: ScriptsBuilder) {
-		this.threadEditForm = form.build()
-		this.scripts.push(...form.scripts)
-		return this
-	}
-
 	addThreadView(view: ScriptsBuilder) {
 		this.threadView = view.build()
 		this.scripts.push(...view.scripts)
@@ -89,7 +82,6 @@ class HomeBuilder extends AbstractBuilder {
 			threadView:           this.threadView,
 			header:               this.header,
 			messageFeatures:      this.messageFeatures,
-			threadEditForm:       this.threadEditForm,
 			newMessageForm:       this.newMessageForm,
 			messagesTree:         this.messagesTree,
 			controlPanel:         this.controlPanel,

@@ -22,7 +22,7 @@ class PublicMessagesTreeBuilder extends AbstractPublicBuilder {
 	addList(tree: MessagesList) {
 		const search = this.search
 		const path = this.path
-		const threadName = this.threadName
+		const parentName = this.parentName
 		const isAuthed = this.isAuthed
 
 		const close = ((new URLSearchParams(search)).get("close") || "").split(",").map(parseFloat).filter(v => !isNaN(v))
@@ -44,8 +44,8 @@ class PublicMessagesTreeBuilder extends AbstractPublicBuilder {
 			noMessagesText:    this.i18n("noMessagesText"),
 			showCounter:       function() { return this.count > 0 },
 
-			messageHref:       function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); return `/t/${threadName}/${this.name}?` + params.toString(); },
-			openThreadHref:    function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); return `/t/${this.thread.name}?` + params.toString(); },
+			messageHref:       function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); return `/${parentName}/${this.name}?` + params.toString(); },
+			openThreadHref:    function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); return `/${this.thread.name}?` + params.toString(); },
 			unfoldHref:        function() { const params = new URLSearchParams(search); params.set(this.ID || 0, `${limit},0`); return path + "?" + params.toString(); },
 			foldHref:          function() { const params = new URLSearchParams(search); params.delete(this.ID || 0); return path + "?" + params.toString(); },
 			prevPageHref:      function() { const params = new URLSearchParams(search); params.set(this.ID || 0, `${limit},${limit + this.offset}`); return path + "?" + params.toString(); },
@@ -57,23 +57,18 @@ class PublicMessagesTreeBuilder extends AbstractPublicBuilder {
 		return this
 	}
 
-	addThread(thread: Thread) {
+	addMessage(message: Message) {
 		const search = this.search
 		const isAuthed = this.isAuthed
 		this.threadPath = mustache.render(this.isMobile ? threadPathTemplateMobile : threadPathTemplate, {
-			lastMessage:   thread,
+			lastMessage:   message,
 			threadPrivate: function() { return this.private },
 			editPublicThread: function() { return isAuthed },
 			editThreadHref: function() { return `/editor/messages/${this.ID}` + search },
 
-			publishThreadAction: "/t/publish" + this.search,
-			privateThreadAction: "/t/private" + this.search,
-			publishThreadTitle: this.i18n("publishThread"),
-			privateThreadTitle: this.i18n("privateThread"),
-
 			lastThreadTarget: "_self",
 			lastThreadExternal: false,
-			lastThreadHref: function() { return `/t/${this.name}` + search },
+			lastThreadHref: function() { return `/${this.name}` + search },
 			threadTitle: function() { return `/${crop(this.title || this.description, 30)}` },
 		})
 

@@ -15,7 +15,7 @@ async function getState(ctx, next) {
 	ctx.state.cwd = getCwd(ctx)
 	ctx.state.messageID = getMessageID(ctx)
 	ctx.state.messageName = getMessageName(ctx)
-	ctx.state.threadName = getThreadName(ctx)
+	ctx.state.parentName = getParentName(ctx)
 	ctx.state.threadID = getThreadID(ctx)
 	ctx.state.leaves = getLeaves(ctx)
 	ctx.state.token = getToken(ctx)
@@ -41,11 +41,11 @@ function getMessageID(ctx): number {
 }
 
 function getMessageName(ctx): string {
-	return ctx.params.messageName || ""
+	return ctx.params.messageName || ctx.params.messageOrParentName || ""
 }
 
-function getThreadName(ctx): string {
-	return ctx.params.threadName || ""
+function getParentName(ctx): string {
+	return ctx.params.parentName || ctx.params.messageOrParentName || ""
 }
 
 function getThreadID(ctx): number {

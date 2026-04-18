@@ -13,6 +13,8 @@ class PublicThreadBuilder extends AbstractPublicBuilder {
 	tree          = undefined
 	controlPanel  = undefined
 	threadView    = undefined
+	messageView   = undefined
+	threadFeatures = undefined
 
 	addHeader(header: Builder) {
 		this.header = header.build()
@@ -34,14 +36,26 @@ class PublicThreadBuilder extends AbstractPublicBuilder {
 		return this
 	}
 
+	addMessageView(view: Builder) {
+		this.messageView = view.build()
+		return this
+	}
+
+	addThreadFeatures(features: Builder) {
+		this.threadFeatures = features.build()
+		return this
+	}
+
 	build() {
 		return mustache.render(this.isMobile ? threadTemplateMobile : threadTemplate, {
-			hasContent:    this.threadView != undefined,
+			hasContent:    this.threadView != undefined || this.messageView != undefined,
 		}, {
 			header:        this.header,
 			messagesTree:  this.tree,
+			threadFeatures: this.threadFeatures,
 			controlPanel:  this.controlPanel,
 			threadView:    this.threadView,
+			messageView:   this.messageView,
 		})
 	}
 

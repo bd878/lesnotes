@@ -11,18 +11,18 @@ async function publicThreadMessage(ctx) {
 	console.log("--> publicThreadMessage")
 
 	const panel = new ControlPanelBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
-	const content = new PublicThreadMessageBuilder(ctx.state.isAuthed, ctx.state.threadName, ctx.state.messageName,
+	const content = new PublicThreadMessageBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName,
 		ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
-	const view = new MessageViewBuilder(ctx.state.isAuthed, ctx.state.threadName, ctx.state.messageName, ctx.userAgent.isMobile,
+	const view = new MessageViewBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName, ctx.userAgent.isMobile,
 		ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
-	const tree = new PublicMessagesTreeBuilder(ctx.state.isAuthed, ctx.state.threadName, ctx.state.messageName, ctx.userAgent.isMobile,
+	const tree = new PublicMessagesTreeBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName, ctx.userAgent.isMobile,
 		ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
 	const params = new URLSearchParams(ctx.search)
-	params.set("cwd", ctx.state.thread.ID)
+	params.set("cwd", ctx.state.message.ID)
 
 	layout
 		.addFooter()
@@ -32,13 +32,13 @@ async function publicThreadMessage(ctx) {
 				.addHeader(ctx.state.isAuthed ? header.addNewNote("/home?" + params.toString()) : header)
 				.addMessageView(
 					view
-						.addDeleteRedirectUrl("/t/" + ctx.state.threadName + ctx.search)
+						.addDeleteRedirectUrl("/" + ctx.state.parentName + ctx.search)
 						.addMessage(ctx.state.message)
 				)
 				.addMessagesTree(
 					tree
 						.addList(ctx.state.tree)
-						.addThread(ctx.state.thread)
+						.addMessage(ctx.state.parentMessage)
 				)
 				.addMessageFeatures(
 					ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation)

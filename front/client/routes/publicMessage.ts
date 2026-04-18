@@ -10,13 +10,13 @@ async function publicMessage(ctx) {
 	console.log("--> publicMessage")
 
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
-	const view = new MessageViewBuilder(ctx.state.isAuthed, ctx.state.threadName, ctx.state.messageName, ctx.userAgent.isMobile,
+	const view = new MessageViewBuilder(ctx.state.isAuthed, ctx.state.messageName, ctx.state.messageName, ctx.userAgent.isMobile,
 		ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
-	const messageHeader = new PublicMessageHeaderBuilder(ctx.state.isAuthed, ctx.state.threadName, ctx.state.messageName, ctx.userAgent.isMobile,
+	const messageHeader = new PublicMessageHeaderBuilder(ctx.state.isAuthed, ctx.state.messageName, ctx.state.messageName, ctx.userAgent.isMobile,
 		ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
-	const content = new PublicMessageBuilder(ctx.state.isAuthed, ctx.state.threadName, ctx.state.messageName, ctx.userAgent.isMobile,
+	const content = new PublicMessageBuilder(ctx.state.isAuthed, ctx.state.messageName, ctx.state.messageName, ctx.userAgent.isMobile,
 		ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
 	layout
@@ -24,11 +24,11 @@ async function publicMessage(ctx) {
 		.addContent(
 			content
 				.addMessageHeader(
-					messageHeader.addThreadLink(ctx.state.message.parentThread)
+					messageHeader.addThreadLink(ctx.state.message.parentMessage)
 				)
 				.addMessageView(
 					view
-						.addDeleteRedirectUrl("/t/" + ctx.state.threadName + ctx.search)
+						.addDeleteRedirectUrl("/" + ctx.state.messageName + ctx.search)
 						.addMessage(ctx.state.message)
 				)
 				.addHeader(

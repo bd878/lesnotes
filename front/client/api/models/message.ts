@@ -23,14 +23,14 @@ export interface Message {
 	title:         string;
 	count:         number;
 	files:         File[];
-	thread:        ThreadIdentity;
+	thread:        Identity;
 	highlight:     boolean;
 	translations:  TranslationPreview[];
 	messages:      MessagesList;
 	private:       boolean;
 }
 
-export interface ThreadIdentity {
+export interface Identity {
 	id: number;
 	title: string;
 	name: string;
@@ -43,7 +43,7 @@ const EmptyMessagesList: MessagesList = Object.freeze({
 	messages: [],
 })
 
-const EmptyThreadIdentity: ThreadIdentity = Object.freeze({
+const EmptyIdentity: Identity = Object.freeze({
 	id: 0,
 	name: "",
 	title: "",
@@ -61,8 +61,9 @@ const EmptyMessage: Message = Object.freeze({
 	name: "",
 	files:  [],
 	highlight: false,
-	thread: EmptyThreadIdentity,
-	parentThread: EmptyThreadIdentity,
+	thread: EmptyIdentity,
+	parentThread: EmptyIdentity,
+	parentMessage: EmptyIdentity,
 	translations: [],
 	messages: EmptyMessagesList,
 	private: true,
@@ -84,9 +85,9 @@ function mapMessagesListFromProto(list?: any): MessagesList {
 	return res
 }
 
-function mapThreadIdentityFromProto(identity?: any): ThreadIdentity {
+function mapIdentityFromProto(identity?: any): Identity {
 	if (!identity) {
-		return EmptyThreadIdentity
+		return EmptyIdentity
 	}
 
 	return {
@@ -112,8 +113,9 @@ export default function mapMessageFromProto(message?: any): Message {
 		title:       message.title,
 		count:       message.count, // TODO: mv count under thread
 		highlight:   message.highlight,
-		thread:      mapThreadIdentityFromProto(message.thread),
-		parentThread: mapThreadIdentityFromProto(message.parent_thread),
+		thread:      mapIdentityFromProto(message.thread),
+		parentThread: mapIdentityFromProto(message.parent_thread),
+		parentMessage: mapIdentityFromProto(message.parent_message),
 		private:     Boolean(message.private),
 		messages:    EmptyMessagesList,
 		files:       [],
