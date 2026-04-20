@@ -54,6 +54,7 @@ func New(conf Config) *Server {
 	mux.Handle("/threads/v1/publish", middleware.Build(handler.PublishThread))
 	mux.Handle("/threads/v1/private", middleware.Build(handler.PrivateThread))
 	mux.Handle("/threads/v1/reorder", middleware.Build(handler.ReorderThread))
+	mux.Handle("PUT /threads/v1/update", middleware.Build(handler.UpdateThread))
 
 	middleware.NoAuth()
 	mux.Handle("/threads/v1/status", middleware.Build(handler.GetStatus))

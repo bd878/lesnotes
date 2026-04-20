@@ -806,24 +806,23 @@ components:
               example: ""
 
     updateForm:
-      oneOf:
-        type: object
-        properties:
-          id:
-            type: integer
-            required: true
-          name:
-            type: string
-            required: false
-          title:
-            type: string
-            required: false
-          text:
-            type: string
-            example: "test message"
-          file_ids:
-            type: string
-            example: ""
+      type: object
+      properties:
+        id:
+          type: integer
+          required: true
+        name:
+          type: string
+          required: false
+        title:
+          type: string
+          required: false
+        text:
+          type: string
+          example: "test message"
+        file_ids:
+          type: string
+          example: ""
 
     updateOk:
       type: object

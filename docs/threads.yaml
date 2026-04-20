@@ -176,6 +176,33 @@ paths:
 # END CREATE
 
 # UPDATE
+  /threads/v1/update:
+    parameters:
+      - $ref: '#/components/parameters/token'
+    put:
+      summary: Update a thread
+      description: |
+        Update a thread text, title, name or file
+      operationId: updateThread
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/updateForm'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/updateOk'
+        "4XX":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serverError'
+
   /threads/v2/update:
     post:
       summary: Update thread
@@ -585,6 +612,22 @@ components:
 # END CREATE
 
 # UPDATE
+  updateForm:
+    type: object
+    properties:
+      id:
+        type: integer
+        required: true
+      name:
+        type: string
+        required: false
+      title:
+        type: string
+        required: false
+      description:
+        type: string
+        example: "test thread desc"
+
   updateThreadJson:
     type: object
     token:

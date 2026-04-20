@@ -1,0 +1,6 @@
+url = https://%STAGE%lesnotes.space/threads/v1/update
+-X PUT
+-d "id=%ID%"
+-d "name=%NAME%"
+-d "title=%TITLE%"
+-d "text=%TEXT%"

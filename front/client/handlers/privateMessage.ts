@@ -11,19 +11,28 @@ async function privateMessage(ctx) {
 	}
 
 	const redirectUrl = form.redirectUrl
+	const id = parseInt(form.id) || 0
 
-	const response = await api.privateMessageJson(ctx.state.token, parseInt(form.id) || 0)
-
+	let response = await api.privateMessageJson(ctx.state.token, id)
 	if (response.error.error) {
 		console.log(response.error)
 		ctx.state.error = response.error.human
 		ctx.body = "error"
+		return
+	}
+
+	response = await api.privateThreadJson(ctx.state.token, id)
+	if (response.error.error) {
+		console.log(response.error)
+		ctx.state.error = response.error.human
+		ctx.body = "error"
+		return
+	}
+
+	if (is.notEmpty(redirectUrl)) {
+		ctx.redirect(redirectUrl)
 	} else {
-		if (is.notEmpty(redirectUrl)) {
-			ctx.redirect(redirectUrl)
-		} else {
-			ctx.redirect(ctx.router.url('message', {idOrName: form.id}, {query: ctx.query}))
-		}
+		ctx.redirect(ctx.router.url('message', {idOrName: form.id}, {query: ctx.query}))
 	}
 
 	console.log("<-- privateMessage")

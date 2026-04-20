@@ -18,6 +18,7 @@ import updateMessage from './updateMessage';
 import updateMessageJson from './updateMessageJson';
 import updateTranslationJson from './updateTranslationJson';
 import updateThreadJson from './updateThreadJson';
+import updateThread from './updateThread';
 import updateCommentJson from './updateCommentJson';
 import privateThread from './privateThread';
 import privateThreadJson from './privateThreadJson';
@@ -85,6 +86,7 @@ export default {
 	updateCommentJson,
 	updateMessageJson,
 	updateThreadJson,
+	updateThread,
 	deleteMessage,
 	deleteMessageJson,
 	deleteMessages,

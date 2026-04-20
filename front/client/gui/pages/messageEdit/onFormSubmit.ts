@@ -1,6 +1,7 @@
 import * as is from '../../../third_party/is'
 import uploadFile from '../../../api/uploadFile';
 import updateMessage from '../../../api/updateMessage'
+import updateThread from '../../../api/updateThread'
 
 async function onEditMessageFormSubmit(elems, e) {
 	e.preventDefault()
@@ -37,10 +38,16 @@ async function onEditMessageFormSubmit(elems, e) {
 	}
 
 	const messageID = elems.messageEditFormElem.id.value
-	const response = await updateMessage(messageID, elems.messageEditFormElem.text.value,
+	let response = await updateMessage(messageID, elems.messageEditFormElem.text.value,
 		elems.messageEditFormElem.title.value, name, Array.from(fileIDs))
 	if (response.error.error) {
 		console.log("[onEditMessageFormSubmit]: cannot send message:", response)
+		return
+	}
+
+	response = await updateThread(messageID, "", "", name)
+	if (response.error.error) {
+		console.log("[onEditMessageFormSubmit]: cannot update thread:", response)
 		return
 	}
 
