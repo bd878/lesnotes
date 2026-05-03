@@ -1,4 +1,4 @@
-import './node_fetch'
+import './node_fetch.ts'
 
 import Koa from 'koa';
 import Router from '@koa/router';
@@ -50,7 +50,7 @@ import login from './routes/login';
 import signup from './routes/signup';
 import newMessage from './routes/newMessage';
 import xxx from './routes/xxx';
-import publicThreadOrMessage from './routes/publicThreadOrMessage'
+import publicThreadOrMessage from './routes/publicThreadOrMessage';
 import publicThreadMessage from './routes/publicThreadMessage';
 import messageView from './routes/messageView';
 import messageEdit from './routes/messageEdit';

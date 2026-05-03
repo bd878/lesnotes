@@ -134,7 +134,7 @@ func (m *Distributed) ProceedPayment(ctx context.Context, id, userID int64) (err
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
-	events := make([]ddd.Event, 0)
+	events := make([]ddd.Event, 0, len(invoice.Cart.Items))
 
 	invoiceEvent, err := domain.PayInvoice(invoice.Id, invoice.Cart, userID, updatedAt)
 	if err != nil {

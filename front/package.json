@@ -6,6 +6,7 @@
 	"author": "bd878",
 	"license": "MIT",
 	"scripts": {
+		"start": "node ./client/index.ts",
 		"server": "npx tsc -p tsconfig-server.json && node ./scripts/build-server.js",
 		"gui": "npx tsc -p tsconfig-gui.json && node ./scripts/build-gui.js"
 	},

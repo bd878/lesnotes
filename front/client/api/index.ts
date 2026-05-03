@@ -13,9 +13,7 @@ import sendMessageJson from './sendMessageJson';
 import sendMessage from './sendMessage';
 import sendTranslationJson from './sendTranslationJson';
 import sendCommentJson from './sendCommentJson';
-import searchMessagesJson from './searchMessagesJson';
 import updateMessage from './updateMessage';
-import updateMessageJson from './updateMessageJson';
 import updateTranslationJson from './updateTranslationJson';
 import updateThreadJson from './updateThreadJson';
 import updateThread from './updateThread';
@@ -37,7 +35,6 @@ import privateMessages from './privateMessages';
 import privateMessageJson from './privateMessageJson';
 import privateFileJson from './privateFileJson';
 import publishFileJson from './publishFileJson';
-import deleteFileJson from './deleteFileJson';
 import moveMessage from './moveMessage';
 import uploadFile from './uploadFile';
 import validateMiniappData from './validateMiniappData';
@@ -84,7 +81,6 @@ export default {
 	sendTranslationJson,
 	updateMessage,
 	updateCommentJson,
-	updateMessageJson,
 	updateThreadJson,
 	updateThread,
 	deleteMessage,
@@ -98,13 +94,11 @@ export default {
 	publishThread,
 	publishFileJson,
 	privateFileJson,
-	deleteFileJson,
 	moveMessage,
 	uploadFile,
 	getFileDownloadUrl,
 	validateMiniappData,
 	validateTgAuthData,
-	searchMessagesJson,
 	reorderThread,
 	readTreeJson,
 }
