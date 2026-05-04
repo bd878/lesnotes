@@ -50,8 +50,6 @@ class PublicMessagesTreeBuilder extends AbstractPublicBuilder {
 			foldHref:          function() { const params = new URLSearchParams(search); params.delete(this.ID || 0); return path + "?" + params.toString(); },
 			prevPageHref:      function() { const params = new URLSearchParams(search); params.set(this.ID || 0, `${limit},${limit + this.offset}`); return path + "?" + params.toString(); },
 			nextPageHref:      function() { const params = new URLSearchParams(search); params.set(this.ID || 0, `${limit},${Math.max(0, this.offset - limit)}`); return path + "?" + params.toString(); },
-		}, {
-			list: this.isMobile ? messagesListTemplateMobile : messagesListTemplate,
 		})
 
 		return this

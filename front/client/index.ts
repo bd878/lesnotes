@@ -1,6 +1,7 @@
 import './node_fetch.ts'
 
 import Koa from 'koa';
+import mustache from 'mustache';
 import Router from '@koa/router';
 import Config from 'config';
 import helmet from './handlers/helmet';
@@ -58,6 +59,8 @@ import status from './routes/status';
 
 const app = new Koa();
 const router = new Router();
+
+mustache.templateCache = undefined
 
 // app.use(helmet);
 app.use(errors);

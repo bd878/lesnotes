@@ -18,6 +18,7 @@ let ctx = await esbuild.context({
 		LIMIT: "24"
 	},
 	bundle: true,
+	minify: true,
 	platform: 'node',
 	outdir: "build",
 	outbase: "client",
