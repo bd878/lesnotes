@@ -49,8 +49,10 @@ func (f *Files) setupConnection() error {
 
 func (f *Files) isConnFailed() bool {
 	state := f.conn.GetState()
-	if state == connectivity.Shutdown || state == connectivity.TransientFailure {
-		logger.Debugw("conn failed", "state", state.String())
+	if state == connectivity.Shutdown ||
+		state == connectivity.TransientFailure ||
+		state == connectivity.Connecting {
+		logger.Debugw("files conn failed", "state", state.String())
 		return true
 	}
 	return false

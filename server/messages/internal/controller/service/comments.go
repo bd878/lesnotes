@@ -63,8 +63,10 @@ func (s *CommentsController) setupConnection() (err error) {
 
 func (s *CommentsController) isConnFailed() bool {
 	state := s.conn.GetState()
-	if state == connectivity.Shutdown || state == connectivity.TransientFailure {
-		logger.Debugw("connection failed", "state", state.String())
+	if state == connectivity.Shutdown ||
+		state == connectivity.TransientFailure ||
+		state == connectivity.Connecting {
+		logger.Debugw("comments conn failed", "state", state.String())
 		return true
 	}
 	return false

@@ -70,6 +70,7 @@ func main() {
 		s.WaitForStream,
 		s.WaitForMux,
 		s.WaitForRPC,
+		s.WaitForChannelz,
 	)
 
 	if err = s.Waiter().Wait(); err != nil {

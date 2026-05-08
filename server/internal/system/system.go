@@ -17,6 +17,7 @@ import (
 
 	"github.com/soheilhy/cmux"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/channelz/service"
 	"golang.org/x/sync/errgroup"
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -42,6 +43,7 @@ type System struct {
 	db               *sql.DB
 	nc               *nats.Conn
 	rpc              *grpc.Server
+	channelzServer   *grpc.Server
 	logger           *logger.Logger
 	listener         net.Listener
 	raftListener     net.Listener
@@ -274,6 +276,32 @@ func (s *System) WaitForStream(ctx context.Context) error {
 		fmt.Fprintln(os.Stdout, "message stream to be shutdown")
 		return s.nc.Drain()
 	})
+	return group.Wait()
+}
+
+func (s *System) WaitForChannelz(ctx context.Context) (err error) {
+	group, gCtx := errgroup.WithContext(ctx)
+
+	group.Go(func() error {
+		lis, err := net.Listen("tcp", ":50050")
+		defer fmt.Fprintln(os.Stdout, "grpc server channelz shutdown")
+		if err != nil {
+			return err
+		}
+		s.channelzServer = grpc.NewServer()
+		service.RegisterChannelzServiceToServer(s.channelzServer)
+		s.channelzServer.Serve(lis)
+		return nil
+	})
+	group.Go(func() error {
+		<-gCtx.Done()
+		fmt.Fprintln(os.Stdout, "grpc channelz server to be shutdown")
+		if s.channelzServer != nil {
+			s.channelzServer.Stop()
+		}
+		return nil
+	})
+
 	return group.Wait()
 }
 

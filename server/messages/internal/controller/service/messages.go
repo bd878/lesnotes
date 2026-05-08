@@ -3,10 +3,12 @@ package service
 import (
 	"context"
 	"fmt"
+	"time"
 	"sync"
 	"strings"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/backoff"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
@@ -65,6 +67,15 @@ func (s *MessagesController) setupConnection() (err error) {
 			s.conf.RpcAddr,
 		),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithConnectParams(grpc.ConnectParams{
+			Backoff: backoff.Config{
+				BaseDelay: 5*time.Second,
+				Multiplier: 2,
+				Jitter: 0.42,
+				MaxDelay: 1*time.Minute,
+			},
+			MinConnectTimeout: 10*time.Second,
+		}),
 	)
 	if err != nil {
 		return err
@@ -80,8 +91,10 @@ func (s *MessagesController) setupConnection() (err error) {
 
 func (s *MessagesController) isConnFailed() bool {
 	state := s.conn.GetState()
-	if state == connectivity.Shutdown || state == connectivity.TransientFailure {
-		logger.Debugw("connection failed", "state", state.String())
+	if state == connectivity.Shutdown ||
+		state == connectivity.TransientFailure ||
+		state == connectivity.Connecting {
+		logger.Debugw("messages conn failed", "state", state.String())
 		return true
 	}
 	return false
@@ -316,6 +329,11 @@ func (s *MessagesController) ReadBatchMessages(ctx context.Context, userID int64
 		Ids:    ids,
 	})
 	if err != nil {
+		if status, ok := status.FromError(err); ok {
+			logger.Errorw("read batch messages", "rpc error", status.Message())
+		} else {
+			logger.Errorw("read batch messages", "non-rpc error", err)
+		}
 		return nil, err
 	}
 

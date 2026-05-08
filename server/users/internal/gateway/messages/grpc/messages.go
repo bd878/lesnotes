@@ -44,8 +44,10 @@ func (g *Gateway) setupConnection() {
 
 func (g *Gateway) isConnFailed() bool {
 	state := g.conn.GetState()
-	if state == connectivity.Shutdown || state == connectivity.TransientFailure {
-		logger.Debugw("messages gateway conn failed", "state", state.String())
+	if state == connectivity.Shutdown ||
+		state == connectivity.TransientFailure ||
+		state == connectivity.Connecting {
+		logger.Debugw("messages conn failed", "state", state.String())
 		return true
 	}
 	return false

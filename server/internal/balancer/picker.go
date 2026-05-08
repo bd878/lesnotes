@@ -88,7 +88,7 @@ func (p *Picker) Pick(info balancer.PickInfo) (balancer.PickResult, error) {
 	result.SubConn = endpoint.SubConn
 
 	result.Done = func(info balancer.DoneInfo) {
-		fmt.Fprintln(os.Stdout, "done info", "error", info.Err, "bytesSent", info.BytesSent, "bytesReceived", info.BytesReceived)
+		fmt.Fprintf(os.Stdout, "done info [%T]: %+[1]v\n", info)
 	}
 
 	fmt.Fprintln(os.Stdout, "pick conn", "method_name", info.FullMethodName, "addr", endpoint.Address)

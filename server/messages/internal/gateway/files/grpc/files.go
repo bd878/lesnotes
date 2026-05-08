@@ -24,7 +24,10 @@ func New(filesAddr string) *Gateway {
 }
 
 func (g *Gateway) setupConnection() (err error) {
-	conn, err := grpc.NewClient(g.filesAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(
+		g.filesAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 	if err != nil {
 		return err
 	}
@@ -36,7 +39,9 @@ func (g *Gateway) setupConnection() (err error) {
 
 func (g *Gateway) isConnFailed() bool {
 	state := g.conn.GetState()
-	if state == connectivity.Shutdown || state == connectivity.TransientFailure {
+	if state == connectivity.Shutdown ||
+		state == connectivity.TransientFailure ||
+		state == connectivity.Connecting {
 		logger.Debugw("files conn failed", "state", state.String())
 		return true
 	}

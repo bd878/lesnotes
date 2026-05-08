@@ -5,8 +5,12 @@ import (
 	"fmt"
 	"golang.org/x/sync/errgroup"
 	"net/http"
+	"net"
 	"os"
 	"time"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/channelz/service"
 
 	sessionsgateway "github.com/bd878/gallery/server/internal/gateway/sessions"
 	usersgateway "github.com/bd878/gallery/server/internal/gateway/users"
@@ -29,6 +33,7 @@ type Config struct {
 
 type Server struct {
 	*http.Server
+	channelzServer *grpc.Server
 	config Config
 }
 
@@ -96,7 +101,10 @@ func New(cfg Config) *Server {
 func (s *Server) Run(ctx context.Context) (err error) {
 	waiter := waiter.New(waiter.CatchSignals())
 
-	waiter.Add(s.WaitForServer)
+	waiter.Add(
+		s.WaitForServer,
+		s.WaitForChannelz,
+	)
 
 	return waiter.Wait()
 }
@@ -120,6 +128,32 @@ func (s *Server) WaitForServer(ctx context.Context) (err error) {
 		if err := s.Shutdown(ctx); err != nil {
 			fmt.Fprintln(os.Stderr, "http server failed to stop gracefully")
 			return err
+		}
+		return nil
+	})
+
+	return group.Wait()
+}
+
+func (s *Server) WaitForChannelz(ctx context.Context) (err error) {
+	group, gCtx := errgroup.WithContext(ctx)
+
+	group.Go(func() error {
+		lis, err := net.Listen("tcp", ":50051")
+		defer fmt.Fprintln(os.Stdout, "grpc server channelz shutdown")
+		if err != nil {
+			return err
+		}
+		s.channelzServer = grpc.NewServer()
+		service.RegisterChannelzServiceToServer(s.channelzServer)
+		s.channelzServer.Serve(lis)
+		return nil
+	})
+	group.Go(func() error {
+		<-gCtx.Done()
+		fmt.Fprintln(os.Stdout, "grpc channelz server to be shutdown")
+		if s.channelzServer != nil {
+			s.channelzServer.Stop()
 		}
 		return nil
 	})
