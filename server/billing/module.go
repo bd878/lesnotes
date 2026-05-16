@@ -37,6 +37,8 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	}
 
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
+	// TODO: inject amotel.OtelMessageContextInjector(), wrap stream into publisher middleware
+	// am.NewMessagePublisher(...)
 	stream.RegisterDomainEventHandlers(dispatcher, stream.NewDomainEventHandlers(nats.NewStream(svc.Nats())))
 
 	controller := application.New(consensus, dispatcher, paymentsRepo, invoicesRepo, svc.Logger())

@@ -3,17 +3,15 @@ package service
 import (
 	"context"
 	"fmt"
-	"time"
 	"sync"
 	"strings"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/backoff"
 	"google.golang.org/grpc/connectivity"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/internal/rpc"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/messages/pkg/loadbalance"
 	"github.com/bd878/gallery/server/messages/pkg/model"
@@ -60,22 +58,14 @@ func (s *MessagesController) Close() {
 }
 
 func (s *MessagesController) setupConnection() (err error) {
-	conn, err := grpc.NewClient(
+	// TODO: rewrite all other connections on internal rpc module
+	// to include otelgrpc
+	conn, err := rpc.NewClient(
 		fmt.Sprintf(
 			"%s:///%s",
 			loadbalance.Name,
 			s.conf.RpcAddr,
 		),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithConnectParams(grpc.ConnectParams{
-			Backoff: backoff.Config{
-				BaseDelay: 5*time.Second,
-				Multiplier: 2,
-				Jitter: 0.42,
-				MaxDelay: 1*time.Minute,
-			},
-			MinConnectTimeout: 10*time.Second,
-		}),
 	)
 	if err != nil {
 		return err

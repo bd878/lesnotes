@@ -9,18 +9,21 @@ import (
 )
 
 type WaitFunc func(ctx context.Context) error
+type CleanupFunc func()
 
 type Waiter interface {
 	Add(fns ...WaitFunc)
+	Cleanup(fns ...CleanupFunc)
 	Wait() error
 	Context() context.Context
 	CancelFunc() context.CancelFunc
 }
 
 type waiter struct {
-	ctx   context.Context
-	fns   []WaitFunc
-	cancel context.CancelFunc
+	ctx          context.Context
+	fns          []WaitFunc
+	cancel       context.CancelFunc
+	cleanupFuncs []CleanupFunc
 }
 
 type waiterCfg struct {
@@ -39,7 +42,8 @@ func New(options ...WaiterOption) Waiter {
 	}
 
 	w := &waiter{
-		fns: []WaitFunc{},
+		fns:          []WaitFunc{},
+		cleanupFuncs: []CleanupFunc{},
 	}
 	w.ctx, w.cancel = context.WithCancel(cfg.parentCtx)
 	if cfg.catchSignals {
@@ -51,6 +55,10 @@ func New(options ...WaiterOption) Waiter {
 
 func (w *waiter) Add(fns ...WaitFunc) {
 	w.fns = append(w.fns, fns...)
+}
+
+func (w *waiter) Cleanup(fns ...CleanupFunc) {
+	w.cleanupFuncs = append(w.cleanupFuncs, fns...)
 }
 
 func (w *waiter) Wait() error {
@@ -65,6 +73,11 @@ func (w *waiter) Wait() error {
 	for _, fn := range w.fns {
 		fn := fn
 		g.Go(func() error { return fn(ctx) })
+	}
+
+	for _, fn := range w.cleanupFuncs {
+		cleanupFunc := fn
+		defer cleanupFunc()
 	}
 
 	return g.Wait()

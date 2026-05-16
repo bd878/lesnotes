@@ -20,6 +20,11 @@ import (
 	"google.golang.org/grpc/channelz/service"
 	"golang.org/x/sync/errgroup"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/internal/waiter"
@@ -49,10 +54,13 @@ type System struct {
 	raftListener     net.Listener
 	waiter           waiter.Waiter
 	mux              cmux.CMux
+	tp               *sdktrace.TracerProvider
 }
 
 func NewSystem(cfg Config) (*System, error) {
 	s := &System{cfg: cfg}
+
+	s.initWaiter()
 
 	if err := s.initDB(); err != nil {
 		return nil, err
@@ -70,12 +78,34 @@ func NewSystem(cfg Config) (*System, error) {
 		return nil, err
 	}
 
+	if err := s.initOpenTelemetry(); err != nil {
+		return nil, err
+	}
+
 	s.initRaftListener()
 	s.initRPC()
 	s.initLogger()
-	s.initWaiter()
 
 	return s, nil
+}
+
+func (s *System) initOpenTelemetry() error {
+	exporter, err := otlptracegrpc.New(context.Background())
+	if err != nil {
+		return err
+	}
+
+	s.tp = sdktrace.NewTracerProvider(sdktrace.WithBatcher(exporter))
+	otel.SetTracerProvider(s.tp)
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
+
+	s.waiter.Cleanup(func() {
+		if err := s.tp.Shutdown(context.Background()); err != nil {
+			fmt.Fprintf(os.Stdout, "ran into an issue shutting down thre tracer provider %v", err)
+		}
+	})
+
+	return nil
 }
 
 func (s *System) Config() Config {
@@ -186,6 +216,7 @@ func (s *System) initRPC() {
 		grpc.ChainUnaryInterceptor(
 			grpcmiddleware.UnaryServerInterceptor(grpcmiddleware.LogBuilder()),
 		),
+		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 		grpc.MaxRecvMsgSize(1024*1024*50), // TODO: for files, parametrize with options
 		grpc.MaxSendMsgSize(1024*1024*50),
 	)
@@ -308,3 +339,4 @@ func (s *System) WaitForChannelz(ctx context.Context) (err error) {
 func (s *System) Addr() string {
 	return s.listener.Addr().String()
 }
+
