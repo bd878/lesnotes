@@ -17,6 +17,7 @@ import (
 
 	"github.com/soheilhy/cmux"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/channelz/service"
 	"golang.org/x/sync/errgroup"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -219,6 +220,14 @@ func (s *System) initRPC() {
 		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 		grpc.MaxRecvMsgSize(1024*1024*50), // TODO: for files, parametrize with options
 		grpc.MaxSendMsgSize(1024*1024*50),
+		grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
+			MinTime: 5*time.Minute,
+			PermitWithoutStream: true,
+		}),
+		grpc.KeepaliveParams(keepalive.ServerParameters{
+			Time: 1*time.Hour,
+			Timeout: 10*time.Second,
+		}),
 	)
 }
 

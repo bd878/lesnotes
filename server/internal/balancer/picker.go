@@ -12,14 +12,14 @@ import (
 	"github.com/bd878/gallery/server/internal/logger"
 )
 
-var _ base.PickerBuilder = (*Picker)(nil)
+var _ base.PickerBuilder = (*SubchannelPicker)(nil)
 
 type conn struct {
 	SubConn  balancer.SubConn
 	Address  string
 }
 
-type Picker struct {
+type SubchannelPicker struct {
 	mu               sync.RWMutex
 	leader           *conn
 	followers        []*conn
@@ -28,7 +28,7 @@ type Picker struct {
 	followerMethods  []string
 }
 
-func (p *Picker) Build(buildInfo base.PickerBuildInfo) balancer.Picker {
+func (p *SubchannelPicker) Build(buildInfo base.PickerBuildInfo) balancer.Picker {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
@@ -61,9 +61,9 @@ func (p *Picker) Build(buildInfo base.PickerBuildInfo) balancer.Picker {
 	return p
 }
 
-var _ balancer.Picker = (*Picker)(nil)
+var _ balancer.Picker = (*SubchannelPicker)(nil)
 
-func (p *Picker) Pick(info balancer.PickInfo) (balancer.PickResult, error) {
+func (p *SubchannelPicker) Pick(info balancer.PickInfo) (balancer.PickResult, error) {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
 
@@ -95,7 +95,7 @@ func (p *Picker) Pick(info balancer.PickInfo) (balancer.PickResult, error) {
 	return result, nil
 }
 
-func (p *Picker) nextFollower() *conn {
+func (p *SubchannelPicker) nextFollower() *conn {
 	cur := atomic.AddUint64(&p.current, uint64(1))
 	len := uint64(len(p.followers))
 	idx := int(cur % len)
@@ -104,6 +104,6 @@ func (p *Picker) nextFollower() *conn {
 
 func RegisterPicker(name string, leaderMethods []string, followerMethods []string) {
 	balancer.Register(
-		base.NewBalancerBuilder(name, &Picker{leaderMethods: leaderMethods, followerMethods: followerMethods}, base.Config{}),
+		base.NewBalancerBuilder(name, &SubchannelPicker{leaderMethods: leaderMethods, followerMethods: followerMethods}, base.Config{HealthCheck: true}),
 	)
 }
