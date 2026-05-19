@@ -1,8 +1,12 @@
 package stream
 
 import (
+	"time"
 	"context"
 	"google.golang.org/protobuf/proto"
+
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/am"
@@ -41,8 +45,25 @@ func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.Event], hand
 	)
 }
 
-func (h domainHandler[T]) HandleEvent(ctx context.Context, event T) error {
+func (h domainHandler[T]) HandleEvent(ctx context.Context, event T) (err error) {
 	logger.Debugw("handle event", "name", event.EventName(), "id", event.ID(), "payload", event.Payload())
+
+	span := trace.SpanFromContext(ctx)
+	defer func(started time.Time) {
+		if err != nil {
+			span.AddEvent(
+				"Encountered an error handling domain event",
+				trace.WithAttributes(attribute.String("error.message", err.Error())),
+			)
+		}
+		span.AddEvent("Handled domain event", trace.WithAttributes(
+			attribute.Int64("TookMS", time.Since(started).Milliseconds()),
+		))
+	}(time.Now())
+
+	span.AddEvent("Handling domain event", trace.WithAttributes(
+		attribute.String("Event", event.EventName()),
+	))
 
 	switch event.EventName() {
 	case domain.MessageCreatedEvent:

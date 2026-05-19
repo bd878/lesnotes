@@ -9,6 +9,8 @@ import (
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/ddd"
+	"github.com/bd878/gallery/server/internal/am"
+	"github.com/bd878/gallery/server/internal/amotel"
 	"github.com/bd878/gallery/server/internal/nats"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/internal/system"
@@ -37,9 +39,12 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	}
 
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
-	// TODO: inject amotel.OtelMessageContextInjector(), wrap stream into publisher middleware
-	// am.NewMessagePublisher(...)
-	stream.RegisterDomainEventHandlers(dispatcher, stream.NewDomainEventHandlers(nats.NewStream(svc.Nats())))
+	stream.RegisterDomainEventHandlers(dispatcher, stream.NewDomainEventHandlers(
+		am.NewMessagePublisher(
+			nats.NewStream(svc.Nats()),
+			amotel.OtelMessageContextInjector(),
+		),
+	))
 
 	controller := application.New(consensus, dispatcher, paymentsRepo, invoicesRepo, svc.Logger())
 

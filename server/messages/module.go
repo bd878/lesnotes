@@ -10,6 +10,8 @@ import (
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/consensus/raft"
 	"github.com/bd878/gallery/server/internal/ddd"
+	"github.com/bd878/gallery/server/internal/am"
+	"github.com/bd878/gallery/server/internal/amotel"
 	"github.com/bd878/gallery/server/internal/discovery/serf"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/internal/nats"
@@ -41,7 +43,12 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	}
 
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
-	stream.RegisterDomainEventHandlers(dispatcher, stream.NewDomainEventHandlers(nats.NewStream(svc.Nats())))
+	stream.RegisterDomainEventHandlers(dispatcher, stream.NewDomainEventHandlers(
+		am.NewMessagePublisher(
+			nats.NewStream(svc.Nats()),
+			amotel.OtelMessageContextInjector(),
+		),
+	))
 
 	controller := application.New(consensus, dispatcher, messagesRepo,
 		translationsRepo, commentsRepo, filesGateway, svc.Logger())

@@ -3,6 +3,10 @@ package grpc
 import (
 	"context"
 
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
+
 	"github.com/bd878/gallery/server/api"
 )
 
@@ -25,7 +29,19 @@ func NewCommentsHandler(ctrl CommentsController) *CommentsHandler {
 }
 
 func (h *CommentsHandler) SendComment(ctx context.Context, req *api.SendCommentRequest) (resp *api.SendCommentResponse, err error) {
+	span := trace.SpanFromContext(ctx)
+
+	span.SetAttributes(
+		attribute.Int64("ID", req.Id),
+		attribute.Int64("MessageID", req.MessageId),
+		attribute.Int64("UserID", req.UserId),
+	)
+
 	err = h.controller.SaveComment(ctx, req.Id, req.UserId, req.MessageId, req.Text, req.Metadata)
+	if err != nil {
+		span.RecordError(err, trace.WithAttributes())
+		span.SetStatus(codes.Error, err.Error())
+	}
 
 	resp = &api.SendCommentResponse{}
 

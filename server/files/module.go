@@ -5,6 +5,8 @@ import (
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/ddd"
+	"github.com/bd878/gallery/server/internal/am"
+	"github.com/bd878/gallery/server/internal/amotel"
 	"github.com/bd878/gallery/server/internal/nats"
 	"github.com/bd878/gallery/server/internal/system"
 	"github.com/bd878/gallery/server/files/config"
@@ -20,12 +22,20 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
 	stream.RegisterDomainEventHandlers(dispatcher,
-		stream.NewDomainEventHandlers(nats.NewStream(svc.Nats())))
+		stream.NewDomainEventHandlers(am.NewMessagePublisher(
+			nats.NewStream(svc.Nats()),
+			amotel.OtelMessageContextInjector(),
+		)))
 
 	controller := application.New(dispatcher, filesRepo, messagesRepo, svc.Logger())
 
-	stream.RegisterIntegrationEventHandlers(nats.NewStream(svc.Nats()),
-		stream.NewIntegrationEventHandlers(controller))
+	stream.RegisterIntegrationEventHandlers(
+		am.NewMessageSubscriber(
+			nats.NewStream(svc.Nats()),
+			amotel.OtelMessageContextExtractor(),
+		),
+		stream.NewIntegrationEventHandlers(controller),
+	)
 
 	filesHandler := grpc.NewFilesHandler(controller)
 
