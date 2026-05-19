@@ -12,12 +12,12 @@ import (
 )
 
 type domainHandler[T ddd.Event] struct {
-	publisher am.MessagePublisher[am.Message]
+	publisher am.MessagePublisher
 }
 
 var _ ddd.EventHandler[ddd.Event] = (*domainHandler[ddd.Event])(nil)
 
-func NewDomainEventHandlers(publisher am.MessagePublisher[am.Message]) *domainHandler[ddd.Event] {
+func NewDomainEventHandlers(publisher am.MessagePublisher) *domainHandler[ddd.Event] {
 	return &domainHandler[ddd.Event]{publisher}
 }
 

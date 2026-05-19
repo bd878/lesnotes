@@ -46,6 +46,7 @@ func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingM
 	return nil
 }
 
+// TODO: event ddd.Event
 func (h integrationHandlers) handlePremiumPayed(ctx context.Context, msg am.IncomingMessage) error {
 	m := &api.PremiumPayed{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {

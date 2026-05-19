@@ -5,6 +5,8 @@ import (
 
 	"github.com/nats-io/nats.go"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/structpb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/bd878/gallery/server/internal/am"
 	"github.com/bd878/gallery/server/api"
@@ -15,17 +17,24 @@ type Stream struct {
 	nc  *nats.Conn
 }
 
-var _ am.RawMessageStream = (*Stream)(nil)
+var _ am.MessageStream = (*Stream)(nil)
 
 func NewStream(nc *nats.Conn) *Stream {
 	return &Stream{nc: nc}
 }
 
 func (s *Stream) Publish(ctx context.Context, topicName string, message am.Message) error {
+	metadata, err := structpb.NewStruct(message.Metadata())
+	if err != nil {
+		return err
+	}
+
 	data, err := proto.Marshal(&api.StreamMessage{
 		Id:   message.ID(),
 		Name: message.MessageName(),
 		Data: message.Data(),
+		Metadata: metadata,
+		SentAt: timestamppb.New(message.SentAt()),
 	})
 	if err != nil {
 		return err
@@ -33,13 +42,13 @@ func (s *Stream) Publish(ctx context.Context, topicName string, message am.Messa
 	return s.nc.Publish(topicName, data)
 }
 
-func (s *Stream) Subscribe(topicName string, handler am.RawMessageHandler) (err error) {
-	_, err = s.nc.Subscribe(topicName, s.handleMsg(topicName, handler))
+func (s *Stream) Subscribe(topicName string, handler am.MessageHandler) error {
+	_, err := s.nc.Subscribe(topicName, s.handleMsg(topicName, handler))
 
-	return
+	return err
 }
 
-func (s *Stream) handleMsg(topicName string, handler am.RawMessageHandler) func(*nats.Msg) {
+func (s *Stream) handleMsg(topicName string, handler am.MessageHandler) func(*nats.Msg) {
 	return func(natsMsg *nats.Msg) {
 		var err error
 
@@ -55,6 +64,8 @@ func (s *Stream) handleMsg(topicName string, handler am.RawMessageHandler) func(
 			name:    m.GetName(),
 			data:    m.GetData(),
 			subject: topicName,
+			metadata: m.GetMetadata().AsMap(),
+			sentAt:  m.SentAt.AsTime(),
 		}
 
 		wCtx, cancel := context.WithCancel(context.TODO())

@@ -1,41 +1,89 @@
 package am
 
 import (
+	"time"
 	"context"
+
+	"github.com/bd878/gallery/server/internal/ddd"
 )
 
 type (
-	Message interface {
-		ID()          string
+	MessageBase interface {
+		ID() string
+		Subject() string
 		MessageName() string
-		Data()        []byte
+		Metadata() ddd.Metadata
+		SentAt() time.Time
+	}
+
+	Message interface {
+		MessageBase
+		Data() []byte
 	}
 
 	IncomingMessage interface {
-		Message
-		Subject() string
+		MessageBase
+		Data() []byte // TODO: remove, use ddd.Event in integrationEvents
 	}
 
-	MessageHandler[I IncomingMessage] interface {
-		HandleMessage(ctx context.Context, msg I) error
+	MessageHandler interface {
+		HandleMessage(ctx context.Context, msg IncomingMessage) error
 	}
 
-	MessageHandlerFunc[I IncomingMessage] func(ctx context.Context, msg I) error
+	MessageHandlerFunc func(ctx context.Context, msg IncomingMessage) error
+	MessagePublisherFunc func(ctx context.Context, topicName string, msg Message) error
 
-	MessagePublisher[O any] interface {
-		Publish(ctx context.Context, topicName string, v O) error
+	MessagePublisher interface {
+		Publish(ctx context.Context, topicName string, msg Message) error
 	}
 
-	MessageSubscriber[I IncomingMessage] interface {
-		Subscribe(topicName string, handler MessageHandler[I]) error
+	MessagePublisherMiddleware = func(next MessagePublisher) MessagePublisher
+	MessageHandlerMiddleware = func(next MessageHandler) MessageHandler
+
+	MessageSubscriber interface {
+		Subscribe(topicName string, handler MessageHandler) error
 	}
 
-	MessageStream[O any, I IncomingMessage] interface {
-		MessagePublisher[O]
-		MessageSubscriber[I]
+	MessageStream interface {
+		MessagePublisher
+		MessageSubscriber
+	}
+
+	messagePublisher struct {
+		publisher MessagePublisher
+	}
+
+	messageSubscriber struct {
+		subscriber MessageSubscriber
+		mws        []MessageHandlerMiddleware
 	}
 )
 
-func (f MessageHandlerFunc[I]) HandleMessage(ctx context.Context, msg I) error {
+func (f MessagePublisherFunc) Publish(ctx context.Context, topicName string, msg Message) error {
+	return f(ctx, topicName, msg)
+}
+
+func (f MessageHandlerFunc) HandleMessage(ctx context.Context, msg IncomingMessage) error {
 	return f(ctx, msg)
+}
+
+func NewMessagePublisher(publisher MessagePublisher, mws ...MessagePublisherMiddleware) MessagePublisher {
+	return messagePublisher{
+		publisher: MessagePublisherWithMiddleware(publisher, mws...),
+	}
+}
+
+func (p messagePublisher) Publish(ctx context.Context, topicName string, msg Message) error {
+	return p.publisher.Publish(ctx, topicName, msg)
+}
+
+func NewMessageSubscriber(subscriber MessageSubscriber, mws ...MessageHandlerMiddleware) MessageSubscriber {
+	return messageSubscriber{
+		subscriber: subscriber,
+		mws:        mws,
+	}
+}
+
+func (s messageSubscriber) Subscribe(topicName string, handler MessageHandler) error {
+	return s.subscriber.Subscribe(topicName, MessageHandlerWithMiddleware(handler, s.mws...))
 }
