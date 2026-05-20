@@ -305,5 +305,23 @@ package Nats as nats {
 	nats_tcp -- "192.168.10.2:4222"
 }
 
+package Collector as collector {
+	component tcp as collector_tcp
+
+	collector_tcp -- "192.168.10.2:4317"
+}
+
+package Prometheus as prometheus {
+	component tcp as prometheus_tcp
+
+	prometheus_tcp -- "192.168.10.2:9090"
+}
+
+package Grafana as grafana {
+	component tcp as grafana_tcp
+
+	grafana_tcp -- "192.168.10.2:3000"
+}
+
 footer 26.02.26
 @enduml

@@ -16,41 +16,69 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-type MessagesRepository interface {
-	Read(ctx context.Context, userIDs []int64, id int64, name string) (message *api.Message, err error)
-	ReadMessages(ctx context.Context, userID int64, limit, offset int32) (messages []*api.Message, isLastPage bool, err error)
-	ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*api.Message, err error)
-}
+type (
+	MessagesRepository interface {
+		Read(ctx context.Context, userIDs []int64, id int64, name string) (message *api.Message, err error)
+		ReadMessages(ctx context.Context, userID int64, limit, offset int32) (messages []*api.Message, isLastPage bool, err error)
+		ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*api.Message, err error)
+	}
 
-type TranslationsRepository interface {
-	ReadTranslation(ctx context.Context, messageID int64, lang string) (translation *api.Translation, err error)
-	ReadMessageTranslations(ctx context.Context, messageID int64) (translations []*api.TranslationPreview, err error)
-	ListTranslations(ctx context.Context, messageID int64) (translations []*api.Translation, err error)
-}
+	TranslationsRepository interface {
+		ReadTranslation(ctx context.Context, messageID int64, lang string) (translation *api.Translation, err error)
+		ReadMessageTranslations(ctx context.Context, messageID int64) (translations []*api.TranslationPreview, err error)
+		ListTranslations(ctx context.Context, messageID int64) (translations []*api.Translation, err error)
+	}
 
-type CommentsRepository interface {
-	Read(ctx context.Context, id, userID int64) (comment *api.Comment, err error)
-	ListMessageComments(ctx context.Context, messageID int64, limit, offset int32) (list *api.CommentsList, err error)
-}
+	CommentsRepository interface {
+		Read(ctx context.Context, id, userID int64) (comment *api.Comment, err error)
+		ListMessageComments(ctx context.Context, messageID int64, limit, offset int32) (list *api.CommentsList, err error)
+	}
 
-type FilesGateway interface {
-	ReadMessageFiles(ctx context.Context, id int64, userIDs []int64) (list []*api.File, err error)
-}
+	FilesGateway interface {
+		ReadMessageFiles(ctx context.Context, id int64, userIDs []int64) (list []*api.File, err error)
+	}
 
-type Consensus interface {
-	Apply(cmd []byte, timeout time.Duration) (err error)
-	GetServers(ctx context.Context) ([]*api.Server, error)
-}
+	Consensus interface {
+		Apply(cmd []byte, timeout time.Duration) (err error)
+		GetServers(ctx context.Context) ([]*api.Server, error)
+	}
 
-type Distributed struct {
-	consensus        Consensus
-	log              *logger.Logger
-	publisher        ddd.EventPublisher[ddd.Event]
-	commentsRepo     CommentsRepository
-	messagesRepo     MessagesRepository
-	translationsRepo TranslationsRepository
-	filesGateway     FilesGateway
-}
+	App interface {
+		SaveMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, userID int64, private bool, name string) (err error)
+		UpdateMessage(ctx context.Context, id int64, text, title, name *string, fileIDs []int64, userID int64) (err error)
+		DeleteUserMessages(ctx context.Context, userID int64) (err error)
+		DeleteMessages(ctx context.Context, ids []int64, userID int64) (err error)
+		PublishMessages(ctx context.Context, ids []int64, userID int64) (err error)
+		PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error)
+		SaveTranslation(ctx context.Context, userID, messageID int64, lang, title, text string) (err error)
+		UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string) (err error)
+		DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error)
+		SaveComment(ctx context.Context, id, userID, messageID int64, text string, metadata []byte) (err error)
+		UpdateComment(ctx context.Context, id, userID int64, text *string, metadata []byte) (err error)
+		DeleteComment(ctx context.Context, id, userID int64) (err error)
+		DeleteMessageComments(ctx context.Context, messageID int64) (err error)
+		ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *api.Message, err error)
+		ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (messages []*api.Message, isLastPage bool, err error)
+		ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*api.Message, err error)
+		ReadTranslation(ctx context.Context, userID, messageID int64, lang string, name string) (translation *api.Translation, err error)
+		ListTranslations(ctx context.Context, userID, messageID int64, name string) (translations []*api.Translation, err error)
+		ReadComment(ctx context.Context, id, userID int64) (comment *api.Comment, err error)
+		ListComments(ctx context.Context, userID, messageID *int64, name *string, limit, offset int32) (comments *api.CommentsList, err error)
+		GetServers(ctx context.Context) ([]*api.Server, error)
+	}
+
+	Distributed struct {
+		consensus        Consensus
+		log              *logger.Logger
+		publisher        ddd.EventPublisher[ddd.Event]
+		commentsRepo     CommentsRepository
+		messagesRepo     MessagesRepository
+		translationsRepo TranslationsRepository
+		filesGateway     FilesGateway
+	}
+)
+
+var _ App = (*Distributed)(nil)
 
 func New(consensus Consensus, publisher ddd.EventPublisher[ddd.Event], messagesRepo MessagesRepository,
 	translationsRepo TranslationsRepository, commentsRepo CommentsRepository, filesGateway FilesGateway, log *logger.Logger) *Distributed {

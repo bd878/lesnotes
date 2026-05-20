@@ -6,12 +6,15 @@ import (
 	"os"
 
 	"golang.org/x/sync/errgroup"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/consensus/raft"
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/am"
 	"github.com/bd878/gallery/server/internal/amotel"
+	"github.com/bd878/gallery/server/internal/amprom"
 	"github.com/bd878/gallery/server/internal/discovery/serf"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/internal/nats"
@@ -47,11 +50,21 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 		am.NewMessagePublisher(
 			nats.NewStream(svc.Nats()),
 			amotel.OtelMessageContextInjector(),
+			amprom.SentMessagesCounter("messages"),
 		),
 	))
 
-	controller := application.New(consensus, dispatcher, messagesRepo,
-		translationsRepo, commentsRepo, filesGateway, svc.Logger())
+	messagesSaved := promauto.NewCounter(
+		prometheus.CounterOpts{
+			Name: "messages_saved_count",
+		},
+	)
+
+	controller := application.NewInstrumentedApp(
+		application.New(consensus, dispatcher, messagesRepo,
+			translationsRepo, commentsRepo, filesGateway, svc.Logger()),
+		messagesSaved,
+	)
 
 	messagesHandler := grpc.NewMessagesHandler(controller)
 	translationsHandler := grpc.NewTranslationsHandler(controller)

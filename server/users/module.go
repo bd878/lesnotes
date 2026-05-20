@@ -9,6 +9,7 @@ import (
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/am"
+	"github.com/bd878/gallery/server/internal/amprom"
 	"github.com/bd878/gallery/server/internal/amotel"
 	"github.com/bd878/gallery/server/internal/nats"
 	"github.com/bd878/gallery/server/internal/logger"
@@ -41,6 +42,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	stream.RegisterIntegrationEventHandlers(am.NewMessageSubscriber(
 			nats.NewStream(svc.Nats()),
 			amotel.OtelMessageContextExtractor(),
+			amprom.ReceivedMessagesCounter("users"),
 		),
 		stream.NewIntegrationEventHandlers(controller),
 	)

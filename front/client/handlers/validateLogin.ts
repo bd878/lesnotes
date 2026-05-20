@@ -11,7 +11,7 @@ async function validateLogin(ctx, next) {
 		console.log(response.error)
 		ctx.state.error = response.error.human
 		await login(ctx)
-	} else {		
+	} else {
 		const expiresAt = new Date(response.expiresAt)
 		console.log("expiresAt", expiresAt.toString())
 		ctx.set({"Set-Cookie":  "token=" + response.token + "; Expires=" + expiresAt.toString() + "; HttpOnly; Path=/; Secure; Domain=" + `${DOMAIN}`})
