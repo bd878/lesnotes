@@ -35,9 +35,21 @@ package Front as front {
 	component front_3
 	component front_4
 
-	front_1 -- "192.168.10.2:8080"
+	front_1 -- "192.168.10.10:8080"
 	front_3 -- "192.168.10.30:8080"
 	front_4 -- "192.168.10.40:8080"
+}
+
+package VDS as vds {
+	nlp -- "192.168.10.13"
+}
+
+package Hosts as hosts {
+	"infra" -- "192.168.10.11"
+	"gallery-prod" -- "192.168.10.10"
+	"gallery-prod-3" -- "192.168.10.30"
+	"gallery-prod-4" -- "192.168.10.40"
+	"gallery-prod-files" -- "192.168.10.5"
 }
 
 package Messages as messages {
@@ -49,10 +61,10 @@ package Messages as messages {
 
 		database PostgreSQL as 9001_db
 
-		7001_http -- "192.168.10.2:7001"
-		9001_grpc -- "192.168.10.2:9001"
-		9001_raft -- "192.168.10.2:9001"
-		8001_serf -- "192.168.10.2:8001"
+		7001_http -- "192.168.10.10:7001"
+		9001_grpc -- "192.168.10.10:9001"
+		9001_raft -- "192.168.10.10:9001"
+		8001_serf -- "192.168.10.10:8001"
 		9001_grpc -- 9001_db
 	}
 
@@ -93,10 +105,10 @@ package Search as search {
 		component http as 7011_http
 		database PostgreSQL as 9011_db
 
-		7011_http -- "192.168.10.2:7011"
-		9011_grpc -- "192.168.10.2:9011"
-		9011_raft -- "192.168.10.2:9011"
-		8011_serf -- "192.168.10.2:8011"
+		7011_http -- "192.168.10.10:7011"
+		9011_grpc -- "192.168.10.10:9011"
+		9011_raft -- "192.168.10.10:9011"
+		8011_serf -- "192.168.10.10:8011"
 		9011_grpc -- 9011_db
 	}
 
@@ -137,10 +149,10 @@ package Users as users {
 		component http as 7021_http
 		database PostgreSQL as 9021_db
 
-		7021_http -- "192.168.10.2:7021"
-		9021_grpc -- "192.168.10.2:9021"
-		9021_raft -- "192.168.10.2:9021"
-		8021_serf -- "192.168.10.2:8021"
+		7021_http -- "192.168.10.10:7021"
+		9021_grpc -- "192.168.10.10:9021"
+		9021_raft -- "192.168.10.10:9021"
+		8021_serf -- "192.168.10.10:8021"
 		9021_grpc -- 9021_db
 	}
 
@@ -180,9 +192,9 @@ package Sessions as sessions {
 		component serf as 8031_serf
 		database PostgreSQL as 9031_db
 
-		9031_grpc -- "192.168.10.2:9031"
-		9031_raft -- "192.168.10.2:9031"
-		8031_serf -- "192.168.10.2:8031"
+		9031_grpc -- "192.168.10.10:9031"
+		9031_raft -- "192.168.10.10:9031"
+		8031_serf -- "192.168.10.10:8031"
 		9031_grpc -- 9031_db
 	}
 
@@ -219,10 +231,10 @@ package Threads as threads {
 		component http as 7041_http
 		database PostgreSQL as 9041_db
 
-		7041_http -- "192.168.10.2:7041"
-		9041_grpc -- "192.168.10.2:9041"
-		9041_raft -- "192.168.10.2:9041"
-		8041_raft -- "192.168.10.2:8041"
+		7041_http -- "192.168.10.10:7041"
+		9041_grpc -- "192.168.10.10:9041"
+		9041_raft -- "192.168.10.10:9041"
+		8041_raft -- "192.168.10.10:8041"
 		9041_grpc -- 9041_db
 	}
 
@@ -263,10 +275,10 @@ package Billing as billing {
 		component http as 7051_http
 		database PostgreSQL as 9051_db
 
-		7051_http -- "192.168.10.2:7051"
-		9051_grpc -- "192.168.10.2:9051"
-		9051_raft -- "192.168.10.2:9051"
-		8051_raft -- "192.168.10.2:8051"
+		7051_http -- "192.168.10.10:7051"
+		9051_grpc -- "192.168.10.10:9051"
+		9051_raft -- "192.168.10.10:9051"
+		8051_raft -- "192.168.10.10:8051"
 		9051_grpc -- 9051_db
 	}
 
@@ -302,26 +314,26 @@ package Billing as billing {
 package Nats as nats {
 	component tcp as nats_tcp
 
-	nats_tcp -- "192.168.10.2:4222"
+	nats_tcp -- "192.168.10.10:4222"
 }
 
 package Collector as collector {
 	component tcp as collector_tcp
 
-	collector_tcp -- "192.168.10.2:4317"
+	collector_tcp -- "192.168.10.10:4317"
 }
 
 package Prometheus as prometheus {
 	component tcp as prometheus_tcp
 
-	prometheus_tcp -- "192.168.10.2:9090"
+	prometheus_tcp -- "192.168.10.10:9090"
 }
 
 package Grafana as grafana {
 	component tcp as grafana_tcp
 
-	grafana_tcp -- "192.168.10.2:3000"
+	grafana_tcp -- "192.168.10.10:3000"
 }
 
-footer 26.02.26
+footer 26.02.106
 @enduml

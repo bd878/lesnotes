@@ -23,11 +23,32 @@ package Files as files {
 	component grpc as files_grpc
 	database PostgreSQL as files_db
 
-	files_http -- "192.168.10.6:8182"
-	files_grpc -- "192.168.10.6:8186"
+	files_http -- "192.168.10.150:8182"
+	files_grpc -- "192.168.10.150:8186"
 
 	files_grpc - files_db 
 	files_http - files_grpc
+}
+
+package VDS as vds {
+	schwarzwald -- "192.168.10.1"
+	kirschen -- "192.168.10.4"
+	sonnenschein -- "192.168.10.6"
+}
+
+package Hosts as hosts {
+	"infra" -- "192.168.10.111"
+	"ansible" -- "192.168.10.112"
+	"gallery-stage" -- "192.168.10.110"
+	"gallery-stage-3" -- "192.168.10.130"
+	"gallery-stage-4" -- "192.168.10.140"
+	"gallery-stage-files" -- "192.168.10.150"
+}
+
+package Infra as infra {
+	component tcp as nats_tcp
+
+	nats_tcp -- "192.168.10.110:4222"
 }
 
 package Front as front {
@@ -35,7 +56,7 @@ package Front as front {
 	component front_3
 	component front_4
 
-	front_1 -- "192.168.10.3:8080"
+	front_1 -- "192.168.10.110:8080"
 	front_3 -- "192.168.10.130:8080"
 	front_4 -- "192.168.10.140:8080"
 }
@@ -49,10 +70,10 @@ package Messages as messages {
 
 		database PostgreSQL as 9101_db
 
-		7101_http -- "192.168.10.3:7101"
-		9101_grpc -- "192.168.10.3:9101"
-		9101_raft -- "192.168.10.3:9101"
-		8101_serf -- "192.168.10.3:8101"
+		7101_http -- "192.168.10.110:7101"
+		9101_grpc -- "192.168.10.110:9101"
+		9101_raft -- "192.168.10.110:9101"
+		8101_serf -- "192.168.10.110:8101"
 		9101_grpc -- 9101_db
 	}
 
@@ -93,10 +114,10 @@ package Search as search {
 		component http as 7111_http
 		database PostgreSQL as 9111_db
 
-		7111_http -- "192.168.10.3:7111"
-		9111_grpc -- "192.168.10.3:9111"
-		9111_raft -- "192.168.10.3:9111"
-		8111_serf -- "192.168.10.3:8111"
+		7111_http -- "192.168.10.110:7111"
+		9111_grpc -- "192.168.10.110:9111"
+		9111_raft -- "192.168.10.110:9111"
+		8111_serf -- "192.168.10.110:8111"
 		9111_grpc -- 9111_db
 	}
 
@@ -137,10 +158,10 @@ package Users as users {
 		component http as 7121_http
 		database PostgreSQL as 9121_db
 
-		7121_http -- "192.168.10.3:7121"
-		9121_grpc -- "192.168.10.3:9121"
-		9121_raft -- "192.168.10.3:9121"
-		8121_serf -- "192.168.10.3:8121"
+		7121_http -- "192.168.10.110:7121"
+		9121_grpc -- "192.168.10.110:9121"
+		9121_raft -- "192.168.10.110:9121"
+		8121_serf -- "192.168.10.110:8121"
 		9121_grpc -- 9121_db
 	}
 
@@ -180,9 +201,9 @@ package Sessions as sessions {
 		component serf as 8131_serf
 		database PostgreSQL as 9131_db
 
-		9131_grpc -- "192.168.10.3:9131"
-		9131_raft -- "192.168.10.3:9131"
-		8131_serf -- "192.168.10.3:8131"
+		9131_grpc -- "192.168.10.110:9131"
+		9131_raft -- "192.168.10.110:9131"
+		8131_serf -- "192.168.10.110:8131"
 		9131_grpc -- 9131_db
 	}
 
@@ -219,10 +240,10 @@ package Threads as threads {
 		component http as 7141_http
 		database PostgreSQL as 9141_db
 
-		7141_http -- "192.168.10.3:7141"
-		9141_grpc -- "192.168.10.3:9141"
-		9141_raft -- "192.168.10.3:9141"
-		8141_raft -- "192.168.10.3:8141"
+		7141_http -- "192.168.10.110:7141"
+		9141_grpc -- "192.168.10.110:9141"
+		9141_raft -- "192.168.10.110:9141"
+		8141_raft -- "192.168.10.110:8141"
 		9141_grpc -- 9141_db
 	}
 
@@ -263,10 +284,10 @@ package Billing as billing {
 		component http as 7151_http
 		database PostgreSQL as 9151_db
 
-		7151_http -- "192.168.10.3:7151"
-		9151_grpc -- "192.168.10.3:9151"
-		9151_raft -- "192.168.10.3:9151"
-		8151_raft -- "192.168.10.3:8151"
+		7151_http -- "192.168.10.110:7151"
+		9151_grpc -- "192.168.10.110:9151"
+		9151_raft -- "192.168.10.110:9151"
+		8151_raft -- "192.168.10.110:8151"
 		9151_grpc -- 9151_db
 	}
 
@@ -297,12 +318,6 @@ package Billing as billing {
 		8154_raft -- "192.168.10.140:8154"
 		9154_grpc -- 9154_db
 	}
-}
-
-package Nats as nats {
-	component tcp as nats_tcp
-
-	nats_tcp -- "192.168.10.3:4222"
 }
 
 footer 25.02.26
