@@ -1,6 +1,6 @@
 ---
 - name: Upgrade and update package repositories on machines
-  hosts: myhosts
+  hosts: hosts
   become: true
   vars_files:
     - /home/snd/ansible_quickstart/vaulted-vars.yaml

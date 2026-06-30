@@ -1,0 +1,13 @@
+---
+addr: "192.168.10.140"
+join_addr: "192.168.10.3" 
+
+messages_port: "9104"
+messages_serf_port: "8104"
+messages_join_port: "8101"
+users_port: "9124"
+users_serf_port: "8124"
+sessions_port: "9134"
+
+raft_bootstrap: false
+log_level: "debug"

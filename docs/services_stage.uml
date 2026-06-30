@@ -46,9 +46,10 @@ package Hosts as hosts {
 }
 
 package Infra as infra {
-	component tcp as nats_tcp
-
-	nats_tcp -- "192.168.10.110:4222"
+	nats -- "192.168.10.111:4222"
+	otelcol -- "192.168.10.111:4317"
+	prometheus -- "192.168.10.111:9090"
+	alertmanager -- "192.168.10.111:9093"
 }
 
 package Front as front {

@@ -26,7 +26,7 @@ type (
 var _ Message = (*RawMessage)(nil)
 
 func NewRawMessage(id, name string, data []byte) *RawMessage {
-	return &RawMessage{id: id, name: name, data: data}
+	return &RawMessage{id: id, name: name, data: data, metadata: make(ddd.Metadata)}
 }
 
 func (m RawMessage) ID() string { return m.id }

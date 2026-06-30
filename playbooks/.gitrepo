@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = schwarzwald:/srv/git/gallery-playbooks.git
+	branch = master
+	commit = 925e4951fc255bd69278d372a2fa86acf278d043
+	parent = d37cc515d4f128b51cfab0111b404fe4734114bc
+	method = merge
+	cmdver = 0.4.9
