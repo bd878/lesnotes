@@ -1,0 +1,14 @@
+- name: remove stale grpc.conf
+  become: yes
+  hosts: test
+
+  tasks:
+  - name: Remove
+    shell: "rm /srv/gallery/stage/{{ item }}/config/grpc.conf"
+    loop:
+      - messages
+      - users
+      - threads
+      - sessions
+      - search
+      - billing

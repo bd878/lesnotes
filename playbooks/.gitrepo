@@ -6,7 +6,7 @@
 [subrepo]
 	remote = schwarzwald:/srv/git/gallery-playbooks.git
 	branch = master
-	commit = 60956e5a530f31f44628add67e6787126191ec94
-	parent = 2938d2551097f1955f95eaedc13c4ebcd9ea4047
+	commit = 6678f0846c191ea15dfc8394d1a11a72b56b7b51
+	parent = b4e2ad399535f9c0c04fbca3bea180096da24cbd
 	method = merge
 	cmdver = 0.4.9

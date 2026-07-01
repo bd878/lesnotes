@@ -1,5 +1,6 @@
 ---
 files_addr: "192.168.10.150"
 files_port: "8186"
+otel_exporter: "192.168.10.111:4317"
 nats: "192.168.10.3:4222"
 domain: "stage.lesnotes.space"

@@ -1,26 +1,119 @@
 - name: Save config on services
-  hosts: hosts
+  hosts: test
 
   tasks:
-  - name: Write grpc services config
-    loop:
-      - messages
-      - users
-      - sessions
-      - billing
-      - search
-      - threads
+  - name: Write grpc config
     ansible.builtin.template:
       src: templates/{{ item }}.grpc.json.j2
       dest: /srv/gallery/stage/{{ item }}/config/grpc.json
+    notify:
+      - Restart {{ item }}
+    loop:
+      - messages
+      - users
+      - threads
+      - billing
+      - search
+      - sessions
 
-  - name: Write http services config
+  - name: Write envs
+    ansible.builtin.template:
+      src: templates/{{ item }}.grpc.conf.j2
+      dest: /srv/gallery/stage/{{ item }}/config/grpc.conf
+    notify:
+      - Restart {{ item }}
+    loop:
+      - messages
+      - users
+      - threads
+      - billing
+      - search
+      - sessions
+
+  - name: Flush pending handlers
+    ansible.builtin.meta: flush_handlers
+
+  - name: Let cluster restart
+    ansible.builtin.pause:
+      seconds: 30
+
+  - name: Write http config
+    ansible.builtin.template:
+      src: templates/{{ item }}.http.json.j2
+      dest: /srv/gallery/stage/{{ item }}/config/http.json
+    notify:
+      - Restart {{ item }} http
     loop:
       - messages
       - users
       - billing
       - search
       - threads
-    ansible.builtin.template:
-      src: templates/{{ item }}.http.json.j2
-      dest: /srv/gallery/stage/{{ item }}/config/http.json
+
+  handlers:
+    - name: Restart messages http
+      become: yes
+      ansible.builtin.service:
+        name: gallery-messages-http
+        state: restarted
+
+    - name: Restart users http
+      become: yes
+      ansible.builtin.service:
+        name: gallery-users-http
+        state: restarted
+
+    - name: Restart billing http
+      become: yes
+      ansible.builtin.service:
+        name: gallery-billing-http
+        state: restarted
+
+    - name: Restart search http
+      become: yes
+      ansible.builtin.service:
+        name: gallery-search-http
+        state: restarted
+
+    - name: Restart threads http
+      become: yes
+      ansible.builtin.service:
+        name: gallery-threads-http
+        state: restarted
+
+
+    - name: Restart messages 
+      become: yes
+      ansible.builtin.service:
+        name: gallery-messages
+        state: restarted
+
+    - name: Restart threads
+      become: yes
+      ansible.builtin.service:
+        name: gallery-threads
+        state: restarted
+
+    - name: Restart users
+      become: yes
+      ansible.builtin.service:
+        name: gallery-users
+        state: restarted
+
+    - name: Restart sessions
+      become: yes
+      ansible.builtin.service:
+        name: gallery-sessions
+        state: restarted
+
+    - name: Restart billing
+      become: yes
+      ansible.builtin.service:
+        name: gallery-billing
+        state: restarted
+
+    - name: Restart search
+      become: yes
+      ansible.builtin.service:
+        name: gallery-search
+        state: restarted

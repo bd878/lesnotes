@@ -6,30 +6,36 @@ messages_port: "9101"
 messages_serf_port: "8101"
 messages_join_port: "8103"
 messages_http_port: "7101"
+messages_name: "messages-1"
 
 users_port: "9121"
 users_serf_port: "8121"
 users_join_port: "8123"
 users_http_port: "7121"
+users_name: "users-1"
 
 sessions_port: "9131"
 sessions_serf_port: "8131"
 sessions_join_port: "8133"
+sessions_name: "sessions-1"
 
 threads_port: "9141"
 threads_serf_port: "8141"
 threads_join_port: "8143"
 threads_http_port: "7141"
+threads_name: "threads-1"
 
 search_port: "9111"
 search_serf_port: "8111"
 search_join_port: "8113"
 search_http_port: "7111"
+search_name: "search-1"
 
 billing_port: "9151"
 billing_serf_port: "8151"
 billing_join_port: "8153"
 billing_http_port: "7151"
+billing_name: "billing-1"
 
 raft_bootstrap: false
 log_level: "debug"
