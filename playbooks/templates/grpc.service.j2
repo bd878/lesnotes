@@ -1,0 +1,17 @@
+[Unit]
+Description=Gallery {{ item }}
+Wants=network.target
+After=syslog.target network-online.target
+
+[Service]
+User=snd
+Group=snd
+EnvironmentFile=/srv/gallery/stage/{{ item }}/config/grpc.conf
+WorkingDirectory=/srv/gallery/stage/{{ item }}
+ExecStart=/srv/gallery/stage/{{ item }}/grpc ./config/grpc.json
+Restart=on-failure
+RestartSec=10
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target

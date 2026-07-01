@@ -1,0 +1,66 @@
+---
+- name: Restart messages http
+  become: yes
+  ansible.builtin.service:
+    name: gallery-messages-http
+    state: restarted
+
+- name: Restart users http
+  become: yes
+  ansible.builtin.service:
+    name: gallery-users-http
+    state: restarted
+
+- name: Restart billing http
+  become: yes
+  ansible.builtin.service:
+    name: gallery-billing-http
+    state: restarted
+
+- name: Restart search http
+  become: yes
+  ansible.builtin.service:
+    name: gallery-search-http
+    state: restarted
+
+- name: Restart threads http
+  become: yes
+  ansible.builtin.service:
+    name: gallery-threads-http
+    state: restarted
+
+- name: Restart messages 
+  become: yes
+  ansible.builtin.service:
+    name: gallery-messages
+    state: restarted
+
+- name: Restart threads
+  become: yes
+  ansible.builtin.service:
+    name: gallery-threads
+    state: restarted
+
+- name: Restart users
+  become: yes
+  ansible.builtin.service:
+    name: gallery-users
+    state: restarted
+
+- name: Restart sessions
+  become: yes
+  ansible.builtin.service:
+    name: gallery-sessions
+    state: restarted
+
+- name: Restart billing
+  become: yes
+  ansible.builtin.service:
+    name: gallery-billing
+    state: restarted
+
+- name: Restart search
+  become: yes
+  ansible.builtin.service:
+    name: gallery-search
+    state: restarted

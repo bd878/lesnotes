@@ -1,0 +1,16 @@
+[Unit]
+Description=Gallery {{ item }} http
+Wants=network.target
+After=syslog.target network-online.target
+
+[Service]
+User=snd
+Group=snd
+WorkingDirectory=/srv/gallery/stage/{{ item }}
+ExecStart=/srv/gallery/stage/{{ item }}/http ./config/http.json
+Restart=on-failure
+RestartSec=10
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
