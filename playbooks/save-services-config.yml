@@ -1,0 +1,26 @@
+- name: Save config on services
+  hosts: hosts
+
+  tasks:
+  - name: Write grpc services config
+    loop:
+      - messages
+      - users
+      - sessions
+      - billing
+      - search
+      - threads
+    ansible.builtin.template:
+      src: templates/{{ item }}.grpc.json.j2
+      dest: /srv/gallery/stage/{{ item }}/config/grpc.json
+
+  - name: Write http services config
+    loop:
+      - messages
+      - users
+      - billing
+      - search
+      - threads
+    ansible.builtin.template:
+      src: templates/{{ item }}.http.json.j2
+      dest: /srv/gallery/stage/{{ item }}/config/http.json

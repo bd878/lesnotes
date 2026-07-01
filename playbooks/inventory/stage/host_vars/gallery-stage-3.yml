@@ -1,0 +1,35 @@
+---
+addr: "192.168.10.130"
+join_addr: "192.168.10.3" 
+
+messages_port: "9103"
+messages_serf_port: "8103"
+messages_join_port: "8101"
+messages_http_port: "7103"
+
+users_port: "9123"
+users_serf_port: "8123"
+users_join_port: "8121"
+users_http_port: "7123"
+
+sessions_port: "9133"
+sessions_serf_port: "8133"
+sessions_join_port: "8131"
+
+threads_port: "9143"
+threads_serf_port: "8143"
+threads_join_port: "8141"
+threads_http_port: "7143"
+
+search_port: "9113"
+search_serf_port: "8113"
+search_join_port: "8111"
+search_http_port: "7113"
+
+billing_port: "9153"
+billing_serf_port: "8153"
+billing_join_port: "8151"
+billing_http_port: "7153"
+
+raft_bootstrap: true
+log_level: "debug"

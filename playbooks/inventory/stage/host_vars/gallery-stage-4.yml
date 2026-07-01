@@ -5,9 +5,31 @@ join_addr: "192.168.10.3"
 messages_port: "9104"
 messages_serf_port: "8104"
 messages_join_port: "8101"
+messages_http_port: "7104"
+
 users_port: "9124"
 users_serf_port: "8124"
+users_join_port: "8121"
+users_http_port: "7124"
+
 sessions_port: "9134"
+sessions_serf_port: "8134"
+sessions_join_port: "8131"
+
+threads_port: "9144"
+threads_serf_port: "8144"
+threads_join_port: "8141"
+threads_http_port: "7144"
+
+search_port: "9114"
+search_serf_port: "8114"
+search_join_port: "8111"
+search_http_port: "7114"
+
+billing_port: "9154"
+billing_serf_port: "8154"
+billing_join_port: "8151"
+billing_http_port: "7154"
 
 raft_bootstrap: false
 log_level: "debug"

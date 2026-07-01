@@ -1,0 +1,15 @@
+{
+  "node_name": "users.{{ users_port }}",
+  "rpc_addr": "{{ addr }}:{{ users_port }}",
+  "serf_addr": "{{ addr }}:{{ users_serf_port }}",
+  "serf_join_addrs": ["{{ join_addr }}:{{ users_join_port }}"],
+  "sessions_service_addr": "{{ addr }}:{{ sessions_port }}",
+  "goose_table_name": "users_goose_db_version",
+  "raft_bootstrap": {{ raft_bootstrap | string | lower }},
+  "raft_log_level": "{{ log_level }}",
+  "log_level": "{{ log_level }}",
+  "pg_conn": "{{ pg_conn }}",
+  "data_path": "../data.{{ users_port }}",
+  "domain": "{{ domain }}",
+  "nats_addr": "{{ nats }}"
+}

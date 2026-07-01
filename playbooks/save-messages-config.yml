@@ -1,8 +1,0 @@
-- name: Save config on messages service
-  hosts: test
-
-  tasks:
-  - name: Write messages config
-    ansible.builtin.template:
-      src: templates/messages.grpc.json.j2
-      dest: /srv/gallery/stage/messages/config/grpc.json

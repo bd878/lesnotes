@@ -1,0 +1,15 @@
+{
+  "node_name": "search.{{ search_port }}",
+  "rpc_addr": "{{ addr }}:{{ search_port }}",
+  "serf_addr": "{{ addr }}:{{ search_serf_port }}",
+  "serf_join_addrs": ["{{ join_addr }}:{{ search_join_port }}"],
+  "users_service_addr": "{{ addr }}:{{ users_port }}",
+  "sessions_service_addr": "{{ addr }}:{{ sessions_port }}",
+  "goose_table_name": "search_goose_db_version",
+  "raft_bootstrap": {{ raft_bootstrap | string | lower }},
+  "raft_log_level": "{{ log_level }}",
+  "log_level": "{{ log_level }}",
+  "data_path": "../data.{{ search_port }}",
+  "pg_conn": "{{ pg_conn }}",
+  "nats_addr": "{{ nats }}"
+}
