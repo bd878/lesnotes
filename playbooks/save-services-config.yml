@@ -1,5 +1,7 @@
 - name: Save config on services
-  hosts: hosts
+  hosts:
+    - gallery-stage-3
+    - gallery-stage-4
 
   tasks:
   - name: Write grpc config
@@ -17,6 +19,8 @@
       - sessions
 
   - name: Write envs
+    tags:
+      - envs
     ansible.builtin.template:
       src: templates/{{ item }}.grpc.conf.j2
       dest: /srv/gallery/stage/{{ item }}/config/grpc.conf

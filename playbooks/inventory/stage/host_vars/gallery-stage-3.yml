@@ -1,6 +1,6 @@
 ---
 addr: "192.168.10.130"
-join_addr: "192.168.10.3" 
+join_addr: "192.168.10.110" 
 
 messages_port: "9103"
 messages_serf_port: "8103"

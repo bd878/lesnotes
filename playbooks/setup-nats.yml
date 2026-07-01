@@ -1,0 +1,33 @@
+---
+- name: Setup nats server
+  become: yes
+  hosts: infra
+
+  tasks: 
+  - name: Download nats rpm
+    ansible.builtin.get_url:
+      url: https://github.com/nats-io/nats-server/releases/download/v2.14.3/nats-server-v2.14.3-amd64.rpm
+      dest: /home/snd/nats-server.rpm
+
+  - name: Install rpm
+    ansible.builtin.dnf:
+      name: /home/snd/nats-server.rpm
+      state: present
+      disable_gpg_check: yes
+
+  - name: Setup config
+    ansible.builtin.template:
+      src: templates/nats.conf.j2
+      dest: /etc/nats-server.conf
+
+  - name: Create systemd service
+    ansible.builtin.template:
+      src: templates/nats.service.j2
+      dest: /etc/systemd/system/nats.service
+
+  - name: Start and enable
+    ansible.builtin.systemd_service:
+      name: nats
+      daemon_reload: true
+      state: started
+      enabled: true
