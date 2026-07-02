@@ -1,15 +1,13 @@
 ---
 - name: Upgrade and update package repositories on machines
-  hosts: hosts
+  hosts: kirschen
   become: true
-  vars_files:
-    - /home/snd/ansible_quickstart/vaulted-vars.yaml
 
   tasks:
   - name: Ensure latest repositories installed
-    dnf: update_cache=yes
+    apt: update_cache=yes
 
   - name: Upgrade packages
-    dnf:
+    apt:
       name: "*"
       state: latest

@@ -1,0 +1,56 @@
+---
+- name: Setup nginx server on a machine
+  become: yes
+  hosts: kirschen
+  
+  tasks:
+  - name: Download nginx
+    ansible.builtin.apt:  
+      name: nginx
+      state: present
+      allow_downgrade: yes
+
+  - name: Set servername
+    set_fact:
+      server_vars: "{{ hostvars[server_name] }}"
+      public_addr: "{{ hostvars[inventory_hostname]['ansible_host'] }}"
+
+  - name: Debug values
+    debug:
+      msg:
+        domain: "{{ server_vars['domain'] }}"
+        addr: "{{ public_addr }}"
+    tags: debug
+
+  - name: Setup config
+    vars:
+      public_addr: ansible_facts['public_addr']
+    ansible.builtin.template:
+      src: templates/nginx.conf.j2
+      dest: /etc/nginx/conf.d/gallery.conf
+
+  - name: Ensure cert path exists
+    file:
+      path: /etc/nginx/ssl/{{ server_vars['domain'] }}/
+      state: directory
+      mode: '0700'
+
+  - name: Copy privkey cert
+    copy:
+      content: "{{ privkey }}"
+      directory_mode: '0700'
+      dest: /etc/nginx/ssl/stage.lesnotes.space/privkey.pem
+      mode: '0600'
+
+  - name: Copy fullchain cert
+    copy:
+      content: "{{ fullchain }}"
+      directory_mode: '0700'
+      dest: /etc/nginx/ssl/stage.lesnotes.space/fullchain.pem
+      mode: '0600'
+
+  - name: Reload nginx
+    ansible.builtin.systemd_service:
+      name: nginx
+      state: reloaded
+      daemon_reload: true

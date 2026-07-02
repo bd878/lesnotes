@@ -1,6 +1,7 @@
 ---
 addr: "192.168.10.110"
 join_addr: "192.168.10.130" 
+front_port: "8080"
 
 messages_port: "9101"
 messages_serf_port: "8101"

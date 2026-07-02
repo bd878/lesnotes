@@ -1,0 +1,86 @@
+server {
+        listen                    {{ public_addr }}:80;
+        server_name               {{ server_vars['domain'] }};
+        return 301                https://{{ server_vars['domain'] }}$request_uri;
+
+#       location /.well-known/acme-challenge/ {
+#               alias /srv/gallery/;
+#               autoindex off;
+#       }
+}
+
+server {
+        listen                    {{ public_addr }}:443 ssl;
+        server_name               {{ server_vars['domain'] }};
+        ssl_certificate           /etc/nginx/ssl/{{ server_vars['domain'] }}/fullchain.pem;
+        ssl_certificate_key       /etc/nginx/ssl/{{ server_vars['domain'] }}/privkey.pem;
+        ssl_session_cache         shared:SSL:10m;
+        ssl_session_timeout       10m;
+
+        keepalive_timeout   70;
+
+        location /messages/v1/ {
+                proxy_pass http://{{ server_vars['addr'] }}:{{ server_vars['messages_http_port'] }};
+        }
+        location /translations/v1/ {
+                proxy_pass http://{{ server_vars['addr'] }}:{{ server_vars['messages_http_port'] }};
+        }
+
+        location /messages/v1/send {
+                client_max_body_size 50m;
+                proxy_pass http://{{ server_vars['addr'] }}:{{ server_vars['messages_http_port'] }};
+        }
+
+        location /messages/v2/ {
+                proxy_pass http://{{ server_vars['addr'] }}:{{ server_vars['messages_http_port'] }};
+        }
+        location /translations/v2/ {
+                proxy_pass http://{{ server_vars['addr'] }}:{{ server_vars['messages_http_port'] }};
+        }
+
+        location /comments/v2/ {
+                proxy_pass http://{{ server_vars['addr'] }}:{{ server_vars['messages_http_port'] }};
+        }
+
+        location /messages/v2/send {
+                client_max_body_size 50m;
+                proxy_pass http://{{ server_vars['addr'] }}:{{ server_vars['messages_http_port'] }};
+        }
+        location /users/v2/ {
+                proxy_pass http://{{ server_vars['addr'] }}:{{ server_vars['users_http_port'] }};
+        }
+        location /users/v1/ {
+                proxy_pass http://{{ server_vars['addr'] }}:{{ server_vars['users_http_port'] }};
+        }
+
+        location /files/v1/ {
+                client_max_body_size 50m;
+                proxy_pass http://{{ files_addr }}:{{ server_vars['files_http_port'] }};
+        }
+        location /files/v2/ {
+                client_max_body_size 50m;
+                proxy_pass http://{{ files_addr }}:{{ server_vars['files_http_port'] }};
+        }
+        location /search/v1 {
+                proxy_pass http://{{ server_vars['addr'] }}:{{ server_vars['search_http_port'] }};
+        }
+        location /search/v2 {
+                proxy_pass http://{{ server_vars['addr'] }}:{{ server_vars['search_http_port'] }};
+        }
+        location /threads/v1 {
+                proxy_pass http://{{ server_vars['addr'] }}:{{ server_vars['threads_http_port'] }};
+        }
+        location /threads/v2 {
+                proxy_pass http://{{ server_vars['addr'] }}:{{ server_vars['threads_http_port'] }};
+        }
+        location /billing/v1 {
+                proxy_pass http://{{ server_vars['addr'] }}:{{ server_vars['billing_http_port'] }};
+        }
+        location /billing/v2 {
+                proxy_pass http://{{ server_vars['addr'] }}:{{ server_vars['billing_http_port'] }};
+        }
+        location / {
+                proxy_pass http://{{ server_vars['addr'] }}:{{ server_vars['front_port'] }};
+        }
+}
+
