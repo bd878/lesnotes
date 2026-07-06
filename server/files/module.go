@@ -6,8 +6,6 @@ import (
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/am"
-	"github.com/bd878/gallery/server/internal/amotel"
-	"github.com/bd878/gallery/server/internal/amprom"
 	"github.com/bd878/gallery/server/internal/nats"
 	"github.com/bd878/gallery/server/internal/system"
 	"github.com/bd878/gallery/server/files/config"
@@ -25,8 +23,6 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	stream.RegisterDomainEventHandlers(dispatcher,
 		stream.NewDomainEventHandlers(am.NewMessagePublisher(
 			nats.NewStream(svc.Nats()),
-			amotel.OtelMessageContextInjector(),
-			amprom.SentMessagesCounter("files"),
 		)))
 
 	controller := application.New(dispatcher, filesRepo, messagesRepo, svc.Logger())
@@ -34,8 +30,6 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	stream.RegisterIntegrationEventHandlers(
 		am.NewMessageSubscriber(
 			nats.NewStream(svc.Nats()),
-			amotel.OtelMessageContextExtractor(),
-			amprom.ReceivedMessagesCounter("files"),
 		),
 		stream.NewIntegrationEventHandlers(controller),
 	)
