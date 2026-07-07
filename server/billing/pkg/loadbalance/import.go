@@ -7,7 +7,7 @@ func init() {
 	balancer.RegisterPicker(
 		Name,
 		[]string{"CreateInvoice", "StartPayment", "ProceedPayment",
-			"CancelPayment", "RefundPayment"},
+			"CancelPayment", "RefundPayment", "Apply"},
 		[]string{"GetPayment", "GetInvoice"},
 	)
 }

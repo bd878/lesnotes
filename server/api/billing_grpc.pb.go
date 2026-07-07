@@ -19,24 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Billing_CreateInvoice_FullMethodName  = "/billing.v1.Billing/CreateInvoice"
-	Billing_StartPayment_FullMethodName   = "/billing.v1.Billing/StartPayment"
-	Billing_ProceedPayment_FullMethodName = "/billing.v1.Billing/ProceedPayment"
-	Billing_CancelPayment_FullMethodName  = "/billing.v1.Billing/CancelPayment"
-	Billing_RefundPayment_FullMethodName  = "/billing.v1.Billing/RefundPayment"
-	Billing_GetInvoice_FullMethodName     = "/billing.v1.Billing/GetInvoice"
-	Billing_GetPayment_FullMethodName     = "/billing.v1.Billing/GetPayment"
+	Billing_Apply_FullMethodName      = "/billing.v1.Billing/Apply"
+	Billing_GetInvoice_FullMethodName = "/billing.v1.Billing/GetInvoice"
+	Billing_GetPayment_FullMethodName = "/billing.v1.Billing/GetPayment"
 )
 
 // BillingClient is the client API for Billing service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BillingClient interface {
-	CreateInvoice(ctx context.Context, in *CreateInvoiceRequest, opts ...grpc.CallOption) (*CreateInvoiceResponse, error)
-	StartPayment(ctx context.Context, in *StartPaymentRequest, opts ...grpc.CallOption) (*StartPaymentResponse, error)
-	ProceedPayment(ctx context.Context, in *ProceedPaymentRequest, opts ...grpc.CallOption) (*ProceedPaymentResponse, error)
-	CancelPayment(ctx context.Context, in *CancelPaymentRequest, opts ...grpc.CallOption) (*CancelPaymentResponse, error)
-	RefundPayment(ctx context.Context, in *RefundPaymentRequest, opts ...grpc.CallOption) (*RefundPaymentResponse, error)
+	Apply(ctx context.Context, in *Command, opts ...grpc.CallOption) (*CommandResponse, error)
 	GetInvoice(ctx context.Context, in *GetInvoiceRequest, opts ...grpc.CallOption) (*GetInvoiceResponse, error)
 	GetPayment(ctx context.Context, in *GetPaymentRequest, opts ...grpc.CallOption) (*GetPaymentResponse, error)
 }
@@ -49,50 +41,10 @@ func NewBillingClient(cc grpc.ClientConnInterface) BillingClient {
 	return &billingClient{cc}
 }
 
-func (c *billingClient) CreateInvoice(ctx context.Context, in *CreateInvoiceRequest, opts ...grpc.CallOption) (*CreateInvoiceResponse, error) {
+func (c *billingClient) Apply(ctx context.Context, in *Command, opts ...grpc.CallOption) (*CommandResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreateInvoiceResponse)
-	err := c.cc.Invoke(ctx, Billing_CreateInvoice_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *billingClient) StartPayment(ctx context.Context, in *StartPaymentRequest, opts ...grpc.CallOption) (*StartPaymentResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(StartPaymentResponse)
-	err := c.cc.Invoke(ctx, Billing_StartPayment_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *billingClient) ProceedPayment(ctx context.Context, in *ProceedPaymentRequest, opts ...grpc.CallOption) (*ProceedPaymentResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ProceedPaymentResponse)
-	err := c.cc.Invoke(ctx, Billing_ProceedPayment_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *billingClient) CancelPayment(ctx context.Context, in *CancelPaymentRequest, opts ...grpc.CallOption) (*CancelPaymentResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CancelPaymentResponse)
-	err := c.cc.Invoke(ctx, Billing_CancelPayment_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *billingClient) RefundPayment(ctx context.Context, in *RefundPaymentRequest, opts ...grpc.CallOption) (*RefundPaymentResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RefundPaymentResponse)
-	err := c.cc.Invoke(ctx, Billing_RefundPayment_FullMethodName, in, out, cOpts...)
+	out := new(CommandResponse)
+	err := c.cc.Invoke(ctx, Billing_Apply_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -123,11 +75,7 @@ func (c *billingClient) GetPayment(ctx context.Context, in *GetPaymentRequest, o
 // All implementations must embed UnimplementedBillingServer
 // for forward compatibility.
 type BillingServer interface {
-	CreateInvoice(context.Context, *CreateInvoiceRequest) (*CreateInvoiceResponse, error)
-	StartPayment(context.Context, *StartPaymentRequest) (*StartPaymentResponse, error)
-	ProceedPayment(context.Context, *ProceedPaymentRequest) (*ProceedPaymentResponse, error)
-	CancelPayment(context.Context, *CancelPaymentRequest) (*CancelPaymentResponse, error)
-	RefundPayment(context.Context, *RefundPaymentRequest) (*RefundPaymentResponse, error)
+	Apply(context.Context, *Command) (*CommandResponse, error)
 	GetInvoice(context.Context, *GetInvoiceRequest) (*GetInvoiceResponse, error)
 	GetPayment(context.Context, *GetPaymentRequest) (*GetPaymentResponse, error)
 	mustEmbedUnimplementedBillingServer()
@@ -140,20 +88,8 @@ type BillingServer interface {
 // pointer dereference when methods are called.
 type UnimplementedBillingServer struct{}
 
-func (UnimplementedBillingServer) CreateInvoice(context.Context, *CreateInvoiceRequest) (*CreateInvoiceResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method CreateInvoice not implemented")
-}
-func (UnimplementedBillingServer) StartPayment(context.Context, *StartPaymentRequest) (*StartPaymentResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method StartPayment not implemented")
-}
-func (UnimplementedBillingServer) ProceedPayment(context.Context, *ProceedPaymentRequest) (*ProceedPaymentResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method ProceedPayment not implemented")
-}
-func (UnimplementedBillingServer) CancelPayment(context.Context, *CancelPaymentRequest) (*CancelPaymentResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method CancelPayment not implemented")
-}
-func (UnimplementedBillingServer) RefundPayment(context.Context, *RefundPaymentRequest) (*RefundPaymentResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method RefundPayment not implemented")
+func (UnimplementedBillingServer) Apply(context.Context, *Command) (*CommandResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Apply not implemented")
 }
 func (UnimplementedBillingServer) GetInvoice(context.Context, *GetInvoiceRequest) (*GetInvoiceResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetInvoice not implemented")
@@ -182,92 +118,20 @@ func RegisterBillingServer(s grpc.ServiceRegistrar, srv BillingServer) {
 	s.RegisterService(&Billing_ServiceDesc, srv)
 }
 
-func _Billing_CreateInvoice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateInvoiceRequest)
+func _Billing_Apply_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Command)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(BillingServer).CreateInvoice(ctx, in)
+		return srv.(BillingServer).Apply(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Billing_CreateInvoice_FullMethodName,
+		FullMethod: Billing_Apply_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BillingServer).CreateInvoice(ctx, req.(*CreateInvoiceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Billing_StartPayment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(StartPaymentRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(BillingServer).StartPayment(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Billing_StartPayment_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BillingServer).StartPayment(ctx, req.(*StartPaymentRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Billing_ProceedPayment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ProceedPaymentRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(BillingServer).ProceedPayment(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Billing_ProceedPayment_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BillingServer).ProceedPayment(ctx, req.(*ProceedPaymentRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Billing_CancelPayment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CancelPaymentRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(BillingServer).CancelPayment(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Billing_CancelPayment_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BillingServer).CancelPayment(ctx, req.(*CancelPaymentRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Billing_RefundPayment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RefundPaymentRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(BillingServer).RefundPayment(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Billing_RefundPayment_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BillingServer).RefundPayment(ctx, req.(*RefundPaymentRequest))
+		return srv.(BillingServer).Apply(ctx, req.(*Command))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -316,24 +180,8 @@ var Billing_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*BillingServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "CreateInvoice",
-			Handler:    _Billing_CreateInvoice_Handler,
-		},
-		{
-			MethodName: "StartPayment",
-			Handler:    _Billing_StartPayment_Handler,
-		},
-		{
-			MethodName: "ProceedPayment",
-			Handler:    _Billing_ProceedPayment_Handler,
-		},
-		{
-			MethodName: "CancelPayment",
-			Handler:    _Billing_CancelPayment_Handler,
-		},
-		{
-			MethodName: "RefundPayment",
-			Handler:    _Billing_RefundPayment_Handler,
+			MethodName: "Apply",
+			Handler:    _Billing_Apply_Handler,
 		},
 		{
 			MethodName: "GetInvoice",

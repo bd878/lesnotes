@@ -3,15 +3,20 @@ package service
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/billing/pkg/loadbalance"
+	"github.com/bd878/gallery/server/billing/internal/machine"
 	"github.com/bd878/gallery/server/billing/pkg/model"
+	"github.com/bd878/gallery/server/billing/internal/domain"
 )
 
 type Config struct {
@@ -22,9 +27,10 @@ type Controller struct {
 	conf         Config
 	client       api.BillingClient
 	conn         *grpc.ClientConn
+	publisher    ddd.EventPublisher[ddd.Event]
 }
 
-func New(conf Config) *Controller {
+func New(conf Config, /* TODO: add publisher */) *Controller {
 	controller := &Controller{conf: conf}
 
 	controller.setupConnection()
@@ -84,12 +90,29 @@ func (s *Controller) CreateInvoice(ctx context.Context, id string, userID int64,
 		return err
 	}
 
-	_, err = s.client.CreateInvoice(ctx, &api.CreateInvoiceRequest{
-		Id:        id,
-		UserId:    userID,
-		Total:     total,
-		Metadata:  metadata,
-		Cart:      cc,
+	cartProto, err := proto.Marshal(cc)
+	if err != nil {
+		return err
+	}
+
+	cmd, err := proto.Marshal(&machine.AppendInvoiceCommand{
+		Id:            id,
+		UserId:        userID,
+		Total:         total,
+		Cart:          cartProto,
+		Status:        "unpaid",
+		Metadata:      metadata,
+		CreatedAt:     time.Now().UTC().Format(time.RFC3339),
+		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType:  int32(machine.AppendInvoiceRequest),
+		Cmd:      cmd,
+		Duration: "10s",
 	})
 
 	return
@@ -104,13 +127,25 @@ func (s *Controller) StartPayment(ctx context.Context, id, userID int64, invoice
 
 	logger.Debugw("start payment", "id", id, "user_id", userID, "invoice_id", invoiceID, "currency", currency, "total", total, "metadata", metadata)
 
-	_, err = s.client.StartPayment(ctx, &api.StartPaymentRequest{
-		Id:        id,
-		UserId:    userID,
-		InvoiceId: invoiceID,
-		Currency:  currency,
-		Total:     total,
-		Metadata:  metadata,
+	cmd, err := proto.Marshal(&machine.AppendPaymentCommand{
+		Id:            id,
+		UserId:        userID,
+		InvoiceId:     invoiceID,
+		Status:        "pending",
+		Currency:      currency,
+		Total:         total,
+		Metadata:      metadata,
+		CreatedAt:     time.Now().UTC().Format(time.RFC3339),
+		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType:   int32(machine.AppendPaymentRequest),
+		Cmd:       cmd,
+		Duration:  "10s",
 	})
 
 	return
@@ -125,12 +160,87 @@ func (s *Controller) ProceedPayment(ctx context.Context, id, userID int64) (err 
 
 	logger.Debugw("proceed payment", "id", id, "user_id", userID)
 
-	_, err = s.client.ProceedPayment(ctx, &api.ProceedPaymentRequest{
-		Id:        id,
-		UserId:    userID,
-	})
 
-	return
+	payment, err := s.GetPayment(ctx, id, userID)
+	if err != nil {
+		return err
+	}
+
+	cmd, err := proto.Marshal(&machine.ProceedPaymentCommand{
+		Id:            id,
+		UserId:        userID,
+		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
+	})
+	if err != nil {
+		return err
+	}
+
+	ii, err := s.GetInvoice(ctx, payment.InvoiceID, userID)
+	if err != nil {
+		return err
+	}
+
+	invoice, err := model.InvoiceToProto(ii)
+	if err != nil {
+		return err
+	}
+
+	logger.Debugw("get invoice", "payment_id", id, "invoice_id", invoice.Id, "user_id", userID)
+
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
+	events := make([]ddd.Event, 0, len(invoice.Cart.Items))
+
+	invoiceEvent, err := domain.PayInvoice(invoice.Id, invoice.Cart, userID, updatedAt)
+	if err != nil {
+		return err
+	}
+
+	events = append(events, invoiceEvent)
+
+	for _, cartItem := range invoice.Cart.Items {
+		switch v := cartItem.Item.(type) {
+		case *api.CartItem_Premium:
+			event, err := domain.PayPremium(invoice.Id, userID,
+				v.Premium.ExpiresAt, updatedAt, v.Premium.Cost, v.Premium.Discount)
+			if err != nil {
+				return err
+			}
+
+			events = append(events, event)
+		}
+	}
+
+	cmd1, err := proto.Marshal(&machine.PayInvoiceCommand{
+		Id:            payment.InvoiceID,
+		UserId:        userID,
+		UpdatedAt:     updatedAt,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType:    int32(machine.ProceedPaymentRequest),
+		Cmd:        cmd,
+		Duration:   "10s",
+	})
+	if err != nil {
+		// TODO: rollback payment if failed
+		return
+	}
+
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType: int32(machine.PayInvoiceRequest),
+		Cmd:     cmd1,
+		Duration: "10s",
+	})
+	if err != nil {
+		// TODO: rollback payment if failed
+		return err
+	}
+
+	return s.publisher.Publish(context.TODO(), events...)
 }
 
 func (s *Controller) CancelPayment(ctx context.Context, id, userID int64) (err error) {
@@ -142,9 +252,19 @@ func (s *Controller) CancelPayment(ctx context.Context, id, userID int64) (err e
 
 	logger.Debugw("cancel payment", "id", id, "user_id", userID)
 
-	_, err = s.client.CancelPayment(ctx, &api.CancelPaymentRequest{
-		Id:        id,
-		UserId:    userID,
+	cmd, err := proto.Marshal(&machine.CancelPaymentCommand{
+		Id:            id,
+		UserId:        userID,
+		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType:  int32(machine.CancelPaymentRequest),
+		Cmd:      cmd,
+		Duration: "10s",
 	})
 
 	return
@@ -159,9 +279,19 @@ func (s *Controller) RefundPayment(ctx context.Context, id, userID int64) (err e
 
 	logger.Debugw("refund payment", "id", id, "user_id", userID)
 
-	_, err = s.client.RefundPayment(ctx, &api.RefundPaymentRequest{
-		Id:        id,
-		UserId:    userID,
+	cmd, err := proto.Marshal(&machine.RefundPaymentCommand{
+		Id:            id,
+		UserId:        userID,
+		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType:  int32(machine.RefundPaymentRequest),
+		Cmd:      cmd,
+		Duration: "10s",
 	})
 
 	return
