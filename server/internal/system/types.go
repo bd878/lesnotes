@@ -2,6 +2,7 @@ package system
 
 import (
 	"net"
+	"net/http"
 	"database/sql"
 
 	"github.com/soheilhy/cmux"
@@ -18,6 +19,8 @@ type Service interface {
 	Config() Config
 	Pool() *pgxpool.Pool
 	Mux() cmux.CMux
+	ServeMux() *http.ServeMux
+	HTTP() *http.Server
 	Nats() *nats.Conn
 	RPC() *grpc.Server
 	Waiter() waiter.Waiter

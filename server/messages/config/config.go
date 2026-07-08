@@ -7,6 +7,7 @@ type Config struct {
 	FilesServiceAddr    string   `json:"files_service_addr"`
 	SessionsServiceAddr string   `json:"sessions_service_addr"`
 	ThreadsServiceAddr  string   `json:"threads_service_addr"`
+	MessagesServiceAddr string   `json:"messages_service_addr"`
 	RpcAddr             string   `json:"rpc_addr"`
 	SerfAddr            string   `json:"serf_addr"`
 	RaftServers         []string `json:"raft_servers"`

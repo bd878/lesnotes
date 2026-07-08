@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"io"
 	"bytes"
+	"net/http"
 	"os"
 	"net"
 	"time"
@@ -34,6 +35,7 @@ import (
 )
 
 type Config struct {
+	HttpAddr          string
 	RpcAddr           string
 	NodeName          string
 	LogLevel          string
@@ -55,6 +57,8 @@ type System struct {
 	raftListener     net.Listener
 	waiter           waiter.Waiter
 	mux              cmux.CMux
+	http             *http.Server
+	serveMux         *http.ServeMux
 	tp               *sdktrace.TracerProvider
 }
 
@@ -83,8 +87,18 @@ func NewSystem(cfg Config) (*System, error) {
 		return nil, err
 	}
 
-	s.initRaftListener()
-	s.initRPC()
+	if err := s.initRaftListener(); err != nil {
+		return nil, err
+	}
+
+	if err := s.initRPC(); err != nil {
+		return nil, err
+	}
+
+	if err := s.initHTTP(); err != nil {
+		return nil, err
+	}
+
 	s.initLogger()
 
 	return s, nil
@@ -118,7 +132,9 @@ func(s *System) Listener() net.Listener {
 }
 
 func (s *System) initDB() (err error) {
-	s.db, err = sql.Open("pgx", s.cfg.PGConn)
+	if s.cfg.PGConn != "" {
+		s.db, err = sql.Open("pgx", s.cfg.PGConn)
+	}
 	return
 }
 
@@ -127,7 +143,9 @@ func (s *System) DB() *sql.DB {
 }
 
 func (s *System) initPool() (err error) {
-	s.pool, err = pgxpool.New(context.Background(), s.cfg.PGConn)
+	if s.cfg.PGConn != "" {
+		s.pool, err = pgxpool.New(context.Background(), s.cfg.PGConn)
+	}
 	return
 }
 
@@ -136,7 +154,9 @@ func (s *System) Pool() *pgxpool.Pool {
 }
 
 func (s *System) initNats() (err error) {
-	s.nc, err = nats.Connect(s.cfg.NatsAddr)
+	if s.cfg.NatsAddr != "" {
+		s.nc, err = nats.Connect(s.cfg.NatsAddr)
+	}
 	return
 }
 
@@ -145,17 +165,19 @@ func (s *System) Nats() *nats.Conn {
 }
 
 func (s *System) initMux() (err error) {
-	s.listener, err = net.Listen("tcp4", s.cfg.RpcAddr)
-	if err != nil {
-		return
-	}
+	if s.cfg.RpcAddr != "" {
+		s.listener, err = net.Listen("tcp4", s.cfg.RpcAddr)
+		if err != nil {
+			return
+		}
 
-	s.mux = cmux.New(s.listener)
+		s.mux = cmux.New(s.listener)
+	}
 
 	return
 }
 
-func (s *System) initRaftListener() {
+func (s *System) initRaftListener() (err error) {
 	s.raftListener = s.mux.Match(func(r io.Reader) bool {
 		b := make([]byte, 1)
 		if _, err := r.Read(b); err != nil {
@@ -163,6 +185,7 @@ func (s *System) initRaftListener() {
 		}
 		return bytes.Compare(b, []byte{byte(raft.RaftRPC)}) == 0
 	})
+	return nil
 }
 
 func (s *System) RaftListener() net.Listener {
@@ -171,6 +194,10 @@ func (s *System) RaftListener() net.Listener {
 
 func (s *System) Mux() cmux.CMux {
 	return s.mux
+}
+
+func (s *System) ServeMux() *http.ServeMux {
+	return s.serveMux
 }
 
 func (s *System) MigrateDB(fs fs.FS) error {
@@ -212,27 +239,72 @@ func (s *System) Waiter() waiter.Waiter {
 	return s.waiter
 }
 
-func (s *System) initRPC() {
-	s.rpc = grpc.NewServer(
-		grpc.ChainUnaryInterceptor(
-			grpcmiddleware.UnaryServerInterceptor(grpcmiddleware.LogBuilder()),
-		),
-		grpc.StatsHandler(otelgrpc.NewServerHandler()),
-		grpc.MaxRecvMsgSize(1024*1024*50), // TODO: for files, parametrize with options
-		grpc.MaxSendMsgSize(1024*1024*50),
-		grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
-			MinTime: 5*time.Minute,
-			PermitWithoutStream: true,
-		}),
-		grpc.KeepaliveParams(keepalive.ServerParameters{
-			Time: 1*time.Hour,
-			Timeout: 10*time.Second,
-		}),
-	)
+func (s *System) initRPC() (err error) {
+	if s.cfg.RpcAddr != "" {
+		s.rpc = grpc.NewServer(
+			grpc.ChainUnaryInterceptor(
+				grpcmiddleware.UnaryServerInterceptor(grpcmiddleware.LogBuilder()),
+			),
+			grpc.StatsHandler(otelgrpc.NewServerHandler()),
+			grpc.MaxRecvMsgSize(1024*1024*50), // TODO: for files, parametrize with options
+			grpc.MaxSendMsgSize(1024*1024*50),
+			grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
+				MinTime: 5*time.Minute,
+				PermitWithoutStream: true,
+			}),
+			grpc.KeepaliveParams(keepalive.ServerParameters{
+				Time: 1*time.Hour,
+				Timeout: 10*time.Second,
+			}),
+		)
+	}
+	return nil
+}
+
+func (s *System) initHTTP() (err error) {
+	if s.cfg.HttpAddr != "" {
+		s.serveMux = http.NewServeMux()
+
+		s.http = &http.Server{
+			Addr: s.cfg.HttpAddr,
+			Handler: s.serveMux,
+		}
+	}
+	return nil
 }
 
 func (s *System) RPC() *grpc.Server {
 	return s.rpc
+}
+
+func (s *System) HTTP() *http.Server {
+	return s.http
+}
+
+func (s *System) WaitForHTTP(ctx context.Context) (err error) {
+	group, gCtx := errgroup.WithContext(ctx)
+
+	group.Go(func() error {
+		fmt.Fprintf(os.Stdout, "http server started %s\n", s.HttpAddr())
+		defer fmt.Fprintln(os.Stdout, "http server shutdown")
+		if err := s.HTTP().ListenAndServe(); err != nil {
+			return err
+		}
+		return nil
+	})
+	group.Go(func() error {
+		<-gCtx.Done()
+		fmt.Fprintln(os.Stdout, "http server to be shutdown")
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		defer cancel()
+		if err := s.HTTP().Shutdown(ctx); err != nil {
+			fmt.Fprintln(os.Stderr, "http server failed to stop gracefully")
+			return err
+		}
+		return nil
+	})
+
+	return group.Wait()
 }
 
 func (s *System) WaitForRPC(ctx context.Context) (err error) {
@@ -349,3 +421,6 @@ func (s *System) Addr() string {
 	return s.listener.Addr().String()
 }
 
+func (s *System) HttpAddr() string {
+	return s.http.Addr
+}

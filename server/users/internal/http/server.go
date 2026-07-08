@@ -21,7 +21,7 @@ import (
 
 type Config struct {
 	Addr                string
-	RpcAddr             string
+	UsersServiceAddr    string
 	SessionsServiceAddr string
 	MessagesServiceAddr string
 	CookieDomain        string
@@ -48,7 +48,7 @@ func New(cfg Config) (server *Server) {
 	sessionsGateway := sessionsgateway.New(cfg.SessionsServiceAddr)
 	messagesGateway := messagesgateway.New(cfg.MessagesServiceAddr)
 
-	ctrl := controller.New(controller.Config{RpcAddr: cfg.RpcAddr}, messagesGateway, sessionsGateway)
+	ctrl := controller.New(controller.Config{RpcAddr: cfg.UsersServiceAddr}, messagesGateway, sessionsGateway)
 
 	handler := httphandler.New(ctrl, httphandler.Config{
 		CookieDomain:    cfg.CookieDomain,

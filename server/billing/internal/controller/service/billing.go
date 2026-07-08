@@ -30,8 +30,8 @@ type Controller struct {
 	publisher    ddd.EventPublisher[ddd.Event]
 }
 
-func New(conf Config, /* TODO: add publisher */) *Controller {
-	controller := &Controller{conf: conf}
+func New(conf Config, publisher ddd.EventPublisher[ddd.Event]) *Controller {
+	controller := &Controller{conf: conf, publisher: publisher}
 
 	controller.setupConnection()
 

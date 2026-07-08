@@ -1,4 +1,4 @@
-package billing
+package grpc
 
 import (
 	"os"
@@ -8,9 +8,6 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/internal/ddd"
-	"github.com/bd878/gallery/server/internal/am"
-	"github.com/bd878/gallery/server/internal/nats"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/internal/system"
 	"github.com/bd878/gallery/server/internal/discovery/serf"
@@ -18,7 +15,6 @@ import (
 	"github.com/bd878/gallery/server/billing/config"
 	"github.com/bd878/gallery/server/billing/internal/repository/postgres"
 	"github.com/bd878/gallery/server/billing/internal/machine"
-	"github.com/bd878/gallery/server/billing/internal/handler/stream"
 	"github.com/bd878/gallery/server/billing/internal/controller/distributed"
 	"github.com/bd878/gallery/server/billing/internal/handler/grpc"
 )
@@ -37,14 +33,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 		return err
 	}
 
-	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
-	stream.RegisterDomainEventHandlers(dispatcher, stream.NewDomainEventHandlers(
-		am.NewMessagePublisher(
-			nats.NewStream(svc.Nats()),
-		),
-	))
-
-	controller := application.New(consensus, dispatcher, paymentsRepo, invoicesRepo, svc.Logger())
+	controller := application.New(consensus, paymentsRepo, invoicesRepo, svc.Logger())
 
 	handler := grpc.New(controller)
 

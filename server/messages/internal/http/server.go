@@ -25,7 +25,7 @@ import (
 
 type Config struct {
 	Addr                string
-	RpcAddr             string
+	MessagesServiceAddr string
 	UsersServiceAddr    string
 	SessionsServiceAddr string
 	ThreadsServiceAddr  string
@@ -47,9 +47,9 @@ func New(cfg Config) *Server {
 	threadsGateway := threadsgateway.New(cfg.ThreadsServiceAddr)
 	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
 
-	messagesController := controller.NewMessagesController(controller.MessagesConfig{RpcAddr: cfg.RpcAddr}, threadsGateway)
-	translationsController := controller.NewTranslationsController(controller.TranslationsConfig{RpcAddr: cfg.RpcAddr})
-	commentsController := controller.NewCommentsController(controller.CommentsConfig{RpcAddr: cfg.RpcAddr})
+	messagesController := controller.NewMessagesController(controller.MessagesConfig{RpcAddr: cfg.MessagesServiceAddr}, threadsGateway)
+	translationsController := controller.NewTranslationsController(controller.TranslationsConfig{RpcAddr: cfg.MessagesServiceAddr})
+	commentsController := controller.NewCommentsController(controller.CommentsConfig{RpcAddr: cfg.MessagesServiceAddr})
 
 	handler := httphandler.New(messagesController, translationsController, commentsController)
 

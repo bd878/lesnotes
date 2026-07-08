@@ -6,6 +6,7 @@ type Config struct {
 	RpcAddr                string          `json:"rpc_addr"`
 	MessagesServiceAddr    string          `json:"messages_service_addr"` // ???
 	SessionsServiceAddr    string          `json:"sessions_service_addr"`
+	UsersServiceAddr       string          `json:"users_service_addr"`
 
 	SerfAddr               string          `json:"serf_addr"`
 	RaftServers            []string        `json:"raft_servers"`

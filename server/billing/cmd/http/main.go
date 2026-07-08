@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"context"
 	"os"
 
 	_ "github.com/bd878/gallery/server/billing/pkg/loadbalance"
@@ -11,7 +10,7 @@ import (
 
 	"github.com/bd878/gallery/server/billing/config"
 	"github.com/bd878/gallery/server/billing/internal/http"
-	"github.com/bd878/gallery/server/internal/logger"
+	"github.com/bd878/gallery/server/internal/system"
 )
 
 func init() {
@@ -29,20 +28,31 @@ func main() {
 	}
 
 	cfg := config.Load(flag.Arg(0))
-	logger.SetDefault(logger.New(logger.Config{
-		NodeName:   cfg.NodeName,
-		LogLevel:   cfg.LogLevel,
-		SkipCaller: 0,
-	}))
 
-	server := http.New(http.Config{
-		Addr:                  cfg.HttpAddr,
-		RpcAddr:               cfg.RpcAddr,
-		UsersServiceAddr:      cfg.UsersServiceAddr,
-		SessionsServiceAddr:   cfg.SessionsServiceAddr,
+	s, err := system.NewSystem(system.Config{
+		NodeName: cfg.NodeName,
+		LogLevel: cfg.LogLevel,
+		SkipCaller: 1,
+		NatsAddr: cfg.NatsAddr,
+		HttpAddr: cfg.HttpAddr,
 	})
+	if err != nil {
+		panic(err)
+	}
 
-	if err := server.Run(context.Background()); err != nil {
-		fmt.Fprintf(os.Stderr, "server exited %v\n", err)
+	if err := http.Root(s.Waiter().Context(), cfg, s); err != nil {
+		panic(err)
+	}
+
+	fmt.Println("starting billing http service")
+	defer fmt.Println("stopped billing http service")
+
+	s.Waiter().Add(
+		s.WaitForHTTP,
+		s.WaitForStream,
+	)
+
+	if err = s.Waiter().Wait(); err != nil {
+		fmt.Fprintln(os.Stderr, "waiter exited with error", err)
 	}
 }

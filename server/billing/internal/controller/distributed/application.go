@@ -6,7 +6,6 @@ import (
 	"bytes"
 
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/billing/pkg/model"
 	"github.com/bd878/gallery/server/billing/internal/machine"
@@ -32,11 +31,10 @@ type Distributed struct {
 	invoicesRepo   InvoicesRepository
 }
 
-func New(consensus Consensus, publisher ddd.EventPublisher[ddd.Event], paymentsRepo PaymentsRepository,
+func New(consensus Consensus, paymentsRepo PaymentsRepository,
 	invoicesRepo InvoicesRepository, log *logger.Logger) *Distributed {
 	return &Distributed{
 		log:            log,
-		publisher:      publisher,
 		consensus:      consensus,
 		paymentsRepo:   paymentsRepo,
 		invoicesRepo:   invoicesRepo,

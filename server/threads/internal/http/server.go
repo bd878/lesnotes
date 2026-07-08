@@ -20,7 +20,7 @@ import (
 
 type Config struct {
 	Addr                string
-	RpcAddr             string
+	ThreadsServiceAddr  string
 	UsersServiceAddr    string
 	SessionsServiceAddr string
 }
@@ -46,7 +46,7 @@ func New(conf Config) *Server {
 	usersGateway := usersgateway.New(conf.UsersServiceAddr)
 	sessionsGateway := sessionsgateway.New(conf.SessionsServiceAddr)
 
-	ctrl := controller.New(controller.Config{RpcAddr: conf.RpcAddr})
+	ctrl := controller.New(controller.Config{RpcAddr: conf.ThreadsServiceAddr})
 
 	handler := httphandler.New(ctrl)
 
