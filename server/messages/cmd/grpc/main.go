@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/bd878/gallery/server/internal/system"
-	"github.com/bd878/gallery/server/messages"
+	"github.com/bd878/gallery/server/messages/internal/grpc"
 	"github.com/bd878/gallery/server/messages/config"
 	"github.com/bd878/gallery/server/messages/migrations"
 )
@@ -33,7 +33,6 @@ func main() {
 		NodeName:       cfg.NodeName,
 		LogLevel:       cfg.LogLevel,
 		SkipCaller:     1,
-		NatsAddr:       cfg.NatsAddr,
 		PGConn:         cfg.PGConn,
 		GooseTableName: cfg.GooseTableName,
 	})
@@ -56,7 +55,7 @@ func main() {
 		panic(err)
 	}
 
-	err = messages.Root(s.Waiter().Context(), cfg, s)
+	err = grpc.Root(s.Waiter().Context(), cfg, s)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "server exited %v\n", err)
 		panic(err)
@@ -67,10 +66,8 @@ func main() {
 
 	s.Waiter().Add(
 		s.WaitForPool,
-		s.WaitForStream,
 		s.WaitForMux,
 		s.WaitForRPC,
-		s.WaitForChannelz,
 	)
 
 	if err = s.Waiter().Wait(); err != nil {

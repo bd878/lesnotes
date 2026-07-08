@@ -19,27 +19,17 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Messages_SaveMessage_FullMethodName        = "/messages.v1.Messages/SaveMessage"
-	Messages_DeleteMessages_FullMethodName     = "/messages.v1.Messages/DeleteMessages"
-	Messages_DeleteUserMessages_FullMethodName = "/messages.v1.Messages/DeleteUserMessages"
-	Messages_PublishMessages_FullMethodName    = "/messages.v1.Messages/PublishMessages"
-	Messages_PrivateMessages_FullMethodName    = "/messages.v1.Messages/PrivateMessages"
-	Messages_UpdateMessage_FullMethodName      = "/messages.v1.Messages/UpdateMessage"
-	Messages_ReadMessage_FullMethodName        = "/messages.v1.Messages/ReadMessage"
-	Messages_ReadMessages_FullMethodName       = "/messages.v1.Messages/ReadMessages"
-	Messages_ReadBatchMessages_FullMethodName  = "/messages.v1.Messages/ReadBatchMessages"
+	Messages_Apply_FullMethodName             = "/messages.v1.Messages/Apply"
+	Messages_ReadMessage_FullMethodName       = "/messages.v1.Messages/ReadMessage"
+	Messages_ReadMessages_FullMethodName      = "/messages.v1.Messages/ReadMessages"
+	Messages_ReadBatchMessages_FullMethodName = "/messages.v1.Messages/ReadBatchMessages"
 )
 
 // MessagesClient is the client API for Messages service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MessagesClient interface {
-	SaveMessage(ctx context.Context, in *SaveMessageRequest, opts ...grpc.CallOption) (*SaveMessageResponse, error)
-	DeleteMessages(ctx context.Context, in *DeleteMessagesRequest, opts ...grpc.CallOption) (*DeleteMessagesResponse, error)
-	DeleteUserMessages(ctx context.Context, in *DeleteUserMessagesRequest, opts ...grpc.CallOption) (*DeleteUserMessagesResponse, error)
-	PublishMessages(ctx context.Context, in *PublishMessagesRequest, opts ...grpc.CallOption) (*PublishMessagesResponse, error)
-	PrivateMessages(ctx context.Context, in *PrivateMessagesRequest, opts ...grpc.CallOption) (*PrivateMessagesResponse, error)
-	UpdateMessage(ctx context.Context, in *UpdateMessageRequest, opts ...grpc.CallOption) (*UpdateMessageResponse, error)
+	Apply(ctx context.Context, in *Command, opts ...grpc.CallOption) (*CommandResponse, error)
 	ReadMessage(ctx context.Context, in *ReadMessageRequest, opts ...grpc.CallOption) (*ReadMessageResponse, error)
 	ReadMessages(ctx context.Context, in *ReadMessagesRequest, opts ...grpc.CallOption) (*ReadMessagesResponse, error)
 	ReadBatchMessages(ctx context.Context, in *ReadBatchMessagesRequest, opts ...grpc.CallOption) (*ReadBatchMessagesResponse, error)
@@ -53,60 +43,10 @@ func NewMessagesClient(cc grpc.ClientConnInterface) MessagesClient {
 	return &messagesClient{cc}
 }
 
-func (c *messagesClient) SaveMessage(ctx context.Context, in *SaveMessageRequest, opts ...grpc.CallOption) (*SaveMessageResponse, error) {
+func (c *messagesClient) Apply(ctx context.Context, in *Command, opts ...grpc.CallOption) (*CommandResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SaveMessageResponse)
-	err := c.cc.Invoke(ctx, Messages_SaveMessage_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *messagesClient) DeleteMessages(ctx context.Context, in *DeleteMessagesRequest, opts ...grpc.CallOption) (*DeleteMessagesResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeleteMessagesResponse)
-	err := c.cc.Invoke(ctx, Messages_DeleteMessages_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *messagesClient) DeleteUserMessages(ctx context.Context, in *DeleteUserMessagesRequest, opts ...grpc.CallOption) (*DeleteUserMessagesResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeleteUserMessagesResponse)
-	err := c.cc.Invoke(ctx, Messages_DeleteUserMessages_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *messagesClient) PublishMessages(ctx context.Context, in *PublishMessagesRequest, opts ...grpc.CallOption) (*PublishMessagesResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(PublishMessagesResponse)
-	err := c.cc.Invoke(ctx, Messages_PublishMessages_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *messagesClient) PrivateMessages(ctx context.Context, in *PrivateMessagesRequest, opts ...grpc.CallOption) (*PrivateMessagesResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(PrivateMessagesResponse)
-	err := c.cc.Invoke(ctx, Messages_PrivateMessages_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *messagesClient) UpdateMessage(ctx context.Context, in *UpdateMessageRequest, opts ...grpc.CallOption) (*UpdateMessageResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UpdateMessageResponse)
-	err := c.cc.Invoke(ctx, Messages_UpdateMessage_FullMethodName, in, out, cOpts...)
+	out := new(CommandResponse)
+	err := c.cc.Invoke(ctx, Messages_Apply_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -147,12 +87,7 @@ func (c *messagesClient) ReadBatchMessages(ctx context.Context, in *ReadBatchMes
 // All implementations must embed UnimplementedMessagesServer
 // for forward compatibility.
 type MessagesServer interface {
-	SaveMessage(context.Context, *SaveMessageRequest) (*SaveMessageResponse, error)
-	DeleteMessages(context.Context, *DeleteMessagesRequest) (*DeleteMessagesResponse, error)
-	DeleteUserMessages(context.Context, *DeleteUserMessagesRequest) (*DeleteUserMessagesResponse, error)
-	PublishMessages(context.Context, *PublishMessagesRequest) (*PublishMessagesResponse, error)
-	PrivateMessages(context.Context, *PrivateMessagesRequest) (*PrivateMessagesResponse, error)
-	UpdateMessage(context.Context, *UpdateMessageRequest) (*UpdateMessageResponse, error)
+	Apply(context.Context, *Command) (*CommandResponse, error)
 	ReadMessage(context.Context, *ReadMessageRequest) (*ReadMessageResponse, error)
 	ReadMessages(context.Context, *ReadMessagesRequest) (*ReadMessagesResponse, error)
 	ReadBatchMessages(context.Context, *ReadBatchMessagesRequest) (*ReadBatchMessagesResponse, error)
@@ -166,23 +101,8 @@ type MessagesServer interface {
 // pointer dereference when methods are called.
 type UnimplementedMessagesServer struct{}
 
-func (UnimplementedMessagesServer) SaveMessage(context.Context, *SaveMessageRequest) (*SaveMessageResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method SaveMessage not implemented")
-}
-func (UnimplementedMessagesServer) DeleteMessages(context.Context, *DeleteMessagesRequest) (*DeleteMessagesResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method DeleteMessages not implemented")
-}
-func (UnimplementedMessagesServer) DeleteUserMessages(context.Context, *DeleteUserMessagesRequest) (*DeleteUserMessagesResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method DeleteUserMessages not implemented")
-}
-func (UnimplementedMessagesServer) PublishMessages(context.Context, *PublishMessagesRequest) (*PublishMessagesResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method PublishMessages not implemented")
-}
-func (UnimplementedMessagesServer) PrivateMessages(context.Context, *PrivateMessagesRequest) (*PrivateMessagesResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method PrivateMessages not implemented")
-}
-func (UnimplementedMessagesServer) UpdateMessage(context.Context, *UpdateMessageRequest) (*UpdateMessageResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method UpdateMessage not implemented")
+func (UnimplementedMessagesServer) Apply(context.Context, *Command) (*CommandResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Apply not implemented")
 }
 func (UnimplementedMessagesServer) ReadMessage(context.Context, *ReadMessageRequest) (*ReadMessageResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ReadMessage not implemented")
@@ -214,110 +134,20 @@ func RegisterMessagesServer(s grpc.ServiceRegistrar, srv MessagesServer) {
 	s.RegisterService(&Messages_ServiceDesc, srv)
 }
 
-func _Messages_SaveMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SaveMessageRequest)
+func _Messages_Apply_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Command)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MessagesServer).SaveMessage(ctx, in)
+		return srv.(MessagesServer).Apply(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Messages_SaveMessage_FullMethodName,
+		FullMethod: Messages_Apply_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MessagesServer).SaveMessage(ctx, req.(*SaveMessageRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Messages_DeleteMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteMessagesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MessagesServer).DeleteMessages(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Messages_DeleteMessages_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MessagesServer).DeleteMessages(ctx, req.(*DeleteMessagesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Messages_DeleteUserMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteUserMessagesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MessagesServer).DeleteUserMessages(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Messages_DeleteUserMessages_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MessagesServer).DeleteUserMessages(ctx, req.(*DeleteUserMessagesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Messages_PublishMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PublishMessagesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MessagesServer).PublishMessages(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Messages_PublishMessages_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MessagesServer).PublishMessages(ctx, req.(*PublishMessagesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Messages_PrivateMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PrivateMessagesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MessagesServer).PrivateMessages(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Messages_PrivateMessages_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MessagesServer).PrivateMessages(ctx, req.(*PrivateMessagesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Messages_UpdateMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateMessageRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MessagesServer).UpdateMessage(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Messages_UpdateMessage_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MessagesServer).UpdateMessage(ctx, req.(*UpdateMessageRequest))
+		return srv.(MessagesServer).Apply(ctx, req.(*Command))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -384,28 +214,8 @@ var Messages_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*MessagesServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "SaveMessage",
-			Handler:    _Messages_SaveMessage_Handler,
-		},
-		{
-			MethodName: "DeleteMessages",
-			Handler:    _Messages_DeleteMessages_Handler,
-		},
-		{
-			MethodName: "DeleteUserMessages",
-			Handler:    _Messages_DeleteUserMessages_Handler,
-		},
-		{
-			MethodName: "PublishMessages",
-			Handler:    _Messages_PublishMessages_Handler,
-		},
-		{
-			MethodName: "PrivateMessages",
-			Handler:    _Messages_PrivateMessages_Handler,
-		},
-		{
-			MethodName: "UpdateMessage",
-			Handler:    _Messages_UpdateMessage_Handler,
+			MethodName: "Apply",
+			Handler:    _Messages_Apply_Handler,
 		},
 		{
 			MethodName: "ReadMessage",

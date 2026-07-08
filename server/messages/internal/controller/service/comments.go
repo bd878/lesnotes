@@ -3,15 +3,20 @@ package service
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/messages/pkg/loadbalance"
 	"github.com/bd878/gallery/server/messages/pkg/model"
+	"github.com/bd878/gallery/server/messages/internal/domain"
+	"github.com/bd878/gallery/server/messages/internal/machine"
 )
 
 type CommentsConfig struct {
@@ -22,11 +27,13 @@ type CommentsController struct {
 	conf   CommentsConfig
 	client api.CommentsClient
 	conn   *grpc.ClientConn
+	publisher    ddd.EventPublisher[ddd.Event]
 }
 
-func NewCommentsController(conf CommentsConfig) *CommentsController {
+func NewCommentsController(conf CommentsConfig, publisher ddd.EventPublisher[ddd.Event]) *CommentsController {
 	c := &CommentsController{
 		conf: conf,
+		publisher: publisher,
 	}
 
 	c.setupConnection()
@@ -81,15 +88,37 @@ func (s *CommentsController) SendComment(ctx context.Context, id, userID, messag
 
 	logger.Debugw("save comment", "id", id, "user_id", userID, "message_id", messageID, "text", text, "metadata", metadata)
 
-	_, err = s.client.SendComment(ctx, &api.SendCommentRequest{
+	createdAt := time.Now().UTC().Format(time.RFC3339)
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
+	cmd, err := proto.Marshal(&machine.AppendCommentCommand{
 		Id:        id,
 		UserId:    userID,
 		MessageId: messageID,
 		Text:      text,
 		Metadata:  metadata,
+		CreatedAt: createdAt,
+		UpdatedAt: updatedAt,
 	})
+	if err != nil {
+		return err
+	}
 
-	return
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType: int32(machine.AppendCommentRequest),
+		Cmd: cmd,
+		Duration: "10s",
+	})
+	if err != nil {
+		return err
+	}
+
+	event, err := domain.CreateComment(id, userID, messageID, text, createdAt, updatedAt)
+	if err != nil {
+		return err
+	}
+
+	return s.publisher.Publish(ctx, event)
 }
 
 func (s *CommentsController) UpdateComment(ctx context.Context, id, userID int64, text *string) (err error) {
@@ -101,13 +130,34 @@ func (s *CommentsController) UpdateComment(ctx context.Context, id, userID int64
 
 	logger.Debugw("update comment", "id", id, "user_id", userID, "text", text)
 
-	_, err = s.client.UpdateComment(ctx, &api.UpdateCommentRequest{
-		Id:     id,
-		UserId: userID,
-		Text:   text,
-	})
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
-	return
+	cmd, err := proto.Marshal(&machine.UpdateCommentCommand{
+		Id:        id,
+		UserId:    userID,
+		Text:      text,
+		UpdatedAt: updatedAt,
+	})
+	if err != nil {
+		return err
+	}
+
+
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType: int32(machine.UpdateCommentRequest),
+		Cmd: cmd,
+		Duration: "10s",
+	})
+	if err != nil {
+		return err
+	}
+
+	event, err := domain.UpdateComment(id, userID, text, updatedAt)
+	if err != nil {
+		return err
+	}
+
+	return s.publisher.Publish(ctx, event)
 }
 
 func (s *CommentsController) DeleteComment(ctx context.Context, id, userID int64) (err error) {
@@ -119,12 +169,29 @@ func (s *CommentsController) DeleteComment(ctx context.Context, id, userID int64
 
 	logger.Debugw("delete comment", "id", id, "user_id", userID)
 
-	_, err = s.client.DeleteComment(ctx, &api.DeleteCommentRequest{
+	cmd, err := proto.Marshal(&machine.DeleteCommentCommand{
 		Id:     id,
 		UserId: userID,
 	})
+	if err != nil {
+		return err
+	}
 
-	return
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType: int32(machine.DeleteCommentRequest),
+		Cmd: cmd,
+		Duration: "10s",
+	})
+	if err != nil {
+		return err
+	}
+
+	event, err := domain.DeleteComment(id, userID)
+	if err != nil {
+		return err
+	}
+
+	return s.publisher.Publish(ctx, event)
 }
 
 func (s *CommentsController) DeleteMessageComments(ctx context.Context, messageID int64) (err error) {
@@ -136,11 +203,28 @@ func (s *CommentsController) DeleteMessageComments(ctx context.Context, messageI
 
 	logger.Debugw("delete message comments", "message_id", messageID)
 
-	_, err = s.client.DeleteMessageComments(ctx, &api.DeleteMessageCommentsRequest{
+	cmd, err := proto.Marshal(&machine.DeleteMessageCommentsCommand{
 		MessageId: messageID,
 	})
+	if err != nil {
+		return err
+	}
 
-	return
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType: int32(machine.DeleteMessageCommentsRequest),
+		Cmd: cmd,
+		Duration: "10s",
+	})
+	if err != nil {
+		return err
+	}
+
+	event, err := domain.DeleteMessageComments(messageID)
+	if err != nil {
+		return err
+	}
+
+	return s.publisher.Publish(ctx, event)
 }
 
 func (s *CommentsController) ReadComment(ctx context.Context, id, userID int64) (comment *model.Comment, err error) {

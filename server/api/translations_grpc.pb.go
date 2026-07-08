@@ -19,20 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Translations_SaveTranslation_FullMethodName   = "/translations.v1.Translations/SaveTranslation"
-	Translations_UpdateTranslation_FullMethodName = "/translations.v1.Translations/UpdateTranslation"
-	Translations_DeleteTranslation_FullMethodName = "/translations.v1.Translations/DeleteTranslation"
-	Translations_ReadTranslation_FullMethodName   = "/translations.v1.Translations/ReadTranslation"
-	Translations_ListTranslations_FullMethodName  = "/translations.v1.Translations/ListTranslations"
+	Translations_Apply_FullMethodName            = "/translations.v1.Translations/Apply"
+	Translations_ReadTranslation_FullMethodName  = "/translations.v1.Translations/ReadTranslation"
+	Translations_ListTranslations_FullMethodName = "/translations.v1.Translations/ListTranslations"
 )
 
 // TranslationsClient is the client API for Translations service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TranslationsClient interface {
-	SaveTranslation(ctx context.Context, in *SaveTranslationRequest, opts ...grpc.CallOption) (*SaveTranslationResponse, error)
-	UpdateTranslation(ctx context.Context, in *UpdateTranslationRequest, opts ...grpc.CallOption) (*UpdateTranslationResponse, error)
-	DeleteTranslation(ctx context.Context, in *DeleteTranslationRequest, opts ...grpc.CallOption) (*DeleteTranslationResponse, error)
+	Apply(ctx context.Context, in *Command, opts ...grpc.CallOption) (*CommandResponse, error)
 	ReadTranslation(ctx context.Context, in *ReadTranslationRequest, opts ...grpc.CallOption) (*ReadTranslationResponse, error)
 	ListTranslations(ctx context.Context, in *ListTranslationsRequest, opts ...grpc.CallOption) (*ListTranslationsResponse, error)
 }
@@ -45,30 +41,10 @@ func NewTranslationsClient(cc grpc.ClientConnInterface) TranslationsClient {
 	return &translationsClient{cc}
 }
 
-func (c *translationsClient) SaveTranslation(ctx context.Context, in *SaveTranslationRequest, opts ...grpc.CallOption) (*SaveTranslationResponse, error) {
+func (c *translationsClient) Apply(ctx context.Context, in *Command, opts ...grpc.CallOption) (*CommandResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SaveTranslationResponse)
-	err := c.cc.Invoke(ctx, Translations_SaveTranslation_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *translationsClient) UpdateTranslation(ctx context.Context, in *UpdateTranslationRequest, opts ...grpc.CallOption) (*UpdateTranslationResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UpdateTranslationResponse)
-	err := c.cc.Invoke(ctx, Translations_UpdateTranslation_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *translationsClient) DeleteTranslation(ctx context.Context, in *DeleteTranslationRequest, opts ...grpc.CallOption) (*DeleteTranslationResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeleteTranslationResponse)
-	err := c.cc.Invoke(ctx, Translations_DeleteTranslation_FullMethodName, in, out, cOpts...)
+	out := new(CommandResponse)
+	err := c.cc.Invoke(ctx, Translations_Apply_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -99,9 +75,7 @@ func (c *translationsClient) ListTranslations(ctx context.Context, in *ListTrans
 // All implementations must embed UnimplementedTranslationsServer
 // for forward compatibility.
 type TranslationsServer interface {
-	SaveTranslation(context.Context, *SaveTranslationRequest) (*SaveTranslationResponse, error)
-	UpdateTranslation(context.Context, *UpdateTranslationRequest) (*UpdateTranslationResponse, error)
-	DeleteTranslation(context.Context, *DeleteTranslationRequest) (*DeleteTranslationResponse, error)
+	Apply(context.Context, *Command) (*CommandResponse, error)
 	ReadTranslation(context.Context, *ReadTranslationRequest) (*ReadTranslationResponse, error)
 	ListTranslations(context.Context, *ListTranslationsRequest) (*ListTranslationsResponse, error)
 	mustEmbedUnimplementedTranslationsServer()
@@ -114,14 +88,8 @@ type TranslationsServer interface {
 // pointer dereference when methods are called.
 type UnimplementedTranslationsServer struct{}
 
-func (UnimplementedTranslationsServer) SaveTranslation(context.Context, *SaveTranslationRequest) (*SaveTranslationResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method SaveTranslation not implemented")
-}
-func (UnimplementedTranslationsServer) UpdateTranslation(context.Context, *UpdateTranslationRequest) (*UpdateTranslationResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method UpdateTranslation not implemented")
-}
-func (UnimplementedTranslationsServer) DeleteTranslation(context.Context, *DeleteTranslationRequest) (*DeleteTranslationResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method DeleteTranslation not implemented")
+func (UnimplementedTranslationsServer) Apply(context.Context, *Command) (*CommandResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Apply not implemented")
 }
 func (UnimplementedTranslationsServer) ReadTranslation(context.Context, *ReadTranslationRequest) (*ReadTranslationResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ReadTranslation not implemented")
@@ -150,56 +118,20 @@ func RegisterTranslationsServer(s grpc.ServiceRegistrar, srv TranslationsServer)
 	s.RegisterService(&Translations_ServiceDesc, srv)
 }
 
-func _Translations_SaveTranslation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SaveTranslationRequest)
+func _Translations_Apply_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Command)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TranslationsServer).SaveTranslation(ctx, in)
+		return srv.(TranslationsServer).Apply(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Translations_SaveTranslation_FullMethodName,
+		FullMethod: Translations_Apply_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TranslationsServer).SaveTranslation(ctx, req.(*SaveTranslationRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Translations_UpdateTranslation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateTranslationRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TranslationsServer).UpdateTranslation(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Translations_UpdateTranslation_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TranslationsServer).UpdateTranslation(ctx, req.(*UpdateTranslationRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Translations_DeleteTranslation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteTranslationRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TranslationsServer).DeleteTranslation(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Translations_DeleteTranslation_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TranslationsServer).DeleteTranslation(ctx, req.(*DeleteTranslationRequest))
+		return srv.(TranslationsServer).Apply(ctx, req.(*Command))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -248,16 +180,8 @@ var Translations_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*TranslationsServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "SaveTranslation",
-			Handler:    _Translations_SaveTranslation_Handler,
-		},
-		{
-			MethodName: "UpdateTranslation",
-			Handler:    _Translations_UpdateTranslation_Handler,
-		},
-		{
-			MethodName: "DeleteTranslation",
-			Handler:    _Translations_DeleteTranslation_Handler,
+			MethodName: "Apply",
+			Handler:    _Translations_Apply_Handler,
 		},
 		{
 			MethodName: "ReadTranslation",

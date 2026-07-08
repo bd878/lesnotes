@@ -2,22 +2,14 @@ syntax = "proto3";
 
 package billing.v1;
 
+import "protos/distributed.proto";
+
 option go_package = "github.com/bd878/gallery/server/api";
 
 service Billing {
-	rpc Apply(Command) returns (CommandResponse) {}
+	rpc Apply(distributed.v1.Command) returns (distributed.v1.CommandResponse) {}
 	rpc GetInvoice(GetInvoiceRequest) returns (GetInvoiceResponse) {}
 	rpc GetPayment(GetPaymentRequest) returns (GetPaymentResponse) {}
-}
-
-message Command {
-	int32 req_type = 1;
-	bytes cmd = 2;
-	string duration = 3;
-}
-
-message CommandResponse {
-	optional string err = 1;
 }
 
 message BillingSnapshot {

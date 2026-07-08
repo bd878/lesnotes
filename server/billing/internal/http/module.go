@@ -5,7 +5,6 @@ import (
 
 	"github.com/bd878/gallery/server/internal/am"
 	"github.com/bd878/gallery/server/internal/ddd"
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/billing/config"
 	"github.com/bd878/gallery/server/internal/system"
 	"github.com/bd878/gallery/server/internal/nats"
@@ -36,14 +35,14 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 
 	handler := httphandler.New(ctrl)
 
-	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
+	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(svg.Logger(), usersGateway, sessionsGateway, usermodel.PublicUserID))
 	svc.ServeMux().Handle("GET   /billing/v1/invoices", middleware.Build(handler.GetInvoice))
 	svc.ServeMux().Handle("GET   /billing/v1/payments", middleware.Build(handler.GetPayment))
 
 	middleware.NoAuth()
 	svc.ServeMux().Handle("GET   /billing/v1/status", middleware.Build(handler.GetStatus))
 
-	middleware.WithAuth(httpmiddleware.TokenAuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
+	middleware.WithAuth(httpmiddleware.TokenAuthBuilder(svg.Logger(), usersGateway, sessionsGateway, usermodel.PublicUserID))
 	svc.ServeMux().Handle("POST  /billing/v2/invoices", middleware.Build(handler.CreateInvoiceJsonAPI))
 	svc.ServeMux().Handle("POST  /billing/v2/payments", middleware.Build(handler.StartPaymentJsonAPI))
 	svc.ServeMux().Handle("POST  /billing/v2/cancel",   middleware.Build(handler.CancelPaymentJsonAPI))

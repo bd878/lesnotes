@@ -19,7 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Distributed_GetServers_FullMethodName = "/Distributed/GetServers"
+	Distributed_GetServers_FullMethodName = "/distributed.v1.Distributed/GetServers"
 )
 
 // DistributedClient is the client API for Distributed service.
@@ -108,7 +108,7 @@ func _Distributed_GetServers_Handler(srv interface{}, ctx context.Context, dec f
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Distributed_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "Distributed",
+	ServiceName: "distributed.v1.Distributed",
 	HandlerType: (*DistributedServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

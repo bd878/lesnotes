@@ -265,310 +265,6 @@ func (x *TranslationPreview) GetUpdatedAt() string {
 	return ""
 }
 
-type SaveTranslationRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Lang          string                 `protobuf:"bytes,2,opt,name=lang,proto3" json:"lang,omitempty"`
-	Text          string                 `protobuf:"bytes,3,opt,name=text,proto3" json:"text,omitempty"`
-	Title         string                 `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`
-	UserId        int64                  `protobuf:"varint,5,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SaveTranslationRequest) Reset() {
-	*x = SaveTranslationRequest{}
-	mi := &file_protos_translations_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SaveTranslationRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SaveTranslationRequest) ProtoMessage() {}
-
-func (x *SaveTranslationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_translations_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SaveTranslationRequest.ProtoReflect.Descriptor instead.
-func (*SaveTranslationRequest) Descriptor() ([]byte, []int) {
-	return file_protos_translations_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *SaveTranslationRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *SaveTranslationRequest) GetLang() string {
-	if x != nil {
-		return x.Lang
-	}
-	return ""
-}
-
-func (x *SaveTranslationRequest) GetText() string {
-	if x != nil {
-		return x.Text
-	}
-	return ""
-}
-
-func (x *SaveTranslationRequest) GetTitle() string {
-	if x != nil {
-		return x.Title
-	}
-	return ""
-}
-
-func (x *SaveTranslationRequest) GetUserId() int64 {
-	if x != nil {
-		return x.UserId
-	}
-	return 0
-}
-
-type SaveTranslationResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SaveTranslationResponse) Reset() {
-	*x = SaveTranslationResponse{}
-	mi := &file_protos_translations_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SaveTranslationResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SaveTranslationResponse) ProtoMessage() {}
-
-func (x *SaveTranslationResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_translations_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SaveTranslationResponse.ProtoReflect.Descriptor instead.
-func (*SaveTranslationResponse) Descriptor() ([]byte, []int) {
-	return file_protos_translations_proto_rawDescGZIP(), []int{4}
-}
-
-type UpdateTranslationRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Lang          string                 `protobuf:"bytes,2,opt,name=lang,proto3" json:"lang,omitempty"`
-	Text          *string                `protobuf:"bytes,3,opt,name=text,proto3,oneof" json:"text,omitempty"`
-	Title         *string                `protobuf:"bytes,4,opt,name=title,proto3,oneof" json:"title,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UpdateTranslationRequest) Reset() {
-	*x = UpdateTranslationRequest{}
-	mi := &file_protos_translations_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateTranslationRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateTranslationRequest) ProtoMessage() {}
-
-func (x *UpdateTranslationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_translations_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateTranslationRequest.ProtoReflect.Descriptor instead.
-func (*UpdateTranslationRequest) Descriptor() ([]byte, []int) {
-	return file_protos_translations_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *UpdateTranslationRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *UpdateTranslationRequest) GetLang() string {
-	if x != nil {
-		return x.Lang
-	}
-	return ""
-}
-
-func (x *UpdateTranslationRequest) GetText() string {
-	if x != nil && x.Text != nil {
-		return *x.Text
-	}
-	return ""
-}
-
-func (x *UpdateTranslationRequest) GetTitle() string {
-	if x != nil && x.Title != nil {
-		return *x.Title
-	}
-	return ""
-}
-
-type UpdateTranslationResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UpdateTranslationResponse) Reset() {
-	*x = UpdateTranslationResponse{}
-	mi := &file_protos_translations_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateTranslationResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateTranslationResponse) ProtoMessage() {}
-
-func (x *UpdateTranslationResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_translations_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateTranslationResponse.ProtoReflect.Descriptor instead.
-func (*UpdateTranslationResponse) Descriptor() ([]byte, []int) {
-	return file_protos_translations_proto_rawDescGZIP(), []int{6}
-}
-
-type DeleteTranslationRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Lang          string                 `protobuf:"bytes,2,opt,name=lang,proto3" json:"lang,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DeleteTranslationRequest) Reset() {
-	*x = DeleteTranslationRequest{}
-	mi := &file_protos_translations_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeleteTranslationRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteTranslationRequest) ProtoMessage() {}
-
-func (x *DeleteTranslationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_translations_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteTranslationRequest.ProtoReflect.Descriptor instead.
-func (*DeleteTranslationRequest) Descriptor() ([]byte, []int) {
-	return file_protos_translations_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *DeleteTranslationRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *DeleteTranslationRequest) GetLang() string {
-	if x != nil {
-		return x.Lang
-	}
-	return ""
-}
-
-type DeleteTranslationResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DeleteTranslationResponse) Reset() {
-	*x = DeleteTranslationResponse{}
-	mi := &file_protos_translations_proto_msgTypes[8]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeleteTranslationResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteTranslationResponse) ProtoMessage() {}
-
-func (x *DeleteTranslationResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_translations_proto_msgTypes[8]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteTranslationResponse.ProtoReflect.Descriptor instead.
-func (*DeleteTranslationResponse) Descriptor() ([]byte, []int) {
-	return file_protos_translations_proto_rawDescGZIP(), []int{8}
-}
-
 type ReadTranslationRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
@@ -581,7 +277,7 @@ type ReadTranslationRequest struct {
 
 func (x *ReadTranslationRequest) Reset() {
 	*x = ReadTranslationRequest{}
-	mi := &file_protos_translations_proto_msgTypes[9]
+	mi := &file_protos_translations_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -593,7 +289,7 @@ func (x *ReadTranslationRequest) String() string {
 func (*ReadTranslationRequest) ProtoMessage() {}
 
 func (x *ReadTranslationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_translations_proto_msgTypes[9]
+	mi := &file_protos_translations_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -606,7 +302,7 @@ func (x *ReadTranslationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReadTranslationRequest.ProtoReflect.Descriptor instead.
 func (*ReadTranslationRequest) Descriptor() ([]byte, []int) {
-	return file_protos_translations_proto_rawDescGZIP(), []int{9}
+	return file_protos_translations_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ReadTranslationRequest) GetUserId() int64 {
@@ -646,7 +342,7 @@ type ReadTranslationResponse struct {
 
 func (x *ReadTranslationResponse) Reset() {
 	*x = ReadTranslationResponse{}
-	mi := &file_protos_translations_proto_msgTypes[10]
+	mi := &file_protos_translations_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -658,7 +354,7 @@ func (x *ReadTranslationResponse) String() string {
 func (*ReadTranslationResponse) ProtoMessage() {}
 
 func (x *ReadTranslationResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_translations_proto_msgTypes[10]
+	mi := &file_protos_translations_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -671,7 +367,7 @@ func (x *ReadTranslationResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReadTranslationResponse.ProtoReflect.Descriptor instead.
 func (*ReadTranslationResponse) Descriptor() ([]byte, []int) {
-	return file_protos_translations_proto_rawDescGZIP(), []int{10}
+	return file_protos_translations_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ReadTranslationResponse) GetTranslation() *Translation {
@@ -692,7 +388,7 @@ type ListTranslationsRequest struct {
 
 func (x *ListTranslationsRequest) Reset() {
 	*x = ListTranslationsRequest{}
-	mi := &file_protos_translations_proto_msgTypes[11]
+	mi := &file_protos_translations_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -704,7 +400,7 @@ func (x *ListTranslationsRequest) String() string {
 func (*ListTranslationsRequest) ProtoMessage() {}
 
 func (x *ListTranslationsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_translations_proto_msgTypes[11]
+	mi := &file_protos_translations_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -717,7 +413,7 @@ func (x *ListTranslationsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTranslationsRequest.ProtoReflect.Descriptor instead.
 func (*ListTranslationsRequest) Descriptor() ([]byte, []int) {
-	return file_protos_translations_proto_rawDescGZIP(), []int{11}
+	return file_protos_translations_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ListTranslationsRequest) GetId() int64 {
@@ -750,7 +446,7 @@ type ListTranslationsResponse struct {
 
 func (x *ListTranslationsResponse) Reset() {
 	*x = ListTranslationsResponse{}
-	mi := &file_protos_translations_proto_msgTypes[12]
+	mi := &file_protos_translations_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -762,7 +458,7 @@ func (x *ListTranslationsResponse) String() string {
 func (*ListTranslationsResponse) ProtoMessage() {}
 
 func (x *ListTranslationsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_translations_proto_msgTypes[12]
+	mi := &file_protos_translations_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -775,7 +471,7 @@ func (x *ListTranslationsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTranslationsResponse.ProtoReflect.Descriptor instead.
 func (*ListTranslationsResponse) Descriptor() ([]byte, []int) {
-	return file_protos_translations_proto_rawDescGZIP(), []int{12}
+	return file_protos_translations_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ListTranslationsResponse) GetTranslations() []*Translation {
@@ -789,7 +485,7 @@ var File_protos_translations_proto protoreflect.FileDescriptor
 
 const file_protos_translations_proto_rawDesc = "" +
 	"\n" +
-	"\x19protos/translations.proto\x12\x0ftranslations.v1\"\xa5\x01\n" +
+	"\x19protos/translations.proto\x12\x0ftranslations.v1\x1a\x18protos/distributed.proto\"\xa5\x01\n" +
 	"\x17TranslationSnapshotItem\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04lang\x18\x02 \x01(\tR\x04lang\x12\x12\n" +
@@ -815,26 +511,7 @@ const file_protos_translations_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x04 \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\x05 \x01(\tR\tupdatedAt\"\x7f\n" +
-	"\x16SaveTranslationRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04lang\x18\x02 \x01(\tR\x04lang\x12\x12\n" +
-	"\x04text\x18\x03 \x01(\tR\x04text\x12\x14\n" +
-	"\x05title\x18\x04 \x01(\tR\x05title\x12\x17\n" +
-	"\auser_id\x18\x05 \x01(\x03R\x06userId\"\x19\n" +
-	"\x17SaveTranslationResponse\"\x85\x01\n" +
-	"\x18UpdateTranslationRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04lang\x18\x02 \x01(\tR\x04lang\x12\x17\n" +
-	"\x04text\x18\x03 \x01(\tH\x00R\x04text\x88\x01\x01\x12\x19\n" +
-	"\x05title\x18\x04 \x01(\tH\x01R\x05title\x88\x01\x01B\a\n" +
-	"\x05_textB\b\n" +
-	"\x06_title\"\x1b\n" +
-	"\x19UpdateTranslationResponse\">\n" +
-	"\x18DeleteTranslationRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04lang\x18\x02 \x01(\tR\x04lang\"\x1b\n" +
-	"\x19DeleteTranslationResponse\"w\n" +
+	"updated_at\x18\x05 \x01(\tR\tupdatedAt\"w\n" +
 	"\x16ReadTranslationRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x0e\n" +
 	"\x02id\x18\x02 \x01(\x03R\x02id\x12\x12\n" +
@@ -848,11 +525,9 @@ const file_protos_translations_proto_rawDesc = "" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x17\n" +
 	"\auser_id\x18\x03 \x01(\x03R\x06userId\"\\\n" +
 	"\x18ListTranslationsResponse\x12@\n" +
-	"\ftranslations\x18\x01 \x03(\v2\x1c.translations.v1.TranslationR\ftranslations2\xa5\x04\n" +
-	"\fTranslations\x12f\n" +
-	"\x0fSaveTranslation\x12'.translations.v1.SaveTranslationRequest\x1a(.translations.v1.SaveTranslationResponse\"\x00\x12l\n" +
-	"\x11UpdateTranslation\x12).translations.v1.UpdateTranslationRequest\x1a*.translations.v1.UpdateTranslationResponse\"\x00\x12l\n" +
-	"\x11DeleteTranslation\x12).translations.v1.DeleteTranslationRequest\x1a*.translations.v1.DeleteTranslationResponse\"\x00\x12f\n" +
+	"\ftranslations\x18\x01 \x03(\v2\x1c.translations.v1.TranslationR\ftranslations2\xa4\x02\n" +
+	"\fTranslations\x12A\n" +
+	"\x05Apply\x12\x17.distributed.v1.Command\x1a\x1f.distributed.v1.CommandResponse\x12f\n" +
 	"\x0fReadTranslation\x12'.translations.v1.ReadTranslationRequest\x1a(.translations.v1.ReadTranslationResponse\"\x00\x12i\n" +
 	"\x10ListTranslations\x12(.translations.v1.ListTranslationsRequest\x1a).translations.v1.ListTranslationsResponse\"\x00B%Z#github.com/bd878/gallery/server/apib\x06proto3"
 
@@ -868,40 +543,32 @@ func file_protos_translations_proto_rawDescGZIP() []byte {
 	return file_protos_translations_proto_rawDescData
 }
 
-var file_protos_translations_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_protos_translations_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_protos_translations_proto_goTypes = []any{
-	(*TranslationSnapshotItem)(nil),   // 0: translations.v1.TranslationSnapshotItem
-	(*Translation)(nil),               // 1: translations.v1.Translation
-	(*TranslationPreview)(nil),        // 2: translations.v1.TranslationPreview
-	(*SaveTranslationRequest)(nil),    // 3: translations.v1.SaveTranslationRequest
-	(*SaveTranslationResponse)(nil),   // 4: translations.v1.SaveTranslationResponse
-	(*UpdateTranslationRequest)(nil),  // 5: translations.v1.UpdateTranslationRequest
-	(*UpdateTranslationResponse)(nil), // 6: translations.v1.UpdateTranslationResponse
-	(*DeleteTranslationRequest)(nil),  // 7: translations.v1.DeleteTranslationRequest
-	(*DeleteTranslationResponse)(nil), // 8: translations.v1.DeleteTranslationResponse
-	(*ReadTranslationRequest)(nil),    // 9: translations.v1.ReadTranslationRequest
-	(*ReadTranslationResponse)(nil),   // 10: translations.v1.ReadTranslationResponse
-	(*ListTranslationsRequest)(nil),   // 11: translations.v1.ListTranslationsRequest
-	(*ListTranslationsResponse)(nil),  // 12: translations.v1.ListTranslationsResponse
+	(*TranslationSnapshotItem)(nil),  // 0: translations.v1.TranslationSnapshotItem
+	(*Translation)(nil),              // 1: translations.v1.Translation
+	(*TranslationPreview)(nil),       // 2: translations.v1.TranslationPreview
+	(*ReadTranslationRequest)(nil),   // 3: translations.v1.ReadTranslationRequest
+	(*ReadTranslationResponse)(nil),  // 4: translations.v1.ReadTranslationResponse
+	(*ListTranslationsRequest)(nil),  // 5: translations.v1.ListTranslationsRequest
+	(*ListTranslationsResponse)(nil), // 6: translations.v1.ListTranslationsResponse
+	(*Command)(nil),                  // 7: distributed.v1.Command
+	(*CommandResponse)(nil),          // 8: distributed.v1.CommandResponse
 }
 var file_protos_translations_proto_depIdxs = []int32{
-	1,  // 0: translations.v1.ReadTranslationResponse.translation:type_name -> translations.v1.Translation
-	1,  // 1: translations.v1.ListTranslationsResponse.translations:type_name -> translations.v1.Translation
-	3,  // 2: translations.v1.Translations.SaveTranslation:input_type -> translations.v1.SaveTranslationRequest
-	5,  // 3: translations.v1.Translations.UpdateTranslation:input_type -> translations.v1.UpdateTranslationRequest
-	7,  // 4: translations.v1.Translations.DeleteTranslation:input_type -> translations.v1.DeleteTranslationRequest
-	9,  // 5: translations.v1.Translations.ReadTranslation:input_type -> translations.v1.ReadTranslationRequest
-	11, // 6: translations.v1.Translations.ListTranslations:input_type -> translations.v1.ListTranslationsRequest
-	4,  // 7: translations.v1.Translations.SaveTranslation:output_type -> translations.v1.SaveTranslationResponse
-	6,  // 8: translations.v1.Translations.UpdateTranslation:output_type -> translations.v1.UpdateTranslationResponse
-	8,  // 9: translations.v1.Translations.DeleteTranslation:output_type -> translations.v1.DeleteTranslationResponse
-	10, // 10: translations.v1.Translations.ReadTranslation:output_type -> translations.v1.ReadTranslationResponse
-	12, // 11: translations.v1.Translations.ListTranslations:output_type -> translations.v1.ListTranslationsResponse
-	7,  // [7:12] is the sub-list for method output_type
-	2,  // [2:7] is the sub-list for method input_type
-	2,  // [2:2] is the sub-list for extension type_name
-	2,  // [2:2] is the sub-list for extension extendee
-	0,  // [0:2] is the sub-list for field type_name
+	1, // 0: translations.v1.ReadTranslationResponse.translation:type_name -> translations.v1.Translation
+	1, // 1: translations.v1.ListTranslationsResponse.translations:type_name -> translations.v1.Translation
+	7, // 2: translations.v1.Translations.Apply:input_type -> distributed.v1.Command
+	3, // 3: translations.v1.Translations.ReadTranslation:input_type -> translations.v1.ReadTranslationRequest
+	5, // 4: translations.v1.Translations.ListTranslations:input_type -> translations.v1.ListTranslationsRequest
+	8, // 5: translations.v1.Translations.Apply:output_type -> distributed.v1.CommandResponse
+	4, // 6: translations.v1.Translations.ReadTranslation:output_type -> translations.v1.ReadTranslationResponse
+	6, // 7: translations.v1.Translations.ListTranslations:output_type -> translations.v1.ListTranslationsResponse
+	5, // [5:8] is the sub-list for method output_type
+	2, // [2:5] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_protos_translations_proto_init() }
@@ -909,15 +576,15 @@ func file_protos_translations_proto_init() {
 	if File_protos_translations_proto != nil {
 		return
 	}
-	file_protos_translations_proto_msgTypes[5].OneofWrappers = []any{}
-	file_protos_translations_proto_msgTypes[9].OneofWrappers = []any{}
+	file_protos_distributed_proto_init()
+	file_protos_translations_proto_msgTypes[3].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_protos_translations_proto_rawDesc), len(file_protos_translations_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   13,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -2,14 +2,14 @@ package grpc
 
 import (
 	"context"
+	"time"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/messages/internal/machine"
 )
 
 type TranslationsController interface {
-	SaveTranslation(ctx context.Context, userID, messageID int64, lang, title, text string) (err error)
-	UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string) (err error)
-	DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error)
+	Apply(ctx context.Context, reqType machine.RequestType, cmd []byte, duration time.Duration) (err error)
 	ReadTranslation(ctx context.Context, userID, messageID int64, lang string, name string) (result *api.Translation, err error)
 	ListTranslations(ctx context.Context, userID, messageID int64, name string) (result []*api.Translation, err error)
 }
@@ -25,27 +25,13 @@ func NewTranslationsHandler(ctrl TranslationsController) *TranslationsHandler {
 	return handler
 }
 
-func (h *TranslationsHandler) SaveTranslation(ctx context.Context, req *api.SaveTranslationRequest) (resp *api.SaveTranslationResponse, err error) {
-	err = h.controller.SaveTranslation(ctx, req.UserId, req.Id, req.Lang, req.Title, req.Text)
+func (h *TranslationsHandler) Apply(ctx context.Context, req *api.Command) (resp *api.CommandResponse, err error) {
+	duration, err := time.ParseDuration(req.Duration)
+	if err != nil {
+		return nil, err
+	}
 
-	resp = &api.SaveTranslationResponse{}
-
-	return
-}
-
-func (h *TranslationsHandler) UpdateTranslation(ctx context.Context, req *api.UpdateTranslationRequest) (resp *api.UpdateTranslationResponse, err error) {
-	err = h.controller.UpdateTranslation(ctx, req.Id, req.Lang, req.Title, req.Text)
-
-	resp = &api.UpdateTranslationResponse{}
-
-	return
-}
-
-func (h *TranslationsHandler) DeleteTranslation(ctx context.Context, req *api.DeleteTranslationRequest) (resp *api.DeleteTranslationResponse, err error) {
-	err = h.controller.DeleteTranslation(ctx, req.Id, req.Lang)
-
-	resp = &api.DeleteTranslationResponse{}
-
+	err = h.controller.Apply(ctx, machine.RequestType(req.ReqType), req.Cmd, duration)
 	return
 }
 

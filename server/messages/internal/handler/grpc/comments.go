@@ -2,19 +2,14 @@ package grpc
 
 import (
 	"context"
-
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/trace"
+	"time"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/messages/internal/machine"
 )
 
 type CommentsController interface {
-	SaveComment(ctx context.Context, id, userID, messageID int64, text string, metadata []byte) (err error)
-	DeleteComment(ctx context.Context, id, userID int64) (err error)
-	DeleteMessageComments(ctx context.Context, messageID int64) (err error)
-	UpdateComment(ctx context.Context, id, userID int64, text *string, metadata []byte) (err error)
+	Apply(ctx context.Context, reqType machine.RequestType, cmd []byte, duration time.Duration) (err error)
 	ReadComment(ctx context.Context, id, userID int64) (comment *api.Comment, err error)
 	ListComments(ctx context.Context, userID, messageID *int64, name *string, limit, offset int32) (list *api.CommentsList, err error)
 }
@@ -28,47 +23,13 @@ func NewCommentsHandler(ctrl CommentsController) *CommentsHandler {
 	return &CommentsHandler{controller: ctrl}
 }
 
-func (h *CommentsHandler) SendComment(ctx context.Context, req *api.SendCommentRequest) (resp *api.SendCommentResponse, err error) {
-	span := trace.SpanFromContext(ctx)
-
-	span.SetAttributes(
-		attribute.Int64("ID", req.Id),
-		attribute.Int64("MessageID", req.MessageId),
-		attribute.Int64("UserID", req.UserId),
-	)
-
-	err = h.controller.SaveComment(ctx, req.Id, req.UserId, req.MessageId, req.Text, req.Metadata)
+func (h *CommentsHandler) Apply(ctx context.Context, req *api.Command) (resp *api.CommandResponse, err error) {
+	duration, err := time.ParseDuration(req.Duration)
 	if err != nil {
-		span.RecordError(err, trace.WithAttributes())
-		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
 
-	resp = &api.SendCommentResponse{}
-
-	return
-}
-
-func (h *CommentsHandler) UpdateComment(ctx context.Context, req *api.UpdateCommentRequest) (resp *api.UpdateCommentResponse, err error) {
-	err = h.controller.UpdateComment(ctx, req.Id, req.UserId, req.Text, req.Metadata)
-
-	resp = &api.UpdateCommentResponse{}
-
-	return
-}
-
-func (h *CommentsHandler) DeleteComment(ctx context.Context, req *api.DeleteCommentRequest) (resp *api.DeleteCommentResponse, err error) {
-	err = h.controller.DeleteComment(ctx, req.Id, req.UserId)
-
-	resp = &api.DeleteCommentResponse{}
-
-	return
-}
-
-func (h *CommentsHandler) DeleteMessageComments(ctx context.Context, req *api.DeleteMessageCommentsRequest) (resp *api.DeleteMessageCommentsResponse, err error) {
-	err = h.controller.DeleteMessageComments(ctx, req.MessageId)
-
-	resp = &api.DeleteMessageCommentsResponse{}
-
+	err = h.controller.Apply(ctx, machine.RequestType(req.ReqType), req.Cmd, duration)
 	return
 }
 

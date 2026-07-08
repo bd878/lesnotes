@@ -3,15 +3,20 @@ package service
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/logger"
+	"github.com/bd878/gallery/server/messages/internal/machine"
 	"github.com/bd878/gallery/server/messages/pkg/loadbalance"
 	"github.com/bd878/gallery/server/messages/pkg/model"
+	"github.com/bd878/gallery/server/messages/internal/domain"
 )
 
 type TranslationsConfig struct {
@@ -22,11 +27,13 @@ type TranslationsController struct {
 	conf   TranslationsConfig
 	client api.TranslationsClient
 	conn   *grpc.ClientConn
+	publisher    ddd.EventPublisher[ddd.Event]
 }
 
-func NewTranslationsController(conf TranslationsConfig) *TranslationsController {
+func NewTranslationsController(conf TranslationsConfig, publisher ddd.EventPublisher[ddd.Event]) *TranslationsController {
 	controller := &TranslationsController{
 		conf: conf,
+		publisher: publisher,
 	}
 
 	controller.setupConnection()
@@ -81,15 +88,36 @@ func (s *TranslationsController) SaveTranslation(ctx context.Context, userID, me
 
 	logger.Debugw("save translation", "user_id", userID, "message_id", messageID, "lang", lang, "title", title, "text", text)
 
-	_, err = s.client.SaveTranslation(ctx, &api.SaveTranslationRequest{
-		Id:        messageID,
-		UserId:    userID,
+	createdAt := time.Now().UTC().Format(time.RFC3339)
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
+	cmd, err := proto.Marshal(&machine.AppendTranslationCommand{
+		MessageId: messageID,
 		Lang:      lang,
 		Title:     title,
 		Text:      text,
+		CreatedAt: createdAt,
+		UpdatedAt: updatedAt,
 	})
+	if err != nil {
+		return err
+	}
 
-	return
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType: int32(machine.AppendTranslationRequest),
+		Cmd: cmd,
+		Duration: "10s",
+	})
+	if err != nil {
+		return err
+	}
+
+	event, err := domain.CreateTranslation(userID, messageID, lang, title, text, createdAt, updatedAt)
+	if err != nil {
+		return err
+	}
+
+	return s.publisher.Publish(ctx, event)
 }
 
 func (s *TranslationsController) UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string) (err error) {
@@ -101,14 +129,34 @@ func (s *TranslationsController) UpdateTranslation(ctx context.Context, messageI
 
 	logger.Debugw("update translation", "message_id", messageID, "lang", lang, "title", title, "text", text)
 
-	_, err = s.client.UpdateTranslation(ctx, &api.UpdateTranslationRequest{
-		Id:        messageID,
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
+	cmd, err := proto.Marshal(&machine.UpdateTranslationCommand{
+		MessageId: messageID,
 		Lang:      lang,
 		Title:     title,
 		Text:      text,
+		UpdatedAt: updatedAt,
 	})
+	if err != nil {
+		return err
+	}
 
-	return
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType: int32(machine.UpdateTranslationRequest),
+		Cmd: cmd,
+		Duration: "10s",
+	})
+	if err != nil {
+		return err
+	}
+
+	event, err := domain.UpdateTranslation(messageID, lang, title, text, updatedAt)
+	if err != nil {
+		return err
+	}
+
+	return s.publisher.Publish(ctx, event)
 }
 
 func (s *TranslationsController) DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error) {
@@ -120,12 +168,29 @@ func (s *TranslationsController) DeleteTranslation(ctx context.Context, messageI
 
 	logger.Debugw("delete translation", "message_id", messageID, "lang", lang)
 
-	_, err = s.client.DeleteTranslation(ctx, &api.DeleteTranslationRequest{
-		Id:        messageID,
+	cmd, err := proto.Marshal(&machine.DeleteTranslationCommand{
+		MessageId: messageID,
 		Lang:      lang,
 	})
+	if err != nil {
+		return err
+	}
 
-	return
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType: int32(machine.DeleteTranslationRequest),
+		Cmd: cmd,
+		Duration: "10s",
+	})
+	if err != nil {
+		return err
+	}
+
+	event, err := domain.DeleteTranslation(messageID, lang)
+	if err != nil {
+		return err
+	}
+
+	return s.publisher.Publish(ctx, event)
 }
 
 func (s *TranslationsController) ReadTranslation(ctx context.Context, userID, messageID int64, lang string, name *string) (translation *model.Translation, err error) {

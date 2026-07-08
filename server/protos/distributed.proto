@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package distributed.v1;
+
 option go_package = "github.com/bd878/gallery/server/api";
 
 service Distributed {
@@ -16,4 +18,14 @@ message Server {
 	string id = 1;
 	string raft_addr = 2;
 	bool   is_leader = 3;
+}
+
+message Command {
+	int32 req_type = 1;
+	bytes cmd = 2;
+	string duration = 3;
+}
+
+message CommandResponse {
+	optional string err = 1;
 }

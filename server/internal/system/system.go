@@ -178,13 +178,15 @@ func (s *System) initMux() (err error) {
 }
 
 func (s *System) initRaftListener() (err error) {
-	s.raftListener = s.mux.Match(func(r io.Reader) bool {
-		b := make([]byte, 1)
-		if _, err := r.Read(b); err != nil {
-			return false
-		}
-		return bytes.Compare(b, []byte{byte(raft.RaftRPC)}) == 0
-	})
+	if s.mux != nil {
+		s.raftListener = s.mux.Match(func(r io.Reader) bool {
+			b := make([]byte, 1)
+			if _, err := r.Read(b); err != nil {
+				return false
+			}
+			return bytes.Compare(b, []byte{byte(raft.RaftRPC)}) == 0
+		})
+	}
 	return nil
 }
 

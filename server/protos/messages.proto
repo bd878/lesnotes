@@ -5,16 +5,12 @@ package messages.v1;
 import "protos/translations.proto";
 import "protos/comments.proto";
 import "protos/files.proto";
+import "protos/distributed.proto";
 
 option go_package = "github.com/bd878/gallery/server/api";
 
 service Messages {
-	rpc SaveMessage(SaveMessageRequest) returns (SaveMessageResponse) {}
-	rpc DeleteMessages(DeleteMessagesRequest) returns (DeleteMessagesResponse) {}
-	rpc DeleteUserMessages(DeleteUserMessagesRequest) returns (DeleteUserMessagesResponse) {}
-	rpc PublishMessages(PublishMessagesRequest) returns (PublishMessagesResponse) {}
-	rpc PrivateMessages(PrivateMessagesRequest) returns (PrivateMessagesResponse) {}
-	rpc UpdateMessage(UpdateMessageRequest) returns (UpdateMessageResponse) {}
+	rpc Apply(distributed.v1.Command) returns (distributed.v1.CommandResponse);
 	rpc ReadMessage(ReadMessageRequest) returns (ReadMessageResponse) {}
 	rpc ReadMessages(ReadMessagesRequest) returns (ReadMessagesResponse) {}
 	rpc ReadBatchMessages(ReadBatchMessagesRequest) returns (ReadBatchMessagesResponse) {}
@@ -73,63 +69,6 @@ message ReadBatchMessagesResponse {
 message ReadMessagesResponse {
 	repeated Message messages = 1;
 	bool             is_last_page = 2;
-}
-
-message UpdateMessageRequest {
-	int64    id = 1;
-	int64    user_id = 2;
-	optional string   text = 3;
-	repeated int64 file_ids = 4;
-	optional string   title = 5;
-	optional string   name  = 6;
-}
-
-message UpdateMessageResponse {
-}
-
-message SaveMessageRequest {
-	int64    id = 1;
-	int64    user_id = 2;
-	string   text = 3;
-	bool     private = 4;
-	string   name = 5;
-	repeated int64 file_ids = 6;
-	string   title = 7;
-}
-
-message SaveMessageResponse {
-}
-
-message DeleteUserMessagesRequest {
-	int64    user_id = 1;
-}
-
-message DeleteUserMessagesResponse {}
-
-message DeleteMessagesRequest {
-	repeated int64  ids = 1;
-	int64 user_id = 2;
-}
-
-message PublishMessagesRequest {
-	repeated int64 ids = 1;
-	int64 user_id = 2;
-}
-
-message PublishMessagesResponse {
-	string    updated_at = 1;
-}
-
-message PrivateMessagesRequest {
-	repeated int64 ids = 1;
-	int64 user_id = 2;
-}
-
-message PrivateMessagesResponse {
-	string    updated_at = 1;
-}
-
-message DeleteMessagesResponse {
 }
 
 message ReadMessageRequest {

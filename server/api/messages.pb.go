@@ -560,614 +560,6 @@ func (x *ReadMessagesResponse) GetIsLastPage() bool {
 	return false
 }
 
-type UpdateMessageRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Text          *string                `protobuf:"bytes,3,opt,name=text,proto3,oneof" json:"text,omitempty"`
-	FileIds       []int64                `protobuf:"varint,4,rep,packed,name=file_ids,json=fileIds,proto3" json:"file_ids,omitempty"`
-	Title         *string                `protobuf:"bytes,5,opt,name=title,proto3,oneof" json:"title,omitempty"`
-	Name          *string                `protobuf:"bytes,6,opt,name=name,proto3,oneof" json:"name,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UpdateMessageRequest) Reset() {
-	*x = UpdateMessageRequest{}
-	mi := &file_protos_messages_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateMessageRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateMessageRequest) ProtoMessage() {}
-
-func (x *UpdateMessageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateMessageRequest.ProtoReflect.Descriptor instead.
-func (*UpdateMessageRequest) Descriptor() ([]byte, []int) {
-	return file_protos_messages_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *UpdateMessageRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *UpdateMessageRequest) GetUserId() int64 {
-	if x != nil {
-		return x.UserId
-	}
-	return 0
-}
-
-func (x *UpdateMessageRequest) GetText() string {
-	if x != nil && x.Text != nil {
-		return *x.Text
-	}
-	return ""
-}
-
-func (x *UpdateMessageRequest) GetFileIds() []int64 {
-	if x != nil {
-		return x.FileIds
-	}
-	return nil
-}
-
-func (x *UpdateMessageRequest) GetTitle() string {
-	if x != nil && x.Title != nil {
-		return *x.Title
-	}
-	return ""
-}
-
-func (x *UpdateMessageRequest) GetName() string {
-	if x != nil && x.Name != nil {
-		return *x.Name
-	}
-	return ""
-}
-
-type UpdateMessageResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UpdateMessageResponse) Reset() {
-	*x = UpdateMessageResponse{}
-	mi := &file_protos_messages_proto_msgTypes[8]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateMessageResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateMessageResponse) ProtoMessage() {}
-
-func (x *UpdateMessageResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_proto_msgTypes[8]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateMessageResponse.ProtoReflect.Descriptor instead.
-func (*UpdateMessageResponse) Descriptor() ([]byte, []int) {
-	return file_protos_messages_proto_rawDescGZIP(), []int{8}
-}
-
-type SaveMessageRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Text          string                 `protobuf:"bytes,3,opt,name=text,proto3" json:"text,omitempty"`
-	Private       bool                   `protobuf:"varint,4,opt,name=private,proto3" json:"private,omitempty"`
-	Name          string                 `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty"`
-	FileIds       []int64                `protobuf:"varint,6,rep,packed,name=file_ids,json=fileIds,proto3" json:"file_ids,omitempty"`
-	Title         string                 `protobuf:"bytes,7,opt,name=title,proto3" json:"title,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SaveMessageRequest) Reset() {
-	*x = SaveMessageRequest{}
-	mi := &file_protos_messages_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SaveMessageRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SaveMessageRequest) ProtoMessage() {}
-
-func (x *SaveMessageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SaveMessageRequest.ProtoReflect.Descriptor instead.
-func (*SaveMessageRequest) Descriptor() ([]byte, []int) {
-	return file_protos_messages_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *SaveMessageRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *SaveMessageRequest) GetUserId() int64 {
-	if x != nil {
-		return x.UserId
-	}
-	return 0
-}
-
-func (x *SaveMessageRequest) GetText() string {
-	if x != nil {
-		return x.Text
-	}
-	return ""
-}
-
-func (x *SaveMessageRequest) GetPrivate() bool {
-	if x != nil {
-		return x.Private
-	}
-	return false
-}
-
-func (x *SaveMessageRequest) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *SaveMessageRequest) GetFileIds() []int64 {
-	if x != nil {
-		return x.FileIds
-	}
-	return nil
-}
-
-func (x *SaveMessageRequest) GetTitle() string {
-	if x != nil {
-		return x.Title
-	}
-	return ""
-}
-
-type SaveMessageResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SaveMessageResponse) Reset() {
-	*x = SaveMessageResponse{}
-	mi := &file_protos_messages_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SaveMessageResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SaveMessageResponse) ProtoMessage() {}
-
-func (x *SaveMessageResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SaveMessageResponse.ProtoReflect.Descriptor instead.
-func (*SaveMessageResponse) Descriptor() ([]byte, []int) {
-	return file_protos_messages_proto_rawDescGZIP(), []int{10}
-}
-
-type DeleteUserMessagesRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DeleteUserMessagesRequest) Reset() {
-	*x = DeleteUserMessagesRequest{}
-	mi := &file_protos_messages_proto_msgTypes[11]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeleteUserMessagesRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteUserMessagesRequest) ProtoMessage() {}
-
-func (x *DeleteUserMessagesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_proto_msgTypes[11]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteUserMessagesRequest.ProtoReflect.Descriptor instead.
-func (*DeleteUserMessagesRequest) Descriptor() ([]byte, []int) {
-	return file_protos_messages_proto_rawDescGZIP(), []int{11}
-}
-
-func (x *DeleteUserMessagesRequest) GetUserId() int64 {
-	if x != nil {
-		return x.UserId
-	}
-	return 0
-}
-
-type DeleteUserMessagesResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DeleteUserMessagesResponse) Reset() {
-	*x = DeleteUserMessagesResponse{}
-	mi := &file_protos_messages_proto_msgTypes[12]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeleteUserMessagesResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteUserMessagesResponse) ProtoMessage() {}
-
-func (x *DeleteUserMessagesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_proto_msgTypes[12]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteUserMessagesResponse.ProtoReflect.Descriptor instead.
-func (*DeleteUserMessagesResponse) Descriptor() ([]byte, []int) {
-	return file_protos_messages_proto_rawDescGZIP(), []int{12}
-}
-
-type DeleteMessagesRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Ids           []int64                `protobuf:"varint,1,rep,packed,name=ids,proto3" json:"ids,omitempty"`
-	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DeleteMessagesRequest) Reset() {
-	*x = DeleteMessagesRequest{}
-	mi := &file_protos_messages_proto_msgTypes[13]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeleteMessagesRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteMessagesRequest) ProtoMessage() {}
-
-func (x *DeleteMessagesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_proto_msgTypes[13]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteMessagesRequest.ProtoReflect.Descriptor instead.
-func (*DeleteMessagesRequest) Descriptor() ([]byte, []int) {
-	return file_protos_messages_proto_rawDescGZIP(), []int{13}
-}
-
-func (x *DeleteMessagesRequest) GetIds() []int64 {
-	if x != nil {
-		return x.Ids
-	}
-	return nil
-}
-
-func (x *DeleteMessagesRequest) GetUserId() int64 {
-	if x != nil {
-		return x.UserId
-	}
-	return 0
-}
-
-type PublishMessagesRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Ids           []int64                `protobuf:"varint,1,rep,packed,name=ids,proto3" json:"ids,omitempty"`
-	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *PublishMessagesRequest) Reset() {
-	*x = PublishMessagesRequest{}
-	mi := &file_protos_messages_proto_msgTypes[14]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *PublishMessagesRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PublishMessagesRequest) ProtoMessage() {}
-
-func (x *PublishMessagesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_proto_msgTypes[14]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PublishMessagesRequest.ProtoReflect.Descriptor instead.
-func (*PublishMessagesRequest) Descriptor() ([]byte, []int) {
-	return file_protos_messages_proto_rawDescGZIP(), []int{14}
-}
-
-func (x *PublishMessagesRequest) GetIds() []int64 {
-	if x != nil {
-		return x.Ids
-	}
-	return nil
-}
-
-func (x *PublishMessagesRequest) GetUserId() int64 {
-	if x != nil {
-		return x.UserId
-	}
-	return 0
-}
-
-type PublishMessagesResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UpdatedAt     string                 `protobuf:"bytes,1,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *PublishMessagesResponse) Reset() {
-	*x = PublishMessagesResponse{}
-	mi := &file_protos_messages_proto_msgTypes[15]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *PublishMessagesResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PublishMessagesResponse) ProtoMessage() {}
-
-func (x *PublishMessagesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_proto_msgTypes[15]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PublishMessagesResponse.ProtoReflect.Descriptor instead.
-func (*PublishMessagesResponse) Descriptor() ([]byte, []int) {
-	return file_protos_messages_proto_rawDescGZIP(), []int{15}
-}
-
-func (x *PublishMessagesResponse) GetUpdatedAt() string {
-	if x != nil {
-		return x.UpdatedAt
-	}
-	return ""
-}
-
-type PrivateMessagesRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Ids           []int64                `protobuf:"varint,1,rep,packed,name=ids,proto3" json:"ids,omitempty"`
-	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *PrivateMessagesRequest) Reset() {
-	*x = PrivateMessagesRequest{}
-	mi := &file_protos_messages_proto_msgTypes[16]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *PrivateMessagesRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PrivateMessagesRequest) ProtoMessage() {}
-
-func (x *PrivateMessagesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_proto_msgTypes[16]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PrivateMessagesRequest.ProtoReflect.Descriptor instead.
-func (*PrivateMessagesRequest) Descriptor() ([]byte, []int) {
-	return file_protos_messages_proto_rawDescGZIP(), []int{16}
-}
-
-func (x *PrivateMessagesRequest) GetIds() []int64 {
-	if x != nil {
-		return x.Ids
-	}
-	return nil
-}
-
-func (x *PrivateMessagesRequest) GetUserId() int64 {
-	if x != nil {
-		return x.UserId
-	}
-	return 0
-}
-
-type PrivateMessagesResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UpdatedAt     string                 `protobuf:"bytes,1,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *PrivateMessagesResponse) Reset() {
-	*x = PrivateMessagesResponse{}
-	mi := &file_protos_messages_proto_msgTypes[17]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *PrivateMessagesResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PrivateMessagesResponse) ProtoMessage() {}
-
-func (x *PrivateMessagesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_proto_msgTypes[17]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PrivateMessagesResponse.ProtoReflect.Descriptor instead.
-func (*PrivateMessagesResponse) Descriptor() ([]byte, []int) {
-	return file_protos_messages_proto_rawDescGZIP(), []int{17}
-}
-
-func (x *PrivateMessagesResponse) GetUpdatedAt() string {
-	if x != nil {
-		return x.UpdatedAt
-	}
-	return ""
-}
-
-type DeleteMessagesResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DeleteMessagesResponse) Reset() {
-	*x = DeleteMessagesResponse{}
-	mi := &file_protos_messages_proto_msgTypes[18]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeleteMessagesResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteMessagesResponse) ProtoMessage() {}
-
-func (x *DeleteMessagesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_proto_msgTypes[18]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteMessagesResponse.ProtoReflect.Descriptor instead.
-func (*DeleteMessagesResponse) Descriptor() ([]byte, []int) {
-	return file_protos_messages_proto_rawDescGZIP(), []int{18}
-}
-
 type ReadMessageRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -1179,7 +571,7 @@ type ReadMessageRequest struct {
 
 func (x *ReadMessageRequest) Reset() {
 	*x = ReadMessageRequest{}
-	mi := &file_protos_messages_proto_msgTypes[19]
+	mi := &file_protos_messages_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1191,7 +583,7 @@ func (x *ReadMessageRequest) String() string {
 func (*ReadMessageRequest) ProtoMessage() {}
 
 func (x *ReadMessageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_proto_msgTypes[19]
+	mi := &file_protos_messages_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1204,7 +596,7 @@ func (x *ReadMessageRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReadMessageRequest.ProtoReflect.Descriptor instead.
 func (*ReadMessageRequest) Descriptor() ([]byte, []int) {
-	return file_protos_messages_proto_rawDescGZIP(), []int{19}
+	return file_protos_messages_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ReadMessageRequest) GetId() int64 {
@@ -1238,7 +630,7 @@ type ReadMessageResponse struct {
 
 func (x *ReadMessageResponse) Reset() {
 	*x = ReadMessageResponse{}
-	mi := &file_protos_messages_proto_msgTypes[20]
+	mi := &file_protos_messages_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1250,7 +642,7 @@ func (x *ReadMessageResponse) String() string {
 func (*ReadMessageResponse) ProtoMessage() {}
 
 func (x *ReadMessageResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_proto_msgTypes[20]
+	mi := &file_protos_messages_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1263,7 +655,7 @@ func (x *ReadMessageResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReadMessageResponse.ProtoReflect.Descriptor instead.
 func (*ReadMessageResponse) Descriptor() ([]byte, []int) {
-	return file_protos_messages_proto_rawDescGZIP(), []int{20}
+	return file_protos_messages_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ReadMessageResponse) GetMessage() *Message {
@@ -1284,7 +676,7 @@ var File_protos_messages_proto protoreflect.FileDescriptor
 
 const file_protos_messages_proto_rawDesc = "" +
 	"\n" +
-	"\x15protos/messages.proto\x12\vmessages.v1\x1a\x19protos/translations.proto\x1a\x15protos/comments.proto\x1a\x12protos/files.proto\"\xe4\x01\n" +
+	"\x15protos/messages.proto\x12\vmessages.v1\x1a\x19protos/translations.proto\x1a\x15protos/comments.proto\x1a\x12protos/files.proto\x1a\x18protos/distributed.proto\"\xe4\x01\n" +
 	"\x10MessagesSnapshot\x12<\n" +
 	"\amessage\x18\x01 \x01(\v2 .messages.v1.MessageSnapshotItemH\x00R\amessage\x12L\n" +
 	"\vtranslation\x18\x03 \x01(\v2(.translations.v1.TranslationSnapshotItemH\x00R\vtranslation\x12<\n" +
@@ -1329,46 +721,7 @@ const file_protos_messages_proto_rawDesc = "" +
 	"\x14ReadMessagesResponse\x120\n" +
 	"\bmessages\x18\x01 \x03(\v2\x14.messages.v1.MessageR\bmessages\x12 \n" +
 	"\fis_last_page\x18\x02 \x01(\bR\n" +
-	"isLastPage\"\xc3\x01\n" +
-	"\x14UpdateMessageRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x17\n" +
-	"\x04text\x18\x03 \x01(\tH\x00R\x04text\x88\x01\x01\x12\x19\n" +
-	"\bfile_ids\x18\x04 \x03(\x03R\afileIds\x12\x19\n" +
-	"\x05title\x18\x05 \x01(\tH\x01R\x05title\x88\x01\x01\x12\x17\n" +
-	"\x04name\x18\x06 \x01(\tH\x02R\x04name\x88\x01\x01B\a\n" +
-	"\x05_textB\b\n" +
-	"\x06_titleB\a\n" +
-	"\x05_name\"\x17\n" +
-	"\x15UpdateMessageResponse\"\xb0\x01\n" +
-	"\x12SaveMessageRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x12\n" +
-	"\x04text\x18\x03 \x01(\tR\x04text\x12\x18\n" +
-	"\aprivate\x18\x04 \x01(\bR\aprivate\x12\x12\n" +
-	"\x04name\x18\x05 \x01(\tR\x04name\x12\x19\n" +
-	"\bfile_ids\x18\x06 \x03(\x03R\afileIds\x12\x14\n" +
-	"\x05title\x18\a \x01(\tR\x05title\"\x15\n" +
-	"\x13SaveMessageResponse\"4\n" +
-	"\x19DeleteUserMessagesRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\"\x1c\n" +
-	"\x1aDeleteUserMessagesResponse\"B\n" +
-	"\x15DeleteMessagesRequest\x12\x10\n" +
-	"\x03ids\x18\x01 \x03(\x03R\x03ids\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\x03R\x06userId\"C\n" +
-	"\x16PublishMessagesRequest\x12\x10\n" +
-	"\x03ids\x18\x01 \x03(\x03R\x03ids\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\x03R\x06userId\"8\n" +
-	"\x17PublishMessagesResponse\x12\x1d\n" +
-	"\n" +
-	"updated_at\x18\x01 \x01(\tR\tupdatedAt\"C\n" +
-	"\x16PrivateMessagesRequest\x12\x10\n" +
-	"\x03ids\x18\x01 \x03(\x03R\x03ids\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\x03R\x06userId\"8\n" +
-	"\x17PrivateMessagesResponse\x12\x1d\n" +
-	"\n" +
-	"updated_at\x18\x01 \x01(\tR\tupdatedAt\"\x18\n" +
-	"\x16DeleteMessagesResponse\"S\n" +
+	"isLastPage\"S\n" +
 	"\x12ReadMessageRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\buser_ids\x18\x02 \x03(\x03R\auserIds\x12\x12\n" +
@@ -1377,14 +730,9 @@ const file_protos_messages_proto_rawDesc = "" +
 	"\amessage\x18\x01 \x01(\v2\x14.messages.v1.MessageH\x00R\amessage\x88\x01\x01\x12\x17\n" +
 	"\ais_root\x18\x02 \x01(\bR\x06isRootB\n" +
 	"\n" +
-	"\b_message2\xcf\x06\n" +
-	"\bMessages\x12R\n" +
-	"\vSaveMessage\x12\x1f.messages.v1.SaveMessageRequest\x1a .messages.v1.SaveMessageResponse\"\x00\x12[\n" +
-	"\x0eDeleteMessages\x12\".messages.v1.DeleteMessagesRequest\x1a#.messages.v1.DeleteMessagesResponse\"\x00\x12g\n" +
-	"\x12DeleteUserMessages\x12&.messages.v1.DeleteUserMessagesRequest\x1a'.messages.v1.DeleteUserMessagesResponse\"\x00\x12^\n" +
-	"\x0fPublishMessages\x12#.messages.v1.PublishMessagesRequest\x1a$.messages.v1.PublishMessagesResponse\"\x00\x12^\n" +
-	"\x0fPrivateMessages\x12#.messages.v1.PrivateMessagesRequest\x1a$.messages.v1.PrivateMessagesResponse\"\x00\x12X\n" +
-	"\rUpdateMessage\x12!.messages.v1.UpdateMessageRequest\x1a\".messages.v1.UpdateMessageResponse\"\x00\x12R\n" +
+	"\b_message2\xde\x02\n" +
+	"\bMessages\x12A\n" +
+	"\x05Apply\x12\x17.distributed.v1.Command\x1a\x1f.distributed.v1.CommandResponse\x12R\n" +
 	"\vReadMessage\x12\x1f.messages.v1.ReadMessageRequest\x1a .messages.v1.ReadMessageResponse\"\x00\x12U\n" +
 	"\fReadMessages\x12 .messages.v1.ReadMessagesRequest\x1a!.messages.v1.ReadMessagesResponse\"\x00\x12d\n" +
 	"\x11ReadBatchMessages\x12%.messages.v1.ReadBatchMessagesRequest\x1a&.messages.v1.ReadBatchMessagesResponse\"\x00B%Z#github.com/bd878/gallery/server/apib\x06proto3"
@@ -1401,63 +749,43 @@ func file_protos_messages_proto_rawDescGZIP() []byte {
 	return file_protos_messages_proto_rawDescData
 }
 
-var file_protos_messages_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
+var file_protos_messages_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_protos_messages_proto_goTypes = []any{
-	(*MessagesSnapshot)(nil),           // 0: messages.v1.MessagesSnapshot
-	(*MessageSnapshotItem)(nil),        // 1: messages.v1.MessageSnapshotItem
-	(*Message)(nil),                    // 2: messages.v1.Message
-	(*ReadMessagesRequest)(nil),        // 3: messages.v1.ReadMessagesRequest
-	(*ReadBatchMessagesRequest)(nil),   // 4: messages.v1.ReadBatchMessagesRequest
-	(*ReadBatchMessagesResponse)(nil),  // 5: messages.v1.ReadBatchMessagesResponse
-	(*ReadMessagesResponse)(nil),       // 6: messages.v1.ReadMessagesResponse
-	(*UpdateMessageRequest)(nil),       // 7: messages.v1.UpdateMessageRequest
-	(*UpdateMessageResponse)(nil),      // 8: messages.v1.UpdateMessageResponse
-	(*SaveMessageRequest)(nil),         // 9: messages.v1.SaveMessageRequest
-	(*SaveMessageResponse)(nil),        // 10: messages.v1.SaveMessageResponse
-	(*DeleteUserMessagesRequest)(nil),  // 11: messages.v1.DeleteUserMessagesRequest
-	(*DeleteUserMessagesResponse)(nil), // 12: messages.v1.DeleteUserMessagesResponse
-	(*DeleteMessagesRequest)(nil),      // 13: messages.v1.DeleteMessagesRequest
-	(*PublishMessagesRequest)(nil),     // 14: messages.v1.PublishMessagesRequest
-	(*PublishMessagesResponse)(nil),    // 15: messages.v1.PublishMessagesResponse
-	(*PrivateMessagesRequest)(nil),     // 16: messages.v1.PrivateMessagesRequest
-	(*PrivateMessagesResponse)(nil),    // 17: messages.v1.PrivateMessagesResponse
-	(*DeleteMessagesResponse)(nil),     // 18: messages.v1.DeleteMessagesResponse
-	(*ReadMessageRequest)(nil),         // 19: messages.v1.ReadMessageRequest
-	(*ReadMessageResponse)(nil),        // 20: messages.v1.ReadMessageResponse
-	(*TranslationSnapshotItem)(nil),    // 21: translations.v1.TranslationSnapshotItem
-	(*CommentSnapshotItem)(nil),        // 22: comments.v1.CommentSnapshotItem
-	(*TranslationPreview)(nil),         // 23: translations.v1.TranslationPreview
-	(*File)(nil),                       // 24: files.v1.File
+	(*MessagesSnapshot)(nil),          // 0: messages.v1.MessagesSnapshot
+	(*MessageSnapshotItem)(nil),       // 1: messages.v1.MessageSnapshotItem
+	(*Message)(nil),                   // 2: messages.v1.Message
+	(*ReadMessagesRequest)(nil),       // 3: messages.v1.ReadMessagesRequest
+	(*ReadBatchMessagesRequest)(nil),  // 4: messages.v1.ReadBatchMessagesRequest
+	(*ReadBatchMessagesResponse)(nil), // 5: messages.v1.ReadBatchMessagesResponse
+	(*ReadMessagesResponse)(nil),      // 6: messages.v1.ReadMessagesResponse
+	(*ReadMessageRequest)(nil),        // 7: messages.v1.ReadMessageRequest
+	(*ReadMessageResponse)(nil),       // 8: messages.v1.ReadMessageResponse
+	(*TranslationSnapshotItem)(nil),   // 9: translations.v1.TranslationSnapshotItem
+	(*CommentSnapshotItem)(nil),       // 10: comments.v1.CommentSnapshotItem
+	(*TranslationPreview)(nil),        // 11: translations.v1.TranslationPreview
+	(*File)(nil),                      // 12: files.v1.File
+	(*Command)(nil),                   // 13: distributed.v1.Command
+	(*CommandResponse)(nil),           // 14: distributed.v1.CommandResponse
 }
 var file_protos_messages_proto_depIdxs = []int32{
 	1,  // 0: messages.v1.MessagesSnapshot.message:type_name -> messages.v1.MessageSnapshotItem
-	21, // 1: messages.v1.MessagesSnapshot.translation:type_name -> translations.v1.TranslationSnapshotItem
-	22, // 2: messages.v1.MessagesSnapshot.comment:type_name -> comments.v1.CommentSnapshotItem
-	23, // 3: messages.v1.Message.translations:type_name -> translations.v1.TranslationPreview
-	24, // 4: messages.v1.Message.files:type_name -> files.v1.File
+	9,  // 1: messages.v1.MessagesSnapshot.translation:type_name -> translations.v1.TranslationSnapshotItem
+	10, // 2: messages.v1.MessagesSnapshot.comment:type_name -> comments.v1.CommentSnapshotItem
+	11, // 3: messages.v1.Message.translations:type_name -> translations.v1.TranslationPreview
+	12, // 4: messages.v1.Message.files:type_name -> files.v1.File
 	2,  // 5: messages.v1.ReadBatchMessagesResponse.messages:type_name -> messages.v1.Message
 	2,  // 6: messages.v1.ReadMessagesResponse.messages:type_name -> messages.v1.Message
 	2,  // 7: messages.v1.ReadMessageResponse.message:type_name -> messages.v1.Message
-	9,  // 8: messages.v1.Messages.SaveMessage:input_type -> messages.v1.SaveMessageRequest
-	13, // 9: messages.v1.Messages.DeleteMessages:input_type -> messages.v1.DeleteMessagesRequest
-	11, // 10: messages.v1.Messages.DeleteUserMessages:input_type -> messages.v1.DeleteUserMessagesRequest
-	14, // 11: messages.v1.Messages.PublishMessages:input_type -> messages.v1.PublishMessagesRequest
-	16, // 12: messages.v1.Messages.PrivateMessages:input_type -> messages.v1.PrivateMessagesRequest
-	7,  // 13: messages.v1.Messages.UpdateMessage:input_type -> messages.v1.UpdateMessageRequest
-	19, // 14: messages.v1.Messages.ReadMessage:input_type -> messages.v1.ReadMessageRequest
-	3,  // 15: messages.v1.Messages.ReadMessages:input_type -> messages.v1.ReadMessagesRequest
-	4,  // 16: messages.v1.Messages.ReadBatchMessages:input_type -> messages.v1.ReadBatchMessagesRequest
-	10, // 17: messages.v1.Messages.SaveMessage:output_type -> messages.v1.SaveMessageResponse
-	18, // 18: messages.v1.Messages.DeleteMessages:output_type -> messages.v1.DeleteMessagesResponse
-	12, // 19: messages.v1.Messages.DeleteUserMessages:output_type -> messages.v1.DeleteUserMessagesResponse
-	15, // 20: messages.v1.Messages.PublishMessages:output_type -> messages.v1.PublishMessagesResponse
-	17, // 21: messages.v1.Messages.PrivateMessages:output_type -> messages.v1.PrivateMessagesResponse
-	8,  // 22: messages.v1.Messages.UpdateMessage:output_type -> messages.v1.UpdateMessageResponse
-	20, // 23: messages.v1.Messages.ReadMessage:output_type -> messages.v1.ReadMessageResponse
-	6,  // 24: messages.v1.Messages.ReadMessages:output_type -> messages.v1.ReadMessagesResponse
-	5,  // 25: messages.v1.Messages.ReadBatchMessages:output_type -> messages.v1.ReadBatchMessagesResponse
-	17, // [17:26] is the sub-list for method output_type
-	8,  // [8:17] is the sub-list for method input_type
+	13, // 8: messages.v1.Messages.Apply:input_type -> distributed.v1.Command
+	7,  // 9: messages.v1.Messages.ReadMessage:input_type -> messages.v1.ReadMessageRequest
+	3,  // 10: messages.v1.Messages.ReadMessages:input_type -> messages.v1.ReadMessagesRequest
+	4,  // 11: messages.v1.Messages.ReadBatchMessages:input_type -> messages.v1.ReadBatchMessagesRequest
+	14, // 12: messages.v1.Messages.Apply:output_type -> distributed.v1.CommandResponse
+	8,  // 13: messages.v1.Messages.ReadMessage:output_type -> messages.v1.ReadMessageResponse
+	6,  // 14: messages.v1.Messages.ReadMessages:output_type -> messages.v1.ReadMessagesResponse
+	5,  // 15: messages.v1.Messages.ReadBatchMessages:output_type -> messages.v1.ReadBatchMessagesResponse
+	12, // [12:16] is the sub-list for method output_type
+	8,  // [8:12] is the sub-list for method input_type
 	8,  // [8:8] is the sub-list for extension type_name
 	8,  // [8:8] is the sub-list for extension extendee
 	0,  // [0:8] is the sub-list for field type_name
@@ -1471,20 +799,20 @@ func file_protos_messages_proto_init() {
 	file_protos_translations_proto_init()
 	file_protos_comments_proto_init()
 	file_protos_files_proto_init()
+	file_protos_distributed_proto_init()
 	file_protos_messages_proto_msgTypes[0].OneofWrappers = []any{
 		(*MessagesSnapshot_Message)(nil),
 		(*MessagesSnapshot_Translation)(nil),
 		(*MessagesSnapshot_Comment)(nil),
 	}
-	file_protos_messages_proto_msgTypes[7].OneofWrappers = []any{}
-	file_protos_messages_proto_msgTypes[20].OneofWrappers = []any{}
+	file_protos_messages_proto_msgTypes[8].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_protos_messages_proto_rawDesc), len(file_protos_messages_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   21,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

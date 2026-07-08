@@ -240,7 +240,7 @@ func (s *Controller) ProceedPayment(ctx context.Context, id, userID int64) (err 
 		return err
 	}
 
-	return s.publisher.Publish(context.TODO(), events...)
+	return s.publisher.Publish(ctx, events...)
 }
 
 func (s *Controller) CancelPayment(ctx context.Context, id, userID int64) (err error) {

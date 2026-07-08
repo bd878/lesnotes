@@ -1,4 +1,4 @@
-package messages
+package grpc
 
 import (
 	"context"
@@ -6,21 +6,15 @@ import (
 	"os"
 
 	"golang.org/x/sync/errgroup"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/consensus/raft"
-	"github.com/bd878/gallery/server/internal/ddd"
-	"github.com/bd878/gallery/server/internal/am"
 	"github.com/bd878/gallery/server/internal/discovery/serf"
 	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/internal/nats"
 	"github.com/bd878/gallery/server/internal/system"
 	"github.com/bd878/gallery/server/messages/config"
 	"github.com/bd878/gallery/server/messages/internal/controller/distributed"
 	"github.com/bd878/gallery/server/messages/internal/handler/grpc"
-	"github.com/bd878/gallery/server/messages/internal/handler/stream"
 	"github.com/bd878/gallery/server/messages/internal/machine"
 	"github.com/bd878/gallery/server/messages/internal/repository/postgres"
 	filesgateway "github.com/bd878/gallery/server/messages/internal/gateway/files/grpc"
@@ -43,24 +37,8 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 		return err
 	}
 
-	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
-	stream.RegisterDomainEventHandlers(dispatcher, stream.NewDomainEventHandlers(
-		am.NewMessagePublisher(
-			nats.NewStream(svc.Nats()),
-		),
-	))
-
-	messagesSaved := promauto.NewCounter(
-		prometheus.CounterOpts{
-			Name: "messages_saved_count",
-		},
-	)
-
-	controller := application.NewInstrumentedApp(
-		application.New(consensus, dispatcher, messagesRepo,
-			translationsRepo, commentsRepo, filesGateway, svc.Logger()),
-		messagesSaved,
-	)
+	controller := application.New(consensus, messagesRepo,
+			translationsRepo, commentsRepo, filesGateway, svc.Logger())
 
 	messagesHandler := grpc.NewMessagesHandler(controller)
 	translationsHandler := grpc.NewTranslationsHandler(controller)

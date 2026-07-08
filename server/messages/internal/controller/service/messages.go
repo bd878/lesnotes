@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 	"fmt"
 	"sync"
 	"strings"
@@ -9,9 +10,14 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
+	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/rpc"
+	"github.com/bd878/gallery/server/messages/internal/domain"
+	"github.com/bd878/gallery/server/messages/internal/machine"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/messages/pkg/loadbalance"
 	"github.com/bd878/gallery/server/messages/pkg/model"
@@ -41,10 +47,17 @@ type MessagesController struct {
 	client  api.MessagesClient
 	conn    *grpc.ClientConn
 	threads ThreadsGateway
+	messagesSaved prometheus.Counter
+	publisher    ddd.EventPublisher[ddd.Event]
 }
 
-func NewMessagesController(conf MessagesConfig, threads ThreadsGateway) *MessagesController {
-	controller := &MessagesController{conf: conf, threads: threads}
+func NewMessagesController(conf MessagesConfig, publisher ddd.EventPublisher[ddd.Event], threads ThreadsGateway, messagesSaved prometheus.Counter) *MessagesController {
+	controller := &MessagesController{
+		conf: conf,
+		threads: threads,
+		publisher: publisher,
+		messagesSaved: messagesSaved,
+	}
 
 	controller.setupConnection()
 
@@ -99,14 +112,28 @@ func (s *MessagesController) SaveMessage(ctx context.Context, id int64, text, ti
 
 	logger.Debugw("save message", "id", id, "text", text, "title", title, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private, "name", name)
 
-	_, err = s.client.SaveMessage(ctx, &api.SaveMessageRequest{
-		Id:      id,
-		Text:    text,
-		Title:   title,
-		FileIds: fileIDs,
-		UserId:  userID,
-		Private: private,
-		Name:    name,
+	createdAt := time.Now().UTC().Format(time.RFC3339)
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
+	cmd, err := proto.Marshal(&machine.AppendCommand{
+		Id:        id,
+		Text:      text,
+		Title:     title,
+		FileIds:   fileIDs,
+		UserId:    userID,
+		Private:   private,
+		Name:      name,
+		CreatedAt: createdAt,
+		UpdatedAt: updatedAt,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType: int32(machine.AppendRequest),
+		Cmd: cmd,
+		Duration: "10s",
 	})
 	if err != nil {
 		return
@@ -126,6 +153,16 @@ func (s *MessagesController) SaveMessage(ctx context.Context, id int64, text, ti
 		return
 	}
 
+	event, err := domain.CreateMessage(id, text, title, fileIDs, userID, private, name, createdAt, updatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.publisher.Publish(ctx, event)
+	if err != nil {
+		return nil, err
+	}
+
 	message = &model.Message{
 		ID:      id,
 		Text:    text,
@@ -135,6 +172,33 @@ func (s *MessagesController) SaveMessage(ctx context.Context, id int64, text, ti
 		UserID:  userID,
 		Private: private,
 	}
+
+	s.messagesSaved.Inc()
+
+	return
+}
+
+func (s *MessagesController) DeleteUserMessages(ctx context.Context, userID int64) (err error) {
+	if s.isConnFailed() {
+		if err = s.setupConnection(); err != nil {
+			return
+		}
+	}
+
+	logger.Debugw("delete user messages", "user_id", userID)
+
+	cmd, err := proto.Marshal(&machine.DeleteUserMessagesCommand{
+		UserId: userID,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType: int32(machine.DeleteUserMessagesRequest),
+		Cmd: cmd,
+		Duration: "10s",
+	})
 
 	return
 }
@@ -161,10 +225,33 @@ func (s *MessagesController) DeleteMessages(ctx context.Context, ids []int64, us
 		}
 	}
 
-	_, err = s.client.DeleteMessages(ctx, &api.DeleteMessagesRequest{
-		Ids:    ids,
-		UserId: userID,
-	})
+	for _, id := range ids {
+
+		event, err := domain.DeleteMessage(id, userID)
+		if err != nil {
+			return err
+		}
+
+		cmd, err := proto.Marshal(&machine.DeleteCommand{
+			Id:     id,
+			UserId: userID,
+		})
+		if err != nil {
+			return err
+		}
+
+		_, err = s.client.Apply(ctx, &api.Command{
+			ReqType: int32(machine.DeleteRequest),
+			Cmd: cmd,
+			Duration: "10s",
+		})
+		if err != nil {
+			return err
+		}
+
+		s.publisher.Publish(ctx, event)
+
+	}
 
 	return
 }
@@ -178,12 +265,32 @@ func (s *MessagesController) PublishMessages(ctx context.Context, ids []int64, u
 
 	logger.Debugw("publish messages", "ids", ids, "user_id", userID)
 
-	_, err = s.client.PublishMessages(ctx, &api.PublishMessagesRequest{
-		Ids:    ids,
-		UserId: userID,
-	})
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
-	return
+	cmd, err := proto.Marshal(&machine.PublishCommand{
+		Ids:       ids,
+		UserId:    userID,
+		UpdatedAt: updatedAt,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType: int32(machine.PublishRequest),
+		Cmd: cmd,
+		Duration: "10s",
+	})
+	if err != nil {
+		return err
+	}
+
+	event, err := domain.PublishMessages(userID, ids, updatedAt)
+	if err != nil {
+		return err
+	}
+
+	return s.publisher.Publish(ctx, event)
 }
 
 func (s *MessagesController) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
@@ -195,12 +302,32 @@ func (s *MessagesController) PrivateMessages(ctx context.Context, ids []int64, u
 
 	logger.Debugw("private messages", "ids", ids, "user_id", userID)
 
-	_, err = s.client.PrivateMessages(ctx, &api.PrivateMessagesRequest{
-		Ids:    ids,
-		UserId: userID,
-	})
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
-	return
+	cmd, err := proto.Marshal(&machine.PrivateCommand{
+		Ids:       ids,
+		UserId:    userID,
+		UpdatedAt: updatedAt,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType: int32(machine.PrivateRequest),
+		Cmd: cmd,
+		Duration: "10s",
+	})
+	if err != nil {
+		return err
+	}
+
+	event, err := domain.PrivateMessages(userID, ids, updatedAt)
+	if err != nil {
+		return err
+	}
+
+	return s.publisher.Publish(ctx, event)
 }
 
 func (s *MessagesController) UpdateMessage(ctx context.Context, id int64, text, title, name *string, fileIDs []int64, userID int64) (err error) {
@@ -212,16 +339,36 @@ func (s *MessagesController) UpdateMessage(ctx context.Context, id int64, text, 
 
 	logger.Debugw("update message", "id", id, "text", text, "title", title, "name", name, "file_ids", fileIDs, "user_id", userID)
 
-	_, err = s.client.UpdateMessage(ctx, &api.UpdateMessageRequest{
-		Id:      id,
-		UserId:  userID,
-		FileIds: fileIDs,
-		Text:    text,
-		Title:   title,
-		Name:    name,
-	})
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
-	return
+	event, err := domain.UpdateMessage(id, text, title, fileIDs, userID, name, updatedAt)
+	if err != nil {
+		return err
+	}
+
+	cmd, err := proto.Marshal(&machine.UpdateCommand{
+		Id:        id,
+		UserId:    userID,
+		FileIds:   fileIDs,
+		Text:      text,
+		Name:      name,
+		Title:     title,
+		UpdatedAt: updatedAt,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType: int32(machine.UpdateRequest),
+		Cmd: cmd,
+		Duration: "10s",
+	})
+	if err != nil {
+		return
+	}
+
+	return s.publisher.Publish(ctx, event)
 }
 
 // Get messages in order

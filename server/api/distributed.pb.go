@@ -161,21 +161,132 @@ func (x *Server) GetIsLeader() bool {
 	return false
 }
 
+type Command struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ReqType       int32                  `protobuf:"varint,1,opt,name=req_type,json=reqType,proto3" json:"req_type,omitempty"`
+	Cmd           []byte                 `protobuf:"bytes,2,opt,name=cmd,proto3" json:"cmd,omitempty"`
+	Duration      string                 `protobuf:"bytes,3,opt,name=duration,proto3" json:"duration,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Command) Reset() {
+	*x = Command{}
+	mi := &file_protos_distributed_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Command) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Command) ProtoMessage() {}
+
+func (x *Command) ProtoReflect() protoreflect.Message {
+	mi := &file_protos_distributed_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Command.ProtoReflect.Descriptor instead.
+func (*Command) Descriptor() ([]byte, []int) {
+	return file_protos_distributed_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *Command) GetReqType() int32 {
+	if x != nil {
+		return x.ReqType
+	}
+	return 0
+}
+
+func (x *Command) GetCmd() []byte {
+	if x != nil {
+		return x.Cmd
+	}
+	return nil
+}
+
+func (x *Command) GetDuration() string {
+	if x != nil {
+		return x.Duration
+	}
+	return ""
+}
+
+type CommandResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Err           *string                `protobuf:"bytes,1,opt,name=err,proto3,oneof" json:"err,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CommandResponse) Reset() {
+	*x = CommandResponse{}
+	mi := &file_protos_distributed_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CommandResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CommandResponse) ProtoMessage() {}
+
+func (x *CommandResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_protos_distributed_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CommandResponse.ProtoReflect.Descriptor instead.
+func (*CommandResponse) Descriptor() ([]byte, []int) {
+	return file_protos_distributed_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *CommandResponse) GetErr() string {
+	if x != nil && x.Err != nil {
+		return *x.Err
+	}
+	return ""
+}
+
 var File_protos_distributed_proto protoreflect.FileDescriptor
 
 const file_protos_distributed_proto_rawDesc = "" +
 	"\n" +
-	"\x18protos/distributed.proto\"\x13\n" +
-	"\x11GetServersRequest\"7\n" +
-	"\x12GetServersResponse\x12!\n" +
-	"\aservers\x18\x03 \x03(\v2\a.ServerR\aservers\"R\n" +
+	"\x18protos/distributed.proto\x12\x0edistributed.v1\"\x13\n" +
+	"\x11GetServersRequest\"F\n" +
+	"\x12GetServersResponse\x120\n" +
+	"\aservers\x18\x03 \x03(\v2\x16.distributed.v1.ServerR\aservers\"R\n" +
 	"\x06Server\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
 	"\traft_addr\x18\x02 \x01(\tR\braftAddr\x12\x1b\n" +
-	"\tis_leader\x18\x03 \x01(\bR\bisLeader2F\n" +
-	"\vDistributed\x127\n" +
+	"\tis_leader\x18\x03 \x01(\bR\bisLeader\"R\n" +
+	"\aCommand\x12\x19\n" +
+	"\breq_type\x18\x01 \x01(\x05R\areqType\x12\x10\n" +
+	"\x03cmd\x18\x02 \x01(\fR\x03cmd\x12\x1a\n" +
+	"\bduration\x18\x03 \x01(\tR\bduration\"0\n" +
+	"\x0fCommandResponse\x12\x15\n" +
+	"\x03err\x18\x01 \x01(\tH\x00R\x03err\x88\x01\x01B\x06\n" +
+	"\x04_err2d\n" +
+	"\vDistributed\x12U\n" +
 	"\n" +
-	"GetServers\x12\x12.GetServersRequest\x1a\x13.GetServersResponse\"\x00B%Z#github.com/bd878/gallery/server/apib\x06proto3"
+	"GetServers\x12!.distributed.v1.GetServersRequest\x1a\".distributed.v1.GetServersResponse\"\x00B%Z#github.com/bd878/gallery/server/apib\x06proto3"
 
 var (
 	file_protos_distributed_proto_rawDescOnce sync.Once
@@ -189,16 +300,18 @@ func file_protos_distributed_proto_rawDescGZIP() []byte {
 	return file_protos_distributed_proto_rawDescData
 }
 
-var file_protos_distributed_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_protos_distributed_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_protos_distributed_proto_goTypes = []any{
-	(*GetServersRequest)(nil),  // 0: GetServersRequest
-	(*GetServersResponse)(nil), // 1: GetServersResponse
-	(*Server)(nil),             // 2: Server
+	(*GetServersRequest)(nil),  // 0: distributed.v1.GetServersRequest
+	(*GetServersResponse)(nil), // 1: distributed.v1.GetServersResponse
+	(*Server)(nil),             // 2: distributed.v1.Server
+	(*Command)(nil),            // 3: distributed.v1.Command
+	(*CommandResponse)(nil),    // 4: distributed.v1.CommandResponse
 }
 var file_protos_distributed_proto_depIdxs = []int32{
-	2, // 0: GetServersResponse.servers:type_name -> Server
-	0, // 1: Distributed.GetServers:input_type -> GetServersRequest
-	1, // 2: Distributed.GetServers:output_type -> GetServersResponse
+	2, // 0: distributed.v1.GetServersResponse.servers:type_name -> distributed.v1.Server
+	0, // 1: distributed.v1.Distributed.GetServers:input_type -> distributed.v1.GetServersRequest
+	1, // 2: distributed.v1.Distributed.GetServers:output_type -> distributed.v1.GetServersResponse
 	2, // [2:3] is the sub-list for method output_type
 	1, // [1:2] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -211,13 +324,14 @@ func file_protos_distributed_proto_init() {
 	if File_protos_distributed_proto != nil {
 		return
 	}
+	file_protos_distributed_proto_msgTypes[4].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_protos_distributed_proto_rawDesc), len(file_protos_distributed_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

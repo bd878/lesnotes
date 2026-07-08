@@ -7,13 +7,10 @@ import (
 	"time"
 
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/messages/internal/domain"
 	"github.com/bd878/gallery/server/messages/internal/machine"
 	"github.com/bd878/gallery/server/messages/internal/controller"
 	users "github.com/bd878/gallery/server/users/pkg/model"
-	"google.golang.org/protobuf/proto"
 )
 
 type (
@@ -44,19 +41,6 @@ type (
 	}
 
 	App interface {
-		SaveMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, userID int64, private bool, name string) (err error)
-		UpdateMessage(ctx context.Context, id int64, text, title, name *string, fileIDs []int64, userID int64) (err error)
-		DeleteUserMessages(ctx context.Context, userID int64) (err error)
-		DeleteMessages(ctx context.Context, ids []int64, userID int64) (err error)
-		PublishMessages(ctx context.Context, ids []int64, userID int64) (err error)
-		PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error)
-		SaveTranslation(ctx context.Context, userID, messageID int64, lang, title, text string) (err error)
-		UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string) (err error)
-		DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error)
-		SaveComment(ctx context.Context, id, userID, messageID int64, text string, metadata []byte) (err error)
-		UpdateComment(ctx context.Context, id, userID int64, text *string, metadata []byte) (err error)
-		DeleteComment(ctx context.Context, id, userID int64) (err error)
-		DeleteMessageComments(ctx context.Context, messageID int64) (err error)
 		ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *api.Message, err error)
 		ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (messages []*api.Message, isLastPage bool, err error)
 		ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*api.Message, err error)
@@ -70,7 +54,6 @@ type (
 	Distributed struct {
 		consensus        Consensus
 		log              *logger.Logger
-		publisher        ddd.EventPublisher[ddd.Event]
 		commentsRepo     CommentsRepository
 		messagesRepo     MessagesRepository
 		translationsRepo TranslationsRepository
@@ -80,11 +63,10 @@ type (
 
 var _ App = (*Distributed)(nil)
 
-func New(consensus Consensus, publisher ddd.EventPublisher[ddd.Event], messagesRepo MessagesRepository,
+func New(consensus Consensus, messagesRepo MessagesRepository,
 	translationsRepo TranslationsRepository, commentsRepo CommentsRepository, filesGateway FilesGateway, log *logger.Logger) *Distributed {
 	return &Distributed{
 		log:              log,
-		publisher:        publisher,
 		consensus:        consensus,
 		commentsRepo:     commentsRepo,
 		messagesRepo:     messagesRepo,
@@ -93,7 +75,7 @@ func New(consensus Consensus, publisher ddd.EventPublisher[ddd.Event], messagesR
 	}
 }
 
-func (m *Distributed) apply(ctx context.Context, reqType machine.RequestType, cmd []byte) (err error) {
+func (m *Distributed) Apply(ctx context.Context, reqType machine.RequestType, cmd []byte, duration time.Duration) (err error) {
 	var buf bytes.Buffer
 	_, err = buf.Write([]byte{byte(reqType)})
 	if err != nil {
@@ -105,363 +87,7 @@ func (m *Distributed) apply(ctx context.Context, reqType machine.RequestType, cm
 		return
 	}
 
-	return m.consensus.Apply(buf.Bytes(), 10*time.Second)
-}
-
-func (m *Distributed) SaveMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, userID int64, private bool, name string) (err error) {
-	m.log.Debugw("save message", "id", id, "text", text, "title", title, "file_ids", fileIDs, "user_id", userID, "private", private, "name", name)
-
-	createdAt := time.Now().UTC().Format(time.RFC3339)
-	updatedAt := time.Now().UTC().Format(time.RFC3339)
-
-	event, err := domain.CreateMessage(id, text, title, fileIDs, userID, private, name, createdAt, updatedAt)
-	if err != nil {
-		return err
-	}
-
-	cmd, err := proto.Marshal(&machine.AppendCommand{
-		Id:        id,
-		Text:      text,
-		Title:     title,
-		FileIds:   fileIDs,
-		UserId:    userID,
-		Private:   private,
-		Name:      name,
-		CreatedAt: createdAt,
-		UpdatedAt: updatedAt,
-	})
-	if err != nil {
-		return err
-	}
-
-	err = m.apply(ctx, machine.AppendRequest, cmd)
-	if err != nil {
-		return
-	}
-
-	return m.publisher.Publish(context.TODO(), event)
-}
-
-func (m *Distributed) UpdateMessage(ctx context.Context, id int64, text, title, name *string, fileIDs []int64, userID int64) (err error) {
-	m.log.Debugw("update message", "id", id, "text", text, "title", title, "name", name, "file_ids", fileIDs, "user_id", userID)
-
-	updatedAt := time.Now().UTC().Format(time.RFC3339)
-
-	event, err := domain.UpdateMessage(id, text, title, fileIDs, userID, name, updatedAt)
-	if err != nil {
-		return err
-	}
-
-	cmd, err := proto.Marshal(&machine.UpdateCommand{
-		Id:        id,
-		UserId:    userID,
-		FileIds:   fileIDs,
-		Text:      text,
-		Name:      name,
-		Title:     title,
-		UpdatedAt: updatedAt,
-	})
-	if err != nil {
-		return err
-	}
-
-	err = m.apply(ctx, machine.UpdateRequest, cmd)
-	if err != nil {
-		return err
-	}
-
-	return m.publisher.Publish(context.TODO(), event)
-}
-
-func (m *Distributed) DeleteUserMessages(ctx context.Context, userID int64) (err error) {
-	m.log.Debugw("delete user messages", "user_id", userID)
-
-	cmd, err := proto.Marshal(&machine.DeleteUserMessagesCommand{
-		UserId: userID,
-	})
-	if err != nil {
-		return err
-	}
-
-	err = m.apply(ctx, machine.DeleteUserMessagesRequest, cmd)
-
-	return
-}
-
-func (m *Distributed) DeleteMessages(ctx context.Context, ids []int64, userID int64) (err error) {
-	m.log.Debugw("delete messages", "ids", ids, "user_id", userID)
-
-	for _, id := range ids {
-
-		event, err := domain.DeleteMessage(id, userID)
-		if err != nil {
-			return err
-		}
-
-		cmd, err := proto.Marshal(&machine.DeleteCommand{
-			Id:     id,
-			UserId: userID,
-		})
-		if err != nil {
-			return err
-		}
-
-		err = m.apply(ctx, machine.DeleteRequest, cmd)
-		if err != nil {
-			return err
-		}
-
-		m.publisher.Publish(context.TODO(), event)
-
-	}
-
-	return
-}
-
-func (m *Distributed) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
-	m.log.Debugw("publish messages", "ids", ids, "user_id", userID)
-
-	updatedAt := time.Now().UTC().Format(time.RFC3339)
-
-	cmd, err := proto.Marshal(&machine.PublishCommand{
-		Ids:       ids,
-		UserId:    userID,
-		UpdatedAt: updatedAt,
-	})
-	if err != nil {
-		return err
-	}
-
-	err = m.apply(ctx, machine.PublishRequest, cmd)
-	if err != nil {
-		return
-	}
-
-	event, err := domain.PublishMessages(userID, ids, updatedAt)
-	if err != nil {
-		return err
-	}
-
-	return m.publisher.Publish(context.TODO(), event)
-}
-
-func (m *Distributed) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
-	m.log.Debugw("private messages", "ids", ids, "user_id", userID)
-
-	updatedAt := time.Now().UTC().Format(time.RFC3339)
-
-	cmd, err := proto.Marshal(&machine.PrivateCommand{
-		Ids:       ids,
-		UserId:    userID,
-		UpdatedAt: updatedAt,
-	})
-	if err != nil {
-		return err
-	}
-
-	err = m.apply(ctx, machine.PrivateRequest, cmd)
-	if err != nil {
-		return
-	}
-
-	event, err := domain.PrivateMessages(userID, ids, updatedAt)
-	if err != nil {
-		return err
-	}
-
-	return m.publisher.Publish(context.TODO(), event)
-}
-
-func (m *Distributed) SaveTranslation(ctx context.Context, userID, messageID int64, lang, title, text string) (err error) {
-	m.log.Debugw("save translation", "user_id", userID, "message_id", messageID, "lang", lang, "title", title, "text", text)
-
-	createdAt := time.Now().UTC().Format(time.RFC3339)
-	updatedAt := time.Now().UTC().Format(time.RFC3339)
-
-	cmd, err := proto.Marshal(&machine.AppendTranslationCommand{
-		MessageId: messageID,
-		Lang:      lang,
-		Title:     title,
-		Text:      text,
-		CreatedAt: createdAt,
-		UpdatedAt: updatedAt,
-	})
-	if err != nil {
-		return err
-	}
-
-	err = m.apply(ctx, machine.AppendTranslationRequest, cmd)
-	if err != nil {
-		return
-	}
-
-	event, err := domain.CreateTranslation(userID, messageID, lang, title, text, createdAt, updatedAt)
-	if err != nil {
-		return err
-	}
-
-	return m.publisher.Publish(context.TODO(), event)
-}
-
-func (m *Distributed) UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string) (err error) {
-	m.log.Debugw("update translation", "message_id", messageID, "lang", lang, "title", title, "text", text)
-
-	updatedAt := time.Now().UTC().Format(time.RFC3339)
-
-	cmd, err := proto.Marshal(&machine.UpdateTranslationCommand{
-		MessageId: messageID,
-		Lang:      lang,
-		Title:     title,
-		Text:      text,
-		UpdatedAt: updatedAt,
-	})
-	if err != nil {
-		return err
-	}
-
-	err = m.apply(ctx, machine.UpdateTranslationRequest, cmd)
-	if err != nil {
-		return
-	}
-
-	event, err := domain.UpdateTranslation(messageID, lang, title, text, updatedAt)
-	if err != nil {
-		return err
-	}
-
-	return m.publisher.Publish(context.TODO(), event)
-}
-
-func (m *Distributed) DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error) {
-	m.log.Debugw("delete translation", "message_id", messageID, "lang", lang)
-
-	cmd, err := proto.Marshal(&machine.DeleteTranslationCommand{
-		MessageId: messageID,
-		Lang:      lang,
-	})
-	if err != nil {
-		return err
-	}
-
-	err = m.apply(ctx, machine.DeleteTranslationRequest, cmd)
-	if err != nil {
-		return
-	}
-
-	event, err := domain.DeleteTranslation(messageID, lang)
-	if err != nil {
-		return err
-	}
-
-	return m.publisher.Publish(context.TODO(), event)
-}
-
-func (m *Distributed) SaveComment(ctx context.Context, id, userID, messageID int64, text string, metadata []byte) (err error) {
-	m.log.Debugw("save comment", "id", id, "user_id", userID, "message_id", messageID, "text", text, "metadata", metadata)
-
-	createdAt := time.Now().UTC().Format(time.RFC3339)
-	updatedAt := time.Now().UTC().Format(time.RFC3339)
-
-	cmd, err := proto.Marshal(&machine.AppendCommentCommand{
-		Id:        id,
-		UserId:    userID,
-		MessageId: messageID,
-		Text:      text,
-		Metadata:  metadata,
-		CreatedAt: createdAt,
-		UpdatedAt: updatedAt,
-	})
-	if err != nil {
-		return err
-	}
-
-	err = m.apply(ctx, machine.AppendCommentRequest, cmd)
-	if err != nil {
-		return
-	}
-
-	event, err := domain.CreateComment(id, userID, messageID, text, createdAt, updatedAt)
-	if err != nil {
-		return err
-	}
-
-	return m.publisher.Publish(context.TODO(), event)
-}
-
-func (m *Distributed) UpdateComment(ctx context.Context, id, userID int64, text *string, metadata []byte) (err error) {
-	m.log.Debugw("update comment", "id", id, "user_id", userID, "text", text, "metadata", metadata)
-
-	updatedAt := time.Now().UTC().Format(time.RFC3339)
-
-	cmd, err := proto.Marshal(&machine.UpdateCommentCommand{
-		Id:        id,
-		UserId:    userID,
-		Text:      text,
-		Metadata:  metadata,
-		UpdatedAt: updatedAt,
-	})
-	if err != nil {
-		return err
-	}
-
-	err = m.apply(ctx, machine.UpdateCommentRequest, cmd)
-	if err != nil {
-		return err
-	}
-
-	event, err := domain.UpdateComment(id, userID, text, updatedAt)
-	if err != nil {
-		return err
-	}
-
-	return m.publisher.Publish(context.TODO(), event)
-}
-
-func (m *Distributed) DeleteComment(ctx context.Context, id, userID int64) (err error) {
-	m.log.Debugw("delete comment", "id", id, "user_id", userID)
-
-	cmd, err := proto.Marshal(&machine.DeleteCommentCommand{
-		Id:     id,
-		UserId: userID,
-	})
-	if err != nil {
-		return err
-	}
-
-	err = m.apply(ctx, machine.DeleteCommentRequest, cmd)
-	if err != nil {
-		return err
-	}
-
-	event, err := domain.DeleteComment(id, userID)
-	if err != nil {
-		return err
-	}
-
-	return m.publisher.Publish(context.TODO(), event)
-}
-
-func (m *Distributed) DeleteMessageComments(ctx context.Context, messageID int64) (err error) {
-	m.log.Debugw("delete message comments", "message_id", messageID)
-
-	cmd, err := proto.Marshal(&machine.DeleteMessageCommentsCommand{
-		MessageId: messageID,
-	})
-	if err != nil {
-		return err
-	}
-
-	err = m.apply(ctx, machine.DeleteMessageCommentsRequest, cmd)
-	if err != nil {
-		return err
-	}
-
-	event, err := domain.DeleteMessageComments(messageID)
-	if err != nil {
-		return err
-	}
-
-	return m.publisher.Publish(context.TODO(), event)
+	return m.consensus.Apply(buf.Bytes(), duration)
 }
 
 // TODO: pass one userID only, for public messages create ReadPublicMessage request

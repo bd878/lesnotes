@@ -2,13 +2,12 @@ syntax = "proto3";
 
 package comments.v1;
 
+import "protos/distributed.proto";
+
 option go_package = "github.com/bd878/gallery/server/api";
 
 service Comments {
-	rpc SendComment(SendCommentRequest) returns (SendCommentResponse);
-	rpc UpdateComment(UpdateCommentRequest) returns (UpdateCommentResponse);
-	rpc DeleteComment(DeleteCommentRequest) returns (DeleteCommentResponse);
-	rpc DeleteMessageComments(DeleteMessageCommentsRequest) returns (DeleteMessageCommentsResponse);
+	rpc Apply(distributed.v1.Command) returns (distributed.v1.CommandResponse);
 	rpc ReadComment(ReadCommentRequest) returns (ReadCommentResponse);
 	rpc ListComments(ListCommentsRequest) returns (ListCommentsResponse);
 }
@@ -41,17 +40,6 @@ message CommentsList {
 	int32    count = 5;
 }
 
-message SendCommentRequest {
-	int64     id = 1;
-	int64     message_id = 2;
-	int64     user_id = 3;
-	string    text = 4;
-	optional bytes metadata = 5;
-}
-
-message SendCommentResponse {
-}
-
 message ListCommentsRequest {
 	int32     limit = 1;
 	int32     offset = 2;
@@ -69,24 +57,6 @@ message ListCommentsResponse {
 	int32    count = 5;
 }
 
-message UpdateCommentRequest {
-	int64      id = 1;
-	int64      user_id = 2;
-	optional string text = 3;
-	optional bytes  metadata = 4;
-}
-
-message UpdateCommentResponse {
-}
-
-message DeleteCommentRequest {
-	int64      id = 1;
-	int64      user_id = 2;
-}
-
-message DeleteCommentResponse {
-}
-
 message ReadCommentRequest {
 	int64      id = 1;
 	int64      user_id = 2;
@@ -94,11 +64,4 @@ message ReadCommentRequest {
 
 message ReadCommentResponse {
 	Comment comment = 1;
-}
-
-message DeleteMessageCommentsRequest {
-	int64      message_id = 1;
-}
-
-message DeleteMessageCommentsResponse {
 }
