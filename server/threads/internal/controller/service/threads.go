@@ -3,29 +3,35 @@ package service
 import (
 	"context"
 	"fmt"
+	"time"
 
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/logger"
+	"github.com/bd878/gallery/server/threads/internal/domain"
+	"github.com/bd878/gallery/server/threads/internal/machine"
 	"github.com/bd878/gallery/server/threads/pkg/loadbalance"
 	"github.com/bd878/gallery/server/threads/pkg/model"
+	"github.com/bd878/gallery/server/threads/config"
 )
 
-type Config struct {
-	RpcAddr  string
-}
-
 type Controller struct {
-	conf         Config
+	conf         config.Config
 	client       api.ThreadsClient
 	conn         *grpc.ClientConn
+	publisher    ddd.EventPublisher[ddd.Event]
 }
 
-func New(conf Config) *Controller {
-	controller := &Controller{conf: conf}
+func New(conf config.Config, publisher ddd.EventPublisher[ddd.Event]) *Controller {
+	controller := &Controller{
+		conf: conf,
+		publisher: publisher,
+	}
 
 	controller.setupConnection()
 
@@ -43,7 +49,7 @@ func (s *Controller) setupConnection() (err error) {
 		fmt.Sprintf(
 			"%s:///%s",
 			loadbalance.Name,
-			s.conf.RpcAddr,
+			s.conf.ThreadsServiceAddr,
 		),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
@@ -164,9 +170,32 @@ func (s *Controller) PublishThread(ctx context.Context, id, userID int64) (err e
 
 	logger.Debugw("publish thread", "id", id, "user_id", userID)
 
-	_, err = s.client.Publish(ctx, &api.PublishRequest{Id: id, UserId: userID})
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
-	return
+	cmd, err := proto.Marshal(&machine.PublishCommand{
+		Id:            id,
+		UserId:        userID,
+		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType: int32(machine.PublishRequest),
+		Cmd: cmd,
+		Duration: "10s",
+	})
+	if err != nil {
+		return
+	}
+
+	event, err := domain.PublishThread(id, userID, updatedAt)
+	if err != nil {
+		return err
+	}
+
+	return s.publisher.Publish(ctx, event)
 }
 
 func (s *Controller) PrivateThread(ctx context.Context, id, userID int64) (err error) {
@@ -178,9 +207,32 @@ func (s *Controller) PrivateThread(ctx context.Context, id, userID int64) (err e
 
 	logger.Debugw("private thread", "id", id, "user_id", userID)
 
-	_, err = s.client.Private(ctx, &api.PrivateRequest{Id: id, UserId: userID})
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
-	return
+	cmd, err := proto.Marshal(&machine.PrivateCommand{
+		Id:            id,
+		UserId:        userID,
+		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType: int32(machine.PrivateRequest),
+		Cmd: cmd,
+		Duration: "10s",
+	})
+	if err != nil {
+		return
+	}
+
+	event, err := domain.PrivateThread(id, userID, updatedAt)
+	if err != nil {
+		return err
+	}
+
+	return s.publisher.Publish(ctx, event)
 }
 
 
@@ -194,21 +246,43 @@ func (s *Controller) CreateThread(ctx context.Context, id, userID, parentID, nex
 	logger.Debugw("create thread", "id", id, "user_id", userID, "parent_id", parentID,
 		"next_id", nextID, "prev_id", prevID, "name", name, "description", description, "title", title, "private", private)
 
-	_, err = s.client.Create(ctx, &api.CreateRequest{
-		Id:       id,
-		UserId:   userID,
-		ParentId: parentID,
-		NextId:   nextID,
-		PrevId:   prevID,
-		Name:     name,
-		Private:  private,
-		Description: description,
-		Title:    title,
+
+	createdAt := time.Now().UTC().Format(time.RFC3339)
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
+	event, err := domain.CreateThread(id, userID, parentID, name, description, title, private, createdAt, updatedAt)
+	if err != nil {
+		return err
+	}
+
+	cmd, err := proto.Marshal(&machine.AppendCommand{
+		Id:            id,
+		UserId:        userID,
+		ParentId:      parentID,
+		NextId:        nextID,
+		PrevId:        prevID,
+		Name:          name,
+		Private:       private,
+		Description:   description,
+		CreatedAt:     createdAt,
+		UpdatedAt:     updatedAt,
+		Title:         title,
 	})
+	if err != nil {
+		return err
+	}
 
-	return
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType: int32(machine.AppendRequest),
+		Cmd: cmd,
+		Duration: "10s",
+	})
+	if err != nil {
+		return
+	}
+
+	return s.publisher.Publish(ctx, event)
 }
-
 
 func (s *Controller) UpdateThread(ctx context.Context, id, userID int64, name, description, title *string) (err error) {
 	if s.isConnFailed() {
@@ -219,15 +293,35 @@ func (s *Controller) UpdateThread(ctx context.Context, id, userID int64, name, d
 
 	logger.Debugw("create thread", "id", id, "user_id", userID, "name", name, "description", description, "title", title)
 
-	_, err = s.client.Update(ctx, &api.UpdateRequest{
-		Id:          id,
-		UserId:      userID,
-		Name:        name,
-		Description: description,
-		Title:       title,
-	})
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
-	return
+	event, err := domain.UpdateThread(id, userID, name, description, title, updatedAt)
+	if err != nil {
+		return err
+	}
+
+	cmd, err := proto.Marshal(&machine.UpdateCommand{
+		Id:            id,
+		UserId:        userID,
+		Name:          name,
+		Description:   description,
+		Title:         title,
+		UpdatedAt:     updatedAt,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType: int32(machine.UpdateRequest),
+		Cmd: cmd,
+		Duration: "10s",
+	})
+	if err != nil {
+		return
+	}
+
+	return s.publisher.Publish(ctx, event)
 }
 
 
@@ -240,17 +334,97 @@ func (s *Controller) ReorderThread(ctx context.Context, id, userID, parentID, ne
 
 	logger.Debugw("reorder thread", "id", id, "user_id", userID, "parent_id", parentID, "next_id", nextID, "prev_id", prevID)
 
-	_, err = s.client.Reorder(ctx, &api.ReorderRequest{
-		Id:       id,
-		UserId:   userID,
-		ParentId: parentID,
-		NextId:   nextID,
-		PrevId:   prevID,
+	cmd, err := proto.Marshal(&machine.ReorderCommand{
+		Id:            id,
+		UserId:        userID,
+		ParentId:      parentID,
+		NextId:        nextID,
+		PrevId:        prevID,
+		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
 	})
+	if err != nil {
+		return err
+	}
+
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType: int32(machine.ReorderRequest),
+		Cmd: cmd,
+		Duration: "10s",
+	})
+	if err != nil {
+		return
+	}
+
+	if parentID != -1 {
+		event, err := domain.ChangeThreadParent(id, userID, parentID)
+		if err != nil {
+			return err
+		}
+
+		err = s.publisher.Publish(ctx, event)
+	}
 
 	return
 }
 
+
+func (s *Controller) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+	if s.isConnFailed() {
+		if err = s.setupConnection(); err != nil {
+			return
+		}
+	}
+
+	logger.Debugw("private thread messages", "ids", ids, "user_id", userID)
+
+	cmd, err := proto.Marshal(&machine.PrivateMessagesCommand{
+		Ids:         ids,
+		UserId:      userID,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType: int32(machine.PrivateMessagesRequest),
+		Cmd: cmd,
+		Duration: "10s",
+	})
+	if err != nil {
+		return err
+	}
+
+	return
+}
+
+func (s *Controller) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+	if s.isConnFailed() {
+		if err = s.setupConnection(); err != nil {
+			return
+		}
+	}
+
+	logger.Debugw("publish thread messages", "ids", ids, "user_id", userID)
+
+	cmd, err := proto.Marshal(&machine.PublishMessagesCommand{
+		Ids:       ids,
+		UserId:    userID,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType: int32(machine.PublishMessagesRequest),
+		Cmd: cmd,
+		Duration: "10s",
+	})
+	if err != nil {
+		return
+	}
+
+	return
+}
 
 func (s *Controller) DeleteThread(ctx context.Context, id, userID int64) (err error) {
 	if s.isConnFailed() {
@@ -261,7 +435,27 @@ func (s *Controller) DeleteThread(ctx context.Context, id, userID int64) (err er
 
 	logger.Debugw("delete thread", "id", id, "user_id", userID)
 
-	_, err = s.client.Delete(ctx, &api.DeleteRequest{Id: id, UserId: userID})
+	cmd, err := proto.Marshal(&machine.DeleteCommand{
+		Id:       id,
+		UserId:   userID,
+	})
+	if err != nil {
+		return err
+	}
 
-	return
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType: int32(machine.DeleteRequest),
+		Cmd: cmd,
+		Duration: "10s",
+	})
+	if err != nil {
+		return
+	}
+
+	event, err := domain.DeleteThread(id, userID)
+	if err != nil {
+		return err
+	}
+
+	return s.publisher.Publish(ctx, event)
 }

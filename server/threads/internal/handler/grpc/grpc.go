@@ -1,26 +1,23 @@
 package grpc
 
 import (
+	"time"
 	"errors"
 	"context"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/threads/internal/machine"
 	"github.com/bd878/gallery/server/threads/internal/controller"
 	threads "github.com/bd878/gallery/server/threads/pkg/model"
 )
 
 type Controller interface {
+	Apply(ctx context.Context, reqType machine.RequestType, cmd []byte, duration time.Duration) (err error)
 	ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (ids []*threads.Thread, isLastPage bool, err error)
 	ListMessages(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool, privateMessage *bool) (ids []*threads.Thread, isLastPage bool, err error)
 	ReadThread(ctx context.Context, id, userID int64, name string) (thread *threads.Thread, err error)
 	ReadParent(ctx context.Context, id, userID int64) (thread *threads.Thread, err error)
 	ResolveThread(ctx context.Context, id, userID int64) (path []*api.PathStep, err error)
-	CreateThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name, description, title string, private bool) (err error)
-	UpdateThread(ctx context.Context, id, userID int64, name, description, title *string) (err error)
-	ReorderThread(ctx context.Context, id, userID, parentID, nextID, prevID int64) (err error)
-	DeleteThread(ctx context.Context, id, userID int64) (err error)
-	PublishThread(ctx context.Context, id, userID int64) (err error)
-	PrivateThread(ctx context.Context, id, userID int64) (err error)
 	CountThreads(ctx context.Context, id, userID int64) (total int32, err error)
 	CountMessages(ctx context.Context, id, userID int64, privateMessage *bool) (total int32, err error)
 	GetServers(ctx context.Context) (servers []*api.Server, err error)
@@ -36,6 +33,17 @@ func New(ctrl Controller) *Handler {
 	handler := &Handler{controller: ctrl}
 
 	return handler
+}
+
+func (h *Handler) Apply(ctx context.Context, req *api.Command) (resp *api.CommandResponse, err error) {
+	duration, err := time.ParseDuration(req.Duration)
+	if err != nil {
+		return nil, err
+	}
+
+	err = h.controller.Apply(ctx, machine.RequestType(req.ReqType), req.Cmd, duration)
+
+	return
 }
 
 func (h *Handler) Read(ctx context.Context, req *api.ReadRequest) (resp *api.Thread, err error) {
@@ -95,20 +103,6 @@ func (h *Handler) Resolve(ctx context.Context, req *api.ResolveRequest) (resp *a
 	return
 }
 
-func (h *Handler) Create(ctx context.Context, req *api.CreateRequest) (resp *api.CreateResponse, err error) {
-	// TODO: validate that parent thread exists
-
-	err = h.controller.CreateThread(ctx, req.Id, req.UserId, req.ParentId, req.NextId, req.PrevId,
-		req.Name, req.Description, req.Title, req.Private)
-	if err != nil {
-		return
-	}
-
-	resp = &api.CreateResponse{}
-
-	return
-}
-
 func (h *Handler) ReadParent(ctx context.Context, req *api.ReadParentRequest) (resp *api.ReadParentResponse, err error) {
 	parent, err := h.controller.ReadParent(ctx, req.Id, req.UserId)
 	if err != nil {
@@ -120,61 +114,6 @@ func (h *Handler) ReadParent(ctx context.Context, req *api.ReadParentRequest) (r
 	}
 
 	resp = &api.ReadParentResponse{Parent: threads.ThreadToProto(parent), IsRoot: false}
-
-	return
-}
-
-func (h *Handler) Update(ctx context.Context, req *api.UpdateRequest) (resp *api.UpdateResponse, err error) {
-	err = h.controller.UpdateThread(ctx, req.Id, req.UserId, req.Name, req.Description, req.Title)
-	if err != nil {
-		return
-	}
-
-	resp = &api.UpdateResponse{}
-
-	return
-}
-
-func (h *Handler) Reorder(ctx context.Context, req *api.ReorderRequest) (resp *api.ReorderResponse, err error) {
-	err = h.controller.ReorderThread(ctx, req.Id, req.UserId, req.ParentId, req.NextId, req.PrevId)
-	if err != nil {
-		return
-	}
-
-	resp = &api.ReorderResponse{}
-
-	return
-}
-
-func (h *Handler) Delete(ctx context.Context, req *api.DeleteRequest) (resp *api.DeleteResponse, err error) {
-	err = h.controller.DeleteThread(ctx, req.Id, req.UserId)
-	if err != nil {
-		return
-	}
-
-	resp = &api.DeleteResponse{}
-
-	return
-}
-
-func (h *Handler) Publish(ctx context.Context, req *api.PublishRequest) (resp *api.PublishResponse, err error) {
-	err = h.controller.PublishThread(ctx, req.Id, req.UserId)
-	if err != nil {
-		return
-	}
-
-	resp = &api.PublishResponse{}
-
-	return
-}
-
-func (h *Handler) Private(ctx context.Context, req *api.PrivateRequest) (resp *api.PrivateResponse, err error) {
-	err = h.controller.PrivateThread(ctx, req.Id, req.UserId)
-	if err != nil {
-		return
-	}
-
-	resp = &api.PrivateResponse{}
 
 	return
 }

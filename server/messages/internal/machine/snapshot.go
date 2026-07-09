@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 
+	"go.uber.org/zap"
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
 
@@ -73,7 +74,8 @@ func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 
 		var snapshot api.MessagesSnapshot
 		if err = proto.Unmarshal(data, &snapshot); err != nil {
-			return err
+			logger.Debugln(zap.ByteString("data", data), zap.Error(err))
+			continue
 		}
 
 		err = f.dumper.Restore(context.TODO(), &snapshot)

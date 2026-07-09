@@ -19,17 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
+	Threads_Apply_FullMethodName         = "/threads.v1.Threads/Apply"
 	Threads_List_FullMethodName          = "/threads.v1.Threads/List"
 	Threads_ListMessages_FullMethodName  = "/threads.v1.Threads/ListMessages"
 	Threads_Read_FullMethodName          = "/threads.v1.Threads/Read"
 	Threads_ReadParent_FullMethodName    = "/threads.v1.Threads/ReadParent"
 	Threads_Resolve_FullMethodName       = "/threads.v1.Threads/Resolve"
-	Threads_Publish_FullMethodName       = "/threads.v1.Threads/Publish"
-	Threads_Private_FullMethodName       = "/threads.v1.Threads/Private"
-	Threads_Reorder_FullMethodName       = "/threads.v1.Threads/Reorder"
-	Threads_Update_FullMethodName        = "/threads.v1.Threads/Update"
-	Threads_Create_FullMethodName        = "/threads.v1.Threads/Create"
-	Threads_Delete_FullMethodName        = "/threads.v1.Threads/Delete"
 	Threads_Count_FullMethodName         = "/threads.v1.Threads/Count"
 	Threads_CountMessages_FullMethodName = "/threads.v1.Threads/CountMessages"
 )
@@ -38,17 +33,12 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ThreadsClient interface {
+	Apply(ctx context.Context, in *Command, opts ...grpc.CallOption) (*CommandResponse, error)
 	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
 	ListMessages(ctx context.Context, in *ListMessagesRequest, opts ...grpc.CallOption) (*ListMessagesResponse, error)
 	Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*Thread, error)
 	ReadParent(ctx context.Context, in *ReadParentRequest, opts ...grpc.CallOption) (*ReadParentResponse, error)
 	Resolve(ctx context.Context, in *ResolveRequest, opts ...grpc.CallOption) (*ResolveResponse, error)
-	Publish(ctx context.Context, in *PublishRequest, opts ...grpc.CallOption) (*PublishResponse, error)
-	Private(ctx context.Context, in *PrivateRequest, opts ...grpc.CallOption) (*PrivateResponse, error)
-	Reorder(ctx context.Context, in *ReorderRequest, opts ...grpc.CallOption) (*ReorderResponse, error)
-	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error)
-	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error)
-	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
 	Count(ctx context.Context, in *CountRequest, opts ...grpc.CallOption) (*CountResponse, error)
 	CountMessages(ctx context.Context, in *CountMessagesRequest, opts ...grpc.CallOption) (*CountMessagesResponse, error)
 }
@@ -59,6 +49,16 @@ type threadsClient struct {
 
 func NewThreadsClient(cc grpc.ClientConnInterface) ThreadsClient {
 	return &threadsClient{cc}
+}
+
+func (c *threadsClient) Apply(ctx context.Context, in *Command, opts ...grpc.CallOption) (*CommandResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CommandResponse)
+	err := c.cc.Invoke(ctx, Threads_Apply_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *threadsClient) List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error) {
@@ -111,66 +111,6 @@ func (c *threadsClient) Resolve(ctx context.Context, in *ResolveRequest, opts ..
 	return out, nil
 }
 
-func (c *threadsClient) Publish(ctx context.Context, in *PublishRequest, opts ...grpc.CallOption) (*PublishResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(PublishResponse)
-	err := c.cc.Invoke(ctx, Threads_Publish_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *threadsClient) Private(ctx context.Context, in *PrivateRequest, opts ...grpc.CallOption) (*PrivateResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(PrivateResponse)
-	err := c.cc.Invoke(ctx, Threads_Private_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *threadsClient) Reorder(ctx context.Context, in *ReorderRequest, opts ...grpc.CallOption) (*ReorderResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ReorderResponse)
-	err := c.cc.Invoke(ctx, Threads_Reorder_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *threadsClient) Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UpdateResponse)
-	err := c.cc.Invoke(ctx, Threads_Update_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *threadsClient) Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreateResponse)
-	err := c.cc.Invoke(ctx, Threads_Create_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *threadsClient) Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeleteResponse)
-	err := c.cc.Invoke(ctx, Threads_Delete_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *threadsClient) Count(ctx context.Context, in *CountRequest, opts ...grpc.CallOption) (*CountResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CountResponse)
@@ -195,17 +135,12 @@ func (c *threadsClient) CountMessages(ctx context.Context, in *CountMessagesRequ
 // All implementations must embed UnimplementedThreadsServer
 // for forward compatibility.
 type ThreadsServer interface {
+	Apply(context.Context, *Command) (*CommandResponse, error)
 	List(context.Context, *ListRequest) (*ListResponse, error)
 	ListMessages(context.Context, *ListMessagesRequest) (*ListMessagesResponse, error)
 	Read(context.Context, *ReadRequest) (*Thread, error)
 	ReadParent(context.Context, *ReadParentRequest) (*ReadParentResponse, error)
 	Resolve(context.Context, *ResolveRequest) (*ResolveResponse, error)
-	Publish(context.Context, *PublishRequest) (*PublishResponse, error)
-	Private(context.Context, *PrivateRequest) (*PrivateResponse, error)
-	Reorder(context.Context, *ReorderRequest) (*ReorderResponse, error)
-	Update(context.Context, *UpdateRequest) (*UpdateResponse, error)
-	Create(context.Context, *CreateRequest) (*CreateResponse, error)
-	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
 	Count(context.Context, *CountRequest) (*CountResponse, error)
 	CountMessages(context.Context, *CountMessagesRequest) (*CountMessagesResponse, error)
 	mustEmbedUnimplementedThreadsServer()
@@ -218,6 +153,9 @@ type ThreadsServer interface {
 // pointer dereference when methods are called.
 type UnimplementedThreadsServer struct{}
 
+func (UnimplementedThreadsServer) Apply(context.Context, *Command) (*CommandResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Apply not implemented")
+}
 func (UnimplementedThreadsServer) List(context.Context, *ListRequest) (*ListResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method List not implemented")
 }
@@ -232,24 +170,6 @@ func (UnimplementedThreadsServer) ReadParent(context.Context, *ReadParentRequest
 }
 func (UnimplementedThreadsServer) Resolve(context.Context, *ResolveRequest) (*ResolveResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Resolve not implemented")
-}
-func (UnimplementedThreadsServer) Publish(context.Context, *PublishRequest) (*PublishResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method Publish not implemented")
-}
-func (UnimplementedThreadsServer) Private(context.Context, *PrivateRequest) (*PrivateResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method Private not implemented")
-}
-func (UnimplementedThreadsServer) Reorder(context.Context, *ReorderRequest) (*ReorderResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method Reorder not implemented")
-}
-func (UnimplementedThreadsServer) Update(context.Context, *UpdateRequest) (*UpdateResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method Update not implemented")
-}
-func (UnimplementedThreadsServer) Create(context.Context, *CreateRequest) (*CreateResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method Create not implemented")
-}
-func (UnimplementedThreadsServer) Delete(context.Context, *DeleteRequest) (*DeleteResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method Delete not implemented")
 }
 func (UnimplementedThreadsServer) Count(context.Context, *CountRequest) (*CountResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Count not implemented")
@@ -276,6 +196,24 @@ func RegisterThreadsServer(s grpc.ServiceRegistrar, srv ThreadsServer) {
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&Threads_ServiceDesc, srv)
+}
+
+func _Threads_Apply_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Command)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ThreadsServer).Apply(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Threads_Apply_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ThreadsServer).Apply(ctx, req.(*Command))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Threads_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -368,114 +306,6 @@ func _Threads_Resolve_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Threads_Publish_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PublishRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ThreadsServer).Publish(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Threads_Publish_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ThreadsServer).Publish(ctx, req.(*PublishRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Threads_Private_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PrivateRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ThreadsServer).Private(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Threads_Private_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ThreadsServer).Private(ctx, req.(*PrivateRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Threads_Reorder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReorderRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ThreadsServer).Reorder(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Threads_Reorder_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ThreadsServer).Reorder(ctx, req.(*ReorderRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Threads_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ThreadsServer).Update(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Threads_Update_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ThreadsServer).Update(ctx, req.(*UpdateRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Threads_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ThreadsServer).Create(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Threads_Create_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ThreadsServer).Create(ctx, req.(*CreateRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Threads_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ThreadsServer).Delete(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Threads_Delete_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ThreadsServer).Delete(ctx, req.(*DeleteRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Threads_Count_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CountRequest)
 	if err := dec(in); err != nil {
@@ -520,6 +350,10 @@ var Threads_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ThreadsServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "Apply",
+			Handler:    _Threads_Apply_Handler,
+		},
+		{
 			MethodName: "List",
 			Handler:    _Threads_List_Handler,
 		},
@@ -538,30 +372,6 @@ var Threads_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Resolve",
 			Handler:    _Threads_Resolve_Handler,
-		},
-		{
-			MethodName: "Publish",
-			Handler:    _Threads_Publish_Handler,
-		},
-		{
-			MethodName: "Private",
-			Handler:    _Threads_Private_Handler,
-		},
-		{
-			MethodName: "Reorder",
-			Handler:    _Threads_Reorder_Handler,
-		},
-		{
-			MethodName: "Update",
-			Handler:    _Threads_Update_Handler,
-		},
-		{
-			MethodName: "Create",
-			Handler:    _Threads_Create_Handler,
-		},
-		{
-			MethodName: "Delete",
-			Handler:    _Threads_Delete_Handler,
 		},
 		{
 			MethodName: "Count",

@@ -707,638 +707,6 @@ func (x *ReadRequest) GetName() string {
 	return ""
 }
 
-type PublishRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *PublishRequest) Reset() {
-	*x = PublishRequest{}
-	mi := &file_protos_threads_proto_msgTypes[8]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *PublishRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PublishRequest) ProtoMessage() {}
-
-func (x *PublishRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_proto_msgTypes[8]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PublishRequest.ProtoReflect.Descriptor instead.
-func (*PublishRequest) Descriptor() ([]byte, []int) {
-	return file_protos_threads_proto_rawDescGZIP(), []int{8}
-}
-
-func (x *PublishRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *PublishRequest) GetUserId() int64 {
-	if x != nil {
-		return x.UserId
-	}
-	return 0
-}
-
-type PublishResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *PublishResponse) Reset() {
-	*x = PublishResponse{}
-	mi := &file_protos_threads_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *PublishResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PublishResponse) ProtoMessage() {}
-
-func (x *PublishResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PublishResponse.ProtoReflect.Descriptor instead.
-func (*PublishResponse) Descriptor() ([]byte, []int) {
-	return file_protos_threads_proto_rawDescGZIP(), []int{9}
-}
-
-type PrivateRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *PrivateRequest) Reset() {
-	*x = PrivateRequest{}
-	mi := &file_protos_threads_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *PrivateRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PrivateRequest) ProtoMessage() {}
-
-func (x *PrivateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PrivateRequest.ProtoReflect.Descriptor instead.
-func (*PrivateRequest) Descriptor() ([]byte, []int) {
-	return file_protos_threads_proto_rawDescGZIP(), []int{10}
-}
-
-func (x *PrivateRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *PrivateRequest) GetUserId() int64 {
-	if x != nil {
-		return x.UserId
-	}
-	return 0
-}
-
-type PrivateResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *PrivateResponse) Reset() {
-	*x = PrivateResponse{}
-	mi := &file_protos_threads_proto_msgTypes[11]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *PrivateResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PrivateResponse) ProtoMessage() {}
-
-func (x *PrivateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_proto_msgTypes[11]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PrivateResponse.ProtoReflect.Descriptor instead.
-func (*PrivateResponse) Descriptor() ([]byte, []int) {
-	return file_protos_threads_proto_rawDescGZIP(), []int{11}
-}
-
-type UpdateRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Name          *string                `protobuf:"bytes,3,opt,name=name,proto3,oneof" json:"name,omitempty"`
-	Description   *string                `protobuf:"bytes,4,opt,name=description,proto3,oneof" json:"description,omitempty"`
-	Title         *string                `protobuf:"bytes,5,opt,name=title,proto3,oneof" json:"title,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UpdateRequest) Reset() {
-	*x = UpdateRequest{}
-	mi := &file_protos_threads_proto_msgTypes[12]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateRequest) ProtoMessage() {}
-
-func (x *UpdateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_proto_msgTypes[12]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateRequest.ProtoReflect.Descriptor instead.
-func (*UpdateRequest) Descriptor() ([]byte, []int) {
-	return file_protos_threads_proto_rawDescGZIP(), []int{12}
-}
-
-func (x *UpdateRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *UpdateRequest) GetUserId() int64 {
-	if x != nil {
-		return x.UserId
-	}
-	return 0
-}
-
-func (x *UpdateRequest) GetName() string {
-	if x != nil && x.Name != nil {
-		return *x.Name
-	}
-	return ""
-}
-
-func (x *UpdateRequest) GetDescription() string {
-	if x != nil && x.Description != nil {
-		return *x.Description
-	}
-	return ""
-}
-
-func (x *UpdateRequest) GetTitle() string {
-	if x != nil && x.Title != nil {
-		return *x.Title
-	}
-	return ""
-}
-
-type UpdateResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UpdateResponse) Reset() {
-	*x = UpdateResponse{}
-	mi := &file_protos_threads_proto_msgTypes[13]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateResponse) ProtoMessage() {}
-
-func (x *UpdateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_proto_msgTypes[13]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateResponse.ProtoReflect.Descriptor instead.
-func (*UpdateResponse) Descriptor() ([]byte, []int) {
-	return file_protos_threads_proto_rawDescGZIP(), []int{13}
-}
-
-type ReorderRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	NextId        int64                  `protobuf:"varint,3,opt,name=next_id,json=nextId,proto3" json:"next_id,omitempty"`
-	PrevId        int64                  `protobuf:"varint,4,opt,name=prev_id,json=prevId,proto3" json:"prev_id,omitempty"`
-	ParentId      int64                  `protobuf:"varint,5,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ReorderRequest) Reset() {
-	*x = ReorderRequest{}
-	mi := &file_protos_threads_proto_msgTypes[14]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ReorderRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ReorderRequest) ProtoMessage() {}
-
-func (x *ReorderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_proto_msgTypes[14]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ReorderRequest.ProtoReflect.Descriptor instead.
-func (*ReorderRequest) Descriptor() ([]byte, []int) {
-	return file_protos_threads_proto_rawDescGZIP(), []int{14}
-}
-
-func (x *ReorderRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *ReorderRequest) GetUserId() int64 {
-	if x != nil {
-		return x.UserId
-	}
-	return 0
-}
-
-func (x *ReorderRequest) GetNextId() int64 {
-	if x != nil {
-		return x.NextId
-	}
-	return 0
-}
-
-func (x *ReorderRequest) GetPrevId() int64 {
-	if x != nil {
-		return x.PrevId
-	}
-	return 0
-}
-
-func (x *ReorderRequest) GetParentId() int64 {
-	if x != nil {
-		return x.ParentId
-	}
-	return 0
-}
-
-type ReorderResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ReorderResponse) Reset() {
-	*x = ReorderResponse{}
-	mi := &file_protos_threads_proto_msgTypes[15]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ReorderResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ReorderResponse) ProtoMessage() {}
-
-func (x *ReorderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_proto_msgTypes[15]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ReorderResponse.ProtoReflect.Descriptor instead.
-func (*ReorderResponse) Descriptor() ([]byte, []int) {
-	return file_protos_threads_proto_rawDescGZIP(), []int{15}
-}
-
-type CreateRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	ParentId      int64                  `protobuf:"varint,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
-	Name          string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
-	Private       bool                   `protobuf:"varint,5,opt,name=private,proto3" json:"private,omitempty"`
-	NextId        int64                  `protobuf:"varint,6,opt,name=next_id,json=nextId,proto3" json:"next_id,omitempty"`
-	PrevId        int64                  `protobuf:"varint,7,opt,name=prev_id,json=prevId,proto3" json:"prev_id,omitempty"`
-	Description   string                 `protobuf:"bytes,8,opt,name=description,proto3" json:"description,omitempty"`
-	Title         string                 `protobuf:"bytes,9,opt,name=title,proto3" json:"title,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *CreateRequest) Reset() {
-	*x = CreateRequest{}
-	mi := &file_protos_threads_proto_msgTypes[16]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CreateRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CreateRequest) ProtoMessage() {}
-
-func (x *CreateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_proto_msgTypes[16]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CreateRequest.ProtoReflect.Descriptor instead.
-func (*CreateRequest) Descriptor() ([]byte, []int) {
-	return file_protos_threads_proto_rawDescGZIP(), []int{16}
-}
-
-func (x *CreateRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *CreateRequest) GetUserId() int64 {
-	if x != nil {
-		return x.UserId
-	}
-	return 0
-}
-
-func (x *CreateRequest) GetParentId() int64 {
-	if x != nil {
-		return x.ParentId
-	}
-	return 0
-}
-
-func (x *CreateRequest) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *CreateRequest) GetPrivate() bool {
-	if x != nil {
-		return x.Private
-	}
-	return false
-}
-
-func (x *CreateRequest) GetNextId() int64 {
-	if x != nil {
-		return x.NextId
-	}
-	return 0
-}
-
-func (x *CreateRequest) GetPrevId() int64 {
-	if x != nil {
-		return x.PrevId
-	}
-	return 0
-}
-
-func (x *CreateRequest) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
-}
-
-func (x *CreateRequest) GetTitle() string {
-	if x != nil {
-		return x.Title
-	}
-	return ""
-}
-
-type CreateResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *CreateResponse) Reset() {
-	*x = CreateResponse{}
-	mi := &file_protos_threads_proto_msgTypes[17]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CreateResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CreateResponse) ProtoMessage() {}
-
-func (x *CreateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_proto_msgTypes[17]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CreateResponse.ProtoReflect.Descriptor instead.
-func (*CreateResponse) Descriptor() ([]byte, []int) {
-	return file_protos_threads_proto_rawDescGZIP(), []int{17}
-}
-
-type DeleteRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DeleteRequest) Reset() {
-	*x = DeleteRequest{}
-	mi := &file_protos_threads_proto_msgTypes[18]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeleteRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteRequest) ProtoMessage() {}
-
-func (x *DeleteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_proto_msgTypes[18]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteRequest.ProtoReflect.Descriptor instead.
-func (*DeleteRequest) Descriptor() ([]byte, []int) {
-	return file_protos_threads_proto_rawDescGZIP(), []int{18}
-}
-
-func (x *DeleteRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *DeleteRequest) GetUserId() int64 {
-	if x != nil {
-		return x.UserId
-	}
-	return 0
-}
-
-type DeleteResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DeleteResponse) Reset() {
-	*x = DeleteResponse{}
-	mi := &file_protos_threads_proto_msgTypes[19]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeleteResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteResponse) ProtoMessage() {}
-
-func (x *DeleteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_proto_msgTypes[19]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteResponse.ProtoReflect.Descriptor instead.
-func (*DeleteResponse) Descriptor() ([]byte, []int) {
-	return file_protos_threads_proto_rawDescGZIP(), []int{19}
-}
-
 type ResolveRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -1349,7 +717,7 @@ type ResolveRequest struct {
 
 func (x *ResolveRequest) Reset() {
 	*x = ResolveRequest{}
-	mi := &file_protos_threads_proto_msgTypes[20]
+	mi := &file_protos_threads_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1361,7 +729,7 @@ func (x *ResolveRequest) String() string {
 func (*ResolveRequest) ProtoMessage() {}
 
 func (x *ResolveRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_proto_msgTypes[20]
+	mi := &file_protos_threads_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1374,7 +742,7 @@ func (x *ResolveRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResolveRequest.ProtoReflect.Descriptor instead.
 func (*ResolveRequest) Descriptor() ([]byte, []int) {
-	return file_protos_threads_proto_rawDescGZIP(), []int{20}
+	return file_protos_threads_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ResolveRequest) GetId() int64 {
@@ -1403,7 +771,7 @@ type PathStep struct {
 
 func (x *PathStep) Reset() {
 	*x = PathStep{}
-	mi := &file_protos_threads_proto_msgTypes[21]
+	mi := &file_protos_threads_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1415,7 +783,7 @@ func (x *PathStep) String() string {
 func (*PathStep) ProtoMessage() {}
 
 func (x *PathStep) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_proto_msgTypes[21]
+	mi := &file_protos_threads_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1428,7 +796,7 @@ func (x *PathStep) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PathStep.ProtoReflect.Descriptor instead.
 func (*PathStep) Descriptor() ([]byte, []int) {
-	return file_protos_threads_proto_rawDescGZIP(), []int{21}
+	return file_protos_threads_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *PathStep) GetId() int64 {
@@ -1468,7 +836,7 @@ type ResolveResponse struct {
 
 func (x *ResolveResponse) Reset() {
 	*x = ResolveResponse{}
-	mi := &file_protos_threads_proto_msgTypes[22]
+	mi := &file_protos_threads_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1480,7 +848,7 @@ func (x *ResolveResponse) String() string {
 func (*ResolveResponse) ProtoMessage() {}
 
 func (x *ResolveResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_proto_msgTypes[22]
+	mi := &file_protos_threads_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1493,7 +861,7 @@ func (x *ResolveResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResolveResponse.ProtoReflect.Descriptor instead.
 func (*ResolveResponse) Descriptor() ([]byte, []int) {
-	return file_protos_threads_proto_rawDescGZIP(), []int{22}
+	return file_protos_threads_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *ResolveResponse) GetPath() []*PathStep {
@@ -1513,7 +881,7 @@ type ReadParentRequest struct {
 
 func (x *ReadParentRequest) Reset() {
 	*x = ReadParentRequest{}
-	mi := &file_protos_threads_proto_msgTypes[23]
+	mi := &file_protos_threads_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1525,7 +893,7 @@ func (x *ReadParentRequest) String() string {
 func (*ReadParentRequest) ProtoMessage() {}
 
 func (x *ReadParentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_proto_msgTypes[23]
+	mi := &file_protos_threads_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1538,7 +906,7 @@ func (x *ReadParentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReadParentRequest.ProtoReflect.Descriptor instead.
 func (*ReadParentRequest) Descriptor() ([]byte, []int) {
-	return file_protos_threads_proto_rawDescGZIP(), []int{23}
+	return file_protos_threads_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ReadParentRequest) GetId() int64 {
@@ -1565,7 +933,7 @@ type ReadParentResponse struct {
 
 func (x *ReadParentResponse) Reset() {
 	*x = ReadParentResponse{}
-	mi := &file_protos_threads_proto_msgTypes[24]
+	mi := &file_protos_threads_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1577,7 +945,7 @@ func (x *ReadParentResponse) String() string {
 func (*ReadParentResponse) ProtoMessage() {}
 
 func (x *ReadParentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_proto_msgTypes[24]
+	mi := &file_protos_threads_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1590,7 +958,7 @@ func (x *ReadParentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReadParentResponse.ProtoReflect.Descriptor instead.
 func (*ReadParentResponse) Descriptor() ([]byte, []int) {
-	return file_protos_threads_proto_rawDescGZIP(), []int{24}
+	return file_protos_threads_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *ReadParentResponse) GetParent() *Thread {
@@ -1617,7 +985,7 @@ type CountRequest struct {
 
 func (x *CountRequest) Reset() {
 	*x = CountRequest{}
-	mi := &file_protos_threads_proto_msgTypes[25]
+	mi := &file_protos_threads_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1629,7 +997,7 @@ func (x *CountRequest) String() string {
 func (*CountRequest) ProtoMessage() {}
 
 func (x *CountRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_proto_msgTypes[25]
+	mi := &file_protos_threads_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1642,7 +1010,7 @@ func (x *CountRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CountRequest.ProtoReflect.Descriptor instead.
 func (*CountRequest) Descriptor() ([]byte, []int) {
-	return file_protos_threads_proto_rawDescGZIP(), []int{25}
+	return file_protos_threads_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *CountRequest) GetId() int64 {
@@ -1670,7 +1038,7 @@ type CountMessagesRequest struct {
 
 func (x *CountMessagesRequest) Reset() {
 	*x = CountMessagesRequest{}
-	mi := &file_protos_threads_proto_msgTypes[26]
+	mi := &file_protos_threads_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1682,7 +1050,7 @@ func (x *CountMessagesRequest) String() string {
 func (*CountMessagesRequest) ProtoMessage() {}
 
 func (x *CountMessagesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_proto_msgTypes[26]
+	mi := &file_protos_threads_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1695,7 +1063,7 @@ func (x *CountMessagesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CountMessagesRequest.ProtoReflect.Descriptor instead.
 func (*CountMessagesRequest) Descriptor() ([]byte, []int) {
-	return file_protos_threads_proto_rawDescGZIP(), []int{26}
+	return file_protos_threads_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *CountMessagesRequest) GetId() int64 {
@@ -1728,7 +1096,7 @@ type CountResponse struct {
 
 func (x *CountResponse) Reset() {
 	*x = CountResponse{}
-	mi := &file_protos_threads_proto_msgTypes[27]
+	mi := &file_protos_threads_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1740,7 +1108,7 @@ func (x *CountResponse) String() string {
 func (*CountResponse) ProtoMessage() {}
 
 func (x *CountResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_proto_msgTypes[27]
+	mi := &file_protos_threads_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1753,7 +1121,7 @@ func (x *CountResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CountResponse.ProtoReflect.Descriptor instead.
 func (*CountResponse) Descriptor() ([]byte, []int) {
-	return file_protos_threads_proto_rawDescGZIP(), []int{27}
+	return file_protos_threads_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *CountResponse) GetTotal() int32 {
@@ -1772,7 +1140,7 @@ type CountMessagesResponse struct {
 
 func (x *CountMessagesResponse) Reset() {
 	*x = CountMessagesResponse{}
-	mi := &file_protos_threads_proto_msgTypes[28]
+	mi := &file_protos_threads_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1784,7 +1152,7 @@ func (x *CountMessagesResponse) String() string {
 func (*CountMessagesResponse) ProtoMessage() {}
 
 func (x *CountMessagesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_proto_msgTypes[28]
+	mi := &file_protos_threads_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1797,7 +1165,7 @@ func (x *CountMessagesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CountMessagesResponse.ProtoReflect.Descriptor instead.
 func (*CountMessagesResponse) Descriptor() ([]byte, []int) {
-	return file_protos_threads_proto_rawDescGZIP(), []int{28}
+	return file_protos_threads_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *CountMessagesResponse) GetTotal() int32 {
@@ -1812,7 +1180,7 @@ var File_protos_threads_proto protoreflect.FileDescriptor
 const file_protos_threads_proto_rawDesc = "" +
 	"\n" +
 	"\x14protos/threads.proto\x12\n" +
-	"threads.v1\"S\n" +
+	"threads.v1\x1a\x18protos/distributed.proto\"S\n" +
 	"\x0fThreadsSnapshot\x128\n" +
 	"\x06thread\x18\x01 \x01(\v2\x1e.threads.v1.ThreadSnapshotItemH\x00R\x06threadB\x06\n" +
 	"\x04Item\"\xef\x02\n" +
@@ -1879,46 +1247,6 @@ const file_protos_threads_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\"9\n" +
-	"\x0ePublishRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\x03R\x06userId\"\x11\n" +
-	"\x0fPublishResponse\"9\n" +
-	"\x0ePrivateRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\x03R\x06userId\"\x11\n" +
-	"\x0fPrivateResponse\"\xb6\x01\n" +
-	"\rUpdateRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x17\n" +
-	"\x04name\x18\x03 \x01(\tH\x00R\x04name\x88\x01\x01\x12%\n" +
-	"\vdescription\x18\x04 \x01(\tH\x01R\vdescription\x88\x01\x01\x12\x19\n" +
-	"\x05title\x18\x05 \x01(\tH\x02R\x05title\x88\x01\x01B\a\n" +
-	"\x05_nameB\x0e\n" +
-	"\f_descriptionB\b\n" +
-	"\x06_title\"\x10\n" +
-	"\x0eUpdateResponse\"\x88\x01\n" +
-	"\x0eReorderRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x17\n" +
-	"\anext_id\x18\x03 \x01(\x03R\x06nextId\x12\x17\n" +
-	"\aprev_id\x18\x04 \x01(\x03R\x06prevId\x12\x1b\n" +
-	"\tparent_id\x18\x05 \x01(\x03R\bparentId\"\x11\n" +
-	"\x0fReorderResponse\"\xed\x01\n" +
-	"\rCreateRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x1b\n" +
-	"\tparent_id\x18\x03 \x01(\x03R\bparentId\x12\x12\n" +
-	"\x04name\x18\x04 \x01(\tR\x04name\x12\x18\n" +
-	"\aprivate\x18\x05 \x01(\bR\aprivate\x12\x17\n" +
-	"\anext_id\x18\x06 \x01(\x03R\x06nextId\x12\x17\n" +
-	"\aprev_id\x18\a \x01(\x03R\x06prevId\x12 \n" +
-	"\vdescription\x18\b \x01(\tR\vdescription\x12\x14\n" +
-	"\x05title\x18\t \x01(\tR\x05title\"\x10\n" +
-	"\x0eCreateResponse\"8\n" +
-	"\rDeleteRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\x03R\x06userId\"\x10\n" +
-	"\x0eDeleteResponse\"9\n" +
 	"\x0eResolveRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\"^\n" +
@@ -1947,20 +1275,15 @@ const file_protos_threads_proto_rawDesc = "" +
 	"\rCountResponse\x12\x14\n" +
 	"\x05total\x18\x01 \x01(\x05R\x05total\"-\n" +
 	"\x15CountMessagesResponse\x12\x14\n" +
-	"\x05total\x18\x01 \x01(\x05R\x05total2\x9a\a\n" +
-	"\aThreads\x12;\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total2\xc4\x04\n" +
+	"\aThreads\x12C\n" +
+	"\x05Apply\x12\x17.distributed.v1.Command\x1a\x1f.distributed.v1.CommandResponse\"\x00\x12;\n" +
 	"\x04List\x12\x17.threads.v1.ListRequest\x1a\x18.threads.v1.ListResponse\"\x00\x12S\n" +
 	"\fListMessages\x12\x1f.threads.v1.ListMessagesRequest\x1a .threads.v1.ListMessagesResponse\"\x00\x125\n" +
 	"\x04Read\x12\x17.threads.v1.ReadRequest\x1a\x12.threads.v1.Thread\"\x00\x12M\n" +
 	"\n" +
 	"ReadParent\x12\x1d.threads.v1.ReadParentRequest\x1a\x1e.threads.v1.ReadParentResponse\"\x00\x12D\n" +
-	"\aResolve\x12\x1a.threads.v1.ResolveRequest\x1a\x1b.threads.v1.ResolveResponse\"\x00\x12D\n" +
-	"\aPublish\x12\x1a.threads.v1.PublishRequest\x1a\x1b.threads.v1.PublishResponse\"\x00\x12D\n" +
-	"\aPrivate\x12\x1a.threads.v1.PrivateRequest\x1a\x1b.threads.v1.PrivateResponse\"\x00\x12D\n" +
-	"\aReorder\x12\x1a.threads.v1.ReorderRequest\x1a\x1b.threads.v1.ReorderResponse\"\x00\x12A\n" +
-	"\x06Update\x12\x19.threads.v1.UpdateRequest\x1a\x1a.threads.v1.UpdateResponse\"\x00\x12A\n" +
-	"\x06Create\x12\x19.threads.v1.CreateRequest\x1a\x1a.threads.v1.CreateResponse\"\x00\x12A\n" +
-	"\x06Delete\x12\x19.threads.v1.DeleteRequest\x1a\x1a.threads.v1.DeleteResponse\"\x00\x12>\n" +
+	"\aResolve\x12\x1a.threads.v1.ResolveRequest\x1a\x1b.threads.v1.ResolveResponse\"\x00\x12>\n" +
 	"\x05Count\x12\x18.threads.v1.CountRequest\x1a\x19.threads.v1.CountResponse\"\x00\x12V\n" +
 	"\rCountMessages\x12 .threads.v1.CountMessagesRequest\x1a!.threads.v1.CountMessagesResponse\"\x00B%Z#github.com/bd878/gallery/server/apib\x06proto3"
 
@@ -1976,7 +1299,7 @@ func file_protos_threads_proto_rawDescGZIP() []byte {
 	return file_protos_threads_proto_rawDescData
 }
 
-var file_protos_threads_proto_msgTypes = make([]protoimpl.MessageInfo, 29)
+var file_protos_threads_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
 var file_protos_threads_proto_goTypes = []any{
 	(*ThreadsSnapshot)(nil),       // 0: threads.v1.ThreadsSnapshot
 	(*ThreadSnapshotItem)(nil),    // 1: threads.v1.ThreadSnapshotItem
@@ -1986,62 +1309,42 @@ var file_protos_threads_proto_goTypes = []any{
 	(*ListResponse)(nil),          // 5: threads.v1.ListResponse
 	(*ListMessagesResponse)(nil),  // 6: threads.v1.ListMessagesResponse
 	(*ReadRequest)(nil),           // 7: threads.v1.ReadRequest
-	(*PublishRequest)(nil),        // 8: threads.v1.PublishRequest
-	(*PublishResponse)(nil),       // 9: threads.v1.PublishResponse
-	(*PrivateRequest)(nil),        // 10: threads.v1.PrivateRequest
-	(*PrivateResponse)(nil),       // 11: threads.v1.PrivateResponse
-	(*UpdateRequest)(nil),         // 12: threads.v1.UpdateRequest
-	(*UpdateResponse)(nil),        // 13: threads.v1.UpdateResponse
-	(*ReorderRequest)(nil),        // 14: threads.v1.ReorderRequest
-	(*ReorderResponse)(nil),       // 15: threads.v1.ReorderResponse
-	(*CreateRequest)(nil),         // 16: threads.v1.CreateRequest
-	(*CreateResponse)(nil),        // 17: threads.v1.CreateResponse
-	(*DeleteRequest)(nil),         // 18: threads.v1.DeleteRequest
-	(*DeleteResponse)(nil),        // 19: threads.v1.DeleteResponse
-	(*ResolveRequest)(nil),        // 20: threads.v1.ResolveRequest
-	(*PathStep)(nil),              // 21: threads.v1.PathStep
-	(*ResolveResponse)(nil),       // 22: threads.v1.ResolveResponse
-	(*ReadParentRequest)(nil),     // 23: threads.v1.ReadParentRequest
-	(*ReadParentResponse)(nil),    // 24: threads.v1.ReadParentResponse
-	(*CountRequest)(nil),          // 25: threads.v1.CountRequest
-	(*CountMessagesRequest)(nil),  // 26: threads.v1.CountMessagesRequest
-	(*CountResponse)(nil),         // 27: threads.v1.CountResponse
-	(*CountMessagesResponse)(nil), // 28: threads.v1.CountMessagesResponse
+	(*ResolveRequest)(nil),        // 8: threads.v1.ResolveRequest
+	(*PathStep)(nil),              // 9: threads.v1.PathStep
+	(*ResolveResponse)(nil),       // 10: threads.v1.ResolveResponse
+	(*ReadParentRequest)(nil),     // 11: threads.v1.ReadParentRequest
+	(*ReadParentResponse)(nil),    // 12: threads.v1.ReadParentResponse
+	(*CountRequest)(nil),          // 13: threads.v1.CountRequest
+	(*CountMessagesRequest)(nil),  // 14: threads.v1.CountMessagesRequest
+	(*CountResponse)(nil),         // 15: threads.v1.CountResponse
+	(*CountMessagesResponse)(nil), // 16: threads.v1.CountMessagesResponse
+	(*Command)(nil),               // 17: distributed.v1.Command
+	(*CommandResponse)(nil),       // 18: distributed.v1.CommandResponse
 }
 var file_protos_threads_proto_depIdxs = []int32{
 	1,  // 0: threads.v1.ThreadsSnapshot.thread:type_name -> threads.v1.ThreadSnapshotItem
 	2,  // 1: threads.v1.ListResponse.list:type_name -> threads.v1.Thread
 	2,  // 2: threads.v1.ListMessagesResponse.list:type_name -> threads.v1.Thread
-	21, // 3: threads.v1.ResolveResponse.path:type_name -> threads.v1.PathStep
+	9,  // 3: threads.v1.ResolveResponse.path:type_name -> threads.v1.PathStep
 	2,  // 4: threads.v1.ReadParentResponse.parent:type_name -> threads.v1.Thread
-	3,  // 5: threads.v1.Threads.List:input_type -> threads.v1.ListRequest
-	4,  // 6: threads.v1.Threads.ListMessages:input_type -> threads.v1.ListMessagesRequest
-	7,  // 7: threads.v1.Threads.Read:input_type -> threads.v1.ReadRequest
-	23, // 8: threads.v1.Threads.ReadParent:input_type -> threads.v1.ReadParentRequest
-	20, // 9: threads.v1.Threads.Resolve:input_type -> threads.v1.ResolveRequest
-	8,  // 10: threads.v1.Threads.Publish:input_type -> threads.v1.PublishRequest
-	10, // 11: threads.v1.Threads.Private:input_type -> threads.v1.PrivateRequest
-	14, // 12: threads.v1.Threads.Reorder:input_type -> threads.v1.ReorderRequest
-	12, // 13: threads.v1.Threads.Update:input_type -> threads.v1.UpdateRequest
-	16, // 14: threads.v1.Threads.Create:input_type -> threads.v1.CreateRequest
-	18, // 15: threads.v1.Threads.Delete:input_type -> threads.v1.DeleteRequest
-	25, // 16: threads.v1.Threads.Count:input_type -> threads.v1.CountRequest
-	26, // 17: threads.v1.Threads.CountMessages:input_type -> threads.v1.CountMessagesRequest
-	5,  // 18: threads.v1.Threads.List:output_type -> threads.v1.ListResponse
-	6,  // 19: threads.v1.Threads.ListMessages:output_type -> threads.v1.ListMessagesResponse
-	2,  // 20: threads.v1.Threads.Read:output_type -> threads.v1.Thread
-	24, // 21: threads.v1.Threads.ReadParent:output_type -> threads.v1.ReadParentResponse
-	22, // 22: threads.v1.Threads.Resolve:output_type -> threads.v1.ResolveResponse
-	9,  // 23: threads.v1.Threads.Publish:output_type -> threads.v1.PublishResponse
-	11, // 24: threads.v1.Threads.Private:output_type -> threads.v1.PrivateResponse
-	15, // 25: threads.v1.Threads.Reorder:output_type -> threads.v1.ReorderResponse
-	13, // 26: threads.v1.Threads.Update:output_type -> threads.v1.UpdateResponse
-	17, // 27: threads.v1.Threads.Create:output_type -> threads.v1.CreateResponse
-	19, // 28: threads.v1.Threads.Delete:output_type -> threads.v1.DeleteResponse
-	27, // 29: threads.v1.Threads.Count:output_type -> threads.v1.CountResponse
-	28, // 30: threads.v1.Threads.CountMessages:output_type -> threads.v1.CountMessagesResponse
-	18, // [18:31] is the sub-list for method output_type
-	5,  // [5:18] is the sub-list for method input_type
+	17, // 5: threads.v1.Threads.Apply:input_type -> distributed.v1.Command
+	3,  // 6: threads.v1.Threads.List:input_type -> threads.v1.ListRequest
+	4,  // 7: threads.v1.Threads.ListMessages:input_type -> threads.v1.ListMessagesRequest
+	7,  // 8: threads.v1.Threads.Read:input_type -> threads.v1.ReadRequest
+	11, // 9: threads.v1.Threads.ReadParent:input_type -> threads.v1.ReadParentRequest
+	8,  // 10: threads.v1.Threads.Resolve:input_type -> threads.v1.ResolveRequest
+	13, // 11: threads.v1.Threads.Count:input_type -> threads.v1.CountRequest
+	14, // 12: threads.v1.Threads.CountMessages:input_type -> threads.v1.CountMessagesRequest
+	18, // 13: threads.v1.Threads.Apply:output_type -> distributed.v1.CommandResponse
+	5,  // 14: threads.v1.Threads.List:output_type -> threads.v1.ListResponse
+	6,  // 15: threads.v1.Threads.ListMessages:output_type -> threads.v1.ListMessagesResponse
+	2,  // 16: threads.v1.Threads.Read:output_type -> threads.v1.Thread
+	12, // 17: threads.v1.Threads.ReadParent:output_type -> threads.v1.ReadParentResponse
+	10, // 18: threads.v1.Threads.Resolve:output_type -> threads.v1.ResolveResponse
+	15, // 19: threads.v1.Threads.Count:output_type -> threads.v1.CountResponse
+	16, // 20: threads.v1.Threads.CountMessages:output_type -> threads.v1.CountMessagesResponse
+	13, // [13:21] is the sub-list for method output_type
+	5,  // [5:13] is the sub-list for method input_type
 	5,  // [5:5] is the sub-list for extension type_name
 	5,  // [5:5] is the sub-list for extension extendee
 	0,  // [0:5] is the sub-list for field type_name
@@ -2052,20 +1355,20 @@ func file_protos_threads_proto_init() {
 	if File_protos_threads_proto != nil {
 		return
 	}
+	file_protos_distributed_proto_init()
 	file_protos_threads_proto_msgTypes[0].OneofWrappers = []any{
 		(*ThreadsSnapshot_Thread)(nil),
 	}
 	file_protos_threads_proto_msgTypes[4].OneofWrappers = []any{}
 	file_protos_threads_proto_msgTypes[12].OneofWrappers = []any{}
-	file_protos_threads_proto_msgTypes[24].OneofWrappers = []any{}
-	file_protos_threads_proto_msgTypes[26].OneofWrappers = []any{}
+	file_protos_threads_proto_msgTypes[14].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_protos_threads_proto_rawDesc), len(file_protos_threads_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   29,
+			NumMessages:   17,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -5,11 +5,8 @@ import (
 	"context"
 	"bytes"
 
-	"google.golang.org/protobuf/proto"
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/threads/internal/domain"
 	"github.com/bd878/gallery/server/threads/internal/machine"
 	"github.com/bd878/gallery/server/threads/internal/controller"
 	"github.com/bd878/gallery/server/threads/pkg/model"
@@ -34,19 +31,17 @@ type Distributed struct {
 	consensus       Consensus
 	log             *logger.Logger
 	threadsRepo     ThreadsRepository
-	publisher       ddd.EventPublisher[ddd.Event]
 }
 
-func New(consensus Consensus, publisher ddd.EventPublisher[ddd.Event], threadsRepo ThreadsRepository, log *logger.Logger) *Distributed {
+func New(consensus Consensus, threadsRepo ThreadsRepository, log *logger.Logger) *Distributed {
 	return &Distributed{
 		log:          log,
-		publisher:    publisher,
 		consensus:    consensus,
 		threadsRepo:  threadsRepo,
 	}
 }
 
-func (m *Distributed) apply(ctx context.Context, reqType machine.RequestType, cmd []byte) (err error) {
+func (m *Distributed) Apply(ctx context.Context, reqType machine.RequestType, cmd []byte, duration time.Duration) (err error) {
 	var buf bytes.Buffer
 	_, err = buf.Write([]byte{byte(reqType)})
 	if err != nil {
@@ -58,213 +53,7 @@ func (m *Distributed) apply(ctx context.Context, reqType machine.RequestType, cm
 		return
 	}
 
-	return m.consensus.Apply(buf.Bytes(), 10*time.Second)
-}
-
-func (m *Distributed) CreateThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name, description, title string, private bool) (err error) {
-	m.log.Debugw("create thread", "id", id, "user_id", userID, "parent_id", parentID,
-		"next_id", nextID, "prev_id", prevID, "name", name, "description", description, "title", title, "private", private)
-
-
-	createdAt := time.Now().UTC().Format(time.RFC3339)
-	updatedAt := time.Now().UTC().Format(time.RFC3339)
-
-	event, err := domain.CreateThread(id, userID, parentID, name, description, title, private, createdAt, updatedAt)
-	if err != nil {
-		return err
-	}
-
-	cmd, err := proto.Marshal(&machine.AppendCommand{
-		Id:            id,
-		UserId:        userID,
-		ParentId:      parentID,
-		NextId:        nextID,
-		PrevId:        prevID,
-		Name:          name,
-		Private:       private,
-		Description:   description,
-		CreatedAt:     createdAt,
-		UpdatedAt:     updatedAt,
-		Title:         title,
-	})
-	if err != nil {
-		return err
-	}
-
-	err = m.apply(ctx, machine.AppendRequest, cmd)
-	if err != nil {
-		return
-	}
-
-	return m.publisher.Publish(context.TODO(), event)
-}
-
-func (m *Distributed) UpdateThread(ctx context.Context, id, userID int64, name, description, title *string) (err error) {
-	m.log.Debugw("update thread", "id", id, "user_id", userID, "name", name, "description", description, "title", title)
-
-	updatedAt := time.Now().UTC().Format(time.RFC3339)
-
-	event, err := domain.UpdateThread(id, userID, name, description, title, updatedAt)
-	if err != nil {
-		return err
-	}
-
-	cmd, err := proto.Marshal(&machine.UpdateCommand{
-		Id:            id,
-		UserId:        userID,
-		Name:          name,
-		Description:   description,
-		Title:         title,
-		UpdatedAt:     updatedAt,
-	})
-	if err != nil {
-		return err
-	}
-
-	err = m.apply(ctx, machine.UpdateRequest, cmd)
-	if err != nil {
-		return err
-	}
-
-	return m.publisher.Publish(context.TODO(), event)
-}
-
-func (m *Distributed) ReorderThread(ctx context.Context, id, userID, parentID, nextID, prevID int64) (err error) {
-	m.log.Debugw("reorder thread", "id", id, "user_id", userID, "parent_id", parentID, "next_id", nextID, "prev_id", prevID)
-
-	cmd, err := proto.Marshal(&machine.ReorderCommand{
-		Id:            id,
-		UserId:        userID,
-		ParentId:      parentID,
-		NextId:        nextID,
-		PrevId:        prevID,
-		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
-	})
-	if err != nil {
-		return err
-	}
-
-	err = m.apply(ctx, machine.ReorderRequest, cmd)
-	if err != nil {
-		return
-	}
-
-	if parentID != -1 {
-		event, err := domain.ChangeThreadParent(id, userID, parentID)
-		if err != nil {
-			return err
-		}
-
-		err = m.publisher.Publish(context.TODO(), event)
-	}
-
-	return
-}
-
-func (m *Distributed) PrivateThread(ctx context.Context, id, userID int64) error {
-	m.log.Debugw("private thread", "id", id, "user_id", userID)
-
-	updatedAt := time.Now().UTC().Format(time.RFC3339)
-
-	cmd, err := proto.Marshal(&machine.PrivateCommand{
-		Id:            id,
-		UserId:        userID,
-		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
-	})
-	if err != nil {
-		return err
-	}
-
-	err = m.apply(ctx, machine.PrivateRequest, cmd)
-	if err != nil {
-		return err
-	}
-
-	event, err := domain.PrivateThread(id, userID, updatedAt)
-	if err != nil {
-		return err
-	}
-
-	return m.publisher.Publish(context.TODO(), event)
-}
-
-func (m *Distributed) PublishThread(ctx context.Context, id int64, userID int64) error {
-	m.log.Debugw("publich thread", "id", id, "user_id", userID)
-
-	updatedAt := time.Now().UTC().Format(time.RFC3339)
-
-	cmd, err := proto.Marshal(&machine.PublishCommand{
-		Id:            id,
-		UserId:        userID,
-		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
-	})
-	if err != nil {
-		return err
-	}
-
-	err = m.apply(ctx, machine.PublishRequest, cmd)
-	if err != nil {
-		return err
-	}
-
-	event, err := domain.PublishThread(id, userID, updatedAt)
-	if err != nil {
-		return err
-	}
-
-	return m.publisher.Publish(context.TODO(), event)
-}
-
-func (m *Distributed) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
-	m.log.Debugw("publish thread messages", "ids", ids, "user_id", userID)
-
-	cmd, err := proto.Marshal(&machine.PublishMessagesCommand{
-		Ids:       ids,
-		UserId:    userID,
-	})
-	if err != nil {
-		return err
-	}
-
-	return m.apply(ctx, machine.PublishMessagesRequest, cmd)
-}
-
-func (m *Distributed) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
-	m.log.Debugw("private thread messages", "ids", ids, "user_id", userID)
-
-	cmd, err := proto.Marshal(&machine.PrivateMessagesCommand{
-		Ids:         ids,
-		UserId:      userID,
-	})
-	if err != nil {
-		return err
-	}
-
-	return m.apply(ctx, machine.PrivateMessagesRequest, cmd)
-}
-
-func (m *Distributed) DeleteThread(ctx context.Context, id, userID int64) error {
-	m.log.Debugw("delete thread", "id", id, "user_id", userID)
-
-	cmd, err := proto.Marshal(&machine.DeleteCommand{
-		Id:       id,
-		UserId:   userID,
-	})
-	if err != nil {
-		return err
-	}
-
-	err = m.apply(ctx, machine.DeleteRequest, cmd)
-	if err != nil {
-		return err
-	}
-
-	event, err := domain.DeleteThread(id, userID)
-	if err != nil {
-		return err
-	}
-
-	return m.publisher.Publish(context.TODO(), event)
+	return m.consensus.Apply(buf.Bytes(), duration)
 }
 
 func (m *Distributed) ResolveThread(ctx context.Context, id, userID int64) (path []*api.PathStep, err error) {
