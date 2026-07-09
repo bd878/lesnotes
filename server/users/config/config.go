@@ -4,7 +4,6 @@ type Config struct {
 	NodeName               string          `json:"node_name"`
 	HttpAddr               string          `json:"http_addr"`
 	RpcAddr                string          `json:"rpc_addr"`
-	MessagesServiceAddr    string          `json:"messages_service_addr"` // ???
 	SessionsServiceAddr    string          `json:"sessions_service_addr"`
 	UsersServiceAddr       string          `json:"users_service_addr"`
 

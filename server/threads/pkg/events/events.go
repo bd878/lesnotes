@@ -1,7 +1,7 @@
 package events
 
 const (
-	MessagesChannel = "gallery.threads.Thread"
+	ThreadsChannel = "gallery.threads.Thread"
 
 	ThreadCreatedEvent   = "threadsapi.ThreadCreated"
 	ThreadDeletedEvent   = "threadsapi.ThreadDeleted"

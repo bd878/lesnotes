@@ -1,4 +1,4 @@
-package users
+package grpc
 
 import (
 	"os"
@@ -8,8 +8,6 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/internal/am"
-	"github.com/bd878/gallery/server/internal/nats"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/internal/system"
 	"github.com/bd878/gallery/server/internal/discovery/serf"
@@ -17,7 +15,6 @@ import (
 	"github.com/bd878/gallery/server/users/config"
 	"github.com/bd878/gallery/server/users/internal/repository/postgres"
 	"github.com/bd878/gallery/server/users/internal/machine"
-	"github.com/bd878/gallery/server/users/internal/handler/stream"
 	"github.com/bd878/gallery/server/users/internal/controller/distributed"
 	"github.com/bd878/gallery/server/users/internal/handler/grpc"
 )
@@ -36,12 +33,6 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	}
 
 	controller := application.New(consensus, usersRepo, svc.Logger())
-
-	stream.RegisterIntegrationEventHandlers(am.NewMessageSubscriber(
-			nats.NewStream(svc.Nats()),
-		),
-		stream.NewIntegrationEventHandlers(controller),
-	)
 
 	handler := grpc.New(controller)
 

@@ -4,9 +4,7 @@ import (
 	"time"
 	"context"
 	"bytes"
-	"golang.org/x/crypto/bcrypt"
 
-	"google.golang.org/protobuf/proto"
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/users/pkg/model"
@@ -37,7 +35,7 @@ func New(consensus Consensus, usersRepo UsersRepository, log *logger.Logger) *Di
 	}
 }
 
-func (m *Distributed) apply(ctx context.Context, reqType machine.RequestType, cmd []byte) (err error) {
+func (m *Distributed) Apply(ctx context.Context, reqType machine.RequestType, cmd []byte, duration time.Duration) (err error) {
 	var buf bytes.Buffer
 	_, err = buf.Write([]byte{byte(reqType)})
 	if err != nil {
@@ -49,84 +47,7 @@ func (m *Distributed) apply(ctx context.Context, reqType machine.RequestType, cm
 		return
 	}
 
-	return m.consensus.Apply(buf.Bytes(), 10*time.Second)
-}
-
-func (m *Distributed) CreateUser(ctx context.Context, id int64, login, password string, metadata []byte) (user *model.User, err error) {
-	m.log.Debugw("create user", "id", id, "login", login, "password", password, "metadata", metadata)
-
-	hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return nil, err
-	}
-
-	cmd, err := proto.Marshal(&machine.AppendCommand{
-		Id:             id,
-		Login:          login,
-		HashedPassword: string(hashed),
-		Metadata:       metadata,
-		CreatedAt:      time.Now().UTC().Format(time.RFC3339),
-		UpdatedAt:      time.Now().UTC().Format(time.RFC3339),
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	err = m.apply(ctx, machine.AppendRequest, cmd)
-
-	user = &model.User{
-		ID:              id,
-		Login:           login,
-		HashedPassword:  string(hashed),
-		Metadata:        metadata,
-	}
-
-	return
-}
-
-func (m *Distributed) DeleteUser(ctx context.Context, id int64) (err error) {
-	m.log.Debugw("delete user", "id", id)
-
-	cmd, err := proto.Marshal(&machine.DeleteCommand{
-		Id: id,
-	})
-	if err != nil {
-		return err
-	}
-
-	return m.apply(ctx, machine.DeleteRequest, cmd)
-}
-
-func (m *Distributed) UpdateUser(ctx context.Context, id int64, login *string, metadata []byte) (err error) {
-	m.log.Debugw("update user", "id", id, "login", login, "metadata", metadata)
-
-	cmd, err := proto.Marshal(&machine.UpdateCommand{
-		Id:             id,
-		Login:          login,
-		Metadata:       metadata,
-		UpdatedAt:      time.Now().UTC().Format(time.RFC3339),
-	})
-	if err != nil {
-		return err
-	}
-
-	return m.apply(ctx, machine.UpdateRequest, cmd)
-}
-
-func (m *Distributed) MakePremium(ctx context.Context, id int64, invoiceID, createdAt, expiresAt string) (err error) {
-	m.log.Debugw("make premium", "id", id, "invoice_id", invoiceID, "created_at", createdAt, "expiresAt", expiresAt)
-
-	cmd, err := proto.Marshal(&machine.MakePremiumCommand{
-		InvoiceId:       invoiceID,
-		Id:              id,
-		CreatedAt:       createdAt,
-		ExpiresAt:       expiresAt,
-	})
-	if err != nil {
-		return err
-	}
-
-	return m.apply(ctx, machine.MakePremiumRequest, cmd)
+	return m.consensus.Apply(buf.Bytes(), duration)
 }
 
 func (m *Distributed) FindUser(ctx context.Context, login string) (user *model.User, err error) {

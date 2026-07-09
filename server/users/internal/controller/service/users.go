@@ -7,20 +7,21 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/internal/ddd"
+	"github.com/bd878/gallery/server/users/config"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/users/pkg/model"
 	"github.com/bd878/gallery/server/users/pkg/loadbalance"
+	"github.com/bd878/gallery/server/users/internal/machine"
+	"github.com/bd878/gallery/server/users/internal/domain"
 	"github.com/bd878/gallery/server/users/internal/controller"
 	sessions "github.com/bd878/gallery/server/sessions/pkg/model"
 )
-
-type Config struct {
-	RpcAddr string
-}
 
 type SessionsGateway interface {
 	GetSession(ctx context.Context, token string) (session *sessions.Session, err error)
@@ -30,20 +31,20 @@ type SessionsGateway interface {
 	RemoveSession(ctx context.Context, token string) (err error)
 }
 
-type MessagesGateway interface {
-	DeleteUserMessages(ctx context.Context, userID int64) error
-}
-
 type Controller struct {
-	conf         Config
+	conf         config.Config
 	client       api.UsersClient
 	conn         *grpc.ClientConn
 	sessions     SessionsGateway
-	messages     MessagesGateway
+	publisher    ddd.EventPublisher[ddd.Event]
 }
 
-func New(conf Config, messages MessagesGateway, sessions SessionsGateway) *Controller {
-	controller := &Controller{conf: conf, messages: messages, sessions: sessions}
+func New(conf config.Config, sessions SessionsGateway, publisher ddd.EventPublisher[ddd.Event]) *Controller {
+	controller := &Controller{
+		conf: conf,
+		sessions: sessions,
+		publisher: publisher,
+	}
 
 	controller.setupConnection()
 
@@ -61,7 +62,7 @@ func (s *Controller) setupConnection() (err error) {
 		fmt.Sprintf(
 			"%s:///%s",
 			loadbalance.Name,
-			s.conf.RpcAddr,
+			s.conf.UsersServiceAddr,
 		),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
@@ -97,10 +98,26 @@ func (s *Controller) CreateUser(ctx context.Context, id int64, login, password s
 
 	logger.Debugw("create user", "id", id, "login", login, "len(password)", len(password))
 
-	_, err = s.client.CreateUser(ctx, &api.CreateUserRequest{
-		Id:         id,
-		Login:      login,
-		Password:   password,
+	hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
+	}
+
+	cmd, err := proto.Marshal(&machine.AppendCommand{
+		Id:             id,
+		Login:          login,
+		HashedPassword: string(hashed),
+		CreatedAt:      time.Now().UTC().Format(time.RFC3339),
+		UpdatedAt:      time.Now().UTC().Format(time.RFC3339),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType: int32(machine.AppendRequest),
+		Cmd: cmd,
+		Duration: "10s",
 	})
 	if err != nil {
 		return
@@ -226,10 +243,48 @@ func (s *Controller) UpdateUser(ctx context.Context, id int64, login *string, me
 
 	logger.Debugw("update user", "id", id, "login", login, "metadata", metadata)
 
-	_, err = s.client.UpdateUser(ctx, &api.UpdateUserRequest{
-		Id:        id,
-		Login:     login,
-		Metadata:  metadata,
+	cmd, err := proto.Marshal(&machine.UpdateCommand{
+		Id:             id,
+		Login:          login,
+		Metadata:       metadata,
+		UpdatedAt:      time.Now().UTC().Format(time.RFC3339),
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType: int32(machine.UpdateRequest),
+		Cmd: cmd,
+		Duration: "10s",
+	})
+
+	return
+}
+
+func (s *Controller) MakePremium(ctx context.Context, id int64, invoiceID, createdAt, expiresAt string) (err error) {
+	if s.isConnFailed() {
+		if err = s.setupConnection(); err != nil {
+			return
+		}
+	}
+
+	logger.Debugw("make premium", "id", id, "invoice_id", invoiceID, "created_at", createdAt, "expiresAt", expiresAt)
+
+	cmd, err := proto.Marshal(&machine.MakePremiumCommand{
+		InvoiceId:       invoiceID,
+		Id:              id,
+		CreatedAt:       createdAt,
+		ExpiresAt:       expiresAt,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType: int32(machine.MakePremiumRequest),
+		Cmd: cmd,
+		Duration: "10s",
 	})
 
 	return
@@ -280,17 +335,28 @@ func (s *Controller) DeleteUser(ctx context.Context, id int64) (err error) {
 		return
 	}
 
-	// TODO: emit event, drop gateway
-	err = s.messages.DeleteUserMessages(ctx, id)
-	if err != nil {
-		return
-	}
-
-	_, err = s.client.DeleteUser(ctx, &api.DeleteUserRequest{
+	cmd, err := proto.Marshal(&machine.DeleteCommand{
 		Id: id,
 	})
+	if err != nil {
+		return err
+	}
 
-	return
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType: int32(machine.DeleteRequest),
+		Cmd: cmd,
+		Duration: "10s",
+	})
+	if err != nil {
+		return err
+	}
+
+	event, err := domain.DeleteUser(id)
+	if err != nil {
+		return err
+	}
+
+	return s.publisher.Publish(ctx, event)
 }
 
 func (s *Controller) LogoutUser(ctx context.Context, token string) (err error) {
