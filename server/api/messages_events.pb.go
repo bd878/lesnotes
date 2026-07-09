@@ -32,6 +32,7 @@ type MessageCreated struct {
 	CreatedAt     string                 `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt     string                 `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	FileIds       []int64                `protobuf:"varint,9,rep,packed,name=file_ids,json=fileIds,proto3" json:"file_ids,omitempty"`
+	ThreadId      int64                  `protobuf:"varint,10,opt,name=thread_id,json=threadId,proto3" json:"thread_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -127,6 +128,13 @@ func (x *MessageCreated) GetFileIds() []int64 {
 		return x.FileIds
 	}
 	return nil
+}
+
+func (x *MessageCreated) GetThreadId() int64 {
+	if x != nil {
+		return x.ThreadId
+	}
+	return 0
 }
 
 type MessageDeleted struct {
@@ -397,7 +405,7 @@ var File_protos_messages_events_proto protoreflect.FileDescriptor
 
 const file_protos_messages_events_proto_rawDesc = "" +
 	"\n" +
-	"\x1cprotos/messages_events.proto\x12\x12messages_events.v1\"\xea\x01\n" +
+	"\x1cprotos/messages_events.proto\x12\x12messages_events.v1\"\x87\x02\n" +
 	"\x0eMessageCreated\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x12\n" +
@@ -409,7 +417,9 @@ const file_protos_messages_events_proto_rawDesc = "" +
 	"created_at\x18\a \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
 	"updated_at\x18\b \x01(\tR\tupdatedAt\x12\x19\n" +
-	"\bfile_ids\x18\t \x03(\x03R\afileIds\"9\n" +
+	"\bfile_ids\x18\t \x03(\x03R\afileIds\x12\x1b\n" +
+	"\tthread_id\x18\n" +
+	" \x01(\x03R\bthreadId\"9\n" +
 	"\x0eMessageDeleted\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\"\xdc\x01\n" +

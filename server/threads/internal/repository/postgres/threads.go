@@ -485,7 +485,7 @@ func (r *ThreadsRepository) ReorderThread(ctx context.Context, id, userID, paren
 	return
 }
 
-func (r *ThreadsRepository) AppendThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name, description, title string, private bool, createdAt, updatedAt string) (err error) {
+func (r *ThreadsRepository) AppendThread(ctx context.Context, id, userID, parentID int64, name, description, title string, private bool, createdAt, updatedAt string) (err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {

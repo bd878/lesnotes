@@ -8,8 +8,8 @@ message AppendCommand {
 	int64   parent_id = 3;
 	string  name = 4;
 	bool    private = 5;
-	int64   next_id = 6;
-	int64   prev_id = 7;
+	int64   next_id = 6; // not used
+	int64   prev_id = 7; // not used (TODO: make optional)
 	string  description = 8;
 	string  created_at = 9;
 	string  updated_at = 10;

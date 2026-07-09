@@ -236,7 +236,7 @@ func (s *Controller) PrivateThread(ctx context.Context, id, userID int64) (err e
 }
 
 
-func (s *Controller) CreateThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, name, description, title string, private bool) (err error) {
+func (s *Controller) CreateThread(ctx context.Context, id, userID, parentID int64, name, description, title string, private bool) (err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -244,7 +244,7 @@ func (s *Controller) CreateThread(ctx context.Context, id, userID, parentID, nex
 	}
 
 	logger.Debugw("create thread", "id", id, "user_id", userID, "parent_id", parentID,
-		"next_id", nextID, "prev_id", prevID, "name", name, "description", description, "title", title, "private", private)
+		"name", name, "description", description, "title", title, "private", private)
 
 
 	createdAt := time.Now().UTC().Format(time.RFC3339)
@@ -259,8 +259,6 @@ func (s *Controller) CreateThread(ctx context.Context, id, userID, parentID, nex
 		Id:            id,
 		UserId:        userID,
 		ParentId:      parentID,
-		NextId:        nextID,
-		PrevId:        prevID,
 		Name:          name,
 		Private:       private,
 		Description:   description,

@@ -42,8 +42,6 @@ type (
 	CreateThreadRequest struct {
 		ID               int64        `json:"id"`
 		ParentID         int64        `json:"parent"`
-		NextID           int64        `json:"next"`
-		PrevID           int64        `json:"prev"`
 		Name             string       `json:"name"`
 		Private          bool         `json:"private"`
 		Description      string       `json:"description"`

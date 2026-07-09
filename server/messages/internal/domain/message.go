@@ -20,6 +20,7 @@ var (
 
 type MessageCreated struct {
 	ID        int64
+	ThreadID  int64
 	UserID    int64
 	Text      string
 	Title     string
@@ -32,7 +33,7 @@ type MessageCreated struct {
 
 func (MessageCreated) Key() string { return MessageCreatedEvent }
 
-func CreateMessage(id int64, text, title string, fileIDs []int64, userID int64, private bool, name string, createdAt, updatedAt string) (ddd.Event, error) {
+func CreateMessage(id, threadID int64, text, title string, fileIDs []int64, userID int64, private bool, name string, createdAt, updatedAt string) (ddd.Event, error) {
 	if id == 0 {
 		return nil, ErrIDRequired
 	}
@@ -40,6 +41,7 @@ func CreateMessage(id int64, text, title string, fileIDs []int64, userID int64, 
 
 	return ddd.NewEvent(MessageCreatedEvent, &MessageCreated{
 		ID:        id,
+		ThreadID:  threadID,
 		UserID:    userID,
 		Text:      text,
 		Title:     title,

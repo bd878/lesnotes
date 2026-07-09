@@ -40,7 +40,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 		am.NewMessageSubscriber(
 			nats.NewStream(svc.Nats()),
 		),
-		stream.NewIntegrationEventHandlers(ctrl, svc.Logger()),
+		stream.NewIntegrationEventHandlers(ctrl, ctrl, svc.Logger()),
 	)
 
 	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(svc.Logger(), usersGateway, sessionsGateway, usermodel.PublicUserID))

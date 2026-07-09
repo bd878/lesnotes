@@ -34,9 +34,6 @@ type ThreadsGateway interface {
 	// TODO: fix params order
 	CountThreads(ctx context.Context, id, userID int64) (total int32, err error)
 	CountMessages(ctx context.Context, id, userID int64, privateMessage *bool) (total int32, err error)
-	CreateThread(ctx context.Context, id, userID, parentID int64, name string, private bool) (err error)
-	DeleteThread(ctx context.Context, id, userID int64) (err error)
-	UpdateThread(ctx context.Context, id, userID int64) (err error)
 	ResolvePath(ctx context.Context, userID, id int64) (path []*api.PathStep, err error)
 	ReadThread(ctx context.Context, userID, id int64, name string) (thread *threads.Thread, err error)
 	ReadParent(ctx context.Context, userID, id int64) (thread *threads.Thread, err error)
@@ -139,21 +136,7 @@ func (s *MessagesController) SaveMessage(ctx context.Context, id int64, text, ti
 		return
 	}
 
-	// TODO: what if we fall here? Message is created, but thread is not yet.
-	// In readThreadMessages we request by batch. We arrive in situation, where
-	// len(threads) != len(messages).
-
-	err = s.threads.CreateThread(ctx, id, userID, threadID, name, private)
-	if err != nil {
-		if status, ok := status.FromError(err); ok {
-			logger.Debugw("thread failed", "message", status.Message())
-		} else {
-			logger.Debugw("non-rpc error", "error", err)
-		}
-		return
-	}
-
-	event, err := domain.CreateMessage(id, text, title, fileIDs, userID, private, name, createdAt, updatedAt)
+	event, err := domain.CreateMessage(id, threadID, text, title, fileIDs, userID, private, name, createdAt, updatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -211,19 +194,6 @@ func (s *MessagesController) DeleteMessages(ctx context.Context, ids []int64, us
 	}
 
 	logger.Debugw("delete messages", "ids", ids, "user_id", userID)
-
-	// TODO: DeleteThreads
-	for _, id := range ids {
-		err = s.threads.DeleteThread(ctx, id, userID)
-		if err != nil {
-			if status, ok := status.FromError(err); ok {
-				logger.Debugw("thread failed", "message", status.Message())
-			} else {
-				logger.Debugw("non-rpc error", "error", err)
-			}
-			return
-		}
-	}
 
 	for _, id := range ids {
 

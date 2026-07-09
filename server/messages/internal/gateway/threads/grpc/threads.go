@@ -59,60 +59,6 @@ func (g *Gateway) isConnFailed() bool {
 	return false
 }
 
-func (g *Gateway) CreateThread(ctx context.Context, id, userID, parentID int64, name string, private bool) (err error) {
-	if g.isConnFailed() {
-		if err = g.setupConnection(); err != nil {
-			return
-		}
-	}
-
-	logger.Debugw("create thread", "id", id, "user_id", userID, "parent_id", parentID, "name", name, "private", private)
-
-	_, err = g.client.Create(ctx, &api.CreateRequest{
-		Id:       id,
-		UserId:   userID,
-		ParentId: parentID,
-		Name:     name,
-		Private:  private,
-	})
-
-	return
-}
-
-func (g *Gateway) DeleteThread(ctx context.Context, id, userID int64) (err error) {
-	if g.isConnFailed() {
-		if err = g.setupConnection(); err != nil {
-			return
-		}
-	}
-
-	logger.Debugw("delete thread", "id", id, "user_id", userID)
-
-	_, err = g.client.Delete(ctx, &api.DeleteRequest{
-		Id:     id,
-		UserId: userID,
-	})
-
-	return
-}
-
-func (g *Gateway) UpdateThread(ctx context.Context, id, userID int64) (err error) {
-	if g.isConnFailed() {
-		if err = g.setupConnection(); err != nil {
-			return
-		}
-	}
-
-	logger.Debugw("update thread", "id", id, "user_id", userID)
-
-	_, err = g.client.Update(ctx, &api.UpdateRequest{
-		Id:     id,
-		UserId: userID,
-	})
-
-	return
-}
-
 func (g *Gateway) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32) (list []*model.Thread, isLastPage bool, err error) {
 	if g.isConnFailed() {
 		if err = g.setupConnection(); err != nil {
