@@ -330,6 +330,7 @@ func (s *Controller) DeleteUser(ctx context.Context, id int64) (err error) {
 
 	logger.Debugw("delete user", "id", id)
 
+	// TODO: emit event, not call
 	err = s.sessions.RemoveAllUserSessions(ctx, id)
 	if err != nil {
 		return

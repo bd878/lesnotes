@@ -32,6 +32,9 @@ func (h *TranslationsHandler) Apply(ctx context.Context, req *api.Command) (resp
 	}
 
 	err = h.controller.Apply(ctx, machine.RequestType(req.ReqType), req.Cmd, duration)
+
+	resp = &api.CommandResponse{}
+
 	return
 }
 

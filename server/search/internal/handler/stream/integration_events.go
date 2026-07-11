@@ -69,7 +69,7 @@ func RegisterIntegrationEventHandlers(subscriber am.RawMessageSubscriber, handle
 		return
 	}
 
-	err = subscriber.Subscribe(threadsevents.MessagesChannel, handlers)
+	err = subscriber.Subscribe(threadsevents.ThreadsChannel, handlers)
 	if err != nil {
 		return
 	}

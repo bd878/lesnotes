@@ -8,7 +8,7 @@ import (
 
 	"github.com/bd878/gallery/server/internal/system"
 
-	"github.com/bd878/gallery/server/search"
+	"github.com/bd878/gallery/server/search/internal/grpc"
 	"github.com/bd878/gallery/server/search/migrations"
 	"github.com/bd878/gallery/server/search/config"
 )
@@ -34,7 +34,6 @@ func main() {
 		NodeName:           cfg.NodeName,
 		LogLevel:           cfg.LogLevel,
 		SkipCaller:         1,
-		NatsAddr:           cfg.NatsAddr,
 		PGConn:             cfg.PGConn,
 		GooseTableName:     cfg.GooseTableName,
 	})
@@ -58,7 +57,7 @@ func main() {
 		panic(err)
 	}
 
-	if err := search.Root(s.Waiter().Context(), cfg, s); err != nil {
+	if err := grpc.Root(s.Waiter().Context(), cfg, s); err != nil {
 		fmt.Fprintf(os.Stderr, "server exited %v\n", err)
 		panic(err)
 	}
@@ -68,7 +67,6 @@ func main() {
 
 	s.Waiter().Add(
 		s.WaitForPool,
-		s.WaitForStream,
 		s.WaitForMux,
 		s.WaitForRPC,
 	)

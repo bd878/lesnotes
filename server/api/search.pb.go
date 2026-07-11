@@ -939,7 +939,7 @@ var File_protos_search_proto protoreflect.FileDescriptor
 
 const file_protos_search_proto_rawDesc = "" +
 	"\n" +
-	"\x13protos/search.proto\x12\tsearch.v1\"\xa0\x02\n" +
+	"\x13protos/search.proto\x12\tsearch.v1\x1a\x18protos/distributed.proto\"\xa0\x02\n" +
 	"\x0eSearchSnapshot\x12@\n" +
 	"\amessage\x18\x01 \x01(\v2$.search.v1.SearchMessageSnapshotItemH\x00R\amessage\x127\n" +
 	"\x04file\x18\x02 \x01(\v2!.search.v1.SearchFileSnapshotItemH\x00R\x04file\x12=\n" +
@@ -1027,8 +1027,9 @@ const file_protos_search_proto_rawDesc = "" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\"V\n" +
 	"\x13SearchFilesResponse\x12)\n" +
 	"\x04list\x18\x01 \x03(\v2\x15.search.v1.SearchFileR\x04list\x12\x14\n" +
-	"\x05count\x18\x02 \x01(\x05R\x05count2\xb1\x01\n" +
-	"\x06Search\x12W\n" +
+	"\x05count\x18\x02 \x01(\x05R\x05count2\xf6\x01\n" +
+	"\x06Search\x12C\n" +
+	"\x05Apply\x12\x17.distributed.v1.Command\x1a\x1f.distributed.v1.CommandResponse\"\x00\x12W\n" +
 	"\x0eSearchMessages\x12 .search.v1.SearchMessagesRequest\x1a!.search.v1.SearchMessagesResponse\"\x00\x12N\n" +
 	"\vSearchFiles\x12\x1d.search.v1.SearchFilesRequest\x1a\x1e.search.v1.SearchFilesResponse\"\x00B%Z#github.com/bd878/gallery/server/apib\x06proto3"
 
@@ -1057,6 +1058,8 @@ var file_protos_search_proto_goTypes = []any{
 	(*SearchMessagesResponse)(nil),        // 8: search.v1.SearchMessagesResponse
 	(*SearchFilesRequest)(nil),            // 9: search.v1.SearchFilesRequest
 	(*SearchFilesResponse)(nil),           // 10: search.v1.SearchFilesResponse
+	(*Command)(nil),                       // 11: distributed.v1.Command
+	(*CommandResponse)(nil),               // 12: distributed.v1.CommandResponse
 }
 var file_protos_search_proto_depIdxs = []int32{
 	1,  // 0: search.v1.SearchSnapshot.message:type_name -> search.v1.SearchMessageSnapshotItem
@@ -1065,12 +1068,14 @@ var file_protos_search_proto_depIdxs = []int32{
 	4,  // 3: search.v1.SearchSnapshot.translation:type_name -> search.v1.SearchTranslationSnapshotItem
 	5,  // 4: search.v1.SearchMessagesResponse.list:type_name -> search.v1.SearchMessage
 	6,  // 5: search.v1.SearchFilesResponse.list:type_name -> search.v1.SearchFile
-	7,  // 6: search.v1.Search.SearchMessages:input_type -> search.v1.SearchMessagesRequest
-	9,  // 7: search.v1.Search.SearchFiles:input_type -> search.v1.SearchFilesRequest
-	8,  // 8: search.v1.Search.SearchMessages:output_type -> search.v1.SearchMessagesResponse
-	10, // 9: search.v1.Search.SearchFiles:output_type -> search.v1.SearchFilesResponse
-	8,  // [8:10] is the sub-list for method output_type
-	6,  // [6:8] is the sub-list for method input_type
+	11, // 6: search.v1.Search.Apply:input_type -> distributed.v1.Command
+	7,  // 7: search.v1.Search.SearchMessages:input_type -> search.v1.SearchMessagesRequest
+	9,  // 8: search.v1.Search.SearchFiles:input_type -> search.v1.SearchFilesRequest
+	12, // 9: search.v1.Search.Apply:output_type -> distributed.v1.CommandResponse
+	8,  // 10: search.v1.Search.SearchMessages:output_type -> search.v1.SearchMessagesResponse
+	10, // 11: search.v1.Search.SearchFiles:output_type -> search.v1.SearchFilesResponse
+	9,  // [9:12] is the sub-list for method output_type
+	6,  // [6:9] is the sub-list for method input_type
 	6,  // [6:6] is the sub-list for extension type_name
 	6,  // [6:6] is the sub-list for extension extendee
 	0,  // [0:6] is the sub-list for field type_name
@@ -1081,6 +1086,7 @@ func file_protos_search_proto_init() {
 	if File_protos_search_proto != nil {
 		return
 	}
+	file_protos_distributed_proto_init()
 	file_protos_search_proto_msgTypes[0].OneofWrappers = []any{
 		(*SearchSnapshot_Message)(nil),
 		(*SearchSnapshot_File)(nil),

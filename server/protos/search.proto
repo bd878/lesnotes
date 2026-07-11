@@ -2,9 +2,12 @@ syntax = "proto3";
 
 package search.v1;
 
+import "protos/distributed.proto";
+
 option go_package = "github.com/bd878/gallery/server/api";
 
 service Search {
+	rpc Apply(distributed.v1.Command) returns (distributed.v1.CommandResponse) {}
 	rpc SearchMessages(SearchMessagesRequest) returns (SearchMessagesResponse) {}
 	rpc SearchFiles(SearchFilesRequest) returns (SearchFilesResponse) {}
 }

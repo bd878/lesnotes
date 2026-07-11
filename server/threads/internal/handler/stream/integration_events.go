@@ -62,6 +62,8 @@ func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingM
 	return nil
 }
 
+// TODO: delete user threads when user deleted
+
 func (h integrationHandlers) handleMessageCreated(ctx context.Context, msg am.IncomingMessage) error {
 	m := &api.MessageCreated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {

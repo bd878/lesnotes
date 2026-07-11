@@ -19,6 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
+	Search_Apply_FullMethodName          = "/search.v1.Search/Apply"
 	Search_SearchMessages_FullMethodName = "/search.v1.Search/SearchMessages"
 	Search_SearchFiles_FullMethodName    = "/search.v1.Search/SearchFiles"
 )
@@ -27,6 +28,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SearchClient interface {
+	Apply(ctx context.Context, in *Command, opts ...grpc.CallOption) (*CommandResponse, error)
 	SearchMessages(ctx context.Context, in *SearchMessagesRequest, opts ...grpc.CallOption) (*SearchMessagesResponse, error)
 	SearchFiles(ctx context.Context, in *SearchFilesRequest, opts ...grpc.CallOption) (*SearchFilesResponse, error)
 }
@@ -37,6 +39,16 @@ type searchClient struct {
 
 func NewSearchClient(cc grpc.ClientConnInterface) SearchClient {
 	return &searchClient{cc}
+}
+
+func (c *searchClient) Apply(ctx context.Context, in *Command, opts ...grpc.CallOption) (*CommandResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CommandResponse)
+	err := c.cc.Invoke(ctx, Search_Apply_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *searchClient) SearchMessages(ctx context.Context, in *SearchMessagesRequest, opts ...grpc.CallOption) (*SearchMessagesResponse, error) {
@@ -63,6 +75,7 @@ func (c *searchClient) SearchFiles(ctx context.Context, in *SearchFilesRequest, 
 // All implementations must embed UnimplementedSearchServer
 // for forward compatibility.
 type SearchServer interface {
+	Apply(context.Context, *Command) (*CommandResponse, error)
 	SearchMessages(context.Context, *SearchMessagesRequest) (*SearchMessagesResponse, error)
 	SearchFiles(context.Context, *SearchFilesRequest) (*SearchFilesResponse, error)
 	mustEmbedUnimplementedSearchServer()
@@ -75,6 +88,9 @@ type SearchServer interface {
 // pointer dereference when methods are called.
 type UnimplementedSearchServer struct{}
 
+func (UnimplementedSearchServer) Apply(context.Context, *Command) (*CommandResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Apply not implemented")
+}
 func (UnimplementedSearchServer) SearchMessages(context.Context, *SearchMessagesRequest) (*SearchMessagesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SearchMessages not implemented")
 }
@@ -100,6 +116,24 @@ func RegisterSearchServer(s grpc.ServiceRegistrar, srv SearchServer) {
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&Search_ServiceDesc, srv)
+}
+
+func _Search_Apply_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Command)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SearchServer).Apply(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Search_Apply_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SearchServer).Apply(ctx, req.(*Command))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Search_SearchMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -145,6 +179,10 @@ var Search_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "search.v1.Search",
 	HandlerType: (*SearchServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Apply",
+			Handler:    _Search_Apply_Handler,
+		},
 		{
 			MethodName: "SearchMessages",
 			Handler:    _Search_SearchMessages_Handler,

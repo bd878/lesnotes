@@ -30,6 +30,9 @@ func (h *CommentsHandler) Apply(ctx context.Context, req *api.Command) (resp *ap
 	}
 
 	err = h.controller.Apply(ctx, machine.RequestType(req.ReqType), req.Cmd, duration)
+
+	resp = &api.CommandResponse{}
+
 	return
 }
 

@@ -35,6 +35,9 @@ func (h *Handler) Apply(ctx context.Context, req *api.Command) (resp *api.Comman
 	}
 
 	err = h.controller.Apply(ctx, machine.RequestType(req.ReqType), req.Cmd, duration)
+
+	resp = &api.CommandResponse{}
+
 	return
 }
 

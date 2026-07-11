@@ -49,7 +49,6 @@ func main() {
 	s.Waiter().Add(
 		s.WaitForHTTP,
 		s.WaitForStream,
-		s.WaitForChannelz,
 	)
 
 	if err = s.Waiter().Wait(); err != nil {
