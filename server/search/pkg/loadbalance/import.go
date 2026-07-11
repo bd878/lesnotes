@@ -6,7 +6,7 @@ func init() {
 	balancer.RegisterResolver(Name)
 	balancer.RegisterPicker(
 		Name,
-		[]string{"SaveMessage", "DeleteMessage", "PublishMessage", "PrivateMessage", "UpdateMessage"},
+		[]string{"Apply"},
 		[]string{"SearchMessages"},
 	)
 }

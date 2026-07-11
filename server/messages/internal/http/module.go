@@ -48,6 +48,12 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	translationsController := controller.NewTranslationsController(controller.TranslationsConfig{RpcAddr: cfg.MessagesServiceAddr}, dispatcher)
 	commentsController := controller.NewCommentsController(controller.CommentsConfig{RpcAddr: cfg.MessagesServiceAddr}, dispatcher)
 
+	stream.RegisterIntegrationEventHandlers(am.NewMessageSubscriber(
+			nats.NewStream(svc.Nats()),
+		),
+		stream.NewIntegrationEventHandlers(messagesController),
+	)
+
 	handler := httphandler.New(messagesController, translationsController, commentsController)
 
 	svc.ServeMux().Handle("/messages/v1/send", middleware.Build(handler.SendMessage))
