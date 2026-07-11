@@ -2,12 +2,15 @@
   hosts:
     - gallery-stage-3
     - gallery-stage-4
+    - gallery-stage
 
   tasks:
   - name: Write grpc config
     ansible.builtin.template:
       src: templates/{{ item }}.grpc.json.j2
       dest: /srv/gallery/stage/{{ item }}/config/grpc.json
+    tags:
+      - grpc
     notify:
       - Restart {{ item }}
     loop:
@@ -45,8 +48,10 @@
     ansible.builtin.template:
       src: templates/{{ item }}.http.json.j2
       dest: /srv/gallery/stage/{{ item }}/config/http.json
-    notify:
-      - Restart {{ item }} http
+#    notify:
+#     - Restart {{ item }} http
+    tags:
+      - http
     loop:
       - messages
       - users
