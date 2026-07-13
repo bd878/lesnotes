@@ -41,7 +41,7 @@ type (
 	MessageHandlerMiddleware = func(next MessageHandler) MessageHandler
 
 	MessageSubscriber interface {
-		Subscribe(topicName string, handler MessageHandler) error
+		Subscribe(topicName string, handler MessageHandler, options ...SubscriberOption) error
 	}
 
 	MessageStream interface {
@@ -84,6 +84,6 @@ func NewMessageSubscriber(subscriber MessageSubscriber, mws ...MessageHandlerMid
 	}
 }
 
-func (s messageSubscriber) Subscribe(topicName string, handler MessageHandler) error {
-	return s.subscriber.Subscribe(topicName, MessageHandlerWithMiddleware(handler, s.mws...))
+func (s messageSubscriber) Subscribe(topicName string, handler MessageHandler, options ...SubscriberOption) error {
+	return s.subscriber.Subscribe(topicName, MessageHandlerWithMiddleware(handler, s.mws...), options...)
 }

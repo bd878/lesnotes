@@ -64,22 +64,22 @@ func NewIntegrationEventHandlers(messages MessagesController, threads ThreadsCon
 }
 
 func RegisterIntegrationEventHandlers(subscriber am.RawMessageSubscriber, handlers am.RawMessageHandler) (err error) {
-	err = subscriber.Subscribe(messageevents.MessagesChannel, handlers)
+	err = subscriber.Subscribe(messageevents.MessagesChannel, handlers, am.GroupName("search-messages"))
 	if err != nil {
 		return
 	}
 
-	err = subscriber.Subscribe(threadsevents.ThreadsChannel, handlers)
+	err = subscriber.Subscribe(threadsevents.ThreadsChannel, handlers, am.GroupName("search-threads"))
 	if err != nil {
 		return
 	}
 
-	err = subscriber.Subscribe(filesevents.FilesChannel, handlers)
+	err = subscriber.Subscribe(filesevents.FilesChannel, handlers, am.GroupName("search-files"))
 	if err != nil {
 		return
 	}
 
-	err = subscriber.Subscribe(messageevents.TranslationsChannel, handlers)
+	err = subscriber.Subscribe(messageevents.TranslationsChannel, handlers, am.GroupName("search-translations"))
 	if err != nil {
 		return
 	}

@@ -15,6 +15,7 @@ type Config struct {
 	RaftLogLevel        string   `json:"raft_log_level"`
 	LogLevel            string   `json:"log_level"`
 	NatsAddr            string   `json:"nats_addr"`
+	QueueGroup          string   `json:"queue_group"`
 
 	RaftBootstrap bool   `json:"raft_bootstrap"`
 	PGConn        string `json:"pg_conn"`

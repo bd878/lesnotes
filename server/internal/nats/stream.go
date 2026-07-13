@@ -42,10 +42,16 @@ func (s *Stream) Publish(ctx context.Context, topicName string, message am.Messa
 	return s.nc.Publish(topicName, data)
 }
 
-func (s *Stream) Subscribe(topicName string, handler am.MessageHandler) error {
-	_, err := s.nc.Subscribe(topicName, s.handleMsg(topicName, handler))
+func (s *Stream) Subscribe(topicName string, handler am.MessageHandler, options ...am.SubscriberOption) (err error) {
+	subCfg := am.NewSubscriberConfig(options)
 
-	return err
+	if groupName := subCfg.GroupName(); groupName != "" {
+		_, err = s.nc.QueueSubscribe(groupName, topicName, s.handleMsg(topicName, handler))
+	} else {
+		_, err = s.nc.Subscribe(topicName, s.handleMsg(topicName, handler))
+	}
+
+	return
 }
 
 func (s *Stream) handleMsg(topicName string, handler am.MessageHandler) func(*nats.Msg) {

@@ -27,7 +27,7 @@ func NewIntegrationEventHandlers(users UsersController) am.RawMessageHandler {
 }
 
 func RegisterIntegrationEventHandlers(subscriber am.RawMessageSubscriber, handlers am.RawMessageHandler) (err error) {
-	err = subscriber.Subscribe(billing.BillingChannel, handlers)
+	err = subscriber.Subscribe(billing.BillingChannel, handlers, am.GroupName("users-billing"))
 	if err != nil {
 		return
 	}
