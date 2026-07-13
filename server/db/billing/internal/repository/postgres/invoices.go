@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/billing"
 	"github.com/bd878/gallery/server/internal/logger"
 )
 
@@ -47,10 +47,10 @@ func (r *InvoicesRepository) CancelInvoice(ctx context.Context, id string, userI
 	return
 }
 
-func (r *InvoicesRepository) GetInvoice(ctx context.Context, id string, userID int64) (invoice *api.Invoice, err error) {
+func (r *InvoicesRepository) GetInvoice(ctx context.Context, id string, userID int64) (invoice *billing.Invoice, err error) {
 	const query = "SELECT status, total, metadata, cart, created_at, updated_at FROM %s WHERE user_id = $1 AND id = $2"
 
-	invoice = &api.Invoice{
+	invoice = &billing.Invoice{
 		Id:      id,
 		UserId:  userID,
 	}
@@ -65,7 +65,7 @@ func (r *InvoicesRepository) GetInvoice(ctx context.Context, id string, userID i
 		return
 	}
 
-	var cc api.Cart
+	var cc billing.Cart
 	err = proto.Unmarshal(cart, &cc)
 	if err != nil {
 		return

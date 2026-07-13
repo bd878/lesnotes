@@ -1,4 +1,4 @@
-package grpc
+package billing
 
 import (
 	"os"
@@ -8,15 +8,16 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/billing"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/internal/system"
 	"github.com/bd878/gallery/server/internal/discovery/serf"
 	"github.com/bd878/gallery/server/internal/consensus/raft"
-	"github.com/bd878/gallery/server/billing/config"
-	"github.com/bd878/gallery/server/billing/internal/repository/postgres"
-	"github.com/bd878/gallery/server/billing/internal/machine"
-	"github.com/bd878/gallery/server/billing/internal/controller/distributed"
-	"github.com/bd878/gallery/server/billing/internal/handler/grpc"
+	"github.com/bd878/gallery/server/db/billing/config"
+	"github.com/bd878/gallery/server/db/billing/internal/repository/postgres"
+	"github.com/bd878/gallery/server/db/billing/internal/machine"
+	"github.com/bd878/gallery/server/db/billing/internal/controller/distributed"
+	"github.com/bd878/gallery/server/db/billing/internal/handler/grpc"
 )
 
 func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error) {
@@ -37,7 +38,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 
 	handler := grpc.New(controller)
 
-	api.RegisterBillingServer(svc.RPC(), handler)
+	billing.RegisterBillingServer(svc.RPC(), handler)
 	api.RegisterDistributedServer(svc.RPC(), handler)
 
 	return nil

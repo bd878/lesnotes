@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"os"
 
-	_ "github.com/bd878/gallery/server/billing/pkg/loadbalance"
+	_ "github.com/bd878/gallery/server/db/billing/pkg/loadbalance"
 	_ "github.com/bd878/gallery/server/sessions/pkg/loadbalance"
 
 	"github.com/bd878/gallery/server/billing/config"
-	"github.com/bd878/gallery/server/billing/internal/http"
+	"github.com/bd878/gallery/server/billing"
 	"github.com/bd878/gallery/server/internal/system"
 )
 
@@ -40,12 +40,12 @@ func main() {
 		panic(err)
 	}
 
-	if err := http.Root(s.Waiter().Context(), cfg, s); err != nil {
+	if err := billing.Root(s.Waiter().Context(), cfg, s); err != nil {
 		panic(err)
 	}
 
-	fmt.Println("starting billing http service")
-	defer fmt.Println("stopped billing http service")
+	fmt.Println("starting billing service")
+	defer fmt.Println("stopped billing service")
 
 	s.Waiter().Add(
 		s.WaitForHTTP,

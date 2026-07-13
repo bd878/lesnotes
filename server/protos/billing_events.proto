@@ -4,7 +4,7 @@ package billing_events.v1;
 
 import "protos/billing.proto";
 
-option go_package = "github.com/bd878/gallery/server/api";
+option go_package = "github.com/bd878/gallery/server/api/billing";
 
 message InvoicePayed {
 	string id = 1;

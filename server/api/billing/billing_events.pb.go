@@ -4,7 +4,7 @@
 // 	protoc        v3.19.4
 // source: protos/billing_events.proto
 
-package api
+package billing
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -192,7 +192,7 @@ const file_protos_billing_events_proto_rawDesc = "" +
 	"\x04cost\x18\x04 \x01(\x03R\x04cost\x12\x1a\n" +
 	"\bdiscount\x18\x05 \x01(\x03R\bdiscount\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\x06 \x01(\tR\tcreatedAtB%Z#github.com/bd878/gallery/server/apib\x06proto3"
+	"created_at\x18\x06 \x01(\tR\tcreatedAtB-Z+github.com/bd878/gallery/server/api/billingb\x06proto3"
 
 var (
 	file_protos_billing_events_proto_rawDescOnce sync.Once

@@ -6,9 +6,9 @@ import (
 	"os"
 	"database/sql"
 
-	"github.com/bd878/gallery/server/billing/internal/grpc"
-	"github.com/bd878/gallery/server/billing/migrations"
-	"github.com/bd878/gallery/server/billing/config"
+	"github.com/bd878/gallery/server/db/billing"
+	"github.com/bd878/gallery/server/db/billing/migrations"
+	"github.com/bd878/gallery/server/db/billing/config"
 	"github.com/bd878/gallery/server/internal/system"
 )
 
@@ -56,13 +56,13 @@ func main() {
 		panic(err)
 	}
 
-	if err := grpc.Root(s.Waiter().Context(), cfg, s); err != nil {
+	if err := billing.Root(s.Waiter().Context(), cfg, s); err != nil {
 		fmt.Fprintf(os.Stderr, "server exited %v\n", err)
 		panic(err)
 	}
 
-	fmt.Println("starting billing service")
-	defer fmt.Println("stopped billing service")
+	fmt.Println("starting billing db")
+	defer fmt.Println("stopped billing db")
 
 	s.Waiter().Add(
 		s.WaitForPool,

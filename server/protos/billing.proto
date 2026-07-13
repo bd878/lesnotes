@@ -4,7 +4,7 @@ package billing.v1;
 
 import "protos/distributed.proto";
 
-option go_package = "github.com/bd878/gallery/server/api";
+option go_package = "github.com/bd878/gallery/server/api/billing";
 
 service Billing {
 	rpc Apply(distributed.v1.Command) returns (distributed.v1.CommandResponse) {}

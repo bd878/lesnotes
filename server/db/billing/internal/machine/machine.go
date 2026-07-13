@@ -6,7 +6,8 @@ import (
 
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
-	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/billing"
+	"github.com/bd878/gallery/server/db/billing/pkg/machine"
 	"github.com/bd878/gallery/server/internal/logger"
 )
 
@@ -28,8 +29,8 @@ type InvoicesRepository interface {
 }
 
 type Dumper interface {
-	Open(ctx context.Context) (ch chan *api.BillingSnapshot, err error)
-	Restore(ctx context.Context, snapshot *api.BillingSnapshot) (err error)
+	Open(ctx context.Context) (ch chan *billing.BillingSnapshot, err error)
+	Restore(ctx context.Context, snapshot *billing.BillingSnapshot) (err error)
 	Close() (err error)
 }
 
@@ -53,21 +54,21 @@ func New(paymentsRepo PaymentsRepository, invoicesRepo InvoicesRepository, dumpe
 
 func (f *Machine) Apply(record *raft.Log) interface{} {
 	buf := record.Data
-	reqType := RequestType(buf[0])
+	reqType := machine.RequestType(buf[0])
 	switch reqType {
-	case AppendInvoiceRequest:
+	case machine.AppendInvoiceRequest:
 		return f.applyAppendInvoice(buf[1:])
-	case AppendPaymentRequest:
+	case machine.AppendPaymentRequest:
 		return f.applyAppendPayment(buf[1:])
-	case ProceedPaymentRequest:
+	case machine.ProceedPaymentRequest:
 		return f.applyProceedPayment(buf[1:])
-	case PayInvoiceRequest:
+	case machine.PayInvoiceRequest:
 		return f.applyPayInvoice(buf[1:])
-	case CancelPaymentRequest:
+	case machine.CancelPaymentRequest:
 		return f.applyCancelPayment(buf[1:])
-	case CancelInvoiceRequest:
+	case machine.CancelInvoiceRequest:
 		return f.applyCancelInvoice(buf[1:])
-	case RefundPaymentRequest:
+	case machine.RefundPaymentRequest:
 		return f.applyRefundPayment(buf[1:])
 	default:
 		f.log.Errorw("unknown request type", "type", reqType)
@@ -76,7 +77,7 @@ func (f *Machine) Apply(record *raft.Log) interface{} {
 }
 
 func (f *Machine) applyAppendInvoice(raw []byte) interface{} {
-	var cmd AppendInvoiceCommand
+	var cmd billing.AppendInvoiceCommand
 	proto.Unmarshal(raw, &cmd)
 
 	return f.invoicesRepo.SaveInvoice(context.TODO(), cmd.Id, cmd.UserId, cmd.Status, cmd.Total,
@@ -84,7 +85,7 @@ func (f *Machine) applyAppendInvoice(raw []byte) interface{} {
 }
 
 func (f *Machine) applyAppendPayment(raw []byte) interface{} {
-	var cmd AppendPaymentCommand
+	var cmd billing.AppendPaymentCommand
 	proto.Unmarshal(raw, &cmd)
 
 	return f.paymentsRepo.SavePayment(context.TODO(), cmd.Id, cmd.UserId, cmd.InvoiceId,
@@ -92,35 +93,35 @@ func (f *Machine) applyAppendPayment(raw []byte) interface{} {
 }
 
 func (f *Machine) applyProceedPayment(raw []byte) interface{} {
-	var cmd ProceedPaymentCommand
+	var cmd billing.ProceedPaymentCommand
 	proto.Unmarshal(raw, &cmd)
 
 	return f.paymentsRepo.ProceedPayment(context.TODO(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyPayInvoice(raw []byte) interface{} {
-	var cmd PayInvoiceCommand
+	var cmd billing.PayInvoiceCommand
 	proto.Unmarshal(raw, &cmd)
 
 	return f.invoicesRepo.PayInvoice(context.TODO(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyCancelPayment(raw []byte) interface{} {
-	var cmd CancelPaymentCommand
+	var cmd billing.CancelPaymentCommand
 	proto.Unmarshal(raw, &cmd)
 
 	return f.paymentsRepo.CancelPayment(context.TODO(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyCancelInvoice(raw []byte) interface{} {
-	var cmd CancelInvoiceCommand
+	var cmd billing.CancelInvoiceCommand
 	proto.Unmarshal(raw, &cmd)
 
 	return f.invoicesRepo.CancelInvoice(context.TODO(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
 }
 
 func (f *Machine) applyRefundPayment(raw []byte) interface{} {
-	var cmd RefundPaymentCommand
+	var cmd billing.RefundPaymentCommand
 	proto.Unmarshal(raw, &cmd)
 
 	return f.paymentsRepo.RefundPayment(context.TODO(), cmd.Id, cmd.UserId, cmd.UpdatedAt)

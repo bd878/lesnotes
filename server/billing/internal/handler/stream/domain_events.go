@@ -6,7 +6,7 @@ import (
 
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/am"
-	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/billing"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/billing/internal/domain"
 	"github.com/bd878/gallery/server/billing/pkg/events"
@@ -44,7 +44,7 @@ func (h domainHandler[T]) HandleEvent(ctx context.Context, event T) error {
 func (h domainHandler[T]) onInvoicePayed(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.InvoicePayed)
 
-	data, err := proto.Marshal(&api.InvoicePayed{
+	data, err := proto.Marshal(&billing.InvoicePayed{
 		Id:       payload.ID,
 		UserId:   payload.UserID,
 		Cart:     payload.Cart,
@@ -60,7 +60,7 @@ func (h domainHandler[T]) onInvoicePayed(ctx context.Context, event ddd.Event) e
 func (h domainHandler[T]) onPremiumPayed(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.PremiumPayed)
 
-	data, err := proto.Marshal(&api.PremiumPayed{
+	data, err := proto.Marshal(&billing.PremiumPayed{
 		InvoiceId:   payload.InvoiceID,
 		ExpiresAt:   payload.ExpiresAt,
 		CreatedAt:   payload.CreatedAt,

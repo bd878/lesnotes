@@ -4,9 +4,10 @@
 // 	protoc        v3.19.4
 // source: protos/billing.proto
 
-package api
+package billing
 
 import (
+	api "github.com/bd878/gallery/server/api"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -977,7 +978,7 @@ const file_protos_billing_proto_rawDesc = "" +
 	"\n" +
 	"GetInvoice\x12\x1d.billing.v1.GetInvoiceRequest\x1a\x1e.billing.v1.GetInvoiceResponse\"\x00\x12M\n" +
 	"\n" +
-	"GetPayment\x12\x1d.billing.v1.GetPaymentRequest\x1a\x1e.billing.v1.GetPaymentResponse\"\x00B%Z#github.com/bd878/gallery/server/apib\x06proto3"
+	"GetPayment\x12\x1d.billing.v1.GetPaymentRequest\x1a\x1e.billing.v1.GetPaymentResponse\"\x00B-Z+github.com/bd878/gallery/server/api/billingb\x06proto3"
 
 var (
 	file_protos_billing_proto_rawDescOnce sync.Once
@@ -1005,8 +1006,8 @@ var file_protos_billing_proto_goTypes = []any{
 	(*GetInvoiceResponse)(nil),  // 9: billing.v1.GetInvoiceResponse
 	(*GetPaymentRequest)(nil),   // 10: billing.v1.GetPaymentRequest
 	(*GetPaymentResponse)(nil),  // 11: billing.v1.GetPaymentResponse
-	(*Command)(nil),             // 12: distributed.v1.Command
-	(*CommandResponse)(nil),     // 13: distributed.v1.CommandResponse
+	(*api.Command)(nil),         // 12: distributed.v1.Command
+	(*api.CommandResponse)(nil), // 13: distributed.v1.CommandResponse
 }
 var file_protos_billing_proto_depIdxs = []int32{
 	1,  // 0: billing.v1.BillingSnapshot.invoice:type_name -> billing.v1.InvoiceSnapshotItem
@@ -1034,7 +1035,6 @@ func file_protos_billing_proto_init() {
 	if File_protos_billing_proto != nil {
 		return
 	}
-	file_protos_distributed_proto_init()
 	file_protos_billing_proto_msgTypes[0].OneofWrappers = []any{
 		(*BillingSnapshot_Invoice)(nil),
 		(*BillingSnapshot_Payment)(nil),

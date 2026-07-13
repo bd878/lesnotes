@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/billing"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/internal/store"
 )
@@ -17,7 +17,7 @@ type snapshot struct {
 	store         *store.Store
 	dumper        Dumper
 	ctx           context.Context
-	ch            <-chan *api.BillingSnapshot
+	ch            <-chan *billing.BillingSnapshot
 }
 
 func (f *Machine) Snapshot() (raft.FSMSnapshot, error) {
@@ -71,7 +71,7 @@ func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 
 		logger.Debugw("restore", "n", n)
 
-		var snapshot api.BillingSnapshot
+		var snapshot billing.BillingSnapshot
 		if err = proto.Unmarshal(data, &snapshot); err != nil {
 			return err
 		}
@@ -90,9 +90,9 @@ func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
 
 	for snapshot := range s.ch {
 		switch v := snapshot.Item.(type) {
-		case *api.BillingSnapshot_Invoice:
+		case *billing.BillingSnapshot_Invoice:
 			logger.Debugw("invoice snapshot", "id", v.Invoice.Id)
-		case *api.BillingSnapshot_Payment:
+		case *billing.BillingSnapshot_Payment:
 			logger.Debugw("payment snapshot", "id", v.Payment.Id)
 		default:
 			logger.Debugln("unknown snapshot")

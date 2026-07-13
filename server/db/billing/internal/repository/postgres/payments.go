@@ -8,8 +8,8 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/bd878/gallery/server/api/billing"
 	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/billing/pkg/model"
 )
 
 type PaymentsRepository struct {
@@ -54,17 +54,17 @@ func (r *PaymentsRepository) RefundPayment(ctx context.Context, id, userID int64
 	return
 }
 
-func (r *PaymentsRepository) GetPayment(ctx context.Context, id, userID int64) (payment *model.Payment, err error) {
+func (r *PaymentsRepository) GetPayment(ctx context.Context, id, userID int64) (payment *billing.Payment, err error) {
 	const query = "SELECT invoice_id, status, currency, total, metadata, created_at, updated_at FROM %s WHERE user_id = $1 AND id = $2"
 
-	payment = &model.Payment{
-		ID:     id,
-		UserID: userID,
+	payment = &billing.Payment{
+		Id:     id,
+		UserId: userID,
 	}
 
 	var createdAt, updatedAt *time.Time
 
-	err = r.pool.QueryRow(ctx, r.table(query), userID, id).Scan(&payment.InvoiceID, &payment.Status,
+	err = r.pool.QueryRow(ctx, r.table(query), userID, id).Scan(&payment.InvoiceId, &payment.Status,
 		&payment.Currency, &payment.Total, &payment.Metadata, &createdAt, &updatedAt)
 	if err != nil {
 		return

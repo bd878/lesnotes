@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/bd878/gallery/server/billing/internal/machine";
+option go_package = "github.com/bd878/gallery/server/api/billing";
 
 message AppendInvoiceCommand {
 	string  id = 1;

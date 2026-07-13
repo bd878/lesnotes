@@ -2,10 +2,10 @@ package model
 
 import (
 	"encoding/json"
-	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/billing"
 )
 
-func InvoiceFromProto(proto *api.Invoice) (*Invoice, error) {
+func InvoiceFromProto(proto *billing.Invoice) (*Invoice, error) {
 	cart, err := CartFromProto(proto.Cart)
 	if err != nil {
 		return nil, err
@@ -23,13 +23,13 @@ func InvoiceFromProto(proto *api.Invoice) (*Invoice, error) {
 	}, nil
 }
 
-func InvoiceToProto(invoice *Invoice) (*api.Invoice, error) {
+func InvoiceToProto(invoice *Invoice) (*billing.Invoice, error) {
 	cart, err := CartToProto(invoice.Cart)
 	if err != nil {
 		return nil, err
 	}
 
-	return &api.Invoice{
+	return &billing.Invoice{
 		Id:             invoice.ID,
 		UserId:         invoice.UserID,
 		Total:          invoice.Total,
@@ -41,7 +41,7 @@ func InvoiceToProto(invoice *Invoice) (*api.Invoice, error) {
 	}, nil
 }
 
-func PaymentFromProto(proto *api.Payment) *Payment {
+func PaymentFromProto(proto *billing.Payment) *Payment {
 	return &Payment{
 		ID:             proto.Id,
 		UserID:         proto.UserId,
@@ -55,8 +55,8 @@ func PaymentFromProto(proto *api.Payment) *Payment {
 	}
 }
 
-func PaymentToProto(payment *Payment) *api.Payment {
-	return &api.Payment{
+func PaymentToProto(payment *Payment) *billing.Payment {
+	return &billing.Payment{
 		Id:             payment.ID,
 		UserId:         payment.UserID,
 		InvoiceId:      payment.InvoiceID,
@@ -69,7 +69,7 @@ func PaymentToProto(payment *Payment) *api.Payment {
 	}
 }
 
-func CartFromProto(proto *api.Cart) (*Cart, error) {
+func CartFromProto(proto *billing.Cart) (*Cart, error) {
 	items, err := MapCartItemsFromProto(CartItemFromProto, proto.Items)
 	if err != nil {
 		return nil, err
@@ -80,20 +80,20 @@ func CartFromProto(proto *api.Cart) (*Cart, error) {
 	}, nil
 }
 
-func CartToProto(cart *Cart) (*api.Cart, error) {
+func CartToProto(cart *Cart) (*billing.Cart, error) {
 	items, err := MapCartItemsToProto(CartItemToProto, cart.Items)
 	if err != nil {
 		return nil, err
 	}
 
-	return &api.Cart{
+	return &billing.Cart{
 		Items: items,
 	}, nil
 }
 
-func CartItemFromProto(item *api.CartItem) (*CartItem, error) {
+func CartItemFromProto(item *billing.CartItem) (*CartItem, error) {
 	switch v := item.Item.(type) {
-	case *api.CartItem_Premium:
+	case *billing.CartItem_Premium:
 		premium, err := json.Marshal(&PremiumItem{
 			ExpiresAt:   v.Premium.ExpiresAt,
 			Cost:        v.Premium.Cost,
@@ -113,7 +113,7 @@ func CartItemFromProto(item *api.CartItem) (*CartItem, error) {
 	}
 }
 
-func CartItemToProto(item *CartItem) (*api.CartItem, error) {
+func CartItemToProto(item *CartItem) (*billing.CartItem, error) {
 	switch item.Type {
 	case "premium":
 		var premium PremiumItem
@@ -122,9 +122,9 @@ func CartItemToProto(item *CartItem) (*api.CartItem, error) {
 			return nil, err
 		}
 
-		return &api.CartItem{
-			Item: &api.CartItem_Premium{
-				Premium: &api.Premium{
+		return &billing.CartItem{
+			Item: &billing.CartItem_Premium{
+				Premium: &billing.Premium{
 					ExpiresAt: premium.ExpiresAt,
 					Cost:      premium.Cost,
 					Discount:  premium.Discount,
@@ -133,19 +133,19 @@ func CartItemToProto(item *CartItem) (*api.CartItem, error) {
 			},
 		}, nil
 	default:
-		return &api.CartItem{}, nil
+		return &billing.CartItem{}, nil
 	}
 }
 
-func MapInvoicesToProto(mapper (func(*Invoice) *api.Invoice), invoices []*Invoice) []*api.Invoice {
-	res := make([]*api.Invoice, len(invoices))
+func MapInvoicesToProto(mapper (func(*Invoice) *billing.Invoice), invoices []*Invoice) []*billing.Invoice {
+	res := make([]*billing.Invoice, len(invoices))
 	for i, invoice := range invoices {
 		res[i] = mapper(invoice)
 	}
 	return res
 }
 
-func MapInvoicesFromProto(mapper (func(*api.Invoice) *Invoice), invoices []*api.Invoice) []*Invoice {
+func MapInvoicesFromProto(mapper (func(*billing.Invoice) *Invoice), invoices []*billing.Invoice) []*Invoice {
 	res := make([]*Invoice, len(invoices))
 	for i, invoice := range invoices {
 		res[i] = mapper(invoice)
@@ -153,15 +153,15 @@ func MapInvoicesFromProto(mapper (func(*api.Invoice) *Invoice), invoices []*api.
 	return res
 }
 
-func MapPaymentsToProto(mapper (func(*Payment) *api.Payment), payments []*Payment) []*api.Payment {
-	res := make([]*api.Payment, len(payments))
+func MapPaymentsToProto(mapper (func(*Payment) *billing.Payment), payments []*Payment) []*billing.Payment {
+	res := make([]*billing.Payment, len(payments))
 	for i, payment := range payments {
 		res[i] = mapper(payment)
 	}
 	return res
 }
 
-func MapPaymentsFromProto(mapper (func(*api.Payment) *Payment), payments []*api.Payment) []*Payment {
+func MapPaymentsFromProto(mapper (func(*billing.Payment) *Payment), payments []*billing.Payment) []*Payment {
 	res := make([]*Payment, len(payments))
 	for i, payment := range payments {
 		res[i] = mapper(payment)
@@ -169,8 +169,8 @@ func MapPaymentsFromProto(mapper (func(*api.Payment) *Payment), payments []*api.
 	return res
 }
 
-func MapCartItemsToProto(mapper (func(*CartItem) (*api.CartItem, error)), items []*CartItem) (res []*api.CartItem, err error) {
-	res = make([]*api.CartItem, len(items))
+func MapCartItemsToProto(mapper (func(*CartItem) (*billing.CartItem, error)), items []*CartItem) (res []*billing.CartItem, err error) {
+	res = make([]*billing.CartItem, len(items))
 	for i, item := range items {
 		res[i], err = mapper(item)
 		if err != nil {
@@ -180,7 +180,7 @@ func MapCartItemsToProto(mapper (func(*CartItem) (*api.CartItem, error)), items 
 	return res, nil
 }
 
-func MapCartItemsFromProto(mapper (func(*api.CartItem) (*CartItem, error)), items []*api.CartItem) (res []*CartItem, err error) {
+func MapCartItemsFromProto(mapper (func(*billing.CartItem) (*CartItem, error)), items []*billing.CartItem) (res []*CartItem, err error) {
 	res = make([]*CartItem, len(items))
 	for i, item := range items {
 		res[i], err = mapper(item)

@@ -11,10 +11,11 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/billing"
+	"github.com/bd878/gallery/server/db/billing/pkg/loadbalance"
+	"github.com/bd878/gallery/server/db/billing/pkg/machine"
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/billing/pkg/loadbalance"
-	"github.com/bd878/gallery/server/billing/internal/machine"
 	"github.com/bd878/gallery/server/billing/pkg/model"
 	"github.com/bd878/gallery/server/billing/internal/domain"
 )
@@ -25,7 +26,7 @@ type Config struct {
 
 type Controller struct {
 	conf         Config
-	client       api.BillingClient
+	client       billing.BillingClient
 	conn         *grpc.ClientConn
 	publisher    ddd.EventPublisher[ddd.Event]
 }
@@ -57,7 +58,7 @@ func (s *Controller) setupConnection() (err error) {
 		return err
 	}
 
-	client := api.NewBillingClient(conn)
+	client := billing.NewBillingClient(conn)
 
 	s.conn = conn
 	s.client = client
@@ -95,7 +96,7 @@ func (s *Controller) CreateInvoice(ctx context.Context, id string, userID int64,
 		return err
 	}
 
-	cmd, err := proto.Marshal(&machine.AppendInvoiceCommand{
+	cmd, err := proto.Marshal(&billing.AppendInvoiceCommand{
 		Id:            id,
 		UserId:        userID,
 		Total:         total,
@@ -127,7 +128,7 @@ func (s *Controller) StartPayment(ctx context.Context, id, userID int64, invoice
 
 	logger.Debugw("start payment", "id", id, "user_id", userID, "invoice_id", invoiceID, "currency", currency, "total", total, "metadata", metadata)
 
-	cmd, err := proto.Marshal(&machine.AppendPaymentCommand{
+	cmd, err := proto.Marshal(&billing.AppendPaymentCommand{
 		Id:            id,
 		UserId:        userID,
 		InvoiceId:     invoiceID,
@@ -166,7 +167,7 @@ func (s *Controller) ProceedPayment(ctx context.Context, id, userID int64) (err 
 		return err
 	}
 
-	cmd, err := proto.Marshal(&machine.ProceedPaymentCommand{
+	cmd, err := proto.Marshal(&billing.ProceedPaymentCommand{
 		Id:            id,
 		UserId:        userID,
 		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
@@ -200,7 +201,7 @@ func (s *Controller) ProceedPayment(ctx context.Context, id, userID int64) (err 
 
 	for _, cartItem := range invoice.Cart.Items {
 		switch v := cartItem.Item.(type) {
-		case *api.CartItem_Premium:
+		case *billing.CartItem_Premium:
 			event, err := domain.PayPremium(invoice.Id, userID,
 				v.Premium.ExpiresAt, updatedAt, v.Premium.Cost, v.Premium.Discount)
 			if err != nil {
@@ -211,7 +212,7 @@ func (s *Controller) ProceedPayment(ctx context.Context, id, userID int64) (err 
 		}
 	}
 
-	cmd1, err := proto.Marshal(&machine.PayInvoiceCommand{
+	cmd1, err := proto.Marshal(&billing.PayInvoiceCommand{
 		Id:            payment.InvoiceID,
 		UserId:        userID,
 		UpdatedAt:     updatedAt,
@@ -252,7 +253,7 @@ func (s *Controller) CancelPayment(ctx context.Context, id, userID int64) (err e
 
 	logger.Debugw("cancel payment", "id", id, "user_id", userID)
 
-	cmd, err := proto.Marshal(&machine.CancelPaymentCommand{
+	cmd, err := proto.Marshal(&billing.CancelPaymentCommand{
 		Id:            id,
 		UserId:        userID,
 		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
@@ -279,7 +280,7 @@ func (s *Controller) RefundPayment(ctx context.Context, id, userID int64) (err e
 
 	logger.Debugw("refund payment", "id", id, "user_id", userID)
 
-	cmd, err := proto.Marshal(&machine.RefundPaymentCommand{
+	cmd, err := proto.Marshal(&billing.RefundPaymentCommand{
 		Id:            id,
 		UserId:        userID,
 		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
@@ -306,7 +307,7 @@ func (s *Controller) GetInvoice(ctx context.Context, id string, userID int64) (i
 
 	logger.Debugw("get invoice", "id", id, "user_id", userID)
 
-	resp, err := s.client.GetInvoice(ctx, &api.GetInvoiceRequest{
+	resp, err := s.client.GetInvoice(ctx, &billing.GetInvoiceRequest{
 		Id:        id,
 		UserId:    userID,
 	})
@@ -331,7 +332,7 @@ func (s *Controller) GetPayment(ctx context.Context, id, userID int64) (payment 
 
 	logger.Debugw("get payment", "id", id, "user_id", userID)
 
-	resp, err := s.client.GetPayment(ctx, &api.GetPaymentRequest{
+	resp, err := s.client.GetPayment(ctx, &billing.GetPaymentRequest{
 		Id:       id,
 		UserId:   userID,
 	})

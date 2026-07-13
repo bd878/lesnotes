@@ -6,17 +6,17 @@ import (
 	"bytes"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/billing"
 	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/billing/pkg/model"
-	"github.com/bd878/gallery/server/billing/internal/machine"
+	"github.com/bd878/gallery/server/db/billing/pkg/machine"
 )
 
 type PaymentsRepository interface {
-	GetPayment(ctx context.Context, id, userID int64) (payment *model.Payment, err error)
+	GetPayment(ctx context.Context, id, userID int64) (payment *billing.Payment, err error)
 }
 
 type InvoicesRepository interface {
-	GetInvoice(ctx context.Context, id string, userID int64) (invoice *api.Invoice, err error)
+	GetInvoice(ctx context.Context, id string, userID int64) (invoice *billing.Invoice, err error)
 }
 
 type Consensus interface {
@@ -56,12 +56,12 @@ func (m *Distributed) Apply(ctx context.Context, reqType machine.RequestType, cm
 	return m.consensus.Apply(buf.Bytes(), duration)
 }
 
-func (m *Distributed) GetInvoice(ctx context.Context, id string, userID int64) (invoice *api.Invoice, err error) {
+func (m *Distributed) GetInvoice(ctx context.Context, id string, userID int64) (invoice *billing.Invoice, err error) {
 	m.log.Debugw("get invoice", "id", id, "user_id", userID)
 	return m.invoicesRepo.GetInvoice(ctx, id, userID)
 }
 
-func (m *Distributed) GetPayment(ctx context.Context, id, userID int64) (payment *model.Payment, err error) {
+func (m *Distributed) GetPayment(ctx context.Context, id, userID int64) (payment *billing.Payment, err error) {
 	m.log.Debugw("get payment", "id", id, "user_id", userID)
 	return m.paymentsRepo.GetPayment(ctx, id, userID)
 }

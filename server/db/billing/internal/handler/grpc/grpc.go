@@ -5,19 +5,19 @@ import (
 	"time"
 
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/billing/pkg/model"
-	"github.com/bd878/gallery/server/billing/internal/machine"
+	"github.com/bd878/gallery/server/api/billing"
+	"github.com/bd878/gallery/server/db/billing/pkg/machine"
 )
 
 type Controller interface {
 	Apply(ctx context.Context, reqType machine.RequestType, cmd []byte, duration time.Duration) (err error)
 	GetServers(ctx context.Context) (servers []*api.Server, err error)
-	GetInvoice(ctx context.Context, id string, userID int64) (invoice *api.Invoice, err error)
-	GetPayment(ctx context.Context, id, userID int64) (payment *model.Payment, err error)
+	GetInvoice(ctx context.Context, id string, userID int64) (invoice *billing.Invoice, err error)
+	GetPayment(ctx context.Context, id, userID int64) (payment *billing.Payment, err error)
 }
 
 type Handler struct {
-	api.UnimplementedBillingServer
+	billing.UnimplementedBillingServer
 	api.UnimplementedDistributedServer
 	controller Controller
 }
@@ -41,27 +41,27 @@ func (h *Handler) Apply(ctx context.Context, req *api.Command) (resp *api.Comman
 	return
 }
 
-func (h *Handler) GetInvoice(ctx context.Context, req *api.GetInvoiceRequest) (resp *api.GetInvoiceResponse, err error) {
+func (h *Handler) GetInvoice(ctx context.Context, req *billing.GetInvoiceRequest) (resp *billing.GetInvoiceResponse, err error) {
 	invoice, err := h.controller.GetInvoice(ctx, req.Id, req.UserId)
 	if err != nil {
 		return nil, err
 	}
 
-	resp = &api.GetInvoiceResponse{
+	resp = &billing.GetInvoiceResponse{
 		Invoice: invoice,
 	}
 
 	return
 }
 
-func (h *Handler) GetPayment(ctx context.Context, req *api.GetPaymentRequest) (resp *api.GetPaymentResponse, err error) {
+func (h *Handler) GetPayment(ctx context.Context, req *billing.GetPaymentRequest) (resp *billing.GetPaymentResponse, err error) {
 	payment, err := h.controller.GetPayment(ctx, req.Id, req.UserId)
 	if err != nil {
 		return nil, err
 	}
 
-	resp = &api.GetPaymentResponse{
-		Payment: model.PaymentToProto(payment),
+	resp = &billing.GetPaymentResponse{
+		Payment: payment,
 	}
 
 	return

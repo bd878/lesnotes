@@ -9,7 +9,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/billing"
 	"github.com/bd878/gallery/server/internal/logger"
 )
 
@@ -19,7 +19,7 @@ type Dumper struct {
 	paymentsTableName string
 	ctx               context.Context
 	cancel            context.CancelCauseFunc
-	ch                chan *api.BillingSnapshot
+	ch                chan *billing.BillingSnapshot
 	wg                sync.WaitGroup
 }
 
@@ -31,9 +31,9 @@ func NewDumper(pool *pgxpool.Pool, invoicesTableName, paymentsTableName string) 
 	}
 }
 
-func (r *Dumper) Open(ctx context.Context) (ch chan *api.BillingSnapshot, err error) {
+func (r *Dumper) Open(ctx context.Context) (ch chan *billing.BillingSnapshot, err error) {
 	r.ctx, r.cancel = context.WithCancelCause(ctx)
-	ch = make(chan *api.BillingSnapshot, 100)
+	ch = make(chan *billing.BillingSnapshot, 100)
 	r.ch = ch
 
 	r.wg.Add(1)
@@ -65,7 +65,7 @@ func (r *Dumper) dumpInvoices() {
 	defer rows.Close()
 
 	for rows.Next() {
-		invoice := &api.InvoiceSnapshotItem{}
+		invoice := &billing.InvoiceSnapshotItem{}
 
 		var createdAt, updatedAt *time.Time
 		err = rows.Scan(&invoice.Id, &invoice.UserId, &invoice.Status, &invoice.Total,
@@ -85,8 +85,8 @@ func (r *Dumper) dumpInvoices() {
 		default:
 		}
 
-		r.ch <- &api.BillingSnapshot{
-			Item: &api.BillingSnapshot_Invoice{
+		r.ch <- &billing.BillingSnapshot{
+			Item: &billing.BillingSnapshot_Invoice{
 				Invoice: invoice,
 			},
 		}
@@ -115,7 +115,7 @@ func (r *Dumper) dumpPayments() {
 	defer rows.Close()
 
 	for rows.Next() {
-		payment := &api.PaymentSnapshotItem{}
+		payment := &billing.PaymentSnapshotItem{}
 
 		var createdAt, updatedAt *time.Time
 		err = rows.Scan(&payment.Id, &payment.InvoiceId, &payment.UserId, &payment.Status,
@@ -135,8 +135,8 @@ func (r *Dumper) dumpPayments() {
 		default:
 		}
 
-		r.ch <- &api.BillingSnapshot{
-			Item: &api.BillingSnapshot_Payment{
+		r.ch <- &billing.BillingSnapshot{
+			Item: &billing.BillingSnapshot_Payment{
 				Payment: payment,
 			},
 		}
@@ -156,9 +156,9 @@ func (r *Dumper) Close() (err error) {
 	return nil
 }
 
-func (r *Dumper) Restore(ctx context.Context, snapshot *api.BillingSnapshot) (err error) {
+func (r *Dumper) Restore(ctx context.Context, snapshot *billing.BillingSnapshot) (err error) {
 	switch v := snapshot.Item.(type) {
-	case *api.BillingSnapshot_Invoice:
+	case *billing.BillingSnapshot_Invoice:
 
 		query := "INSERT INTO %s(id, user_id, status, total, cart, metadata, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)"
 
@@ -167,7 +167,7 @@ func (r *Dumper) Restore(ctx context.Context, snapshot *api.BillingSnapshot) (er
 
 		return
 
-	case *api.BillingSnapshot_Payment:
+	case *billing.BillingSnapshot_Payment:
 
 		query := "INSERT INTO %s(id, invoice_id, user_id, status, currency, total, metadata, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)"
 
