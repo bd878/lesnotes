@@ -8,6 +8,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/sessions"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/internal/system"
 	"github.com/bd878/gallery/server/internal/discovery/serf"
@@ -36,7 +37,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 
 	handler := grpc.New(controller)
 
-	api.RegisterSessionsServer(svc.RPC(), handler)
+	sessions.RegisterSessionsServer(svc.RPC(), handler)
 	api.RegisterDistributedServer(svc.RPC(), handler)
 
 	return nil

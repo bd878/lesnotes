@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/bd878/gallery/server/sessions/pkg/model"
+	"github.com/bd878/gallery/server/api/sessions"
 )
 
 type SessionsRepository struct {
@@ -31,16 +31,16 @@ func (r *SessionsRepository) Save(ctx context.Context, userID int64, token, crea
 	return err
 }
 
-func (r *SessionsRepository) Get(ctx context.Context, token string) (session *model.Session, err error) {
+func (r *SessionsRepository) Get(ctx context.Context, token string) (session *sessions.Session, err error) {
 	const query = "SELECT user_id, created_at, expires_at FROM %s WHERE value = $1"
 
 	var createdAt, expiresAt *time.Time
 
-	session = &model.Session{
+	session = &sessions.Session{
 		Token:          token,
 	}
 
-	err = r.pool.QueryRow(ctx, r.table(query), token).Scan(&session.UserID, &createdAt, &expiresAt)
+	err = r.pool.QueryRow(ctx, r.table(query), token).Scan(&session.UserId, &createdAt, &expiresAt)
 	if err != nil {
 		return
 	}
@@ -51,7 +51,7 @@ func (r *SessionsRepository) Get(ctx context.Context, token string) (session *mo
 	return
 }
 
-func (r *SessionsRepository) List(ctx context.Context, userID int64) (sessions []*model.Session, err error) {
+func (r *SessionsRepository) List(ctx context.Context, userID int64) (list []*sessions.Session, err error) {
 	const query = "SELECT value, created_at, expires_at FROM %s WHERE user_id = $1"
 
 	var rows pgx.Rows
@@ -62,12 +62,12 @@ func (r *SessionsRepository) List(ctx context.Context, userID int64) (sessions [
 
 	defer rows.Close()
 
-	sessions = make([]*model.Session, 0)
+	list = make([]*sessions.Session, 0)
 	for rows.Next() {
 		var createdAt, expiresAt *time.Time
 
-		session := &model.Session{
-			UserID:         userID,
+		session := &sessions.Session{
+			UserId:         userID,
 		}
 
 		err = rows.Scan(&session.Token, &createdAt, &expiresAt)
@@ -78,7 +78,7 @@ func (r *SessionsRepository) List(ctx context.Context, userID int64) (sessions [
 		session.CreatedAt = createdAt.Format(time.RFC3339)
 		session.ExpiresAt = expiresAt.Format(time.RFC3339)
 
-		sessions = append(sessions, session)
+		list = append(list, session)
 	}
 
 	err = rows.Err()

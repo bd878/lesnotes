@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/sessions"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/internal/store"
 )
@@ -17,7 +17,7 @@ type snapshot struct {
 	store         *store.Store
 	dumper        Dumper
 	ctx           context.Context
-	ch            <-chan *api.SessionsSnapshot
+	ch            <-chan *sessions.SessionsSnapshot
 }
 
 func (f *Machine) Snapshot() (raft.FSMSnapshot, error) {
@@ -73,7 +73,7 @@ func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 
 		logger.Debugw("restore", "size", size, "n", n)
 
-		var snapshot api.SessionsSnapshot
+		var snapshot sessions.SessionsSnapshot
 		if err = proto.Unmarshal(data, &snapshot); err != nil {
 			return err
 		}
@@ -92,7 +92,7 @@ func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
 
 	for snapshot := range s.ch {
 		switch v := snapshot.Item.(type) {
-		case *api.SessionsSnapshot_Session:
+		case *sessions.SessionsSnapshot_Session:
 			logger.Debugw("session snapshot", "token", v.Session.Token)
 		default:
 			logger.Debugln("unknown snapshot")

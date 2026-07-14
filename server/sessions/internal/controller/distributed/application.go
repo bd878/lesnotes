@@ -7,15 +7,15 @@ import (
 
 	"google.golang.org/protobuf/proto"
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/sessions"
 	"github.com/bd878/gallery/server/internal/utils"
 	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/sessions/pkg/model"
-	"github.com/bd878/gallery/server/sessions/internal/machine"
+	"github.com/bd878/gallery/server/sessions/pkg/machine"
 )
 
 type SessionsRepository interface {
-	Get(ctx context.Context, token string) (session *model.Session, err error)
-	List(ctx context.Context, userID int64) (sessions []*model.Session, err error)
+	Get(ctx context.Context, token string) (session *sessions.Session, err error)
+	List(ctx context.Context, userID int64) (sessions []*sessions.Session, err error)
 }
 
 type Consensus interface {
@@ -52,7 +52,7 @@ func (m *Distributed) apply(ctx context.Context, reqType machine.RequestType, cm
 	return m.consensus.Apply(buf.Bytes(), 10*time.Second)
 }
 
-func (m *Distributed) CreateSession(ctx context.Context, userID int64) (session *model.Session, err error) {
+func (m *Distributed) CreateSession(ctx context.Context, userID int64) (session *sessions.Session, err error) {
 	m.log.Debugw("create session", "userID", userID)
 
 	token := utils.RandomString(10)
@@ -60,7 +60,7 @@ func (m *Distributed) CreateSession(ctx context.Context, userID int64) (session 
 	createdAt := time.Now().UTC().Format(time.RFC3339)
 	expiresAt := time.Now().Add(time.Hour * 24 * 5).UTC().Format(time.RFC3339)
 
-	cmd, err := proto.Marshal(&machine.AppendCommand{
+	cmd, err := proto.Marshal(&sessions.AppendCommand{
 		UserId:     userID,
 		Token:      token,
 		ExpiresAt:  expiresAt,
@@ -72,8 +72,8 @@ func (m *Distributed) CreateSession(ctx context.Context, userID int64) (session 
 
 	err = m.apply(ctx, machine.AppendRequest, cmd)
 
-	session = &model.Session{
-		UserID:         userID,
+	session = &sessions.Session{
+		UserId:         userID,
 		Token:          token,
 		CreatedAt:      createdAt,
 		ExpiresAt:      expiresAt,
@@ -82,13 +82,13 @@ func (m *Distributed) CreateSession(ctx context.Context, userID int64) (session 
 	return
 }
 
-func (m *Distributed) GetSession(ctx context.Context, token string) (*model.Session, error) {
+func (m *Distributed) GetSession(ctx context.Context, token string) (*sessions.Session, error) {
 	m.log.Debugw("get session", "token", token)
 
 	return m.sessionsRepo.Get(ctx, token)
 }
 
-func (m *Distributed) ListUserSessions(ctx context.Context, userID int64) ([]*model.Session, error) {
+func (m *Distributed) ListUserSessions(ctx context.Context, userID int64) ([]*sessions.Session, error) {
 	m.log.Debugw("list user sessions", "userID", userID)
 
 	return m.sessionsRepo.List(ctx, userID)
@@ -97,7 +97,7 @@ func (m *Distributed) ListUserSessions(ctx context.Context, userID int64) ([]*mo
 func (m *Distributed) RemoveSession(ctx context.Context, token string) error {
 	m.log.Debugw("remove session", "token", token)
 
-	cmd, err := proto.Marshal(&machine.DeleteCommand{
+	cmd, err := proto.Marshal(&sessions.DeleteCommand{
 		Token: token,
 	})
 	if err != nil {
@@ -110,7 +110,7 @@ func (m *Distributed) RemoveSession(ctx context.Context, token string) error {
 func (m *Distributed) RemoveUserSessions(ctx context.Context, userID int64) error {
 	m.log.Debugw("remove user sessions", "userID", userID)
 
-	cmd, err := proto.Marshal(&machine.DeleteUserSessionsCommand{
+	cmd, err := proto.Marshal(&sessions.DeleteUserSessionsCommand{
 		UserId: userID,
 	})
 	if err != nil {

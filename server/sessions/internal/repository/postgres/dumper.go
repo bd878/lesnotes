@@ -9,7 +9,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/sessions"
 	"github.com/bd878/gallery/server/internal/logger"
 )
 
@@ -18,7 +18,7 @@ type Dumper struct {
 	sessionsTableName string
 	ctx               context.Context
 	cancel            context.CancelCauseFunc
-	ch                chan *api.SessionsSnapshot
+	ch                chan *sessions.SessionsSnapshot
 	wg                sync.WaitGroup
 }
 
@@ -29,9 +29,9 @@ func NewDumper(pool *pgxpool.Pool, sessionsTableName string) *Dumper {
 	}
 }
 
-func (r *Dumper) Open(ctx context.Context) (ch chan *api.SessionsSnapshot, err error) {
+func (r *Dumper) Open(ctx context.Context) (ch chan *sessions.SessionsSnapshot, err error) {
 	r.ctx, r.cancel = context.WithCancelCause(ctx)
-	ch = make(chan *api.SessionsSnapshot, 100)
+	ch = make(chan *sessions.SessionsSnapshot, 100)
 	r.ch = ch
 
 	r.wg.Add(1)
@@ -61,7 +61,7 @@ func (r *Dumper) runSessions() {
 	defer rows.Close()
 
 	for rows.Next() {
-		session := &api.SessionSnapshotItem{}
+		session := &sessions.SessionSnapshotItem{}
 
 		var createdAt, expiresAt *time.Time
 		err = rows.Scan(&session.UserId, &session.Token, &createdAt, &expiresAt)
@@ -80,8 +80,8 @@ func (r *Dumper) runSessions() {
 		default:
 		}
 
-		r.ch <- &api.SessionsSnapshot{
-			Item: &api.SessionsSnapshot_Session{
+		r.ch <- &sessions.SessionsSnapshot{
+			Item: &sessions.SessionsSnapshot_Session{
 				Session: session,
 			},
 		}
@@ -101,9 +101,9 @@ func (r *Dumper) Close() (err error) {
 	return nil
 }
 
-func (r *Dumper) Restore(ctx context.Context, snapshot *api.SessionsSnapshot) (err error) {
+func (r *Dumper) Restore(ctx context.Context, snapshot *sessions.SessionsSnapshot) (err error) {
 	switch v := snapshot.Item.(type) {
-	case *api.SessionsSnapshot_Session:
+	case *sessions.SessionsSnapshot_Session:
 
 		query := "INSERT INTO %s(user_id, value, created_at, expires_at) VALUES ($1, $2, $3, $4)"
 
