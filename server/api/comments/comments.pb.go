@@ -4,9 +4,10 @@
 // 	protoc        v3.19.4
 // source: protos/comments.proto
 
-package api
+package comments
 
 import (
+	api "github.com/bd878/gallery/server/api"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -600,7 +601,7 @@ const file_protos_comments_proto_rawDesc = "" +
 	"\bComments\x12A\n" +
 	"\x05Apply\x12\x17.distributed.v1.Command\x1a\x1f.distributed.v1.CommandResponse\x12P\n" +
 	"\vReadComment\x12\x1f.comments.v1.ReadCommentRequest\x1a .comments.v1.ReadCommentResponse\x12S\n" +
-	"\fListComments\x12 .comments.v1.ListCommentsRequest\x1a!.comments.v1.ListCommentsResponseB%Z#github.com/bd878/gallery/server/apib\x06proto3"
+	"\fListComments\x12 .comments.v1.ListCommentsRequest\x1a!.comments.v1.ListCommentsResponseB.Z,github.com/bd878/gallery/server/api/commentsb\x06proto3"
 
 var (
 	file_protos_comments_proto_rawDescOnce sync.Once
@@ -623,8 +624,8 @@ var file_protos_comments_proto_goTypes = []any{
 	(*ListCommentsResponse)(nil), // 4: comments.v1.ListCommentsResponse
 	(*ReadCommentRequest)(nil),   // 5: comments.v1.ReadCommentRequest
 	(*ReadCommentResponse)(nil),  // 6: comments.v1.ReadCommentResponse
-	(*Command)(nil),              // 7: distributed.v1.Command
-	(*CommandResponse)(nil),      // 8: distributed.v1.CommandResponse
+	(*api.Command)(nil),          // 7: distributed.v1.Command
+	(*api.CommandResponse)(nil),  // 8: distributed.v1.CommandResponse
 }
 var file_protos_comments_proto_depIdxs = []int32{
 	1, // 0: comments.v1.CommentsList.comments:type_name -> comments.v1.Comment
@@ -648,7 +649,6 @@ func file_protos_comments_proto_init() {
 	if File_protos_comments_proto != nil {
 		return
 	}
-	file_protos_distributed_proto_init()
 	file_protos_comments_proto_msgTypes[0].OneofWrappers = []any{}
 	file_protos_comments_proto_msgTypes[1].OneofWrappers = []any{}
 	file_protos_comments_proto_msgTypes[3].OneofWrappers = []any{}

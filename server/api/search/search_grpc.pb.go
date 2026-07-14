@@ -4,10 +4,11 @@
 // - protoc             v3.19.4
 // source: protos/search.proto
 
-package api
+package search
 
 import (
 	context "context"
+	api "github.com/bd878/gallery/server/api"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -28,7 +29,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SearchClient interface {
-	Apply(ctx context.Context, in *Command, opts ...grpc.CallOption) (*CommandResponse, error)
+	Apply(ctx context.Context, in *api.Command, opts ...grpc.CallOption) (*api.CommandResponse, error)
 	SearchMessages(ctx context.Context, in *SearchMessagesRequest, opts ...grpc.CallOption) (*SearchMessagesResponse, error)
 	SearchFiles(ctx context.Context, in *SearchFilesRequest, opts ...grpc.CallOption) (*SearchFilesResponse, error)
 }
@@ -41,9 +42,9 @@ func NewSearchClient(cc grpc.ClientConnInterface) SearchClient {
 	return &searchClient{cc}
 }
 
-func (c *searchClient) Apply(ctx context.Context, in *Command, opts ...grpc.CallOption) (*CommandResponse, error) {
+func (c *searchClient) Apply(ctx context.Context, in *api.Command, opts ...grpc.CallOption) (*api.CommandResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CommandResponse)
+	out := new(api.CommandResponse)
 	err := c.cc.Invoke(ctx, Search_Apply_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -75,7 +76,7 @@ func (c *searchClient) SearchFiles(ctx context.Context, in *SearchFilesRequest, 
 // All implementations must embed UnimplementedSearchServer
 // for forward compatibility.
 type SearchServer interface {
-	Apply(context.Context, *Command) (*CommandResponse, error)
+	Apply(context.Context, *api.Command) (*api.CommandResponse, error)
 	SearchMessages(context.Context, *SearchMessagesRequest) (*SearchMessagesResponse, error)
 	SearchFiles(context.Context, *SearchFilesRequest) (*SearchFilesResponse, error)
 	mustEmbedUnimplementedSearchServer()
@@ -88,7 +89,7 @@ type SearchServer interface {
 // pointer dereference when methods are called.
 type UnimplementedSearchServer struct{}
 
-func (UnimplementedSearchServer) Apply(context.Context, *Command) (*CommandResponse, error) {
+func (UnimplementedSearchServer) Apply(context.Context, *api.Command) (*api.CommandResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Apply not implemented")
 }
 func (UnimplementedSearchServer) SearchMessages(context.Context, *SearchMessagesRequest) (*SearchMessagesResponse, error) {
@@ -119,7 +120,7 @@ func RegisterSearchServer(s grpc.ServiceRegistrar, srv SearchServer) {
 }
 
 func _Search_Apply_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Command)
+	in := new(api.Command)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -131,7 +132,7 @@ func _Search_Apply_Handler(srv interface{}, ctx context.Context, dec func(interf
 		FullMethod: Search_Apply_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SearchServer).Apply(ctx, req.(*Command))
+		return srv.(SearchServer).Apply(ctx, req.(*api.Command))
 	}
 	return interceptor(ctx, in, info, handler)
 }

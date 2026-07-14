@@ -4,7 +4,7 @@
 // 	protoc        v3.19.4
 // source: protos/translations_events.proto
 
-package api
+package translations
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -267,7 +267,7 @@ const file_protos_translations_events_proto_rawDesc = "" +
 	"\n" +
 	"updated_at\x18\x05 \x01(\tR\tupdatedAtB\a\n" +
 	"\x05_textB\b\n" +
-	"\x06_titleB%Z#github.com/bd878/gallery/server/apib\x06proto3"
+	"\x06_titleB2Z0github.com/bd878/gallery/server/api/translationsb\x06proto3"
 
 var (
 	file_protos_translations_events_proto_rawDescOnce sync.Once

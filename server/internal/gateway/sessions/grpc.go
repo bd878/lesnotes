@@ -7,7 +7,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
-	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/sessions"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/sessions/pkg/loadbalance"
 	"github.com/bd878/gallery/server/sessions/pkg/model"
@@ -15,7 +15,7 @@ import (
 
 type Gateway struct {
 	addr            string
-	client          api.SessionsClient
+	client          sessions.SessionsClient
 	conn            *grpc.ClientConn
 }
 
@@ -39,7 +39,7 @@ func (g *Gateway) setupConnection() error {
 	}
 
 	g.conn = conn
-	g.client = api.NewSessionsClient(conn)
+	g.client = sessions.NewSessionsClient(conn)
 
 	return nil
 }
@@ -61,7 +61,7 @@ func (g *Gateway) GetSession(ctx context.Context, token string) (*model.Session,
 			return nil, err
 		}
 	}
-	resp, err := g.client.Get(ctx, &api.GetSessionRequest{Token: token})
+	resp, err := g.client.Get(ctx, &sessions.GetSessionRequest{Token: token})
 	if err != nil {
 		return nil, err
 	}

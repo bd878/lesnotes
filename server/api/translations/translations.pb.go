@@ -4,9 +4,10 @@
 // 	protoc        v3.19.4
 // source: protos/translations.proto
 
-package api
+package translations
 
 import (
+	api "github.com/bd878/gallery/server/api"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -529,7 +530,7 @@ const file_protos_translations_proto_rawDesc = "" +
 	"\fTranslations\x12A\n" +
 	"\x05Apply\x12\x17.distributed.v1.Command\x1a\x1f.distributed.v1.CommandResponse\x12f\n" +
 	"\x0fReadTranslation\x12'.translations.v1.ReadTranslationRequest\x1a(.translations.v1.ReadTranslationResponse\"\x00\x12i\n" +
-	"\x10ListTranslations\x12(.translations.v1.ListTranslationsRequest\x1a).translations.v1.ListTranslationsResponse\"\x00B%Z#github.com/bd878/gallery/server/apib\x06proto3"
+	"\x10ListTranslations\x12(.translations.v1.ListTranslationsRequest\x1a).translations.v1.ListTranslationsResponse\"\x00B2Z0github.com/bd878/gallery/server/api/translationsb\x06proto3"
 
 var (
 	file_protos_translations_proto_rawDescOnce sync.Once
@@ -552,8 +553,8 @@ var file_protos_translations_proto_goTypes = []any{
 	(*ReadTranslationResponse)(nil),  // 4: translations.v1.ReadTranslationResponse
 	(*ListTranslationsRequest)(nil),  // 5: translations.v1.ListTranslationsRequest
 	(*ListTranslationsResponse)(nil), // 6: translations.v1.ListTranslationsResponse
-	(*Command)(nil),                  // 7: distributed.v1.Command
-	(*CommandResponse)(nil),          // 8: distributed.v1.CommandResponse
+	(*api.Command)(nil),              // 7: distributed.v1.Command
+	(*api.CommandResponse)(nil),      // 8: distributed.v1.CommandResponse
 }
 var file_protos_translations_proto_depIdxs = []int32{
 	1, // 0: translations.v1.ReadTranslationResponse.translation:type_name -> translations.v1.Translation
@@ -576,7 +577,6 @@ func file_protos_translations_proto_init() {
 	if File_protos_translations_proto != nil {
 		return
 	}
-	file_protos_distributed_proto_init()
 	file_protos_translations_proto_msgTypes[3].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{

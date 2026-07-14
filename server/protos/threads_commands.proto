@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package threads_commands.v1;
+
+option go_package = "github.com/bd878/gallery/server/api/threads";
+
+message AppendCommand {
+	int64   id = 1;
+	int64   user_id = 2;
+	int64   parent_id = 3;
+	string  name = 4;
+	bool    private = 5;
+	int64   next_id = 6; // not used
+	int64   prev_id = 7; // not used (TODO: make optional)
+	string  description = 8;
+	string  created_at = 9;
+	string  updated_at = 10;
+	string  title = 11;
+}
+
+message UpdateCommand {
+	int64   id = 1;
+	int64   user_id = 2;
+	optional string  name = 3;
+	optional string  description = 4;
+	optional string  title = 5;
+	string  updated_at = 6;
+}
+
+message ReorderCommand {
+	int64  id = 1;
+	int64  user_id = 2;
+	int64  next_id = 3;
+	int64  prev_id = 4;
+	int64  parent_id = 5;
+	string updated_at = 6;
+}
+
+message DeleteCommand {
+	int64   id = 1;
+	int64   user_id = 2;
+}
+
+message PublishCommand {
+	int64   id = 1;
+	int64   user_id = 2;
+	string  updated_at = 3;
+}
+
+message PrivateCommand {
+	int64   id = 1;
+	int64   user_id = 2;
+	string  updated_at = 3;
+}
+
+message PublishMessagesCommand {
+	repeated int64   ids = 1;
+	int64   user_id = 2;
+}
+
+message PrivateMessagesCommand {
+	repeated int64 ids = 1;
+	int64   user_id = 2;
+}

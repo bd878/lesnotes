@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package comments_events.v1;
 
-option go_package = "github.com/bd878/gallery/server/api";
+option go_package = "github.com/bd878/gallery/server/api/comments";
 
 message CommentCreated {
 	int64    message_id = 1;

@@ -7,15 +7,15 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
-	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/users"
 	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/users/pkg/loadbalance"
+	"github.com/bd878/gallery/server/db/users/pkg/loadbalance"
 	"github.com/bd878/gallery/server/users/pkg/model"
 )
 
 type Gateway struct {
 	addr            string
-	client          api.UsersClient
+	client          users.UsersClient
 	conn            *grpc.ClientConn
 }
 
@@ -38,7 +38,7 @@ func (g *Gateway) setupConnection() error {
 	}
 
 	g.conn = conn
-	g.client = api.NewUsersClient(conn)
+	g.client = users.NewUsersClient(conn)
 
 	return nil
 }
@@ -61,7 +61,7 @@ func (g *Gateway) GetUser(ctx context.Context, userID int64) (*model.User, error
 		}
 	}
 
-	resp, err := g.client.GetUser(ctx, &api.GetUserRequest{
+	resp, err := g.client.GetUser(ctx, &users.GetUserRequest{
 		Id: userID,
 	})
 	if err != nil {

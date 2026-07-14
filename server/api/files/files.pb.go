@@ -4,7 +4,7 @@
 // 	protoc        v3.19.4
 // source: protos/files.proto
 
-package api
+package files
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -1091,7 +1091,7 @@ const file_protos_files_proto_rawDesc = "" +
 	"\fPublishFiles\x12\x1d.files.v1.PublishFilesRequest\x1a\x1e.files.v1.PublishFilesResponse\"\x00\x12O\n" +
 	"\fPrivateFiles\x12\x1d.files.v1.PrivateFilesRequest\x1a\x1e.files.v1.PrivateFilesResponse\"\x00\x12L\n" +
 	"\vDeleteFiles\x12\x1c.files.v1.DeleteFilesRequest\x1a\x1d.files.v1.DeleteFilesResponse\"\x00\x12[\n" +
-	"\x10ReadMessageFiles\x12!.files.v1.ReadMessageFilesRequest\x1a\".files.v1.ReadMessageFilesResponse\"\x00B%Z#github.com/bd878/gallery/server/apib\x06proto3"
+	"\x10ReadMessageFiles\x12!.files.v1.ReadMessageFilesRequest\x1a\".files.v1.ReadMessageFilesResponse\"\x00B+Z)github.com/bd878/gallery/server/api/filesb\x06proto3"
 
 var (
 	file_protos_files_proto_rawDescOnce sync.Once

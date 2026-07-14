@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package threads_events.v1;
 
-option go_package = "github.com/bd878/gallery/server/api";
+option go_package = "github.com/bd878/gallery/server/api/threads";
 
 message ThreadCreated {
 	int64  id = 1;

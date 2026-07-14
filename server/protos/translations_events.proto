@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package translations_events.v1;
 
-option go_package = "github.com/bd878/gallery/server/api";
+option go_package = "github.com/bd878/gallery/server/api/translations";
 
 message TranslationCreated {
 	int64    id = 1;

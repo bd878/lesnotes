@@ -4,9 +4,13 @@
 // 	protoc        v3.19.4
 // source: protos/messages.proto
 
-package api
+package messages
 
 import (
+	api "github.com/bd878/gallery/server/api"
+	comments "github.com/bd878/gallery/server/api/comments"
+	files "github.com/bd878/gallery/server/api/files"
+	translations "github.com/bd878/gallery/server/api/translations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -79,7 +83,7 @@ func (x *MessagesSnapshot) GetMessage() *MessageSnapshotItem {
 	return nil
 }
 
-func (x *MessagesSnapshot) GetTranslation() *TranslationSnapshotItem {
+func (x *MessagesSnapshot) GetTranslation() *translations.TranslationSnapshotItem {
 	if x != nil {
 		if x, ok := x.Item.(*MessagesSnapshot_Translation); ok {
 			return x.Translation
@@ -88,7 +92,7 @@ func (x *MessagesSnapshot) GetTranslation() *TranslationSnapshotItem {
 	return nil
 }
 
-func (x *MessagesSnapshot) GetComment() *CommentSnapshotItem {
+func (x *MessagesSnapshot) GetComment() *comments.CommentSnapshotItem {
 	if x != nil {
 		if x, ok := x.Item.(*MessagesSnapshot_Comment); ok {
 			return x.Comment
@@ -107,11 +111,11 @@ type MessagesSnapshot_Message struct {
 
 type MessagesSnapshot_Translation struct {
 	// FileSnapshotItem file = 2;
-	Translation *TranslationSnapshotItem `protobuf:"bytes,3,opt,name=translation,proto3,oneof"`
+	Translation *translations.TranslationSnapshotItem `protobuf:"bytes,3,opt,name=translation,proto3,oneof"`
 }
 
 type MessagesSnapshot_Comment struct {
-	Comment *CommentSnapshotItem `protobuf:"bytes,4,opt,name=comment,proto3,oneof"`
+	Comment *comments.CommentSnapshotItem `protobuf:"bytes,4,opt,name=comment,proto3,oneof"`
 }
 
 func (*MessagesSnapshot_Message) isMessagesSnapshot_Item() {}
@@ -221,18 +225,18 @@ func (x *MessageSnapshotItem) GetTitle() string {
 }
 
 type Message struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,3,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     string                 `protobuf:"bytes,4,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	Text          string                 `protobuf:"bytes,5,opt,name=text,proto3" json:"text,omitempty"`
-	Private       bool                   `protobuf:"varint,6,opt,name=private,proto3" json:"private,omitempty"`
-	Name          string                 `protobuf:"bytes,7,opt,name=name,proto3" json:"name,omitempty"`
-	FileIds       []int64                `protobuf:"varint,8,rep,packed,name=file_ids,json=fileIds,proto3" json:"file_ids,omitempty"`
-	Title         string                 `protobuf:"bytes,9,opt,name=title,proto3" json:"title,omitempty"`
-	Translations  []*TranslationPreview  `protobuf:"bytes,10,rep,name=translations,proto3" json:"translations,omitempty"`
-	Files         []*File                `protobuf:"bytes,11,rep,name=files,proto3" json:"files,omitempty"`
+	state         protoimpl.MessageState             `protogen:"open.v1"`
+	Id            int64                              `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId        int64                              `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	CreatedAt     string                             `protobuf:"bytes,3,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     string                             `protobuf:"bytes,4,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Text          string                             `protobuf:"bytes,5,opt,name=text,proto3" json:"text,omitempty"`
+	Private       bool                               `protobuf:"varint,6,opt,name=private,proto3" json:"private,omitempty"`
+	Name          string                             `protobuf:"bytes,7,opt,name=name,proto3" json:"name,omitempty"`
+	FileIds       []int64                            `protobuf:"varint,8,rep,packed,name=file_ids,json=fileIds,proto3" json:"file_ids,omitempty"`
+	Title         string                             `protobuf:"bytes,9,opt,name=title,proto3" json:"title,omitempty"`
+	Translations  []*translations.TranslationPreview `protobuf:"bytes,10,rep,name=translations,proto3" json:"translations,omitempty"`
+	Files         []*files.File                      `protobuf:"bytes,11,rep,name=files,proto3" json:"files,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -330,14 +334,14 @@ func (x *Message) GetTitle() string {
 	return ""
 }
 
-func (x *Message) GetTranslations() []*TranslationPreview {
+func (x *Message) GetTranslations() []*translations.TranslationPreview {
 	if x != nil {
 		return x.Translations
 	}
 	return nil
 }
 
-func (x *Message) GetFiles() []*File {
+func (x *Message) GetFiles() []*files.File {
 	if x != nil {
 		return x.Files
 	}
@@ -735,7 +739,7 @@ const file_protos_messages_proto_rawDesc = "" +
 	"\x05Apply\x12\x17.distributed.v1.Command\x1a\x1f.distributed.v1.CommandResponse\x12R\n" +
 	"\vReadMessage\x12\x1f.messages.v1.ReadMessageRequest\x1a .messages.v1.ReadMessageResponse\"\x00\x12U\n" +
 	"\fReadMessages\x12 .messages.v1.ReadMessagesRequest\x1a!.messages.v1.ReadMessagesResponse\"\x00\x12d\n" +
-	"\x11ReadBatchMessages\x12%.messages.v1.ReadBatchMessagesRequest\x1a&.messages.v1.ReadBatchMessagesResponse\"\x00B%Z#github.com/bd878/gallery/server/apib\x06proto3"
+	"\x11ReadBatchMessages\x12%.messages.v1.ReadBatchMessagesRequest\x1a&.messages.v1.ReadBatchMessagesResponse\"\x00B.Z,github.com/bd878/gallery/server/api/messagesb\x06proto3"
 
 var (
 	file_protos_messages_proto_rawDescOnce sync.Once
@@ -751,21 +755,21 @@ func file_protos_messages_proto_rawDescGZIP() []byte {
 
 var file_protos_messages_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_protos_messages_proto_goTypes = []any{
-	(*MessagesSnapshot)(nil),          // 0: messages.v1.MessagesSnapshot
-	(*MessageSnapshotItem)(nil),       // 1: messages.v1.MessageSnapshotItem
-	(*Message)(nil),                   // 2: messages.v1.Message
-	(*ReadMessagesRequest)(nil),       // 3: messages.v1.ReadMessagesRequest
-	(*ReadBatchMessagesRequest)(nil),  // 4: messages.v1.ReadBatchMessagesRequest
-	(*ReadBatchMessagesResponse)(nil), // 5: messages.v1.ReadBatchMessagesResponse
-	(*ReadMessagesResponse)(nil),      // 6: messages.v1.ReadMessagesResponse
-	(*ReadMessageRequest)(nil),        // 7: messages.v1.ReadMessageRequest
-	(*ReadMessageResponse)(nil),       // 8: messages.v1.ReadMessageResponse
-	(*TranslationSnapshotItem)(nil),   // 9: translations.v1.TranslationSnapshotItem
-	(*CommentSnapshotItem)(nil),       // 10: comments.v1.CommentSnapshotItem
-	(*TranslationPreview)(nil),        // 11: translations.v1.TranslationPreview
-	(*File)(nil),                      // 12: files.v1.File
-	(*Command)(nil),                   // 13: distributed.v1.Command
-	(*CommandResponse)(nil),           // 14: distributed.v1.CommandResponse
+	(*MessagesSnapshot)(nil),                     // 0: messages.v1.MessagesSnapshot
+	(*MessageSnapshotItem)(nil),                  // 1: messages.v1.MessageSnapshotItem
+	(*Message)(nil),                              // 2: messages.v1.Message
+	(*ReadMessagesRequest)(nil),                  // 3: messages.v1.ReadMessagesRequest
+	(*ReadBatchMessagesRequest)(nil),             // 4: messages.v1.ReadBatchMessagesRequest
+	(*ReadBatchMessagesResponse)(nil),            // 5: messages.v1.ReadBatchMessagesResponse
+	(*ReadMessagesResponse)(nil),                 // 6: messages.v1.ReadMessagesResponse
+	(*ReadMessageRequest)(nil),                   // 7: messages.v1.ReadMessageRequest
+	(*ReadMessageResponse)(nil),                  // 8: messages.v1.ReadMessageResponse
+	(*translations.TranslationSnapshotItem)(nil), // 9: translations.v1.TranslationSnapshotItem
+	(*comments.CommentSnapshotItem)(nil),         // 10: comments.v1.CommentSnapshotItem
+	(*translations.TranslationPreview)(nil),      // 11: translations.v1.TranslationPreview
+	(*files.File)(nil),                           // 12: files.v1.File
+	(*api.Command)(nil),                          // 13: distributed.v1.Command
+	(*api.CommandResponse)(nil),                  // 14: distributed.v1.CommandResponse
 }
 var file_protos_messages_proto_depIdxs = []int32{
 	1,  // 0: messages.v1.MessagesSnapshot.message:type_name -> messages.v1.MessageSnapshotItem
@@ -796,10 +800,6 @@ func file_protos_messages_proto_init() {
 	if File_protos_messages_proto != nil {
 		return
 	}
-	file_protos_translations_proto_init()
-	file_protos_comments_proto_init()
-	file_protos_files_proto_init()
-	file_protos_distributed_proto_init()
 	file_protos_messages_proto_msgTypes[0].OneofWrappers = []any{
 		(*MessagesSnapshot_Message)(nil),
 		(*MessagesSnapshot_Translation)(nil),

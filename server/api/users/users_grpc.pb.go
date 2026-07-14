@@ -4,10 +4,11 @@
 // - protoc             v3.19.4
 // source: protos/users.proto
 
-package api
+package users
 
 import (
 	context "context"
+	api "github.com/bd878/gallery/server/api"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -28,7 +29,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UsersClient interface {
-	Apply(ctx context.Context, in *Command, opts ...grpc.CallOption) (*CommandResponse, error)
+	Apply(ctx context.Context, in *api.Command, opts ...grpc.CallOption) (*api.CommandResponse, error)
 	FindUser(ctx context.Context, in *FindUserRequest, opts ...grpc.CallOption) (*User, error)
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*User, error)
 }
@@ -41,9 +42,9 @@ func NewUsersClient(cc grpc.ClientConnInterface) UsersClient {
 	return &usersClient{cc}
 }
 
-func (c *usersClient) Apply(ctx context.Context, in *Command, opts ...grpc.CallOption) (*CommandResponse, error) {
+func (c *usersClient) Apply(ctx context.Context, in *api.Command, opts ...grpc.CallOption) (*api.CommandResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CommandResponse)
+	out := new(api.CommandResponse)
 	err := c.cc.Invoke(ctx, Users_Apply_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -75,7 +76,7 @@ func (c *usersClient) GetUser(ctx context.Context, in *GetUserRequest, opts ...g
 // All implementations must embed UnimplementedUsersServer
 // for forward compatibility.
 type UsersServer interface {
-	Apply(context.Context, *Command) (*CommandResponse, error)
+	Apply(context.Context, *api.Command) (*api.CommandResponse, error)
 	FindUser(context.Context, *FindUserRequest) (*User, error)
 	GetUser(context.Context, *GetUserRequest) (*User, error)
 	mustEmbedUnimplementedUsersServer()
@@ -88,7 +89,7 @@ type UsersServer interface {
 // pointer dereference when methods are called.
 type UnimplementedUsersServer struct{}
 
-func (UnimplementedUsersServer) Apply(context.Context, *Command) (*CommandResponse, error) {
+func (UnimplementedUsersServer) Apply(context.Context, *api.Command) (*api.CommandResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Apply not implemented")
 }
 func (UnimplementedUsersServer) FindUser(context.Context, *FindUserRequest) (*User, error) {
@@ -119,7 +120,7 @@ func RegisterUsersServer(s grpc.ServiceRegistrar, srv UsersServer) {
 }
 
 func _Users_Apply_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Command)
+	in := new(api.Command)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -131,7 +132,7 @@ func _Users_Apply_Handler(srv interface{}, ctx context.Context, dec func(interfa
 		FullMethod: Users_Apply_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UsersServer).Apply(ctx, req.(*Command))
+		return srv.(UsersServer).Apply(ctx, req.(*api.Command))
 	}
 	return interceptor(ctx, in, info, handler)
 }

@@ -4,7 +4,7 @@
 // - protoc             v3.19.4
 // source: protos/sessions.proto
 
-package api
+package sessions
 
 import (
 	context "context"

@@ -4,7 +4,7 @@
 // - protoc             v3.19.4
 // source: protos/files.proto
 
-package api
+package files
 
 import (
 	context "context"

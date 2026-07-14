@@ -4,9 +4,10 @@
 // 	protoc        v3.19.4
 // source: protos/threads.proto
 
-package api
+package threads
 
 import (
+	api "github.com/bd878/gallery/server/api"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -1285,7 +1286,7 @@ const file_protos_threads_proto_rawDesc = "" +
 	"ReadParent\x12\x1d.threads.v1.ReadParentRequest\x1a\x1e.threads.v1.ReadParentResponse\"\x00\x12D\n" +
 	"\aResolve\x12\x1a.threads.v1.ResolveRequest\x1a\x1b.threads.v1.ResolveResponse\"\x00\x12>\n" +
 	"\x05Count\x12\x18.threads.v1.CountRequest\x1a\x19.threads.v1.CountResponse\"\x00\x12V\n" +
-	"\rCountMessages\x12 .threads.v1.CountMessagesRequest\x1a!.threads.v1.CountMessagesResponse\"\x00B%Z#github.com/bd878/gallery/server/apib\x06proto3"
+	"\rCountMessages\x12 .threads.v1.CountMessagesRequest\x1a!.threads.v1.CountMessagesResponse\"\x00B-Z+github.com/bd878/gallery/server/api/threadsb\x06proto3"
 
 var (
 	file_protos_threads_proto_rawDescOnce sync.Once
@@ -1318,8 +1319,8 @@ var file_protos_threads_proto_goTypes = []any{
 	(*CountMessagesRequest)(nil),  // 14: threads.v1.CountMessagesRequest
 	(*CountResponse)(nil),         // 15: threads.v1.CountResponse
 	(*CountMessagesResponse)(nil), // 16: threads.v1.CountMessagesResponse
-	(*Command)(nil),               // 17: distributed.v1.Command
-	(*CommandResponse)(nil),       // 18: distributed.v1.CommandResponse
+	(*api.Command)(nil),           // 17: distributed.v1.Command
+	(*api.CommandResponse)(nil),   // 18: distributed.v1.CommandResponse
 }
 var file_protos_threads_proto_depIdxs = []int32{
 	1,  // 0: threads.v1.ThreadsSnapshot.thread:type_name -> threads.v1.ThreadSnapshotItem
@@ -1355,7 +1356,6 @@ func file_protos_threads_proto_init() {
 	if File_protos_threads_proto != nil {
 		return
 	}
-	file_protos_distributed_proto_init()
 	file_protos_threads_proto_msgTypes[0].OneofWrappers = []any{
 		(*ThreadsSnapshot_Thread)(nil),
 	}

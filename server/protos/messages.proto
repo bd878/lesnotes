@@ -7,7 +7,7 @@ import "protos/comments.proto";
 import "protos/files.proto";
 import "protos/distributed.proto";
 
-option go_package = "github.com/bd878/gallery/server/api";
+option go_package = "github.com/bd878/gallery/server/api/messages";
 
 service Messages {
 	rpc Apply(distributed.v1.Command) returns (distributed.v1.CommandResponse);

@@ -1,11 +1,9 @@
 package model
 
-import (
-	"github.com/bd878/gallery/server/api"
-)
+import "github.com/bd878/gallery/server/api/files"
 
-func FileToProto(file *File) *api.File {
-	return &api.File{
+func FileToProto(file *File) *files.File {
+	return &files.File{
 		Id:            file.ID,
 		Name:          file.Name,
 		CreatedAt:     file.CreatedAt,
@@ -19,7 +17,7 @@ func FileToProto(file *File) *api.File {
 	}
 }
 
-func FileFromProto(proto *api.File) *File {
+func FileFromProto(proto *files.File) *File {
 	return &File{
 		ID:                proto.Id,
 		Name:              proto.Name,
@@ -34,23 +32,23 @@ func FileFromProto(proto *api.File) *File {
 	}
 }
 
-func MapFilesDictFromProto(mapper (func(*api.File) *File), files map[int64]*api.File) map[int64]*File {
-	res := make(map[int64]*File, len(files))
-	for id, file := range files {
+func MapFilesDictFromProto(mapper (func(*files.File) *File), list map[int64]*files.File) map[int64]*File {
+	res := make(map[int64]*File, len(list))
+	for id, file := range list {
 		res[id] = mapper(file)
 	}
 	return res
 }
 
-func MapFilesDictToProto(mapper (func(*File) *api.File), files map[int64]*File) map[int64]*api.File {
-	res := make(map[int64]*api.File, len(files))
-	for id, file := range files {
+func MapFilesDictToProto(mapper (func(*File) *files.File), list map[int64]*File) map[int64]*files.File {
+	res := make(map[int64]*files.File, len(list))
+	for id, file := range list {
 		res[id] = mapper(file)
 	}
 	return res
 }
 
-func MapFilesFromProto(mapper (func(*api.File) *File), files []*api.File) []*File {
+func MapFilesFromProto(mapper (func(*files.File) *File), files []*files.File) []*File {
 	res := make([]*File, len(files))
 	for i, file := range files {
 		res[i] = mapper(file)
@@ -58,9 +56,9 @@ func MapFilesFromProto(mapper (func(*api.File) *File), files []*api.File) []*Fil
 	return res
 }
 
-func MapFilesToProto(mapper (func(*File) *api.File), files []*File) []*api.File {
-	res := make([]*api.File, len(files))
-	for i, file := range files {
+func MapFilesToProto(mapper (func(*File) *files.File), list []*File) []*files.File {
+	res := make([]*files.File, len(list))
+	for i, file := range list {
 		res[i] = mapper(file)
 	}
 	return res

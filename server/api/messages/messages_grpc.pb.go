@@ -4,10 +4,11 @@
 // - protoc             v3.19.4
 // source: protos/messages.proto
 
-package api
+package messages
 
 import (
 	context "context"
+	api "github.com/bd878/gallery/server/api"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -29,7 +30,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MessagesClient interface {
-	Apply(ctx context.Context, in *Command, opts ...grpc.CallOption) (*CommandResponse, error)
+	Apply(ctx context.Context, in *api.Command, opts ...grpc.CallOption) (*api.CommandResponse, error)
 	ReadMessage(ctx context.Context, in *ReadMessageRequest, opts ...grpc.CallOption) (*ReadMessageResponse, error)
 	ReadMessages(ctx context.Context, in *ReadMessagesRequest, opts ...grpc.CallOption) (*ReadMessagesResponse, error)
 	ReadBatchMessages(ctx context.Context, in *ReadBatchMessagesRequest, opts ...grpc.CallOption) (*ReadBatchMessagesResponse, error)
@@ -43,9 +44,9 @@ func NewMessagesClient(cc grpc.ClientConnInterface) MessagesClient {
 	return &messagesClient{cc}
 }
 
-func (c *messagesClient) Apply(ctx context.Context, in *Command, opts ...grpc.CallOption) (*CommandResponse, error) {
+func (c *messagesClient) Apply(ctx context.Context, in *api.Command, opts ...grpc.CallOption) (*api.CommandResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CommandResponse)
+	out := new(api.CommandResponse)
 	err := c.cc.Invoke(ctx, Messages_Apply_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -87,7 +88,7 @@ func (c *messagesClient) ReadBatchMessages(ctx context.Context, in *ReadBatchMes
 // All implementations must embed UnimplementedMessagesServer
 // for forward compatibility.
 type MessagesServer interface {
-	Apply(context.Context, *Command) (*CommandResponse, error)
+	Apply(context.Context, *api.Command) (*api.CommandResponse, error)
 	ReadMessage(context.Context, *ReadMessageRequest) (*ReadMessageResponse, error)
 	ReadMessages(context.Context, *ReadMessagesRequest) (*ReadMessagesResponse, error)
 	ReadBatchMessages(context.Context, *ReadBatchMessagesRequest) (*ReadBatchMessagesResponse, error)
@@ -101,7 +102,7 @@ type MessagesServer interface {
 // pointer dereference when methods are called.
 type UnimplementedMessagesServer struct{}
 
-func (UnimplementedMessagesServer) Apply(context.Context, *Command) (*CommandResponse, error) {
+func (UnimplementedMessagesServer) Apply(context.Context, *api.Command) (*api.CommandResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Apply not implemented")
 }
 func (UnimplementedMessagesServer) ReadMessage(context.Context, *ReadMessageRequest) (*ReadMessageResponse, error) {
@@ -135,7 +136,7 @@ func RegisterMessagesServer(s grpc.ServiceRegistrar, srv MessagesServer) {
 }
 
 func _Messages_Apply_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Command)
+	in := new(api.Command)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -147,7 +148,7 @@ func _Messages_Apply_Handler(srv interface{}, ctx context.Context, dec func(inte
 		FullMethod: Messages_Apply_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MessagesServer).Apply(ctx, req.(*Command))
+		return srv.(MessagesServer).Apply(ctx, req.(*api.Command))
 	}
 	return interceptor(ctx, in, info, handler)
 }

@@ -4,7 +4,7 @@ package search.v1;
 
 import "protos/distributed.proto";
 
-option go_package = "github.com/bd878/gallery/server/api";
+option go_package = "github.com/bd878/gallery/server/api/search";
 
 service Search {
 	rpc Apply(distributed.v1.Command) returns (distributed.v1.CommandResponse) {}
@@ -74,6 +74,26 @@ message SearchMessage {
 	bool    private = 6;
 	string  created_at = 7;
 	string  updated_at = 8;
+}
+
+message SearchThread {
+	int64   id = 1;
+	int64   user_id = 2;
+	int64   parent_id = 3;
+	string  name = 4;
+	string  description = 5;
+	bool    private = 6;
+	string  created_at = 7;
+	string  updated_at = 8;
+}
+
+message SearchTranslation {
+	int64   message_id = 1;
+	string  lang = 2;
+	string  title = 3;
+	string  text = 4;
+	string  created_at = 5;
+	string  updated_at = 6;
 }
 
 message SearchFile {

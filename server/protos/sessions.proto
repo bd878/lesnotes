@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package sessions.v1;
 
-option go_package = "github.com/bd878/gallery/server/api";
+option go_package = "github.com/bd878/gallery/server/api/sessions";
 
 service Sessions {
 	rpc List(ListUserSessionsRequest) returns (ListUserSessionsResponse);

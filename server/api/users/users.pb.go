@@ -4,9 +4,10 @@
 // 	protoc        v3.19.4
 // source: protos/users.proto
 
-package api
+package users
 
 import (
+	api "github.com/bd878/gallery/server/api"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -481,7 +482,7 @@ const file_protos_users_proto_rawDesc = "" +
 	"\x05Users\x12C\n" +
 	"\x05Apply\x12\x17.distributed.v1.Command\x1a\x1f.distributed.v1.CommandResponse\"\x00\x125\n" +
 	"\bFindUser\x12\x19.users.v1.FindUserRequest\x1a\x0e.users.v1.User\x123\n" +
-	"\aGetUser\x12\x18.users.v1.GetUserRequest\x1a\x0e.users.v1.UserB%Z#github.com/bd878/gallery/server/apib\x06proto3"
+	"\aGetUser\x12\x18.users.v1.GetUserRequest\x1a\x0e.users.v1.UserB+Z)github.com/bd878/gallery/server/api/usersb\x06proto3"
 
 var (
 	file_protos_users_proto_rawDescOnce sync.Once
@@ -503,8 +504,8 @@ var file_protos_users_proto_goTypes = []any{
 	(*PremiumSnapshotItem)(nil), // 3: users.v1.PremiumSnapshotItem
 	(*GetUserRequest)(nil),      // 4: users.v1.GetUserRequest
 	(*FindUserRequest)(nil),     // 5: users.v1.FindUserRequest
-	(*Command)(nil),             // 6: distributed.v1.Command
-	(*CommandResponse)(nil),     // 7: distributed.v1.CommandResponse
+	(*api.Command)(nil),         // 6: distributed.v1.Command
+	(*api.CommandResponse)(nil), // 7: distributed.v1.CommandResponse
 }
 var file_protos_users_proto_depIdxs = []int32{
 	2, // 0: users.v1.UsersSnapshot.user:type_name -> users.v1.UserSnapshotItem
@@ -527,7 +528,6 @@ func file_protos_users_proto_init() {
 	if File_protos_users_proto != nil {
 		return
 	}
-	file_protos_distributed_proto_init()
 	file_protos_users_proto_msgTypes[0].OneofWrappers = []any{}
 	file_protos_users_proto_msgTypes[1].OneofWrappers = []any{
 		(*UsersSnapshot_User)(nil),

@@ -4,7 +4,7 @@
 // 	protoc        v3.19.4
 // source: protos/threads_events.proto
 
-package api
+package threads
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -489,7 +489,7 @@ const file_protos_threads_events_proto_rawDesc = "" +
 	"\x13ThreadParentChanged\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x1b\n" +
-	"\tparent_id\x18\x03 \x01(\x03R\bparentIdB%Z#github.com/bd878/gallery/server/apib\x06proto3"
+	"\tparent_id\x18\x03 \x01(\x03R\bparentIdB-Z+github.com/bd878/gallery/server/api/threadsb\x06proto3"
 
 var (
 	file_protos_threads_events_proto_rawDescOnce sync.Once

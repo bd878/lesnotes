@@ -4,7 +4,7 @@
 // 	protoc        v3.19.4
 // source: protos/comments_events.proto
 
-package api
+package comments
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -296,7 +296,7 @@ const file_protos_comments_events_proto_rawDesc = "" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\"7\n" +
 	"\x16MessageCommentsDeleted\x12\x1d\n" +
 	"\n" +
-	"message_id\x18\x01 \x01(\x03R\tmessageIdB%Z#github.com/bd878/gallery/server/apib\x06proto3"
+	"message_id\x18\x01 \x01(\x03R\tmessageIdB.Z,github.com/bd878/gallery/server/api/commentsb\x06proto3"
 
 var (
 	file_protos_comments_events_proto_rawDescOnce sync.Once

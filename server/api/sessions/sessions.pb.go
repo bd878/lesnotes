@@ -4,7 +4,7 @@
 // 	protoc        v3.19.4
 // source: protos/sessions.proto
 
-package api
+package sessions
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -637,7 +637,7 @@ const file_protos_sessions_proto_rawDesc = "" +
 	"\x03Get\x12\x1e.sessions.v1.GetSessionRequest\x1a\x14.sessions.v1.Session\x12A\n" +
 	"\x06Create\x12!.sessions.v1.CreateSessionRequest\x1a\x14.sessions.v1.Session\x12O\n" +
 	"\x06Remove\x12!.sessions.v1.RemoveSessionRequest\x1a\".sessions.v1.RemoveSessionResponse\x12Z\n" +
-	"\tRemoveAll\x12%.sessions.v1.RemoveAllSessionsRequest\x1a&.sessions.v1.RemoveAllSessionsResponseB%Z#github.com/bd878/gallery/server/apib\x06proto3"
+	"\tRemoveAll\x12%.sessions.v1.RemoveAllSessionsRequest\x1a&.sessions.v1.RemoveAllSessionsResponseB.Z,github.com/bd878/gallery/server/api/sessionsb\x06proto3"
 
 var (
 	file_protos_sessions_proto_rawDescOnce sync.Once

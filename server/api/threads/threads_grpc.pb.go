@@ -4,10 +4,11 @@
 // - protoc             v3.19.4
 // source: protos/threads.proto
 
-package api
+package threads
 
 import (
 	context "context"
+	api "github.com/bd878/gallery/server/api"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -33,7 +34,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ThreadsClient interface {
-	Apply(ctx context.Context, in *Command, opts ...grpc.CallOption) (*CommandResponse, error)
+	Apply(ctx context.Context, in *api.Command, opts ...grpc.CallOption) (*api.CommandResponse, error)
 	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
 	ListMessages(ctx context.Context, in *ListMessagesRequest, opts ...grpc.CallOption) (*ListMessagesResponse, error)
 	Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*Thread, error)
@@ -51,9 +52,9 @@ func NewThreadsClient(cc grpc.ClientConnInterface) ThreadsClient {
 	return &threadsClient{cc}
 }
 
-func (c *threadsClient) Apply(ctx context.Context, in *Command, opts ...grpc.CallOption) (*CommandResponse, error) {
+func (c *threadsClient) Apply(ctx context.Context, in *api.Command, opts ...grpc.CallOption) (*api.CommandResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CommandResponse)
+	out := new(api.CommandResponse)
 	err := c.cc.Invoke(ctx, Threads_Apply_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -135,7 +136,7 @@ func (c *threadsClient) CountMessages(ctx context.Context, in *CountMessagesRequ
 // All implementations must embed UnimplementedThreadsServer
 // for forward compatibility.
 type ThreadsServer interface {
-	Apply(context.Context, *Command) (*CommandResponse, error)
+	Apply(context.Context, *api.Command) (*api.CommandResponse, error)
 	List(context.Context, *ListRequest) (*ListResponse, error)
 	ListMessages(context.Context, *ListMessagesRequest) (*ListMessagesResponse, error)
 	Read(context.Context, *ReadRequest) (*Thread, error)
@@ -153,7 +154,7 @@ type ThreadsServer interface {
 // pointer dereference when methods are called.
 type UnimplementedThreadsServer struct{}
 
-func (UnimplementedThreadsServer) Apply(context.Context, *Command) (*CommandResponse, error) {
+func (UnimplementedThreadsServer) Apply(context.Context, *api.Command) (*api.CommandResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Apply not implemented")
 }
 func (UnimplementedThreadsServer) List(context.Context, *ListRequest) (*ListResponse, error) {
@@ -199,7 +200,7 @@ func RegisterThreadsServer(s grpc.ServiceRegistrar, srv ThreadsServer) {
 }
 
 func _Threads_Apply_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Command)
+	in := new(api.Command)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -211,7 +212,7 @@ func _Threads_Apply_Handler(srv interface{}, ctx context.Context, dec func(inter
 		FullMethod: Threads_Apply_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ThreadsServer).Apply(ctx, req.(*Command))
+		return srv.(ThreadsServer).Apply(ctx, req.(*api.Command))
 	}
 	return interceptor(ctx, in, info, handler)
 }

@@ -4,7 +4,7 @@
 // 	protoc        v3.19.4
 // source: protos/users_events.proto
 
-package api
+package users
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -71,7 +71,7 @@ const file_protos_users_events_proto_rawDesc = "" +
 	"\n" +
 	"\x19protos/users_events.proto\x12\x0fusers_events.v1\"&\n" +
 	"\vUserDeleted\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userIdB%Z#github.com/bd878/gallery/server/apib\x06proto3"
+	"\auser_id\x18\x01 \x01(\x03R\x06userIdB+Z)github.com/bd878/gallery/server/api/usersb\x06proto3"
 
 var (
 	file_protos_users_events_proto_rawDescOnce sync.Once

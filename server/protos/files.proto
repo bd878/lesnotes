@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package files.v1;
 
-option go_package = "github.com/bd878/gallery/server/api";
+option go_package = "github.com/bd878/gallery/server/api/files";
 
 service Files {
 	rpc ReadFile(ReadFileRequest) returns (File) {}
