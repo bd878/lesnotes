@@ -4,7 +4,7 @@ import (
 	"context"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/messages"
 	messagesevents "github.com/bd878/gallery/server/messages/pkg/events"
 	"github.com/bd878/gallery/server/internal/am"
 	"github.com/bd878/gallery/server/internal/logger"
@@ -59,7 +59,7 @@ func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingM
 }
 
 func (h integrationHandlers) handleMessageCreated(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.MessageCreated{}
+	m := &messages.MessageCreated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}
@@ -68,7 +68,7 @@ func (h integrationHandlers) handleMessageCreated(ctx context.Context, msg am.In
 }
 
 func (h integrationHandlers) handleMessageDeleted(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.MessageDeleted{}
+	m := &messages.MessageDeleted{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}
@@ -77,7 +77,7 @@ func (h integrationHandlers) handleMessageDeleted(ctx context.Context, msg am.In
 }
 
 func (h integrationHandlers) handleMessageUpdated(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.MessageUpdated{}
+	m := &messages.MessageUpdated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}
@@ -86,7 +86,7 @@ func (h integrationHandlers) handleMessageUpdated(ctx context.Context, msg am.In
 }
 
 func (h integrationHandlers) handleMessagesPublished(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.MessagesPublished{}
+	m := &messages.MessagesPublished{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}
@@ -95,7 +95,7 @@ func (h integrationHandlers) handleMessagesPublished(ctx context.Context, msg am
 }
 
 func (h integrationHandlers) handleMessagesPrivated(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.MessagesPrivated{}
+	m := &messages.MessagesPrivated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}

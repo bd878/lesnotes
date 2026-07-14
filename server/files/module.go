@@ -3,7 +3,7 @@ package files
 import (
 	"context"
 
-	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/files"
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/am"
 	"github.com/bd878/gallery/server/internal/nats"
@@ -36,7 +36,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 
 	filesHandler := grpc.NewFilesHandler(controller)
 
-	api.RegisterFilesServer(svc.RPC(), filesHandler)
+	files.RegisterFilesServer(svc.RPC(), filesHandler)
 
 	return nil
 }

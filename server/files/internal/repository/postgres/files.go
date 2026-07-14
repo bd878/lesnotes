@@ -12,7 +12,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/files"
 	"github.com/bd878/gallery/server/internal/logger"
 )
 
@@ -75,10 +75,10 @@ func (r *FilesRepository) SaveFile(ctx context.Context, reader io.Reader, userID
 	return
 }
 
-func (r *FilesRepository) GetMetaByID(ctx context.Context, id int64) (file *api.File, err error) {
+func (r *FilesRepository) GetMetaByID(ctx context.Context, id int64) (file *files.File, err error) {
 	query := "SELECT owner_id, name, description, private, oid, mime, size, created_at, updated_at FROM %s WHERE id = $1"
 
-	file = &api.File{
+	file = &files.File{
 		Id:   id,
 	}
 
@@ -95,10 +95,10 @@ func (r *FilesRepository) GetMetaByID(ctx context.Context, id int64) (file *api.
 	return
 }
 
-func (r *FilesRepository) GetMetaByName(ctx context.Context, fileName string) (file *api.File, err error) {
+func (r *FilesRepository) GetMetaByName(ctx context.Context, fileName string) (file *files.File, err error) {
 	query := "SELECT owner_id, id, description, private, oid, mime, size, created_at, updated_at FROM %s WHERE name = $1"
 
-	file = &api.File{
+	file = &files.File{
 		Name:  fileName,
 	}
 
@@ -116,7 +116,7 @@ func (r *FilesRepository) GetMetaByName(ctx context.Context, fileName string) (f
 }
 
 
-func (r *FilesRepository) ListFiles(ctx context.Context, userID int64, limit, offset int32, ascending, private bool) (list []*api.File, isLastPage bool, err error) {
+func (r *FilesRepository) ListFiles(ctx context.Context, userID int64, limit, offset int32, ascending, private bool) (list []*files.File, isLastPage bool, err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -152,11 +152,11 @@ func (r *FilesRepository) ListFiles(ctx context.Context, userID int64, limit, of
 		return
 	}
 
-	list = make([]*api.File, 0)
+	list = make([]*files.File, 0)
 	for rows.Next() {
 		var createdAt, updatedAt time.Time
 
-		file := &api.File{
+		file := &files.File{
 			UserId:   userID,
 		}
 
@@ -192,7 +192,7 @@ func (r *FilesRepository) ListFiles(ctx context.Context, userID int64, limit, of
 	return
 }
 
-func (r *FilesRepository) ReadBatchFiles(ctx context.Context, fileIDs []int64) (files []*api.File, err error) {
+func (r *FilesRepository) ReadBatchFiles(ctx context.Context, fileIDs []int64) (list []*files.File, err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -212,7 +212,7 @@ func (r *FilesRepository) ReadBatchFiles(ctx context.Context, fileIDs []int64) (
 		}
 	}()
 
-	files = make([]*api.File, 0)
+	list = make([]*files.File, 0)
 	if len(fileIDs) == 0 {
 		return
 	}
@@ -236,7 +236,7 @@ func (r *FilesRepository) ReadBatchFiles(ctx context.Context, fileIDs []int64) (
 	}
 
 	for rows.Next() {
-		file := &api.File{}
+		file := &files.File{}
 
 		var createdAt, updatedAt *time.Time
 
@@ -249,7 +249,7 @@ func (r *FilesRepository) ReadBatchFiles(ctx context.Context, fileIDs []int64) (
 		file.CreatedAt = createdAt.Format(time.RFC3339)
 		file.UpdatedAt = updatedAt.Format(time.RFC3339)
 
-		files = append(files, file)
+		list = append(list, file)
 	}
 
 	if err = rows.Err(); err != nil {

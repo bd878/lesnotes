@@ -6,7 +6,7 @@ import (
 
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/am"
-	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/files"
 	"github.com/bd878/gallery/server/files/internal/domain"
 	"github.com/bd878/gallery/server/files/pkg/events"
 )
@@ -46,7 +46,7 @@ func (h domainHandler[T]) HandleEvent(ctx context.Context, event T) error {
 
 func (h domainHandler[T]) onFileUploaded(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.FileUploaded)
-	data, err := proto.Marshal(&api.FileUploaded{
+	data, err := proto.Marshal(&files.FileUploaded{
 		Id:           payload.ID,
 		UserId:       payload.UserID,
 		Name:         payload.Name,
@@ -66,7 +66,7 @@ func (h domainHandler[T]) onFileUploaded(ctx context.Context, event ddd.Event) e
 
 func (h domainHandler[T]) onFilesDeleted(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.FilesDeleted)
-	data, err := proto.Marshal(&api.FilesDeleted{
+	data, err := proto.Marshal(&files.FilesDeleted{
 		Ids:         payload.IDs,
 		UserId:      payload.UserID,
 	})
@@ -79,7 +79,7 @@ func (h domainHandler[T]) onFilesDeleted(ctx context.Context, event ddd.Event) e
 
 func (h domainHandler[T]) onFilesPrivated(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.FilesPrivated)
-	data, err := proto.Marshal(&api.FilesPrivated{
+	data, err := proto.Marshal(&files.FilesPrivated{
 		Ids:         payload.IDs,
 		UserId:      payload.UserID,
 		UpdatedAt:   payload.UpdatedAt,
@@ -93,7 +93,7 @@ func (h domainHandler[T]) onFilesPrivated(ctx context.Context, event ddd.Event) 
 
 func (h domainHandler[T]) onFilesPublished(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.FilesPublished)
-	data, err := proto.Marshal(&api.FilesPublished{
+	data, err := proto.Marshal(&files.FilesPublished{
 		Ids:         payload.IDs,
 		UserId:      payload.UserID,
 		UpdatedAt:   payload.UpdatedAt,

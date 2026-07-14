@@ -6,7 +6,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/files"
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/files/internal/domain"
@@ -14,12 +14,12 @@ import (
 
 type FilesRepository interface {
 	SaveFile(ctx context.Context, reader io.Reader, userID, id int64, private bool, name, description, mime, createdAt, updatedAt string) (size int64, err error)
-	GetMetaByID(ctx context.Context, id int64) (file *api.File, err error)
-	GetMetaByName(ctx context.Context, fileName string) (file *api.File, err error)
+	GetMetaByID(ctx context.Context, id int64) (file *files.File, err error)
+	GetMetaByName(ctx context.Context, fileName string) (file *files.File, err error)
 	DeleteFiles(ctx context.Context, userID int64, ids []int64) (err error)
 	ReadFile(ctx context.Context, oid int32, writer io.Writer) (err error)
-	ReadBatchFiles(ctx context.Context, ids []int64) (list []*api.File, err error)
-	ListFiles(ctx context.Context, userID int64, limit, offset int32, ascending, private bool) (list []*api.File, isLastPage bool, err error)
+	ReadBatchFiles(ctx context.Context, ids []int64) (list []*files.File, err error)
+	ListFiles(ctx context.Context, userID int64, limit, offset int32, ascending, private bool) (list []*files.File, isLastPage bool, err error)
 	PublishFiles(ctx context.Context, userID int64, ids []int64, updatedAt string) (err error)
 	PrivateFiles(ctx context.Context, userID int64, ids []int64, updatedAt string) (err error)
 }
@@ -77,7 +77,7 @@ func (a *Application) UpdateMessageFiles(ctx context.Context, id, userID int64, 
 	return a.messagesRepo.UpdateMessageFiles(ctx, id, userID, fileIDs)
 }
 
-func (a *Application) ReadMessageFiles(ctx context.Context, id int64, userIDs []int64) (list []*api.File, err error) {
+func (a *Application) ReadMessageFiles(ctx context.Context, id int64, userIDs []int64) (list []*files.File, err error) {
 	a.log.Debugw("read message files", "id", id, "user_ids", userIDs)
 
 	fileIDs, err := a.messagesRepo.ReadMessageFiles(ctx, id, userIDs)
@@ -132,25 +132,25 @@ func (a *Application) PrivateMessageFiles(ctx context.Context, userID int64, mes
 	return nil
 }
 
-func (a *Application) ReadBatchFiles(ctx context.Context, userID int64, ids []int64) (files map[int64]*api.File, err error) {
+func (a *Application) ReadBatchFiles(ctx context.Context, userID int64, ids []int64) (list map[int64]*files.File, err error) {
 	a.log.Debugw("read batch files", "user_id", userID, "ids", ids)
 
-	files = make(map[int64]*api.File, len(ids))
+	list = make(map[int64]*files.File, len(ids))
 	for _, id := range ids {
 		file, err := a.filesRepo.GetMetaByID(ctx, id)
 		if err != nil {
-			files[id] = &api.File{Error: err.Error()}
+			list[id] = &files.File{Error: err.Error()}
 			logger.Errorw("failed to read file", "user_id", userID, "id", id, "error", err)
 			continue
 		}
 
-		files[id] = file
+		list[id] = file
 	}
 
-	return files, nil
+	return list, nil
 }
 
-func (a *Application) ReadFile(ctx context.Context, id int64, name string, public bool) (file *api.File, err error) {
+func (a *Application) ReadFile(ctx context.Context, id int64, name string, public bool) (file *files.File, err error) {
 	a.log.Debugw("read file", "id", id, "name", name, "public", public)
 
 	if name != "" {
@@ -200,7 +200,7 @@ func (a *Application) WriteFileStream(ctx context.Context, userID, id int64, pri
 	return
 }
 
-func (a *Application) ListFiles(ctx context.Context, userID int64, limit, offset int32, ascending, private bool) (list []*api.File, isLastPage bool, err error) {
+func (a *Application) ListFiles(ctx context.Context, userID int64, limit, offset int32, ascending, private bool) (list []*files.File, isLastPage bool, err error) {
 	a.log.Debugw("list files", "user_id", userID, "limit", limit, "offset", offset, "ascending", ascending, "private", private)
 
 	return a.filesRepo.ListFiles(ctx, userID, limit, offset, ascending, private)

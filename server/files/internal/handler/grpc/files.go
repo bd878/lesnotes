@@ -7,23 +7,23 @@ import (
 	"sync"
 	"errors"
 
-	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/files"
 )
 
 type FilesController interface {
-	ReadBatchFiles(ctx context.Context, userID int64, ids []int64) (dict map[int64]*api.File, err error)
-	ReadFile(ctx context.Context, id int64, name string, public bool) (file *api.File, err error)
+	ReadBatchFiles(ctx context.Context, userID int64, ids []int64) (dict map[int64]*files.File, err error)
+	ReadFile(ctx context.Context, id int64, name string, public bool) (file *files.File, err error)
 	ReadFileStream(ctx context.Context, oid int32, writer io.Writer) (err error)
 	WriteFileStream(ctx context.Context, userID, id int64, private bool, name, description, mime string, reader io.Reader) (size int64, err error)
-	ListFiles(ctx context.Context, userID int64, limit, offset int32, ascending, private bool) (list []*api.File, isLastPage bool, err error)
+	ListFiles(ctx context.Context, userID int64, limit, offset int32, ascending, private bool) (list []*files.File, isLastPage bool, err error)
 	PublishFiles(ctx context.Context, userID int64, ids []int64) (err error)
 	PrivateFiles(ctx context.Context, userID int64, ids []int64) (err error)
 	DeleteFiles(ctx context.Context, userID int64, ids []int64) (err error)
-	ReadMessageFiles(ctx context.Context, id int64, userIDs []int64) (list []*api.File, err error)
+	ReadMessageFiles(ctx context.Context, id int64, userIDs []int64) (list []*files.File, err error)
 }
 
 type Handler struct {
-	api.UnimplementedFilesServer
+	files.UnimplementedFilesServer
 	controller FilesController
 }
 
@@ -33,20 +33,20 @@ func NewFilesHandler(ctrl FilesController) *Handler {
 	}
 }
 
-func (h *Handler) ReadBatchFiles(ctx context.Context, req *api.ReadBatchFilesRequest) (resp *api.ReadBatchFilesResponse, err error) {
+func (h *Handler) ReadBatchFiles(ctx context.Context, req *files.ReadBatchFilesRequest) (resp *files.ReadBatchFilesResponse, err error) {
 	dict, err := h.controller.ReadBatchFiles(ctx, req.UserId, req.Ids)
 	if err != nil {
 		return nil, err
 	}
 
-	resp = &api.ReadBatchFilesResponse{
+	resp = &files.ReadBatchFilesResponse{
 		Files: dict,
 	}
 
 	return
 }
 
-func (h *Handler) ReadFile(ctx context.Context, req *api.ReadFileRequest) (*api.File, error) {
+func (h *Handler) ReadFile(ctx context.Context, req *files.ReadFileRequest) (*files.File, error) {
 	file, err := h.controller.ReadFile(ctx, req.Id, req.Name, req.Public)
 	if err != nil {
 		return nil, err
@@ -56,14 +56,14 @@ func (h *Handler) ReadFile(ctx context.Context, req *api.ReadFileRequest) (*api.
 }
 
 type streamWriter struct {
-	api.Files_ReadFileStreamServer
+	files.Files_ReadFileStreamServer
 }
 
 var _ io.Writer = (*streamWriter)(nil)
 
 func (w *streamWriter) Write(p []byte) (n int, err error) {
-	err = w.Send(&api.FileData{
-		Data: &api.FileData_Chunk{
+	err = w.Send(&files.FileData{
+		Data: &files.FileData_Chunk{
 			Chunk: p,
 		},
 	})
@@ -71,15 +71,15 @@ func (w *streamWriter) Write(p []byte) (n int, err error) {
 	return len(p), err
 }
 
-func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.Files_ReadFileStreamServer) (err error) {
+func (h *Handler) ReadFileStream(params *files.ReadFileStreamRequest, stream files.Files_ReadFileStreamServer) (err error) {
 	file, err := h.controller.ReadFile(context.TODO(), params.Id, params.Name, params.Public)
 	if err != nil {
 		return err
 	}
 
-	err = stream.Send(&api.FileData{
-		Data: &api.FileData_File{
-			File: &api.File{
+	err = stream.Send(&files.FileData{
+		Data: &files.FileData_File{
+			File: &files.File{
 				Id:             file.Id,
 				Oid:            file.Oid,
 				UserId:         file.UserId,
@@ -100,7 +100,7 @@ func (h *Handler) ReadFileStream(params *api.ReadFileStreamRequest, stream api.F
 }
 
 type streamReader struct {
-	api.Files_SaveFileStreamServer
+	files.Files_SaveFileStreamServer
 	mu  sync.Mutex
 	buf bytes.Buffer
 }
@@ -120,7 +120,7 @@ func (r *streamReader) Read(p []byte) (n int, err error) {
 		return 0, err
 	}
 
-	chunk, ok := fileData.Data.(*api.FileData_Chunk)
+	chunk, ok := fileData.Data.(*files.FileData_Chunk)
 	if !ok {
 		return 0, errors.New("file data chunk expected, wrong format")
 	}
@@ -133,13 +133,13 @@ func (r *streamReader) Read(p []byte) (n int, err error) {
 	return r.buf.Read(p)
 }
 
-func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) (err error) {
+func (h *Handler) SaveFileStream(stream files.Files_SaveFileStreamServer) (err error) {
 	meta, err := stream.Recv()
 	if err != nil {
 		return err
 	}
 
-	file, ok := meta.Data.(*api.FileData_File)
+	file, ok := meta.Data.(*files.FileData_File)
 	if !ok {
 		return errors.New("wrong format: file meta expected")
 	}
@@ -150,16 +150,16 @@ func (h *Handler) SaveFileStream(stream api.Files_SaveFileStreamServer) (err err
 		return
 	}
 
-	return stream.SendAndClose(&api.SaveFileStreamResponse{})
+	return stream.SendAndClose(&files.SaveFileStreamResponse{})
 }
 
-func (h *Handler) ListFiles(ctx context.Context, req *api.ListFilesRequest) (resp *api.ListFilesResponse, err error) {
+func (h *Handler) ListFiles(ctx context.Context, req *files.ListFilesRequest) (resp *files.ListFilesResponse, err error) {
 	list, isLastPage, err := h.controller.ListFiles(ctx, req.UserId, req.Limit, req.Offset, req.Asc, req.Private)
 	if err != nil {
 		return nil, err
 	}
 
-	resp = &api.ListFilesResponse{
+	resp = &files.ListFilesResponse{
 		Files:      list,
 		IsLastPage: isLastPage,
 	}
@@ -167,46 +167,46 @@ func (h *Handler) ListFiles(ctx context.Context, req *api.ListFilesRequest) (res
 	return
 }
 
-func (h *Handler) PublishFiles(ctx context.Context, req *api.PublishFilesRequest) (resp *api.PublishFilesResponse, err error) {
+func (h *Handler) PublishFiles(ctx context.Context, req *files.PublishFilesRequest) (resp *files.PublishFilesResponse, err error) {
 	err = h.controller.PublishFiles(ctx, req.UserId, req.Ids)
 	if err != nil {
 		return nil, err
 	}
 
-	resp = &api.PublishFilesResponse{}
+	resp = &files.PublishFilesResponse{}
 
 	return
 }
 
-func (h *Handler) PrivateFiles(ctx context.Context, req *api.PrivateFilesRequest) (resp *api.PrivateFilesResponse, err error) {
+func (h *Handler) PrivateFiles(ctx context.Context, req *files.PrivateFilesRequest) (resp *files.PrivateFilesResponse, err error) {
 	err = h.controller.PrivateFiles(ctx, req.UserId, req.Ids)
 	if err != nil {
 		return nil, err
 	}
 
-	resp = &api.PrivateFilesResponse{}
+	resp = &files.PrivateFilesResponse{}
 
 	return
 }
 
-func (h *Handler) DeleteFiles(ctx context.Context, req *api.DeleteFilesRequest) (resp *api.DeleteFilesResponse, err error) {
+func (h *Handler) DeleteFiles(ctx context.Context, req *files.DeleteFilesRequest) (resp *files.DeleteFilesResponse, err error) {
 	err = h.controller.DeleteFiles(ctx, req.UserId, req.Ids)
 	if err != nil {
 		return nil, err
 	}
 
-	resp = &api.DeleteFilesResponse{}
+	resp = &files.DeleteFilesResponse{}
 
 	return
 }
 
-func (h *Handler) ReadMessageFiles(ctx context.Context, req *api.ReadMessageFilesRequest) (resp *api.ReadMessageFilesResponse, err error) {
+func (h *Handler) ReadMessageFiles(ctx context.Context, req *files.ReadMessageFilesRequest) (resp *files.ReadMessageFilesResponse, err error) {
 	list, err := h.controller.ReadMessageFiles(ctx, req.Id, req.UserIds)
 	if err != nil {
 		return nil, err
 	}
 
-	resp = &api.ReadMessageFilesResponse{
+	resp = &files.ReadMessageFilesResponse{
 		Files: list,
 	}
 
