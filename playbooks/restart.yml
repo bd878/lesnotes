@@ -1,0 +1,15 @@
+---
+- name: Restart messages db and service
+  hosts: hosts
+  become: Yes
+
+  tasks:
+  - name: Restart db
+    ansible.builtin.service:
+      name: messages-db
+      state: restarted
+
+  - name: Restart endpoing
+    ansible.builtin.service:
+      name: messages
+      state: restarted

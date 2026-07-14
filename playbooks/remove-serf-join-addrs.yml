@@ -1,0 +1,11 @@
+---
+- name: Remove serf-join-addrs from schwarzwald to init db cluster
+  hosts: gallery-stage
+
+  tasks:
+  - name: Update db config
+    ansible.builtin.template:
+      src: templates/{{ item }}_db.json.j2
+      dest: /srv/gallery/stage/{{ item }}/config/db.json
+    loop:
+      - messages

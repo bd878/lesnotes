@@ -1,0 +1,25 @@
+---
+- name: List gallery systemd units
+  hosts: hosts
+  become: Yes
+
+  tasks:
+  - name: List units
+    community.general.systemd_info:
+      unitname:
+        - billing.service
+        - billing-db.service
+        - users.service
+        - users-db.service
+        - threads.service
+        - threads-db.service
+        - messages.service
+        - messages-db.service
+        - search.service
+        - search-db.service
+        - sessions.service
+    register: systemd_output
+
+  - name: Print gathered info
+    ansible.builtin.debug:
+      var: systemd_output.units

@@ -1,0 +1,83 @@
+- name: Save service and db config
+  hosts:
+    - gallery-stage-3
+    - gallery-stage-4
+    - gallery-stage
+
+  tasks:
+  - name: Write db config
+    ansible.builtin.template:
+      src: templates/{{ item }}_db.json.j2
+      dest: /srv/gallery/stage/{{ item }}/config/db.json
+    tags:
+      - db
+    loop:
+      - billing
+      - search
+      - messages
+      - threads
+      - users
+      - sessions
+
+  - name: Remove stale files
+    tags:
+      - stale
+    ansible.builtin.file:
+      state: absent
+      path: "{{ item }}"
+    with_items:
+      - /srv/gallery/stage/billing/config/otel.conf
+      - /srv/gallery/stage/billing/config/grpc.conf
+      - /srv/gallery/stage/billing/config/grpc.json
+      - /srv/gallery/stage/billing/config/http.json
+      - /srv/gallery/stage/search/config/otel.conf
+      - /srv/gallery/stage/search/config/grpc.conf
+      - /srv/gallery/stage/search/config/grpc.json
+      - /srv/gallery/stage/search/config/http.json
+      - /srv/gallery/stage/messages/config/otel.conf
+      - /srv/gallery/stage/messages/config/grpc.conf
+      - /srv/gallery/stage/messages/config/grpc.json
+      - /srv/gallery/stage/messages/config/http.json
+      - /srv/gallery/stage/threads/config/otel.conf
+      - /srv/gallery/stage/threads/config/grpc.conf
+      - /srv/gallery/stage/threads/config/grpc.json
+      - /srv/gallery/stage/threads/config/http.json
+      - /srv/gallery/stage/users/config/otel.conf
+      - /srv/gallery/stage/users/config/grpc.conf
+      - /srv/gallery/stage/users/config/grpc.json
+      - /srv/gallery/stage/users/config/http.json
+      - /srv/gallery/stage/sessions/config/otel.conf
+      - /srv/gallery/stage/sessions/config/grpc.conf
+      - /srv/gallery/stage/sessions/config/grpc.json
+      - /srv/gallery/stage/sessions/config/http.json
+
+  - name: Write endpoint envs
+    tags:
+      - envs
+    ansible.builtin.template:
+      src: templates/{{ item }}.conf.j2
+      dest: /srv/gallery/stage/{{ item }}/config/service.conf
+    loop:
+      - billing
+      - search
+      - messages
+      - threads
+      - users
+      - sessions
+
+  - name: Flush pending handlers
+    ansible.builtin.meta: flush_handlers
+
+  - name: Write service config
+    ansible.builtin.template:
+      src: templates/{{ item }}.json.j2
+      dest: /srv/gallery/stage/{{ item }}/config/service.json
+    tags:
+      - service
+    loop:
+      - billing
+      - search
+      - messages
+      - threads
+      - users
+

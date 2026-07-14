@@ -1,0 +1,46 @@
+---
+- name: Fix stale sessions db service
+  hosts: hosts
+  become: Yes
+
+  tasks:
+  - name: Stop and disable sessions-db
+    ansible.builtin.service:
+      name: sessions-db
+      state: stopped
+      enabled: false    
+    ignore_errors: true
+
+  - name: Remove sessions-db file
+    ansible.builtin.file:
+      path: /etc/systemd/system/sessions-db.service
+      state: absent
+    ignore_errors: true
+
+  - name: Remove sessions file
+    ansible.builtin.file:
+      path: /etc/systemd/system/sessions.service
+      state: absent
+    ignore_errors: true
+
+  - name: Create new service file
+    ansible.builtin.template:
+      src: ./templates/endpoint.service.j2
+      dest: /etc/systemd/system/sessions.service
+    notify: Reload systemd daemon
+    loop:
+      - sessions
+
+  - name: Flush pending handlers
+    ansible.builtin.meta: flush_handlers
+
+  - name: Ensure started
+    ansible.builtin.service:
+      name: sessions
+      state: started
+      enabled: true
+
+  handlers:
+  - name: Reload systemd daemon
+    ansible.builtin.systemd_service:
+      daemon_reload: true

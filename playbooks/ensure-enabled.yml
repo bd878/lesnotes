@@ -1,0 +1,31 @@
+- name: Ensure services enabled
+  hosts: hosts
+  become: Yes
+
+  tasks:
+  - name: Ensure endpoint enabled and started
+    ansible.builtin.systemd_service:
+      name: "{{ item }}"
+      state: started
+      enabled: true
+    loop:
+      - billing
+      - search
+      - threads
+      - sessions
+      - messages
+      - users
+
+  - name: Ensure db enabled and started
+    ansible.builtin.systemd_service:
+      name: "{{ item }}-db"
+      state: started
+      enabled: true
+    loop:
+      - billing
+      - search
+      - threads
+      - messages
+      - users
+
+

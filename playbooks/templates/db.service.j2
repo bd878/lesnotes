@@ -1,5 +1,5 @@
 [Unit]
-Description=Gallery {{ item }} http
+Description=Gallery {{ item }} database
 Wants=network.target
 After=syslog.target network-online.target
 
@@ -7,7 +7,7 @@ After=syslog.target network-online.target
 User=snd
 Group=snd
 WorkingDirectory=/srv/gallery/stage/{{ item }}
-ExecStart=/srv/gallery/stage/{{ item }}/http ./config/http.json
+ExecStart=/srv/gallery/stage/{{ item }}/{{ item }}_db ./config/db.json
 Restart=on-failure
 RestartSec=10
 KillMode=process

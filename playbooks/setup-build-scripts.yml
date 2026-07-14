@@ -1,0 +1,27 @@
+---
+- name: Write build scripts
+  hosts: schwarzwald
+
+  tasks:
+  - name: Write db scripts
+    ansible.builtin.template:
+      src: templates/build-service-db.j2
+      dest: /srv/misc/scripts/build-{{ item }}-db
+    loop:
+      - billing
+      - users
+      - threads
+      - search
+      - messages
+
+  - name: Write endpoint scripts
+    ansible.builtin.template:
+      src: templates/build-service.j2
+      dest: /srv/misc/scripts/build-{{ item }}
+    loop:
+      - billing
+      - sessions
+      - users
+      - threads
+      - search
+      - messages

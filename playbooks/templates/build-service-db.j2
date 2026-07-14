@@ -1,0 +1,59 @@
+#!/bin/bash
+#
+# Builds {{ item }} db
+#
+
+set -e
+
+HOSTS=( gallery-$ENV gallery-$ENV-4 gallery-$ENV-3 )
+declare -A pause=(["prod"]="40s" ["stage"]="20s")
+
+# env BUILD_DIR, ENV
+
+touch "$BUILD_DIR/logs/{{ item }}_db.log"
+
+echo "*** logging in $BUILD_DIR/logs/{{ item }}_db.log"
+
+exec 7<&1
+exec &> "$BUILD_DIR/logs/{{ item }}_db.log"
+
+# build 
+echo "*** building {{ item }} db"
+
+cd $BUILD_DIR/gallery/server/db/{{ item }}
+echo "*** pwd = $(pwd)"
+go version
+[ $? -ne 0 ] && echo "*** go is not installed, exit." && exit 1
+go env -w "CGO_ENABLED=1"
+go build -v -buildvcs=false ./cmd/{{ item }}_db/
+[ $? -ne 0 ] && echo "*** build failed, exit." && exit 1
+
+# stop
+set +e
+
+for host in ${HOSTS[@]}; do
+    echo "*** stop {{ item }} db on $host"
+    ssh "$host" "sudo systemctl stop {{ item }}-db"
+
+    scp {{ item }}_db "$host:/srv/gallery/$ENV/{{ item }}/"
+
+    echo "*** start {{ item }} db on $host"
+    ssh "$host" "sudo systemctl start {{ item }}-db"
+
+    sleep ${pause[$ENV]} # let cluster restart
+done
+
+set -e
+
+echo
+
+# restore
+echo "*** build finish $(date)"
+echo "==="
+
+exec 1<&7 7<&-
+
+echo "done."
+
+exit 0;
+
