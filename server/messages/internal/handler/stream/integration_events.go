@@ -6,8 +6,8 @@ import (
 
 	"github.com/bd878/gallery/server/internal/am"
 	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/api"
-	users "github.com/bd878/gallery/server/users/pkg/events"
+	"github.com/bd878/gallery/server/api/users"
+	"github.com/bd878/gallery/server/users/pkg/events"
 )
 
 type MessagesController interface {
@@ -27,7 +27,7 @@ func NewIntegrationEventHandlers(messages MessagesController) am.RawMessageHandl
 }
 
 func RegisterIntegrationEventHandlers(subscriber am.RawMessageSubscriber, handlers am.RawMessageHandler) (err error) {
-	err = subscriber.Subscribe(users.UsersChannel, handlers, am.GroupName("messages-users"))
+	err = subscriber.Subscribe(events.UsersChannel, handlers, am.GroupName("messages-users"))
 	if err != nil {
 		return
 	}
@@ -39,7 +39,7 @@ func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingM
 	logger.Debugw("handle message", "name", msg.MessageName(), "subject", msg.Subject())
 
 	switch msg.MessageName() {
-	case users.UserDeletedEvent:
+	case events.UserDeletedEvent:
 		return h.handleUserDeleted(ctx, msg)
 	}
 
@@ -47,7 +47,7 @@ func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingM
 }
 
 func (h integrationHandlers) handleUserDeleted(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.UserDeleted{}
+	m := &users.UserDeleted{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}

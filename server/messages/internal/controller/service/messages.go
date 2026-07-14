@@ -14,14 +14,17 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/threads"
+	"github.com/bd878/gallery/server/api/messages"
+	"github.com/bd878/gallery/server/api/files"
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/rpc"
 	"github.com/bd878/gallery/server/messages/internal/domain"
-	"github.com/bd878/gallery/server/messages/internal/machine"
+	"github.com/bd878/gallery/server/db/messages/pkg/machine"
 	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/messages/pkg/loadbalance"
+	"github.com/bd878/gallery/server/db/messages/pkg/loadbalance"
 	"github.com/bd878/gallery/server/messages/pkg/model"
-	threads "github.com/bd878/gallery/server/threads/pkg/model"
+	threadsmodel "github.com/bd878/gallery/server/threads/pkg/model"
 )
 
 type MessagesConfig struct {
@@ -29,28 +32,34 @@ type MessagesConfig struct {
 }
 
 type ThreadsGateway interface {
-	ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32) (list []*threads.Thread, isLastPage bool, err error)
-	ListMessages(ctx context.Context, userID, parentID int64, limit, offset int32, privateMessage *bool) (list []*threads.Thread, isLastPage bool, err error)
+	ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32) (list []*threadsmodel.Thread, isLastPage bool, err error)
+	ListMessages(ctx context.Context, userID, parentID int64, limit, offset int32, privateMessage *bool) (list []*threadsmodel.Thread, isLastPage bool, err error)
 	// TODO: fix params order
 	CountThreads(ctx context.Context, id, userID int64) (total int32, err error)
 	CountMessages(ctx context.Context, id, userID int64, privateMessage *bool) (total int32, err error)
-	ResolvePath(ctx context.Context, userID, id int64) (path []*api.PathStep, err error)
-	ReadThread(ctx context.Context, userID, id int64, name string) (thread *threads.Thread, err error)
-	ReadParent(ctx context.Context, userID, id int64) (thread *threads.Thread, err error)
+	ResolvePath(ctx context.Context, userID, id int64) (path []*threads.PathStep, err error)
+	ReadThread(ctx context.Context, userID, id int64, name string) (thread *threadsmodel.Thread, err error)
+	ReadParent(ctx context.Context, userID, id int64) (thread *threadsmodel.Thread, err error)
+}
+
+type FilesGateway interface {
+	ReadMessageFiles(ctx context.Context, id int64, userIDs []int64) (list []*files.File, err error)
 }
 
 type MessagesController struct {
 	conf    MessagesConfig
-	client  api.MessagesClient
+	client  messages.MessagesClient
 	conn    *grpc.ClientConn
 	threads ThreadsGateway
+	filesGateway FilesGateway
 	messagesSaved prometheus.Counter
 	publisher    ddd.EventPublisher[ddd.Event]
 }
 
-func NewMessagesController(conf MessagesConfig, publisher ddd.EventPublisher[ddd.Event], threads ThreadsGateway, messagesSaved prometheus.Counter) *MessagesController {
+func NewMessagesController(conf MessagesConfig, publisher ddd.EventPublisher[ddd.Event], filesGateway FilesGateway, threads ThreadsGateway, messagesSaved prometheus.Counter) *MessagesController {
 	controller := &MessagesController{
 		conf: conf,
+		filesGateway: filesGateway,
 		threads: threads,
 		publisher: publisher,
 		messagesSaved: messagesSaved,
@@ -81,7 +90,7 @@ func (s *MessagesController) setupConnection() (err error) {
 		return err
 	}
 
-	client := api.NewMessagesClient(conn)
+	client := messages.NewMessagesClient(conn)
 
 	s.conn = conn
 	s.client = client
@@ -112,7 +121,7 @@ func (s *MessagesController) SaveMessage(ctx context.Context, id int64, text, ti
 	createdAt := time.Now().UTC().Format(time.RFC3339)
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
-	cmd, err := proto.Marshal(&machine.AppendCommand{
+	cmd, err := proto.Marshal(&messages.AppendCommand{
 		Id:        id,
 		Text:      text,
 		Title:     title,
@@ -170,7 +179,7 @@ func (s *MessagesController) DeleteUserMessages(ctx context.Context, userID int6
 
 	logger.Debugw("delete user messages", "user_id", userID)
 
-	cmd, err := proto.Marshal(&machine.DeleteUserMessagesCommand{
+	cmd, err := proto.Marshal(&messages.DeleteUserMessagesCommand{
 		UserId: userID,
 	})
 	if err != nil {
@@ -202,7 +211,7 @@ func (s *MessagesController) DeleteMessages(ctx context.Context, ids []int64, us
 			return err
 		}
 
-		cmd, err := proto.Marshal(&machine.DeleteCommand{
+		cmd, err := proto.Marshal(&messages.DeleteCommand{
 			Id:     id,
 			UserId: userID,
 		})
@@ -237,7 +246,7 @@ func (s *MessagesController) PublishMessages(ctx context.Context, ids []int64, u
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
-	cmd, err := proto.Marshal(&machine.PublishCommand{
+	cmd, err := proto.Marshal(&messages.PublishCommand{
 		Ids:       ids,
 		UserId:    userID,
 		UpdatedAt: updatedAt,
@@ -274,7 +283,7 @@ func (s *MessagesController) PrivateMessages(ctx context.Context, ids []int64, u
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
-	cmd, err := proto.Marshal(&machine.PrivateCommand{
+	cmd, err := proto.Marshal(&messages.PrivateCommand{
 		Ids:       ids,
 		UserId:    userID,
 		UpdatedAt: updatedAt,
@@ -316,7 +325,7 @@ func (s *MessagesController) UpdateMessage(ctx context.Context, id int64, text, 
 		return err
 	}
 
-	cmd, err := proto.Marshal(&machine.UpdateCommand{
+	cmd, err := proto.Marshal(&messages.UpdateCommand{
 		Id:        id,
 		UserId:    userID,
 		FileIds:   fileIDs,
@@ -422,7 +431,7 @@ func (s *MessagesController) ReadThreadMessages(ctx context.Context, userID, thr
 }
 
 // Read messages by given ids
-func (s *MessagesController) ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*model.Message, err error) {
+func (s *MessagesController) ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (list []*model.Message, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -431,7 +440,7 @@ func (s *MessagesController) ReadBatchMessages(ctx context.Context, userID int64
 
 	logger.Debugw("read batch messages", "user_id", userID, "ids", ids)
 
-	res, err := s.client.ReadBatchMessages(ctx, &api.ReadBatchMessagesRequest{
+	res, err := s.client.ReadBatchMessages(ctx, &messages.ReadBatchMessagesRequest{
 		UserId: userID,
 		Ids:    ids,
 	})
@@ -444,7 +453,14 @@ func (s *MessagesController) ReadBatchMessages(ctx context.Context, userID int64
 		return nil, err
 	}
 
-	messages = model.MapMessagesFromProto(model.MessageFromProto, res.Messages)
+	for _, message := range res.Messages {
+		message.Files, err = s.filesGateway.ReadMessageFiles(ctx, message.Id, []int64{userID, message.UserId})
+		if err != nil {
+			return
+		}
+	}
+
+	list = model.MapMessagesFromProto(model.MessageFromProto, res.Messages)
 
 	return
 }
@@ -459,7 +475,7 @@ func (s *MessagesController) ReadMessages(ctx context.Context, userID int64, lim
 
 	logger.Debugw("read messages", "user_id", userID, "limit", limit, "offset", offset, "ascending", ascending)
 
-	res, err := s.client.ReadMessages(ctx, &api.ReadMessagesRequest{
+	res, err := s.client.ReadMessages(ctx, &messages.ReadMessagesRequest{
 		UserId: userID,
 		Limit:  limit,
 		Offset: offset,
@@ -467,6 +483,13 @@ func (s *MessagesController) ReadMessages(ctx context.Context, userID int64, lim
 	})
 	if err != nil {
 		return nil, err
+	}
+
+	for _, message := range res.Messages {
+		message.Files, err = s.filesGateway.ReadMessageFiles(ctx, message.Id, []int64{userID, message.UserId})
+		if err != nil {
+			return
+		}
 	}
 
 	list = &model.MessagesList{
@@ -490,13 +513,18 @@ func (s *MessagesController) ReadMessage(ctx context.Context, id int64, name str
 
 	logger.Debugw("read message", "id", id, "name", name, "user_ids", userIDs)
 
-	res, err := s.client.ReadMessage(ctx, &api.ReadMessageRequest{
+	res, err := s.client.ReadMessage(ctx, &messages.ReadMessageRequest{
 		Id:      id,
 		UserIds: userIDs,
 		Name:    name,
 	})
 	if err != nil {
 		return nil, err
+	}
+
+	res.Message.Files, err = s.filesGateway.ReadMessageFiles(ctx, res.Message.Id, append(userIDs, res.Message.UserId))
+	if err != nil {
+		return
 	}
 
 	// TODO: add threads count
@@ -515,7 +543,7 @@ func (s *MessagesController) ReadMessage(ctx context.Context, id int64, name str
 		Private: parent.Private,
 	}
 
-	parentMessage, err := s.client.ReadMessage(ctx, &api.ReadMessageRequest{
+	parentMessage, err := s.client.ReadMessage(ctx, &messages.ReadMessageRequest{
 		Id: parent.ID,
 		UserIds: userIDs,
 	})

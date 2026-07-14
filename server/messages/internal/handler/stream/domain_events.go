@@ -8,7 +8,9 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/messages"
+	"github.com/bd878/gallery/server/api/comments"
+	"github.com/bd878/gallery/server/api/translations"
 	"github.com/bd878/gallery/server/internal/am"
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/logger"
@@ -98,7 +100,7 @@ func (h domainHandler[T]) HandleEvent(ctx context.Context, event T) (err error) 
 
 func (h domainHandler[T]) onMessageCreated(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.MessageCreated)
-	data, err := proto.Marshal(&api.MessageCreated{
+	data, err := proto.Marshal(&messages.MessageCreated{
 		Id:        payload.ID,
 		UserId:    payload.UserID,
 		FileIds:   payload.FileIDs,
@@ -118,7 +120,7 @@ func (h domainHandler[T]) onMessageCreated(ctx context.Context, event ddd.Event)
 
 func (h domainHandler[T]) onMessageDeleted(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.MessageDeleted)
-	data, err := proto.Marshal(&api.MessageDeleted{
+	data, err := proto.Marshal(&messages.MessageDeleted{
 		Id:     payload.ID,
 		UserId: payload.UserID,
 	})
@@ -131,7 +133,7 @@ func (h domainHandler[T]) onMessageDeleted(ctx context.Context, event ddd.Event)
 
 func (h domainHandler[T]) onMessageUpdated(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.MessageUpdated)
-	data, err := proto.Marshal(&api.MessageUpdated{
+	data, err := proto.Marshal(&messages.MessageUpdated{
 		Id:        payload.ID,
 		UserId:    payload.UserID,
 		FileIds:   payload.FileIDs,
@@ -149,7 +151,7 @@ func (h domainHandler[T]) onMessageUpdated(ctx context.Context, event ddd.Event)
 
 func (h domainHandler[T]) onMessagesPrivate(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.MessagesPrivated)
-	data, err := proto.Marshal(&api.MessagesPrivated{
+	data, err := proto.Marshal(&messages.MessagesPrivated{
 		Ids:       payload.IDs,
 		UserId:    payload.UserID,
 		UpdatedAt: payload.UpdatedAt,
@@ -163,7 +165,7 @@ func (h domainHandler[T]) onMessagesPrivate(ctx context.Context, event ddd.Event
 
 func (h domainHandler[T]) onMessagesPublish(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.MessagesPublished)
-	data, err := proto.Marshal(&api.MessagesPublished{
+	data, err := proto.Marshal(&messages.MessagesPublished{
 		Ids:       payload.IDs,
 		UserId:    payload.UserID,
 		UpdatedAt: payload.UpdatedAt,
@@ -177,7 +179,7 @@ func (h domainHandler[T]) onMessagesPublish(ctx context.Context, event ddd.Event
 
 func (h domainHandler[T]) onTranslationCreated(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.TranslationCreated)
-	data, err := proto.Marshal(&api.TranslationCreated{
+	data, err := proto.Marshal(&translations.TranslationCreated{
 		Id:        payload.MessageID,
 		UserId:    payload.UserID,
 		Lang:      payload.Lang,
@@ -195,7 +197,7 @@ func (h domainHandler[T]) onTranslationCreated(ctx context.Context, event ddd.Ev
 
 func (h domainHandler[T]) onTranslationDeleted(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.TranslationDeleted)
-	data, err := proto.Marshal(&api.TranslationDeleted{
+	data, err := proto.Marshal(&translations.TranslationDeleted{
 		Id:        payload.MessageID,
 		Lang:      payload.Lang,
 	})
@@ -208,7 +210,7 @@ func (h domainHandler[T]) onTranslationDeleted(ctx context.Context, event ddd.Ev
 
 func (h domainHandler[T]) onTranslationUpdated(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.TranslationUpdated)
-	data, err := proto.Marshal(&api.TranslationUpdated{
+	data, err := proto.Marshal(&translations.TranslationUpdated{
 		Id:        payload.MessageID,
 		Lang:      payload.Lang,
 		Text:      payload.Text,
@@ -224,7 +226,7 @@ func (h domainHandler[T]) onTranslationUpdated(ctx context.Context, event ddd.Ev
 
 func (h domainHandler[T]) onCommentCreated(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.CommentCreated)
-	data, err := proto.Marshal(&api.CommentCreated{
+	data, err := proto.Marshal(&comments.CommentCreated{
 		MessageId: payload.MessageID,
 		Id:        payload.ID,
 		UserId:    payload.UserID,
@@ -241,7 +243,7 @@ func (h domainHandler[T]) onCommentCreated(ctx context.Context, event ddd.Event)
 
 func (h domainHandler[T]) onCommentUpdated(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.CommentUpdated)
-	data, err := proto.Marshal(&api.CommentUpdated{
+	data, err := proto.Marshal(&comments.CommentUpdated{
 		Id:        payload.ID,
 		UserId:    payload.UserID,
 		Text:      payload.Text,
@@ -256,7 +258,7 @@ func (h domainHandler[T]) onCommentUpdated(ctx context.Context, event ddd.Event)
 
 func (h domainHandler[T]) onCommentDeleted(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.CommentDeleted)
-	data, err := proto.Marshal(&api.CommentDeleted{
+	data, err := proto.Marshal(&comments.CommentDeleted{
 		Id:     payload.ID,
 		UserId: payload.UserID,
 	})
@@ -269,7 +271,7 @@ func (h domainHandler[T]) onCommentDeleted(ctx context.Context, event ddd.Event)
 
 func (h domainHandler[T]) onMessageCommentsDeleted(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.MessageCommentsDeleted)
-	data, err := proto.Marshal(&api.MessageCommentsDeleted{
+	data, err := proto.Marshal(&comments.MessageCommentsDeleted{
 		MessageId: payload.MessageID,
 	})
 	if err != nil {

@@ -7,13 +7,13 @@ import (
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/files"
 	"github.com/bd878/gallery/server/internal/logger"
 )
 
 type Gateway struct {
 	filesAddr string
-	client    api.FilesClient
+	client    files.FilesClient
 	conn      *grpc.ClientConn
 }
 
@@ -33,7 +33,7 @@ func (g *Gateway) setupConnection() (err error) {
 	}
 
 	g.conn = conn
-	g.client = api.NewFilesClient(conn)
+	g.client = files.NewFilesClient(conn)
 	return nil
 }
 
@@ -48,7 +48,7 @@ func (g *Gateway) isConnFailed() bool {
 	return false
 }
 
-func (g *Gateway) ReadMessageFiles(ctx context.Context, messageID int64, userIDs []int64) (list []*api.File, err error) {
+func (g *Gateway) ReadMessageFiles(ctx context.Context, messageID int64, userIDs []int64) (list []*files.File, err error) {
 	if g.isConnFailed() {
 		logger.Info("conn failed, setup new connection")
 		if err := g.setupConnection(); err != nil {
@@ -56,7 +56,7 @@ func (g *Gateway) ReadMessageFiles(ctx context.Context, messageID int64, userIDs
 		}
 	}
 
-	resp, err := g.client.ReadMessageFiles(ctx, &api.ReadMessageFilesRequest{
+	resp, err := g.client.ReadMessageFiles(ctx, &files.ReadMessageFilesRequest{
 		Id: messageID,
 		UserIds: userIDs,
 	})

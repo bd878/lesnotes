@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"os"
 
-	_ "github.com/bd878/gallery/server/messages/pkg/loadbalance"
+	_ "github.com/bd878/gallery/server/db/messages/pkg/loadbalance"
 	_ "github.com/bd878/gallery/server/sessions/pkg/loadbalance"
-	_ "github.com/bd878/gallery/server/threads/pkg/loadbalance"
+	_ "github.com/bd878/gallery/server/db/threads/pkg/loadbalance"
 
+	"github.com/bd878/gallery/server/messages"
 	"github.com/bd878/gallery/server/messages/config"
 	"github.com/bd878/gallery/server/internal/system"
-	"github.com/bd878/gallery/server/messages/internal/http"
 )
 
 func init() {
@@ -40,12 +40,12 @@ func main() {
 		panic(err)
 	}
 
-	if err := http.Root(s.Waiter().Context(), cfg, s); err != nil {
+	if err := messages.Root(s.Waiter().Context(), cfg, s); err != nil {
 		panic(err)
 	}
 
-	fmt.Println("starting messages http service")
-	defer fmt.Println("stopped messages http service")
+	fmt.Println("starting messages service")
+	defer fmt.Println("stopped messages service")
 
 	s.Waiter().Add(
 		s.WaitForHTTP,

@@ -1,11 +1,13 @@
 package model
 
 import (
-	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/messages"
+	"github.com/bd878/gallery/server/api/translations"
+	"github.com/bd878/gallery/server/api/comments"
 	files "github.com/bd878/gallery/server/files/pkg/model"
 )
 
-func MessageFromProto(proto *api.Message) *Message {
+func MessageFromProto(proto *messages.Message) *Message {
 	return &Message{
 		ID:           proto.Id,
 		CreatedAt:    proto.CreatedAt,
@@ -21,8 +23,8 @@ func MessageFromProto(proto *api.Message) *Message {
 	}
 }
 
-func MessageToProto(msg *Message) *api.Message {
-	return &api.Message{
+func MessageToProto(msg *Message) *messages.Message {
+	return &messages.Message{
 		Id:           msg.ID,
 		UserId:       msg.UserID,
 		CreatedAt:    msg.CreatedAt,
@@ -37,7 +39,7 @@ func MessageToProto(msg *Message) *api.Message {
 	}
 }
 
-func TranslationFromProto(proto *api.Translation) *Translation {
+func TranslationFromProto(proto *translations.Translation) *Translation {
 	return &Translation{
 		MessageID: proto.Id,
 		Lang:      proto.Lang,
@@ -48,8 +50,8 @@ func TranslationFromProto(proto *api.Translation) *Translation {
 	}
 }
 
-func TranslationToProto(translation *Translation) *api.Translation {
-	return &api.Translation{
+func TranslationToProto(translation *Translation) *translations.Translation {
+	return &translations.Translation{
 		Id:        translation.MessageID,
 		Lang:      translation.Lang,
 		Title:     translation.Title,
@@ -59,7 +61,7 @@ func TranslationToProto(translation *Translation) *api.Translation {
 	}
 }
 
-func CommentFromProto(proto *api.Comment) *Comment {
+func CommentFromProto(proto *comments.Comment) *Comment {
 	return &Comment{
 		MessageID: proto.MessageId,
 		UserID:    proto.UserId,
@@ -71,8 +73,8 @@ func CommentFromProto(proto *api.Comment) *Comment {
 	}
 }
 
-func CommentToProto(comment *Comment) *api.Comment {
-	return &api.Comment{
+func CommentToProto(comment *Comment) *comments.Comment {
+	return &comments.Comment{
 		MessageId: comment.MessageID,
 		UserId:    comment.UserID,
 		Id:        comment.ID,
@@ -83,7 +85,7 @@ func CommentToProto(comment *Comment) *api.Comment {
 	}
 }
 
-func TranslationPreviewFromProto(proto *api.TranslationPreview) *TranslationPreview {
+func TranslationPreviewFromProto(proto *translations.TranslationPreview) *TranslationPreview {
 	return &TranslationPreview{
 		MessageID: proto.Id,
 		Lang:      proto.Lang,
@@ -93,8 +95,8 @@ func TranslationPreviewFromProto(proto *api.TranslationPreview) *TranslationPrev
 	}
 }
 
-func TranslationPreviewToProto(preview *TranslationPreview) *api.TranslationPreview {
-	return &api.TranslationPreview{
+func TranslationPreviewToProto(preview *TranslationPreview) *translations.TranslationPreview {
+	return &translations.TranslationPreview{
 		Id:        preview.MessageID,
 		Lang:      preview.Lang,
 		Title:     preview.Title,
@@ -103,15 +105,15 @@ func TranslationPreviewToProto(preview *TranslationPreview) *api.TranslationPrev
 	}
 }
 
-func MapMessagesToProto(mapper func(*Message) *api.Message, msgs []*Message) []*api.Message {
-	res := make([]*api.Message, len(msgs))
+func MapMessagesToProto(mapper func(*Message) *messages.Message, msgs []*Message) []*messages.Message {
+	res := make([]*messages.Message, len(msgs))
 	for i, msg := range msgs {
 		res[i] = mapper(msg)
 	}
 	return res
 }
 
-func MapMessagesFromProto(mapper func(*api.Message) *Message, msgs []*api.Message) []*Message {
+func MapMessagesFromProto(mapper func(*messages.Message) *Message, msgs []*messages.Message) []*Message {
 	res := make([]*Message, len(msgs))
 	for i, msg := range msgs {
 		res[i] = mapper(msg)
@@ -119,31 +121,31 @@ func MapMessagesFromProto(mapper func(*api.Message) *Message, msgs []*api.Messag
 	return res
 }
 
-func MapTranslationsToProto(mapper func(*Translation) *api.Translation, translations []*Translation) []*api.Translation {
-	res := make([]*api.Translation, len(translations))
-	for i, translation := range translations {
+func MapTranslationsToProto(mapper func(*Translation) *translations.Translation, list []*Translation) []*translations.Translation {
+	res := make([]*translations.Translation, len(list))
+	for i, translation := range list {
 		res[i] = mapper(translation)
 	}
 	return res
 }
 
-func MapTranslationsFromProto(mapper func(*api.Translation) *Translation, translations []*api.Translation) []*Translation {
-	res := make([]*Translation, len(translations))
-	for i, translation := range translations {
+func MapTranslationsFromProto(mapper func(*translations.Translation) *Translation, list []*translations.Translation) []*Translation {
+	res := make([]*Translation, len(list))
+	for i, translation := range list {
 		res[i] = mapper(translation)
 	}
 	return res
 }
 
-func MapTranslationPreviewsToProto(mapper func(*TranslationPreview) *api.TranslationPreview, previews []*TranslationPreview) []*api.TranslationPreview {
-	res := make([]*api.TranslationPreview, len(previews))
+func MapTranslationPreviewsToProto(mapper func(*TranslationPreview) *translations.TranslationPreview, previews []*TranslationPreview) []*translations.TranslationPreview {
+	res := make([]*translations.TranslationPreview, len(previews))
 	for i, preview := range previews {
 		res[i] = mapper(preview)
 	}
 	return res
 }
 
-func MapTranslationPreviewsFromProto(mapper func(*api.TranslationPreview) *TranslationPreview, previews []*api.TranslationPreview) []*TranslationPreview {
+func MapTranslationPreviewsFromProto(mapper func(*translations.TranslationPreview) *TranslationPreview, previews []*translations.TranslationPreview) []*TranslationPreview {
 	res := make([]*TranslationPreview, len(previews))
 	for i, preview := range previews {
 		res[i] = mapper(preview)
@@ -151,17 +153,17 @@ func MapTranslationPreviewsFromProto(mapper func(*api.TranslationPreview) *Trans
 	return res
 }
 
-func MapCommentsFromProto(mapper func(*api.Comment) *Comment, comments []*api.Comment) []*Comment {
-	res := make([]*Comment, len(comments))
-	for i, comment := range comments {
+func MapCommentsFromProto(mapper func(*comments.Comment) *Comment, list []*comments.Comment) []*Comment {
+	res := make([]*Comment, len(list))
+	for i, comment := range list {
 		res[i] = mapper(comment)
 	}
 	return res
 }
 
-func MapCommentsToProto(mapper func(*Comment) *api.Comment, comments []*Comment) []*api.Comment {
-	res := make([]*api.Comment, len(comments))
-	for i, comment := range comments {
+func MapCommentsToProto(mapper func(*Comment) *comments.Comment, list []*Comment) []*comments.Comment {
+	res := make([]*comments.Comment, len(list))
+	for i, comment := range list {
 		res[i] = mapper(comment)
 	}
 	return res

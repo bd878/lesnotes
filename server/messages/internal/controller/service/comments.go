@@ -11,12 +11,13 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/comments"
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/messages/pkg/loadbalance"
+	"github.com/bd878/gallery/server/db/messages/pkg/loadbalance"
 	"github.com/bd878/gallery/server/messages/pkg/model"
 	"github.com/bd878/gallery/server/messages/internal/domain"
-	"github.com/bd878/gallery/server/messages/internal/machine"
+	"github.com/bd878/gallery/server/db/messages/pkg/machine"
 )
 
 type CommentsConfig struct {
@@ -25,7 +26,7 @@ type CommentsConfig struct {
 
 type CommentsController struct {
 	conf   CommentsConfig
-	client api.CommentsClient
+	client comments.CommentsClient
 	conn   *grpc.ClientConn
 	publisher    ddd.EventPublisher[ddd.Event]
 }
@@ -60,7 +61,7 @@ func (s *CommentsController) setupConnection() (err error) {
 		return err
 	}
 
-	client := api.NewCommentsClient(conn)
+	client := comments.NewCommentsClient(conn)
 
 	s.conn = conn
 	s.client = client
@@ -91,7 +92,7 @@ func (s *CommentsController) SendComment(ctx context.Context, id, userID, messag
 	createdAt := time.Now().UTC().Format(time.RFC3339)
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
-	cmd, err := proto.Marshal(&machine.AppendCommentCommand{
+	cmd, err := proto.Marshal(&comments.AppendCommentCommand{
 		Id:        id,
 		UserId:    userID,
 		MessageId: messageID,
@@ -132,7 +133,7 @@ func (s *CommentsController) UpdateComment(ctx context.Context, id, userID int64
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
-	cmd, err := proto.Marshal(&machine.UpdateCommentCommand{
+	cmd, err := proto.Marshal(&comments.UpdateCommentCommand{
 		Id:        id,
 		UserId:    userID,
 		Text:      text,
@@ -169,7 +170,7 @@ func (s *CommentsController) DeleteComment(ctx context.Context, id, userID int64
 
 	logger.Debugw("delete comment", "id", id, "user_id", userID)
 
-	cmd, err := proto.Marshal(&machine.DeleteCommentCommand{
+	cmd, err := proto.Marshal(&comments.DeleteCommentCommand{
 		Id:     id,
 		UserId: userID,
 	})
@@ -203,7 +204,7 @@ func (s *CommentsController) DeleteMessageComments(ctx context.Context, messageI
 
 	logger.Debugw("delete message comments", "message_id", messageID)
 
-	cmd, err := proto.Marshal(&machine.DeleteMessageCommentsCommand{
+	cmd, err := proto.Marshal(&comments.DeleteMessageCommentsCommand{
 		MessageId: messageID,
 	})
 	if err != nil {
@@ -236,7 +237,7 @@ func (s *CommentsController) ReadComment(ctx context.Context, id, userID int64) 
 
 	logger.Debugw("read comment", "id", id, "user_id", userID)
 
-	res, err := s.client.ReadComment(ctx, &api.ReadCommentRequest{
+	res, err := s.client.ReadComment(ctx, &comments.ReadCommentRequest{
 		Id:     id,
 		UserId: userID,
 	})
@@ -258,7 +259,7 @@ func (s *CommentsController) ListComments(ctx context.Context, userID, messageID
 
 	logger.Debugw("list comments", "message_id", messageID, "user_id", userID, "name", name, "limit", limit, "offset", offset, "ascending", asc)
 
-	res, err := s.client.ListComments(ctx, &api.ListCommentsRequest{
+	res, err := s.client.ListComments(ctx, &comments.ListCommentsRequest{
 		MessageId: messageID,
 		UserId:    userID,
 		Name:      name,

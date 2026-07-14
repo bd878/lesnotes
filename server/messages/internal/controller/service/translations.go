@@ -11,10 +11,11 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/translations"
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/messages/internal/machine"
-	"github.com/bd878/gallery/server/messages/pkg/loadbalance"
+	"github.com/bd878/gallery/server/db/messages/pkg/machine"
+	"github.com/bd878/gallery/server/db/messages/pkg/loadbalance"
 	"github.com/bd878/gallery/server/messages/pkg/model"
 	"github.com/bd878/gallery/server/messages/internal/domain"
 )
@@ -25,7 +26,7 @@ type TranslationsConfig struct {
 
 type TranslationsController struct {
 	conf   TranslationsConfig
-	client api.TranslationsClient
+	client translations.TranslationsClient
 	conn   *grpc.ClientConn
 	publisher    ddd.EventPublisher[ddd.Event]
 }
@@ -60,7 +61,7 @@ func (s *TranslationsController) setupConnection() (err error) {
 		return err
 	}
 
-	client := api.NewTranslationsClient(conn)
+	client := translations.NewTranslationsClient(conn)
 
 	s.conn = conn
 	s.client = client
@@ -91,7 +92,7 @@ func (s *TranslationsController) SaveTranslation(ctx context.Context, userID, me
 	createdAt := time.Now().UTC().Format(time.RFC3339)
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
-	cmd, err := proto.Marshal(&machine.AppendTranslationCommand{
+	cmd, err := proto.Marshal(&translations.AppendTranslationCommand{
 		MessageId: messageID,
 		Lang:      lang,
 		Title:     title,
@@ -131,7 +132,7 @@ func (s *TranslationsController) UpdateTranslation(ctx context.Context, messageI
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
-	cmd, err := proto.Marshal(&machine.UpdateTranslationCommand{
+	cmd, err := proto.Marshal(&translations.UpdateTranslationCommand{
 		MessageId: messageID,
 		Lang:      lang,
 		Title:     title,
@@ -168,7 +169,7 @@ func (s *TranslationsController) DeleteTranslation(ctx context.Context, messageI
 
 	logger.Debugw("delete translation", "message_id", messageID, "lang", lang)
 
-	cmd, err := proto.Marshal(&machine.DeleteTranslationCommand{
+	cmd, err := proto.Marshal(&translations.DeleteTranslationCommand{
 		MessageId: messageID,
 		Lang:      lang,
 	})
@@ -202,7 +203,7 @@ func (s *TranslationsController) ReadTranslation(ctx context.Context, userID, me
 
 	logger.Debugw("read translation", "user_id", userID, "message_id", messageID, "lang", lang, "name", name)
 
-	resp, err := s.client.ReadTranslation(ctx, &api.ReadTranslationRequest{
+	resp, err := s.client.ReadTranslation(ctx, &translations.ReadTranslationRequest{
 		UserId:    userID,
 		Id:        messageID,
 		Lang:      lang,
@@ -217,7 +218,7 @@ func (s *TranslationsController) ReadTranslation(ctx context.Context, userID, me
 	return
 }
 
-func (s *TranslationsController) ListTranslations(ctx context.Context, userID, messageID int64, name string) (translations []*model.Translation, err error) {
+func (s *TranslationsController) ListTranslations(ctx context.Context, userID, messageID int64, name string) (list []*model.Translation, err error) {
 	if s.isConnFailed() {
 		if err = s.setupConnection(); err != nil {
 			return
@@ -226,7 +227,7 @@ func (s *TranslationsController) ListTranslations(ctx context.Context, userID, m
 
 	logger.Debugw("list translations", "user_id", userID, "message_id", messageID, "name", name)
 
-	resp, err := s.client.ListTranslations(ctx, &api.ListTranslationsRequest{
+	resp, err := s.client.ListTranslations(ctx, &translations.ListTranslationsRequest{
 		UserId:    userID,
 		Id:        messageID,
 		Name:      name,
@@ -235,7 +236,7 @@ func (s *TranslationsController) ListTranslations(ctx context.Context, userID, m
 		return nil, err
 	}
 
-	translations = model.MapTranslationsFromProto(model.TranslationFromProto, resp.Translations)
+	list = model.MapTranslationsFromProto(model.TranslationFromProto, resp.Translations)
 
 	return
 }

@@ -8,18 +8,6 @@ type Config struct {
 	SessionsServiceAddr string   `json:"sessions_service_addr"`
 	ThreadsServiceAddr  string   `json:"threads_service_addr"`
 	MessagesServiceAddr string   `json:"messages_service_addr"`
-	RpcAddr             string   `json:"rpc_addr"`
-	SerfAddr            string   `json:"serf_addr"`
-	RaftServers         []string `json:"raft_servers"`
-	SerfJoinAddrs       []string `json:"serf_join_addrs"`
-	RaftLogLevel        string   `json:"raft_log_level"`
 	LogLevel            string   `json:"log_level"`
 	NatsAddr            string   `json:"nats_addr"`
-	QueueGroup          string   `json:"queue_group"`
-
-	RaftBootstrap bool   `json:"raft_bootstrap"`
-	PGConn        string `json:"pg_conn"`
-	// TODO ShutdownTimeout string     `json:"shutdown_timeout"`
-	GooseTableName string `json:"goose_table_name"`
-	DataPath       string `json:"data_path"`
 }

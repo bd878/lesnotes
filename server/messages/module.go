@@ -1,4 +1,4 @@
-package http
+package messages
 
 import (
 	"context"
@@ -18,6 +18,7 @@ import (
 	httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
 	controller "github.com/bd878/gallery/server/messages/internal/controller/service"
 	threadsgateway "github.com/bd878/gallery/server/messages/internal/gateway/threads/grpc"
+	filesgateway "github.com/bd878/gallery/server/messages/internal/gateway/files/grpc"
 	httphandler "github.com/bd878/gallery/server/messages/internal/handler/http"
 	usermodel "github.com/bd878/gallery/server/users/pkg/model"
 )
@@ -28,6 +29,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	usersGateway := usersgateway.New(cfg.UsersServiceAddr)
 	sessionsGateway := sessionsgateway.New(cfg.SessionsServiceAddr)
 	threadsGateway := threadsgateway.New(cfg.ThreadsServiceAddr)
+	filesGateway := filesgateway.New(cfg.FilesServiceAddr)
 	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(svc.Logger(), usersGateway, sessionsGateway, usermodel.PublicUserID))
 
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
@@ -44,7 +46,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	)
 
 	messagesController := controller.NewMessagesController(controller.MessagesConfig{RpcAddr: cfg.MessagesServiceAddr},
-		dispatcher, threadsGateway, messagesSaved)
+		dispatcher, filesGateway, threadsGateway, messagesSaved)
 	translationsController := controller.NewTranslationsController(controller.TranslationsConfig{RpcAddr: cfg.MessagesServiceAddr}, dispatcher)
 	commentsController := controller.NewCommentsController(controller.CommentsConfig{RpcAddr: cfg.MessagesServiceAddr}, dispatcher)
 

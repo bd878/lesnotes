@@ -8,15 +8,15 @@ import (
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/threads"
 	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/threads/pkg/loadbalance"
+	"github.com/bd878/gallery/server/db/threads/pkg/loadbalance"
 	"github.com/bd878/gallery/server/threads/pkg/model"
 )
 
 type Gateway struct {
 	addr   string
-	client api.ThreadsClient
+	client threads.ThreadsClient
 	conn   *grpc.ClientConn
 }
 
@@ -42,7 +42,7 @@ func (g *Gateway) setupConnection() error {
 	}
 
 	g.conn = conn
-	g.client = api.NewThreadsClient(conn)
+	g.client = threads.NewThreadsClient(conn)
 
 	return nil
 }
@@ -68,7 +68,7 @@ func (g *Gateway) ListThreads(ctx context.Context, userID, parentID int64, limit
 
 	logger.Debugw("list threads", "user_id", userID, "parent_id", parentID, "limit", limit, "offset", offset)
 
-	resp, err := g.client.List(ctx, &api.ListRequest{
+	resp, err := g.client.List(ctx, &threads.ListRequest{
 		UserId:   userID,
 		ParentId: parentID,
 		Limit:    limit,
@@ -93,7 +93,7 @@ func (g *Gateway) ListMessages(ctx context.Context, userID, parentID int64, limi
 
 	logger.Debugw("list messages", "user_id", userID, "parent_id", parentID, "limit", limit, "offset", offset, "private_message", privateMessage)
 
-	resp, err := g.client.ListMessages(ctx, &api.ListMessagesRequest{
+	resp, err := g.client.ListMessages(ctx, &threads.ListMessagesRequest{
 		UserId:   userID,
 		ParentId: parentID,
 		Limit:    limit,
@@ -119,7 +119,7 @@ func (g *Gateway) CountThreads(ctx context.Context, id, userID int64) (total int
 
 	logger.Debugw("count threads", "id", id, "user_id", userID)
 
-	resp, err := g.client.Count(ctx, &api.CountRequest{
+	resp, err := g.client.Count(ctx, &threads.CountRequest{
 		UserId: userID,
 		Id:     id,
 	})
@@ -141,7 +141,7 @@ func (g *Gateway) CountMessages(ctx context.Context, id, userID int64, privateMe
 
 	logger.Debugw("count messages", "id", id, "user_id", userID, "private_message", privateMessage)
 
-	resp, err := g.client.CountMessages(ctx, &api.CountMessagesRequest{
+	resp, err := g.client.CountMessages(ctx, &threads.CountMessagesRequest{
 		UserId:         userID,
 		Id:             id,
 		PrivateMessage: privateMessage,
@@ -155,7 +155,7 @@ func (g *Gateway) CountMessages(ctx context.Context, id, userID int64, privateMe
 	return
 }
 
-func (g *Gateway) ResolvePath(ctx context.Context, userID, id int64) (path []*api.PathStep, err error) {
+func (g *Gateway) ResolvePath(ctx context.Context, userID, id int64) (path []*threads.PathStep, err error) {
 	if g.isConnFailed() {
 		if err = g.setupConnection(); err != nil {
 			return
@@ -164,7 +164,7 @@ func (g *Gateway) ResolvePath(ctx context.Context, userID, id int64) (path []*ap
 
 	logger.Debugw("resolve path", "user_id", userID, "id", id)
 
-	resp, err := g.client.Resolve(ctx, &api.ResolveRequest{
+	resp, err := g.client.Resolve(ctx, &threads.ResolveRequest{
 		UserId: userID,
 		Id:     id,
 	})
@@ -186,7 +186,7 @@ func (g *Gateway) ReadThread(ctx context.Context, userID, id int64, name string)
 
 	logger.Debugw("read thread", "user_id", userID, "id", id, "name", name)
 
-	resp, err := g.client.Read(ctx, &api.ReadRequest{
+	resp, err := g.client.Read(ctx, &threads.ReadRequest{
 		Id:     id,
 		UserId: userID,
 		Name:   name,
@@ -209,7 +209,7 @@ func (g *Gateway) ReadParent(ctx context.Context, userID, id int64) (thread *mod
 
 	logger.Debugw("read parent", "user_id", userID, "id", id)
 
-	resp, err := g.client.ReadParent(ctx, &api.ReadParentRequest{
+	resp, err := g.client.ReadParent(ctx, &threads.ReadParentRequest{
 		UserId: userID,
 		Id: id,
 	})
