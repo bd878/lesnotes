@@ -6,7 +6,7 @@ import (
 
 	"github.com/bd878/gallery/server/internal/am"
 	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/messages"
 	messageevents "github.com/bd878/gallery/server/messages/pkg/events"
 )
 
@@ -65,7 +65,7 @@ func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingM
 // TODO: delete user threads when user deleted
 
 func (h integrationHandlers) handleMessageCreated(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.MessageCreated{}
+	m := &messages.MessageCreated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 	return err
 	}
@@ -74,7 +74,7 @@ func (h integrationHandlers) handleMessageCreated(ctx context.Context, msg am.In
 }
 
 func (h integrationHandlers) handleMessageDeleted(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.MessageDeleted{}
+	m := &messages.MessageDeleted{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}
@@ -83,7 +83,7 @@ func (h integrationHandlers) handleMessageDeleted(ctx context.Context, msg am.In
 }
 
 func (h integrationHandlers) handleMessagesPublish(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.MessagesPublished{}
+	m := &messages.MessagesPublished{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func (h integrationHandlers) handleMessagesPublish(ctx context.Context, msg am.I
 }
 
 func (h integrationHandlers) handleMessagesPrivate(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.MessagesPrivated{}
+	m := &messages.MessagesPrivated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}

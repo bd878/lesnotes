@@ -1,10 +1,8 @@
 package model
 
-import (
-	"github.com/bd878/gallery/server/api"
-)
+import "github.com/bd878/gallery/server/api/threads"
 
-func ThreadFromProto(proto *api.Thread) *Thread {
+func ThreadFromProto(proto *threads.Thread) *Thread {
 	return &Thread{
 		ID:             proto.Id,
 		UserID:         proto.UserId,
@@ -22,8 +20,8 @@ func ThreadFromProto(proto *api.Thread) *Thread {
 	}
 }
 
-func ThreadToProto(msg *Thread) *api.Thread {
-	return &api.Thread{
+func ThreadToProto(msg *Thread) *threads.Thread {
+	return &threads.Thread{
 		Id:             msg.ID,
 		UserId:         msg.UserID,
 		ParentId:       msg.ParentID,
@@ -40,7 +38,7 @@ func ThreadToProto(msg *Thread) *api.Thread {
 	}
 }
 
-func PathFromProto(path []*api.PathStep) []*PathStep {
+func PathFromProto(path []*threads.PathStep) []*PathStep {
 	res := make([]*PathStep, len(path))
 	for i, step := range path {
 		res[i] = &PathStep{
@@ -52,15 +50,15 @@ func PathFromProto(path []*api.PathStep) []*PathStep {
 	return res
 }
 
-func MapThreadsToProto(mapper (func(*Thread) *api.Thread), msgs []*Thread) []*api.Thread {
-	res := make([]*api.Thread, len(msgs))
+func MapThreadsToProto(mapper (func(*Thread) *threads.Thread), msgs []*Thread) []*threads.Thread {
+	res := make([]*threads.Thread, len(msgs))
 	for i, msg := range msgs {
 		res[i] = mapper(msg)
 	}
 	return res
 }
 
-func MapThreadsFromProto(mapper (func(*api.Thread) *Thread), msgs []*api.Thread) []*Thread {
+func MapThreadsFromProto(mapper (func(*threads.Thread) *Thread), msgs []*threads.Thread) []*Thread {
 	res := make([]*Thread, len(msgs))
 	for i, msg := range msgs {
 		res[i] = mapper(msg)

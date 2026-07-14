@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"os"
 
-	_ "github.com/bd878/gallery/server/threads/pkg/loadbalance"
+	_ "github.com/bd878/gallery/server/db/threads/pkg/loadbalance"
 	_ "github.com/bd878/gallery/server/sessions/pkg/loadbalance"
 
 	"github.com/bd878/gallery/server/threads/config"
-	"github.com/bd878/gallery/server/threads/internal/http"
+	"github.com/bd878/gallery/server/threads"
 	"github.com/bd878/gallery/server/internal/system"
 )
 
@@ -39,12 +39,12 @@ func main() {
 		panic(err)
 	}
 
-	if err := http.Root(s.Waiter().Context(), cfg, s); err != nil {
+	if err := threads.Root(s.Waiter().Context(), cfg, s); err != nil {
 		panic(err)
 	}
 
-	fmt.Println("starting threads http service")
-	defer fmt.Println("stopped threads http service")
+	fmt.Println("starting threads service")
+	defer fmt.Println("stopped threads service")
 
 	s.Waiter().Add(
 		s.WaitForHTTP,

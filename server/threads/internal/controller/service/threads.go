@@ -11,18 +11,19 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/threads"
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/threads/internal/domain"
-	"github.com/bd878/gallery/server/threads/internal/machine"
-	"github.com/bd878/gallery/server/threads/pkg/loadbalance"
+	"github.com/bd878/gallery/server/db/threads/pkg/machine"
+	"github.com/bd878/gallery/server/db/threads/pkg/loadbalance"
 	"github.com/bd878/gallery/server/threads/pkg/model"
 	"github.com/bd878/gallery/server/threads/config"
 )
 
 type Controller struct {
 	conf         config.Config
-	client       api.ThreadsClient
+	client       threads.ThreadsClient
 	conn         *grpc.ClientConn
 	publisher    ddd.EventPublisher[ddd.Event]
 }
@@ -57,7 +58,7 @@ func (s *Controller) setupConnection() (err error) {
 		return err
 	}
 
-	client := api.NewThreadsClient(conn)
+	client := threads.NewThreadsClient(conn)
 
 	s.conn = conn
 	s.client = client
@@ -85,7 +86,7 @@ func (s *Controller) ReadThread(ctx context.Context, id, userID int64, name stri
 
 	logger.Debugw("read thread", "id", id, "user_id", userID, "name", name)
 
-	resp, err := s.client.Read(ctx, &api.ReadRequest{Id: id, UserId: userID, Name: name})
+	resp, err := s.client.Read(ctx, &threads.ReadRequest{Id: id, UserId: userID, Name: name})
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +105,7 @@ func (s *Controller) ListThreads(ctx context.Context, userID, parentID int64, li
 
 	logger.Debugw("list threads", "user_id", userID, "parent_id", parentID, "limit", limit, "offset", offset, "asc", asc)
 
-	resp, err := s.client.List(ctx, &api.ListRequest{
+	resp, err := s.client.List(ctx, &threads.ListRequest{
 		UserId:   userID,
 		ParentId: parentID,
 		Limit:    limit,
@@ -127,7 +128,7 @@ func (s *Controller) ListMessages(ctx context.Context, userID, parentID int64, l
 
 	logger.Debugw("list messages", "user_id", userID, "parent_id", parentID, "limit", limit, "offset", offset, "asc", asc, "private_message", privateMessage)
 
-	resp, err := s.client.ListMessages(ctx, &api.ListMessagesRequest{
+	resp, err := s.client.ListMessages(ctx, &threads.ListMessagesRequest{
 		UserId:   userID,
 		ParentId: parentID,
 		Limit:    limit,
@@ -151,7 +152,7 @@ func (s *Controller) ResolveThread(ctx context.Context, id, userID int64) (path 
 
 	logger.Debugw("resolve thread", "id", id, "user_id", userID)
 
-	resp, err := s.client.Resolve(ctx, &api.ResolveRequest{Id: id, UserId: userID})
+	resp, err := s.client.Resolve(ctx, &threads.ResolveRequest{Id: id, UserId: userID})
 	if err != nil {
 		return nil, err
 	}
@@ -172,7 +173,7 @@ func (s *Controller) PublishThread(ctx context.Context, id, userID int64) (err e
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
-	cmd, err := proto.Marshal(&machine.PublishCommand{
+	cmd, err := proto.Marshal(&threads.PublishCommand{
 		Id:            id,
 		UserId:        userID,
 		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
@@ -209,7 +210,7 @@ func (s *Controller) PrivateThread(ctx context.Context, id, userID int64) (err e
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
-	cmd, err := proto.Marshal(&machine.PrivateCommand{
+	cmd, err := proto.Marshal(&threads.PrivateCommand{
 		Id:            id,
 		UserId:        userID,
 		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
@@ -255,7 +256,7 @@ func (s *Controller) CreateThread(ctx context.Context, id, userID, parentID int6
 		return err
 	}
 
-	cmd, err := proto.Marshal(&machine.AppendCommand{
+	cmd, err := proto.Marshal(&threads.AppendCommand{
 		Id:            id,
 		UserId:        userID,
 		ParentId:      parentID,
@@ -298,7 +299,7 @@ func (s *Controller) UpdateThread(ctx context.Context, id, userID int64, name, d
 		return err
 	}
 
-	cmd, err := proto.Marshal(&machine.UpdateCommand{
+	cmd, err := proto.Marshal(&threads.UpdateCommand{
 		Id:            id,
 		UserId:        userID,
 		Name:          name,
@@ -332,7 +333,7 @@ func (s *Controller) ReorderThread(ctx context.Context, id, userID, parentID, ne
 
 	logger.Debugw("reorder thread", "id", id, "user_id", userID, "parent_id", parentID, "next_id", nextID, "prev_id", prevID)
 
-	cmd, err := proto.Marshal(&machine.ReorderCommand{
+	cmd, err := proto.Marshal(&threads.ReorderCommand{
 		Id:            id,
 		UserId:        userID,
 		ParentId:      parentID,
@@ -375,7 +376,7 @@ func (s *Controller) PrivateMessages(ctx context.Context, ids []int64, userID in
 
 	logger.Debugw("private thread messages", "ids", ids, "user_id", userID)
 
-	cmd, err := proto.Marshal(&machine.PrivateMessagesCommand{
+	cmd, err := proto.Marshal(&threads.PrivateMessagesCommand{
 		Ids:         ids,
 		UserId:      userID,
 	})
@@ -404,7 +405,7 @@ func (s *Controller) PublishMessages(ctx context.Context, ids []int64, userID in
 
 	logger.Debugw("publish thread messages", "ids", ids, "user_id", userID)
 
-	cmd, err := proto.Marshal(&machine.PublishMessagesCommand{
+	cmd, err := proto.Marshal(&threads.PublishMessagesCommand{
 		Ids:       ids,
 		UserId:    userID,
 	})
@@ -433,7 +434,7 @@ func (s *Controller) DeleteThread(ctx context.Context, id, userID int64) (err er
 
 	logger.Debugw("delete thread", "id", id, "user_id", userID)
 
-	cmd, err := proto.Marshal(&machine.DeleteCommand{
+	cmd, err := proto.Marshal(&threads.DeleteCommand{
 		Id:       id,
 		UserId:   userID,
 	})

@@ -6,7 +6,7 @@ import (
 
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/am"
-	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/threads"
 	"github.com/bd878/gallery/server/threads/internal/domain"
 	"github.com/bd878/gallery/server/threads/pkg/events"
 )
@@ -52,7 +52,7 @@ func (h domainHandler[T]) HandleEvent(ctx context.Context, event T) error {
 
 func (h domainHandler[T]) onThreadCreated(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.ThreadCreated)
-	data, err := proto.Marshal(&api.ThreadCreated{
+	data, err := proto.Marshal(&threads.ThreadCreated{
 		Id:          payload.ID,
 		UserId:      payload.UserID,
 		ParentId:    payload.ParentID,
@@ -72,7 +72,7 @@ func (h domainHandler[T]) onThreadCreated(ctx context.Context, event ddd.Event) 
 
 func (h domainHandler[T]) onThreadDeleted(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.ThreadDeleted)
-	data, err := proto.Marshal(&api.ThreadDeleted{
+	data, err := proto.Marshal(&threads.ThreadDeleted{
 		Id:          payload.ID,
 		UserId:      payload.UserID,
 	})
@@ -85,7 +85,7 @@ func (h domainHandler[T]) onThreadDeleted(ctx context.Context, event ddd.Event) 
 
 func (h domainHandler[T]) onThreadPrivated(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.ThreadPrivated)
-	data, err := proto.Marshal(&api.ThreadPrivated{
+	data, err := proto.Marshal(&threads.ThreadPrivated{
 		Id:          payload.ID,
 		UserId:      payload.UserID,
 		UpdatedAt:   payload.UpdatedAt,
@@ -99,7 +99,7 @@ func (h domainHandler[T]) onThreadPrivated(ctx context.Context, event ddd.Event)
 
 func (h domainHandler[T]) onThreadUpdated(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.ThreadUpdated)
-	data, err := proto.Marshal(&api.ThreadUpdated{
+	data, err := proto.Marshal(&threads.ThreadUpdated{
 		Id:          payload.ID,
 		UserId:      payload.UserID,
 		Name:        payload.Name,
@@ -116,7 +116,7 @@ func (h domainHandler[T]) onThreadUpdated(ctx context.Context, event ddd.Event) 
 
 func (h domainHandler[T]) onThreadPublished(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.ThreadPublished)
-	data, err := proto.Marshal(&api.ThreadPublished{
+	data, err := proto.Marshal(&threads.ThreadPublished{
 		Id:          payload.ID,
 		UserId:      payload.UserID,
 		UpdatedAt:   payload.UpdatedAt,
@@ -130,7 +130,7 @@ func (h domainHandler[T]) onThreadPublished(ctx context.Context, event ddd.Event
 
 func (h domainHandler[T]) onThreadParentChanged(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.ThreadParentChanged)
-	data, err := proto.Marshal(&api.ThreadParentChanged{
+	data, err := proto.Marshal(&threads.ThreadParentChanged{
 		Id:          payload.ID,
 		UserId:      payload.UserID,
 		ParentId:    payload.ParentID,
