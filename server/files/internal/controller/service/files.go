@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/files"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/files/pkg/model"
 )
@@ -22,7 +22,7 @@ type Config struct {
 
 type Files struct {
 	conf    Config
-	client  api.FilesClient
+	client  files.FilesClient
 	conn    *grpc.ClientConn
 }
 
@@ -39,7 +39,7 @@ func (f *Files) setupConnection() error {
 		return err
 	}
 
-	client := api.NewFilesClient(conn)
+	client := files.NewFilesClient(conn)
 
 	f.conn = conn
 	f.client = client
@@ -65,7 +65,7 @@ func (f *Files) Close() {
 }
 
 type streamReader struct {
-	api.Files_ReadFileStreamClient
+	files.Files_ReadFileStreamClient
 	mu  sync.Mutex
 	buf bytes.Buffer
 }
@@ -83,7 +83,7 @@ func (s *streamReader) Read(p []byte) (int, error) {
 		return 0, err
 	}
 
-	chunk, ok := data.Data.(*api.FileData_Chunk)
+	chunk, ok := data.Data.(*files.FileData_Chunk)
 	if !ok {
 		return 0, errors.New("wrong format: FileData_Chunk expected")
 	}
@@ -106,7 +106,7 @@ func (f *Files) ReadFileStream(ctx context.Context, id int64, fileName string, p
 
 	logger.Debugw("read file stream", "id", id, "name", fileName, "public", public)
 
-	stream, err := f.client.ReadFileStream(ctx, &api.ReadFileStreamRequest{
+	stream, err := f.client.ReadFileStream(ctx, &files.ReadFileStreamRequest{
 		Id:      id,
 		Name:    fileName,
 		Public:  public,
@@ -120,7 +120,7 @@ func (f *Files) ReadFileStream(ctx context.Context, id int64, fileName string, p
 		return nil, nil, err
 	}
 
-	meta, ok := data.Data.(*api.FileData_File)
+	meta, ok := data.Data.(*files.FileData_File)
 	if !ok {
 		logger.Errorln("FileData_File expected")
 		return nil, nil, errors.New("wrong format: FileData_File expected")
@@ -143,7 +143,7 @@ func (f *Files) ReadFileMeta(ctx context.Context, id, userID int64, public bool)
 
 	logger.Debugw("read file meta", "id", id, "user_id", userID, "public", public)
 
-	resp, err := f.client.ReadFile(ctx, &api.ReadFileRequest{
+	resp, err := f.client.ReadFile(ctx, &files.ReadFileRequest{
 		Id:     id,
 		Public: public,
 	})
@@ -172,9 +172,9 @@ func (f *Files) SaveFileStream(ctx context.Context, fileStream io.Reader, id, us
 		return err
 	}
 
-	err = stream.Send(&api.FileData{
-		Data: &api.FileData_File{
-			File: &api.File{
+	err = stream.Send(&files.FileData{
+		Data: &files.FileData_File{
+			File: &files.File{
 				Id:           id,
 				Name:         fileName,
 				UserId:       userID,
@@ -198,8 +198,8 @@ func (f *Files) SaveFileStream(ctx context.Context, fileStream io.Reader, id, us
 			return err
 		}
 
-		err = stream.Send(&api.FileData{
-			Data: &api.FileData_Chunk{
+		err = stream.Send(&files.FileData{
+			Data: &files.FileData_Chunk{
 				Chunk: buffer[:n],
 			},
 		})
@@ -223,7 +223,7 @@ func (f *Files) ListFiles(ctx context.Context, userID int64, limit, offset int32
 
 	logger.Debugw("list files", "user_id", userID, "limit", limit, "offset", offset, "ascending", ascending, "private", private)
 
-	resp, err := f.client.ListFiles(ctx, &api.ListFilesRequest{
+	resp, err := f.client.ListFiles(ctx, &files.ListFilesRequest{
 		UserId:      userID,
 		Limit:       limit,
 		Offset:      offset,
@@ -254,7 +254,7 @@ func (f *Files) PublishFile(ctx context.Context, id, userID int64) (err error) {
 		}
 	}
 
-	_, err = f.client.PublishFiles(ctx, &api.PublishFilesRequest{Ids: []int64{id}, UserId: userID})
+	_, err = f.client.PublishFiles(ctx, &files.PublishFilesRequest{Ids: []int64{id}, UserId: userID})
 
 	return
 }
@@ -267,7 +267,7 @@ func (f *Files) PrivateFile(ctx context.Context, id, userID int64) (err error) {
 		}
 	}
 
-	_, err = f.client.PrivateFiles(ctx, &api.PrivateFilesRequest{Ids: []int64{id}, UserId: userID})
+	_, err = f.client.PrivateFiles(ctx, &files.PrivateFilesRequest{Ids: []int64{id}, UserId: userID})
 
 	return
 }
@@ -280,7 +280,7 @@ func (f *Files) DeleteFile(ctx context.Context, id, userID int64) (err error) {
 		}
 	}
 
-	_, err = f.client.DeleteFiles(ctx, &api.DeleteFilesRequest{Ids: []int64{id}, UserId: userID})
+	_, err = f.client.DeleteFiles(ctx, &files.DeleteFilesRequest{Ids: []int64{id}, UserId: userID})
 
 	return
 }
