@@ -1,11 +1,9 @@
 package model
 
-import (
-	"github.com/bd878/gallery/server/api"
-)
+import "github.com/bd878/gallery/server/api/users"
 
-func UserToProto(u *User) *api.User {
-	return &api.User{
+func UserToProto(u *User) *users.User {
+	return &users.User{
 		Id:               u.ID,
 		Login:            u.Login,
 		HashedPassword:   u.HashedPassword,
@@ -16,7 +14,7 @@ func UserToProto(u *User) *api.User {
 	}
 }
 
-func UserFromProto(u *api.User) *User {
+func UserFromProto(u *users.User) *User {
 	return &User{
 		ID:               u.Id,
 		Login:            u.Login,

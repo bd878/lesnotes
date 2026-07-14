@@ -6,8 +6,8 @@ import (
 
 	"github.com/bd878/gallery/server/internal/am"
 	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/api"
-	billing "github.com/bd878/gallery/server/billing/pkg/events"
+	"github.com/bd878/gallery/server/api/billing"
+	billingevents "github.com/bd878/gallery/server/billing/pkg/events"
 )
 
 type UsersController interface {
@@ -27,7 +27,7 @@ func NewIntegrationEventHandlers(users UsersController) am.RawMessageHandler {
 }
 
 func RegisterIntegrationEventHandlers(subscriber am.RawMessageSubscriber, handlers am.RawMessageHandler) (err error) {
-	err = subscriber.Subscribe(billing.BillingChannel, handlers, am.GroupName("users-billing"))
+	err = subscriber.Subscribe(billingevents.BillingChannel, handlers, am.GroupName("users-billing"))
 	if err != nil {
 		return
 	}
@@ -39,7 +39,7 @@ func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingM
 	logger.Debugw("handle message", "name", msg.MessageName(), "subject", msg.Subject())
 
 	switch msg.MessageName() {
-	case billing.PremiumPayedEvent:
+	case billingevents.PremiumPayedEvent:
 		return h.handlePremiumPayed(ctx, msg)
 	}
 
@@ -48,7 +48,7 @@ func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingM
 
 // TODO: event ddd.Event
 func (h integrationHandlers) handlePremiumPayed(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.PremiumPayed{}
+	m := &billing.PremiumPayed{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}

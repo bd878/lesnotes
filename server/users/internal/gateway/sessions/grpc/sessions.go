@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/sessions"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/sessions/pkg/loadbalance"
 	"github.com/bd878/gallery/server/sessions/pkg/model"
@@ -16,7 +16,7 @@ import (
 
 type Gateway struct {
 	addr          string
-	client        api.SessionsClient
+	client        sessions.SessionsClient
 	conn          *grpc.ClientConn
 }
 
@@ -40,7 +40,7 @@ func (g *Gateway) setupConnection() error {
 	}
 
 	g.conn = conn
-	g.client = api.NewSessionsClient(conn)
+	g.client = sessions.NewSessionsClient(conn)
 
 	return nil
 }
@@ -63,7 +63,7 @@ func (g *Gateway) GetSession(ctx context.Context, token string) (session *model.
 		}
 	}
 
-	resp, err := g.client.Get(ctx, &api.GetSessionRequest{
+	resp, err := g.client.Get(ctx, &sessions.GetSessionRequest{
 		Token:  token,
 	})
 	if err != nil {
@@ -75,21 +75,21 @@ func (g *Gateway) GetSession(ctx context.Context, token string) (session *model.
 	return
 }
 
-func (g *Gateway) ListUserSessions(ctx context.Context, userID int64) (sessions []*model.Session, err error) {
+func (g *Gateway) ListUserSessions(ctx context.Context, userID int64) (list []*model.Session, err error) {
 	if g.isConnFailed() {
 		if err = g.setupConnection(); err != nil {
 			return
 		}
 	}
 
-	resp, err := g.client.List(ctx, &api.ListUserSessionsRequest{
+	resp, err := g.client.List(ctx, &sessions.ListUserSessionsRequest{
 		UserId: userID,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	sessions = model.MapSessionsFromProto(model.SessionFromProto, resp.Sessions)
+	list = model.MapSessionsFromProto(model.SessionFromProto, resp.Sessions)
 
 	return
 }
@@ -101,7 +101,7 @@ func (g *Gateway) CreateSession(ctx context.Context, userID int64) (session *mod
 		}
 	}
 
-	resp, err := g.client.Create(ctx, &api.CreateSessionRequest{
+	resp, err := g.client.Create(ctx, &sessions.CreateSessionRequest{
 		UserId:         userID,
 	})
 	if err != nil {
@@ -120,7 +120,7 @@ func (g *Gateway) RemoveSession(ctx context.Context, token string) (err error) {
 		}
 	}
 
-	_, err = g.client.Remove(ctx, &api.RemoveSessionRequest{
+	_, err = g.client.Remove(ctx, &sessions.RemoveSessionRequest{
 		Token:  token,
 	})
 
@@ -134,7 +134,7 @@ func (g *Gateway) RemoveAllUserSessions(ctx context.Context, userID int64) (err 
 		}
 	}
 
-	_, err = g.client.RemoveAll(ctx, &api.RemoveAllSessionsRequest{
+	_, err = g.client.RemoveAll(ctx, &sessions.RemoveAllSessionsRequest{
 		UserId: userID,
 	})
 

@@ -6,7 +6,7 @@ import (
 
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/am"
-	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/users"
 	"github.com/bd878/gallery/server/users/internal/domain"
 	"github.com/bd878/gallery/server/users/pkg/events"
 )
@@ -37,7 +37,7 @@ func (h domainHandler[T]) HandleEvent(ctx context.Context, event T) error {
 
 func (h domainHandler[T]) onUserDeleted(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*domain.UserDeleted)
-	data, err := proto.Marshal(&api.UserDeleted{
+	data, err := proto.Marshal(&users.UserDeleted{
 		UserId:      payload.UserID,
 	})
 	if err != nil {

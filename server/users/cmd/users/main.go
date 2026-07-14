@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"os"
 
-	_ "github.com/bd878/gallery/server/users/pkg/loadbalance"
+	_ "github.com/bd878/gallery/server/db/users/pkg/loadbalance"
 	_ "github.com/bd878/gallery/server/sessions/pkg/loadbalance"
-	_ "github.com/bd878/gallery/server/messages/pkg/loadbalance"
+	_ "github.com/bd878/gallery/server/db/messages/pkg/loadbalance"
 
 	"github.com/bd878/gallery/server/internal/system"
 	"github.com/bd878/gallery/server/users/config"
-	"github.com/bd878/gallery/server/users/internal/http"
+	"github.com/bd878/gallery/server/users"
 )
 
 func init() {
@@ -40,7 +40,7 @@ func main() {
 		panic(err)
 	}
 
-	if err := http.Root(s.Waiter().Context(), cfg, s); err != nil {
+	if err := users.Root(s.Waiter().Context(), cfg, s); err != nil {
 		panic(err)
 	}
 

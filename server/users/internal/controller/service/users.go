@@ -12,12 +12,13 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/users"
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/users/config"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/users/pkg/model"
-	"github.com/bd878/gallery/server/users/pkg/loadbalance"
-	"github.com/bd878/gallery/server/users/internal/machine"
+	"github.com/bd878/gallery/server/db/users/pkg/loadbalance"
+	"github.com/bd878/gallery/server/db/users/pkg/machine"
 	"github.com/bd878/gallery/server/users/internal/domain"
 	"github.com/bd878/gallery/server/users/internal/controller"
 	sessions "github.com/bd878/gallery/server/sessions/pkg/model"
@@ -33,7 +34,7 @@ type SessionsGateway interface {
 
 type Controller struct {
 	conf         config.Config
-	client       api.UsersClient
+	client       users.UsersClient
 	conn         *grpc.ClientConn
 	sessions     SessionsGateway
 	publisher    ddd.EventPublisher[ddd.Event]
@@ -70,7 +71,7 @@ func (s *Controller) setupConnection() (err error) {
 		return err
 	}
 
-	client := api.NewUsersClient(conn)
+	client := users.NewUsersClient(conn)
 
 	s.conn = conn
 	s.client = client
@@ -103,7 +104,7 @@ func (s *Controller) CreateUser(ctx context.Context, id int64, login, password s
 		return nil, err
 	}
 
-	cmd, err := proto.Marshal(&machine.AppendCommand{
+	cmd, err := proto.Marshal(&users.AppendCommand{
 		Id:             id,
 		Login:          login,
 		HashedPassword: string(hashed),
@@ -152,18 +153,18 @@ func (s *Controller) FindUser(ctx context.Context, id int64, login, token string
 
 	logger.Debugw("find user", "id", id, "login", login, "token", token)
 
-	var userProto *api.User
+	var userProto *users.User
 	if token != "" {
 		session, err := s.sessions.GetSession(ctx, token)
 		if err != nil {
 			return nil, err
 		}
 
-		userProto, err = s.client.GetUser(ctx, &api.GetUserRequest{
+		userProto, err = s.client.GetUser(ctx, &users.GetUserRequest{
 			Id: int64(session.UserID),
 		})
 	} else {
-		userProto, err = s.client.FindUser(ctx, &api.FindUserRequest{
+		userProto, err = s.client.FindUser(ctx, &users.FindUserRequest{
 			Login: login,
 		})
 	}
@@ -199,8 +200,8 @@ func (s *Controller) AuthUser(ctx context.Context, token string) (user *model.Us
 		return nil, controller.ErrTokenExpired
 	}
 
-	var userProto *api.User
-	userProto, err = s.client.GetUser(ctx, &api.GetUserRequest{
+	var userProto *users.User
+	userProto, err = s.client.GetUser(ctx, &users.GetUserRequest{
 		Id:  int64(session.UserID),
 	})
 	if err != nil {
@@ -224,7 +225,7 @@ func (s *Controller) GetUser(ctx context.Context, id int64) (user *model.User, e
 
 	logger.Debugw("get user", "id", id)
 
-	userProto, err := s.client.GetUser(ctx, &api.GetUserRequest{Id: id})
+	userProto, err := s.client.GetUser(ctx, &users.GetUserRequest{Id: id})
 	if err != nil {
 		return nil, err
 	}
@@ -243,7 +244,7 @@ func (s *Controller) UpdateUser(ctx context.Context, id int64, login *string, me
 
 	logger.Debugw("update user", "id", id, "login", login, "metadata", metadata)
 
-	cmd, err := proto.Marshal(&machine.UpdateCommand{
+	cmd, err := proto.Marshal(&users.UpdateCommand{
 		Id:             id,
 		Login:          login,
 		Metadata:       metadata,
@@ -271,7 +272,7 @@ func (s *Controller) MakePremium(ctx context.Context, id int64, invoiceID, creat
 
 	logger.Debugw("make premium", "id", id, "invoice_id", invoiceID, "created_at", createdAt, "expiresAt", expiresAt)
 
-	cmd, err := proto.Marshal(&machine.MakePremiumCommand{
+	cmd, err := proto.Marshal(&users.MakePremiumCommand{
 		InvoiceId:       invoiceID,
 		Id:              id,
 		CreatedAt:       createdAt,
@@ -299,7 +300,7 @@ func (s *Controller) LoginUser(ctx context.Context, login, password string) (ses
 
 	logger.Debugw("login user", "login", login, "len(password)", len(password))
 
-	user, err := s.client.FindUser(ctx, &api.FindUserRequest{
+	user, err := s.client.FindUser(ctx, &users.FindUserRequest{
 		Login:   login,
 	})
 	if err != nil {
@@ -336,7 +337,7 @@ func (s *Controller) DeleteUser(ctx context.Context, id int64) (err error) {
 		return
 	}
 
-	cmd, err := proto.Marshal(&machine.DeleteCommand{
+	cmd, err := proto.Marshal(&users.DeleteCommand{
 		Id: id,
 	})
 	if err != nil {
