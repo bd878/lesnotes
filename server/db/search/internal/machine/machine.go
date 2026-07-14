@@ -1,0 +1,242 @@
+package machine
+
+import (
+	"context"
+
+	"github.com/hashicorp/raft"
+	"google.golang.org/protobuf/proto"
+	"github.com/bd878/gallery/server/api/search"
+	"github.com/bd878/gallery/server/internal/logger"
+	"github.com/bd878/gallery/server/db/search/pkg/machine"
+)
+
+type MessagesRepository interface {
+	SaveMessage(ctx context.Context, id, userID int64, name, title, text string, private bool, createdAt, updatedAt string) error
+	UpdateMessage(ctx context.Context, id, userID int64, name, title, text *string, updatedAt string) error
+	PrivateMessages(ctx context.Context, ids []int64, userID int64, updatedAt string) error
+	PublishMessages(ctx context.Context, ids []int64, userID int64, updatedAt string) error
+	DeleteMessage(ctx context.Context, id, userID int64) error
+}
+
+type FilesRepository interface {
+	SaveFile(ctx context.Context, id, userID int64, name, description, mime string, private bool, size int64, createdAt, updatedAt string) (err error)
+	DeleteFiles(ctx context.Context, id []int64, userID int64) (err error)
+	PublishFiles(ctx context.Context, id []int64, userID int64, updatedAt string) (err error)
+	PrivateFiles(ctx context.Context, id []int64, userID int64, updatedAt string) (err error)
+}
+
+type ThreadsRepository interface {
+	SaveThread(ctx context.Context, id, userID, parentID int64, name, description string, private bool, createdAt, updatedAt string) error
+	UpdateThread(ctx context.Context, id, userID int64, name, description *string, updatedAt string) error
+	DeleteThread(ctx context.Context, id, userID int64) error
+	ChangeThreadParent(ctx context.Context, id, userID, parentID int64) error
+	PublishThread(ctx context.Context, id, userID int64, updatedAt string) error
+	PrivateThread(ctx context.Context, id, userID int64, updatedAt string) error
+}
+
+type TranslationsRepository interface {
+	SaveTranslation(ctx context.Context, userID, messageID int64, lang, title, text string, createdAt, updatedAt string) error
+	DeleteTranslation(ctx context.Context, messageID int64, lang string) error
+	UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string, updatedAt string) error
+}
+
+type Dumper interface {
+	Open(ctx context.Context) (ch chan *search.SearchSnapshot, err error)
+	Restore(ctx context.Context, user *search.SearchSnapshot) (err error)
+	Close() (err error)
+}
+
+var _ raft.FSM = (*Machine)(nil)
+
+type Machine struct {
+	log                *logger.Logger
+	dumper             Dumper
+	messagesRepo       MessagesRepository
+	filesRepo          FilesRepository
+	threadsRepo        ThreadsRepository
+	translationsRepo   TranslationsRepository
+}
+
+func New(messagesRepo MessagesRepository, filesRepo FilesRepository, threadsRepo ThreadsRepository,
+	translationsRepo TranslationsRepository, dumper Dumper, log *logger.Logger) *Machine {
+	return &Machine{
+		log:                 log,
+		dumper:              dumper,
+		messagesRepo:        messagesRepo,
+		filesRepo:           filesRepo,
+		translationsRepo:    translationsRepo,
+		threadsRepo:         threadsRepo,
+	}
+}
+
+func (f *Machine) Apply(record *raft.Log) interface{} {
+	buf := record.Data
+	reqType := machine.RequestType(buf[0])
+	switch reqType {
+	case machine.AppendMessageRequest:
+		return f.applyAppendMessage(buf[1:])
+	case machine.UpdateMessageRequest:
+		return f.applyUpdateMessage(buf[1:])
+	case machine.DeleteMessageRequest:
+		return f.applyDeleteMessage(buf[1:])
+	case machine.PublishMessagesRequest:
+		return f.applyPublishMessages(buf[1:])
+	case machine.PrivateMessagesRequest:
+		return f.applyPrivateMessages(buf[1:])
+	case machine.AppendThreadRequest:
+		return f.applyAppendThread(buf[1:])
+	case machine.UpdateThreadRequest:
+		return f.applyUpdateThread(buf[1:])
+	case machine.DeleteThreadRequest:
+		return f.applyDeleteThread(buf[1:])
+	case machine.ChangeThreadParentRequest:
+		return f.applyChangeThreadParent(buf[1:])
+	case machine.PublishThreadRequest:
+		return f.applyPublishThread(buf[1:])
+	case machine.PrivateThreadRequest:
+		return f.applyPrivateThread(buf[1:])
+	case machine.AppendFileRequest:
+		return f.applyAppendFile(buf[1:])
+	case machine.DeleteFilesRequest:
+		return f.applyDeleteFiles(buf[1:])
+	case machine.PublishFilesRequest:
+		return f.applyPublishFiles(buf[1:])
+	case machine.PrivateFilesRequest:
+		return f.applyPrivateFiles(buf[1:])
+	case machine.AppendTranslationRequest:
+		return f.applyAppendTranslation(buf[1:])
+	case machine.DeleteTranslationRequest:
+		return f.applyDeleteTranslation(buf[1:])
+	case machine.UpdateTranslationRequest:
+		return f.applyUpdateTranslation(buf[1:])
+	default:
+		logger.Errorw("unknown request type", "type", reqType)
+	}
+	return nil
+}
+
+func (f *Machine) applyAppendMessage(raw []byte) interface{} {
+	var cmd search.AppendMessageCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.messagesRepo.SaveMessage(context.TODO(), cmd.Id, cmd.UserId, cmd.Name, cmd.Title, cmd.Text, cmd.Private, cmd.CreatedAt, cmd.UpdatedAt)
+}
+
+func (f *Machine) applyUpdateMessage(raw []byte) interface{} {
+	var cmd search.UpdateMessageCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.messagesRepo.UpdateMessage(context.TODO(), cmd.Id, cmd.UserId, cmd.Name, cmd.Title, cmd.Text, cmd.UpdatedAt)
+}
+
+func (f *Machine) applyDeleteMessage(raw []byte) interface{} {
+	var cmd search.DeleteMessageCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.messagesRepo.DeleteMessage(context.TODO(), cmd.Id, cmd.UserId)
+}
+
+func (f *Machine) applyPublishMessages(raw []byte) interface{} {
+	var cmd search.PublishMessagesCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.messagesRepo.PublishMessages(context.TODO(), cmd.Ids, cmd.UserId, cmd.UpdatedAt)
+}
+
+func (f *Machine) applyPrivateMessages(raw []byte) interface{} {
+	var cmd search.PrivateMessagesCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.messagesRepo.PrivateMessages(context.TODO(), cmd.Ids, cmd.UserId, cmd.UpdatedAt)
+}
+
+func (f *Machine) applyAppendThread(raw []byte) interface{} {
+	var cmd search.AppendThreadCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.threadsRepo.SaveThread(context.TODO(), cmd.Id, cmd.UserId, cmd.ParentId, cmd.Name, cmd.Description, cmd.Private, cmd.CreatedAt, cmd.UpdatedAt)
+}
+
+func (f *Machine) applyUpdateThread(raw []byte) interface{} {
+	var cmd search.UpdateThreadCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.threadsRepo.UpdateThread(context.TODO(), cmd.Id, cmd.UserId, cmd.Name, cmd.Description, cmd.UpdatedAt)
+}
+
+func (f *Machine) applyDeleteThread(raw []byte) interface{} {
+	var cmd search.DeleteThreadCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.threadsRepo.DeleteThread(context.TODO(), cmd.Id, cmd.UserId)
+}
+
+func (f *Machine) applyChangeThreadParent(raw []byte) interface{} {
+	var cmd search.ChangeThreadParentCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.threadsRepo.ChangeThreadParent(context.TODO(), cmd.Id, cmd.UserId, cmd.ParentId)
+}
+
+func (f *Machine) applyPublishThread(raw []byte) interface{} {
+	var cmd search.PublishThreadCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.threadsRepo.PublishThread(context.TODO(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
+}
+
+func (f *Machine) applyPrivateThread(raw []byte) interface{} {
+	var cmd search.PrivateThreadCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.threadsRepo.PrivateThread(context.TODO(), cmd.Id, cmd.UserId, cmd.UpdatedAt)
+}
+
+func (f *Machine) applyAppendFile(raw []byte) interface{} {
+	var cmd search.AppendFileCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.filesRepo.SaveFile(context.TODO(), cmd.Id, cmd.UserId, cmd.Name, cmd.Description, cmd.Mime, cmd.Private, cmd.Size, cmd.CreatedAt, cmd.UpdatedAt)
+}
+
+func (f *Machine) applyDeleteFiles(raw []byte) interface{} {
+	var cmd search.DeleteFilesCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.filesRepo.DeleteFiles(context.TODO(), cmd.Ids, cmd.UserId)
+}
+
+func (f *Machine) applyPublishFiles(raw []byte) interface{} {
+	var cmd search.PublishFilesCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.filesRepo.PublishFiles(context.TODO(), cmd.Ids, cmd.UserId, cmd.UpdatedAt)
+}
+
+func (f *Machine) applyPrivateFiles(raw []byte) interface{} {
+	var cmd search.PrivateFilesCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.filesRepo.PrivateFiles(context.TODO(), cmd.Ids, cmd.UserId, cmd.UpdatedAt)
+}
+
+func (f *Machine) applyAppendTranslation(raw []byte) interface{} {
+	var cmd search.AppendTranslationCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.translationsRepo.SaveTranslation(context.TODO(), cmd.UserId, cmd.MessageId, cmd.Lang, cmd.Title, cmd.Text, cmd.CreatedAt, cmd.UpdatedAt)
+}
+
+func (f *Machine) applyDeleteTranslation(raw []byte) interface{} {
+	var cmd search.DeleteTranslationCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.translationsRepo.DeleteTranslation(context.TODO(), cmd.MessageId, cmd.Lang)
+}
+
+func (f *Machine) applyUpdateTranslation(raw []byte) interface{} {
+	var cmd search.UpdateTranslationCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.translationsRepo.UpdateTranslation(context.TODO(), cmd.MessageId, cmd.Lang, cmd.Title, cmd.Text, cmd.UpdatedAt)
+}

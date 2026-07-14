@@ -1,0 +1,77 @@
+package postgres
+
+import (
+	"fmt"
+	"time"
+	"context"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+
+	"github.com/bd878/gallery/server/api/search"
+)
+
+type TranslationsRepository struct {
+	tableName        string
+	pool             *pgxpool.Pool
+}
+
+func NewTranslationsRepository(pool *pgxpool.Pool, tableName string) *TranslationsRepository {
+	return &TranslationsRepository{tableName: tableName, pool: pool}
+}
+
+func (r *TranslationsRepository) SaveTranslation(ctx context.Context, userID, messageID int64, lang, title, text string, createdAt, updatedAt string) (err error) {
+	const query = "INSERT INTO %s(message_id, user_id, lang, title, text, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)"
+
+	_, err = r.pool.Exec(ctx, r.table(query), messageID, userID, lang, title, text, createdAt, updatedAt)
+
+	return
+}
+
+func (r *TranslationsRepository) DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error) {
+	const query = "DELETE FROM %s WHERE message_id = $1 AND lang = $2"
+
+	_, err = r.pool.Exec(ctx, r.table(query), messageID, lang)
+
+	return
+}
+
+func (r *TranslationsRepository) UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string, updatedAt string) (err error) {
+	const query = "UPDATE %s SET title = $3, text = $4, updated_at = $5 WHERE message_id = $1 AND lang = $2"
+
+	_, err = r.pool.Exec(ctx, r.table(query), messageID, lang, title, text, updatedAt)
+
+	return
+}
+
+func (r *TranslationsRepository) SearchTranslations(ctx context.Context, userID int64, substr string) (list []*search.SearchTranslation, err error) {
+	const query = "SELECT message_id, lang, text, title, created_at, updated_at FROM %s WHERE user_id = $1 AND text || ' ' || title ILIKE $2"
+
+	rows, err := r.pool.Query(ctx, r.table(query), userID, "'%" + substr + "%'")
+	defer rows.Close()
+	if err != nil {
+		return
+	}
+
+	list = make([]*search.SearchTranslation, 0)
+	for rows.Next() {
+		var createdAt, updatedAt *time.Time
+
+		translation := &search.SearchTranslation{}
+
+		err = rows.Scan(&translation.MessageId, &translation.Lang, &translation.Text, &translation.Title, &createdAt, &updatedAt)
+		if err != nil {
+			return
+		}
+
+		translation.CreatedAt = createdAt.Format(time.RFC3339)
+		translation.UpdatedAt = updatedAt.Format(time.RFC3339)
+
+		list = append(list, translation)
+	}
+
+	return
+}
+
+func (r TranslationsRepository) table(query string) string {
+	return fmt.Sprintf(query, r.tableName)
+}

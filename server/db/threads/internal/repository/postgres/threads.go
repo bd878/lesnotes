@@ -1,0 +1,730 @@
+package postgres
+
+import (
+	"os"
+	"fmt"
+	"time"
+	"context"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
+
+	"github.com/bd878/gallery/server/api/threads"
+	"github.com/bd878/gallery/server/internal/logger"
+)
+
+type ThreadsRepository struct {
+	tableName          string
+	pool               *pgxpool.Pool
+}
+
+func NewThreadsRepository(pool *pgxpool.Pool, tableName string) *ThreadsRepository {
+	return &ThreadsRepository{tableName: tableName, pool: pool}
+}
+
+func (r *ThreadsRepository) ReadThreadByID(ctx context.Context, id, userID int64/*may be public*/) (thread *threads.Thread, err error) {
+	query := "SELECT user_id, parent_id, next_id, prev_id, name, description, title, private, private_message, created_at, updated_at FROM %s WHERE id = $1 AND (user_id = $2 OR private = false)"
+
+	thread = &threads.Thread{
+		Id:     id,
+	}
+
+	var createdAt, updatedAt *time.Time
+
+	err = r.pool.QueryRow(ctx, r.table(query), id, userID).Scan(&thread.UserId, &thread.ParentId, &thread.NextId, &thread.PrevId,
+		&thread.Name, &thread.Description, &thread.Title, &thread.Private, &thread.PrivateMessage, &createdAt, &updatedAt)
+	if err != nil {
+		return
+	}
+
+	thread.CreatedAt = createdAt.Format(time.RFC3339)
+	thread.UpdatedAt = updatedAt.Format(time.RFC3339)
+
+	err = r.pool.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2"), thread.UserId, thread.Id).Scan(&thread.Count)
+
+	return
+}
+
+func (r *ThreadsRepository) ReadThreadByName(ctx context.Context, name string, userID int64 /*may be public*/) (thread *threads.Thread, err error) {
+	query := "SELECT user_id, id, parent_id, next_id, prev_id, description, title, private, private_message, created_at, updated_at FROM %s WHERE name = $1 AND (user_id = $2 OR private = false)"
+
+	thread = &threads.Thread{
+		Name:     name,
+	}
+
+	var createdAt, updatedAt *time.Time
+
+	err = r.pool.QueryRow(ctx, r.table(query), name, userID).Scan(&thread.UserId, &thread.Id, &thread.ParentId, &thread.NextId, &thread.PrevId,
+		&thread.Description, &thread.Title, &thread.Private, &thread.PrivateMessage, &createdAt, &updatedAt)
+	if err != nil {
+		return
+	}
+
+	thread.CreatedAt = createdAt.Format(time.RFC3339)
+	thread.UpdatedAt = updatedAt.Format(time.RFC3339)
+
+	err = r.pool.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2"), thread.UserId, thread.Id).Scan(&thread.Count)
+
+	return
+}
+
+func (r *ThreadsRepository) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (list []*threads.Thread, isLastPage bool, err error) {
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			tx.Rollback(ctx)
+		default:
+			tx.Commit(ctx)
+		}
+	}()
+
+	const selectThreads = "SELECT id, name, private, private_message, next_id, prev_id, created_at, updated_at FROM %s WHERE user_id = $1 AND parent_id = $2"
+
+	var rows pgx.Rows
+	rows, err = tx.Query(ctx, r.table(selectThreads), userID, parentID)
+	defer rows.Close()
+	if err != nil {
+		return
+	}
+
+	unordered := make([]*threads.Thread, 0)
+	for rows.Next() {
+		thread := &threads.Thread{
+			ParentId: parentID,
+			UserId:   userID,
+		}
+
+		var createdAt, updatedAt *time.Time
+
+		err = rows.Scan(&thread.Id, &thread.Name, &thread.Private, &thread.PrivateMessage,
+			&thread.NextId, &thread.PrevId, &createdAt, &updatedAt)
+		if err != nil {
+			return
+		}
+
+		thread.CreatedAt = createdAt.Format(time.RFC3339)
+		thread.UpdatedAt = updatedAt.Format(time.RFC3339)
+
+		unordered = append(unordered, thread)
+	}
+
+	var nextID int64
+	list = make([]*threads.Thread, 0)
+	for range unordered {
+		for _, thread := range unordered {
+			if thread.NextId == nextID {
+				list = append(list, thread)
+				nextID = thread.Id
+				break
+			}
+		}
+	}
+
+	if err = rows.Err(); err != nil {
+		return
+	}
+
+	for _, thread := range list {
+		err = tx.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2"), userID, thread.Id).Scan(&thread.Count)
+		if err != nil {
+			return
+		}
+	}
+
+	if int32(len(list)) <= offset+limit {
+		isLastPage = true
+	}
+
+	end := min(int32(len(list)), offset+limit)
+
+	list = list[offset:end]
+
+	return
+}
+
+func (r *ThreadsRepository) ListMessages(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool /* TODO: use asc */, privateMessage *bool) (list []*threads.Thread, isLastPage bool, err error) {
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			tx.Rollback(ctx)
+		default:
+			tx.Commit(ctx)
+		}
+	}()
+
+	/* TODO: use limit, offset in query */
+
+	query := "SELECT id, name, private, private_message, next_id, prev_id, created_at, updated_at FROM %s WHERE user_id = $1 AND parent_id = $2"
+
+	logger.Debugw("list messages", "user_id", userID, "parentID", parentID, "limit", limit, "offset", offset)
+
+	var rows pgx.Rows
+	rows, err = tx.Query(ctx, r.table(query), userID, parentID)
+	defer rows.Close()
+	if err != nil {
+		return
+	}
+
+	unordered := make([]*threads.Thread, 0)
+	for rows.Next() {
+		thread := &threads.Thread{
+			ParentId: parentID,
+			UserId:   userID,
+		}
+
+		var createdAt, updatedAt *time.Time
+
+		err = rows.Scan(&thread.Id, &thread.Name, &thread.Private, &thread.PrivateMessage,
+			&thread.NextId, &thread.PrevId, &createdAt, &updatedAt)
+		if err != nil {
+			return
+		}
+
+		thread.CreatedAt = createdAt.Format(time.RFC3339)
+		thread.UpdatedAt = updatedAt.Format(time.RFC3339)
+
+		unordered = append(unordered, thread)
+	}
+
+	logger.Debugw("list messages", "unordered", unordered)
+
+	/* create list from root in reverse order */
+	var nextID int64
+	list = make([]*threads.Thread, 0)
+	for range unordered {
+		for _, thread := range unordered {
+			if thread.NextId == nextID {
+				if privateMessage == nil {
+					list = append(list, thread)
+				} else if *privateMessage == true && thread.PrivateMessage == true {
+					list = append(list, thread)
+				} else if *privateMessage == false && thread.PrivateMessage == false {
+					list = append(list, thread)
+				}
+
+				nextID = thread.Id
+				break
+			}
+		}
+	}
+
+	logger.Debugw("list messages", "list", list)
+
+	if err = rows.Err(); err != nil {
+		return
+	}
+
+	for _, thread := range list {
+		var countQuery string
+		if privateMessage == nil {
+			countQuery = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2"
+		} else if *privateMessage == true {
+			countQuery = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2 AND private_message = true"
+		} else if *privateMessage == false {
+			countQuery = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2 AND private_message = false"
+		}
+
+		err = tx.QueryRow(ctx, r.table(countQuery), userID, thread.Id).Scan(&thread.Count)
+		if err != nil {
+			return
+		}
+	}
+
+	if int32(len(list)) <= offset+limit {
+		isLastPage = true
+	}
+
+	end := min(int32(len(list)), offset+limit)
+
+	list = list[offset:end]
+
+	return
+}
+
+func (r *ThreadsRepository) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+	for _, id := range ids {
+		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private_message = false WHERE user_id = $1 AND id = $2"), userID, id)
+		if err != nil {
+			logger.Errorln(err)
+		}
+	}
+
+	return
+}
+
+func (r *ThreadsRepository) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+	for _, id := range ids {
+		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private_message = true WHERE user_id = $1 AND id = $2"), userID, id)
+		if err != nil {
+			logger.Errorln(err)
+		}
+	}
+
+	return
+}
+
+func (r *ThreadsRepository) CountThreads(ctx context.Context, id, userID int64) (total int32, err error) {
+	const query = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2"
+
+	err = r.pool.QueryRow(ctx, r.table(query), userID, id).Scan(&total)
+
+	return
+}
+
+func (r *ThreadsRepository) CountMessages(ctx context.Context, id, userID int64, privateMessage *bool) (total int32, err error) {
+	var query string
+	if privateMessage == nil {
+		query = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2"
+	} else if *privateMessage == true {
+		query = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2 AND private_message = true"
+	} else if *privateMessage == false {
+		query = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2 AND private_message = false"
+	}
+
+	logger.Debugw("count messages", "id", id, "user_id", userID, "query", query)
+
+	err = r.pool.QueryRow(ctx, r.table(query), userID, id).Scan(&total)
+
+	logger.Debugw("count messages", "total", total)
+
+	return
+}
+
+func (r *ThreadsRepository) ReorderThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, updatedAt string) (err error) {
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			tx.Rollback(ctx)
+		default:
+			tx.Commit(ctx)
+		}
+	}()
+
+	// validate arguments
+
+	const updateNextThread = "UPDATE %s SET prev_id = $3 WHERE user_id = $1 AND id = $2"
+	const updatePrevThread = "UPDATE %s SET next_id = $3 WHERE user_id = $1 AND id = $2"
+	const selectParentID = "SELECT parent_id FROM %s WHERE user_id = $1 AND id = $2"
+	const updateMe = "UPDATE %s SET parent_id = $3, next_id = $4, prev_id = $5, updated_at = $6 WHERE user_id = $1 AND id = $2"
+
+	var currentParentID, currentNextID, currentPrevID, prevIDParent, nextIDParent int64
+	err = tx.QueryRow(ctx, r.table("SELECT parent_id, next_id, prev_id FROM %s WHERE user_id = $1 AND id = $2"), userID, id).
+		Scan(&currentParentID, &currentNextID, &currentPrevID)
+	if err != nil {
+		logger.Debugw("failed to select thread", "error", err)
+		return
+	}
+
+	if prevID != 0 && nextID != 0 {
+		return fmt.Errorf("either prevID or nextID must be given, not both; next_id = %d, prev_id = %d", prevID, nextID)
+	}
+
+	if prevID == id {
+		return fmt.Errorf("prevID == id: %d, %d", prevID, id)
+	}
+	if nextID == id {
+		return fmt.Errorf("nextID == id: %d, %d", nextID, id)
+	}
+	if parentID == id {
+		return fmt.Errorf("parentID == id: %d, %d", parentID, id)
+	}
+
+	if prevID != 0 {
+		err = tx.QueryRow(ctx, r.table(selectParentID), userID, prevID).Scan(&prevIDParent)
+		if err != nil {
+			logger.Debugw("failed to get prev id parent", "error", err)
+			return
+		}
+	}
+
+	if nextID != 0 {
+		err = tx.QueryRow(ctx, r.table(selectParentID), userID, nextID).Scan(&nextIDParent)
+		if err != nil {
+			logger.Debugw("failed to get next id parent", "error", err)
+			return
+		}
+	}
+
+	if parentID != -1 {
+		if prevID != 0 && prevIDParent != parentID {
+			return fmt.Errorf("prevIDParent != parentID: %d != %d", prevIDParent, parentID)
+		}
+
+		if nextID != 0 && nextIDParent != parentID {
+			return fmt.Errorf("nextIDParent != parentID: %d != %d", nextIDParent, parentID)
+		}
+	} else {
+		if prevID != 0 {
+			parentID = prevIDParent
+		}
+
+		if nextID != 0 {
+			parentID = nextIDParent
+		}
+	}
+
+	// validate parent
+	threadID := parentID
+	for threadID != 0 {
+		if id == threadID {
+			return fmt.Errorf("new parent %s is a relative of thread %s", parentID, id)
+		}
+
+		err = tx.QueryRow(ctx, r.table("SELECT parent_id FROM %s WHERE user_id = $1 AND id = $2"),
+			userID, threadID).Scan(&threadID)
+		if err != nil {
+			return
+		}
+	}
+	// end validate parent
+
+	// end validate arguments
+	// unlink
+
+	if currentPrevID != 0 {
+		_, err = tx.Exec(ctx, r.table(updatePrevThread), userID, currentPrevID, currentNextID)
+		if err != nil {
+			logger.Debugw("failed to update prev thread", "error", err)
+			return
+		}
+	}
+
+	if currentNextID != 0 {
+		_, err = tx.Exec(ctx, r.table(updateNextThread), userID, currentNextID, currentPrevID)
+		if err != nil {
+			logger.Debugw("failed to update next thread", "error", err)
+			return
+		}
+	}
+
+	// end unlink
+	// reorder
+	if prevID != 0 {
+		// reorder before
+
+		var nextID int64
+
+		err = tx.QueryRow(ctx, r.table("SELECT next_id FROM %s WHERE user_id = $1 AND id = $2"), userID, prevID).
+			Scan(&nextID)
+		if err != nil {
+			logger.Debugw("failed to get next id of prev id", "prev_id", prevID, "error", err)
+			return
+		}
+
+		_, err = tx.Exec(ctx, r.table(updatePrevThread), userID, prevID, id)
+		if err != nil {
+			return
+		}
+
+		_, err = tx.Exec(ctx, r.table(updateNextThread), userID, nextID, id)
+		if err != nil {
+			return
+		}
+
+		_, err = tx.Exec(ctx, r.table(updateMe), userID, id, parentID, nextID, prevID, updatedAt)
+
+		return
+
+	} else if nextID != 0 {
+		// reorder after
+
+		var prevID int64
+
+		err = tx.QueryRow(ctx, r.table("SELECT prev_id FROM %s WHERE user_id = $1 AND id = $2"), userID, nextID).
+			Scan(&prevID)
+		if err != nil {
+			logger.Debugw("failed to get prev id of next id", "next_id", nextID, "error", err)
+			return
+		}
+
+		_, err = tx.Exec(ctx, r.table(updatePrevThread), userID, prevID, id)
+		if err != nil {
+			return
+		}
+
+		_, err = tx.Exec(ctx, r.table(updateNextThread), userID, nextID, id)
+		if err != nil {
+			return
+		}
+
+		_, err = tx.Exec(ctx, r.table(updateMe), userID, id, parentID, nextID, prevID, updatedAt)
+
+		return
+
+	}
+	// end reorder
+
+	return
+}
+
+func (r *ThreadsRepository) AppendThread(ctx context.Context, id, userID, parentID int64, name, description, title string, private bool, createdAt, updatedAt string) (err error) {
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			fmt.Fprintf(os.Stderr, "[CreateThread]: rollback with error: %v\n", err)
+			err = tx.Rollback(ctx)
+		default:
+			err = tx.Commit(ctx)
+		}
+	}()
+
+	const insert = "INSERT INTO %s(id, user_id, parent_id, name, description, title, private, next_id, prev_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)"
+	const selectLastThread = "SELECT id FROM %s WHERE user_id = $1 AND parent_id = $2 AND next_id = 0"
+	const updateLastThread = "UPDATE %s SET next_id = $4 WHERE user_id = $1 AND id = $2 AND parent_id = $3"
+
+	var lastThreadID int64
+	err = tx.QueryRow(ctx, r.table(selectLastThread), userID, parentID).Scan(&lastThreadID)
+	if err != nil && err != pgx.ErrNoRows {
+		return
+	}
+
+	if err == pgx.ErrNoRows {
+		// new thread
+		_, err = tx.Exec(ctx, r.table(insert), id, userID, parentID, name, description, title, private, 0, 0, createdAt, updatedAt)
+		return
+	}
+
+	_, err = tx.Exec(ctx, r.table(updateLastThread), userID, lastThreadID, parentID, id)
+	if err != nil {
+		return
+	}
+
+	_, err = tx.Exec(ctx, r.table(insert), id, userID, parentID, name, description, title, private, 0 /* next_id */, lastThreadID, createdAt, updatedAt)
+
+	return
+}
+
+func (r *ThreadsRepository) UpdateThread(ctx context.Context, id, userID int64, name, description, title *string, updatedAt string) (err error) {
+	const query = "UPDATE %s SET name = $3, description = $4, title = $5, updated_at = $6 WHERE user_id = $1 AND id = $2"
+
+	_, err = r.pool.Exec(ctx, r.table(query), userID, id, name, description, title, updatedAt)
+
+	return
+}
+
+func (r *ThreadsRepository) PrivateThread(ctx context.Context, id, userID int64, updatedAt string) (err error) {
+	query := "UPDATE %s SET private = true, updated_at = $3 WHERE user_id = $1 AND id = $2"
+
+	_, err = r.pool.Exec(ctx, r.table(query), userID, id, updatedAt)
+
+	return
+}
+
+func (r *ThreadsRepository) PublishThread(ctx context.Context, id, userID int64, updatedAt string) (err error) {
+	query := "UPDATE %s SET private = false, updated_at = $3 WHERE user_id = $1 AND id = $2"
+
+	_, err = r.pool.Exec(ctx, r.table(query), userID, id, updatedAt)
+
+	return
+}
+
+func (r *ThreadsRepository) DeleteThread(ctx context.Context, id, userID int64) (err error) {
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			fmt.Fprintf(os.Stderr, "[DeleteThread]: rollback with error: %v\n", err)
+			err = tx.Rollback(ctx)
+		default:
+			err = tx.Commit(ctx)
+		}
+	}()
+
+	// Unlink
+	const selectThread = "SELECT parent_id, next_id, prev_id FROM %s WHERE user_id = $1 AND id = $2"
+	const updateNextThread = "UPDATE %s SET prev_id = $4 WHERE user_id = $1 AND id = $2 AND parent_id = $3"
+	const updatePrevThread = "UPDATE %s SET next_id = $4 WHERE user_id = $1 AND id = $2 AND parent_id = $3"
+
+	var parentID, nextID, prevID int64
+	err = tx.QueryRow(ctx, r.table(selectThread), userID, id).Scan(&parentID, &nextID, &prevID)
+	if err != nil {
+		logger.Debugln("cannot select thread")
+		return
+	}
+
+	if nextID != 0 {
+		_, err = tx.Exec(ctx, r.table(updateNextThread), userID, nextID, parentID, prevID)
+		if err != nil {
+			logger.Debugln("cannot update next thread")
+			return
+		}
+	}
+
+	if prevID != 0 {
+		_, err = tx.Exec(ctx, r.table(updatePrevThread), userID, prevID, parentID, nextID)
+		if err != nil {
+			logger.Debugln("cannot update prev thread")
+			return
+		}
+	}
+
+	// End unlink
+	// Delete
+	const deleteThread = "DELETE FROM %s WHERE user_id = $1 AND id = $2"
+
+	_, err = tx.Exec(ctx, r.table(deleteThread), userID, id)
+	if err != nil {
+		logger.Debugln("cannot delete thread")
+		return
+	}
+
+	// End delete
+	// Link children
+	const countChildren = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2"
+	const selectLastParentThread = "SELECT id FROM %s WHERE user_id = $1 AND parent_id = $2 AND next_id = 0"
+	const selectFirstThread = "SELECT id FROM %s WHERE user_id = $1 AND parent_id = $2 AND prev_id = 0"
+	const updateFirstThread = "UPDATE %s SET prev_id = $3 WHERE user_id = $1 AND parent_id = $2 AND prev_id = 0"
+	const updateLastParentThread = "UPDATE %s SET next_id = $3 WHERE user_id = $1 AND parent_id = $2 AND next_id = 0"
+	const moveChildren = "UPDATE %s SET parent_id = $3 WHERE user_id = $1 AND parent_id = $2"
+
+	var count int32
+	err = tx.QueryRow(ctx, r.table(countChildren), userID, id).Scan(&count)
+	if err != nil {
+		logger.Debugln("cannot count children")
+		if err == pgx.ErrNoRows {
+			return nil
+		}
+		return
+	}
+
+	// nothing to move, exit
+	if count == 0 {
+		return nil
+	}
+
+	var lastParentThreadID, firstThreadID int64
+	err = tx.QueryRow(ctx, r.table(selectLastParentThread), userID, parentID).Scan(&lastParentThreadID)
+	if err != nil && err != pgx.ErrNoRows {
+		logger.Debugln("cannot select last parent thread")
+		return
+	}
+
+	// it must have children, since count > 0
+	err = tx.QueryRow(ctx, r.table(selectFirstThread), userID, id).Scan(&firstThreadID)
+	if err != nil {
+		logger.Debugln("cannot select first thread")
+		return
+	}
+
+	_, err = tx.Exec(ctx, r.table(updateFirstThread), userID, id, lastParentThreadID)
+	if err != nil {
+		logger.Debugln("cannot update first thread")
+		return
+	}
+
+	if lastParentThreadID != 0 {
+		// move to non-empty thread
+		_, err = tx.Exec(ctx, r.table(updateLastParentThread), userID, parentID, firstThreadID)
+		if err != nil {
+			logger.Debugln("cannot update last parent thread")
+			return
+		}
+	}
+
+	_, err = tx.Exec(ctx, r.table(moveChildren), userID, id, parentID)
+	if err != nil {
+		logger.Debugln("cannot move children")
+		return
+	}
+
+	// End link children
+
+	return
+}
+
+func (r *ThreadsRepository) ResolveThread(ctx context.Context, id, userID int64) (path []*threads.PathStep, err error) {
+	const query = "SELECT name, private, parent_id, title FROM %s WHERE user_id = $1 AND id = $2"
+
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			fmt.Fprintf(os.Stderr, "[ResolvePath]: rollback with error: %v\n", err)
+			err = tx.Rollback(ctx)
+		default:
+			err = tx.Commit(ctx)
+		}
+	}()
+
+	threadID := id
+
+	path = make([]*threads.PathStep, 0)
+
+	for threadID != 0 {
+		var parentID int64
+
+		step := &threads.PathStep{Id: threadID}
+
+		err = tx.QueryRow(ctx, r.table(query), userID, threadID).Scan(&step.Name, &step.Private, &parentID, &step.Title)
+		if err != nil {
+			return
+		}
+
+		path = append(path, step)
+
+		threadID = parentID
+	}
+
+	path = append(path, &threads.PathStep{
+		Id:      threadID, // root
+		Private: true,
+	})
+
+	return
+}
+
+func (r ThreadsRepository) table(query string) string {
+	return fmt.Sprintf(query, r.tableName)
+}
