@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"os"
 
-	_ "github.com/bd878/gallery/server/search/pkg/loadbalance"
+	_ "github.com/bd878/gallery/server/db/search/pkg/loadbalance"
 	_ "github.com/bd878/gallery/server/sessions/pkg/loadbalance"
 
 	"github.com/bd878/gallery/server/search/config"
 	"github.com/bd878/gallery/server/internal/system"
-	"github.com/bd878/gallery/server/search/internal/http"
+	"github.com/bd878/gallery/server/search"
 )
 
 func init() {
@@ -39,12 +39,12 @@ func main() {
 		panic(err)
 	}
 
-	if err := http.Root(s.Waiter().Context(), cfg, s); err != nil {
+	if err := search.Root(s.Waiter().Context(), cfg, s); err != nil {
 		panic(err)
 	}
 
-	fmt.Println("starting search http service")
-	defer fmt.Println("stopped search http service")
+	fmt.Println("starting search service")
+	defer fmt.Println("stopped search service")
 
 	s.Waiter().Add(
 		s.WaitForHTTP,

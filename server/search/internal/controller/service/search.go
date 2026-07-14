@@ -10,10 +10,11 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/search"
 	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/search/pkg/loadbalance"
+	"github.com/bd878/gallery/server/db/search/pkg/loadbalance"
 	"github.com/bd878/gallery/server/search/pkg/model"
-	"github.com/bd878/gallery/server/search/internal/machine"
+	"github.com/bd878/gallery/server/db/search/pkg/machine"
 )
 
 type Config struct {
@@ -22,7 +23,7 @@ type Config struct {
 
 type Controller struct {
 	conf         Config
-	client       api.SearchClient
+	client       search.SearchClient
 	conn         *grpc.ClientConn
 }
 
@@ -53,7 +54,7 @@ func (s *Controller) setupConnection() (err error) {
 		return err
 	}
 
-	client := api.NewSearchClient(conn)
+	client := search.NewSearchClient(conn)
 
 	s.conn = conn
 	s.client = client
@@ -81,7 +82,7 @@ func (s *Controller) SaveMessage(ctx context.Context, id, userID int64, name, ti
 
 	logger.Debugw("save search message", "id", id, "user_id", userID, "name", name, "title", title, "text", text, "private", private)
 
-	cmd, err := proto.Marshal(&machine.AppendMessageCommand{
+	cmd, err := proto.Marshal(&search.AppendMessageCommand{
 		Id:          id,
 		Text:        text,
 		Title:       title,
@@ -113,7 +114,7 @@ func (s *Controller) DeleteMessage(ctx context.Context, id, userID int64) (err e
 
 	logger.Debugw("delete search message", "id", id, "user_id", userID)
 
-	cmd, err := proto.Marshal(&machine.DeleteMessageCommand{
+	cmd, err := proto.Marshal(&search.DeleteMessageCommand{
 		UserId:   userID,
 		Id:       id,
 	})
@@ -139,7 +140,7 @@ func (s *Controller) UpdateMessage(ctx context.Context, id, userID int64, name, 
 
 	logger.Debugw("update search message", "id", id, "user_id", userID, "name", name, "title", title, "text", text)
 
-	cmd, err := proto.Marshal(&machine.UpdateMessageCommand{
+	cmd, err := proto.Marshal(&search.UpdateMessageCommand{
 		Id:         id,
 		Text:       text,
 		Title:      title,
@@ -169,7 +170,7 @@ func (s *Controller) PublishMessages(ctx context.Context, ids []int64, userID in
 
 	logger.Debugw("publish search messages", "ids", ids, "user_id", userID, "updated_at", updatedAt)
 
-	cmd, err := proto.Marshal(&machine.PublishMessagesCommand{
+	cmd, err := proto.Marshal(&search.PublishMessagesCommand{
 		Ids:       ids,
 		UserId:    userID,
 		UpdatedAt: updatedAt,
@@ -196,7 +197,7 @@ func (s *Controller) PrivateMessages(ctx context.Context, ids []int64, userID in
 
 	logger.Debugw("private search messages", "ids", ids, "user_id", userID, "updated_at", updatedAt)
 
-	cmd, err := proto.Marshal(&machine.PrivateMessagesCommand{
+	cmd, err := proto.Marshal(&search.PrivateMessagesCommand{
 		Ids:         ids,
 		UserId:      userID,
 		UpdatedAt:   updatedAt,
@@ -223,7 +224,7 @@ func (s *Controller) SaveThread(ctx context.Context, id, userID, parentID int64,
 
 	logger.Debugw("save thread", "id", id, "user_id", userID, "parent_id", parentID, "name", name, "description", description, "private", private)
 
-	cmd, err := proto.Marshal(&machine.AppendThreadCommand{
+	cmd, err := proto.Marshal(&search.AppendThreadCommand{
 		Id:          id,
 		Name:        name,
 		UserId:      userID,
@@ -255,7 +256,7 @@ func (s *Controller) DeleteThread(ctx context.Context, id, userID int64) (err er
 
 	logger.Debugw("delete thread", "id", id, "user_id", userID)
 
-	cmd, err := proto.Marshal(&machine.DeleteThreadCommand{
+	cmd, err := proto.Marshal(&search.DeleteThreadCommand{
 		UserId:   userID,
 		Id:       id,
 	})
@@ -281,7 +282,7 @@ func (s *Controller) UpdateThread(ctx context.Context, id, userID int64, name, d
 
 	logger.Debugw("update thread", "id", id, "user_id", userID, "name", name, "description", description)
 
-	cmd, err := proto.Marshal(&machine.UpdateThreadCommand{
+	cmd, err := proto.Marshal(&search.UpdateThreadCommand{
 		Id:          id,
 		Description: description,
 		Name:        name,
@@ -310,7 +311,7 @@ func (s *Controller) ChangeThreadParent(ctx context.Context, id, userID, parentI
 
 	logger.Debugw("change thread parent", "id", id, "user_id", userID, "parent_id", parentID)
 
-	cmd, err := proto.Marshal(&machine.ChangeThreadParentCommand{
+	cmd, err := proto.Marshal(&search.ChangeThreadParentCommand{
 		Id:          id,
 		UserId:      userID,
 		ParentId:    parentID,
@@ -337,7 +338,7 @@ func (s *Controller) PrivateThread(ctx context.Context, id, userID int64, update
 
 	logger.Debugw("private thread", "id", id, "user_id", userID)
 
-	cmd, err := proto.Marshal(&machine.PrivateThreadCommand{
+	cmd, err := proto.Marshal(&search.PrivateThreadCommand{
 		Id:         id,
 		UserId:     userID,
 		UpdatedAt:  updatedAt,
@@ -364,7 +365,7 @@ func (s *Controller) PublishThread(ctx context.Context, id, userID int64, update
 
 	logger.Debugw("publish thread", "id", id, "user_id", userID)
 
-	cmd, err := proto.Marshal(&machine.PublishThreadCommand{
+	cmd, err := proto.Marshal(&search.PublishThreadCommand{
 		Id:         id,
 		UserId:     userID,
 		UpdatedAt:  updatedAt,
@@ -391,7 +392,7 @@ func (s *Controller) SaveFile(ctx context.Context, id, userID int64, name, descr
 
 	logger.Debugw("save file", "id", id, "user_id", userID, "name", name, "description", description, "mime", mime, "private", private, "size", size)
 
-	cmd, err := proto.Marshal(&machine.AppendFileCommand{
+	cmd, err := proto.Marshal(&search.AppendFileCommand{
 		Id:          id,
 		UserId:      userID,
 		Name:        name,
@@ -424,7 +425,7 @@ func (s *Controller) PublishFiles(ctx context.Context, ids []int64, userID int64
 
 	logger.Debugw("publish files", "ids", ids, "user_id", userID)
 
-	cmd, err := proto.Marshal(&machine.PublishFilesCommand{
+	cmd, err := proto.Marshal(&search.PublishFilesCommand{
 		Ids:         ids,
 		UserId:      userID,
 		UpdatedAt:   updatedAt,
@@ -451,7 +452,7 @@ func (s *Controller) PrivateFiles(ctx context.Context, ids []int64, userID int64
 
 	logger.Debugw("private files", "ids", ids, "user_id", userID)
 
-	cmd, err := proto.Marshal(&machine.PrivateFilesCommand{
+	cmd, err := proto.Marshal(&search.PrivateFilesCommand{
 		Ids:         ids,
 		UserId:      userID,
 		UpdatedAt:   updatedAt,
@@ -478,7 +479,7 @@ func (s *Controller) DeleteFiles(ctx context.Context, ids []int64, userID int64)
 
 	logger.Debugw("delete files", "id", ids, "user_id", userID)
 
-	cmd, err := proto.Marshal(&machine.DeleteFilesCommand{
+	cmd, err := proto.Marshal(&search.DeleteFilesCommand{
 		Ids:         ids,
 		UserId:      userID,
 	})
@@ -504,7 +505,7 @@ func (s *Controller) SaveTranslation(ctx context.Context, userID, messageID int6
 
 	logger.Debugw("save translation", "user_id", userID, "message_id", messageID, "lang", lang, "title", title, "text", text)
 
-	cmd, err := proto.Marshal(&machine.AppendTranslationCommand{
+	cmd, err := proto.Marshal(&search.AppendTranslationCommand{
 		UserId:      userID,
 		MessageId:   messageID,
 		Lang:        lang,
@@ -535,7 +536,7 @@ func (s *Controller) DeleteTranslation(ctx context.Context, messageID int64, lan
 
 	logger.Debugw("delete translation", "message_id", messageID, "lang", lang)
 
-	cmd, err := proto.Marshal(&machine.DeleteTranslationCommand{
+	cmd, err := proto.Marshal(&search.DeleteTranslationCommand{
 		MessageId:    messageID,
 		Lang:         lang,
 	})
@@ -561,7 +562,7 @@ func (s *Controller) UpdateTranslation(ctx context.Context, messageID int64, lan
 
 	logger.Debugw("update translation", "message_id", messageID, "lang", lang, "title", title, "text", text)
 
-	cmd, err := proto.Marshal(&machine.UpdateTranslationCommand{
+	cmd, err := proto.Marshal(&search.UpdateTranslationCommand{
 		MessageId:     messageID,
 		Lang:          lang,
 		Title:         title,
@@ -590,7 +591,7 @@ func (s *Controller) SearchMessages(ctx context.Context, userID int64, substr st
 
 	logger.Debugw("search messages", "user_id", userID, "substr", substr, "thread_id", threadID, "public", public)
 
-	res, err := s.client.SearchMessages(ctx, &api.SearchMessagesRequest{
+	res, err := s.client.SearchMessages(ctx, &search.SearchMessagesRequest{
 		Substr:   substr,
 		UserId:   userID,
 		ThreadId: &threadID,

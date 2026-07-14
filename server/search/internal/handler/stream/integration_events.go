@@ -6,7 +6,10 @@ import (
 
 	"github.com/bd878/gallery/server/internal/am"
 	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/api"
+	"github.com/bd878/gallery/server/api/messages"
+	"github.com/bd878/gallery/server/api/threads"
+	"github.com/bd878/gallery/server/api/files"
+	"github.com/bd878/gallery/server/api/translations"
 	messageevents "github.com/bd878/gallery/server/messages/pkg/events"
 	threadsevents "github.com/bd878/gallery/server/threads/pkg/events"
 	filesevents "github.com/bd878/gallery/server/files/pkg/events"
@@ -136,7 +139,7 @@ func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingM
 }
 
 func (h integrationHandlers) handleMessageCreated(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.MessageCreated{}
+	m := &messages.MessageCreated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}
@@ -146,7 +149,7 @@ func (h integrationHandlers) handleMessageCreated(ctx context.Context, msg am.In
 }
 
 func (h integrationHandlers) handleMessageDeleted(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.MessageDeleted{}
+	m := &messages.MessageDeleted{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}
@@ -155,7 +158,7 @@ func (h integrationHandlers) handleMessageDeleted(ctx context.Context, msg am.In
 }
 
 func (h integrationHandlers) handleMessageUpdated(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.MessageUpdated{}
+	m := &messages.MessageUpdated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}
@@ -164,7 +167,7 @@ func (h integrationHandlers) handleMessageUpdated(ctx context.Context, msg am.In
 }
 
 func (h integrationHandlers) handleMessagesPublish(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.MessagesPublished{}
+	m := &messages.MessagesPublished{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}
@@ -173,7 +176,7 @@ func (h integrationHandlers) handleMessagesPublish(ctx context.Context, msg am.I
 }
 
 func (h integrationHandlers) handleMessagesPrivate(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.MessagesPrivated{}
+	m := &messages.MessagesPrivated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}
@@ -182,7 +185,7 @@ func (h integrationHandlers) handleMessagesPrivate(ctx context.Context, msg am.I
 }
 
 func (h integrationHandlers) handleThreadCreated(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.ThreadCreated{}
+	m := &threads.ThreadCreated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}
@@ -192,7 +195,7 @@ func (h integrationHandlers) handleThreadCreated(ctx context.Context, msg am.Inc
 }
 
 func (h integrationHandlers) handleThreadDeleted(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.ThreadDeleted{}
+	m := &threads.ThreadDeleted{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}
@@ -201,7 +204,7 @@ func (h integrationHandlers) handleThreadDeleted(ctx context.Context, msg am.Inc
 }
 
 func (h integrationHandlers) handleThreadUpdated(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.ThreadUpdated{}
+	m := &threads.ThreadUpdated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}
@@ -210,7 +213,7 @@ func (h integrationHandlers) handleThreadUpdated(ctx context.Context, msg am.Inc
 }
 
 func (h integrationHandlers) handleThreadParentChanged(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.ThreadCreated{}
+	m := &threads.ThreadCreated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}
@@ -219,7 +222,7 @@ func (h integrationHandlers) handleThreadParentChanged(ctx context.Context, msg 
 }
 
 func (h integrationHandlers) handleThreadPrivated(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.ThreadPrivated{}
+	m := &threads.ThreadPrivated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}
@@ -228,7 +231,7 @@ func (h integrationHandlers) handleThreadPrivated(ctx context.Context, msg am.In
 }
 
 func (h integrationHandlers) handleThreadPublished(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.ThreadPublished{}
+	m := &threads.ThreadPublished{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}
@@ -237,7 +240,7 @@ func (h integrationHandlers) handleThreadPublished(ctx context.Context, msg am.I
 }
 
 func (h integrationHandlers) handleFileUploaded(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.FileUploaded{}
+	m := &files.FileUploaded{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}
@@ -247,7 +250,7 @@ func (h integrationHandlers) handleFileUploaded(ctx context.Context, msg am.Inco
 }
 
 func (h integrationHandlers) handleFilesDeleted(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.FilesDeleted{}
+	m := &files.FilesDeleted{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}
@@ -256,7 +259,7 @@ func (h integrationHandlers) handleFilesDeleted(ctx context.Context, msg am.Inco
 }
 
 func (h integrationHandlers) handleFilesPublished(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.FilesPublished{}
+	m := &files.FilesPublished{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}
@@ -265,7 +268,7 @@ func (h integrationHandlers) handleFilesPublished(ctx context.Context, msg am.In
 }
 
 func (h integrationHandlers) handleFilesPrivated(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.FilesPrivated{}
+	m := &files.FilesPrivated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}
@@ -274,7 +277,7 @@ func (h integrationHandlers) handleFilesPrivated(ctx context.Context, msg am.Inc
 }
 
 func (h integrationHandlers) handleTranslationCreated(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.TranslationCreated{}
+	m := &translations.TranslationCreated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}
@@ -284,7 +287,7 @@ func (h integrationHandlers) handleTranslationCreated(ctx context.Context, msg a
 }
 
 func (h integrationHandlers) handleTranslationDeleted(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.TranslationDeleted{}
+	m := &translations.TranslationDeleted{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}
@@ -293,7 +296,7 @@ func (h integrationHandlers) handleTranslationDeleted(ctx context.Context, msg a
 }
 
 func (h integrationHandlers) handleTranslationUpdated(ctx context.Context, msg am.IncomingMessage) error {
-	m := &api.TranslationUpdated{}
+	m := &translations.TranslationUpdated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
 	}

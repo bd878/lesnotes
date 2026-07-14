@@ -1,10 +1,8 @@
 package model
 
-import (
-	"github.com/bd878/gallery/server/api"
-)
+import "github.com/bd878/gallery/server/api/search"
 
-func MessageFromProto(proto *api.SearchMessage) *Message {
+func MessageFromProto(proto *search.SearchMessage) *Message {
 	return &Message{
 		ID:             proto.Id,
 		UserID:         proto.UserId,
@@ -17,8 +15,8 @@ func MessageFromProto(proto *api.SearchMessage) *Message {
 	}
 }
 
-func MessageToProto(msg *Message) *api.SearchMessage {
-	return &api.SearchMessage{
+func MessageToProto(msg *Message) *search.SearchMessage {
+	return &search.SearchMessage{
 		Id:             msg.ID,
 		UserId:         msg.UserID,
 		Text:           msg.Text,
@@ -30,15 +28,15 @@ func MessageToProto(msg *Message) *api.SearchMessage {
 	}
 }
 
-func MapMessagesToProto(mapper (func(*Message) *api.SearchMessage), msgs []*Message) []*api.SearchMessage {
-	res := make([]*api.SearchMessage, len(msgs))
+func MapMessagesToProto(mapper (func(*Message) *search.SearchMessage), msgs []*Message) []*search.SearchMessage {
+	res := make([]*search.SearchMessage, len(msgs))
 	for i, msg := range msgs {
 		res[i] = mapper(msg)
 	}
 	return res
 }
 
-func MapMessagesFromProto(mapper (func(*api.SearchMessage) *Message), msgs []*api.SearchMessage) []*Message {
+func MapMessagesFromProto(mapper (func(*search.SearchMessage) *Message), msgs []*search.SearchMessage) []*Message {
 	res := make([]*Message, len(msgs))
 	for i, msg := range msgs {
 		res[i] = mapper(msg)
