@@ -80,7 +80,8 @@ func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 
 		err = f.dumper.Restore(context.TODO(), &snapshot)
 		if err != nil {
-			return err
+			logger.Debugln(zap.ByteString("data", data), zap.Error(err))
+			continue
 		}
 	}
 
