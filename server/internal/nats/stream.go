@@ -46,7 +46,7 @@ func (s *Stream) Subscribe(topicName string, handler am.MessageHandler, options 
 	subCfg := am.NewSubscriberConfig(options)
 
 	if groupName := subCfg.GroupName(); groupName != "" {
-		_, err = s.nc.QueueSubscribe(groupName, topicName, s.handleMsg(topicName, handler))
+		_, err = s.nc.QueueSubscribe(topicName, groupName, s.handleMsg(topicName, handler))
 	} else {
 		_, err = s.nc.Subscribe(topicName, s.handleMsg(topicName, handler))
 	}
