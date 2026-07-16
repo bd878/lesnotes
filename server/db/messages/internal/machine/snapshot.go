@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/encoding/prototext"
 
 	"github.com/bd878/gallery/server/api/messages"
 	"github.com/bd878/gallery/server/internal/logger"
@@ -49,11 +50,11 @@ func (f *Machine) Snapshot() (raft.FSMSnapshot, error) {
 func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 	logger.Debugln("restoring fsm from snapshot")
 
-	store := store.NewReader(reader)
-	defer store.Close()
+	s := store.NewReader(reader)
+	defer s.Close()
 
 	for {
-		size, err := store.ReadSize()
+		size, err := s.ReadSize()
 		if err == io.EOF {
 			break
 		}
@@ -61,13 +62,24 @@ func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 			return err
 		}
 
+		logger.Debugw("restore", "size", size)
+
 		data := make([]byte, size)
-		n, err := store.Read(data)
+		n, err := s.Read(data)
 		if err == io.EOF {
 			break
 		}
 		if err != nil {
 			return err
+		}
+
+		if uint64(n) < size {
+			n2, err := s.Read(data[n:])
+			if err != nil {
+				return err
+			}
+
+			logger.Debugw("restore", "n2", n2)
 		}
 
 		logger.Debugw("restore", "n", n)
@@ -77,6 +89,14 @@ func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 			logger.Debugln(zap.ByteString("data", data), zap.Error(err))
 			continue
 		}
+
+		bytes, err := prototext.Marshal(&snapshot)
+		if err != nil {
+			logger.Debugln(zap.Error(err))
+			continue
+		}
+
+		logger.Debugln(zap.String("snapshot", string(bytes)))
 
 		err = f.dumper.Restore(context.TODO(), &snapshot)
 		if err != nil {
@@ -103,6 +123,14 @@ func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
 			logger.Debugln("unknown snapshot")
 			continue
 		}
+
+		bytes, err := prototext.Marshal(snapshot)
+		if err != nil {
+			logger.Debugln(zap.Error(err))
+			continue
+		}
+
+		logger.Debugln(zap.String("snapshot", string(bytes)))
 
 		data, err := proto.Marshal(snapshot)
 		if err != nil {

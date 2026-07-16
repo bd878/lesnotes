@@ -49,11 +49,11 @@ func (f *Machine) Snapshot() (raft.FSMSnapshot, error) {
 func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 	logger.Debugln("restoring fsm from snapshot")
 
-	store := store.NewReader(reader)
-	defer store.Close()
+	s := store.NewReader(reader)
+	defer s.Close()
 
 	for {
-		size, err := store.ReadSize()
+		size, err := s.ReadSize()
 		if err == io.EOF {
 			break
 		}
@@ -62,12 +62,21 @@ func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 		}
 
 		data := make([]byte, size)
-		n, err := store.Read(data)
+		n, err := s.Read(data)
 		if err == io.EOF {
 			break
 		}
 		if err != nil {
 			return err
+		}
+
+		if uint64(n) < size {
+			n2, err := s.Read(data[n:])
+			if err != nil {
+				return err
+			}
+
+			logger.Debugw("restore", "n2", n2)
 		}
 
 		logger.Debugw("restore", "n", n)

@@ -37,6 +37,7 @@ async function login(login: string, password: string, lang?: string) {
 			result.expiresAt = response.expiresAt
 		}
 	} catch (e) {
+		console.log(e)
 		result.error.error   = true
 		result.error.status  = 500
 		result.error.explain = e.toString()

@@ -5,8 +5,10 @@ import (
 	"os"
 	"context"
 
+	"go.uber.org/zap"
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/encoding/prototext"
 
 	"github.com/bd878/gallery/server/api/threads"
 	"github.com/bd878/gallery/server/internal/logger"
@@ -45,14 +47,17 @@ func (f *Machine) Snapshot() (raft.FSMSnapshot, error) {
 	return s, nil
 }
 
+// raft NewFileSnapshotStore has a bug : bufio.Reader has 4096 default size.
+// When reading per bytes, it may occasionally return 0 bytes off limit.
+// With bufio, you must explicitely set larger buffer amount (file size)
 func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 	logger.Debugln("restoring fsm from snapshot")
 
-	store := store.NewReader(reader)
-	defer store.Close()
+	s := store.NewReader(reader)
+	defer s.Close()
 
 	for {
-		size, err := store.ReadSize()
+		size, err := s.ReadSize()
 		if err == io.EOF {
 			break
 		}
@@ -60,8 +65,10 @@ func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 			return err
 		}
 
+		logger.Debugw("restore", "size", size)
+
 		data := make([]byte, size)
-		n, err := store.Read(data)
+		n, err := s.Read(data)
 		if err == io.EOF {
 			break
 		}
@@ -71,10 +78,28 @@ func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 
 		logger.Debugw("restore", "n", n)
 
+		if uint64(n) < size {
+			n2, err := s.Read(data[n:])
+			if err != nil {
+				return err
+			}
+
+			logger.Debugw("restore", "n2", n2)
+		}
+
 		var snapshot threads.ThreadsSnapshot
 		if err = proto.Unmarshal(data, &snapshot); err != nil {
+			logger.Debugln(zap.Error(err))
 			return err
 		}
+
+		bytes, err := prototext.Marshal(&snapshot)
+		if err != nil {
+			logger.Debugln(zap.Error(err))
+			continue
+		}
+
+		logger.Debugln(zap.String("snapshot", string(bytes)))
 
 		err = f.dumper.Restore(context.TODO(), &snapshot)
 		if err != nil {
