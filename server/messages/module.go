@@ -8,7 +8,7 @@ import (
 
 	"github.com/bd878/gallery/server/messages/config"
 	"github.com/bd878/gallery/server/internal/system"
-	"github.com/bd878/gallery/server/internal/nats"
+	"github.com/bd878/gallery/server/internal/jetstream"
 	"github.com/bd878/gallery/server/internal/am"
 	"github.com/bd878/gallery/server/internal/ddd"
 
@@ -33,9 +33,10 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(svc.Logger(), usersGateway, sessionsGateway, usermodel.PublicUserID))
 
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
+	js := jetstream.NewStream(svc.Config().NatsStream, svc.JS(), svc.Logger())
 	stream.RegisterDomainEventHandlers(dispatcher, stream.NewDomainEventHandlers(
 		am.NewMessagePublisher(
-			nats.NewStream(svc.Nats()),
+			js,
 		),
 	))
 
@@ -51,7 +52,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	commentsController := controller.NewCommentsController(controller.CommentsConfig{RpcAddr: cfg.MessagesServiceAddr}, dispatcher)
 
 	stream.RegisterIntegrationEventHandlers(am.NewMessageSubscriber(
-			nats.NewStream(svc.Nats()),
+			js,
 		),
 		stream.NewIntegrationEventHandlers(messagesController),
 	)

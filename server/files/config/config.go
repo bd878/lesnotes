@@ -7,6 +7,7 @@ type Config struct {
 	UsersServiceAddr     string      `json:"users_service_addr"`
 	SessionsServiceAddr  string      `json:"sessions_service_addr"`
 	NatsAddr             string      `json:"nats_addr"`
+	NatsStream           string      `json:"nats_stream"`
 	LogLevel             string      `json:"log_level"`
 
 	PGConn               string      `json:"pg_conn"`

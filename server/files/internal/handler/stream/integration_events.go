@@ -31,7 +31,7 @@ func NewIntegrationEventHandlers(files FilesController) am.RawMessageHandler {
 }
 
 func RegisterIntegrationEventHandlers(subscriber am.RawMessageSubscriber, handlers am.RawMessageHandler) (err error) {
-	err = subscriber.Subscribe(messagesevents.MessagesChannel, handlers, am.GroupName("files-messages"))
+	_, err = subscriber.Subscribe(messagesevents.MessagesChannel, handlers, am.GroupName("files-messages"))
 	if err != nil {
 		return
 	}

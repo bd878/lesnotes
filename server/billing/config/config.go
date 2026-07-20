@@ -8,4 +8,5 @@ type Config struct {
 	SessionsServiceAddr  string      `json:"sessions_service_addr"`
 	LogLevel             string      `json:"log_level"`
 	NatsAddr             string      `json:"nats_addr"`
+	NatsStream           string      `json:"nats_stream"`
 }

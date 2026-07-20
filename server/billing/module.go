@@ -7,7 +7,7 @@ import (
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/billing/config"
 	"github.com/bd878/gallery/server/internal/system"
-	"github.com/bd878/gallery/server/internal/nats"
+	"github.com/bd878/gallery/server/internal/jetstream"
 	"github.com/bd878/gallery/server/billing/internal/handler/stream"
 
 	usermodel "github.com/bd878/gallery/server/users/pkg/model"
@@ -27,7 +27,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
 	stream.RegisterDomainEventHandlers(dispatcher, stream.NewDomainEventHandlers(
 		am.NewMessagePublisher(
-			nats.NewStream(svc.Nats()),
+			jetstream.NewStream(svc.Config().NatsStream, svc.JS(), svc.Logger()),
 		),
 	))
 

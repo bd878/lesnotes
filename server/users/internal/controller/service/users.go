@@ -21,7 +21,7 @@ import (
 	"github.com/bd878/gallery/server/db/users/pkg/machine"
 	"github.com/bd878/gallery/server/users/internal/domain"
 	"github.com/bd878/gallery/server/users/internal/controller"
-	sessions "github.com/bd878/gallery/server/sessions/pkg/model"
+	sessions "github.com/bd878/gallery/server/db/sessions/pkg/model"
 )
 
 type SessionsGateway interface {

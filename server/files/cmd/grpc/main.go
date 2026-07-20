@@ -33,6 +33,7 @@ func main() {
 		NodeName:              cfg.NodeName,
 		LogLevel:              cfg.LogLevel,
 		NatsAddr:              cfg.NatsAddr,
+		NatsStream: cfg.NatsStream,
 		PGConn:                cfg.PGConn,
 		GooseTableName:        cfg.GooseTableName,
 	})

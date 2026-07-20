@@ -7,5 +7,6 @@ type Config struct {
 	UsersServiceAddr       string          `json:"users_service_addr"`
 	LogLevel               string          `json:"log_level"`
 	NatsAddr               string          `json:"nats_addr"`
+	NatsStream           string      `json:"nats_stream"`
 	CookieDomain           string          `json:"cookie_domain"`
 }

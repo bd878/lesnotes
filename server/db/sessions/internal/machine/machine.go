@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
 	"github.com/bd878/gallery/server/api/sessions"
-	"github.com/bd878/gallery/server/sessions/pkg/machine"
+	"github.com/bd878/gallery/server/db/sessions/pkg/machine"
 	"github.com/bd878/gallery/server/internal/logger"
 )
 

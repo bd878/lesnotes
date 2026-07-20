@@ -8,7 +8,7 @@ import (
 
 	"github.com/bd878/gallery/server/internal/utils"
 	users "github.com/bd878/gallery/server/users/pkg/model"
-	sessions "github.com/bd878/gallery/server/sessions/pkg/model"
+	sessions "github.com/bd878/gallery/server/db/sessions/pkg/model"
 )
 
 type Controller interface {

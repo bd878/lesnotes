@@ -6,7 +6,7 @@ import (
 	"os"
 
 	_ "github.com/bd878/gallery/server/db/billing/pkg/loadbalance"
-	_ "github.com/bd878/gallery/server/sessions/pkg/loadbalance"
+	_ "github.com/bd878/gallery/server/db/sessions/pkg/loadbalance"
 
 	"github.com/bd878/gallery/server/billing/config"
 	"github.com/bd878/gallery/server/billing"
@@ -33,6 +33,7 @@ func main() {
 		NodeName: cfg.NodeName,
 		LogLevel: cfg.LogLevel,
 		SkipCaller: 1,
+		NatsStream: cfg.NatsStream,
 		NatsAddr: cfg.NatsAddr,
 		HttpAddr: cfg.HttpAddr,
 	})

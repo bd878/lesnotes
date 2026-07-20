@@ -10,7 +10,7 @@ import (
 	"github.com/bd878/gallery/server/api/sessions"
 	"github.com/bd878/gallery/server/internal/utils"
 	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/sessions/pkg/machine"
+	"github.com/bd878/gallery/server/db/sessions/pkg/machine"
 )
 
 type SessionsRepository interface {

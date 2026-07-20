@@ -9,4 +9,5 @@ type Config struct {
 
 	LogLevel             string      `json:"log_level"`
 	NatsAddr             string      `json:"nats_addr"`
+	NatsStream           string      `json:"nats_stream"`
 }

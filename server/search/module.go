@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/bd878/gallery/server/internal/am"
-	"github.com/bd878/gallery/server/internal/nats"
+	"github.com/bd878/gallery/server/internal/jetstream"
 	"github.com/bd878/gallery/server/search/config"
 	"github.com/bd878/gallery/server/internal/system"
 	"github.com/bd878/gallery/server/search/internal/handler/stream"
@@ -25,9 +25,10 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 
 	ctrl := controller.New(controller.Config{RpcAddr: cfg.SearchServiceAddr})
 
+	js := jetstream.NewStream(svc.Config().NatsStream, svc.JS(), svc.Logger())
 	stream.RegisterIntegrationEventHandlers(
 		am.NewMessageSubscriber(
-			nats.NewStream(svc.Nats()),
+			js,
 		),
 		stream.NewIntegrationEventHandlers(ctrl, ctrl, ctrl, ctrl, svc.Logger()))
 

@@ -21,7 +21,7 @@ type Service interface {
 	Mux() cmux.CMux
 	ServeMux() *http.ServeMux
 	HTTP() *http.Server
-	Nats() *nats.Conn
+	JS() nats.JetStreamContext
 	RPC() *grpc.Server
 	Waiter() waiter.Waiter
 	Logger() *logger.Logger

@@ -13,11 +13,11 @@ import (
 	"github.com/bd878/gallery/server/internal/system"
 	"github.com/bd878/gallery/server/internal/discovery/serf"
 	"github.com/bd878/gallery/server/internal/consensus/raft"
-	"github.com/bd878/gallery/server/sessions/config"
-	"github.com/bd878/gallery/server/sessions/internal/repository/postgres"
-	"github.com/bd878/gallery/server/sessions/internal/machine"
-	"github.com/bd878/gallery/server/sessions/internal/controller/distributed"
-	"github.com/bd878/gallery/server/sessions/internal/handler/grpc"
+	"github.com/bd878/gallery/server/db/sessions/config"
+	"github.com/bd878/gallery/server/db/sessions/internal/repository/postgres"
+	"github.com/bd878/gallery/server/db/sessions/internal/machine"
+	"github.com/bd878/gallery/server/db/sessions/internal/controller/distributed"
+	"github.com/bd878/gallery/server/db/sessions/internal/handler/grpc"
 )
 
 func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error) {

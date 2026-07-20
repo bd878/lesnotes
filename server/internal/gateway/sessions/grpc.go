@@ -9,8 +9,8 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"github.com/bd878/gallery/server/api/sessions"
 	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/sessions/pkg/loadbalance"
-	"github.com/bd878/gallery/server/sessions/pkg/model"
+	"github.com/bd878/gallery/server/db/sessions/pkg/loadbalance"
+	"github.com/bd878/gallery/server/db/sessions/pkg/model"
 )
 
 type Gateway struct {

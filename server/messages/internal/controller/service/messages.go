@@ -446,6 +446,7 @@ func (s *MessagesController) ReadBatchMessages(ctx context.Context, userID int64
 	})
 	if err != nil {
 		if status, ok := status.FromError(err); ok {
+			// here it fails : context canceled while waiting for connections to become ready
 			logger.Errorw("read batch messages", "rpc error", status.Message())
 		} else {
 			logger.Errorw("read batch messages", "non-rpc error", err)

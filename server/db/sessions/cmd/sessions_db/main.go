@@ -6,11 +6,11 @@ import (
 	"os"
 	"database/sql"
 
-	_ "github.com/bd878/gallery/server/sessions/pkg/loadbalance"
+	_ "github.com/bd878/gallery/server/db/sessions/pkg/loadbalance"
 
-	"github.com/bd878/gallery/server/sessions"
-	"github.com/bd878/gallery/server/sessions/migrations"
-	"github.com/bd878/gallery/server/sessions/config"
+	"github.com/bd878/gallery/server/db/sessions"
+	"github.com/bd878/gallery/server/db/sessions/migrations"
+	"github.com/bd878/gallery/server/db/sessions/config"
 	"github.com/bd878/gallery/server/internal/system"
 )
 
@@ -36,6 +36,7 @@ func main() {
 		LogLevel:           cfg.LogLevel,
 		SkipCaller:         1,
 		NatsAddr:           cfg.NatsAddr,
+		NatsStream: cfg.NatsStream,
 		PGConn:             cfg.PGConn,
 		GooseTableName:     cfg.GooseTableName,
 	})

@@ -27,7 +27,7 @@ func NewIntegrationEventHandlers(messages MessagesController) am.RawMessageHandl
 }
 
 func RegisterIntegrationEventHandlers(subscriber am.RawMessageSubscriber, handlers am.RawMessageHandler) (err error) {
-	err = subscriber.Subscribe(events.UsersChannel, handlers, am.GroupName("messages-users"))
+	_, err = subscriber.Subscribe(events.UsersChannel, handlers, am.GroupName("messages-users"))
 	if err != nil {
 		return
 	}

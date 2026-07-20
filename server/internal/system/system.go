@@ -41,6 +41,7 @@ type Config struct {
 	LogLevel          string
 	SkipCaller        int
 	NatsAddr          string
+	NatsStream        string
 	PGConn            string
 	GooseTableName    string
 }
@@ -50,6 +51,7 @@ type System struct {
 	pool             *pgxpool.Pool
 	db               *sql.DB
 	nc               *nats.Conn
+	js               nats.JetStreamContext
 	rpc              *grpc.Server
 	channelzServer   *grpc.Server
 	logger           *logger.Logger
@@ -75,7 +77,7 @@ func NewSystem(cfg Config) (*System, error) {
 		return nil, err
 	}
 
-	if err := s.initNats(); err != nil {
+	if err := s.initJS(); err != nil {
 		return nil, err
 	}
 
@@ -144,7 +146,7 @@ func (s *System) DB() *sql.DB {
 
 func (s *System) initPool() (err error) {
 	if s.cfg.PGConn != "" {
-		s.pool, err = pgxpool.New(context.Background(), s.cfg.PGConn)
+		s.pool, err = pgxpool.New(context.TODO(), s.cfg.PGConn)
 	}
 	return
 }
@@ -153,15 +155,31 @@ func (s *System) Pool() *pgxpool.Pool {
 	return s.pool
 }
 
-func (s *System) initNats() (err error) {
+func (s *System) initJS() (err error) {
 	if s.cfg.NatsAddr != "" {
 		s.nc, err = nats.Connect(s.cfg.NatsAddr)
+		if err != nil {
+			return err
+		}
+
+		s.js, err = s.nc.JetStream()
+		if err != nil {
+			return err
+		}
+
+		_, err = s.js.AddStream(&nats.StreamConfig{
+			Name: s.cfg.NatsStream,
+			Subjects: []string{fmt.Sprintf("%s.>", s.cfg.NatsStream)},
+		})
+		if err != nil {
+			return err
+		}
 	}
 	return
 }
 
-func (s *System) Nats() *nats.Conn {
-	return s.nc
+func (s *System) JS() nats.JetStreamContext {
+	return s.js
 }
 
 func (s *System) initMux() (err error) {
