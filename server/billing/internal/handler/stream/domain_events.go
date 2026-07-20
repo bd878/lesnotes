@@ -54,7 +54,7 @@ func (h domainHandler[T]) onInvoicePayed(ctx context.Context, event ddd.Event) e
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.BillingChannel, am.NewRawMessage(event.ID(), events.InvoicePayedEvent, data))
+	return h.publisher.Publish(ctx, events.BillingChannel, am.NewRawMessage(event.ID(), events.InvoicePayedEvent, data, event.Metadata(), events.BillingChannel))
 }
 
 func (h domainHandler[T]) onPremiumPayed(ctx context.Context, event ddd.Event) error {
@@ -72,5 +72,5 @@ func (h domainHandler[T]) onPremiumPayed(ctx context.Context, event ddd.Event) e
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.BillingChannel, am.NewRawMessage(event.ID(), events.PremiumPayedEvent, data))
+	return h.publisher.Publish(ctx, events.BillingChannel, am.NewRawMessage(event.ID(), events.PremiumPayedEvent, data, event.Metadata(), events.BillingChannel))
 }

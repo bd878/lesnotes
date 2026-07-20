@@ -44,5 +44,5 @@ func (h domainHandler[T]) onUserDeleted(ctx context.Context, event ddd.Event) er
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.UsersChannel, am.NewRawMessage(event.ID(), events.UserDeletedEvent, data))	
+	return h.publisher.Publish(ctx, events.UsersChannel, am.NewRawMessage(event.ID(), events.UserDeletedEvent, data, event.Metadata(), events.UsersChannel))	
 }

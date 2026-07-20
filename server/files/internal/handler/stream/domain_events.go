@@ -61,7 +61,7 @@ func (h domainHandler[T]) onFileUploaded(ctx context.Context, event ddd.Event) e
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.FilesChannel, am.NewRawMessage(event.ID(), events.FileUploadedEvent, data))
+	return h.publisher.Publish(ctx, events.FilesChannel, am.NewRawMessage(event.ID(), events.FileUploadedEvent, data, event.Metadata(), events.FilesChannel))
 }
 
 func (h domainHandler[T]) onFilesDeleted(ctx context.Context, event ddd.Event) error {
@@ -74,7 +74,7 @@ func (h domainHandler[T]) onFilesDeleted(ctx context.Context, event ddd.Event) e
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.FilesChannel, am.NewRawMessage(event.ID(), events.FilesDeletedEvent, data))
+	return h.publisher.Publish(ctx, events.FilesChannel, am.NewRawMessage(event.ID(), events.FilesDeletedEvent, data, event.Metadata(), events.FilesChannel))
 }
 
 func (h domainHandler[T]) onFilesPrivated(ctx context.Context, event ddd.Event) error {
@@ -88,7 +88,7 @@ func (h domainHandler[T]) onFilesPrivated(ctx context.Context, event ddd.Event) 
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.FilesChannel, am.NewRawMessage(event.ID(), events.FilesPrivatedEvent, data))
+	return h.publisher.Publish(ctx, events.FilesChannel, am.NewRawMessage(event.ID(), events.FilesPrivatedEvent, data, event.Metadata(), events.FilesChannel))
 }
 
 func (h domainHandler[T]) onFilesPublished(ctx context.Context, event ddd.Event) error {
@@ -102,5 +102,5 @@ func (h domainHandler[T]) onFilesPublished(ctx context.Context, event ddd.Event)
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.FilesChannel, am.NewRawMessage(event.ID(), events.FilesPublishedEvent, data))
+	return h.publisher.Publish(ctx, events.FilesChannel, am.NewRawMessage(event.ID(), events.FilesPublishedEvent, data, event.Metadata(), events.FilesChannel))
 }

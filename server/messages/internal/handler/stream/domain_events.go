@@ -78,6 +78,7 @@ func (h domainHandler[T]) HandleEvent(ctx context.Context, event T) (err error) 
 }
 
 func (h domainHandler[T]) onMessageCreated(ctx context.Context, event ddd.Event) error {
+	// TODO: add serde, create message in am EventPublisher : am/event_messages.go
 	payload := event.Payload().(*domain.MessageCreated)
 	data, err := proto.Marshal(&messages.MessageCreated{
 		Id:        payload.ID,
@@ -94,7 +95,7 @@ func (h domainHandler[T]) onMessageCreated(ctx context.Context, event ddd.Event)
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.MessagesChannel, am.NewRawMessage(event.ID(), events.MessageCreatedEvent, data))
+	return h.publisher.Publish(ctx, events.MessagesChannel, am.NewRawMessage(event.ID(), events.MessageCreatedEvent, data, event.Metadata(), events.MessagesChannel))
 }
 
 func (h domainHandler[T]) onMessageDeleted(ctx context.Context, event ddd.Event) error {
@@ -107,7 +108,7 @@ func (h domainHandler[T]) onMessageDeleted(ctx context.Context, event ddd.Event)
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.MessagesChannel, am.NewRawMessage(event.ID(), events.MessageDeletedEvent, data))
+	return h.publisher.Publish(ctx, events.MessagesChannel, am.NewRawMessage(event.ID(), events.MessageDeletedEvent, data, event.Metadata(), events.MessagesChannel))
 }
 
 func (h domainHandler[T]) onMessageUpdated(ctx context.Context, event ddd.Event) error {
@@ -125,7 +126,7 @@ func (h domainHandler[T]) onMessageUpdated(ctx context.Context, event ddd.Event)
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.MessagesChannel, am.NewRawMessage(event.ID(), events.MessageUpdatedEvent, data))
+	return h.publisher.Publish(ctx, events.MessagesChannel, am.NewRawMessage(event.ID(), events.MessageUpdatedEvent, data, event.Metadata(), events.MessagesChannel))
 }
 
 func (h domainHandler[T]) onMessagesPrivate(ctx context.Context, event ddd.Event) error {
@@ -139,7 +140,7 @@ func (h domainHandler[T]) onMessagesPrivate(ctx context.Context, event ddd.Event
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.MessagesChannel, am.NewRawMessage(event.ID(), events.MessagesPrivateEvent, data))
+	return h.publisher.Publish(ctx, events.MessagesChannel, am.NewRawMessage(event.ID(), events.MessagesPrivateEvent, data, event.Metadata(), events.MessagesChannel))
 }
 
 func (h domainHandler[T]) onMessagesPublish(ctx context.Context, event ddd.Event) error {
@@ -153,7 +154,7 @@ func (h domainHandler[T]) onMessagesPublish(ctx context.Context, event ddd.Event
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.MessagesChannel, am.NewRawMessage(event.ID(), events.MessagesPublishEvent, data))
+	return h.publisher.Publish(ctx, events.MessagesChannel, am.NewRawMessage(event.ID(), events.MessagesPublishEvent, data, event.Metadata(), events.MessagesChannel))
 }
 
 func (h domainHandler[T]) onTranslationCreated(ctx context.Context, event ddd.Event) error {
@@ -171,7 +172,7 @@ func (h domainHandler[T]) onTranslationCreated(ctx context.Context, event ddd.Ev
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.TranslationsChannel, am.NewRawMessage(event.ID(), events.TranslationCreatedEvent, data))
+	return h.publisher.Publish(ctx, events.TranslationsChannel, am.NewRawMessage(event.ID(), events.TranslationCreatedEvent, data, event.Metadata(), events.TranslationsChannel))
 }
 
 func (h domainHandler[T]) onTranslationDeleted(ctx context.Context, event ddd.Event) error {
@@ -184,7 +185,7 @@ func (h domainHandler[T]) onTranslationDeleted(ctx context.Context, event ddd.Ev
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.TranslationsChannel, am.NewRawMessage(event.ID(), events.TranslationDeletedEvent, data))
+	return h.publisher.Publish(ctx, events.TranslationsChannel, am.NewRawMessage(event.ID(), events.TranslationDeletedEvent, data, event.Metadata(), events.TranslationsChannel))
 }
 
 func (h domainHandler[T]) onTranslationUpdated(ctx context.Context, event ddd.Event) error {
@@ -200,7 +201,7 @@ func (h domainHandler[T]) onTranslationUpdated(ctx context.Context, event ddd.Ev
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.TranslationsChannel, am.NewRawMessage(event.ID(), events.TranslationUpdatedEvent, data))
+	return h.publisher.Publish(ctx, events.TranslationsChannel, am.NewRawMessage(event.ID(), events.TranslationUpdatedEvent, data, event.Metadata(), events.TranslationsChannel))
 }
 
 func (h domainHandler[T]) onCommentCreated(ctx context.Context, event ddd.Event) error {
@@ -217,7 +218,7 @@ func (h domainHandler[T]) onCommentCreated(ctx context.Context, event ddd.Event)
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.CommentsChannel, am.NewRawMessage(event.ID(), events.CommentCreatedEvent, data))
+	return h.publisher.Publish(ctx, events.CommentsChannel, am.NewRawMessage(event.ID(), events.CommentCreatedEvent, data, event.Metadata(), events.CommentsChannel))
 }
 
 func (h domainHandler[T]) onCommentUpdated(ctx context.Context, event ddd.Event) error {
@@ -232,7 +233,7 @@ func (h domainHandler[T]) onCommentUpdated(ctx context.Context, event ddd.Event)
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.CommentsChannel, am.NewRawMessage(event.ID(), events.CommentUpdatedEvent, data))
+	return h.publisher.Publish(ctx, events.CommentsChannel, am.NewRawMessage(event.ID(), events.CommentUpdatedEvent, data, event.Metadata(), events.CommentsChannel))
 }
 
 func (h domainHandler[T]) onCommentDeleted(ctx context.Context, event ddd.Event) error {
@@ -245,7 +246,7 @@ func (h domainHandler[T]) onCommentDeleted(ctx context.Context, event ddd.Event)
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.CommentsChannel, am.NewRawMessage(event.ID(), events.CommentDeletedEvent, data))
+	return h.publisher.Publish(ctx, events.CommentsChannel, am.NewRawMessage(event.ID(), events.CommentDeletedEvent, data, event.Metadata(), events.CommentsChannel))
 }
 
 func (h domainHandler[T]) onMessageCommentsDeleted(ctx context.Context, event ddd.Event) error {
@@ -257,5 +258,5 @@ func (h domainHandler[T]) onMessageCommentsDeleted(ctx context.Context, event dd
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.CommentsChannel, am.NewRawMessage(event.ID(), events.MessageCommentsDeletedEvent, data))
+	return h.publisher.Publish(ctx, events.CommentsChannel, am.NewRawMessage(event.ID(), events.MessageCommentsDeletedEvent, data, event.Metadata(), events.CommentsChannel))
 }
