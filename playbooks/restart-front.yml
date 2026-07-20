@@ -1,0 +1,11 @@
+---
+- name: Restart front
+  hosts: hosts
+  become: Yes
+
+  tasks:
+  - name: Restart front
+    ansible.builtin.systemd_service:
+      name: gallery-front
+      state: restarted
+

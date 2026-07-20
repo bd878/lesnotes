@@ -1,0 +1,17 @@
+- name: Update endpoint services config
+  hosts: hosts
+
+  tasks:
+  - name: Write endpoint config
+    ansible.builtin.template:
+      src: templates/{{ item }}.json.j2
+      dest: /srv/gallery/stage/{{ item }}/config/service.json
+    tags:
+      - service
+    loop:
+      - messages
+      - users
+      - threads
+      - billing
+      - search
+

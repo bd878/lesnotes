@@ -1,9 +1,31 @@
 ---
 - name: Remove stale snapshots
-  hosts: hosts
+  hosts: gallery-stage-4
 
   tasks:
+  - name: Find matching patterns
+    ansible.builtin.find:
+      paths: /srv/gallery/stage/data.{{ item }}
+      patterns: '*data*'
+      file_type: directory
+    register: files_to_delete
+    loop:
+      - billing
+      - search
+      - sessions
+      - threads
+      - messages
+      - users
+
+  - name: Debug
+    ansible.builtin.debug:
+      var: item
+    tags: debug
+    loop: "{{ files_to_delete.results }}"
+ 
   - name: Remove snapshots
     ansible.builtin.file:
-      path: /srv/gallery/stage/data.{{ messages_port }}/raft/snapshot/snapshots/
+      path: "{{ item.files[0].path }}"
       state: absent
+    loop: "{{ files_to_delete.results }}"
+    tags: remove

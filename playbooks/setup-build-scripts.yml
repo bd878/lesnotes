@@ -9,6 +9,7 @@
       dest: /srv/misc/scripts/build-{{ item }}-db
     loop:
       - billing
+      - sessions
       - users
       - threads
       - search
@@ -20,7 +21,6 @@
       dest: /srv/misc/scripts/build-{{ item }}
     loop:
       - billing
-      - sessions
       - users
       - threads
       - search

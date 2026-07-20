@@ -1,0 +1,13 @@
+---
+- name: Restart db services after data path renaming
+  become: Yes
+  hosts: hosts
+
+  tasks:
+  - name: Restart
+    ansible.builtin.service:
+      name: "{{ item }}"
+      state: restarted
+      daemon_reload: true
+    loop:
+      - sessions

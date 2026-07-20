@@ -1,0 +1,46 @@
+---
+- name: Rename sessions on sessions-db service
+  hosts: hosts
+  become: Yes
+
+  tasks:
+  - name: Stop sessions.service
+    ansible.builtin.systemd_service:
+      name: sessions
+      state: stopped
+      enabled: false
+
+  - name: Remove service file
+    ansible.builtin.file:
+      path: /etc/systemd/system/sessions.service
+      state: absent
+    notify: Reload systemd daemon
+
+  - name: Remove sessions endpoint config
+    ansible.builtin.file:
+      path: /srv/gallery/stage/sessions/config/service.json
+      state: absent
+
+  - name: Save db config
+    ansible.builtin.template:
+      src: templates/sessions_db.json.j2
+      dest: /srv/gallery/stage/sessions/config/db.json
+
+  - name: Write db services
+    ansible.builtin.template:
+      src: templates/db.service.j2
+      dest: /etc/systemd/system/{{ item }}-db.service
+    notify: Reload systemd daemon
+    loop:
+      - sessions
+
+  - name: Ensure enabled
+    ansible.builtin.systemd_service:
+      name: sessions-db
+      state: started
+      enabled: true
+
+  handlers:
+  - name: Reload systemd daemon
+    ansible.builtin.systemd_service:
+      daemon_reload: true

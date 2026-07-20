@@ -1,0 +1,16 @@
+---
+- name: Restart all endpoint services
+  hosts: hosts
+  become: Yes
+
+  tasks:
+  - name: Restart
+    ansible.builtin.service:
+      state: restarted
+      name: "{{ item }}"
+    loop:
+      - messages
+      - threads
+      - billing
+      - users
+      - search

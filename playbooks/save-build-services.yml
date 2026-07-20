@@ -1,0 +1,10 @@
+---
+- name: Save build-services script
+  hosts: schwarzwald
+
+  tasks:
+  - name: Save script
+    ansible.builtin.template:
+      src: templates/build-services.j2
+      dest: /srv/misc/scripts/build-services
+    tags: save
