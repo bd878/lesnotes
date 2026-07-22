@@ -57,7 +57,8 @@ type MessagesController struct {
 	publisher    ddd.EventPublisher[ddd.Event]
 }
 
-func NewMessagesController(conf MessagesConfig, publisher ddd.EventPublisher[ddd.Event], filesGateway FilesGateway, threads ThreadsGateway, messagesSaved prometheus.Counter) *MessagesController {
+func NewMessagesController(conf MessagesConfig, publisher ddd.EventPublisher[ddd.Event], filesGateway FilesGateway,
+	threads ThreadsGateway, messagesSaved prometheus.Counter) *MessagesController {
 	controller := &MessagesController{
 		conf: conf,
 		filesGateway: filesGateway,

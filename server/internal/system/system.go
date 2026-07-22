@@ -85,9 +85,9 @@ func NewSystem(cfg Config) (*System, error) {
 		return nil, err
 	}
 
-	// if err := s.initOpenTelemetry(); err != nil {
-	// 	return nil, err
-	// }
+	if err := s.initOpenTelemetry(); err != nil {
+		return nil, err
+	}
 
 	if err := s.initRaftListener(); err != nil {
 		return nil, err
