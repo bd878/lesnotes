@@ -6,6 +6,7 @@ import (
 	"sync"
 	"fmt"
 
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/codes"
@@ -45,12 +46,12 @@ func (r *Resolver) Build(t resolver.Target, cc resolver.ClientConn, _ resolver.B
 		r.target,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
-	r.serviceConfig = r.clientConn.ParseServiceConfig(
-		fmt.Sprintf(`{"loadBalancingConfig":[{"%s":{}}]}`, r.name),
-	)
 	if err != nil {
 		return nil, err
 	}
+	r.serviceConfig = r.clientConn.ParseServiceConfig(
+		fmt.Sprintf(`{"loadBalancingConfig":[{"%s":{}}]}`, r.name),
+	)
 	r.ResolveNow(resolver.ResolveNowOptions{})
 	return r, nil
 }
@@ -97,10 +98,18 @@ func (r *Resolver) ResolveNow(options resolver.ResolveNowOptions) {
 
 					r.addrs = addrs
 
+					if err := r.resolverConn.Close(); err != nil {
+						logger.Errorw("failed to close old resolver conn", zap.Error(err))
+					}
+
 					r.resolverConn, err = grpc.NewClient(
 						r.target,
 						grpc.WithTransportCredentials(insecure.NewCredentials()),
 					)
+					if err != nil {
+						logger.Errorw("failed to recreate resolver conn", zap.Error(err))
+						return
+					}
 					r.serviceConfig = r.clientConn.ParseServiceConfig(
 						fmt.Sprintf(`{"loadBalancingConfig":[{"%s":{}}]}`, r.name),
 					)
@@ -113,6 +122,10 @@ func (r *Resolver) ResolveNow(options resolver.ResolveNowOptions) {
 
 			logger.Errorw("failed to get servers", "error", err)
 			r.clientConn.ReportError(err)
+
+			if err := r.resolverConn.Close(); err != nil {
+				logger.Errorw("failed to close old resolver conn", zap.Error(err))
+			}
 
 			return
 		}
@@ -154,7 +167,10 @@ func (r *Resolver) ResolveNow(options resolver.ResolveNowOptions) {
 }
 
 func (r *Resolver) Close() {
-	if err := r.resolverConn.Close(); err != nil {
-		logger.Error(err)
+	if r.resolverConn != nil {
+		logger.Debugln("close resolver conn")
+		if err := r.resolverConn.Close(); err != nil {
+			logger.Errorln(zap.Error(err))
+		}
 	}
 }
