@@ -3,11 +3,13 @@ package grpc
 import (
 	"context"
 
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api/files"
+	"github.com/bd878/gallery/server/internal/rpc"
 	"github.com/bd878/gallery/server/internal/logger"
 )
 
@@ -24,7 +26,9 @@ func New(filesAddr string) *Gateway {
 }
 
 func (g *Gateway) setupConnection() (err error) {
-	conn, err := grpc.NewClient(
+	g.Close()
+
+	conn, err := rpc.NewClient(
 		g.filesAddr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
@@ -35,6 +39,14 @@ func (g *Gateway) setupConnection() (err error) {
 	g.conn = conn
 	g.client = files.NewFilesClient(conn)
 	return nil
+}
+
+func (g *Gateway) Close() {
+	if g.conn != nil {
+		if err := g.conn.Close(); err != nil {
+			logger.Error(zap.Error(err))
+		}
+	}
 }
 
 func (g *Gateway) isConnFailed() bool {

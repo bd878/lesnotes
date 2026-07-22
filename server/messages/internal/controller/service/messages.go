@@ -7,6 +7,7 @@ import (
 	"sync"
 	"strings"
 
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/status"
@@ -72,13 +73,15 @@ func NewMessagesController(conf MessagesConfig, publisher ddd.EventPublisher[ddd
 
 func (s *MessagesController) Close() {
 	if s.conn != nil {
-		s.conn.Close()
+		if err := s.conn.Close(); err != nil {
+			logger.Error(zap.Error(err))
+		}
 	}
 }
 
 func (s *MessagesController) setupConnection() (err error) {
-	// TODO: rewrite all other connections on internal rpc module
-	// to include otelgrpc
+	s.Close()
+
 	conn, err := rpc.NewClient(
 		fmt.Sprintf(
 			"%s:///%s",

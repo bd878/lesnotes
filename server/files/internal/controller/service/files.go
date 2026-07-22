@@ -7,6 +7,7 @@ import (
 	"io"
 	"sync"
 
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
@@ -33,6 +34,7 @@ func New(cfg Config) *Files {
 }
 
 func (f *Files) setupConnection() error {
+	f.Close()
 	conn, err := grpc.NewClient(f.conf.RpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(1024*1024*50), grpc.MaxCallSendMsgSize(1024*1024*50)))
 	if err != nil {
@@ -60,7 +62,9 @@ func (f *Files) isConnFailed() bool {
 
 func (f *Files) Close() {
 	if f.conn != nil {
-		f.conn.Close()
+		if err := f.conn.Close(); err != nil {
+			logger.Error(zap.Error(err))
+		}
 	}
 }
 

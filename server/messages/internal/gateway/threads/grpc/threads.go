@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api/threads"
 	"github.com/bd878/gallery/server/internal/logger"
+	"github.com/bd878/gallery/server/internal/rpc"
 	"github.com/bd878/gallery/server/db/threads/pkg/loadbalance"
 	"github.com/bd878/gallery/server/threads/pkg/model"
 )
@@ -29,7 +31,9 @@ func New(addr string) *Gateway {
 }
 
 func (g *Gateway) setupConnection() error {
-	conn, err := grpc.NewClient(
+	g.Close()
+
+	conn, err := rpc.NewClient(
 		fmt.Sprintf(
 			"%s:///%s",
 			loadbalance.Name,
@@ -45,6 +49,14 @@ func (g *Gateway) setupConnection() error {
 	g.client = threads.NewThreadsClient(conn)
 
 	return nil
+}
+
+func (g *Gateway) Close() {
+	if g.conn != nil {
+		if err := g.conn.Close(); err != nil {
+			logger.Error(zap.Error(err))
+		}
+	}
 }
 
 func (g *Gateway) isConnFailed() bool {

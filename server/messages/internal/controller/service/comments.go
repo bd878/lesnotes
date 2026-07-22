@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/grpc/connectivity"
@@ -13,6 +14,7 @@ import (
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/comments"
 	"github.com/bd878/gallery/server/internal/ddd"
+	"github.com/bd878/gallery/server/internal/rpc"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/db/messages/pkg/loadbalance"
 	"github.com/bd878/gallery/server/messages/pkg/model"
@@ -44,12 +46,16 @@ func NewCommentsController(conf CommentsConfig, publisher ddd.EventPublisher[ddd
 
 func (s *CommentsController) Close() {
 	if s.conn != nil {
-		s.conn.Close()
+		if err := s.conn.Close(); err != nil {
+			logger.Error(zap.Error(err))
+		}
 	}
 }
 
 func (s *CommentsController) setupConnection() (err error) {
-	conn, err := grpc.NewClient(
+	s.Close()
+
+	conn, err := rpc.NewClient(
 		fmt.Sprintf(
 			"%s:///%s",
 			loadbalance.Name,

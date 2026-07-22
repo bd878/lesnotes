@@ -6,6 +6,7 @@ import (
 	"context"
 	"golang.org/x/crypto/bcrypt"
 
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/grpc/connectivity"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/users"
+	"github.com/bd878/gallery/server/internal/rpc"
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/users/config"
 	"github.com/bd878/gallery/server/internal/logger"
@@ -54,12 +56,16 @@ func New(conf config.Config, sessions SessionsGateway, publisher ddd.EventPublis
 
 func (s *Controller) Close() {
 	if s.conn != nil {
-		s.conn.Close()
+		if err := s.conn.Close(); err != nil {
+			logger.Error(zap.Error(err))
+		}
 	}
 }
 
 func (s *Controller) setupConnection() (err error) {
-	conn, err := grpc.NewClient(
+	s.Close()
+
+	conn, err := rpc.NewClient(
 		fmt.Sprintf(
 			"%s:///%s",
 			loadbalance.Name,

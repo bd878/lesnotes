@@ -10,6 +10,7 @@ type Config struct {
 	RaftLogLevel           string          `json:"raft_log_level"`
 	LogLevel               string          `json:"log_level"`
 	NatsAddr               string          `json:"nats_addr"`
+	NatsStream             string          `json:"nats_stream"`
 
 	RaftBootstrap          bool            `json:"raft_bootstrap"`
 	DataPath               string          `json:"data_path"`

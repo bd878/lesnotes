@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"google.golang.org/protobuf/proto"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
@@ -13,6 +14,7 @@ import (
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/threads"
 	"github.com/bd878/gallery/server/internal/ddd"
+	"github.com/bd878/gallery/server/internal/rpc"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/threads/internal/domain"
 	"github.com/bd878/gallery/server/db/threads/pkg/machine"
@@ -41,12 +43,16 @@ func New(conf config.Config, publisher ddd.EventPublisher[ddd.Event]) *Controlle
 
 func (s *Controller) Close() {
 	if s.conn != nil {
-		s.conn.Close()
+		if err := s.conn.Close(); err != nil {
+			logger.Error(zap.Error(err))
+		}
 	}
 }
 
 func (s *Controller) setupConnection() (err error) {
-	conn, err := grpc.NewClient(
+	s.Close()
+
+	conn, err := rpc.NewClient(
 		fmt.Sprintf(
 			"%s:///%s",
 			loadbalance.Name,
