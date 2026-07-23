@@ -51,7 +51,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	svc.ServeMux().Handle("PUT /threads/v1/update", middleware.Build(handler.UpdateThread))
 
 	middleware.NoAuth()
-	svc.ServeMux().Handle("/threads/v1/status", middleware.Build(handler.GetStatus))
+	svc.ServeMux().Handle("/liveness", middleware.Build(handler.GetStatus))
 
 	middleware.WithAuth(httpmiddleware.TokenAuthBuilder(svc.Logger(), usersGateway, sessionsGateway, usermodel.PublicUserID))
 	svc.ServeMux().Handle("/threads/v2/read", middleware.Build(handler.ReadThreadJsonAPI))

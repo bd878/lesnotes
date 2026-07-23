@@ -5,6 +5,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/bd878/gallery/server/messages/config"
 	"github.com/bd878/gallery/server/internal/system"
@@ -68,7 +69,8 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	svc.ServeMux().Handle("/messages/v1/delete", middleware.Build(handler.DeleteMessages))
 
 	middleware.NoAuth()
-	svc.ServeMux().Handle("/messages/v1/status", middleware.Build(handler.GetStatus))
+	svc.ServeMux().Handle("GET /liveness", middleware.Build(handler.GetStatus))
+	svc.ServeMux().Handle("GET /metrics", promhttp.Handler())
 
 	middleware.WithAuth(httpmiddleware.TokenAuthBuilder(svc.Logger(), usersGateway, sessionsGateway, usermodel.PublicUserID))
 	svc.ServeMux().Handle("/messages/v2/send", middleware.Build(handler.SendMessageJsonAPI))

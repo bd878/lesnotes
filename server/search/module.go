@@ -40,7 +40,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	// TODO: search translations
 
 	middleware.NoAuth()
-	svc.ServeMux().Handle("/search/v1/status", middleware.Build(handler.GetStatus))
+	svc.ServeMux().Handle("/liveness", middleware.Build(handler.GetStatus))
 
 	middleware.WithAuth(httpmiddleware.TokenAuthBuilder(svc.Logger(), usersGateway, sessionsGateway, usermodel.PublicUserID))
 	svc.ServeMux().Handle("/search/v2/messages", middleware.Build(handler.SearchMessagesJsonAPI))

@@ -40,7 +40,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	svc.ServeMux().Handle("GET   /billing/v1/payments", middleware.Build(handler.GetPayment))
 
 	middleware.NoAuth()
-	svc.ServeMux().Handle("GET   /billing/v1/status", middleware.Build(handler.GetStatus))
+	svc.ServeMux().Handle("GET   /liveness", middleware.Build(handler.GetStatus))
 
 	middleware.WithAuth(httpmiddleware.TokenAuthBuilder(svc.Logger(), usersGateway, sessionsGateway, usermodel.PublicUserID))
 	svc.ServeMux().Handle("POST  /billing/v2/invoices", middleware.Build(handler.CreateInvoiceJsonAPI))

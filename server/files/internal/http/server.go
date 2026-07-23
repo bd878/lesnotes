@@ -50,7 +50,7 @@ func New(cfg Config) *Server {
 	mux.Handle("POST /files/v1/upload",          middleware.Build(handler.UploadFile))
 
 	middleware.NoAuth()
-	mux.Handle("GET /files/v1/status",           middleware.Build(handler.GetStatus))
+	mux.Handle("GET /liveness",           middleware.Build(handler.GetStatus))
 
 	middleware.NoAuth().WithAuth(httpmiddleware.TokenAuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
 	mux.Handle("POST /files/v2/read_meta",       middleware.Build(handler.ReadFileMetaJsonAPI))

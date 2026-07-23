@@ -57,7 +57,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	svc.ServeMux().Handle("/users/v1/signup", middleware.Build(handler.Signup))
 	svc.ServeMux().Handle("/users/v1/login",  middleware.Build(handler.Login))
 	svc.ServeMux().Handle("/users/v1/auth",   middleware.Build(handler.Auth))
-	svc.ServeMux().Handle("/users/v1/status", middleware.Build(handler.Status))
+	svc.ServeMux().Handle("/liveness", middleware.Build(handler.Status))
 	svc.ServeMux().Handle("/users/v2/signup", middleware.Build(handler.SignupJsonAPI))
 	svc.ServeMux().Handle("/users/v2/auth",   middleware.Build(handler.AuthJsonAPI))
 	svc.ServeMux().Handle("/users/v2/login",  middleware.Build(handler.LoginJsonAPI))
