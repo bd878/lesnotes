@@ -23,8 +23,8 @@ package Files as files {
 	component grpc as files_grpc
 	database PostgreSQL as files_db
 
-	files_http -- "192.168.10.5:8082"
-	files_grpc -- "192.168.10.5:8086"
+	files_http -- "192.168.10.50:8082"
+	files_grpc -- "192.168.10.50:8086"
 
 	files_grpc - files_db 
 	files_http - files_grpc
@@ -49,7 +49,7 @@ package Hosts as hosts {
 	"gallery-prod" -- "192.168.10.10"
 	"gallery-prod-3" -- "192.168.10.30"
 	"gallery-prod-4" -- "192.168.10.40"
-	"gallery-prod-files" -- "192.168.10.5"
+	"gallery-prod-files" -- "192.168.10.50"
 }
 
 package Messages as messages {
