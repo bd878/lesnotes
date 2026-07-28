@@ -1,0 +1,68 @@
+extensions:
+  health_check:
+  pprof:
+    endpoint: 0.0.0.0:1777
+  zpages:
+    endpoint: 0.0.0.0:55679
+  
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+    
+  # Collect own metrics
+  prometheus:
+    config:
+      scrape_configs:
+      - job_name: 'messages'
+        scrape_interval: 10s
+        static_configs:
+          - targets: {{ messages_endpoints }}
+        metrics_path: '/metrics'
+ 
+processors:
+  batch:
+
+exporters:
+  prometheus:
+    endpoint: "{{ prometheus_endpoint }}"
+  debug:
+    verbosity: normal
+      
+service:
+  telemetry:
+    metrics:
+      readers:
+        - pull:
+            exporter:
+              prometheus:
+                host: '127.0.0.1'
+                port: 8888
+                without_scope_info: true
+                without_type_suffix: true
+                without_units: true
+                with_resource_constant_labels:
+                  included: [ ]
+
+  pipelines:
+
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug]
+
+    metrics:
+      receivers: [otlp, prometheus]
+      processors: [batch]
+      exporters: [debug, prometheus]
+
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug]
+
+  extensions: [health_check, pprof, zpages]
+

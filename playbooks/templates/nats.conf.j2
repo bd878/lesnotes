@@ -1,1 +1,18 @@
 listen: {{ nats }}
+http: localhost:8222
+debug: true
+trace: true
+logtime: true
+log_file: "/tmp/nats.log"
+
+accounts {
+        $SYS {  
+                users = [
+                        { user: "snd", password: "{{ jetstream_pass }}" }
+                ]
+        }
+}
+
+jetstream {
+        store_dir: "/home/snd/jetstream"
+}

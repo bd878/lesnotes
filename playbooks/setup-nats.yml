@@ -31,3 +31,16 @@
       daemon_reload: true
       state: started
       enabled: true
+
+  - name: Install nats cli rpm
+    ansible.builtin.get_url:
+      url: https://github.com/nats-io/natscli/releases/download/v0.4.0/nats-0.4.0-amd64.rpm
+      dest: /home/snd/nats.rpm
+    tags:
+      - cli
+
+  - name: Install rpm
+    ansible.builtin.dnf:
+      name: /home/snd/nats.rpm
+      state: present
+      disable_gpg_check: yes

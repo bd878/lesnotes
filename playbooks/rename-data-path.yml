@@ -1,33 +1,33 @@
 ---
 - name: Rename data paths
-  hosts: gallery-stage
+  hosts: gallery-prod
 
   tasks:
   - name: Update database paths
     ansible.builtin.copy:
-      src: /srv/gallery/stage/data.{{ item.port }}
-      dest: /srv/gallery/stage/data.{{ item.name }}
+      src: /srv/gallery/prod/data.{{ item.port }}/raft
+      dest: /srv/gallery/prod/data.{{ item.name }}
       mode: preserve
       remote_src: true
     loop:
-      - { name: 'sessions', port: '9134' }
-      - { name: 'messages', port: '9104' }
-      - { name: 'threads', port: '9144' }
-      - { name: 'users', port: '9124' }
-      - { name: 'billing', port: '9154' }
-      - { name: 'search', port: '9114' }
+      - { name: 'sessions', port: '9031' }
+      - { name: 'messages', port: '9001' }
+      - { name: 'threads', port: '9041' }
+      - { name: 'users', port: '9021' }
+      - { name: 'billing', port: '9051' }
+      - { name: 'search', port: '9011' }
 
   - name: Remove stale data paths
     ansible.builtin.file:
       state: absent
-      path: /srv/gallery/stage/data.{{ item }}
+      path: /srv/gallery/prod/data.{{ item }}
     tags:
       - remove
     loop:
-      - 9131
-      - 9101
-      - 9141
-      - 9121
-      - 9151
-      - 9111
+      - 9031
+      - 9001
+      - 9041
+      - 9021
+      - 9051
+      - 9011
     

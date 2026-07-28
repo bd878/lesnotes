@@ -1,0 +1,12 @@
+---
+- name: Restart single endpoint
+  hosts: hosts
+  become: Yes
+
+  tasks:
+  - name: Restart
+    ansible.builtin.service:
+      state: restarted
+      name: "{{ item }}"
+    loop:
+      - messages

@@ -1,0 +1,10 @@
+---
+files_addr: "192.168.10.50"
+files_port: "8086"
+files_http_port: "8082"
+
+otel_exporter: "192.168.10.11:4317"
+prometheus_endpoint: "192.168.10.11:9417"
+nats: "192.168.10.11:4222"
+domain: "lesnotes.space"
+http_addr: "192.168.10.30"

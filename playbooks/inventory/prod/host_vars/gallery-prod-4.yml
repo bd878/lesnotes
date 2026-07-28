@@ -1,0 +1,42 @@
+---
+addr: "192.168.10.40"
+join_addr: "192.168.10.10" 
+front_port: "8080"
+
+messages_port: "9004"
+messages_serf_port: "8004"
+messages_join_port: "8001"
+messages_http_port: "7004"
+messages_name: "messages-4"
+
+users_port: "9024"
+users_serf_port: "8024"
+users_join_port: "8021"
+users_http_port: "7024"
+users_name: "users-4"
+
+sessions_port: "9034"
+sessions_serf_port: "8034"
+sessions_join_port: "8031"
+sessions_name: "sessions-4"
+
+threads_port: "9044"
+threads_serf_port: "8044"
+threads_join_port: "8041"
+threads_http_port: "7044"
+threads_name: "threads-4"
+
+search_port: "9014"
+search_serf_port: "8014"
+search_join_port: "8011"
+search_http_port: "7014"
+search_name: "search-4"
+
+billing_port: "9054"
+billing_serf_port: "8054"
+billing_join_port: "8051"
+billing_http_port: "7054"
+billing_name: "billing-4"
+
+raft_bootstrap: false
+log_level: "debug"

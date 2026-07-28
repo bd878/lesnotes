@@ -1,5 +1,5 @@
 - name: Disable stale package repositories from machines
-  hosts: hosts
+  hosts: gallery-prod-files
   become: yes
   vars_files:
     - /home/snd/ansible_quickstart/vaulted-vars.yaml
