@@ -106,6 +106,10 @@ func Warnln(args ...any) {
 	Default().Warnln(args...)
 }
 
+func Debug(args ...any) {
+	Default().Debug(args...)
+}
+
 func Debugln(args ...any) {
 	Default().Debugln(args...)
 }

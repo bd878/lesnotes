@@ -3,8 +3,11 @@ package machine
 import (
 	"context"
 
+	"go.uber.org/zap"
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/encoding/prototext"
+
 	"github.com/bd878/gallery/server/api/users"
 	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/db/users/pkg/machine"
@@ -40,6 +43,8 @@ func New(usersRepo UsersRepository, usersDumper UsersDumper, log *logger.Logger)
 }
 
 func (f *Machine) Apply(record *raft.Log) interface{} {
+	logger.Debug("record", zap.Uint64("index", record.Index),
+		zap.Uint64("term", record.Term), zap.String("type", record.Type.String()), zap.Time("appended_at", record.AppendedAt))
 	buf := record.Data
 	reqType := machine.RequestType(buf[0])
 	switch reqType {
@@ -61,26 +66,74 @@ func (f *Machine) applyAppend(raw []byte) interface{} {
 	var cmd users.AppendCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.usersRepo.Save(context.TODO(), cmd.Id, cmd.Login, cmd.HashedPassword, cmd.Metadata, cmd.CreatedAt, cmd.UpdatedAt)
+	bytes, err := prototext.Marshal(&cmd)
+	if err != nil {
+		logger.Debugln(zap.Error(err))
+	} else {
+		logger.Debug(zap.String("append", string(bytes)))
+	}
+
+	err = f.usersRepo.Save(context.TODO(), cmd.Id, cmd.Login, cmd.HashedPassword, cmd.Metadata, cmd.CreatedAt, cmd.UpdatedAt)
+	if err != nil {
+		logger.Debugln(zap.Error(err))
+	}
+
+	return err
 }
 
 func (f *Machine) applyUpdate(raw []byte) interface{} {
 	var cmd users.UpdateCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.usersRepo.Update(context.TODO(), cmd.Id, cmd.Login, cmd.Metadata, cmd.UpdatedAt)
+	bytes, err := prototext.Marshal(&cmd)
+	if err != nil {
+		logger.Debugln(zap.Error(err))
+	} else {
+		logger.Debug(zap.String("update", string(bytes)))
+	}
+
+	err = f.usersRepo.Update(context.TODO(), cmd.Id, cmd.Login, cmd.Metadata, cmd.UpdatedAt)
+	if err != nil {
+		logger.Debugln(zap.Error(err))
+	}
+
+	return err
 }
 
 func (f *Machine) applyDelete(raw []byte) interface{} {
 	var cmd users.DeleteCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.usersRepo.Delete(context.TODO(), cmd.Id)
+	bytes, err := prototext.Marshal(&cmd)
+	if err != nil {
+		logger.Debugln(zap.Error(err))
+	} else {
+		logger.Debug(zap.String("delete", string(bytes)))
+	}
+
+	err = f.usersRepo.Delete(context.TODO(), cmd.Id)
+	if err != nil {
+		logger.Debugln(zap.Error(err))
+	}
+
+	return err
 }
 
 func (f *Machine) applyMakePremium(raw []byte) interface{} {
 	var cmd users.MakePremiumCommand
 	proto.Unmarshal(raw, &cmd)
 
-	return f.usersRepo.MakePremium(context.TODO(), cmd.Id, cmd.InvoiceId, cmd.CreatedAt, cmd.ExpiresAt)
+	bytes, err := prototext.Marshal(&cmd)
+	if err != nil {
+		logger.Debugln(zap.Error(err))
+	} else {
+		logger.Debug(zap.String("make premium", string(bytes)))
+	}
+
+	err = f.usersRepo.MakePremium(context.TODO(), cmd.Id, cmd.InvoiceId, cmd.CreatedAt, cmd.ExpiresAt)
+	if err != nil {
+		logger.Debugln(zap.Error(err))
+	}
+
+	return err
 }
