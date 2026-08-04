@@ -4,8 +4,9 @@ import (
 	"context"
 	"google.golang.org/protobuf/proto"
 
+	"log/slog"
+
 	"github.com/bd878/gallery/server/internal/am"
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/api/messages"
 	messageevents "github.com/bd878/gallery/server/messages/pkg/events"
 )
@@ -21,16 +22,14 @@ type ThreadsController interface {
 }
 
 type integrationHandlers struct {
-	log        *logger.Logger
 	messages   MessagesController
 	threads    ThreadsController
 }
 
 var _ am.RawMessageHandler = (*integrationHandlers)(nil)
 
-func NewIntegrationEventHandlers(messages MessagesController, threads ThreadsController, log *logger.Logger) am.RawMessageHandler {
+func NewIntegrationEventHandlers(messages MessagesController, threads ThreadsController) am.RawMessageHandler {
 	return integrationHandlers{
-		log:         log,
 		messages:    messages,
 		threads:     threads,
 	}
@@ -46,7 +45,7 @@ func RegisterIntegrationEventHandlers(subscriber am.RawMessageSubscriber, handle
 }
 
 func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingMessage) error {
-	h.log.Debugw("handle message", "name", msg.MessageName(), "subject", msg.Subject())
+	slog.Debug("handle message", slog.String("name", msg.MessageName()), slog.String("subject", msg.Subject()))
 
 	switch msg.MessageName() {
 	case messageevents.MessagesPublishEvent:

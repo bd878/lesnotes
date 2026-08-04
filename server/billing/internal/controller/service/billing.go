@@ -3,13 +3,13 @@ package service
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/proto"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/billing"
@@ -17,7 +17,6 @@ import (
 	"github.com/bd878/gallery/server/db/billing/pkg/machine"
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/rpc"
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/billing/pkg/model"
 	"github.com/bd878/gallery/server/billing/internal/domain"
 )
@@ -44,7 +43,7 @@ func New(conf Config, publisher ddd.EventPublisher[ddd.Event]) *Controller {
 func (s *Controller) Close() {
 	if s.conn != nil {
 		if err := s.conn.Close(); err != nil {
-			logger.Error(zap.Error(err))
+			slog.Error("failed to close billing conn", slog.String("error", err.Error()))
 		}
 	}
 }
@@ -77,7 +76,7 @@ func (s *Controller) isConnFailed() bool {
 	if state == connectivity.Shutdown ||
 		state == connectivity.TransientFailure ||
 		state == connectivity.Connecting {
-		logger.Debugw("billing conn failed", "state", state.String())
+		slog.Debug("billing conn failed", slog.String("state", state.String()))
 		return true
 	}
 	return false
@@ -90,7 +89,7 @@ func (s *Controller) CreateInvoice(ctx context.Context, id string, userID int64,
 		}
 	}
 
-	logger.Debugw("create invoice", "id", id, "user_id", userID, "total", total, "metadata", metadata, "cart", cart)
+	slog.Debug("create invoice", slog.String("id", id), slog.Int64("user_id", userID), slog.Int64("total", total), slog.Any("metadata", metadata), slog.Any("cart", cart))
 
 	cc, err := model.CartToProto(cart)
 	if err != nil {
@@ -132,7 +131,7 @@ func (s *Controller) StartPayment(ctx context.Context, id, userID int64, invoice
 		}
 	}
 
-	logger.Debugw("start payment", "id", id, "user_id", userID, "invoice_id", invoiceID, "currency", currency, "total", total, "metadata", metadata)
+	slog.Debug("start payment", slog.Int64("id", id), slog.Int64("user_id", userID), slog.String("invoice_id", invoiceID), slog.String("currency", currency), slog.Int64("total", total), slog.Any("metadata", metadata))
 
 	cmd, err := proto.Marshal(&billing.AppendPaymentCommand{
 		Id:            id,
@@ -165,7 +164,7 @@ func (s *Controller) ProceedPayment(ctx context.Context, id, userID int64) (err 
 		}
 	}
 
-	logger.Debugw("proceed payment", "id", id, "user_id", userID)
+	slog.Debug("proceed payment", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 
 	payment, err := s.GetPayment(ctx, id, userID)
@@ -192,7 +191,7 @@ func (s *Controller) ProceedPayment(ctx context.Context, id, userID int64) (err 
 		return err
 	}
 
-	logger.Debugw("get invoice", "payment_id", id, "invoice_id", invoice.Id, "user_id", userID)
+	slog.Debug("get invoice", slog.Int64("payment_id", id), slog.String("invoice_id", invoice.Id), slog.Int64("user_id", userID))
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
@@ -257,7 +256,7 @@ func (s *Controller) CancelPayment(ctx context.Context, id, userID int64) (err e
 		}
 	}
 
-	logger.Debugw("cancel payment", "id", id, "user_id", userID)
+	slog.Debug("cancel payment", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&billing.CancelPaymentCommand{
 		Id:            id,
@@ -284,7 +283,7 @@ func (s *Controller) RefundPayment(ctx context.Context, id, userID int64) (err e
 		}
 	}
 
-	logger.Debugw("refund payment", "id", id, "user_id", userID)
+	slog.Debug("refund payment", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&billing.RefundPaymentCommand{
 		Id:            id,
@@ -311,7 +310,7 @@ func (s *Controller) GetInvoice(ctx context.Context, id string, userID int64) (i
 		}
 	}
 
-	logger.Debugw("get invoice", "id", id, "user_id", userID)
+	slog.Debug("get invoice", slog.String("id", id), slog.Int64("user_id", userID))
 
 	resp, err := s.client.GetInvoice(ctx, &billing.GetInvoiceRequest{
 		Id:        id,
@@ -336,7 +335,7 @@ func (s *Controller) GetPayment(ctx context.Context, id, userID int64) (payment 
 		}
 	}
 
-	logger.Debugw("get payment", "id", id, "user_id", userID)
+	slog.Debug("get payment", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	resp, err := s.client.GetPayment(ctx, &billing.GetPaymentRequest{
 		Id:       id,

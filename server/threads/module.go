@@ -41,7 +41,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 		am.NewMessageSubscriber(
 			js,
 		),
-		stream.NewIntegrationEventHandlers(ctrl, ctrl, svc.Logger()),
+		stream.NewIntegrationEventHandlers(ctrl, ctrl),
 	)
 
 	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(svc.Logger(), usersGateway, sessionsGateway, usermodel.PublicUserID))

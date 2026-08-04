@@ -4,10 +4,11 @@ import (
 	"context"
 	"google.golang.org/protobuf/proto"
 
+	"log/slog"
+
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/am"
 	"github.com/bd878/gallery/server/api/billing"
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/billing/internal/domain"
 	"github.com/bd878/gallery/server/billing/pkg/events"
 )
@@ -29,7 +30,7 @@ func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.Event], hand
 }
 
 func (h domainHandler[T]) HandleEvent(ctx context.Context, event T) error {
-	logger.Debugw("handle event", "name", event.EventName(), "id", event.ID(), "payload", event.Payload())
+	slog.Debug("handle event", slog.String("name", event.EventName()), slog.Any("id", event.ID()), slog.Any("payload", event.Payload()))
 
 	switch event.EventName() {
 	case domain.InvoicePayedEvent:

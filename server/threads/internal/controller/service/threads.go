@@ -3,19 +3,18 @@ package service
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
-	"google.golang.org/protobuf/proto"
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/threads"
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/rpc"
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/threads/internal/domain"
 	"github.com/bd878/gallery/server/db/threads/pkg/machine"
 	"github.com/bd878/gallery/server/db/threads/pkg/loadbalance"
@@ -44,7 +43,7 @@ func New(conf config.Config, publisher ddd.EventPublisher[ddd.Event]) *Controlle
 func (s *Controller) Close() {
 	if s.conn != nil {
 		if err := s.conn.Close(); err != nil {
-			logger.Error(zap.Error(err))
+			slog.Error("failed to close threads conn", slog.String("error", err.Error()))
 		}
 	}
 }
@@ -77,7 +76,7 @@ func (s *Controller) isConnFailed() bool {
 	if state == connectivity.Shutdown ||
 		state == connectivity.TransientFailure ||
 		state == connectivity.Connecting {
-		logger.Debugw("threads conn failed", "state", state.String())
+		slog.Debug("threads conn failed", slog.String("state", state.String()))
 		return true
 	}
 	return false
@@ -90,7 +89,7 @@ func (s *Controller) ReadThread(ctx context.Context, id, userID int64, name stri
 		}
 	}
 
-	logger.Debugw("read thread", "id", id, "user_id", userID, "name", name)
+	slog.Debug("read thread", slog.Int64("id", id), slog.Int64("user_id", userID), slog.String("name", name))
 
 	resp, err := s.client.Read(ctx, &threads.ReadRequest{Id: id, UserId: userID, Name: name})
 	if err != nil {
@@ -109,7 +108,7 @@ func (s *Controller) ListThreads(ctx context.Context, userID, parentID int64, li
 		}
 	}
 
-	logger.Debugw("list threads", "user_id", userID, "parent_id", parentID, "limit", limit, "offset", offset, "asc", asc)
+	slog.Debug("list threads", slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("asc", asc))
 
 	resp, err := s.client.List(ctx, &threads.ListRequest{
 		UserId:   userID,
@@ -132,7 +131,7 @@ func (s *Controller) ListMessages(ctx context.Context, userID, parentID int64, l
 		}
 	}
 
-	logger.Debugw("list messages", "user_id", userID, "parent_id", parentID, "limit", limit, "offset", offset, "asc", asc, "private_message", privateMessage)
+	slog.Debug("list messages", slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("asc", asc), slog.Any("private_message", privateMessage))
 
 	resp, err := s.client.ListMessages(ctx, &threads.ListMessagesRequest{
 		UserId:   userID,
@@ -156,7 +155,7 @@ func (s *Controller) ResolveThread(ctx context.Context, id, userID int64) (path 
 		}
 	}
 
-	logger.Debugw("resolve thread", "id", id, "user_id", userID)
+	slog.Debug("resolve thread", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	resp, err := s.client.Resolve(ctx, &threads.ResolveRequest{Id: id, UserId: userID})
 	if err != nil {
@@ -175,7 +174,7 @@ func (s *Controller) PublishThread(ctx context.Context, id, userID int64) (err e
 		}
 	}
 
-	logger.Debugw("publish thread", "id", id, "user_id", userID)
+	slog.Debug("publish thread", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
@@ -212,7 +211,7 @@ func (s *Controller) PrivateThread(ctx context.Context, id, userID int64) (err e
 		}
 	}
 
-	logger.Debugw("private thread", "id", id, "user_id", userID)
+	slog.Debug("private thread", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
@@ -250,8 +249,7 @@ func (s *Controller) CreateThread(ctx context.Context, id, userID, parentID int6
 		}
 	}
 
-	logger.Debugw("create thread", "id", id, "user_id", userID, "parent_id", parentID,
-		"name", name, "description", description, "title", title, "private", private)
+	slog.Debug("create thread", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.String("name", name), slog.String("description", description), slog.String("title", title), slog.Bool("private", private))
 
 
 	createdAt := time.Now().UTC().Format(time.RFC3339)
@@ -296,7 +294,7 @@ func (s *Controller) UpdateThread(ctx context.Context, id, userID int64, name, d
 		}
 	}
 
-	logger.Debugw("create thread", "id", id, "user_id", userID, "name", name, "description", description, "title", title)
+	slog.Debug("update thread", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Any("name", name), slog.Any("description", description), slog.Any("title", title))
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
@@ -337,7 +335,7 @@ func (s *Controller) ReorderThread(ctx context.Context, id, userID, parentID, ne
 		}
 	}
 
-	logger.Debugw("reorder thread", "id", id, "user_id", userID, "parent_id", parentID, "next_id", nextID, "prev_id", prevID)
+	slog.Debug("reorder thread", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.Int64("next_id", nextID), slog.Int64("prev_id", prevID))
 
 	cmd, err := proto.Marshal(&threads.ReorderCommand{
 		Id:            id,
@@ -380,7 +378,7 @@ func (s *Controller) PrivateMessages(ctx context.Context, ids []int64, userID in
 		}
 	}
 
-	logger.Debugw("private thread messages", "ids", ids, "user_id", userID)
+	slog.Debug("private thread messages", slog.Any("ids", ids), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&threads.PrivateMessagesCommand{
 		Ids:         ids,
@@ -409,7 +407,7 @@ func (s *Controller) PublishMessages(ctx context.Context, ids []int64, userID in
 		}
 	}
 
-	logger.Debugw("publish thread messages", "ids", ids, "user_id", userID)
+	slog.Debug("publish thread messages", slog.Any("ids", ids), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&threads.PublishMessagesCommand{
 		Ids:       ids,
@@ -438,7 +436,7 @@ func (s *Controller) DeleteThread(ctx context.Context, id, userID int64) (err er
 		}
 	}
 
-	logger.Debugw("delete thread", "id", id, "user_id", userID)
+	slog.Debug("delete thread", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&threads.DeleteCommand{
 		Id:       id,

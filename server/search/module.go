@@ -30,7 +30,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 		am.NewMessageSubscriber(
 			js,
 		),
-		stream.NewIntegrationEventHandlers(ctrl, ctrl, ctrl, ctrl, svc.Logger()))
+		stream.NewIntegrationEventHandlers(ctrl, ctrl, ctrl, ctrl))
 
 	handler := httphandler.New(ctrl)
 

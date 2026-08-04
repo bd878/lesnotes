@@ -4,16 +4,16 @@ import (
 	"context"
 	"fmt"
 
-	"go.uber.org/zap"
+	"log/slog"
+
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/proto"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/search"
 	"github.com/bd878/gallery/server/internal/rpc"
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/db/search/pkg/loadbalance"
 	"github.com/bd878/gallery/server/search/pkg/model"
 	"github.com/bd878/gallery/server/db/search/pkg/machine"
@@ -40,7 +40,7 @@ func New(conf Config) *Controller {
 func (s *Controller) Close() {
 	if s.conn != nil {
 		if err := s.conn.Close(); err != nil {
-			logger.Error(zap.Error(err))
+			slog.Error("failed to close search conn", slog.String("error", err.Error()))
 		}
 	}
 }
@@ -73,7 +73,7 @@ func (s *Controller) isConnFailed() bool {
 	if state == connectivity.Shutdown ||
 		state == connectivity.TransientFailure ||
 		state == connectivity.Connecting {
-		logger.Debugw("search conn failed", "state", state.String())
+		slog.Debug("search conn failed", slog.String("state", state.String()))
 		return true
 	}
 	return false
@@ -86,7 +86,7 @@ func (s *Controller) SaveMessage(ctx context.Context, id, userID int64, name, ti
 		}
 	}
 
-	logger.Debugw("save search message", "id", id, "user_id", userID, "name", name, "title", title, "text", text, "private", private)
+	slog.Debug("save search message", slog.Int64("id", id), slog.Int64("user_id", userID), slog.String("name", name), slog.String("title", title), slog.String("text", text), slog.Bool("private", private))
 
 	cmd, err := proto.Marshal(&search.AppendMessageCommand{
 		Id:          id,
@@ -118,7 +118,7 @@ func (s *Controller) DeleteMessage(ctx context.Context, id, userID int64) (err e
 		}
 	}
 
-	logger.Debugw("delete search message", "id", id, "user_id", userID)
+	slog.Debug("delete search message", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&search.DeleteMessageCommand{
 		UserId:   userID,
@@ -144,7 +144,7 @@ func (s *Controller) UpdateMessage(ctx context.Context, id, userID int64, name, 
 		}
 	}
 
-	logger.Debugw("update search message", "id", id, "user_id", userID, "name", name, "title", title, "text", text)
+	slog.Debug("update search message", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Any("name", name), slog.Any("title", title), slog.Any("text", text))
 
 	cmd, err := proto.Marshal(&search.UpdateMessageCommand{
 		Id:         id,
@@ -174,7 +174,7 @@ func (s *Controller) PublishMessages(ctx context.Context, ids []int64, userID in
 		}
 	}
 
-	logger.Debugw("publish search messages", "ids", ids, "user_id", userID, "updated_at", updatedAt)
+	slog.Debug("publish search messages", slog.Any("ids", ids), slog.Int64("user_id", userID), slog.String("updated_at", updatedAt))
 
 	cmd, err := proto.Marshal(&search.PublishMessagesCommand{
 		Ids:       ids,
@@ -201,7 +201,7 @@ func (s *Controller) PrivateMessages(ctx context.Context, ids []int64, userID in
 		}
 	}
 
-	logger.Debugw("private search messages", "ids", ids, "user_id", userID, "updated_at", updatedAt)
+	slog.Debug("private search messages", slog.Any("ids", ids), slog.Int64("user_id", userID), slog.String("updated_at", updatedAt))
 
 	cmd, err := proto.Marshal(&search.PrivateMessagesCommand{
 		Ids:         ids,
@@ -228,7 +228,7 @@ func (s *Controller) SaveThread(ctx context.Context, id, userID, parentID int64,
 		}
 	}
 
-	logger.Debugw("save thread", "id", id, "user_id", userID, "parent_id", parentID, "name", name, "description", description, "private", private)
+	slog.Debug("save thread", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.String("name", name), slog.String("description", description), slog.Bool("private", private))
 
 	cmd, err := proto.Marshal(&search.AppendThreadCommand{
 		Id:          id,
@@ -260,7 +260,7 @@ func (s *Controller) DeleteThread(ctx context.Context, id, userID int64) (err er
 		}
 	}
 
-	logger.Debugw("delete thread", "id", id, "user_id", userID)
+	slog.Debug("delete thread", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&search.DeleteThreadCommand{
 		UserId:   userID,
@@ -286,7 +286,7 @@ func (s *Controller) UpdateThread(ctx context.Context, id, userID int64, name, d
 		}
 	}
 
-	logger.Debugw("update thread", "id", id, "user_id", userID, "name", name, "description", description)
+	slog.Debug("update thread", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Any("name", name), slog.Any("description", description))
 
 	cmd, err := proto.Marshal(&search.UpdateThreadCommand{
 		Id:          id,
@@ -315,7 +315,7 @@ func (s *Controller) ChangeThreadParent(ctx context.Context, id, userID, parentI
 		}
 	}
 
-	logger.Debugw("change thread parent", "id", id, "user_id", userID, "parent_id", parentID)
+	slog.Debug("change thread parent", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Int64("parent_id", parentID))
 
 	cmd, err := proto.Marshal(&search.ChangeThreadParentCommand{
 		Id:          id,
@@ -342,7 +342,7 @@ func (s *Controller) PrivateThread(ctx context.Context, id, userID int64, update
 		}
 	}
 
-	logger.Debugw("private thread", "id", id, "user_id", userID)
+	slog.Debug("private thread", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&search.PrivateThreadCommand{
 		Id:         id,
@@ -369,7 +369,7 @@ func (s *Controller) PublishThread(ctx context.Context, id, userID int64, update
 		}
 	}
 
-	logger.Debugw("publish thread", "id", id, "user_id", userID)
+	slog.Debug("publish thread", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&search.PublishThreadCommand{
 		Id:         id,
@@ -396,7 +396,7 @@ func (s *Controller) SaveFile(ctx context.Context, id, userID int64, name, descr
 		}
 	}
 
-	logger.Debugw("save file", "id", id, "user_id", userID, "name", name, "description", description, "mime", mime, "private", private, "size", size)
+	slog.Debug("save file", slog.Int64("id", id), slog.Int64("user_id", userID), slog.String("name", name), slog.String("description", description), slog.String("mime", mime), slog.Bool("private", private), slog.Int64("size", size))
 
 	cmd, err := proto.Marshal(&search.AppendFileCommand{
 		Id:          id,
@@ -429,7 +429,7 @@ func (s *Controller) PublishFiles(ctx context.Context, ids []int64, userID int64
 		}
 	}
 
-	logger.Debugw("publish files", "ids", ids, "user_id", userID)
+	slog.Debug("publish files", slog.Any("ids", ids), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&search.PublishFilesCommand{
 		Ids:         ids,
@@ -456,7 +456,7 @@ func (s *Controller) PrivateFiles(ctx context.Context, ids []int64, userID int64
 		}
 	}
 
-	logger.Debugw("private files", "ids", ids, "user_id", userID)
+	slog.Debug("private files", slog.Any("ids", ids), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&search.PrivateFilesCommand{
 		Ids:         ids,
@@ -483,7 +483,7 @@ func (s *Controller) DeleteFiles(ctx context.Context, ids []int64, userID int64)
 		}
 	}
 
-	logger.Debugw("delete files", "id", ids, "user_id", userID)
+	slog.Debug("delete files", slog.Any("ids", ids), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&search.DeleteFilesCommand{
 		Ids:         ids,
@@ -509,7 +509,7 @@ func (s *Controller) SaveTranslation(ctx context.Context, userID, messageID int6
 		}
 	}
 
-	logger.Debugw("save translation", "user_id", userID, "message_id", messageID, "lang", lang, "title", title, "text", text)
+	slog.Debug("save translation", slog.Int64("user_id", userID), slog.Int64("message_id", messageID), slog.String("lang", lang), slog.String("title", title), slog.String("text", text))
 
 	cmd, err := proto.Marshal(&search.AppendTranslationCommand{
 		UserId:      userID,
@@ -540,7 +540,7 @@ func (s *Controller) DeleteTranslation(ctx context.Context, messageID int64, lan
 		}
 	}
 
-	logger.Debugw("delete translation", "message_id", messageID, "lang", lang)
+	slog.Debug("delete translation", slog.Int64("message_id", messageID), slog.String("lang", lang))
 
 	cmd, err := proto.Marshal(&search.DeleteTranslationCommand{
 		MessageId:    messageID,
@@ -566,7 +566,7 @@ func (s *Controller) UpdateTranslation(ctx context.Context, messageID int64, lan
 		}
 	}
 
-	logger.Debugw("update translation", "message_id", messageID, "lang", lang, "title", title, "text", text)
+	slog.Debug("update translation", slog.Int64("message_id", messageID), slog.String("lang", lang), slog.Any("title", title), slog.Any("text", text))
 
 	cmd, err := proto.Marshal(&search.UpdateTranslationCommand{
 		MessageId:     messageID,
@@ -595,7 +595,7 @@ func (s *Controller) SearchMessages(ctx context.Context, userID int64, substr st
 		}
 	}
 
-	logger.Debugw("search messages", "user_id", userID, "substr", substr, "thread_id", threadID, "public", public)
+	slog.Debug("search messages", slog.Int64("user_id", userID), slog.String("substr", substr), slog.Int64("thread_id", threadID), slog.Int("public", int(public)))
 
 	res, err := s.client.SearchMessages(ctx, &search.SearchMessagesRequest{
 		Substr:   substr,
@@ -609,7 +609,7 @@ func (s *Controller) SearchMessages(ctx context.Context, userID int64, substr st
 
 	list = model.MapMessagesFromProto(model.MessageFromProto, res.List)
 
-	logger.Debugw("found messages", "count", len(list))
+	slog.Debug("found messages", slog.Int("count", len(list)))
 
 	return 
 }
