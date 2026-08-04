@@ -3,19 +3,18 @@ package service
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/proto"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/comments"
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/rpc"
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/db/messages/pkg/loadbalance"
 	"github.com/bd878/gallery/server/messages/pkg/model"
 	"github.com/bd878/gallery/server/messages/internal/domain"
@@ -47,7 +46,7 @@ func NewCommentsController(conf CommentsConfig, publisher ddd.EventPublisher[ddd
 func (s *CommentsController) Close() {
 	if s.conn != nil {
 		if err := s.conn.Close(); err != nil {
-			logger.Error(zap.Error(err))
+			slog.Error("failed to close comments conn", slog.String("error", err.Error()))
 		}
 	}
 }
@@ -80,7 +79,7 @@ func (s *CommentsController) isConnFailed() bool {
 	if state == connectivity.Shutdown ||
 		state == connectivity.TransientFailure ||
 		state == connectivity.Connecting {
-		logger.Debugw("comments conn failed", "state", state.String())
+		slog.Error("comments conn failed", slog.String("state", state.String()))
 		return true
 	}
 	return false
@@ -93,7 +92,7 @@ func (s *CommentsController) SendComment(ctx context.Context, id, userID, messag
 		}
 	}
 
-	logger.Debugw("save comment", "id", id, "user_id", userID, "message_id", messageID, "text", text, "metadata", metadata)
+	slog.Debug("save comment", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Int64("message_id", messageID), slog.String("text", text), slog.Any("metadata", metadata))
 
 	createdAt := time.Now().UTC().Format(time.RFC3339)
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
@@ -135,7 +134,7 @@ func (s *CommentsController) UpdateComment(ctx context.Context, id, userID int64
 		}
 	}
 
-	logger.Debugw("update comment", "id", id, "user_id", userID, "text", text)
+	slog.Debug("update comment", slog.Int64("id", id), slog.Int64("user_id", userID), slog.String("text", *text))
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
@@ -174,7 +173,7 @@ func (s *CommentsController) DeleteComment(ctx context.Context, id, userID int64
 		}
 	}
 
-	logger.Debugw("delete comment", "id", id, "user_id", userID)
+	slog.Debug("delete comment", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&comments.DeleteCommentCommand{
 		Id:     id,
@@ -208,7 +207,7 @@ func (s *CommentsController) DeleteMessageComments(ctx context.Context, messageI
 		}
 	}
 
-	logger.Debugw("delete message comments", "message_id", messageID)
+	slog.Debug("delete message comments", slog.Int64("message_id", messageID))
 
 	cmd, err := proto.Marshal(&comments.DeleteMessageCommentsCommand{
 		MessageId: messageID,
@@ -241,7 +240,7 @@ func (s *CommentsController) ReadComment(ctx context.Context, id, userID int64) 
 		}
 	}
 
-	logger.Debugw("read comment", "id", id, "user_id", userID)
+	slog.Debug("read comment", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	res, err := s.client.ReadComment(ctx, &comments.ReadCommentRequest{
 		Id:     id,
@@ -263,7 +262,7 @@ func (s *CommentsController) ListComments(ctx context.Context, userID, messageID
 		}
 	}
 
-	logger.Debugw("list comments", "message_id", messageID, "user_id", userID, "name", name, "limit", limit, "offset", offset, "ascending", asc)
+	slog.Debug("list comments", slog.Any("message_id", messageID), slog.Any("user_id", userID), slog.Any("name", name), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("ascending", asc))
 
 	res, err := s.client.ListComments(ctx, &comments.ListCommentsRequest{
 		MessageId: messageID,

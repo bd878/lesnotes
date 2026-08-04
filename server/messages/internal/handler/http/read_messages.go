@@ -7,7 +7,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/bd878/gallery/server/internal/logger"
+	"log/slog"
+
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
 	messages "github.com/bd878/gallery/server/messages/pkg/model"
 	server "github.com/bd878/gallery/server/pkg/model"
@@ -171,7 +172,7 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) (err er
 }
 
 func (h *Handler) readBatchMessages(ctx context.Context, w http.ResponseWriter, userID int64, ids []int64) (err error) {
-	logger.Debugw("read batch messages", "user_id", userID, "ids", ids)
+	slog.Debug("read batch messages", slog.Int64("user_id", userID), slog.Any("ids", ids))
 
 	list, err := h.controller.ReadBatchMessages(ctx, userID, ids)
 	if err != nil {
@@ -298,7 +299,7 @@ func (h *Handler) readMessageOrMessages(ctx context.Context, w http.ResponseWrit
 }
 
 func (h *Handler) readMessage(ctx context.Context, w http.ResponseWriter, userID, messageID int64, name string, publicOnly bool) (err error) {
-	logger.Debugw("read message", "user_id", userID, "message_id", messageID, "name", name, "public", publicOnly)
+	slog.Debug("read message", slog.Int64("user_id", userID), slog.Int64("message_id", messageID), slog.String("name", name), slog.Bool("public", publicOnly))
 
 	message, err := h.controller.ReadMessage(ctx, messageID, name, []int64{userID, users.PublicUserID})
 	if err != nil {
@@ -360,7 +361,7 @@ func filterPublicMessages(list []*messages.Message) (filtered []*messages.Messag
 func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter, userID, threadID int64, limit, offset int32, ascending, publicOnly bool) (err error) {
 	// TODO: read if thread is public
 
-	logger.Debugw("read thread messages", "user_id", userID, "thread_id", threadID, "limit", limit, "offset", offset, "ascending", ascending, "public", publicOnly)
+	slog.Debug("read thread messages", slog.Int64("user_id", userID), slog.Int64("thread_id", threadID), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("ascending", ascending), slog.Bool("public", publicOnly))
 
 	list, err := h.controller.ReadThreadMessages(ctx, userID, threadID, "", limit, offset, ascending, nil)
 	if err != nil {
@@ -404,7 +405,7 @@ func (h *Handler) readThreadMessages(ctx context.Context, w http.ResponseWriter,
 }
 
 func (h *Handler) readMessages(ctx context.Context, w http.ResponseWriter, userID int64, limit, offset int32, ascending, publicOnly bool) (err error) {
-	logger.Debugw("read messages", "user_id", userID, "limit", limit, "offset", offset, "ascending", ascending, "public", publicOnly)
+	slog.Debug("read messages", slog.Int64("user_id", userID), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("ascending", ascending), slog.Bool("public", publicOnly))
 
 	list, err := h.controller.ReadMessages(ctx, userID, limit, offset, ascending)
 	if err != nil {

@@ -8,8 +8,9 @@ import (
 	"github.com/bd878/gallery/server/api/comments"
 	"github.com/bd878/gallery/server/api/translations"
 	"github.com/bd878/gallery/server/internal/am"
+	"log/slog"
+
 	"github.com/bd878/gallery/server/internal/ddd"
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/messages/internal/domain"
 	"github.com/bd878/gallery/server/messages/pkg/events"
 )
@@ -44,7 +45,7 @@ func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.Event], hand
 }
 
 func (h domainHandler[T]) HandleEvent(ctx context.Context, event T) (err error) {
-	logger.Debugw("handle event", "name", event.EventName(), "id", event.ID(), "payload", event.Payload())
+	slog.Debug("handle event", slog.String("name", event.EventName()), slog.Any("id", event.ID()), slog.Any("payload", event.Payload()))
 
 	switch event.EventName() {
 	case domain.MessageCreatedEvent:

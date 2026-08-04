@@ -3,14 +3,14 @@ package grpc
 import (
 	"context"
 
-	"go.uber.org/zap"
+	"log/slog"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api/files"
 	"github.com/bd878/gallery/server/internal/rpc"
-	"github.com/bd878/gallery/server/internal/logger"
 )
 
 type Gateway struct {
@@ -44,7 +44,7 @@ func (g *Gateway) setupConnection() (err error) {
 func (g *Gateway) Close() {
 	if g.conn != nil {
 		if err := g.conn.Close(); err != nil {
-			logger.Error(zap.Error(err))
+			slog.Error("failed to close files conn", slog.String("error", err.Error()))
 		}
 	}
 }
@@ -54,7 +54,7 @@ func (g *Gateway) isConnFailed() bool {
 	if state == connectivity.Shutdown ||
 		state == connectivity.TransientFailure ||
 		state == connectivity.Connecting {
-		logger.Debugw("files conn failed", "state", state.String())
+		slog.Debug("files conn failed", slog.String("state", state.String()))
 		return true
 	}
 	return false
@@ -62,7 +62,7 @@ func (g *Gateway) isConnFailed() bool {
 
 func (g *Gateway) ReadMessageFiles(ctx context.Context, messageID int64, userIDs []int64) (list []*files.File, err error) {
 	if g.isConnFailed() {
-		logger.Info("conn failed, setup new connection")
+		slog.Info("conn failed, setup new connection")
 		if err := g.setupConnection(); err != nil {
 			return nil, err
 		}

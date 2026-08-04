@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"go.uber.org/zap"
+	"log/slog"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api/threads"
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/internal/rpc"
 	"github.com/bd878/gallery/server/db/threads/pkg/loadbalance"
 	"github.com/bd878/gallery/server/threads/pkg/model"
@@ -54,18 +54,17 @@ func (g *Gateway) setupConnection() error {
 func (g *Gateway) Close() {
 	if g.conn != nil {
 		if err := g.conn.Close(); err != nil {
-			logger.Error(zap.Error(err))
+			slog.Error("failed to close threads conn", slog.String("error", err.Error()))
 		}
 	}
 }
 
 func (g *Gateway) isConnFailed() bool {
 	state := g.conn.GetState()
-	logger.Debugw("is threads conn failed", "state", state.String())
 	if state == connectivity.Shutdown ||
 		state == connectivity.TransientFailure ||
 		state == connectivity.Connecting {
-		logger.Debugw("threads conn failed", "state", state.String())
+		slog.Debug("threads conn failed", slog.String("state", state.String()))
 		return true
 	}
 	return false
@@ -78,7 +77,7 @@ func (g *Gateway) ListThreads(ctx context.Context, userID, parentID int64, limit
 		}
 	}
 
-	logger.Debugw("list threads", "user_id", userID, "parent_id", parentID, "limit", limit, "offset", offset)
+	slog.Debug("list threads", slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)))
 
 	resp, err := g.client.List(ctx, &threads.ListRequest{
 		UserId:   userID,
@@ -103,7 +102,7 @@ func (g *Gateway) ListMessages(ctx context.Context, userID, parentID int64, limi
 		}
 	}
 
-	logger.Debugw("list messages", "user_id", userID, "parent_id", parentID, "limit", limit, "offset", offset, "private_message", privateMessage)
+	slog.Debug("list messages", slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("private_message", *privateMessage))
 
 	resp, err := g.client.ListMessages(ctx, &threads.ListMessagesRequest{
 		UserId:   userID,
@@ -129,7 +128,7 @@ func (g *Gateway) CountThreads(ctx context.Context, id, userID int64) (total int
 		}
 	}
 
-	logger.Debugw("count threads", "id", id, "user_id", userID)
+	slog.Debug("count threads", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	resp, err := g.client.Count(ctx, &threads.CountRequest{
 		UserId: userID,
@@ -151,7 +150,7 @@ func (g *Gateway) CountMessages(ctx context.Context, id, userID int64, privateMe
 		}
 	}
 
-	logger.Debugw("count messages", "id", id, "user_id", userID, "private_message", privateMessage)
+	slog.Debug("count messages", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Bool("private_message", *privateMessage))
 
 	resp, err := g.client.CountMessages(ctx, &threads.CountMessagesRequest{
 		UserId:         userID,
@@ -174,7 +173,7 @@ func (g *Gateway) ResolvePath(ctx context.Context, userID, id int64) (path []*th
 		}
 	}
 
-	logger.Debugw("resolve path", "user_id", userID, "id", id)
+	slog.Debug("resolve path", slog.Int64("user_id", userID), slog.Int64("id", id))
 
 	resp, err := g.client.Resolve(ctx, &threads.ResolveRequest{
 		UserId: userID,
@@ -196,7 +195,7 @@ func (g *Gateway) ReadThread(ctx context.Context, userID, id int64, name string)
 		}
 	}
 
-	logger.Debugw("read thread", "user_id", userID, "id", id, "name", name)
+	slog.Debug("read thread", slog.Int64("user_id", userID), slog.Int64("id", id), slog.String("name", name))
 
 	resp, err := g.client.Read(ctx, &threads.ReadRequest{
 		Id:     id,
@@ -219,7 +218,7 @@ func (g *Gateway) ReadParent(ctx context.Context, userID, id int64) (thread *mod
 		}
 	}
 
-	logger.Debugw("read parent", "user_id", userID, "id", id)
+	slog.Debug("read parent", slog.Int64("user_id", userID), slog.Int64("id", id))
 
 	resp, err := g.client.ReadParent(ctx, &threads.ReadParentRequest{
 		UserId: userID,

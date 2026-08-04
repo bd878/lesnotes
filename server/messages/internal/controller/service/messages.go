@@ -2,12 +2,12 @@ package service
 
 import (
 	"context"
-	"time"
 	"fmt"
-	"sync"
+	"log/slog"
 	"strings"
+	"sync"
+	"time"
 
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/status"
@@ -22,7 +22,6 @@ import (
 	"github.com/bd878/gallery/server/internal/rpc"
 	"github.com/bd878/gallery/server/messages/internal/domain"
 	"github.com/bd878/gallery/server/db/messages/pkg/machine"
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/db/messages/pkg/loadbalance"
 	"github.com/bd878/gallery/server/messages/pkg/model"
 	threadsmodel "github.com/bd878/gallery/server/threads/pkg/model"
@@ -75,7 +74,7 @@ func NewMessagesController(conf MessagesConfig, publisher ddd.EventPublisher[ddd
 func (s *MessagesController) Close() {
 	if s.conn != nil {
 		if err := s.conn.Close(); err != nil {
-			logger.Error(zap.Error(err))
+			slog.Error("failed to close messages conn", slog.String("error", err.Error()))
 		}
 	}
 }
@@ -107,7 +106,7 @@ func (s *MessagesController) isConnFailed() bool {
 	if state == connectivity.Shutdown ||
 		state == connectivity.TransientFailure ||
 		state == connectivity.Connecting {
-		logger.Debugw("messages conn failed", "state", state.String())
+		slog.Debug("messages conn failed", slog.String("state", state.String()))
 		return true
 	}
 	return false
@@ -120,7 +119,7 @@ func (s *MessagesController) SaveMessage(ctx context.Context, id int64, text, ti
 		}
 	}
 
-	logger.Debugw("save message", "id", id, "text", text, "title", title, "file_ids", fileIDs, "thread_id", threadID, "user_id", userID, "private", private, "name", name)
+	slog.Debug("save message", slog.Int64("id", id), slog.String("text", text), slog.String("title", title), slog.Any("file_ids", fileIDs), slog.Int64("thread_id", threadID), slog.Int64("user_id", userID), slog.Bool("private", private), slog.String("name", name))
 
 	createdAt := time.Now().UTC().Format(time.RFC3339)
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
@@ -181,7 +180,7 @@ func (s *MessagesController) DeleteUserMessages(ctx context.Context, userID int6
 		}
 	}
 
-	logger.Debugw("delete user messages", "user_id", userID)
+	slog.Debug("delete user messages", slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&messages.DeleteUserMessagesCommand{
 		UserId: userID,
@@ -206,7 +205,7 @@ func (s *MessagesController) DeleteMessages(ctx context.Context, ids []int64, us
 		}
 	}
 
-	logger.Debugw("delete messages", "ids", ids, "user_id", userID)
+	slog.Debug("delete messages", slog.Any("ids", ids), slog.Int64("user_id", userID))
 
 	for _, id := range ids {
 
@@ -246,7 +245,7 @@ func (s *MessagesController) PublishMessages(ctx context.Context, ids []int64, u
 		}
 	}
 
-	logger.Debugw("publish messages", "ids", ids, "user_id", userID)
+	slog.Debug("publish messages", slog.Any("ids", ids), slog.Int64("user_id", userID))
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
@@ -283,7 +282,7 @@ func (s *MessagesController) PrivateMessages(ctx context.Context, ids []int64, u
 		}
 	}
 
-	logger.Debugw("private messages", "ids", ids, "user_id", userID)
+	slog.Debug("private messages", slog.Any("ids", ids), slog.Int64("user_id", userID))
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
@@ -320,7 +319,7 @@ func (s *MessagesController) UpdateMessage(ctx context.Context, id int64, text, 
 		}
 	}
 
-	logger.Debugw("update message", "id", id, "text", text, "title", title, "name", name, "file_ids", fileIDs, "user_id", userID)
+	slog.Debug("update message", slog.Int64("id", id), slog.Any("text", text), slog.Any("title", title), slog.Any("name", name), slog.Any("file_ids", fileIDs), slog.Int64("user_id", userID))
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
@@ -363,8 +362,7 @@ func (s *MessagesController) ReadThreadMessages(ctx context.Context, userID, thr
 		}
 	}
 
-	logger.Debugw("read thread messages", "user_id", userID, "thread_id", threadID, "thread_name",
-		threadName, "limit", limit, "offset", offset, "ascending", ascending, "private_message", privateMessage)
+	slog.Debug("read thread messages", slog.Int64("user_id", userID), slog.Int64("thread_id", threadID), slog.String("thread_name", threadName), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("ascending", ascending), slog.Any("private_message", privateMessage))
 
 	// read thread that is not root
 	if threadName != "" || threadID != 0 {
@@ -383,15 +381,15 @@ func (s *MessagesController) ReadThreadMessages(ctx context.Context, userID, thr
 		return nil, err
 	}
 
-	logger.Debugw("read thread messages", "count total", total)
+	slog.Debug("read thread messages", slog.Any("count total", total))
 
 	threadsList, isLastPage, err := s.threads.ListMessages(ctx, userID, threadID, limit, offset, privateMessage)
-	if err != nil {
-		logger.Debugw("failed to list messages", "error", err)
-		return nil, err
-	}
+		if err != nil {
+			slog.Debug("failed to list messages", slog.Any("error", err))
+			return nil, err
+		}
 
-	logger.Debugw("read thread messages", "threads_list", threadsList)
+	slog.Debug("read thread messages", slog.Any("threads_list", threadsList))
 
 	ids := make([]int64, 0)
 	for _, thread := range threadsList {
@@ -400,7 +398,7 @@ func (s *MessagesController) ReadThreadMessages(ctx context.Context, userID, thr
 
 	messages, err := s.ReadBatchMessages(ctx, userID, ids)
 	if err != nil {
-		logger.Debugw("failed to read batch messages", "error", err)
+		slog.Debug("failed to read batch messages", slog.Any("error", err))
 		return nil, err
 	}
 
@@ -442,7 +440,7 @@ func (s *MessagesController) ReadBatchMessages(ctx context.Context, userID int64
 		}
 	}
 
-	logger.Debugw("read batch messages", "user_id", userID, "ids", ids)
+	slog.Debug("read batch messages", slog.Int64("user_id", userID), slog.Any("ids", ids))
 
 	res, err := s.client.ReadBatchMessages(ctx, &messages.ReadBatchMessagesRequest{
 		UserId: userID,
@@ -451,9 +449,9 @@ func (s *MessagesController) ReadBatchMessages(ctx context.Context, userID int64
 	if err != nil {
 		if status, ok := status.FromError(err); ok {
 			// here it fails : context canceled while waiting for connections to become ready
-			logger.Errorw("read batch messages", "rpc error", status.Message())
+			slog.Error("read batch messages", slog.String("rpc error", status.Message()))
 		} else {
-			logger.Errorw("read batch messages", "non-rpc error", err)
+			slog.Error("read batch messages", slog.Any("non-rpc error", err))
 		}
 		return nil, err
 	}
@@ -478,7 +476,7 @@ func (s *MessagesController) ReadMessages(ctx context.Context, userID int64, lim
 		}
 	}
 
-	logger.Debugw("read messages", "user_id", userID, "limit", limit, "offset", offset, "ascending", ascending)
+	slog.Debug("read messages", slog.Int64("user_id", userID), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("ascending", ascending))
 
 	res, err := s.client.ReadMessages(ctx, &messages.ReadMessagesRequest{
 		UserId: userID,
@@ -516,7 +514,7 @@ func (s *MessagesController) ReadMessage(ctx context.Context, id int64, name str
 		}
 	}
 
-	logger.Debugw("read message", "id", id, "name", name, "user_ids", userIDs)
+	slog.Debug("read message", slog.Int64("id", id), slog.String("name", name), slog.Any("user_ids", userIDs))
 
 	res, err := s.client.ReadMessage(ctx, &messages.ReadMessageRequest{
 		Id:      id,
@@ -582,7 +580,7 @@ func (s *MessagesController) ReadPath(ctx context.Context, userID, id int64, nam
 		}
 	}
 
-	logger.Debugw("read path", "user_id", userID, "id", id, "name", name)
+	slog.Debug("read path", slog.Int64("user_id", userID), slog.Int64("id", id), slog.String("name", name))
 
 	if name != "" && id == 0 {
 		message, err := s.ReadMessage(ctx, id, name, []int64{userID})
@@ -591,7 +589,7 @@ func (s *MessagesController) ReadPath(ctx context.Context, userID, id int64, nam
 		}
 
 		id = message.ID
-		logger.Debugw("read path", "message", message)
+			slog.Debug("read path", slog.Any("message", message))
 	}
 
 	threads, err := s.threads.ResolvePath(ctx, userID, id)
@@ -771,19 +769,18 @@ func (s *MessagesController) ReadTree(ctx context.Context, userID, highlightID i
 		}
 	}
 
-	logger.Debugw("read tree", "user_id", userID, "highlight_id", highlightID, "highlight_name", highlightName, "message_id",
-		rootID, "name", rootName, "limit", limit, "offset", offset, "private_message", privateMessage, "pairs", pairs)
+	slog.Debug("read tree", slog.Int64("user_id", userID), slog.Int64("highlight_id", highlightID), slog.String("highlight_name", highlightName), slog.Int64("message_id", rootID), slog.String("name", rootName), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Any("private_message", privateMessage), slog.Any("pairs", pairs))
 
 	map1 := NewLimitOffsetMap(pairs)
 
-	logger.Debugw("read_tree", "map1", map1.String())
+	slog.Debug("read_tree", slog.String("map1", map1.String()))
 
 	highlightPath, _, err := s.ReadPath(ctx, userID, highlightID, highlightName)
 	if err != nil {
 		return nil, err
 	}
 
-	logger.Debugw("read_tree", "highlight path", highlightPath)
+	slog.Debug("read_tree", slog.Any("highlight path", highlightPath))
 
 	highlightMap := NewIDMap(highlightPath)
 

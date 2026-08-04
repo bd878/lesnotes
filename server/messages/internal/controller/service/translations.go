@@ -3,19 +3,18 @@ package service
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/proto"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/translations"
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/rpc"
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/db/messages/pkg/machine"
 	"github.com/bd878/gallery/server/db/messages/pkg/loadbalance"
 	"github.com/bd878/gallery/server/messages/pkg/model"
@@ -47,7 +46,7 @@ func NewTranslationsController(conf TranslationsConfig, publisher ddd.EventPubli
 func (s *TranslationsController) Close() {
 	if s.conn != nil {
 		if err := s.conn.Close(); err != nil {
-			logger.Error(zap.Error(err))
+			slog.Error("failed to close translations conn", slog.String("error", err.Error()))
 		}
 	}
 }
@@ -80,7 +79,7 @@ func (s *TranslationsController) isConnFailed() bool {
 	if state == connectivity.Shutdown ||
 		state == connectivity.TransientFailure ||
 		state == connectivity.Connecting {
-		logger.Debugw("translations conn failed", "state", state.String())
+		slog.Debug("translations conn failed", slog.String("state", state.String()))
 		return true
 	}
 	return false
@@ -93,7 +92,7 @@ func (s *TranslationsController) SaveTranslation(ctx context.Context, userID, me
 		}
 	}
 
-	logger.Debugw("save translation", "user_id", userID, "message_id", messageID, "lang", lang, "title", title, "text", text)
+	slog.Debug("save translation", slog.Int64("user_id", userID), slog.Int64("message_id", messageID), slog.String("lang", lang), slog.String("title", title), slog.String("text", text))
 
 	createdAt := time.Now().UTC().Format(time.RFC3339)
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
@@ -134,7 +133,7 @@ func (s *TranslationsController) UpdateTranslation(ctx context.Context, messageI
 		}
 	}
 
-	logger.Debugw("update translation", "message_id", messageID, "lang", lang, "title", title, "text", text)
+	slog.Debug("update translation", slog.Int64("message_id", messageID), slog.String("lang", lang), slog.Any("title", title), slog.Any("text", text))
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
@@ -173,7 +172,7 @@ func (s *TranslationsController) DeleteTranslation(ctx context.Context, messageI
 		}
 	}
 
-	logger.Debugw("delete translation", "message_id", messageID, "lang", lang)
+	slog.Debug("delete translation", slog.Int64("message_id", messageID), slog.String("lang", lang))
 
 	cmd, err := proto.Marshal(&translations.DeleteTranslationCommand{
 		MessageId: messageID,
@@ -207,7 +206,7 @@ func (s *TranslationsController) ReadTranslation(ctx context.Context, userID, me
 		}
 	}
 
-	logger.Debugw("read translation", "user_id", userID, "message_id", messageID, "lang", lang, "name", name)
+	slog.Debug("read translation", slog.Int64("user_id", userID), slog.Int64("message_id", messageID), slog.String("lang", lang), slog.Any("name", name))
 
 	resp, err := s.client.ReadTranslation(ctx, &translations.ReadTranslationRequest{
 		UserId:    userID,
@@ -231,7 +230,7 @@ func (s *TranslationsController) ListTranslations(ctx context.Context, userID, m
 		}
 	}
 
-	logger.Debugw("list translations", "user_id", userID, "message_id", messageID, "name", name)
+	slog.Debug("list translations", slog.Int64("user_id", userID), slog.Int64("message_id", messageID), slog.String("name", name))
 
 	resp, err := s.client.ListTranslations(ctx, &translations.ListTranslationsRequest{
 		UserId:    userID,
