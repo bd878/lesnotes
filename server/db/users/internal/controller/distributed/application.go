@@ -4,10 +4,10 @@ import (
 	"time"
 	"context"
 	"bytes"
+	"log/slog"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/users"
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/db/users/pkg/machine"
 )
 
@@ -23,13 +23,11 @@ type Consensus interface {
 
 type Distributed struct {
 	consensus         Consensus
-	log               *logger.Logger
 	usersRepo         UsersRepository
 }
 
-func New(consensus Consensus, usersRepo UsersRepository, log *logger.Logger) *Distributed {
+func New(consensus Consensus, usersRepo UsersRepository) *Distributed {
 	return &Distributed{
-		log:         log,
 		consensus:   consensus,
 		usersRepo:   usersRepo,
 	}
@@ -51,16 +49,16 @@ func (m *Distributed) Apply(ctx context.Context, reqType machine.RequestType, cm
 }
 
 func (m *Distributed) FindUser(ctx context.Context, login string) (user *users.User, err error) {
-	m.log.Debugw("find user", "login", login)
+	slog.Debug("find user", slog.String("login", login))
 	return m.usersRepo.FindByLogin(ctx, login)
 }
 
 func (m *Distributed) GetUser(ctx context.Context, id int64) (user *users.User, err error) {
-	m.log.Debugw("get user", "id", id)
+	slog.Debug("get user", slog.Int64("id", id))
 	return m.usersRepo.FindByID(ctx, id)
 }
 
 func (m *Distributed) GetServers(ctx context.Context) ([]*api.Server, error) {
-	m.log.Debugln("get servers")
+	slog.Debug("get servers")
 	return m.consensus.GetServers(ctx)
 }

@@ -6,7 +6,7 @@ import (
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/search"
-	"github.com/bd878/gallery/server/internal/logger"
+	"log/slog"
 	"github.com/bd878/gallery/server/db/search/pkg/machine"
 )
 
@@ -64,7 +64,7 @@ func (h *Handler) SearchMessages(ctx context.Context, req *search.SearchMessages
 		return nil, err
 	}
 
-	logger.Debugw("found messages", "count", len(list))
+	slog.Debug("found messages", slog.Int("count", len(list)))
 
 	resp = &search.SearchMessagesResponse{
 		List:   list,

@@ -49,7 +49,6 @@ type Dumper interface {
 var _ raft.FSM = (*Machine)(nil)
 
 type Machine struct {
-	log                *logger.Logger
 	dumper             Dumper
 	messagesRepo       MessagesRepository
 	filesRepo          FilesRepository
@@ -58,9 +57,8 @@ type Machine struct {
 }
 
 func New(messagesRepo MessagesRepository, filesRepo FilesRepository, threadsRepo ThreadsRepository,
-	translationsRepo TranslationsRepository, dumper Dumper, log *logger.Logger) *Machine {
+	translationsRepo TranslationsRepository, dumper Dumper) *Machine {
 	return &Machine{
-		log:                 log,
 		dumper:              dumper,
 		messagesRepo:        messagesRepo,
 		filesRepo:           filesRepo,

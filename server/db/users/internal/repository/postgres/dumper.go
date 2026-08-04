@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/bd878/gallery/server/api/users"
-	"github.com/bd878/gallery/server/internal/logger"
+	"log/slog"
 )
 
 type UsersDumper struct {
@@ -53,11 +53,11 @@ func (r *UsersDumper) runUsers() {
 	query := "SELECT id, login, salt, metadata, created_at, updated_at FROM %s"
 
 	defer r.wg.Done()
-	defer logger.Debugln("users dump finished")
+	defer slog.Debug("users dump finished")
 
 	rows, err := r.pool.Query(r.ctx, r.usersTable(query))
 	if err != nil {
-		logger.Errorln(err)
+		slog.Error("users dump error", slog.String("error", err.Error()))
 		r.cancel(err)
 		return
 	}
@@ -70,7 +70,7 @@ func (r *UsersDumper) runUsers() {
 		var createdAt, updatedAt *time.Time
 		err = rows.Scan(&user.Id, &user.Login, &user.HashedPassword, &user.Metadata, &createdAt, &updatedAt)
 		if err != nil {
-			logger.Errorln(err)
+			slog.Error("users scan error", slog.String("error", err.Error()))
 			r.cancel(err)
 			return
 		}
@@ -92,7 +92,7 @@ func (r *UsersDumper) runUsers() {
 	}
 
 	if err := rows.Err(); err != nil {
-		logger.Errorln(err)
+		slog.Error("users rows error", slog.String("error", err.Error()))
 		r.cancel(err)
 		return
 	}
@@ -102,11 +102,11 @@ func (r *UsersDumper) runPremiums() {
 	query := "SELECT id, invoice_id, created_at, expires_at FROM %s"
 
 	defer r.wg.Done()
-	defer logger.Debugln("premiums dump finished")
+	defer slog.Debug("premiums dump finished")
 
 	rows, err := r.pool.Query(r.ctx, r.premiumsTable(query))
 	if err != nil {
-		logger.Errorln(err)
+		slog.Error("premiums dump error", slog.String("error", err.Error()))
 		r.cancel(err)
 		return
 	}
@@ -119,7 +119,7 @@ func (r *UsersDumper) runPremiums() {
 		var createdAt, expiresAt *time.Time
 		err = rows.Scan(&premium.Id, &premium.InvoiceId, &createdAt, &expiresAt)
 		if err != nil {
-			logger.Errorln(err)
+			slog.Error("premiums scan error", slog.String("error", err.Error()))
 			r.cancel(err)
 			return
 		}
@@ -141,14 +141,14 @@ func (r *UsersDumper) runPremiums() {
 	}
 
 	if err := rows.Err(); err != nil {
-		logger.Errorln(err)
+		slog.Error("premiums rows error", slog.String("error", err.Error()))
 		r.cancel(err)
 		return
 	}
 }
 
 func (r *UsersDumper) Close() (err error) {
-	logger.Debugln("close dumper")
+	slog.Debug("close dumper")
 	r.cancel(nil)
 	r.wg.Wait()
 	return nil

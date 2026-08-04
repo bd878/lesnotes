@@ -10,7 +10,7 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	"github.com/bd878/gallery/server/api/billing"
-	"github.com/bd878/gallery/server/internal/logger"
+	"log/slog"
 )
 
 type InvoicesRepository struct {
@@ -81,7 +81,7 @@ func (r *InvoicesRepository) GetInvoice(ctx context.Context, id string, userID i
 func (r *InvoicesRepository) Dump(ctx context.Context, writer io.Writer) (err error) {
 	var conn *pgxpool.Conn
 
-	logger.Debugln("dumping invoices repo")
+	slog.Debug("dumping invoices repo")
 
 	conn, err = r.pool.Acquire(ctx)
 	defer conn.Release()
@@ -98,7 +98,7 @@ func (r *InvoicesRepository) Dump(ctx context.Context, writer io.Writer) (err er
 func (r *InvoicesRepository) Restore(ctx context.Context, reader io.Reader) (err error) {
 	var conn *pgxpool.Conn
 
-	logger.Debugln("restoring invoices repo")
+	slog.Debug("restoring invoices repo")
 
 	query := r.table("COPY %s FROM STDIN BINARY")
 

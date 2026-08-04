@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/bd878/gallery/server/api/sessions"
-	"github.com/bd878/gallery/server/internal/logger"
+	"log/slog"
 )
 
 type Dumper struct {
@@ -49,11 +49,11 @@ func (r *Dumper) runSessions() {
 	query := "SELECT user_id, value, created_at, expires_at FROM %s"
 
 	defer r.wg.Done()
-	defer logger.Debugln("sessions dump finished")
+	defer slog.Debug("sessions dump finished")
 
 	rows, err := r.pool.Query(r.ctx, r.sessionsTable(query))
 	if err != nil {
-		logger.Errorln(err)
+		slog.Error("sessions dump error", slog.String("error", err.Error()))
 		r.cancel(err)
 		return
 	}
@@ -66,7 +66,7 @@ func (r *Dumper) runSessions() {
 		var createdAt, expiresAt *time.Time
 		err = rows.Scan(&session.UserId, &session.Token, &createdAt, &expiresAt)
 		if err != nil {
-			logger.Errorln(err)
+			slog.Error("sessions scan error", slog.String("error", err.Error()))
 			r.cancel(err)
 			return
 		}
@@ -88,14 +88,14 @@ func (r *Dumper) runSessions() {
 	}
 
 	if err := rows.Err(); err != nil {
-		logger.Errorln(err)
+		slog.Error("sessions rows error", slog.String("error", err.Error()))
 		r.cancel(err)
 		return
 	}
 }
 
 func (r *Dumper) Close() (err error) {
-	logger.Debugln("close dumper")
+	slog.Debug("close dumper")
 	r.cancel(nil)
 	r.wg.Wait()
 	return nil

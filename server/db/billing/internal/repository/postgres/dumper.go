@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/bd878/gallery/server/api/billing"
-	"github.com/bd878/gallery/server/internal/logger"
+	"log/slog"
 )
 
 type Dumper struct {
@@ -53,11 +53,11 @@ func (r *Dumper) dumpInvoices() {
 	query := "SELECT id, user_id, status, total, cart, metadata, created_at, updated_at FROM %s"
 
 	defer r.wg.Done()
-	defer logger.Debugln("invoices dump finished")
+	defer slog.Debug("invoices dump finished")
 
 	rows, err := r.pool.Query(r.ctx, r.invoicesTable(query))
 	if err != nil {
-		logger.Errorln(err)
+		slog.Error("invoices dump error", slog.String("error", err.Error()))
 		r.cancel(err)
 		return
 	}
@@ -71,7 +71,7 @@ func (r *Dumper) dumpInvoices() {
 		err = rows.Scan(&invoice.Id, &invoice.UserId, &invoice.Status, &invoice.Total,
 			&invoice.Cart, &invoice.Metadata, &createdAt, &updatedAt)
 		if err != nil {
-			logger.Errorln(err)
+			slog.Error("invoices scan error", slog.String("error", err.Error()))
 			r.cancel(err)
 			return
 		}
@@ -93,7 +93,7 @@ func (r *Dumper) dumpInvoices() {
 	}
 
 	if err := rows.Err(); err != nil {
-		logger.Errorln(err)
+		slog.Error("invoices rows error", slog.String("error", err.Error()))
 		r.cancel(err)
 		return
 	}
@@ -103,11 +103,11 @@ func (r *Dumper) dumpPayments() {
 	query := "SELECT id, invoice_id, user_id, status, currency, total, metadata, created_at, updated_at FROM %s"
 
 	defer r.wg.Done()
-	defer logger.Debugln("payments dump finished")
+	defer slog.Debug("payments dump finished")
 
 	rows, err := r.pool.Query(r.ctx, r.paymentsTable(query))
 	if err != nil {
-		logger.Errorln(err)
+		slog.Error("payments dump error", slog.String("error", err.Error()))
 		r.cancel(err)
 		return
 	}
@@ -121,7 +121,7 @@ func (r *Dumper) dumpPayments() {
 		err = rows.Scan(&payment.Id, &payment.InvoiceId, &payment.UserId, &payment.Status,
 			&payment.Currency, &payment.Total, &payment.Metadata, &createdAt, &updatedAt)
 		if err != nil {
-			logger.Errorln(err)
+			slog.Error("payments scan error", slog.String("error", err.Error()))
 			r.cancel(err)
 			return
 		}
@@ -143,14 +143,14 @@ func (r *Dumper) dumpPayments() {
 	}
 
 	if err := rows.Err(); err != nil {
-		logger.Errorln(err)
+		slog.Error("payments rows error", slog.String("error", err.Error()))
 		r.cancel(err)
 		return
 	}
 }
 
 func (r *Dumper) Close() (err error) {
-	logger.Debugln("close dumper")
+	slog.Debug("close dumper")
 	r.cancel(nil)
 	r.wg.Wait()
 	return nil

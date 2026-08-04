@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"log/slog"
 	"time"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/comments"
 	"github.com/bd878/gallery/server/api/translations"
 	"github.com/bd878/gallery/server/api/messages"
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/db/messages/pkg/machine"
 	"github.com/bd878/gallery/server/db/messages/internal/controller"
 	users "github.com/bd878/gallery/server/users/pkg/model"
@@ -52,7 +52,6 @@ type (
 
 	Distributed struct {
 		consensus        Consensus
-		log              *logger.Logger
 		commentsRepo     CommentsRepository
 		messagesRepo     MessagesRepository
 		translationsRepo TranslationsRepository
@@ -62,9 +61,8 @@ type (
 var _ App = (*Distributed)(nil)
 
 func New(consensus Consensus, messagesRepo MessagesRepository,
-	translationsRepo TranslationsRepository, commentsRepo CommentsRepository, log *logger.Logger) *Distributed {
+	translationsRepo TranslationsRepository, commentsRepo CommentsRepository) *Distributed {
 	return &Distributed{
-		log:              log,
 		consensus:        consensus,
 		commentsRepo:     commentsRepo,
 		messagesRepo:     messagesRepo,
@@ -89,7 +87,7 @@ func (m *Distributed) Apply(ctx context.Context, reqType machine.RequestType, cm
 
 // TODO: pass one userID only, for public messages create ReadPublicMessage request
 func (m *Distributed) ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *messages.Message, err error) {
-	m.log.Debugw("read message", "id", id, "name", name, "user_ids", userIDs)
+	slog.Debug("read message", slog.Int64("id", id), slog.String("name", name), slog.Any("user_ids", userIDs))
 
 	if id == 0 && name == "" {
 		return nil, controller.ErrMessageIsRoot
@@ -109,7 +107,7 @@ func (m *Distributed) ReadMessage(ctx context.Context, id int64, name string, us
 }
 
 func (m *Distributed) ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (messages []*messages.Message, isLastPage bool, err error) {
-	m.log.Debugw("read messages", "user_id", userID, "limit", limit, "offset", offset, "ascending", ascending)
+	slog.Debug("read messages", slog.Int64("user_id", userID), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("ascending", ascending))
 
 	messages, isLastPage, err = m.messagesRepo.ReadMessages(ctx, userID, limit, offset)
 	if err != nil {
@@ -128,7 +126,7 @@ func (m *Distributed) ReadMessages(ctx context.Context, userID int64, limit, off
 }
 
 func (m *Distributed) ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*messages.Message, err error) {
-	m.log.Debugw("read batch messages", "user_id", userID, "ids", ids)
+	slog.Debug("read batch messages", slog.Int64("user_id", userID), slog.Any("ids", ids))
 
 	messages, err = m.messagesRepo.ReadBatchMessages(ctx, userID, ids)
 	if err != nil {
@@ -146,7 +144,7 @@ func (m *Distributed) ReadBatchMessages(ctx context.Context, userID int64, ids [
 }
 
 func (m *Distributed) ReadTranslation(ctx context.Context, userID, messageID int64, lang string, name string) (translation *translations.Translation, err error) {
-	m.log.Debugw("read translation", "user_id", userID, "message_id", messageID, "lang", lang, "name", name)
+	slog.Debug("read translation", slog.Int64("user_id", userID), slog.Int64("message_id", messageID), slog.String("lang", lang), slog.String("name", name))
 
 	message, err := m.messagesRepo.Read(ctx, []int64{userID}, messageID, name)
 	if err != nil {
@@ -167,7 +165,7 @@ func (m *Distributed) ReadTranslation(ctx context.Context, userID, messageID int
 }
 
 func (m *Distributed) ListTranslations(ctx context.Context, userID, messageID int64, name string) (translations []*translations.Translation, err error) {
-	m.log.Debugw("list translations", "user_id", userID, "message_id", messageID, "name", name)
+	slog.Debug("list translations", slog.Int64("user_id", userID), slog.Int64("message_id", messageID), slog.String("name", name))
 
 	message, err := m.messagesRepo.Read(ctx, []int64{userID}, messageID, name)
 	if err != nil {
@@ -188,12 +186,12 @@ func (m *Distributed) ListTranslations(ctx context.Context, userID, messageID in
 }
 
 func (m *Distributed) ReadComment(ctx context.Context, id, userID int64) (comment *comments.Comment, err error) {
-	m.log.Debugw("read commnet", "id", id, "user_id", userID)
+	slog.Debug("read commnet", slog.Int64("id", id), slog.Int64("user_id", userID))
 	return m.commentsRepo.Read(ctx, id, userID)
 }
 
 func (m *Distributed) ListComments(ctx context.Context, userID, messageID *int64, name *string, limit, offset int32) (result *comments.CommentsList, err error) {
-	m.log.Debugw("list comments", "message_id", messageID, "user_id", userID, "name", name, "limit", limit, "offset", offset)
+	slog.Debug("list comments", slog.Any("message_id", messageID), slog.Any("user_id", userID), slog.Any("name", name), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)))
 
 	if messageID != nil {
 		return m.commentsRepo.ListMessageComments(ctx, *messageID, limit, offset)
@@ -218,6 +216,6 @@ func (m *Distributed) ListComments(ctx context.Context, userID, messageID *int64
 }
 
 func (m *Distributed) GetServers(ctx context.Context) ([]*api.Server, error) {
-	m.log.Debugln("get servers")
+	slog.Debug("get servers")
 	return m.consensus.GetServers(ctx)
 }

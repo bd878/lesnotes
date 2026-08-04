@@ -4,12 +4,12 @@ import (
 	"time"
 	"context"
 	"bytes"
+	"log/slog"
 
 	"google.golang.org/protobuf/proto"
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/sessions"
 	"github.com/bd878/gallery/server/internal/utils"
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/db/sessions/pkg/machine"
 )
 
@@ -25,13 +25,11 @@ type Consensus interface {
 
 type Distributed struct {
 	consensus         Consensus
-	log               *logger.Logger
 	sessionsRepo      SessionsRepository
 }
 
-func New(consensus Consensus, sessionsRepo SessionsRepository, log *logger.Logger) *Distributed {
+func New(consensus Consensus, sessionsRepo SessionsRepository) *Distributed {
 	return &Distributed{
-		log:            log,
 		consensus:      consensus,
 		sessionsRepo:   sessionsRepo,
 	}
@@ -53,7 +51,7 @@ func (m *Distributed) apply(ctx context.Context, reqType machine.RequestType, cm
 }
 
 func (m *Distributed) CreateSession(ctx context.Context, userID int64) (session *sessions.Session, err error) {
-	m.log.Debugw("create session", "userID", userID)
+	slog.Debug("create session", slog.Int64("userID", userID))
 
 	token := utils.RandomString(10)
 
@@ -83,19 +81,19 @@ func (m *Distributed) CreateSession(ctx context.Context, userID int64) (session 
 }
 
 func (m *Distributed) GetSession(ctx context.Context, token string) (*sessions.Session, error) {
-	m.log.Debugw("get session", "token", token)
+	slog.Debug("get session", slog.String("token", token))
 
 	return m.sessionsRepo.Get(ctx, token)
 }
 
 func (m *Distributed) ListUserSessions(ctx context.Context, userID int64) ([]*sessions.Session, error) {
-	m.log.Debugw("list user sessions", "userID", userID)
+	slog.Debug("list user sessions", slog.Int64("userID", userID))
 
 	return m.sessionsRepo.List(ctx, userID)
 }
 
 func (m *Distributed) RemoveSession(ctx context.Context, token string) error {
-	m.log.Debugw("remove session", "token", token)
+	slog.Debug("remove session", slog.String("token", token))
 
 	cmd, err := proto.Marshal(&sessions.DeleteCommand{
 		Token: token,
@@ -108,7 +106,7 @@ func (m *Distributed) RemoveSession(ctx context.Context, token string) error {
 }
 
 func (m *Distributed) RemoveUserSessions(ctx context.Context, userID int64) error {
-	m.log.Debugw("remove user sessions", "userID", userID)
+	slog.Debug("remove user sessions", slog.Int64("userID", userID))
 
 	cmd, err := proto.Marshal(&sessions.DeleteUserSessionsCommand{
 		UserId: userID,
@@ -121,6 +119,6 @@ func (m *Distributed) RemoveUserSessions(ctx context.Context, userID int64) erro
 }
 
 func (m *Distributed) GetServers(ctx context.Context) ([]*api.Server, error) {
-	m.log.Debugln("get servers")
+	slog.Debug("get servers")
 	return m.consensus.GetServers(ctx)
 }

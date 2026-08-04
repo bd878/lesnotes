@@ -4,10 +4,10 @@ import (
 	"time"
 	"context"
 	"bytes"
+	"log/slog"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/billing"
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/db/billing/pkg/machine"
 )
 
@@ -26,15 +26,13 @@ type Consensus interface {
 
 type Distributed struct {
 	consensus      Consensus
-	log            *logger.Logger
 	paymentsRepo   PaymentsRepository
 	invoicesRepo   InvoicesRepository
 }
 
 func New(consensus Consensus, paymentsRepo PaymentsRepository,
-	invoicesRepo InvoicesRepository, log *logger.Logger) *Distributed {
+	invoicesRepo InvoicesRepository) *Distributed {
 	return &Distributed{
-		log:            log,
 		consensus:      consensus,
 		paymentsRepo:   paymentsRepo,
 		invoicesRepo:   invoicesRepo,
@@ -57,16 +55,16 @@ func (m *Distributed) Apply(ctx context.Context, reqType machine.RequestType, cm
 }
 
 func (m *Distributed) GetInvoice(ctx context.Context, id string, userID int64) (invoice *billing.Invoice, err error) {
-	m.log.Debugw("get invoice", "id", id, "user_id", userID)
+	slog.Debug("get invoice", slog.String("id", id), slog.Int64("user_id", userID))
 	return m.invoicesRepo.GetInvoice(ctx, id, userID)
 }
 
 func (m *Distributed) GetPayment(ctx context.Context, id, userID int64) (payment *billing.Payment, err error) {
-	m.log.Debugw("get payment", "id", id, "user_id", userID)
+	slog.Debug("get payment", slog.Int64("id", id), slog.Int64("user_id", userID))
 	return m.paymentsRepo.GetPayment(ctx, id, userID)
 }
 
 func (m *Distributed) GetServers(ctx context.Context) ([]*api.Server, error) {
-	m.log.Debugln("get servers")
+	slog.Debug("get servers")
 	return m.consensus.GetServers(ctx)
 }

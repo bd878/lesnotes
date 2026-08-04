@@ -4,10 +4,10 @@ import (
 	"time"
 	"context"
 	"bytes"
+	"log/slog"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/search"
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/db/search/pkg/machine"
 )
 
@@ -33,7 +33,6 @@ type Consensus interface {
 
 type Distributed struct {
 	consensus         Consensus
-	log               *logger.Logger
 	messagesRepo      MessagesRepository
 	threadsRepo       ThreadsRepository
 	filesRepo         FilesRepository
@@ -41,9 +40,8 @@ type Distributed struct {
 }
 
 func New(consensus Consensus, messagesRepo MessagesRepository,
-	filesRepo FilesRepository, threadsRepo ThreadsRepository, translationsRepo TranslationsRepository, log *logger.Logger) *Distributed {
+	filesRepo FilesRepository, threadsRepo ThreadsRepository, translationsRepo TranslationsRepository) *Distributed {
 	return &Distributed{
-		log:              log,
 		consensus:        consensus,
 		messagesRepo:     messagesRepo,
 		threadsRepo:      threadsRepo,
@@ -68,14 +66,14 @@ func (m *Distributed) Apply(ctx context.Context, reqType machine.RequestType, cm
 }
 
 func (m *Distributed) SearchMessages(ctx context.Context, userID int64, substr string, threadID int64, public int) (list []*search.SearchMessage, err error) {
-	m.log.Debugw("search messages", "user_id", userID, "substr", substr, "thread_id", threadID, "public", public)
+	slog.Debug("search messages", slog.Int64("user_id", userID), slog.String("substr", substr), slog.Int64("thread_id", threadID), slog.Int("public", public))
 
 	messages, err := m.messagesRepo.SearchMessages(ctx, userID, substr, public)
 	if err != nil {
 		return nil, err
 	}
 
-	m.log.Debugw("found messages", "count", len(messages))
+	slog.Debug("found messages", slog.Int("count", len(messages)))
 
 	if threadID == -1 && threadID == 0 {
 		return messages, nil
@@ -102,7 +100,7 @@ func (m *Distributed) SearchMessages(ctx context.Context, userID int64, substr s
 }
 
 func (m *Distributed) GetServers(ctx context.Context) ([]*api.Server, error) {
-	m.log.Debugln("get servers")
+	slog.Debug("get servers")
 	return m.consensus.GetServers(ctx)
 }
 

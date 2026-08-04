@@ -8,7 +8,7 @@ import (
 	"google.golang.org/protobuf/proto"
 	"github.com/bd878/gallery/server/api/billing"
 	"github.com/bd878/gallery/server/db/billing/pkg/machine"
-	"github.com/bd878/gallery/server/internal/logger"
+	"log/slog"
 )
 
 type PaymentsRepository interface {
@@ -37,15 +37,13 @@ type Dumper interface {
 var _ raft.FSM = (*Machine)(nil)
 
 type Machine struct {
-	log             *logger.Logger
 	dumper          Dumper
 	paymentsRepo    PaymentsRepository
 	invoicesRepo    InvoicesRepository
 }
 
-func New(paymentsRepo PaymentsRepository, invoicesRepo InvoicesRepository, dumper Dumper, log *logger.Logger) *Machine {
+func New(paymentsRepo PaymentsRepository, invoicesRepo InvoicesRepository, dumper Dumper) *Machine {
 	return &Machine{
-		log:          log,
 		dumper:       dumper,
 		paymentsRepo: paymentsRepo,
 		invoicesRepo: invoicesRepo,
@@ -71,7 +69,7 @@ func (f *Machine) Apply(record *raft.Log) interface{} {
 	case machine.RefundPaymentRequest:
 		return f.applyRefundPayment(buf[1:])
 	default:
-		f.log.Errorw("unknown request type", "type", reqType)
+		slog.Error("unknown request type", slog.Any("type", reqType))
 	}
 	return nil
 }

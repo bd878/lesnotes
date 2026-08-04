@@ -9,7 +9,7 @@ import (
 	"github.com/bd878/gallery/server/api/messages"
 	"github.com/bd878/gallery/server/api/comments"
 	"github.com/bd878/gallery/server/api/translations"
-	"github.com/bd878/gallery/server/internal/logger"
+	"log/slog"
 	"github.com/bd878/gallery/server/db/messages/pkg/machine"
 )
 
@@ -45,7 +45,6 @@ type Dumper interface {
 var _ raft.FSM = (*Machine)(nil)
 
 type Machine struct {
-	log              *logger.Logger
 	dumper           Dumper
 	messagesRepo     MessagesRepository
 	commentsRepo     CommentsRepository
@@ -53,9 +52,8 @@ type Machine struct {
 }
 
 func New(messagesRepo MessagesRepository, translationsRepo TranslationsRepository,
-	commentsRepo CommentsRepository, dumper Dumper, log *logger.Logger) *Machine {
+	commentsRepo CommentsRepository, dumper Dumper) *Machine {
 	return &Machine{
-		log:              log,
 		dumper:           dumper,
 		commentsRepo:     commentsRepo,
 		messagesRepo:     messagesRepo,
@@ -94,7 +92,7 @@ func (f *Machine) Apply(record *raft.Log) interface{} {
 	case machine.DeleteMessageCommentsRequest:
 		return f.applyDeleteMessageComments(buf[1:])
 	default:
-		f.log.Errorw("unknown request type", "type", reqType)
+		slog.Error("unknown request type", slog.Any("type", reqType))
 	}
 	return nil
 }

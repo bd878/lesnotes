@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
 	"github.com/bd878/gallery/server/api/threads"
-	"github.com/bd878/gallery/server/internal/logger"
+	"log/slog"
 	"github.com/bd878/gallery/server/db/threads/pkg/machine"
 )
 
@@ -30,14 +30,12 @@ type Dumper interface {
 var _ raft.FSM = (*Machine)(nil)
 
 type Machine struct {
-	log               *logger.Logger
 	threadsRepo       ThreadsRepository
 	dumper            Dumper
 }
 
-func New(threadsRepo ThreadsRepository, dumper Dumper, log *logger.Logger) *Machine {
+func New(threadsRepo ThreadsRepository, dumper Dumper) *Machine {
 	return &Machine{
-		log:           log,
 		dumper:        dumper,
 		threadsRepo:   threadsRepo,
 	}
@@ -64,7 +62,7 @@ func (f *Machine) Apply(record *raft.Log) interface{} {
 	case machine.PrivateMessagesRequest:
 		return f.applyPrivateMessages(buf[1:])
 	default:
-		f.log.Errorw("unknown request type", "type", reqType)
+		slog.Error("unknown request type", slog.Any("type", reqType))
 	}
 	return nil
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/bd878/gallery/server/api/billing"
-	"github.com/bd878/gallery/server/internal/logger"
+	"log/slog"
 )
 
 type PaymentsRepository struct {
@@ -79,7 +79,7 @@ func (r *PaymentsRepository) GetPayment(ctx context.Context, id, userID int64) (
 func (r *PaymentsRepository) Dump(ctx context.Context, writer io.Writer) (err error) {
 	var conn *pgxpool.Conn
 
-	logger.Debugln("dumping payments repo")
+	slog.Debug("dumping payments repo")
 
 	conn, err = r.pool.Acquire(ctx)
 	defer conn.Release()
@@ -96,7 +96,7 @@ func (r *PaymentsRepository) Dump(ctx context.Context, writer io.Writer) (err er
 func (r *PaymentsRepository) Restore(ctx context.Context, reader io.Reader) (err error) {
 	var conn *pgxpool.Conn
 
-	logger.Debugln("restoring payments repo")
+	slog.Debug("restoring payments repo")
 
 	query := r.table("COPY %s FROM STDIN BINARY")
 

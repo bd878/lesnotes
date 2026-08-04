@@ -5,12 +5,11 @@ import (
 	"os"
 	"context"
 
-	"go.uber.org/zap"
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/bd878/gallery/server/api/search"
-	"github.com/bd878/gallery/server/internal/logger"
+	"log/slog"
 	"github.com/bd878/gallery/server/internal/store"
 )
 
@@ -22,7 +21,7 @@ type snapshot struct {
 }
 
 func (f *Machine) Snapshot() (raft.FSMSnapshot, error) {
-	logger.Debugln("snapshotting search")
+	slog.Debug("snapshotting search")
 
 	s := &snapshot{}
 
@@ -47,7 +46,7 @@ func (f *Machine) Snapshot() (raft.FSMSnapshot, error) {
 }
 
 func (f *Machine) Restore(reader io.ReadCloser) (err error) {
-	logger.Debugln("restoring fsm from snapshot")
+	slog.Debug("restoring fsm from snapshot")
 
 	s := store.NewReader(reader)
 	defer s.Close()
@@ -71,25 +70,21 @@ func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 		}
 
 		if uint64(n) < size {
-			n2, err := s.Read(data[n:])
+			_, err := s.Read(data[n:])
 			if err != nil {
 				return err
 			}
-
-			logger.Debugw("restore", "n2", n2)
 		}
-
-		logger.Debugw("restore", "n", n)
 
 		var snapshot search.SearchSnapshot
 		if err = proto.Unmarshal(data, &snapshot); err != nil {
-			logger.Debugln(zap.ByteString("data", data), zap.Error(err))
+			slog.Error("error", slog.String("data", string(data)), slog.String("error", err.Error()))
 			continue
 		}
 
 		err = f.dumper.Restore(context.TODO(), &snapshot)
 		if err != nil {
-			logger.Debugln(zap.ByteString("data", data), zap.Error(err))
+			slog.Error("error", slog.String("data", string(data)), slog.String("error", err.Error()))
 			continue
 		}
 	}
@@ -98,20 +93,16 @@ func (f *Machine) Restore(reader io.ReadCloser) (err error) {
 }
 
 func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
-	logger.Debugln("persisting snapshot")
+	slog.Debug("persisting snapshot")
 
 	for snapshot := range s.ch {
-		switch v := snapshot.Item.(type) {
+		switch snapshot.Item.(type) {
 		case *search.SearchSnapshot_Message:
-			logger.Debugw("message snapshot", "id", v.Message.Id)
 		case *search.SearchSnapshot_File:
-			logger.Debugw("file snapshot", "file_id", v.File.Id)
 		case *search.SearchSnapshot_Translation:
-			logger.Debugw("translation snapshot", "message_id", v.Translation.MessageId)
 		case *search.SearchSnapshot_Thread:
-			logger.Debugw("thread snapshot", "id", v.Thread.Id)
 		default:
-			logger.Debugln("unknown snapshot")
+			slog.Error("unknown snapshot")
 			continue
 		}
 
@@ -120,12 +111,10 @@ func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
 			return err
 		}
 
-		n, err := s.store.Append(data)
+		_, err = s.store.Append(data)
 		if err != nil {
 			return err
 		}
-
-		logger.Debugw("persist", "n", n)
 
 		select {
 		case <-s.ctx.Done():
@@ -133,8 +122,6 @@ func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
 		default:
 		}
 	}
-
-	logger.Debugln("seek store")
 
 	err = s.store.Seek()
 	if err != nil {
@@ -146,18 +133,18 @@ func (s *snapshot) Persist(sink raft.SnapshotSink) (err error) {
 		return err
 	}
 
-	logger.Debugw("store persisted", "n", n)
+	slog.Debug("store persisted", slog.Int64("n", n))
 
 	return
 }
 
 func (s *snapshot) Release() {
-	logger.Debugln("release snapshot")
+	slog.Debug("release snapshot")
 	if err := s.store.Close(); err != nil {
-		logger.Errorw("cannot close store file", "error", err)
+		slog.Error("cannot close store file", slog.String("error", err.Error()))
 	}
 
 	if err := s.dumper.Close(); err != nil {
-		logger.Errorw("cannot close db connection", "error", err)
+		slog.Error("cannot close db connection", slog.String("error", err.Error()))
 	}
 }

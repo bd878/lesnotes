@@ -2,14 +2,13 @@ package machine
 
 import (
 	"context"
+	"log/slog"
 
-	"go.uber.org/zap"
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/encoding/prototext"
 
 	"github.com/bd878/gallery/server/api/users"
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/db/users/pkg/machine"
 )
 
@@ -29,22 +28,20 @@ type UsersDumper interface {
 var _ raft.FSM = (*Machine)(nil)
 
 type Machine struct {
-	log         *logger.Logger
 	usersRepo   UsersRepository
 	usersDumper UsersDumper
 }
 
-func New(usersRepo UsersRepository, usersDumper UsersDumper, log *logger.Logger) *Machine {
+func New(usersRepo UsersRepository, usersDumper UsersDumper) *Machine {
 	return &Machine{
-		log:         log,
 		usersRepo:   usersRepo,
 		usersDumper: usersDumper,
 	}
 }
 
 func (f *Machine) Apply(record *raft.Log) interface{} {
-	logger.Debug("record", zap.Uint64("index", record.Index),
-		zap.Uint64("term", record.Term), zap.String("type", record.Type.String()), zap.Time("appended_at", record.AppendedAt))
+	slog.Debug("record", slog.Uint64("index", record.Index),
+		slog.Uint64("term", record.Term), slog.String("type", record.Type.String()), slog.Time("appended_at", record.AppendedAt))
 	buf := record.Data
 	reqType := machine.RequestType(buf[0])
 	switch reqType {
@@ -57,7 +54,7 @@ func (f *Machine) Apply(record *raft.Log) interface{} {
 	case machine.MakePremiumRequest:
 		return f.applyMakePremium(buf[1:])
 	default:
-		f.log.Errorw("unknown request type", "type", reqType)
+		slog.Error("unknown request type", slog.Any("type", reqType))
 	}
 	return nil
 }
@@ -68,14 +65,14 @@ func (f *Machine) applyAppend(raw []byte) interface{} {
 
 	bytes, err := prototext.Marshal(&cmd)
 	if err != nil {
-		logger.Debugln(zap.Error(err))
+		slog.Debug("error", slog.String("error", err.Error()))
 	} else {
-		logger.Debug(zap.String("append", string(bytes)))
+		slog.Debug("append", slog.String("data", string(bytes)))
 	}
 
 	err = f.usersRepo.Save(context.TODO(), cmd.Id, cmd.Login, cmd.HashedPassword, cmd.Metadata, cmd.CreatedAt, cmd.UpdatedAt)
 	if err != nil {
-		logger.Debugln(zap.Error(err))
+		slog.Debug("error", slog.String("error", err.Error()))
 	}
 
 	return err
@@ -87,14 +84,14 @@ func (f *Machine) applyUpdate(raw []byte) interface{} {
 
 	bytes, err := prototext.Marshal(&cmd)
 	if err != nil {
-		logger.Debugln(zap.Error(err))
+		slog.Debug("error", slog.String("error", err.Error()))
 	} else {
-		logger.Debug(zap.String("update", string(bytes)))
+		slog.Debug("update", slog.String("data", string(bytes)))
 	}
 
 	err = f.usersRepo.Update(context.TODO(), cmd.Id, cmd.Login, cmd.Metadata, cmd.UpdatedAt)
 	if err != nil {
-		logger.Debugln(zap.Error(err))
+		slog.Debug("error", slog.String("error", err.Error()))
 	}
 
 	return err
@@ -106,14 +103,14 @@ func (f *Machine) applyDelete(raw []byte) interface{} {
 
 	bytes, err := prototext.Marshal(&cmd)
 	if err != nil {
-		logger.Debugln(zap.Error(err))
+		slog.Debug("error", slog.String("error", err.Error()))
 	} else {
-		logger.Debug(zap.String("delete", string(bytes)))
+		slog.Debug("delete", slog.String("data", string(bytes)))
 	}
 
 	err = f.usersRepo.Delete(context.TODO(), cmd.Id)
 	if err != nil {
-		logger.Debugln(zap.Error(err))
+		slog.Debug("error", slog.String("error", err.Error()))
 	}
 
 	return err
@@ -125,14 +122,14 @@ func (f *Machine) applyMakePremium(raw []byte) interface{} {
 
 	bytes, err := prototext.Marshal(&cmd)
 	if err != nil {
-		logger.Debugln(zap.Error(err))
+		slog.Debug("error", slog.String("error", err.Error()))
 	} else {
-		logger.Debug(zap.String("make premium", string(bytes)))
+		slog.Debug("make premium", slog.String("data", string(bytes)))
 	}
 
 	err = f.usersRepo.MakePremium(context.TODO(), cmd.Id, cmd.InvoiceId, cmd.CreatedAt, cmd.ExpiresAt)
 	if err != nil {
-		logger.Debugln(zap.Error(err))
+		slog.Debug("error", slog.String("error", err.Error()))
 	}
 
 	return err

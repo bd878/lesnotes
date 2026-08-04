@@ -4,10 +4,10 @@ import (
 	"time"
 	"context"
 	"bytes"
+	"log/slog"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/threads"
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/db/threads/pkg/machine"
 	"github.com/bd878/gallery/server/db/threads/internal/controller"
 )
@@ -29,13 +29,11 @@ type Consensus interface {
 
 type Distributed struct {
 	consensus       Consensus
-	log             *logger.Logger
 	threadsRepo     ThreadsRepository
 }
 
-func New(consensus Consensus, threadsRepo ThreadsRepository, log *logger.Logger) *Distributed {
+func New(consensus Consensus, threadsRepo ThreadsRepository) *Distributed {
 	return &Distributed{
-		log:          log,
 		consensus:    consensus,
 		threadsRepo:  threadsRepo,
 	}
@@ -57,12 +55,12 @@ func (m *Distributed) Apply(ctx context.Context, reqType machine.RequestType, cm
 }
 
 func (m *Distributed) ResolveThread(ctx context.Context, id, userID int64) (path []*threads.PathStep, err error) {
-	m.log.Debugw("resolve thread", "id", id, "user_id", userID)
+	slog.Debug("resolve thread", slog.Int64("id", id), slog.Int64("user_id", userID))
 	return m.threadsRepo.ResolveThread(ctx, id, userID)
 }
 
 func (m *Distributed) ReadThread(ctx context.Context, id, userID int64, name string) (thread *threads.Thread, err error) {
-	m.log.Debugw("read thread", "id", id, "user_id", userID, "name", name)
+	slog.Debug("read thread", slog.Int64("id", id), slog.Int64("user_id", userID), slog.String("name", name))
 	if name != "" {
 		return m.threadsRepo.ReadThreadByName(ctx, name, userID)
 	}
@@ -70,7 +68,7 @@ func (m *Distributed) ReadThread(ctx context.Context, id, userID int64, name str
 }
 
 func (m *Distributed) ReadParent(ctx context.Context, id, userID int64) (parent *threads.Thread, err error) {
-	m.log.Debugw("read parent", "id", id, "user_id", userID)
+	slog.Debug("read parent", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	thread, err := m.threadsRepo.ReadThreadByID(ctx, id, userID)
 	if err != nil {
@@ -85,26 +83,26 @@ func (m *Distributed) ReadParent(ctx context.Context, id, userID int64) (parent 
 }
 
 func (m *Distributed) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (list []*threads.Thread, isLastPage bool, err error) {
-	m.log.Debugw("list threads", "user_id", userID, "parent_id", parentID, "limit", limit, "offset", offset, "asc", asc)
+	slog.Debug("list threads", slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("asc", asc))
 	return m.threadsRepo.ListThreads(ctx, userID, parentID, limit, offset, asc)
 }
 
 func (m *Distributed) ListMessages(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool, private *bool) (list []*threads.Thread, isLastPage bool, err error) {
-	m.log.Debugw("list messages", "user_id", userID, "parent_id", parentID, "limit", limit, "offset", "asc", asc, "private_message", private)
+	slog.Debug("list messages", slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("asc", asc), slog.Any("private_message", private))
 	return m.threadsRepo.ListMessages(ctx, userID, parentID, limit, offset, asc, private)
 }
 
 func (m *Distributed) CountThreads(ctx context.Context, id, userID int64) (total int32, err error) {
-	m.log.Debugw("count threads", "user_id", userID, "id", id)
+	slog.Debug("count threads", slog.Int64("user_id", userID), slog.Int64("id", id))
 	return m.threadsRepo.CountThreads(ctx, id, userID)
 }
 
 func (m *Distributed) CountMessages(ctx context.Context, id, userID int64, privateMessage *bool) (total int32, err error) {
-	m.log.Debugw("count messages", "user_id", userID, "id", id, "private_message", privateMessage)
+	slog.Debug("count messages", slog.Int64("user_id", userID), slog.Int64("id", id), slog.Any("private_message", privateMessage))
 	return m.threadsRepo.CountMessages(ctx, id, userID, privateMessage)
 }
 
 func (m *Distributed) GetServers(ctx context.Context) ([]*api.Server, error) {
-	m.log.Debugln("get servers")
+	slog.Debug("get servers")
 	return m.consensus.GetServers(ctx)
 }

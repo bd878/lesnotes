@@ -7,7 +7,7 @@ import (
 	"google.golang.org/protobuf/proto"
 	"github.com/bd878/gallery/server/api/sessions"
 	"github.com/bd878/gallery/server/db/sessions/pkg/machine"
-	"github.com/bd878/gallery/server/internal/logger"
+	"log/slog"
 )
 
 type SessionsRepository interface {
@@ -25,14 +25,12 @@ type Dumper interface {
 var _ raft.FSM = (*Machine)(nil)
 
 type Machine struct {
-	log            *logger.Logger
 	dumper         Dumper
 	sessionsRepo   SessionsRepository
 }
 
-func New(sessionsRepo SessionsRepository, dumper Dumper, log *logger.Logger) *Machine {
+func New(sessionsRepo SessionsRepository, dumper Dumper) *Machine {
 	return &Machine{
-		log:          log,
 		dumper:       dumper,
 		sessionsRepo: sessionsRepo,
 	}
@@ -49,7 +47,7 @@ func (f *Machine) Apply(record *raft.Log) interface{} {
 	case machine.DeleteUserSessionsRequest:
 		return f.applyDeleteUserSessions(buf[1:])
 	default:
-		f.log.Errorw("unknown request type", "type", reqType)
+		slog.Error("unknown request type", slog.Any("type", reqType))
 	}
 	return nil
 }

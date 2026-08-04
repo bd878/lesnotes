@@ -13,7 +13,6 @@ import (
 	"github.com/bd878/gallery/server/api/translations"
 	"github.com/bd878/gallery/server/internal/consensus/raft"
 	"github.com/bd878/gallery/server/internal/discovery/serf"
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/internal/system"
 	"github.com/bd878/gallery/server/db/messages/config"
 	"github.com/bd878/gallery/server/db/messages/internal/controller/distributed"
@@ -33,12 +32,12 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 		return err
 	}
 
-	if err := setupSerf(svc, cfg, consensus, svc.Logger()); err != nil {
+	if err := setupSerf(svc, cfg, consensus); err != nil {
 		return err
 	}
 
 	controller := application.New(consensus, messagesRepo,
-			translationsRepo, commentsRepo, svc.Logger())
+			translationsRepo, commentsRepo)
 
 	messagesHandler := grpc.NewMessagesHandler(controller)
 	translationsHandler := grpc.NewTranslationsHandler(controller)
@@ -52,7 +51,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	return nil
 }
 
-func setupSerf(svc system.Service, cfg config.Config, handler serf.Handler, logger *logger.Logger) error {
+func setupSerf(svc system.Service, cfg config.Config, handler serf.Handler) error {
 	membership, err := serf.New(
 		serf.Config{
 			NodeName: cfg.NodeName,
@@ -91,7 +90,7 @@ func setupSerf(svc system.Service, cfg config.Config, handler serf.Handler, logg
 
 func setupRaft(svc system.Service, cfg config.Config, messagesRepo *postgres.MessagesRepository,
 	translationsRepo *postgres.TranslationsRepository, commentsRepo *postgres.CommentsRepository, dumper *postgres.Dumper) (*raft.Distributed, error) {
-	fsm := machine.New(messagesRepo, translationsRepo, commentsRepo, dumper, svc.Logger())
+	fsm := machine.New(messagesRepo, translationsRepo, commentsRepo, dumper)
 
 	consensus, err := raft.New(raft.Config{
 		Bootstrap:    cfg.RaftBootstrap,
