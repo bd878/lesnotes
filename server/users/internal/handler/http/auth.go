@@ -3,6 +3,7 @@ package http
 import (
 	"net/http"
 	"time"
+	"log/slog"
 	"encoding/json"
 
 	"github.com/bd878/gallery/server/users/internal/controller"
@@ -26,6 +27,8 @@ func (h *Handler) Auth(w http.ResponseWriter, req *http.Request) (err error) {
 	}
 
 	token := cookie.Value
+
+	slog.Debug("auth", slog.String("token", token))
 
 	_, err = h.controller.AuthUser(req.Context(), token)
 	if err == controller.ErrTokenExpired {

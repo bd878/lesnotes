@@ -2,9 +2,9 @@ package middleware
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
 
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/internal/i18n"
 	"github.com/bd878/gallery/server/internal/third_party/accept"
 )
@@ -22,7 +22,7 @@ func Language(next Handler) Handler {
 			languages := req.Header.Get("Accept-Language")
 			preferredLang, err := accept.Negotiate(languages, i18n.AcceptedLangs...)
 			if err != nil {
-				logger.Errorw("lang middleware", "error", err)
+				slog.Error("lang middleware", slog.String("error", err.Error()))
 				lang = i18n.LangEn
 			} else {
 				lang = i18n.LangFromString(preferredLang)

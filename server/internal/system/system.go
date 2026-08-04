@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"net/http"
 	"os"
+	"log/slog"
 	"net"
 	"time"
 	"context"
@@ -24,8 +25,14 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/log/global"
 	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/sdk/log"
+	"go.opentelemetry.io/otel/sdk/resource"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/contrib/bridges/otelslog"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 
 	"github.com/bd878/gallery/server/internal/logger"
@@ -101,7 +108,13 @@ func NewSystem(cfg Config) (*System, error) {
 		return nil, err
 	}
 
-	s.initLogger()
+	if err := s.initOtelLog(); err != nil {
+		return nil, err
+	}
+
+	if err := s.initLogger(); err != nil {
+		return nil, err
+	}
 
 	return s, nil
 }
@@ -123,6 +136,57 @@ func (s *System) initOpenTelemetry() error {
 	})
 
 	return nil
+}
+
+func (s *System) initOtelLog() error {
+	exporter, err := otlploghttp.New(context.Background(),
+		otlploghttp.WithMaxRequestSize(10 * 1024 * 1024),
+	)
+	if err != nil {
+		return err
+	}
+
+	// TODO: resource.Merge(resource.Default(), resource.NewWithAttributes(semconf.SchemaURL, ...))
+	res := resource.NewSchemaless(
+		attribute.String("node_name", s.cfg.NodeName),
+	)
+
+	processor := log.NewBatchProcessor(exporter)
+
+	provider := log.NewLoggerProvider(
+		log.WithProcessor(processor),
+		log.WithResource(res),
+	)
+
+	global.SetLoggerProvider(provider)
+
+	slog.SetDefault(otelslog.NewLogger("gallery/server/internal/logger",
+		otelslog.WithLoggerProvider(provider),
+	))
+
+	slog.SetLogLoggerLevel(slog.LevelDebug)
+
+	s.waiter.Cleanup(func() {
+		if err := provider.Shutdown(context.Background()); err != nil {
+			fmt.Fprintln(os.Stdout, err)
+		}
+	})
+
+	return nil
+}
+
+func (s *System) initLogger() error {
+	s.logger = logger.New(logger.Config{
+		NodeName:   s.cfg.NodeName,
+		LogLevel:   s.cfg.LogLevel,
+		SkipCaller: s.cfg.SkipCaller,
+	})
+
+	return nil
+}
+
+func (s *System) Logger() *logger.Logger {
+	return s.logger
 }
 
 func (s *System) Config() Config {
@@ -237,18 +301,6 @@ func (s *System) MigrateDB(fs fs.FS) error {
 
 func (s *System) ResetDB() error {
 	return goose.Reset(s.db, ".")
-}
-
-func (s *System) initLogger() {
-	s.logger = logger.New(logger.Config{
-		NodeName:   s.cfg.NodeName,
-		LogLevel:   s.cfg.LogLevel,
-		SkipCaller: s.cfg.SkipCaller,
-	})
-}
-
-func (s *System) Logger() *logger.Logger {
-	return s.logger
 }
 
 func (s *System) initWaiter() {

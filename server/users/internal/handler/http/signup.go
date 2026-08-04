@@ -2,6 +2,7 @@ package http
 
 import (
 	"time"
+	"log/slog"
 	"net/http"
 	"encoding/json"
 	"unicode"
@@ -96,6 +97,11 @@ func (h *Handler) Signup(w http.ResponseWriter, req *http.Request) (err error) {
 
 		return
 	}
+
+	slog.Debug("signup",
+		slog.String("login", login),
+		slog.String("password", password),
+	)
 
 	fiveOrMore, _, _, _ := verifyPassword(password)
 	if !fiveOrMore {

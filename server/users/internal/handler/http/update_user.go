@@ -2,6 +2,7 @@ package http
 
 import (
 	"net/http"
+	"log/slog"
 	"encoding/json"
 
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
@@ -43,6 +44,8 @@ func (h *Handler) Update(w http.ResponseWriter, req *http.Request) (err error) {
 	if login != "" {
 		loginParam = &login
 	}
+
+	slog.Debug("update", slog.String("login", login))
 
 	err = h.controller.UpdateUser(req.Context(), user.ID, loginParam, []byte(metadata))
 	if err != nil {

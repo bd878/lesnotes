@@ -3,6 +3,7 @@ package http
 import (
 	"net/http"
 	"io"
+	"log/slog"
 	"encoding/json"
 
 	"github.com/bd878/gallery/server/users/internal/controller"
@@ -39,6 +40,8 @@ func (h *Handler) AuthJsonAPI(w http.ResponseWriter, req *http.Request) (err err
 
 		return err
 	}
+
+	slog.Debug("auth", slog.String("token", request.Token))
 
 	_, err = h.controller.AuthUser(req.Context(), request.Token)
 	if err == controller.ErrTokenExpired {

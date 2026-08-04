@@ -1,6 +1,7 @@
 package http
 
 import (
+	"log/slog"
 	"net/http"
 	"encoding/json"
 
@@ -64,6 +65,8 @@ func (h *Handler) UpdateJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 
 		return
 	}
+
+	slog.Debug("update", slog.String("login", *request.Login))
 
 	err = h.controller.UpdateUser(req.Context(), user.ID, request.Login, request.Metadata)
 	if err != nil {

@@ -3,6 +3,7 @@ package http
 import (
 	"time"
 	"net/http"
+	"log/slog"
 	"encoding/json"
 
 	users "github.com/bd878/gallery/server/users/pkg/model"
@@ -25,6 +26,8 @@ func (h *Handler) Logout(w http.ResponseWriter, req *http.Request) (err error) {
 	}
 
 	token := cookie.Value
+
+	slog.Debug("logout", slog.String("token", token))
 
 	err = h.controller.LogoutUser(req.Context(), token)
 	if err != nil {

@@ -1,17 +1,16 @@
 package sessions
 
 import (
-	"fmt"
 	"context"
+	"fmt"
+	"log/slog"
 
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api/sessions"
 	"github.com/bd878/gallery/server/internal/rpc"
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/db/sessions/pkg/loadbalance"
 	"github.com/bd878/gallery/server/db/sessions/pkg/model"
 )
@@ -52,7 +51,7 @@ func (g *Gateway) setupConnection() error {
 func (g *Gateway) Close() {
 	if g.conn != nil {
 		if err := g.conn.Close(); err != nil {
-			logger.Error(zap.Error(err))
+			slog.Error("failed to close sessions conn", slog.String("error", err.Error()))
 		}
 	}
 }
@@ -62,7 +61,7 @@ func (g *Gateway) isConnFailed() bool {
 	if state == connectivity.Shutdown ||
 		state == connectivity.TransientFailure ||
 		state == connectivity.Connecting {
-		logger.Debugw("sessions conn failed", "state", state.String())
+		slog.Debug("sessions conn failed", slog.String("state", state.String()))
 		return true
 	}
 	return false

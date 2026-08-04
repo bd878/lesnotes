@@ -3,6 +3,7 @@ package http
 import (
 	"time"
 	"net/http"
+	"log/slog"
 	"encoding/json"
 
 	"github.com/bd878/gallery/server/internal/i18n"
@@ -34,6 +35,8 @@ func (h *Handler) Login(w http.ResponseWriter, req *http.Request) (err error) {
 
 		return
 	}
+
+	slog.Debug("login", slog.String("lang", lang.String()))
 
 	login, password = req.PostFormValue("login"), req.PostFormValue("password")
 

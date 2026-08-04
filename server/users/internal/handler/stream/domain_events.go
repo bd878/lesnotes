@@ -2,6 +2,7 @@ package stream
 
 import (
 	"context"
+	"log/slog"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/bd878/gallery/server/internal/ddd"
@@ -28,6 +29,8 @@ func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.Event], hand
 }
 
 func (h domainHandler[T]) HandleEvent(ctx context.Context, event T) error {
+	slog.Debug("handle domain event", slog.String("name", event.EventName()))
+
 	switch event.EventName() {
 	case domain.UserDeletedEvent:
 		return h.onUserDeleted(ctx, event)

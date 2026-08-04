@@ -4,6 +4,7 @@ import (
 	"io"
 	"errors"
 	"bytes"
+	"log/slog"
 	"context"
 	"net/http"
 	"encoding/json"
@@ -47,7 +48,7 @@ func (b *tokenAuthBuilder) handleMultipartFormData(w http.ResponseWriter, req *h
 	}
 
 	if err != nil {
-		logger.Errorln(err)
+		slog.Error(err.Error())
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{
@@ -100,7 +101,7 @@ func (b *tokenAuthBuilder) handleJson(w http.ResponseWriter, req *http.Request) 
 		// if token is wrong, restore public user (i.e. .lesnotes.space token for stage.lesnotes.space)
 		// TODO: precise error
 		if err != nil {
-			logger.Errorln(err)
+			slog.Error(err.Error())
 			user, err = b.restorePublicUser(w, req)
 		}
 	} else {
@@ -108,7 +109,7 @@ func (b *tokenAuthBuilder) handleJson(w http.ResponseWriter, req *http.Request) 
 	}
 
 	if err != nil {
-		logger.Errorln(err)
+		slog.Error(err.Error())
 		json.NewEncoder(w).Encode(server.ServerResponse{
 			Status: "error",
 			Error: &server.ErrorCode{

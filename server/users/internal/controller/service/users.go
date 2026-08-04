@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 	"context"
+	"log/slog"
 	"golang.org/x/crypto/bcrypt"
 
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/grpc/connectivity"
@@ -17,7 +17,6 @@ import (
 	"github.com/bd878/gallery/server/internal/rpc"
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/users/config"
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/users/pkg/model"
 	"github.com/bd878/gallery/server/db/users/pkg/loadbalance"
 	"github.com/bd878/gallery/server/db/users/pkg/machine"
@@ -57,7 +56,7 @@ func New(conf config.Config, sessions SessionsGateway, publisher ddd.EventPublis
 func (s *Controller) Close() {
 	if s.conn != nil {
 		if err := s.conn.Close(); err != nil {
-			logger.Error(zap.Error(err))
+			slog.Error(err.Error())
 		}
 	}
 }
@@ -90,7 +89,7 @@ func (s *Controller) isConnFailed() bool {
 	if state == connectivity.Shutdown ||
 		state == connectivity.TransientFailure ||
 		state == connectivity.Connecting {
-		logger.Debugw("users conn failed", "state", state.String())
+		slog.Debug("users conn failed", slog.String("state", state.String()))
 		return true
 	}
 	return false
@@ -103,7 +102,11 @@ func (s *Controller) CreateUser(ctx context.Context, id int64, login, password s
 		}
 	}
 
-	logger.Debugw("create user", "id", id, "login", login, "len(password)", len(password))
+	slog.Debug("create user",
+		slog.Int64("id", id),
+		slog.String("login", login),
+		slog.Int("len(password)", len(password)),
+	)
 
 	hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
@@ -130,15 +133,15 @@ func (s *Controller) CreateUser(ctx context.Context, id int64, login, password s
 		return
 	}
 
-	logger.Debugln("user created")
-	logger.Debugln("create session")
+	slog.Debug("user created")
+	slog.Debug("create session")
 
 	session, err := s.sessions.CreateSession(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
-	logger.Debugln("session created")
+	slog.Debug("session created")
 
 	user = &model.User{
 		ID:        id,
@@ -157,7 +160,11 @@ func (s *Controller) FindUser(ctx context.Context, id int64, login, token string
 		}
 	}
 
-	logger.Debugw("find user", "id", id, "login", login, "token", token)
+	slog.Debug("find user",
+		slog.Int64("id", id),
+		slog.String("login", login),
+		slog.String("token", token),
+	)
 
 	var userProto *users.User
 	if token != "" {
@@ -190,7 +197,7 @@ func (s *Controller) AuthUser(ctx context.Context, token string) (user *model.Us
 		}
 	}
 
-	logger.Debugw("auth user", "token", token)
+	slog.Debug("auth user", slog.String("token", token))
 
 	session, err := s.sessions.GetSession(ctx, token)
 	if err != nil {
@@ -229,7 +236,7 @@ func (s *Controller) GetUser(ctx context.Context, id int64) (user *model.User, e
 		}
 	}
 
-	logger.Debugw("get user", "id", id)
+	slog.Debug("get user", slog.Int64("id", id))
 
 	userProto, err := s.client.GetUser(ctx, &users.GetUserRequest{Id: id})
 	if err != nil {
@@ -248,7 +255,11 @@ func (s *Controller) UpdateUser(ctx context.Context, id int64, login *string, me
 		}
 	}
 
-	logger.Debugw("update user", "id", id, "login", login, "metadata", metadata)
+	slog.Debug("update user",
+		slog.Int64("id", id),
+		slog.String("login", *login),
+		slog.Any("metadata", metadata),
+	)
 
 	cmd, err := proto.Marshal(&users.UpdateCommand{
 		Id:             id,
@@ -276,7 +287,12 @@ func (s *Controller) MakePremium(ctx context.Context, id int64, invoiceID, creat
 		}
 	}
 
-	logger.Debugw("make premium", "id", id, "invoice_id", invoiceID, "created_at", createdAt, "expiresAt", expiresAt)
+	slog.Debug("make premium",
+		slog.Int64("id", id),
+		slog.String("invoice_id", invoiceID),
+		slog.String("created_at", createdAt),
+		slog.String("expires_at", expiresAt),
+	)
 
 	cmd, err := proto.Marshal(&users.MakePremiumCommand{
 		InvoiceId:       invoiceID,
@@ -304,7 +320,10 @@ func (s *Controller) LoginUser(ctx context.Context, login, password string) (ses
 		}
 	}
 
-	logger.Debugw("login user", "login", login, "len(password)", len(password))
+	slog.Debug("login user",
+		slog.String("login", login),
+		slog.Int("len(password)", len(password)),
+	)
 
 	user, err := s.client.FindUser(ctx, &users.FindUserRequest{
 		Login:   login,
@@ -313,17 +332,17 @@ func (s *Controller) LoginUser(ctx context.Context, login, password string) (ses
 		return nil, err
 	}
 
-	logger.Debugw("user found", "user_id", user.Id)
+	slog.Debug("user found", slog.Int64("user_id", user.Id))
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.HashedPassword), []byte(password))
 	if err != nil {
-		logger.Errorln(err)
+		slog.Error(err.Error())
 		return nil, controller.ErrWrongPassword
 	}
 
 	session, err = s.sessions.CreateSession(ctx, int64(user.Id))
 
-	logger.Debugw("session created", "session", session)
+	slog.Debug("session created", slog.String("token", session.Token))
 
 	return
 }
@@ -335,7 +354,7 @@ func (s *Controller) DeleteUser(ctx context.Context, id int64) (err error) {
 		}
 	}
 
-	logger.Debugw("delete user", "id", id)
+	slog.Debug("delete user", slog.Int64("id", id))
 
 	// TODO: emit event, not call
 	err = s.sessions.RemoveAllUserSessions(ctx, id)
@@ -374,7 +393,7 @@ func (s *Controller) LogoutUser(ctx context.Context, token string) (err error) {
 		}
 	}
 
-	logger.Debugw("logout user", "token", token)
+	slog.Debug("logout user", slog.String("token", token))
 
 	err = s.sessions.RemoveSession(ctx, token)
 

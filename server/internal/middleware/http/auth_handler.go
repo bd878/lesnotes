@@ -4,6 +4,7 @@ import (
 	"errors"
 	"context"
 	"net/http"
+	"log/slog"
 	"encoding/json"
 
 	"github.com/bd878/gallery/server/internal/logger"
@@ -60,7 +61,7 @@ func (b *authBuilder) Handle(w http.ResponseWriter, req *http.Request) (err erro
 		// if token is wrong, restore public user (i.e. .lesnotes.space token for stage.lesnotes.space)
 		// TODO: precise error
 		if err != nil {
-			logger.Errorln(err)
+			slog.Error(err.Error())
 			user, err = b.restorePublicUser(req)
 		}
 	default:

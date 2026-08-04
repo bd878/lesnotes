@@ -3,6 +3,7 @@ package http
 import (
 	"net/http"
 	"io"
+	"log/slog"
 	"encoding/json"
 
 	"github.com/bd878/gallery/server/internal/i18n"
@@ -20,6 +21,8 @@ func (h *Handler) SignupJsonAPI(w http.ResponseWriter, req *http.Request) (err e
 	if !ok {
 		lang = i18n.LangEn
 	}
+
+	slog.Debug("signup", slog.String("lang", lang.String()))
 
 	data, err = io.ReadAll(req.Body)
 	defer req.Body.Close()

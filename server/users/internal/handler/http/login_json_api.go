@@ -3,6 +3,7 @@ package http
 import (
 	"net/http"
 	"io"
+	"log/slog"
 	"encoding/json"
 
 	"github.com/bd878/gallery/server/internal/i18n"
@@ -33,6 +34,8 @@ func (h *Handler) LoginJsonAPI(w http.ResponseWriter, req *http.Request) (err er
 
 		return err
 	}
+
+	slog.Debug("login", slog.String("lang", lang.String()))
 
 	var request users.LoginRequest
 	if err = json.Unmarshal(data, &request); err != nil {
