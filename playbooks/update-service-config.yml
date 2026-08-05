@@ -2,12 +2,12 @@
   hosts: hosts
 
   tasks:
-  - name: Write endpoint config
+  - name: Write endpoint json config
     ansible.builtin.template:
       src: templates/{{ item }}.json.j2
       dest: /srv/gallery/stage/{{ item }}/config/service.json
     tags:
-      - service
+      - json
     loop:
       - messages
       - users
@@ -15,3 +15,15 @@
       - billing
       - search
 
+  - name: Write
+    ansible.builtin.template:
+      src: templates/{{ item }}.conf.j2
+      dest: /srv/gallery/stage/{{ item }}/config/service.conf
+    tags:
+      - conf
+    loop:
+      - users
+      - messages
+      - billing
+      - search
+      - threads

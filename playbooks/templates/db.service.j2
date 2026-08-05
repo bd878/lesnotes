@@ -6,8 +6,9 @@ After=syslog.target network-online.target
 [Service]
 User=snd
 Group=snd
-WorkingDirectory=/srv/gallery/prod/{{ item }}
-ExecStart=/srv/gallery/prod/{{ item }}/{{ item }}_db ./config/db.json
+EnvironmentFile=/srv/gallery/stage/{{ item }}/config/db.conf
+WorkingDirectory=/srv/gallery/stage/{{ item }}
+ExecStart=/srv/gallery/stage/{{ item }}/{{ item }}_db ./config/db.json
 Restart=on-failure
 RestartSec=10
 KillMode=process

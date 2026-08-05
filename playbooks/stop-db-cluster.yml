@@ -1,0 +1,18 @@
+---
+- name: Stop db cluster
+  hosts: hosts
+  become: Yes
+
+  tasks:
+  - name: Fire and forget 
+    ansible.builtin.service:
+      state: stopped
+      name: "{{ item }}-db"
+    loop:
+      - messages
+      - threads
+      - billing
+      - users
+      - search
+      - sessions
+

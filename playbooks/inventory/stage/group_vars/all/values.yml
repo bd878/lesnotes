@@ -4,6 +4,7 @@ files_port: "8186"
 files_http_port: "8182"
 
 otel_exporter: "192.168.10.111:4317"
+otel_logs_exporter: "192.168.10.111:4318/v1/logs"
 prometheus_endpoint: "192.168.10.111:9417"
 nats: "192.168.10.111:4222"
 domain: "stage.lesnotes.space"
