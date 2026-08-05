@@ -102,7 +102,11 @@ func (g *Gateway) ListMessages(ctx context.Context, userID, parentID int64, limi
 		}
 	}
 
-	slog.Debug("list messages", slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("private_message", *privateMessage))
+	logValues := []any{slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.Int("limit", int(limit)), slog.Int("offset", int(offset))}
+	if privateMessage != nil {
+		logValues = append(logValues, slog.Bool("private_message", *privateMessage))
+	}
+	slog.Debug("list messages", logValues...)
 
 	resp, err := g.client.ListMessages(ctx, &threads.ListMessagesRequest{
 		UserId:   userID,
@@ -150,7 +154,12 @@ func (g *Gateway) CountMessages(ctx context.Context, id, userID int64, privateMe
 		}
 	}
 
-	slog.Debug("count messages", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Bool("private_message", *privateMessage))
+	logValues := []any{slog.Int64("id", id), slog.Int64("user_id", userID)}
+	if privateMessage != nil {
+		logValues = append(logValues, slog.Bool("private_message", *privateMessage))
+	}
+
+	slog.Debug("count messages", logValues...)
 
 	resp, err := g.client.CountMessages(ctx, &threads.CountMessagesRequest{
 		UserId:         userID,

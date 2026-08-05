@@ -133,7 +133,14 @@ func (s *TranslationsController) UpdateTranslation(ctx context.Context, messageI
 		}
 	}
 
-	slog.Debug("update translation", slog.Int64("message_id", messageID), slog.String("lang", lang), slog.Any("title", title), slog.Any("text", text))
+	logValues := []any{slog.Int64("message_id", messageID), slog.String("lang", lang)}
+	if title != nil {
+		logValues = append(logValues, slog.String("title", *title))
+	}
+	if text != nil {
+		logValues = append(logValues, slog.String("text", *text))
+	}
+	slog.Debug("update translation", logValues...)
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
@@ -206,7 +213,11 @@ func (s *TranslationsController) ReadTranslation(ctx context.Context, userID, me
 		}
 	}
 
-	slog.Debug("read translation", slog.Int64("user_id", userID), slog.Int64("message_id", messageID), slog.String("lang", lang), slog.Any("name", name))
+	logValues := []any{slog.Int64("user_id", userID), slog.Int64("message_id", messageID), slog.String("lang", lang)}
+	if name != nil {
+		logValues = append(logValues, slog.String("name", *name))
+	}
+	slog.Debug("read translation", logValues...)
 
 	resp, err := s.client.ReadTranslation(ctx, &translations.ReadTranslationRequest{
 		UserId:    userID,

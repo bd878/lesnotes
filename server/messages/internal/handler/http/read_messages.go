@@ -172,7 +172,7 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) (err er
 }
 
 func (h *Handler) readBatchMessages(ctx context.Context, w http.ResponseWriter, userID int64, ids []int64) (err error) {
-	slog.Debug("read batch messages", slog.Int64("user_id", userID), slog.Any("ids", ids))
+	slog.Debug("read batch messages", slog.Int64("user_id", userID), slog.String("ids", fmt.Sprintf("%v", ids)))
 
 	list, err := h.controller.ReadBatchMessages(ctx, userID, ids)
 	if err != nil {

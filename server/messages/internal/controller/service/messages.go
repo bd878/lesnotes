@@ -119,7 +119,7 @@ func (s *MessagesController) SaveMessage(ctx context.Context, id int64, text, ti
 		}
 	}
 
-	slog.Debug("save message", slog.Int64("id", id), slog.String("text", text), slog.String("title", title), slog.Any("file_ids", fileIDs), slog.Int64("thread_id", threadID), slog.Int64("user_id", userID), slog.Bool("private", private), slog.String("name", name))
+	slog.Debug("save message", slog.Int64("id", id), slog.String("text", text), slog.String("title", title), slog.String("file_ids", fmt.Sprintf("%v", fileIDs)), slog.Int64("thread_id", threadID), slog.Int64("user_id", userID), slog.Bool("private", private), slog.String("name", name))
 
 	createdAt := time.Now().UTC().Format(time.RFC3339)
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
@@ -205,7 +205,7 @@ func (s *MessagesController) DeleteMessages(ctx context.Context, ids []int64, us
 		}
 	}
 
-	slog.Debug("delete messages", slog.Any("ids", ids), slog.Int64("user_id", userID))
+	slog.Debug("delete messages", slog.String("ids", fmt.Sprintf("%v", ids)), slog.Int64("user_id", userID))
 
 	for _, id := range ids {
 
@@ -245,7 +245,7 @@ func (s *MessagesController) PublishMessages(ctx context.Context, ids []int64, u
 		}
 	}
 
-	slog.Debug("publish messages", slog.Any("ids", ids), slog.Int64("user_id", userID))
+	slog.Debug("publish messages", slog.String("ids", fmt.Sprintf("%v", ids)), slog.Int64("user_id", userID))
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
@@ -282,7 +282,7 @@ func (s *MessagesController) PrivateMessages(ctx context.Context, ids []int64, u
 		}
 	}
 
-	slog.Debug("private messages", slog.Any("ids", ids), slog.Int64("user_id", userID))
+	slog.Debug("private messages", slog.String("ids", fmt.Sprintf("%v", ids)), slog.Int64("user_id", userID))
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
@@ -319,7 +319,18 @@ func (s *MessagesController) UpdateMessage(ctx context.Context, id int64, text, 
 		}
 	}
 
-	slog.Debug("update message", slog.Int64("id", id), slog.Any("text", text), slog.Any("title", title), slog.Any("name", name), slog.Any("file_ids", fileIDs), slog.Int64("user_id", userID))
+	logValues := []any{slog.Int64("id", id), slog.Int64("user_id", userID)}
+	if text != nil {
+		logValues = append(logValues, slog.String("text", *text))
+	}
+	if title != nil {
+		logValues = append(logValues, slog.String("title", *title))
+	}
+	if name != nil {
+		logValues = append(logValues, slog.String("name", *name))
+	}
+	logValues = append(logValues, slog.String("file_ids", fmt.Sprintf("%v", fileIDs)))
+	slog.Debug("update message", logValues...)
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
@@ -362,7 +373,11 @@ func (s *MessagesController) ReadThreadMessages(ctx context.Context, userID, thr
 		}
 	}
 
-	slog.Debug("read thread messages", slog.Int64("user_id", userID), slog.Int64("thread_id", threadID), slog.String("thread_name", threadName), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("ascending", ascending), slog.Any("private_message", privateMessage))
+	logValues := []any{slog.Int64("user_id", userID), slog.Int64("thread_id", threadID), slog.String("thread_name", threadName), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("ascending", ascending)}
+	if privateMessage != nil {
+		logValues = append(logValues, slog.Bool("private_message", *privateMessage))
+	}
+	slog.Debug("read thread messages", logValues...)
 
 	// read thread that is not root
 	if threadName != "" || threadID != 0 {
@@ -389,7 +404,7 @@ func (s *MessagesController) ReadThreadMessages(ctx context.Context, userID, thr
 			return nil, err
 		}
 
-	slog.Debug("read thread messages", slog.Any("threads_list", threadsList))
+	slog.Debug("read thread messages", slog.String("threads_list", fmt.Sprintf("%v", threadsList)))
 
 	ids := make([]int64, 0)
 	for _, thread := range threadsList {
@@ -440,7 +455,7 @@ func (s *MessagesController) ReadBatchMessages(ctx context.Context, userID int64
 		}
 	}
 
-	slog.Debug("read batch messages", slog.Int64("user_id", userID), slog.Any("ids", ids))
+	slog.Debug("read batch messages", slog.Int64("user_id", userID), slog.String("ids", fmt.Sprintf("%v", ids)))
 
 	res, err := s.client.ReadBatchMessages(ctx, &messages.ReadBatchMessagesRequest{
 		UserId: userID,
@@ -514,7 +529,7 @@ func (s *MessagesController) ReadMessage(ctx context.Context, id int64, name str
 		}
 	}
 
-	slog.Debug("read message", slog.Int64("id", id), slog.String("name", name), slog.Any("user_ids", userIDs))
+	slog.Debug("read message", slog.Int64("id", id), slog.String("name", name), slog.String("user_ids", fmt.Sprintf("%v", userIDs)))
 
 	res, err := s.client.ReadMessage(ctx, &messages.ReadMessageRequest{
 		Id:      id,
@@ -589,7 +604,7 @@ func (s *MessagesController) ReadPath(ctx context.Context, userID, id int64, nam
 		}
 
 		id = message.ID
-			slog.Debug("read path", slog.Any("message", message))
+			slog.Debug("read path", slog.String("message", fmt.Sprintf("%v", message)))
 	}
 
 	threads, err := s.threads.ResolvePath(ctx, userID, id)
@@ -769,7 +784,12 @@ func (s *MessagesController) ReadTree(ctx context.Context, userID, highlightID i
 		}
 	}
 
-	slog.Debug("read tree", slog.Int64("user_id", userID), slog.Int64("highlight_id", highlightID), slog.String("highlight_name", highlightName), slog.Int64("message_id", rootID), slog.String("name", rootName), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Any("private_message", privateMessage), slog.Any("pairs", pairs))
+	logValues := []any{slog.Int64("user_id", userID), slog.Int64("highlight_id", highlightID), slog.String("highlight_name", highlightName), slog.Int64("message_id", rootID), slog.String("name", rootName), slog.Int("limit", int(limit)), slog.Int("offset", int(offset))}
+	if privateMessage != nil {
+		logValues = append(logValues, slog.Bool("private_message", *privateMessage))
+	}
+	logValues = append(logValues, slog.String("pairs", fmt.Sprintf("%v", pairs)))
+	slog.Debug("read tree", logValues...)
 
 	map1 := NewLimitOffsetMap(pairs)
 
@@ -780,7 +800,7 @@ func (s *MessagesController) ReadTree(ctx context.Context, userID, highlightID i
 		return nil, err
 	}
 
-	slog.Debug("read_tree", slog.Any("highlight path", highlightPath))
+	slog.Debug("read_tree", slog.String("highlight_path", fmt.Sprintf("%v", highlightPath)))
 
 	highlightMap := NewIDMap(highlightPath)
 

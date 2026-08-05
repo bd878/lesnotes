@@ -258,7 +258,7 @@ func (s *Controller) UpdateUser(ctx context.Context, id int64, login *string, me
 	slog.Debug("update user",
 		slog.Int64("id", id),
 		slog.String("login", *login),
-		slog.Any("metadata", metadata),
+		slog.String("metadata", fmt.Sprintf("%v", metadata)),
 	)
 
 	cmd, err := proto.Marshal(&users.UpdateCommand{

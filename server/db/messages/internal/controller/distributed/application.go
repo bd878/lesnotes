@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -87,7 +88,7 @@ func (m *Distributed) Apply(ctx context.Context, reqType machine.RequestType, cm
 
 // TODO: pass one userID only, for public messages create ReadPublicMessage request
 func (m *Distributed) ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *messages.Message, err error) {
-	slog.Debug("read message", slog.Int64("id", id), slog.String("name", name), slog.Any("user_ids", userIDs))
+	slog.Debug("read message", slog.Int64("id", id), slog.String("name", name), slog.String("user_ids", fmt.Sprintf("%v", userIDs)))
 
 	if id == 0 && name == "" {
 		return nil, controller.ErrMessageIsRoot
@@ -126,7 +127,7 @@ func (m *Distributed) ReadMessages(ctx context.Context, userID int64, limit, off
 }
 
 func (m *Distributed) ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*messages.Message, err error) {
-	slog.Debug("read batch messages", slog.Int64("user_id", userID), slog.Any("ids", ids))
+	slog.Debug("read batch messages", slog.Int64("user_id", userID), slog.String("ids", fmt.Sprintf("%v", ids)))
 
 	messages, err = m.messagesRepo.ReadBatchMessages(ctx, userID, ids)
 	if err != nil {
@@ -191,7 +192,17 @@ func (m *Distributed) ReadComment(ctx context.Context, id, userID int64) (commen
 }
 
 func (m *Distributed) ListComments(ctx context.Context, userID, messageID *int64, name *string, limit, offset int32) (result *comments.CommentsList, err error) {
-	slog.Debug("list comments", slog.Any("message_id", messageID), slog.Any("user_id", userID), slog.Any("name", name), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)))
+	logValues := []any{slog.Int("limit", int(limit)), slog.Int("offset", int(offset))}
+	if messageID != nil {
+		logValues = append(logValues, slog.Int64("message_id", *messageID))
+	}
+	if userID != nil {
+		logValues = append(logValues, slog.Int64("user_id", *userID))
+	}
+	if name != nil {
+		logValues = append(logValues, slog.String("name", *name))
+	}
+	slog.Debug("list comments", logValues...)
 
 	if messageID != nil {
 		return m.commentsRepo.ListMessageComments(ctx, *messageID, limit, offset)

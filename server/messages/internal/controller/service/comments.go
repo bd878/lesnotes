@@ -92,7 +92,7 @@ func (s *CommentsController) SendComment(ctx context.Context, id, userID, messag
 		}
 	}
 
-	slog.Debug("save comment", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Int64("message_id", messageID), slog.String("text", text), slog.Any("metadata", metadata))
+	slog.Debug("save comment", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Int64("message_id", messageID), slog.String("text", text), slog.String("metadata", fmt.Sprintf("%v", metadata)))
 
 	createdAt := time.Now().UTC().Format(time.RFC3339)
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
@@ -134,7 +134,11 @@ func (s *CommentsController) UpdateComment(ctx context.Context, id, userID int64
 		}
 	}
 
-	slog.Debug("update comment", slog.Int64("id", id), slog.Int64("user_id", userID), slog.String("text", *text))
+	logValues := []any{slog.Int64("id", id), slog.Int64("user_id", userID)}
+	if text != nil {
+		logValues = append(logValues, slog.String("text", *text))
+	}
+	slog.Debug("update comment", logValues...)
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
@@ -262,7 +266,17 @@ func (s *CommentsController) ListComments(ctx context.Context, userID, messageID
 		}
 	}
 
-	slog.Debug("list comments", slog.Any("message_id", messageID), slog.Any("user_id", userID), slog.Any("name", name), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("ascending", asc))
+	logValues := []any{slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("ascending", asc)}
+	if messageID != nil {
+		logValues = append(logValues, slog.Int64("message_id", *messageID))
+	}
+	if userID != nil {
+		logValues = append(logValues, slog.Int64("user_id", *userID))
+	}
+	if name != nil {
+		logValues = append(logValues, slog.String("name", *name))
+	}
+	slog.Debug("list comments", logValues...)
 
 	res, err := s.client.ListComments(ctx, &comments.ListCommentsRequest{
 		MessageId: messageID,

@@ -88,7 +88,11 @@ func (m *Distributed) ListThreads(ctx context.Context, userID, parentID int64, l
 }
 
 func (m *Distributed) ListMessages(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool, private *bool) (list []*threads.Thread, isLastPage bool, err error) {
-	slog.Debug("list messages", slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("asc", asc), slog.Any("private_message", private))
+	logValues := []any{slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("asc", asc)}
+	if private != nil {
+		logValues = append(logValues, slog.Bool("private_message", *private))
+	}
+	slog.Debug("list messages", logValues...)
 	return m.threadsRepo.ListMessages(ctx, userID, parentID, limit, offset, asc, private)
 }
 
@@ -98,7 +102,11 @@ func (m *Distributed) CountThreads(ctx context.Context, id, userID int64) (total
 }
 
 func (m *Distributed) CountMessages(ctx context.Context, id, userID int64, privateMessage *bool) (total int32, err error) {
-	slog.Debug("count messages", slog.Int64("user_id", userID), slog.Int64("id", id), slog.Any("private_message", privateMessage))
+	logValues := []any{slog.Int64("user_id", userID), slog.Int64("id", id)}
+	if privateMessage != nil {
+		logValues = append(logValues, slog.Bool("private_message", *privateMessage))
+	}
+	slog.Debug("count messages", logValues...)
 	return m.threadsRepo.CountMessages(ctx, id, userID, privateMessage)
 }
 
