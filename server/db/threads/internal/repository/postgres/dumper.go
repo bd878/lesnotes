@@ -1,31 +1,31 @@
 package postgres
 
 import (
-	"fmt"
-	"time"
-	"sync"
-	"errors"
 	"context"
+	"errors"
+	"fmt"
+	"log/slog"
+	"sync"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/bd878/gallery/server/api/threads"
-	"github.com/bd878/gallery/server/internal/logger"
 )
 
 type Dumper struct {
-	pool              *pgxpool.Pool
-	threadsTableName  string
-	ctx               context.Context
-	cancel            context.CancelCauseFunc
-	ch                chan *threads.ThreadsSnapshot
-	wg                sync.WaitGroup
+	pool             *pgxpool.Pool
+	threadsTableName string
+	ctx              context.Context
+	cancel           context.CancelCauseFunc
+	ch               chan *threads.ThreadsSnapshot
+	wg               sync.WaitGroup
 }
 
 func NewDumper(pool *pgxpool.Pool, threadsTableName string) *Dumper {
 	return &Dumper{
-		pool:                 pool,
-		threadsTableName:     threadsTableName,
+		pool:             pool,
+		threadsTableName: threadsTableName,
 	}
 }
 
@@ -49,11 +49,11 @@ func (r *Dumper) runThreads() {
 	query := "SELECT id, name, private, user_id, parent_id, next_id, prev_id, created_at, updated_at, description, title, private_message FROM %s"
 
 	defer r.wg.Done()
-	defer logger.Debugln("threads dump finished")
+	defer slog.Debug("threads dump finished")
 
 	rows, err := r.pool.Query(r.ctx, r.threadsTable(query))
 	if err != nil {
-		logger.Errorln(err)
+		slog.Error(err.Error())
 		r.cancel(err)
 		return
 	}
@@ -67,7 +67,7 @@ func (r *Dumper) runThreads() {
 		err = rows.Scan(&thread.Id, &thread.Name, &thread.Private, &thread.UserId, &thread.ParentId,
 			&thread.NextId, &thread.PrevId, &createdAt, &updatedAt, &thread.Description, &thread.Title, &thread.PrivateMessage)
 		if err != nil {
-			logger.Errorln(err)
+			slog.Error(err.Error())
 			r.cancel(err)
 			return
 		}
@@ -89,14 +89,14 @@ func (r *Dumper) runThreads() {
 	}
 
 	if err := rows.Err(); err != nil {
-		logger.Errorln(err)
+		slog.Error(err.Error())
 		r.cancel(err)
 		return
 	}
 }
 
 func (r *Dumper) Close() (err error) {
-	logger.Debugln("close dumper")
+	slog.Debug("close dumper")
 	r.cancel(nil)
 	r.wg.Wait()
 	return nil
@@ -121,4 +121,3 @@ func (r *Dumper) Restore(ctx context.Context, snapshot *threads.ThreadsSnapshot)
 func (r Dumper) threadsTable(query string) string {
 	return fmt.Sprintf(query, r.threadsTableName)
 }
-

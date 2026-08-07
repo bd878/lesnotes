@@ -1,22 +1,21 @@
 package balancer
 
 import (
-	"time"
 	"context"
-	"sync"
 	"fmt"
+	"log/slog"
+	"sync"
+	"time"
 
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/status"
+	"google.golang.org/grpc/attributes"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/attributes"
-	"google.golang.org/grpc/serviceconfig"
 	"google.golang.org/grpc/resolver"
+	"google.golang.org/grpc/serviceconfig"
+	"google.golang.org/grpc/status"
 
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/internal/logger"
 )
 
 type Resolver struct {
@@ -39,7 +38,7 @@ func (r *Resolver) Build(t resolver.Target, cc resolver.ClientConn, _ resolver.B
 		r.target = t.Endpoint()
 	}
 
-	logger.Debugw("build resolver", "endpoint", r.target)
+	slog.Debug("build resolver", slog.String("endpoint", r.target))
 
 	r.clientConn = cc
 	r.resolverConn, err = grpc.NewClient(
@@ -75,12 +74,12 @@ func (r *Resolver) ResolveNow(options resolver.ResolveNowOptions) {
 	for i := range 10 {
 		client := api.NewDistributedClient(r.resolverConn)
 
-		logger.Debugw("resolver resolve now servers", "retry", i, "target", r.resolverConn.Target())
+		slog.Debug("resolver resolve now servers", slog.Int("retry", i), slog.String("target", r.resolverConn.Target()))
 
 		res, err := client.GetServers(context.TODO(), &api.GetServersRequest{})
 		if err != nil {
 			if status, ok := status.FromError(err); ok {
-				logger.Debugw("failed to get servers", "code", status.Code().String(), "status", status.Message())
+				slog.Debug("failed to get servers", slog.String("code", status.Code().String()), slog.String("status", status.Message()))
 
 				if len(r.addrs) > 0 && (
 					status.Code() == codes.Unavailable ||
@@ -99,7 +98,7 @@ func (r *Resolver) ResolveNow(options resolver.ResolveNowOptions) {
 					r.addrs = addrs
 
 					if err := r.resolverConn.Close(); err != nil {
-						logger.Errorw("failed to close old resolver conn", zap.Error(err))
+						slog.Error("failed to close old resolver conn", slog.String("error", err.Error()))
 					}
 
 					r.resolverConn, err = grpc.NewClient(
@@ -107,35 +106,35 @@ func (r *Resolver) ResolveNow(options resolver.ResolveNowOptions) {
 						grpc.WithTransportCredentials(insecure.NewCredentials()),
 					)
 					if err != nil {
-						logger.Errorw("failed to recreate resolver conn", zap.Error(err))
+						slog.Error("failed to recreate resolver conn", slog.String("error", err.Error()))
 						return
 					}
 					r.serviceConfig = r.clientConn.ParseServiceConfig(
 						fmt.Sprintf(`{"loadBalancingConfig":[{"%s":{}}]}`, r.name),
 					)
 
-					logger.Debugw("recover", "target", r.target)
+					slog.Debug("recover", slog.String("target", r.target))
 
 					continue
 				}
 			}
 
-			logger.Errorw("failed to get servers", "error", err)
+			slog.Error("failed to get servers", slog.String("error", err.Error()))
 			r.clientConn.ReportError(err)
 
 			if err := r.resolverConn.Close(); err != nil {
-				logger.Errorw("failed to close old resolver conn", zap.Error(err))
+				slog.Error("failed to close old resolver conn", slog.String("error", err.Error()))
 			}
 
 			return
 		}
 
-		logger.Debugw("resolver received new servers", "servers", res.Servers)
+		slog.Debug("resolver received new servers", slog.String("servers", fmt.Sprintf("%v", res.Servers)))
 
 		var addrs []resolver.Address
 		var hasLeader bool
 		for _, server := range res.Servers {
-			logger.Debugw("server", "raft_addr", server.RaftAddr, "is_leader", server.IsLeader)
+			slog.Debug("server", slog.String("raft_addr", server.RaftAddr), slog.String("is_leader", fmt.Sprintf("%v", server.IsLeader)))
 
 			if server.IsLeader {
 				hasLeader = true
@@ -160,7 +159,7 @@ func (r *Resolver) ResolveNow(options resolver.ResolveNowOptions) {
 			return
 		}
 
-		logger.Debugln("no leader")
+		slog.Debug("no leader")
 
 		<-ticker.C
 	}
@@ -168,9 +167,9 @@ func (r *Resolver) ResolveNow(options resolver.ResolveNowOptions) {
 
 func (r *Resolver) Close() {
 	if r.resolverConn != nil {
-		logger.Debugln("close resolver conn")
+		slog.Debug("close resolver conn")
 		if err := r.resolverConn.Close(); err != nil {
-			logger.Errorln(zap.Error(err))
+			slog.Error("close resolver conn", slog.String("error", err.Error()))
 		}
 	}
 }

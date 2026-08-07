@@ -13,7 +13,6 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api/files"
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/files/pkg/model"
 )
 

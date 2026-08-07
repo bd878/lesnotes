@@ -1,19 +1,18 @@
 package jetstream
 
 import (
+	"context"
+	"log/slog"
 	"sync"
 	"time"
-	"context"
 
-	"github.com/nats-io/nats.go"
-	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"google.golang.org/protobuf/types/known/structpb"
+	"github.com/nats-io/nats.go"
 
-	"github.com/bd878/gallery/server/internal/am"
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/internal/logger"
+	"github.com/bd878/gallery/server/internal/am"
 )
 
 const maxRetries = 5
@@ -23,16 +22,14 @@ type Stream struct {
 	js         nats.JetStreamContext
 	mu         sync.Mutex
 	subs       []*nats.Subscription
-	log        *logger.Logger
 }
 
 var _ am.MessageStream = (*Stream)(nil)
 
-func NewStream(streamName string, js nats.JetStreamContext, log *logger.Logger) *Stream {
+func NewStream(streamName string, js nats.JetStreamContext) *Stream {
 	return &Stream{
 		streamName: streamName,
 		js:         js,
-		log:        log,
 	}
 }
 
@@ -55,7 +52,7 @@ func (s *Stream) Publish(ctx context.Context, topicName string, rawMsg am.Messag
 		return
 	}
 
-	s.log.Debugln(zap.String("subject", rawMsg.Subject()))
+	slog.Debug("subject", slog.String("subject", rawMsg.Subject()))
 
 	var p nats.PubAckFuture
 	p, err = s.js.PublishMsgAsync(&nats.Msg{
@@ -76,12 +73,12 @@ func (s *Stream) Publish(ctx context.Context, topicName string, rawMsg am.Messag
 			case <-future.Err():
 				tries = tries - 1
 				if tries <= 0 {
-					s.log.Errorw("unable to publish message", zap.Int("maxRetries", maxRetries))
+					slog.Error("unable to publish message", slog.Int("maxRetries", maxRetries))
 					return
 				}
 				future, err = s.js.PublishMsgAsync(future.Msg())
 				if err != nil {
-					s.log.Errorln(zap.Error(err))
+					slog.Error("publish async retry failed", slog.String("error", err.Error()))
 					return
 				}
 			}
@@ -165,7 +162,7 @@ func (s *Stream) handleMsg(cfg am.SubscriberConfig, handler am.MessageHandler) f
 		m := &api.StreamMessage{}
 		err = proto.Unmarshal(natsMsg.Data, m)
 		if err != nil {
-			s.log.Warnln(zap.Error(err))
+			slog.Warn("unmarshal error", slog.String("error", err.Error()))
 			return
 		}
 
@@ -195,7 +192,7 @@ func (s *Stream) handleMsg(cfg am.SubscriberConfig, handler am.MessageHandler) f
 		if cfg.AckType() == am.AckTypeAuto {
 			err = msg.Ack()
 			if err != nil {
-				s.log.Errorln(zap.Error(err))
+				slog.Warn("auto ack error", slog.String("error", err.Error()))
 			}
 		}
 
@@ -203,13 +200,13 @@ func (s *Stream) handleMsg(cfg am.SubscriberConfig, handler am.MessageHandler) f
 		case err = <-errc:
 			if err == nil {
 				if ackErr := msg.Ack(); ackErr != nil {
-					s.log.Warnln(zap.Error(err))
+					slog.Warn("ack error", slog.String("error", ackErr.Error()))
 				}
 				return
 			}
-			s.log.Errorln(zap.Error(err))
+			slog.Error("handler error", slog.String("error", err.Error()))
 			if nakErr := msg.NAck(); nakErr != nil {
-				s.log.Warnln(zap.Error(err))
+				slog.Warn("nack error", slog.String("error", nakErr.Error()))
 			}
 		case <-wCtx.Done():
 			return

@@ -1,12 +1,12 @@
 package machine
 
 import (
+	"log/slog"
 	"context"
 
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
 	"github.com/bd878/gallery/server/api/search"
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/db/search/pkg/machine"
 )
 
@@ -108,7 +108,7 @@ func (f *Machine) Apply(record *raft.Log) interface{} {
 	case machine.UpdateTranslationRequest:
 		return f.applyUpdateTranslation(buf[1:])
 	default:
-		logger.Errorw("unknown request type", "type", reqType)
+		slog.Error("unknown request type", slog.String("type", string(reqType)))
 	}
 	return nil
 }

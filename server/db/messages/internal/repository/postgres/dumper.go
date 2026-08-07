@@ -4,15 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"sync"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/bd878/gallery/server/api/comments"
 	"github.com/bd878/gallery/server/api/messages"
 	"github.com/bd878/gallery/server/api/translations"
-	"github.com/bd878/gallery/server/api/comments"
-	"github.com/bd878/gallery/server/internal/logger"
 )
 
 type Dumper struct {
@@ -60,11 +60,11 @@ func (r *Dumper) runMessages() {
 	query := "SELECT id, text, private, name, user_id, title, created_at, updated_at FROM %s"
 
 	defer r.wg.Done()
-	defer logger.Debugln("messages dump finished")
+	defer slog.Debug("messages dump finished")
 
 	rows, err := r.pool.Query(r.ctx, r.messagesTable(query))
 	if err != nil {
-		logger.Errorln(err)
+		slog.Error(err.Error())
 		r.cancel(err)
 		return
 	}
@@ -78,7 +78,7 @@ func (r *Dumper) runMessages() {
 		err = rows.Scan(&message.Id, &message.Text, &message.Private, &message.Name,
 			&message.UserId, &message.Title, &createdAt, &updatedAt)
 		if err != nil {
-			logger.Errorln(err)
+			slog.Error(err.Error())
 			r.cancel(err)
 			return
 		}
@@ -100,7 +100,7 @@ func (r *Dumper) runMessages() {
 	}
 
 	if err := rows.Err(); err != nil {
-		logger.Errorln(err)
+		slog.Error(err.Error())
 		r.cancel(err)
 		return
 	}
@@ -110,11 +110,11 @@ func (r *Dumper) runTranslations() {
 	query := "SELECT message_id, lang, text, title, created_at, updated_at FROM %s"
 
 	defer r.wg.Done()
-	defer logger.Debugln("translations dump finished")
+	defer slog.Debug("translations dump finished")
 
 	rows, err := r.pool.Query(r.ctx, r.translationsTable(query))
 	if err != nil {
-		logger.Errorln(err)
+		slog.Error(err.Error())
 		r.cancel(err)
 		return
 	}
@@ -128,7 +128,7 @@ func (r *Dumper) runTranslations() {
 		err = rows.Scan(&translation.Id, &translation.Lang, &translation.Text,
 			&translation.Title, &createdAt, &updatedAt)
 		if err != nil {
-			logger.Errorln(err)
+			slog.Error(err.Error())
 			r.cancel(err)
 			return
 		}
@@ -150,7 +150,7 @@ func (r *Dumper) runTranslations() {
 	}
 
 	if err := rows.Err(); err != nil {
-		logger.Errorln(err)
+		slog.Error(err.Error())
 		r.cancel(err)
 		return
 	}
@@ -160,11 +160,11 @@ func (r *Dumper) runComments() {
 	query := "SELECT id, message_id, user_id, text, metadata, created_at, updated_at FROM %s"
 
 	defer r.wg.Done()
-	defer logger.Debugln("comments dump finished")
+	defer slog.Debug("comments dump finished")
 
 	rows, err := r.pool.Query(r.ctx, r.commentsTable(query))
 	if err != nil {
-		logger.Errorln(err)
+		slog.Error(err.Error())
 		r.cancel(err)
 		return
 	}
@@ -178,7 +178,7 @@ func (r *Dumper) runComments() {
 		err = rows.Scan(&comment.Id, &comment.MessageId, &comment.UserId, &comment.Text,
 			&comment.Metadata, &createdAt, &updatedAt)
 		if err != nil {
-			logger.Errorln(err)
+			slog.Error(err.Error())
 			r.cancel(err)
 			return
 		}
@@ -200,14 +200,14 @@ func (r *Dumper) runComments() {
 	}
 
 	if err := rows.Err(); err != nil {
-		logger.Errorln(err)
+		slog.Error(err.Error())
 		r.cancel(err)
 		return
 	}
 }
 
 func (r *Dumper) Close() (err error) {
-	logger.Debugln("close dumper")
+	slog.Debug("close dumper")
 	r.cancel(nil)
 	r.wg.Wait()
 	return nil

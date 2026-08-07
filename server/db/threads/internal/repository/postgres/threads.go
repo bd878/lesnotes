@@ -1,32 +1,32 @@
 package postgres
 
 import (
-	"os"
-	"fmt"
-	"time"
 	"context"
+	"fmt"
+	"log/slog"
+	"os"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/bd878/gallery/server/api/threads"
-	"github.com/bd878/gallery/server/internal/logger"
 )
 
 type ThreadsRepository struct {
-	tableName          string
-	pool               *pgxpool.Pool
+	tableName string
+	pool      *pgxpool.Pool
 }
 
 func NewThreadsRepository(pool *pgxpool.Pool, tableName string) *ThreadsRepository {
 	return &ThreadsRepository{tableName: tableName, pool: pool}
 }
 
-func (r *ThreadsRepository) ReadThreadByID(ctx context.Context, id, userID int64/*may be public*/) (thread *threads.Thread, err error) {
+func (r *ThreadsRepository) ReadThreadByID(ctx context.Context, id, userID int64 /*may be public*/) (thread *threads.Thread, err error) {
 	query := "SELECT user_id, parent_id, next_id, prev_id, name, description, title, private, private_message, created_at, updated_at FROM %s WHERE id = $1 AND (user_id = $2 OR private = false)"
 
 	thread = &threads.Thread{
-		Id:     id,
+		Id: id,
 	}
 
 	var createdAt, updatedAt *time.Time
@@ -49,7 +49,7 @@ func (r *ThreadsRepository) ReadThreadByName(ctx context.Context, name string, u
 	query := "SELECT user_id, id, parent_id, next_id, prev_id, description, title, private, private_message, created_at, updated_at FROM %s WHERE name = $1 AND (user_id = $2 OR private = false)"
 
 	thread = &threads.Thread{
-		Name:     name,
+		Name: name,
 	}
 
 	var createdAt, updatedAt *time.Time
@@ -174,7 +174,7 @@ func (r *ThreadsRepository) ListMessages(ctx context.Context, userID, parentID i
 
 	query := "SELECT id, name, private, private_message, next_id, prev_id, created_at, updated_at FROM %s WHERE user_id = $1 AND parent_id = $2"
 
-	logger.Debugw("list messages", "user_id", userID, "parentID", parentID, "limit", limit, "offset", offset)
+	slog.Debug("list messages", slog.String("user_id", fmt.Sprintf("%v", userID)), slog.String("parentID", fmt.Sprintf("%v", parentID)), slog.String("limit", fmt.Sprintf("%v", limit)), slog.String("offset", fmt.Sprintf("%v", offset)))
 
 	var rows pgx.Rows
 	rows, err = tx.Query(ctx, r.table(query), userID, parentID)
@@ -204,7 +204,7 @@ func (r *ThreadsRepository) ListMessages(ctx context.Context, userID, parentID i
 		unordered = append(unordered, thread)
 	}
 
-	logger.Debugw("list messages", "unordered", unordered)
+	slog.Debug("list messages", slog.String("unordered", fmt.Sprintf("%v", unordered)))
 
 	/* create list from root in reverse order */
 	var nextID int64
@@ -226,7 +226,7 @@ func (r *ThreadsRepository) ListMessages(ctx context.Context, userID, parentID i
 		}
 	}
 
-	logger.Debugw("list messages", "list", list)
+	slog.Debug("list messages", slog.String("list", fmt.Sprintf("%v", list)))
 
 	if err = rows.Err(); err != nil {
 		return
@@ -263,7 +263,7 @@ func (r *ThreadsRepository) PublishMessages(ctx context.Context, ids []int64, us
 	for _, id := range ids {
 		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private_message = false WHERE user_id = $1 AND id = $2"), userID, id)
 		if err != nil {
-			logger.Errorln(err)
+			slog.Error(err.Error())
 		}
 	}
 
@@ -274,7 +274,7 @@ func (r *ThreadsRepository) PrivateMessages(ctx context.Context, ids []int64, us
 	for _, id := range ids {
 		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private_message = true WHERE user_id = $1 AND id = $2"), userID, id)
 		if err != nil {
-			logger.Errorln(err)
+			slog.Error(err.Error())
 		}
 	}
 
@@ -299,11 +299,11 @@ func (r *ThreadsRepository) CountMessages(ctx context.Context, id, userID int64,
 		query = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2 AND private_message = false"
 	}
 
-	logger.Debugw("count messages", "id", id, "user_id", userID, "query", query)
+	slog.Debug("count messages", slog.String("id", fmt.Sprintf("%v", id)), slog.String("user_id", fmt.Sprintf("%v", userID)), slog.String("query", fmt.Sprintf("%v", query)))
 
 	err = r.pool.QueryRow(ctx, r.table(query), userID, id).Scan(&total)
 
-	logger.Debugw("count messages", "total", total)
+	slog.Debug("count messages", slog.String("total", fmt.Sprintf("%v", total)))
 
 	return
 }
@@ -338,7 +338,7 @@ func (r *ThreadsRepository) ReorderThread(ctx context.Context, id, userID, paren
 	err = tx.QueryRow(ctx, r.table("SELECT parent_id, next_id, prev_id FROM %s WHERE user_id = $1 AND id = $2"), userID, id).
 		Scan(&currentParentID, &currentNextID, &currentPrevID)
 	if err != nil {
-		logger.Debugw("failed to select thread", "error", err)
+		slog.Debug("failed to select thread", slog.String("error", err.Error()))
 		return
 	}
 
@@ -359,7 +359,7 @@ func (r *ThreadsRepository) ReorderThread(ctx context.Context, id, userID, paren
 	if prevID != 0 {
 		err = tx.QueryRow(ctx, r.table(selectParentID), userID, prevID).Scan(&prevIDParent)
 		if err != nil {
-			logger.Debugw("failed to get prev id parent", "error", err)
+			slog.Debug("failed to get prev id parent", slog.String("error", err.Error()))
 			return
 		}
 	}
@@ -367,7 +367,7 @@ func (r *ThreadsRepository) ReorderThread(ctx context.Context, id, userID, paren
 	if nextID != 0 {
 		err = tx.QueryRow(ctx, r.table(selectParentID), userID, nextID).Scan(&nextIDParent)
 		if err != nil {
-			logger.Debugw("failed to get next id parent", "error", err)
+			slog.Debug("failed to get next id parent", slog.String("error", err.Error()))
 			return
 		}
 	}
@@ -411,7 +411,7 @@ func (r *ThreadsRepository) ReorderThread(ctx context.Context, id, userID, paren
 	if currentPrevID != 0 {
 		_, err = tx.Exec(ctx, r.table(updatePrevThread), userID, currentPrevID, currentNextID)
 		if err != nil {
-			logger.Debugw("failed to update prev thread", "error", err)
+			slog.Debug("failed to update prev thread", slog.String("error", err.Error()))
 			return
 		}
 	}
@@ -419,7 +419,7 @@ func (r *ThreadsRepository) ReorderThread(ctx context.Context, id, userID, paren
 	if currentNextID != 0 {
 		_, err = tx.Exec(ctx, r.table(updateNextThread), userID, currentNextID, currentPrevID)
 		if err != nil {
-			logger.Debugw("failed to update next thread", "error", err)
+			slog.Debug("failed to update next thread", slog.String("error", err.Error()))
 			return
 		}
 	}
@@ -434,7 +434,7 @@ func (r *ThreadsRepository) ReorderThread(ctx context.Context, id, userID, paren
 		err = tx.QueryRow(ctx, r.table("SELECT next_id FROM %s WHERE user_id = $1 AND id = $2"), userID, prevID).
 			Scan(&nextID)
 		if err != nil {
-			logger.Debugw("failed to get next id of prev id", "prev_id", prevID, "error", err)
+			slog.Debug("failed to get next id of prev id", slog.String("prev_id", fmt.Sprintf("%v", prevID)), slog.String("error", err.Error()))
 			return
 		}
 
@@ -460,7 +460,7 @@ func (r *ThreadsRepository) ReorderThread(ctx context.Context, id, userID, paren
 		err = tx.QueryRow(ctx, r.table("SELECT prev_id FROM %s WHERE user_id = $1 AND id = $2"), userID, nextID).
 			Scan(&prevID)
 		if err != nil {
-			logger.Debugw("failed to get prev id of next id", "next_id", nextID, "error", err)
+			slog.Debug("failed to get prev id of next id", slog.String("next_id", fmt.Sprintf("%v", nextID)), slog.String("error", err.Error()))
 			return
 		}
 
@@ -582,14 +582,14 @@ func (r *ThreadsRepository) DeleteThread(ctx context.Context, id, userID int64) 
 	var parentID, nextID, prevID int64
 	err = tx.QueryRow(ctx, r.table(selectThread), userID, id).Scan(&parentID, &nextID, &prevID)
 	if err != nil {
-		logger.Debugln("cannot select thread")
+		slog.Debug("cannot select thread")
 		return
 	}
 
 	if nextID != 0 {
 		_, err = tx.Exec(ctx, r.table(updateNextThread), userID, nextID, parentID, prevID)
 		if err != nil {
-			logger.Debugln("cannot update next thread")
+			slog.Debug("cannot update next thread")
 			return
 		}
 	}
@@ -597,7 +597,7 @@ func (r *ThreadsRepository) DeleteThread(ctx context.Context, id, userID int64) 
 	if prevID != 0 {
 		_, err = tx.Exec(ctx, r.table(updatePrevThread), userID, prevID, parentID, nextID)
 		if err != nil {
-			logger.Debugln("cannot update prev thread")
+			slog.Debug("cannot update prev thread")
 			return
 		}
 	}
@@ -608,7 +608,7 @@ func (r *ThreadsRepository) DeleteThread(ctx context.Context, id, userID int64) 
 
 	_, err = tx.Exec(ctx, r.table(deleteThread), userID, id)
 	if err != nil {
-		logger.Debugln("cannot delete thread")
+		slog.Debug("cannot delete thread")
 		return
 	}
 
@@ -624,7 +624,7 @@ func (r *ThreadsRepository) DeleteThread(ctx context.Context, id, userID int64) 
 	var count int32
 	err = tx.QueryRow(ctx, r.table(countChildren), userID, id).Scan(&count)
 	if err != nil {
-		logger.Debugln("cannot count children")
+		slog.Debug("cannot count children")
 		if err == pgx.ErrNoRows {
 			return nil
 		}
@@ -639,20 +639,20 @@ func (r *ThreadsRepository) DeleteThread(ctx context.Context, id, userID int64) 
 	var lastParentThreadID, firstThreadID int64
 	err = tx.QueryRow(ctx, r.table(selectLastParentThread), userID, parentID).Scan(&lastParentThreadID)
 	if err != nil && err != pgx.ErrNoRows {
-		logger.Debugln("cannot select last parent thread")
+		slog.Debug("cannot select last parent thread")
 		return
 	}
 
 	// it must have children, since count > 0
 	err = tx.QueryRow(ctx, r.table(selectFirstThread), userID, id).Scan(&firstThreadID)
 	if err != nil {
-		logger.Debugln("cannot select first thread")
+		slog.Debug("cannot select first thread")
 		return
 	}
 
 	_, err = tx.Exec(ctx, r.table(updateFirstThread), userID, id, lastParentThreadID)
 	if err != nil {
-		logger.Debugln("cannot update first thread")
+		slog.Debug("cannot update first thread")
 		return
 	}
 
@@ -660,14 +660,14 @@ func (r *ThreadsRepository) DeleteThread(ctx context.Context, id, userID int64) 
 		// move to non-empty thread
 		_, err = tx.Exec(ctx, r.table(updateLastParentThread), userID, parentID, firstThreadID)
 		if err != nil {
-			logger.Debugln("cannot update last parent thread")
+			slog.Debug("cannot update last parent thread")
 			return
 		}
 	}
 
 	_, err = tx.Exec(ctx, r.table(moveChildren), userID, id, parentID)
 	if err != nil {
-		logger.Debugln("cannot move children")
+		slog.Debug("cannot move children")
 		return
 	}
 

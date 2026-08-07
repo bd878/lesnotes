@@ -22,7 +22,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	sessionsGateway := sessionsgateway.New(cfg.SessionsServiceAddr)
 
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
-	js := jetstream.NewStream(svc.Config().NatsStream, svc.JS(), svc.Logger())
+	js := jetstream.NewStream(svc.Config().NatsStream, svc.JS())
 	stream.RegisterDomainEventHandlers(dispatcher,
 		stream.NewDomainEventHandlers(
 			am.NewMessagePublisher(
@@ -43,12 +43,12 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	})
 
 	// TODO: middleware.Build(handler, ...middlewares)
-	middleware.WithAuth(httpmiddleware.AuthBuilder(svc.Logger(), ctrl, sessionsGateway, users.PublicUserID))
+	middleware.WithAuth(httpmiddleware.AuthBuilder(ctrl, sessionsGateway, users.PublicUserID))
 	svc.ServeMux().Handle("/users/v1/me",     middleware.Build(handler.GetMe))
 	svc.ServeMux().Handle("/users/v1/logout", middleware.Build(handler.Logout))
 	svc.ServeMux().Handle("/users/v1/update", middleware.Build(handler.Update))
 
-	middleware.NoAuth().WithAuth(httpmiddleware.TokenAuthBuilder(svc.Logger(), ctrl, sessionsGateway, users.PublicUserID))
+	middleware.NoAuth().WithAuth(httpmiddleware.TokenAuthBuilder(ctrl, sessionsGateway, users.PublicUserID))
 	svc.ServeMux().Handle("/users/v2/delete", middleware.Build(handler.DeleteJsonAPI))
 	svc.ServeMux().Handle("/users/v2/me",     middleware.Build(handler.GetMe))
 	svc.ServeMux().Handle("/users/v2/update", middleware.Build(handler.UpdateJsonAPI))

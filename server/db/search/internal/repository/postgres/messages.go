@@ -1,21 +1,21 @@
 package postgres
 
 import (
-	"os"
-	"fmt"
-	"time"
 	"context"
+	"fmt"
+	"log/slog"
+	"os"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/api/search"
 )
 
 type MessagesRepository struct {
-	tableName        string
-	pool             *pgxpool.Pool
+	tableName string
+	pool      *pgxpool.Pool
 }
 
 func NewMessagesRepository(pool *pgxpool.Pool, tableName string) *MessagesRepository {
@@ -42,7 +42,7 @@ func (r *MessagesRepository) PublishMessages(ctx context.Context, ids []int64, u
 	for _, id := range ids {
 		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = false, updated_at = $3 WHERE user_id = $1 AND id = $2"), userID, id, updatedAt)
 		if err != nil {
-			logger.Errorln(err)
+			slog.Error(err.Error())
 		}
 	}
 
@@ -53,7 +53,7 @@ func (r *MessagesRepository) PrivateMessages(ctx context.Context, ids []int64, u
 	for _, id := range ids {
 		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = true, updated_at = $3 WHERE user_id = $1 AND id = $2"), userID, id, updatedAt)
 		if err != nil {
-			logger.Errorln(err)
+			slog.Error(err.Error())
 		}
 	}
 
@@ -98,9 +98,9 @@ func (r *MessagesRepository) SearchMessages(ctx context.Context, userID int64, s
 			private = false
 		}
 
-		rows, err = tx.Query(ctx, r.table("SELECT id, name, title, text, private, created_at, updated_at FROM %s WHERE user_id = $1 AND private = $2 AND name || ' ' || title || ' ' || text ILIKE $3"), userID, private, "%" + substr + "%")
+		rows, err = tx.Query(ctx, r.table("SELECT id, name, title, text, private, created_at, updated_at FROM %s WHERE user_id = $1 AND private = $2 AND name || ' ' || title || ' ' || text ILIKE $3"), userID, private, "%"+substr+"%")
 	} else {
-		rows, err = tx.Query(ctx, r.table("SELECT id, name, title, text, private, created_at, updated_at FROM %s WHERE user_id = $1 AND name || ' ' || title || ' ' || text ILIKE $2"), userID, "%" + substr + "%")
+		rows, err = tx.Query(ctx, r.table("SELECT id, name, title, text, private, created_at, updated_at FROM %s WHERE user_id = $1 AND name || ' ' || title || ' ' || text ILIKE $2"), userID, "%"+substr+"%")
 	}
 
 	defer rows.Close()

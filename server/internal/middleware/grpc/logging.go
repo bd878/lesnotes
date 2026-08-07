@@ -2,7 +2,8 @@ package middleware
 
 import (
 	"context"
-	"github.com/bd878/gallery/server/internal/logger"
+	"log/slog"
+
 	"google.golang.org/grpc"
 )
 
@@ -10,13 +11,13 @@ type LogReporter struct {
 }
 
 func (_ *LogReporter) MsgReceive(req any, info *grpc.UnaryServerInfo, params *MsgReceiveParams) {
-	logger.Infow("-->", "method", info.FullMethod, "time", params.Time.UnixMilli())
+	slog.Info("-->", slog.String("method", info.FullMethod), slog.Int64("time", params.Time.UnixMilli()))
 }
 
 func (_ *LogReporter) MsgSend(resp any, info *grpc.UnaryServerInfo, params *MsgSendParams) {
-	logger.Infow("<--", "method", info.FullMethod, "time", params.Time.UnixMilli())
+	slog.Info("<--", slog.String("method", info.FullMethod), slog.Int64("time", params.Time.UnixMilli()))
 	if params.HandlerError != nil {
-		logger.Errorln(params.HandlerError.Error())
+		slog.Error("handler error", slog.String("error", params.HandlerError.Error()))
 	}
 }
 

@@ -1,44 +1,42 @@
 package system
 
 import (
-	"fmt"
-	"io/fs"
-	"io"
 	"bytes"
-	"net/http"
-	"os"
-	"log/slog"
-	"net"
-	"time"
 	"context"
 	"database/sql"
-
-	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/pressly/goose/v3"
-	"github.com/nats-io/nats.go"
+	"fmt"
+	"io"
+	"io/fs"
+	"log/slog"
+	"net"
+	"net/http"
+	"os"
+	"time"
 
 	"github.com/soheilhy/cmux"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/keepalive"
-	"google.golang.org/grpc/channelz/service"
-	"golang.org/x/sync/errgroup"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"go.opentelemetry.io/contrib/bridges/otelslog"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/log/global"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/log"
 	"go.opentelemetry.io/otel/sdk/resource"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/contrib/bridges/otelslog"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/trace"
+	"golang.org/x/sync/errgroup"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/channelz/service"
+	"google.golang.org/grpc/keepalive"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/nats-io/nats.go"
+	"github.com/pressly/goose/v3"
 
-	"github.com/bd878/gallery/server/internal/logger"
-	"github.com/bd878/gallery/server/internal/waiter"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/bd878/gallery/server/internal/consensus/raft"
 	grpcmiddleware "github.com/bd878/gallery/server/internal/middleware/grpc"
+	"github.com/bd878/gallery/server/internal/waiter"
 )
 
 type Config struct {
@@ -61,14 +59,13 @@ type System struct {
 	js               nats.JetStreamContext
 	rpc              *grpc.Server
 	channelzServer   *grpc.Server
-	logger           *logger.Logger
 	listener         net.Listener
 	raftListener     net.Listener
 	waiter           waiter.Waiter
 	mux              cmux.CMux
 	http             *http.Server
 	serveMux         *http.ServeMux
-	tp               *sdktrace.TracerProvider
+	tp               *trace.TracerProvider
 }
 
 func NewSystem(cfg Config) (*System, error) {
@@ -112,10 +109,6 @@ func NewSystem(cfg Config) (*System, error) {
 		return nil, err
 	}
 
-	if err := s.initLogger(); err != nil {
-		return nil, err
-	}
-
 	return s, nil
 }
 
@@ -125,7 +118,7 @@ func (s *System) initOpenTelemetry() error {
 		return err
 	}
 
-	s.tp = sdktrace.NewTracerProvider(sdktrace.WithBatcher(exporter))
+	s.tp = trace.NewTracerProvider(trace.WithBatcher(exporter))
 	otel.SetTracerProvider(s.tp)
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
 
@@ -173,20 +166,6 @@ func (s *System) initOtelLog() error {
 	})
 
 	return nil
-}
-
-func (s *System) initLogger() error {
-	s.logger = logger.New(logger.Config{
-		NodeName:   s.cfg.NodeName,
-		LogLevel:   s.cfg.LogLevel,
-		SkipCaller: s.cfg.SkipCaller,
-	})
-
-	return nil
-}
-
-func (s *System) Logger() *logger.Logger {
-	return s.logger
 }
 
 func (s *System) Config() Config {

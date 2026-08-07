@@ -2,21 +2,21 @@ package i18n
 
 import (
 	_ "embed"
-	"fmt"
-	"strings"
-	"reflect"
 	"encoding/json"
-	"github.com/bd878/gallery/server/internal/logger"
+	"fmt"
+	"reflect"
+	"log/slog"
+	"strings"
 )
 
-type translations struct {
+type translationsData struct {
 	En map[string]string  `json:"en,omitempty"`
 	Ru map[string]string  `json:"ru,omitempty"`
 	De map[string]string  `json:"de,omitempty"`
 	Fr map[string]string  `json:"fr,omitempty"`
 }
 
-type declinations struct {
+type declinationsData struct {
 	En map[string][]string `json:"en,omitempty"`
 	Ru map[string][]string `json:"ru,omitempty"`
 	De map[string][]string `json:"de,omitempty"`
@@ -25,17 +25,17 @@ type declinations struct {
 
 var emptyDecl []string = make([]string, 3)
 
-func (t translations) Get(code LangCode, key string) string {
+func (t translationsData) Get(code LangCode, key string) string {
 	value := reflect.ValueOf(t)
 	fieldValue := value.FieldByName(code.String())
 	if !fieldValue.IsValid() {
-		logger.Errorw("field value is invalid", "value", fieldValue.String())
+		slog.Error("field value is invalid", slog.String("value", fieldValue.String()))
 		return ""
 	}
 
 	dict, ok := fieldValue.Interface().(map[string]string)
 	if !ok {
-		logger.Error("not ok")
+		slog.Error("translations: not ok", slog.String("context", "translationsData.Get"))
 		return ""
 	}
 
@@ -47,23 +47,23 @@ func (t translations) Get(code LangCode, key string) string {
 	return text
 }
 
-func (d declinations) Get(code LangCode, key string) []string {
+func (d declinationsData) Get(code LangCode, key string) []string {
 	value := reflect.ValueOf(d)
 	fieldValue := value.FieldByName(code.String())
 	if !fieldValue.IsValid() {
-		logger.Errorw("field value is invalid", "value", fieldValue.String())
+		slog.Error("declinations: field value is invalid", slog.String("value", fieldValue.String()))
 		return emptyDecl
 	}
 
-	translations, ok := fieldValue.Interface().(map[string][]string)
+	data, ok := fieldValue.Interface().(map[string][]string)
 	if !ok {
-		logger.Error("not ok")
+		slog.Error("translations: not ok", slog.String("context", "declinationsData.Get"))
 		return emptyDecl
 	}
 
-	texts, ok := translations[key]
+	texts, ok := data[key]
 	if !ok {
-		logger.Errorln("cannot convert field value to map[string]string")
+		slog.Error("translations: cannot convert field value to map[string][]string", slog.String("context", "declinationsData.Get"))
 		return emptyDecl
 	}
 
@@ -72,11 +72,11 @@ func (d declinations) Get(code LangCode, key string) []string {
 
 //go:embed texts.json
 var textsFile []byte
-var texts translations
+var texts translationsData
 
 //go:embed decls.json
 var declsFile []byte
-var decls declinations
+var decls declinationsData
 
 func init() {
 	if err := json.Unmarshal(textsFile, &texts); err != nil {

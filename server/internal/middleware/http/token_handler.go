@@ -1,15 +1,14 @@
 package middleware
 
 import (
-	"io"
-	"errors"
 	"bytes"
-	"log/slog"
 	"context"
-	"net/http"
 	"encoding/json"
+	"errors"
+	"io"
+	"log/slog"
+	"net/http"
 
-	"github.com/bd878/gallery/server/internal/logger"
 	server "github.com/bd878/gallery/server/pkg/model"
 	users "github.com/bd878/gallery/server/users/pkg/model"
 )
@@ -17,16 +16,15 @@ import (
 type RequestContextKey struct {}
 
 type tokenAuthBuilder struct {
-	log             *logger.Logger
 	users           UsersGateway
 	sessions        SessionsGateway
 	publicUserID    int64
 	next            Handler
 }
 
-func TokenAuthBuilder(log *logger.Logger, users UsersGateway, sessions SessionsGateway, publicUserID int64) MiddlewareFunc {
+func TokenAuthBuilder(users UsersGateway, sessions SessionsGateway, publicUserID int64) MiddlewareFunc {
 	return func(next Handler) Handler {
-		return &tokenAuthBuilder{log: log, users: users, sessions: sessions, publicUserID: publicUserID, next: next}
+		return &tokenAuthBuilder{users: users, sessions: sessions, publicUserID: publicUserID, next: next}
 	}
 }
 

@@ -1,13 +1,12 @@
 package middleware
 
 import (
-	"errors"
 	"context"
-	"net/http"
-	"log/slog"
 	"encoding/json"
+	"errors"
+	"log/slog"
+	"net/http"
 
-	"github.com/bd878/gallery/server/internal/logger"
 	server "github.com/bd878/gallery/server/pkg/model"
 	users "github.com/bd878/gallery/server/users/pkg/model"
 	sessions "github.com/bd878/gallery/server/db/sessions/pkg/model"
@@ -31,16 +30,15 @@ type SessionsGateway interface {
 }
 
 type authBuilder struct {
-	log           *logger.Logger
 	users         UsersGateway
 	sessions      SessionsGateway
 	publicUserID  int64
 	next          Handler
 }
 
-func AuthBuilder(log *logger.Logger, users UsersGateway, sessions SessionsGateway, publicUserID int64) MiddlewareFunc {
+func AuthBuilder(users UsersGateway, sessions SessionsGateway, publicUserID int64) MiddlewareFunc {
 	return func(next Handler) Handler {
-		return &authBuilder{log: log, users: users, sessions: sessions, publicUserID: publicUserID, next: next}
+		return &authBuilder{users: users, sessions: sessions, publicUserID: publicUserID, next: next}
 	}
 }
 

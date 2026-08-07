@@ -31,10 +31,10 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	sessionsGateway := sessionsgateway.New(cfg.SessionsServiceAddr)
 	threadsGateway := threadsgateway.New(cfg.ThreadsServiceAddr)
 	filesGateway := filesgateway.New(cfg.FilesServiceAddr)
-	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(svc.Logger(), usersGateway, sessionsGateway, usermodel.PublicUserID))
+	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(usersGateway, sessionsGateway, usermodel.PublicUserID))
 
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
-	js := jetstream.NewStream(svc.Config().NatsStream, svc.JS(), svc.Logger())
+	js := jetstream.NewStream(svc.Config().NatsStream, svc.JS())
 	stream.RegisterDomainEventHandlers(dispatcher, stream.NewDomainEventHandlers(
 		am.NewMessagePublisher(
 			js,
@@ -72,7 +72,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	svc.ServeMux().Handle("GET /liveness", middleware.Build(handler.GetStatus))
 	svc.ServeMux().Handle("GET /metrics", promhttp.Handler())
 
-	middleware.WithAuth(httpmiddleware.TokenAuthBuilder(svc.Logger(), usersGateway, sessionsGateway, usermodel.PublicUserID))
+	middleware.WithAuth(httpmiddleware.TokenAuthBuilder(usersGateway, sessionsGateway, usermodel.PublicUserID))
 	svc.ServeMux().Handle("/messages/v2/send", middleware.Build(handler.SendMessageJsonAPI))
 	svc.ServeMux().Handle("/messages/v2/read", middleware.Build(handler.ReadMessagesJsonAPI))
 	// TODO: /threads/v2/read

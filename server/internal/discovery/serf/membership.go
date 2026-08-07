@@ -1,13 +1,13 @@
 package serf
 
 import (
-	"fmt"
-	"os"
 	"context"
+	"fmt"
 	"net"
+	"os"
+	"log/slog"
 
 	"github.com/hashicorp/serf/serf"
-	"github.com/bd878/gallery/server/internal/logger"
 )
 
 type Membership struct {
@@ -79,11 +79,11 @@ func (m *Membership) Run(ctx context.Context) {
 		select {
 		case <-ctx.Done():
 			if err := m.Leave(); err != nil {
-				logger.Errorw("membership failed to leave", "error", err)
+				slog.Error("membership failed to leave", slog.String("error", err.Error()))
 			}
 			return
 		case e := <- m.events:
-			logger.Debugw("serf new event", "type", e.EventType())
+			slog.Debug("serf new event", slog.String("type", e.EventType().String()))
 			switch e.EventType() {
 			case serf.EventMemberJoin:
 				for _, member := range e.(serf.MemberEvent).Members {
@@ -104,35 +104,35 @@ func (m *Membership) Run(ctx context.Context) {
 			case serf.EventQuery:
 				switch e.String() {
 				case "query: snapshot":
-					logger.Debugln("performing snapshot")
+					slog.Debug("performing snapshot")
 					err := m.handler.Snapshot()
 					if err != nil {
-						logger.Debugw("snapshot returned error", "error", err)
+						slog.Debug("snapshot returned error", slog.String("error", err.Error()))
 					}
-					logger.Debugln("snapshot finished")
+					slog.Debug("snapshot finished")
 
 				case "query: restore":
-					logger.Debugln("performing restore")
+					slog.Debug("performing restore")
 					err := m.handler.Restore()
 					if err != nil {
-						logger.Debugw("restore returned error", "error", err)
+						slog.Debug("restore returned error", slog.String("error", err.Error()))
 					}
-					logger.Debugln("restore finished")
+					slog.Debug("restore finished")
 
 				case "query: leader":
-					logger.Debugln("who is leader")
+					slog.Debug("who is leader")
 					err := m.handler.ShowLeader()
 					if err != nil {
-						logger.Debugw("failed to show roles", "error", err)
+						slog.Debug("failed to show roles", slog.String("error", err.Error()))
 					}
-					logger.Debugln("show leader finished")
+					slog.Debug("show leader finished")
 
 				default:
-					logger.Errorw("unknown event payload", "payload", e.String())
+					slog.Error("unknown event payload", slog.String("payload", e.String()))
 				}
 
 			default:
-				logger.Warnf("Unknown event: %s\n", e.String())
+				slog.Warn("unknown event", slog.String("event", e.String()))
 			}
 		}
 	}

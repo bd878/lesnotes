@@ -20,13 +20,13 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	messagesRepo := postgres.NewMessagesRepository(svc.Pool(), "files.messages")
 
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
-	js := jetstream.NewStream(svc.Config().NatsStream, svc.JS(), svc.Logger())
+	js := jetstream.NewStream(svc.Config().NatsStream, svc.JS())
 	stream.RegisterDomainEventHandlers(dispatcher,
 		stream.NewDomainEventHandlers(am.NewMessagePublisher(
 			js,
 		)))
 
-	controller := application.New(dispatcher, filesRepo, messagesRepo, svc.Logger())
+	controller := application.New(dispatcher, filesRepo, messagesRepo)
 
 	stream.RegisterIntegrationEventHandlers(
 		am.NewMessageSubscriber(

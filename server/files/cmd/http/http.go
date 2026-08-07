@@ -3,10 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log/slog"
 	"context"
 	"os"
 
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/files/config"
 	"github.com/bd878/gallery/server/files/internal/http"
 )

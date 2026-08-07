@@ -1,15 +1,16 @@
 package application
 
 import (
-	"io"
 	"context"
+	"fmt"
 	"errors"
+	"io"
+	"log/slog"
 	"time"
 
 	"github.com/bd878/gallery/server/api/files"
-	"github.com/bd878/gallery/server/internal/ddd"
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/files/internal/domain"
+	"github.com/bd878/gallery/server/internal/ddd"
 )
 
 type FilesRepository interface {
@@ -33,38 +34,36 @@ type MessagesRepository interface {
 }
 
 type Application struct {
-	log              *logger.Logger
-	publisher        ddd.EventPublisher[ddd.Event]
-	filesRepo        FilesRepository
-	messagesRepo     MessagesRepository
+	publisher    ddd.EventPublisher[ddd.Event]
+	filesRepo    FilesRepository
+	messagesRepo MessagesRepository
 }
 
 func New(publisher ddd.EventPublisher[ddd.Event],
-	filesRepo FilesRepository, messagesRepo MessagesRepository, log *logger.Logger) *Application {
+	filesRepo FilesRepository, messagesRepo MessagesRepository) *Application {
 	return &Application{
-		log:           log,
-		publisher:     publisher,
-		filesRepo:     filesRepo,
-		messagesRepo:  messagesRepo,
+		publisher:    publisher,
+		filesRepo:    filesRepo,
+		messagesRepo: messagesRepo,
 	}
 }
 
 func (a *Application) SaveMessageFiles(ctx context.Context, id, userID int64, fileIDs []int64) (err error) {
-	a.log.Debugw("save message files", "id", id, "user_id", userID, "file_ids", fileIDs)
+	slog.Debug("save message files", slog.Int64("id", id), slog.Int64("user_id", userID), slog.String("file_ids", fmt.Sprintf("%v", fileIDs)))
 
 	return a.messagesRepo.SaveMessageFiles(ctx, id, userID, fileIDs)
 }
 
 func (a *Application) DeleteMessageFiles(ctx context.Context, id, userID int64) (err error) {
-	a.log.Debugw("delete message files", "id", id, "user_id", userID)
+	slog.Debug("delete message files", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	fileIDs, err := a.messagesRepo.ReadMessageFiles(ctx, id, []int64{userID})
 	if err != nil {
+		slog.Debug("no files")
 		return err
 	}
 
 	if len(fileIDs) == 0 {
-		a.log.Debugln("no files")
 		return nil
 	}
 
@@ -72,13 +71,12 @@ func (a *Application) DeleteMessageFiles(ctx context.Context, id, userID int64) 
 }
 
 func (a *Application) UpdateMessageFiles(ctx context.Context, id, userID int64, fileIDs []int64) (err error) {
-	a.log.Debugw("update message files", "id", id, "user_id", userID, "file_ids", fileIDs)
-
+	slog.Debug("update message files", slog.Int64("id", id), slog.Int64("user_id", userID), slog.String("file_ids", fmt.Sprintf("%v", fileIDs)))
 	return a.messagesRepo.UpdateMessageFiles(ctx, id, userID, fileIDs)
 }
 
 func (a *Application) ReadMessageFiles(ctx context.Context, id int64, userIDs []int64) (list []*files.File, err error) {
-	a.log.Debugw("read message files", "id", id, "user_ids", userIDs)
+	slog.Debug("read message files", slog.Int64("id", id), slog.String("user_ids", fmt.Sprintf("%v", userIDs)))
 
 	fileIDs, err := a.messagesRepo.ReadMessageFiles(ctx, id, userIDs)
 	if err != nil {
@@ -89,58 +87,58 @@ func (a *Application) ReadMessageFiles(ctx context.Context, id int64, userIDs []
 }
 
 func (a *Application) PublishMessageFiles(ctx context.Context, userID int64, messageIDs []int64) (err error) {
-	a.log.Debugw("publish message files", "user_id", userID, "message_ids", messageIDs)
+	slog.Debug("publish message files", slog.Int64("user_id", userID), slog.String("message_ids", fmt.Sprintf("%v", messageIDs)))
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
 	for _, messageID := range messageIDs {
 		fileIDs, err := a.messagesRepo.ReadMessageFiles(ctx, messageID, []int64{userID})
 		if err != nil {
-			logger.Errorln(err)
+			slog.Error(err.Error())
 			continue
 		}
 
 		err = a.filesRepo.PublishFiles(ctx, userID, fileIDs, updatedAt)
 		if err != nil {
-			logger.Errorln(err)
+			slog.Error(err.Error())
 			continue
-		} 
+		}
 	}
 
 	return nil
 }
 
 func (a *Application) PrivateMessageFiles(ctx context.Context, userID int64, messageIDs []int64) (err error) {
-	a.log.Debugw("private message files", "user_id", userID, "message_ids", messageIDs)
+	slog.Debug("private message files", slog.Int64("user_id", userID), slog.String("message_ids", fmt.Sprintf("%v", messageIDs)))
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
 	for _, messageID := range messageIDs {
 		fileIDs, err := a.messagesRepo.ReadMessageFiles(ctx, messageID, []int64{userID})
 		if err != nil {
-			logger.Errorln(err)
+			slog.Error(err.Error())
 			continue
 		}
 
 		err = a.filesRepo.PrivateFiles(ctx, userID, fileIDs, updatedAt)
 		if err != nil {
-			logger.Errorln(err)
+			slog.Error(err.Error())
 			continue
-		} 
+		}
 	}
 
 	return nil
 }
 
 func (a *Application) ReadBatchFiles(ctx context.Context, userID int64, ids []int64) (list map[int64]*files.File, err error) {
-	a.log.Debugw("read batch files", "user_id", userID, "ids", ids)
+	slog.Debug("read batch files", slog.Int64("user_id", userID), slog.String("ids", fmt.Sprintf("%v", ids)))
 
 	list = make(map[int64]*files.File, len(ids))
 	for _, id := range ids {
 		file, err := a.filesRepo.GetMetaByID(ctx, id)
 		if err != nil {
 			list[id] = &files.File{Error: err.Error()}
-			logger.Errorw("failed to read file", "user_id", userID, "id", id, "error", err)
+			slog.Error(err.Error())
 			continue
 		}
 
@@ -151,7 +149,7 @@ func (a *Application) ReadBatchFiles(ctx context.Context, userID int64, ids []in
 }
 
 func (a *Application) ReadFile(ctx context.Context, id int64, name string, public bool) (file *files.File, err error) {
-	a.log.Debugw("read file", "id", id, "name", name, "public", public)
+	slog.Debug("read file", slog.Int64("id", id), slog.String("name", name), slog.Bool("public", public))
 
 	if name != "" {
 		file, err = a.filesRepo.GetMetaByName(ctx, name)
@@ -171,13 +169,19 @@ func (a *Application) ReadFile(ctx context.Context, id int64, name string, publi
 }
 
 func (a *Application) ReadFileStream(ctx context.Context, oid int32, writer io.Writer) (err error) {
-	a.log.Debugw("read file stream", "oid", oid)
-
+	slog.Debug("read file stream", slog.Int("oid", int(oid)))
 	return a.filesRepo.ReadFile(ctx, oid, writer)
 }
 
 func (a *Application) WriteFileStream(ctx context.Context, userID, id int64, private bool, name, description, mime string, reader io.Reader) (size int64, err error) {
-	a.log.Debugw("write file stream", "user_id", userID, "id", id, "private", private, "name", name, "description", description, "mime", mime)
+	slog.Debug("write file stream",
+		slog.Int64("user_id", userID),
+		slog.Int64("id", id),
+		slog.Bool("private", private),
+		slog.String("name", name),
+		slog.String("description", description),
+		slog.String("mime", mime),
+	)
 
 	createdAt := time.Now().UTC().Format(time.RFC3339)
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
@@ -201,13 +205,12 @@ func (a *Application) WriteFileStream(ctx context.Context, userID, id int64, pri
 }
 
 func (a *Application) ListFiles(ctx context.Context, userID int64, limit, offset int32, ascending, private bool) (list []*files.File, isLastPage bool, err error) {
-	a.log.Debugw("list files", "user_id", userID, "limit", limit, "offset", offset, "ascending", ascending, "private", private)
-
+	slog.Debug("list files", slog.Int64("user_id", userID), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("private", private))
 	return a.filesRepo.ListFiles(ctx, userID, limit, offset, ascending, private)
 }
 
 func (a *Application) PublishFiles(ctx context.Context, userID int64, ids []int64) (err error) {
-	a.log.Debugw("publish files", "user_id", userID, "ids", ids)
+	slog.Debug("publish files", slog.Int64("user_id", userID), slog.String("ids", fmt.Sprintf("%v", ids)))
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
@@ -225,7 +228,7 @@ func (a *Application) PublishFiles(ctx context.Context, userID int64, ids []int6
 }
 
 func (a *Application) PrivateFiles(ctx context.Context, userID int64, ids []int64) (err error) {
-	a.log.Debugw("private files", "user_id", userID, "ids", ids)
+	slog.Debug("private files", slog.Int64("user_id", userID), slog.String("ids", fmt.Sprintf("%v", ids)))
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
@@ -243,7 +246,7 @@ func (a *Application) PrivateFiles(ctx context.Context, userID int64, ids []int6
 }
 
 func (a *Application) DeleteFiles(ctx context.Context, userID int64, ids []int64) (err error) {
-	a.log.Debugw("delete files", "user_id", userID, "ids", ids)
+	slog.Debug("delete files", slog.Int64("user_id", userID), slog.String("ids", fmt.Sprintf("%v", ids)))
 
 	event, err := domain.DeleteFiles(userID, ids)
 	if err != nil {

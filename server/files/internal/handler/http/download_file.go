@@ -3,11 +3,11 @@ package http
 import (
 	"io"
 	"fmt"
+	"log/slog"
 	"strconv"
 	"net/http"
 	"encoding/json"
 
-	"github.com/bd878/gallery/server/internal/logger"
 	users "github.com/bd878/gallery/server/users/pkg/model"
 	middleware "github.com/bd878/gallery/server/internal/middleware/http"
 	files "github.com/bd878/gallery/server/files/pkg/model"

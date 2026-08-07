@@ -1,23 +1,22 @@
 package postgres
 
 import (
-	"fmt"
-	"os"
-	"io"
-	"time"
-	"errors"
 	"context"
+	"errors"
+	"fmt"
+	"io"
+	"log/slog"
+	"os"
 	"strings"
-
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"time"
 
 	"github.com/bd878/gallery/server/api/files"
-	"github.com/bd878/gallery/server/internal/logger"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type FilesRepository struct {
-	tableName  string
+	tableName string
 	pool      *pgxpool.Pool
 }
 
@@ -55,7 +54,7 @@ func (r *FilesRepository) SaveFile(ctx context.Context, reader io.Reader, userID
 	lb := tx.LargeObjects()
 	oid, err = lb.Create(ctx, 0)
 	if err != nil {
-		logger.Errorw("failed to create large object", "error", err)
+		slog.Error(err.Error())
 		return
 	}
 
@@ -79,7 +78,7 @@ func (r *FilesRepository) GetMetaByID(ctx context.Context, id int64) (file *file
 	query := "SELECT owner_id, name, description, private, oid, mime, size, created_at, updated_at FROM %s WHERE id = $1"
 
 	file = &files.File{
-		Id:   id,
+		Id: id,
 	}
 
 	var createdAt, updatedAt *time.Time
@@ -99,7 +98,7 @@ func (r *FilesRepository) GetMetaByName(ctx context.Context, fileName string) (f
 	query := "SELECT owner_id, id, description, private, oid, mime, size, created_at, updated_at FROM %s WHERE name = $1"
 
 	file = &files.File{
-		Name:  fileName,
+		Name: fileName,
 	}
 
 	var createdAt, updatedAt *time.Time
@@ -114,7 +113,6 @@ func (r *FilesRepository) GetMetaByName(ctx context.Context, fileName string) (f
 
 	return
 }
-
 
 func (r *FilesRepository) ListFiles(ctx context.Context, userID int64, limit, offset int32, ascending, private bool) (list []*files.File, isLastPage bool, err error) {
 	var tx pgx.Tx
@@ -157,7 +155,7 @@ func (r *FilesRepository) ListFiles(ctx context.Context, userID int64, limit, of
 		var createdAt, updatedAt time.Time
 
 		file := &files.File{
-			UserId:   userID,
+			UserId: userID,
 		}
 
 		err = rows.Scan(&file.Id, &file.Name, &file.Description, &file.Private, &file.Mime, &file.Size, &createdAt, &updatedAt)
@@ -184,7 +182,7 @@ func (r *FilesRepository) ListFiles(ctx context.Context, userID int64, limit, of
 			return
 		}
 
-		if count <= offset + limit {
+		if count <= offset+limit {
 			isLastPage = true
 		}
 	}
@@ -241,7 +239,7 @@ func (r *FilesRepository) ReadBatchFiles(ctx context.Context, fileIDs []int64) (
 		var createdAt, updatedAt *time.Time
 
 		err = rows.Scan(&file.Id, &file.UserId, &file.Name, &file.Private, &createdAt, &updatedAt,
-			 &file.Size, &file.Mime, &file.Description)
+			&file.Size, &file.Mime, &file.Description)
 		if err != nil {
 			return
 		}

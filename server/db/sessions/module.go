@@ -88,7 +88,7 @@ func setupRaft(svc system.Service, cfg config.Config, sessionsRepo *postgres.Ses
 		RaftLogLevel:   cfg.RaftLogLevel,
 		DataDir:        cfg.DataPath,
 		Servers:        cfg.RaftServers,
-	}, raft.NewStreamLayer(svc.RaftListener()), fsm, svc.Logger())
+	}, raft.NewStreamLayer(svc.RaftListener()), fsm)
 	if err != nil {
 		return nil, err
 	}

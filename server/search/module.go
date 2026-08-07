@@ -25,7 +25,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 
 	ctrl := controller.New(controller.Config{RpcAddr: cfg.SearchServiceAddr})
 
-	js := jetstream.NewStream(svc.Config().NatsStream, svc.JS(), svc.Logger())
+	js := jetstream.NewStream(svc.Config().NatsStream, svc.JS())
 	stream.RegisterIntegrationEventHandlers(
 		am.NewMessageSubscriber(
 			js,
@@ -34,7 +34,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 
 	handler := httphandler.New(ctrl)
 
-	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(svc.Logger(), usersGateway, sessionsGateway, usermodel.PublicUserID))
+	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(usersGateway, sessionsGateway, usermodel.PublicUserID))
 	svc.ServeMux().Handle("/search/v1/messages", middleware.Build(handler.SearchMessages))
 	svc.ServeMux().Handle("/search/v1/files", middleware.Build(handler.SearchFiles))
 	// TODO: search translations
@@ -42,7 +42,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	middleware.NoAuth()
 	svc.ServeMux().Handle("/liveness", middleware.Build(handler.GetStatus))
 
-	middleware.WithAuth(httpmiddleware.TokenAuthBuilder(svc.Logger(), usersGateway, sessionsGateway, usermodel.PublicUserID))
+	middleware.WithAuth(httpmiddleware.TokenAuthBuilder(usersGateway, sessionsGateway, usermodel.PublicUserID))
 	svc.ServeMux().Handle("/search/v2/messages", middleware.Build(handler.SearchMessagesJsonAPI))
 	svc.ServeMux().Handle("/search/v2/files", middleware.Build(handler.SearchFilesJsonAPI))
 

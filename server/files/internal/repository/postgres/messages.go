@@ -1,25 +1,24 @@
 package postgres
 
 import (
-	"fmt"
-	"os"
 	"context"
+	"fmt"
+	"log/slog"
+	"os"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-
-	"github.com/bd878/gallery/server/internal/logger"
 )
 
 type MessagesRepository struct {
-	tableName    string
-	pool         *pgxpool.Pool
+	tableName string
+	pool      *pgxpool.Pool
 }
 
 func NewMessagesRepository(pool *pgxpool.Pool, tableName string) *MessagesRepository {
 	return &MessagesRepository{
-		tableName:     tableName,
-		pool:          pool,
+		tableName: tableName,
+		pool:      pool,
 	}
 }
 
@@ -116,7 +115,7 @@ func (r *MessagesRepository) DeleteFiles(ctx context.Context, ids []int64) (err 
 	for _, id := range ids {
 		_, err = r.pool.Exec(ctx, r.table("DELETE FROM %s WHERE file_id = $1"), id)
 		if err != nil {
-			logger.Errorln(err)
+			slog.Error(err.Error())
 			continue
 		}
 	}

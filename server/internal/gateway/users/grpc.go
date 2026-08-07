@@ -1,16 +1,16 @@
 package grpc
 
 import (
-	"fmt"
 	"context"
+	"fmt"
+	"log/slog"
 
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
+
 	"github.com/bd878/gallery/server/api/users"
 	"github.com/bd878/gallery/server/internal/rpc"
-	"github.com/bd878/gallery/server/internal/logger"
 	"github.com/bd878/gallery/server/db/users/pkg/loadbalance"
 	"github.com/bd878/gallery/server/users/pkg/model"
 )
@@ -50,7 +50,7 @@ func (g *Gateway) setupConnection() error {
 func (g *Gateway) Close() {
 	if g.conn != nil {
 		if err := g.conn.Close(); err != nil {
-			logger.Error(zap.Error(err))
+			slog.Error("users gateway close", slog.String("error", err.Error()))
 		}
 	}
 }
@@ -60,7 +60,7 @@ func (g *Gateway) isConnFailed() bool {
 	if state == connectivity.Shutdown ||
 		state == connectivity.TransientFailure ||
 		state == connectivity.Connecting {
-		logger.Debugw("users gateway conn failed", "state", state.String())
+		slog.Debug("users gateway conn failed", slog.String("state", state.String()))
 		return true
 	}
 	return false

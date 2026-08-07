@@ -1,15 +1,16 @@
 package balancer
 
 import (
-	"os"
 	"fmt"
+	"os"
 	"sync"
 	"strings"
 	"sync/atomic"
 
+	"log/slog"
+
 	"google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/balancer/base"
-	"github.com/bd878/gallery/server/internal/logger"
 )
 
 var _ base.PickerBuilder = (*SubchannelPicker)(nil)
@@ -32,13 +33,13 @@ func (p *SubchannelPicker) Build(buildInfo base.PickerBuildInfo) balancer.Picker
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	logger.Debugln("build picker")
+	slog.Debug("build picker")
 
 	p.leader = nil
 
 	var followers []*conn
 	for sc, scInfo := range buildInfo.ReadySCs {
-		logger.Debugw("scinfo", "address", scInfo.Address.Addr, "is_leader", scInfo.Address.Attributes.Value("is_leader"))
+		slog.Debug("scinfo", slog.String("address", fmt.Sprintf("%v", scInfo.Address.Addr)), slog.String("is_leader", fmt.Sprintf("%v", scInfo.Address.Attributes.Value("is_leader"))))
 
 		isLeader := scInfo.
 			Address.
@@ -67,7 +68,7 @@ func (p *SubchannelPicker) Pick(info balancer.PickInfo) (balancer.PickResult, er
 	p.mu.RLock()
 	defer p.mu.RUnlock()
 
-	logger.Debugw("picker pick", "FullMethodName", info.FullMethodName)
+	slog.Debug("picker pick", slog.String("FullMethodName", info.FullMethodName))
 
 	var result balancer.PickResult
 

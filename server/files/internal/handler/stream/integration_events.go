@@ -1,13 +1,13 @@
 package stream
 
 import (
+	"log/slog"
 	"context"
 	"google.golang.org/protobuf/proto"
 
+	"github.com/bd878/gallery/server/internal/am"
 	"github.com/bd878/gallery/server/api/messages"
 	messagesevents "github.com/bd878/gallery/server/messages/pkg/events"
-	"github.com/bd878/gallery/server/internal/am"
-	"github.com/bd878/gallery/server/internal/logger"
 )
 
 type FilesController interface {
@@ -40,7 +40,7 @@ func RegisterIntegrationEventHandlers(subscriber am.RawMessageSubscriber, handle
 }
 
 func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingMessage) error {
-	logger.Debugw("handle message", "name", msg.MessageName(), "subject", msg.Subject())
+	slog.Debug("handle message", slog.String("name", msg.MessageName()), slog.String("subject", msg.Subject()))
 
 	switch msg.MessageName() {
 	case messagesevents.MessageCreatedEvent:

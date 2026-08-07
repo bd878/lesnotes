@@ -3,13 +3,13 @@ package http
 import (
 	"os"
 	"fmt"
+	"log/slog"
 	"time"
 	"context"
 	"net/http"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/bd878/gallery/server/internal/waiter"
-	"github.com/bd878/gallery/server/internal/logger"
 	usermodel "github.com/bd878/gallery/server/users/pkg/model"
 	usersgateway "github.com/bd878/gallery/server/internal/gateway/users"
 	sessionsgateway "github.com/bd878/gallery/server/internal/gateway/sessions"

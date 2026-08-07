@@ -27,7 +27,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
 	stream.RegisterDomainEventHandlers(dispatcher, stream.NewDomainEventHandlers(
 		am.NewMessagePublisher(
-			jetstream.NewStream(svc.Config().NatsStream, svc.JS(), svc.Logger()),
+			jetstream.NewStream(svc.Config().NatsStream, svc.JS()),
 		),
 	))
 
@@ -35,14 +35,14 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 
 	handler := httphandler.New(ctrl)
 
-	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(svc.Logger(), usersGateway, sessionsGateway, usermodel.PublicUserID))
+	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(usersGateway, sessionsGateway, usermodel.PublicUserID))
 	svc.ServeMux().Handle("GET   /billing/v1/invoices", middleware.Build(handler.GetInvoice))
 	svc.ServeMux().Handle("GET   /billing/v1/payments", middleware.Build(handler.GetPayment))
 
 	middleware.NoAuth()
 	svc.ServeMux().Handle("GET   /liveness", middleware.Build(handler.GetStatus))
 
-	middleware.WithAuth(httpmiddleware.TokenAuthBuilder(svc.Logger(), usersGateway, sessionsGateway, usermodel.PublicUserID))
+	middleware.WithAuth(httpmiddleware.TokenAuthBuilder(usersGateway, sessionsGateway, usermodel.PublicUserID))
 	svc.ServeMux().Handle("POST  /billing/v2/invoices", middleware.Build(handler.CreateInvoiceJsonAPI))
 	svc.ServeMux().Handle("POST  /billing/v2/payments", middleware.Build(handler.StartPaymentJsonAPI))
 	svc.ServeMux().Handle("POST  /billing/v2/cancel",   middleware.Build(handler.CancelPaymentJsonAPI))

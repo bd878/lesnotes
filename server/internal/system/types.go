@@ -1,17 +1,16 @@
 package system
 
 import (
+	"database/sql"
 	"net"
 	"net/http"
-	"database/sql"
 
 	"github.com/soheilhy/cmux"
-	"google.golang.org/grpc"
 	"github.com/nats-io/nats.go"
+	"google.golang.org/grpc"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/bd878/gallery/server/internal/waiter"
-	"github.com/bd878/gallery/server/internal/logger"
 )
 
 type Service interface {
@@ -24,6 +23,5 @@ type Service interface {
 	JS() nats.JetStreamContext
 	RPC() *grpc.Server
 	Waiter() waiter.Waiter
-	Logger() *logger.Logger
 	RaftListener() net.Listener
 }

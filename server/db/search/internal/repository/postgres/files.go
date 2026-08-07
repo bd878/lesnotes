@@ -1,17 +1,16 @@
 package postgres
 
 import (
-	"fmt"
 	"context"
+	"fmt"
+	"log/slog"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-
-	"github.com/bd878/gallery/server/internal/logger"
 )
 
 type FilesRepository struct {
-	tableName        string
-	pool             *pgxpool.Pool
+	tableName string
+	pool      *pgxpool.Pool
 }
 
 func NewFilesRepository(pool *pgxpool.Pool, tableName string) *FilesRepository {
@@ -33,7 +32,7 @@ func (r *FilesRepository) DeleteFiles(ctx context.Context, ids []int64, userID i
 	for _, id := range ids {
 		_, err = r.pool.Exec(ctx, r.table(query), id, userID)
 		if err != nil {
-			logger.Errorln(err)
+			slog.Error(err.Error())
 		}
 	}
 
@@ -44,7 +43,7 @@ func (r *FilesRepository) PublishFiles(ctx context.Context, ids []int64, userID 
 	for _, id := range ids {
 		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = false, updated_at = $3 WHERE owner_id = $1 AND id = $2"), userID, id, updatedAt)
 		if err != nil {
-			logger.Errorln(err)
+			slog.Error(err.Error())
 		}
 	}
 
@@ -55,7 +54,7 @@ func (r *FilesRepository) PrivateFiles(ctx context.Context, ids []int64, userID 
 	for _, id := range ids {
 		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = true, updated_at = $3 WHERE owner_id = $1 AND id = $2"), userID, id, updatedAt)
 		if err != nil {
-			logger.Errorln(err)
+			slog.Error(err.Error())
 		}
 	}
 

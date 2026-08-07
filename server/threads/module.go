@@ -25,7 +25,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	sessionsGateway := sessionsgateway.New(cfg.SessionsServiceAddr)
 
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
-	js := jetstream.NewStream(svc.Config().NatsStream, svc.JS(), svc.Logger())
+	js := jetstream.NewStream(svc.Config().NatsStream, svc.JS())
 	stream.RegisterDomainEventHandlers(dispatcher,
 		stream.NewDomainEventHandlers(
 			am.NewMessagePublisher(
@@ -44,7 +44,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 		stream.NewIntegrationEventHandlers(ctrl, ctrl),
 	)
 
-	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(svc.Logger(), usersGateway, sessionsGateway, usermodel.PublicUserID))
+	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(usersGateway, sessionsGateway, usermodel.PublicUserID))
 	svc.ServeMux().Handle("/threads/v1/publish", middleware.Build(handler.PublishThread))
 	svc.ServeMux().Handle("/threads/v1/private", middleware.Build(handler.PrivateThread))
 	svc.ServeMux().Handle("/threads/v1/reorder", middleware.Build(handler.ReorderThread))
@@ -53,7 +53,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	middleware.NoAuth()
 	svc.ServeMux().Handle("/liveness", middleware.Build(handler.GetStatus))
 
-	middleware.WithAuth(httpmiddleware.TokenAuthBuilder(svc.Logger(), usersGateway, sessionsGateway, usermodel.PublicUserID))
+	middleware.WithAuth(httpmiddleware.TokenAuthBuilder(usersGateway, sessionsGateway, usermodel.PublicUserID))
 	svc.ServeMux().Handle("/threads/v2/read", middleware.Build(handler.ReadThreadJsonAPI))
 	svc.ServeMux().Handle("/threads/v2/list", middleware.Build(handler.ListThreadsJsonAPI))
 	svc.ServeMux().Handle("/threads/v2/publish", middleware.Build(handler.PublishThreadJsonAPI))

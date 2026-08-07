@@ -1,18 +1,18 @@
 package raft
 
 import (
-	"os"
-	"time"
-	"errors"
 	"context"
+	"errors"
+	"os"
 	"path/filepath"
+	"log/slog"
+	"time"
 
-	raftboltdb "github.com/hashicorp/raft-boltdb"
 	hclog "github.com/hashicorp/go-hclog"
+	raftboltdb "github.com/hashicorp/raft-boltdb"
 	"github.com/hashicorp/raft"
 
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/internal/logger"
 )
 
 type Config struct {
@@ -31,14 +31,13 @@ type Config struct {
 }
 
 type Distributed struct {
-	log            *logger.Logger
 	conf           Config
 	raft           *raft.Raft
 	snapshotStore  raft.SnapshotStore
 	streamLayer    *StreamLayer
 }
 
-func New(conf Config, streamLayer *StreamLayer, fsm raft.FSM, log *logger.Logger) (*Distributed, error) {
+func New(conf Config, streamLayer *StreamLayer, fsm raft.FSM) (*Distributed, error) {
 	if conf.RetainSnapshots == 0 {
 		conf.RetainSnapshots = 1
 	}
@@ -52,7 +51,6 @@ func New(conf Config, streamLayer *StreamLayer, fsm raft.FSM, log *logger.Logger
 	}
 
 	m := &Distributed{
-		log:         log,
 		conf:        conf,
 		streamLayer: streamLayer,
 	}
@@ -151,7 +149,7 @@ func (m *Distributed) WaitForLeader(timeout time.Duration) error {
 	for {
 		select {
 		case <- timeoutc:
-			m.log.Error("no leader, timeout")
+			slog.Error("no leader, timeout")
 			return nil
 		case <-ticker.C:
 			if lead, _ := m.raft.LeaderWithID(); lead != "" {
@@ -175,10 +173,10 @@ func (m *Distributed) Apply(cmd []byte, timeout time.Duration) (err error) {
 	return nil
 }
 
-func (m *Distributed) GetServers(_ context.Context) ([](*api.Server), error) {
+func (m *Distributed) GetServers(_ context.Context) ([]*api.Server, error) {
 	future := m.raft.GetConfiguration()
 	if err := future.Error(); err != nil {
-		m.log.Error("message", "failed to get servers configuration")
+		slog.Error("message", slog.String("error", "failed to get servers configuration"))
 		return nil, err
 	}
 	var servers []*api.Server
@@ -234,7 +232,7 @@ func (m *Distributed) Leave(id string) error {
 		return errors.New("cannot remove node from cluster: not a leader")
 	}
 
-	m.log.Infow("remove from cluster server", "id", id)
+	slog.Info("remove from cluster server", slog.String("id", id))
 	removeFuture := m.raft.RemoveServer(raft.ServerID(id), 0, 0)
 	return removeFuture.Error()
 }
@@ -250,7 +248,7 @@ func (m *Distributed) Restore() error {
 		return errors.New("cannot restore from snapshot: not a leader")
 	}
 
-	m.log.Debugln("restoring from last snapshot")
+	slog.Debug("restoring from last snapshot")
 	list, err := m.snapshotStore.List()
 	if err != nil {
 		return err
@@ -271,7 +269,7 @@ func (m *Distributed) Restore() error {
 
 func (m *Distributed) ShowLeader() error {
 	state := m.raft.State()
-	m.log.Infow("my state", "addr", m.streamLayer.Addr(), "state", state.String())
+	slog.Info("my state", slog.String("addr", m.streamLayer.Addr().String()), slog.String("state", state.String()))
 	return nil
 }
 
