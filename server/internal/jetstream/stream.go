@@ -65,9 +65,13 @@ func (s *Stream) Publish(ctx context.Context, topicName string, rawMsg am.Messag
 
 	go func(future nats.PubAckFuture, tries int) {
 		var err error
+		timeout := time.After(30 * time.Second)
 
 		for {
 			select {
+			case <-timeout:
+				slog.Error("publish message timeout", slog.String("msgId", rawMsg.ID()))
+				return
 			case <-future.Ok():
 				return
 			case <-future.Err():

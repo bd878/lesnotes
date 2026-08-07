@@ -688,13 +688,16 @@ func (ps *limitOffsetMap) Get(id int64) (result *model.IDLimitOffset, ok bool) {
 func (ps *limitOffsetMap) Iterator(ctx context.Context) (result chan *model.IDLimitOffset) {
 	result = make(chan *model.IDLimitOffset, 0)
 
+	ps.mu.RLock()
+	pairs := make([]*model.IDLimitOffset, 0, len(ps.dict))
+	for _, pair := range ps.dict {
+		pairs = append(pairs, pair)
+	}
+	ps.mu.RUnlock()
+
 	go func(ctx context.Context, ch chan *model.IDLimitOffset) {
-
-		ps.mu.RLock()
-		defer ps.mu.RUnlock()
 		defer close(ch)
-
-		for _, pair := range ps.dict {
+		for _, pair := range pairs {
 			select {
 			case <-ctx.Done():
 				return
@@ -702,7 +705,6 @@ func (ps *limitOffsetMap) Iterator(ctx context.Context) (result chan *model.IDLi
 				ch <- pair
 			}
 		}
-
 	}(ctx, result)
 
 	return
