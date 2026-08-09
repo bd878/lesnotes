@@ -54,7 +54,6 @@ func New(conf Config, publisher ddd.EventPublisher[ddd.Event]) *Controller {
 }
 
 func (s *Controller) CreateInvoice(ctx context.Context, id string, userID int64, total int64, metadata []byte, cart *model.Cart) (err error) {
-
 	slog.Debug("create invoice", slog.String("id", id), slog.Int64("user_id", userID), slog.Int64("total", total), slog.Any("metadata", metadata), slog.Any("cart", cart))
 
 	cc, err := model.CartToProto(cart)
@@ -91,7 +90,6 @@ func (s *Controller) CreateInvoice(ctx context.Context, id string, userID int64,
 }
 
 func (s *Controller) StartPayment(ctx context.Context, id, userID int64, invoiceID string, currency string, total int64, metadata []byte) (err error) {
-
 	slog.Debug("start payment", slog.Int64("id", id), slog.Int64("user_id", userID), slog.String("invoice_id", invoiceID), slog.String("currency", currency), slog.Int64("total", total), slog.Any("metadata", metadata))
 
 	cmd, err := proto.Marshal(&billing.AppendPaymentCommand{
@@ -119,7 +117,6 @@ func (s *Controller) StartPayment(ctx context.Context, id, userID int64, invoice
 }
 
 func (s *Controller) ProceedPayment(ctx context.Context, id, userID int64) (err error) {
-
 	slog.Debug("proceed payment", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	payment, err := s.GetPayment(ctx, id, userID)
@@ -205,7 +202,6 @@ func (s *Controller) ProceedPayment(ctx context.Context, id, userID int64) (err 
 }
 
 func (s *Controller) CancelPayment(ctx context.Context, id, userID int64) (err error) {
-
 	slog.Debug("cancel payment", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&billing.CancelPaymentCommand{
@@ -227,7 +223,6 @@ func (s *Controller) CancelPayment(ctx context.Context, id, userID int64) (err e
 }
 
 func (s *Controller) RefundPayment(ctx context.Context, id, userID int64) (err error) {
-
 	slog.Debug("refund payment", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&billing.RefundPaymentCommand{
@@ -249,7 +244,6 @@ func (s *Controller) RefundPayment(ctx context.Context, id, userID int64) (err e
 }
 
 func (s *Controller) GetInvoice(ctx context.Context, id string, userID int64) (invoice *model.Invoice, err error) {
-
 	slog.Debug("get invoice", slog.String("id", id), slog.Int64("user_id", userID))
 
 	resp, err := s.client.GetInvoice(ctx, &billing.GetInvoiceRequest{
@@ -269,7 +263,6 @@ func (s *Controller) GetInvoice(ctx context.Context, id string, userID int64) (i
 }
 
 func (s *Controller) GetPayment(ctx context.Context, id, userID int64) (payment *model.Payment, err error) {
-
 	slog.Debug("get payment", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	resp, err := s.client.GetPayment(ctx, &billing.GetPaymentRequest{

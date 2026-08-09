@@ -56,7 +56,6 @@ func NewTranslationsController(conf TranslationsConfig, publisher ddd.EventPubli
 }
 
 func (s *TranslationsController) SaveTranslation(ctx context.Context, userID, messageID int64, lang, title, text string) (err error) {
-
 	slog.Debug("save translation", slog.Int64("user_id", userID), slog.Int64("message_id", messageID), slog.String("lang", lang), slog.String("title", title), slog.String("text", text))
 
 	createdAt := time.Now().UTC().Format(time.RFC3339)
@@ -133,7 +132,6 @@ func (s *TranslationsController) UpdateTranslation(ctx context.Context, messageI
 }
 
 func (s *TranslationsController) DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error) {
-
 	slog.Debug("delete translation", slog.Int64("message_id", messageID), slog.String("lang", lang))
 
 	cmd, err := proto.Marshal(&translations.DeleteTranslationCommand{
@@ -185,7 +183,6 @@ func (s *TranslationsController) ReadTranslation(ctx context.Context, userID, me
 }
 
 func (s *TranslationsController) ListTranslations(ctx context.Context, userID, messageID int64, name string) (list []*model.Translation, err error) {
-
 	slog.Debug("list translations", slog.Int64("user_id", userID), slog.Int64("message_id", messageID), slog.String("name", name))
 
 	resp, err := s.client.ListTranslations(ctx, &translations.ListTranslationsRequest{

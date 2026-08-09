@@ -56,7 +56,6 @@ func NewCommentsController(conf CommentsConfig, publisher ddd.EventPublisher[ddd
 }
 
 func (s *CommentsController) SendComment(ctx context.Context, id, userID, messageID int64, text string, metadata []byte) (err error) {
-
 	slog.Debug("save comment", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Int64("message_id", messageID), slog.String("text", text), slog.String("metadata", fmt.Sprintf("%v", metadata)))
 
 	createdAt := time.Now().UTC().Format(time.RFC3339)
@@ -130,7 +129,6 @@ func (s *CommentsController) UpdateComment(ctx context.Context, id, userID int64
 }
 
 func (s *CommentsController) DeleteComment(ctx context.Context, id, userID int64) (err error) {
-
 	slog.Debug("delete comment", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&comments.DeleteCommentCommand{
@@ -159,7 +157,6 @@ func (s *CommentsController) DeleteComment(ctx context.Context, id, userID int64
 }
 
 func (s *CommentsController) DeleteMessageComments(ctx context.Context, messageID int64) (err error) {
-
 	slog.Debug("delete message comments", slog.Int64("message_id", messageID))
 
 	cmd, err := proto.Marshal(&comments.DeleteMessageCommentsCommand{
@@ -187,7 +184,6 @@ func (s *CommentsController) DeleteMessageComments(ctx context.Context, messageI
 }
 
 func (s *CommentsController) ReadComment(ctx context.Context, id, userID int64) (comment *model.Comment, err error) {
-
 	slog.Debug("read comment", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	res, err := s.client.ReadComment(ctx, &comments.ReadCommentRequest{

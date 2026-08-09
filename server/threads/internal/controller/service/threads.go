@@ -53,7 +53,6 @@ func New(conf config.Config, publisher ddd.EventPublisher[ddd.Event]) *Controlle
 }
 
 func (s *Controller) ReadThread(ctx context.Context, id, userID int64, name string) (thread *model.Thread, err error) {
-
 	slog.Debug("read thread", slog.Int64("id", id), slog.Int64("user_id", userID), slog.String("name", name))
 
 	resp, err := s.client.Read(ctx, &threads.ReadRequest{Id: id, UserId: userID, Name: name})
@@ -67,7 +66,6 @@ func (s *Controller) ReadThread(ctx context.Context, id, userID int64, name stri
 }
 
 func (s *Controller) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (list []*model.Thread, isLastPage bool, err error) {
-
 	slog.Debug("list threads", slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("asc", asc))
 
 	resp, err := s.client.List(ctx, &threads.ListRequest{
@@ -85,7 +83,6 @@ func (s *Controller) ListThreads(ctx context.Context, userID, parentID int64, li
 }
 
 func (s *Controller) ListMessages(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool, privateMessage *bool) (list []*model.Thread, isLastPage bool, err error) {
-
 	slog.Debug("list messages", slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("asc", asc), slog.Any("private_message", privateMessage))
 
 	resp, err := s.client.ListMessages(ctx, &threads.ListMessagesRequest{
@@ -104,7 +101,6 @@ func (s *Controller) ListMessages(ctx context.Context, userID, parentID int64, l
 }
 
 func (s *Controller) ResolveThread(ctx context.Context, id, userID int64) (path []*model.PathStep, err error) {
-
 	slog.Debug("resolve thread", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	resp, err := s.client.Resolve(ctx, &threads.ResolveRequest{Id: id, UserId: userID})
@@ -118,7 +114,6 @@ func (s *Controller) ResolveThread(ctx context.Context, id, userID int64) (path 
 }
 
 func (s *Controller) PublishThread(ctx context.Context, id, userID int64) (err error) {
-
 	slog.Debug("publish thread", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
@@ -150,7 +145,6 @@ func (s *Controller) PublishThread(ctx context.Context, id, userID int64) (err e
 }
 
 func (s *Controller) PrivateThread(ctx context.Context, id, userID int64) (err error) {
-
 	slog.Debug("private thread", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
@@ -182,7 +176,6 @@ func (s *Controller) PrivateThread(ctx context.Context, id, userID int64) (err e
 }
 
 func (s *Controller) CreateThread(ctx context.Context, id, userID, parentID int64, name, description, title string, private bool) (err error) {
-
 	slog.Debug("create thread", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.String("name", name), slog.String("description", description), slog.String("title", title), slog.Bool("private", private))
 
 	createdAt := time.Now().UTC().Format(time.RFC3339)
@@ -221,7 +214,6 @@ func (s *Controller) CreateThread(ctx context.Context, id, userID, parentID int6
 }
 
 func (s *Controller) UpdateThread(ctx context.Context, id, userID int64, name, description, title *string) (err error) {
-
 	slog.Debug("update thread", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Any("name", name), slog.Any("description", description), slog.Any("title", title))
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
@@ -256,7 +248,6 @@ func (s *Controller) UpdateThread(ctx context.Context, id, userID int64, name, d
 }
 
 func (s *Controller) ReorderThread(ctx context.Context, id, userID, parentID, nextID, prevID int64) (err error) {
-
 	slog.Debug("reorder thread", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.Int64("next_id", nextID), slog.Int64("prev_id", prevID))
 
 	cmd, err := proto.Marshal(&threads.ReorderCommand{
@@ -293,7 +284,6 @@ func (s *Controller) ReorderThread(ctx context.Context, id, userID, parentID, ne
 }
 
 func (s *Controller) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
-
 	slog.Debug("private thread messages", slog.Any("ids", ids), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&threads.PrivateMessagesCommand{
@@ -317,7 +307,6 @@ func (s *Controller) PrivateMessages(ctx context.Context, ids []int64, userID in
 }
 
 func (s *Controller) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
-
 	slog.Debug("publish thread messages", slog.Any("ids", ids), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&threads.PublishMessagesCommand{
@@ -341,7 +330,6 @@ func (s *Controller) PublishMessages(ctx context.Context, ids []int64, userID in
 }
 
 func (s *Controller) DeleteThread(ctx context.Context, id, userID int64) (err error) {
-
 	slog.Debug("delete thread", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&threads.DeleteCommand{

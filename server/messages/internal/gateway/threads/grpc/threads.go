@@ -35,15 +35,15 @@ func New(addr string) *Gateway {
 	if err != nil {
 		panic(err)
 	}
+
 	gateway.conn = conn
 	gateway.client = threads.NewThreadsClient(conn)
-	return nil
+
 
 	return gateway
 }
 
 func (g *Gateway) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32) (list []*model.Thread, isLastPage bool, err error) {
-
 	slog.Debug("list threads", slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)))
 
 	resp, err := g.client.List(ctx, &threads.ListRequest{
@@ -88,7 +88,6 @@ func (g *Gateway) ListMessages(ctx context.Context, userID, parentID int64, limi
 }
 
 func (g *Gateway) CountThreads(ctx context.Context, id, userID int64) (total int32, err error) {
-
 	slog.Debug("count threads", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	resp, err := g.client.Count(ctx, &threads.CountRequest{
@@ -128,7 +127,6 @@ func (g *Gateway) CountMessages(ctx context.Context, id, userID int64, privateMe
 }
 
 func (g *Gateway) ResolvePath(ctx context.Context, userID, id int64) (path []*threads.PathStep, err error) {
-
 	slog.Debug("resolve path", slog.Int64("user_id", userID), slog.Int64("id", id))
 
 	resp, err := g.client.Resolve(ctx, &threads.ResolveRequest{
@@ -145,7 +143,6 @@ func (g *Gateway) ResolvePath(ctx context.Context, userID, id int64) (path []*th
 }
 
 func (g *Gateway) ReadThread(ctx context.Context, userID, id int64, name string) (thread *model.Thread, err error) {
-
 	slog.Debug("read thread", slog.Int64("user_id", userID), slog.Int64("id", id), slog.String("name", name))
 
 	resp, err := g.client.Read(ctx, &threads.ReadRequest{
@@ -163,7 +160,6 @@ func (g *Gateway) ReadThread(ctx context.Context, userID, id int64, name string)
 }
 
 func (g *Gateway) ReadParent(ctx context.Context, userID, id int64) (thread *model.Thread, err error) {
-
 	slog.Debug("read parent", slog.Int64("user_id", userID), slog.Int64("id", id))
 
 	resp, err := g.client.ReadParent(ctx, &threads.ReadParentRequest{

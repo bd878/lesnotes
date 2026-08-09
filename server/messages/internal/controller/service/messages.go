@@ -83,7 +83,6 @@ func NewMessagesController(conf MessagesConfig, publisher ddd.EventPublisher[ddd
 }
 
 func (s *MessagesController) SaveMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (message *model.Message, err error) {
-
 	slog.Debug("save message", slog.Int64("id", id), slog.String("text", text), slog.String("title", title), slog.String("file_ids", fmt.Sprintf("%v", fileIDs)), slog.Int64("thread_id", threadID), slog.Int64("user_id", userID), slog.Bool("private", private), slog.String("name", name))
 
 	createdAt := time.Now().UTC().Format(time.RFC3339)
@@ -139,7 +138,6 @@ func (s *MessagesController) SaveMessage(ctx context.Context, id int64, text, ti
 }
 
 func (s *MessagesController) DeleteUserMessages(ctx context.Context, userID int64) (err error) {
-
 	slog.Debug("delete user messages", slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&messages.DeleteUserMessagesCommand{
@@ -159,7 +157,6 @@ func (s *MessagesController) DeleteUserMessages(ctx context.Context, userID int6
 }
 
 func (s *MessagesController) DeleteMessages(ctx context.Context, ids []int64, userID int64) (err error) {
-
 	slog.Debug("delete messages", slog.String("ids", fmt.Sprintf("%v", ids)), slog.Int64("user_id", userID))
 
 	for _, id := range ids {
@@ -194,7 +191,6 @@ func (s *MessagesController) DeleteMessages(ctx context.Context, ids []int64, us
 }
 
 func (s *MessagesController) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
-
 	slog.Debug("publish messages", slog.String("ids", fmt.Sprintf("%v", ids)), slog.Int64("user_id", userID))
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
@@ -226,7 +222,6 @@ func (s *MessagesController) PublishMessages(ctx context.Context, ids []int64, u
 }
 
 func (s *MessagesController) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
-
 	slog.Debug("private messages", slog.String("ids", fmt.Sprintf("%v", ids)), slog.Int64("user_id", userID))
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
@@ -384,7 +379,6 @@ func (s *MessagesController) ReadThreadMessages(ctx context.Context, userID, thr
 
 // Read messages by given ids
 func (s *MessagesController) ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (list []*model.Message, err error) {
-
 	slog.Debug("read batch messages", slog.Int64("user_id", userID), slog.String("ids", fmt.Sprintf("%v", ids)))
 
 	res, err := s.client.ReadBatchMessages(ctx, &messages.ReadBatchMessagesRequest{
@@ -415,7 +409,6 @@ func (s *MessagesController) ReadBatchMessages(ctx context.Context, userID int64
 
 // read all messages not concerning thread
 func (s *MessagesController) ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (list *model.MessagesList, err error) {
-
 	slog.Debug("read messages", slog.Int64("user_id", userID), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("ascending", ascending))
 
 	res, err := s.client.ReadMessages(ctx, &messages.ReadMessagesRequest{
@@ -448,7 +441,6 @@ func (s *MessagesController) ReadMessages(ctx context.Context, userID int64, lim
 }
 
 func (s *MessagesController) ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *model.Message, err error) {
-
 	slog.Debug("read message", slog.Int64("id", id), slog.String("name", name), slog.String("user_ids", fmt.Sprintf("%v", userIDs)))
 
 	res, err := s.client.ReadMessage(ctx, &messages.ReadMessageRequest{
@@ -509,7 +501,6 @@ func (s *MessagesController) ReadMessage(ctx context.Context, id int64, name str
 }
 
 func (s *MessagesController) ReadPath(ctx context.Context, userID, id int64, name string) (path []*model.Message, parentID int64, err error) {
-
 	slog.Debug("read path", slog.Int64("user_id", userID), slog.Int64("id", id), slog.String("name", name))
 
 	if name != "" && id == 0 {

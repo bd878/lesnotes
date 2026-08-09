@@ -21,6 +21,7 @@ type Gateway struct {
 
 func New(addr string) *Gateway {
 	g := &Gateway{addr: addr}
+
 	conn, err := rpc.NewClient(
 		fmt.Sprintf(
 			"%s:///%s",
@@ -32,9 +33,10 @@ func New(addr string) *Gateway {
 	if err != nil {
 		panic(err)
 	}
+
 	g.conn = conn
 	g.client = sessions.NewSessionsClient(conn)
-	return nil
+
 	return g
 }
 

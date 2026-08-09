@@ -67,7 +67,6 @@ func New(conf config.Config, sessions SessionsGateway, publisher ddd.EventPublis
 }
 
 func (s *Controller) CreateUser(ctx context.Context, id int64, login, password string) (user *model.User, err error) {
-
 	slog.Debug("create user",
 		slog.Int64("id", id),
 		slog.String("login", login),
@@ -120,7 +119,6 @@ func (s *Controller) CreateUser(ctx context.Context, id int64, login, password s
 }
 
 func (s *Controller) FindUser(ctx context.Context, id int64, login, token string) (user *model.User, err error) {
-
 	slog.Debug("find user",
 		slog.Int64("id", id),
 		slog.String("login", login),
@@ -152,7 +150,6 @@ func (s *Controller) FindUser(ctx context.Context, id int64, login, token string
 }
 
 func (s *Controller) AuthUser(ctx context.Context, token string) (user *model.User, err error) {
-
 	slog.Debug("auth user", slog.String("token", token))
 
 	session, err := s.sessions.GetSession(ctx, token)
@@ -186,7 +183,6 @@ func (s *Controller) AuthUser(ctx context.Context, token string) (user *model.Us
 }
 
 func (s *Controller) GetUser(ctx context.Context, id int64) (user *model.User, err error) {
-
 	slog.Debug("get user", slog.Int64("id", id))
 
 	userProto, err := s.client.GetUser(ctx, &users.GetUserRequest{Id: id})
@@ -200,7 +196,6 @@ func (s *Controller) GetUser(ctx context.Context, id int64) (user *model.User, e
 }
 
 func (s *Controller) UpdateUser(ctx context.Context, id int64, login *string, metadata []byte) (err error) {
-
 	slog.Debug("update user",
 		slog.Int64("id", id),
 		slog.String("login", *login),
@@ -227,7 +222,6 @@ func (s *Controller) UpdateUser(ctx context.Context, id int64, login *string, me
 }
 
 func (s *Controller) MakePremium(ctx context.Context, id int64, invoiceID, createdAt, expiresAt string) (err error) {
-
 	slog.Debug("make premium",
 		slog.Int64("id", id),
 		slog.String("invoice_id", invoiceID),
@@ -255,7 +249,6 @@ func (s *Controller) MakePremium(ctx context.Context, id int64, invoiceID, creat
 }
 
 func (s *Controller) LoginUser(ctx context.Context, login, password string) (session *sessions.Session, err error) {
-
 	slog.Debug("login user",
 		slog.String("login", login),
 		slog.Int("len(password)", len(password)),
@@ -284,7 +277,6 @@ func (s *Controller) LoginUser(ctx context.Context, login, password string) (ses
 }
 
 func (s *Controller) DeleteUser(ctx context.Context, id int64) (err error) {
-
 	slog.Debug("delete user", slog.Int64("id", id))
 
 	// TODO: emit event, not call
@@ -318,7 +310,6 @@ func (s *Controller) DeleteUser(ctx context.Context, id int64) (err error) {
 }
 
 func (s *Controller) LogoutUser(ctx context.Context, token string) (err error) {
-
 	slog.Debug("logout user", slog.String("token", token))
 
 	err = s.sessions.RemoveSession(ctx, token)
