@@ -1,28 +1,28 @@
 package service
 
 import (
-	"fmt"
-	"time"
 	"context"
+	"fmt"
 	"log/slog"
+	"time"
+
 	"golang.org/x/crypto/bcrypt"
 
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/proto"
-	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/users"
-	"github.com/bd878/gallery/server/internal/rpc"
-	"github.com/bd878/gallery/server/internal/ddd"
-	"github.com/bd878/gallery/server/users/config"
-	"github.com/bd878/gallery/server/users/pkg/model"
+	sessions "github.com/bd878/gallery/server/db/sessions/pkg/model"
 	"github.com/bd878/gallery/server/db/users/pkg/loadbalance"
 	"github.com/bd878/gallery/server/db/users/pkg/machine"
-	"github.com/bd878/gallery/server/users/internal/domain"
+	"github.com/bd878/gallery/server/internal/ddd"
+	"github.com/bd878/gallery/server/internal/rpc"
+	"github.com/bd878/gallery/server/users/config"
 	"github.com/bd878/gallery/server/users/internal/controller"
-	sessions "github.com/bd878/gallery/server/db/sessions/pkg/model"
+	"github.com/bd878/gallery/server/users/internal/domain"
+	"github.com/bd878/gallery/server/users/pkg/model"
 )
 
 type SessionsGateway interface {
@@ -34,73 +34,39 @@ type SessionsGateway interface {
 }
 
 type Controller struct {
-	conf         config.Config
-	client       users.UsersClient
-	conn         *grpc.ClientConn
-	sessions     SessionsGateway
-	publisher    ddd.EventPublisher[ddd.Event]
+	conf      config.Config
+	client    users.UsersClient
+	conn      *grpc.ClientConn
+	sessions  SessionsGateway
+	publisher ddd.EventPublisher[ddd.Event]
 }
 
 func New(conf config.Config, sessions SessionsGateway, publisher ddd.EventPublisher[ddd.Event]) *Controller {
 	controller := &Controller{
-		conf: conf,
-		sessions: sessions,
+		conf:      conf,
+		sessions:  sessions,
 		publisher: publisher,
 	}
-
-	controller.setupConnection()
-
-	return controller
-}
-
-func (s *Controller) Close() {
-	if s.conn != nil {
-		if err := s.conn.Close(); err != nil {
-			slog.Error(err.Error())
-		}
-	}
-}
-
-func (s *Controller) setupConnection() (err error) {
-	s.Close()
 
 	conn, err := rpc.NewClient(
 		fmt.Sprintf(
 			"%s:///%s",
 			loadbalance.Name,
-			s.conf.UsersServiceAddr,
+			controller.conf.UsersServiceAddr,
 		),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		return err
+		panic(err)
 	}
-
 	client := users.NewUsersClient(conn)
+	controller.conn = conn
+	controller.client = client
 
-	s.conn = conn
-	s.client = client
-
-	return
-}
-
-func (s *Controller) isConnFailed() bool {
-	state := s.conn.GetState()
-	if state == connectivity.Shutdown ||
-		state == connectivity.TransientFailure ||
-		state == connectivity.Connecting {
-		slog.Debug("users conn failed", slog.String("state", state.String()))
-		return true
-	}
-	return false
+	return controller
 }
 
 func (s *Controller) CreateUser(ctx context.Context, id int64, login, password string) (user *model.User, err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("create user",
 		slog.Int64("id", id),
@@ -125,8 +91,8 @@ func (s *Controller) CreateUser(ctx context.Context, id int64, login, password s
 	}
 
 	_, err = s.client.Apply(ctx, &api.Command{
-		ReqType: int32(machine.AppendRequest),
-		Cmd: cmd,
+		ReqType:  int32(machine.AppendRequest),
+		Cmd:      cmd,
 		Duration: "10s",
 	})
 	if err != nil {
@@ -154,11 +120,6 @@ func (s *Controller) CreateUser(ctx context.Context, id int64, login, password s
 }
 
 func (s *Controller) FindUser(ctx context.Context, id int64, login, token string) (user *model.User, err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("find user",
 		slog.Int64("id", id),
@@ -191,11 +152,6 @@ func (s *Controller) FindUser(ctx context.Context, id int64, login, token string
 }
 
 func (s *Controller) AuthUser(ctx context.Context, token string) (user *model.User, err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("auth user", slog.String("token", token))
 
@@ -215,7 +171,7 @@ func (s *Controller) AuthUser(ctx context.Context, token string) (user *model.Us
 
 	var userProto *users.User
 	userProto, err = s.client.GetUser(ctx, &users.GetUserRequest{
-		Id:  int64(session.UserID),
+		Id: int64(session.UserID),
 	})
 	if err != nil {
 		return
@@ -230,11 +186,6 @@ func (s *Controller) AuthUser(ctx context.Context, token string) (user *model.Us
 }
 
 func (s *Controller) GetUser(ctx context.Context, id int64) (user *model.User, err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("get user", slog.Int64("id", id))
 
@@ -249,11 +200,6 @@ func (s *Controller) GetUser(ctx context.Context, id int64) (user *model.User, e
 }
 
 func (s *Controller) UpdateUser(ctx context.Context, id int64, login *string, metadata []byte) (err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("update user",
 		slog.Int64("id", id),
@@ -262,18 +208,18 @@ func (s *Controller) UpdateUser(ctx context.Context, id int64, login *string, me
 	)
 
 	cmd, err := proto.Marshal(&users.UpdateCommand{
-		Id:             id,
-		Login:          login,
-		Metadata:       metadata,
-		UpdatedAt:      time.Now().UTC().Format(time.RFC3339),
+		Id:        id,
+		Login:     login,
+		Metadata:  metadata,
+		UpdatedAt: time.Now().UTC().Format(time.RFC3339),
 	})
 	if err != nil {
 		return err
 	}
 
 	_, err = s.client.Apply(ctx, &api.Command{
-		ReqType: int32(machine.UpdateRequest),
-		Cmd: cmd,
+		ReqType:  int32(machine.UpdateRequest),
+		Cmd:      cmd,
 		Duration: "10s",
 	})
 
@@ -281,11 +227,6 @@ func (s *Controller) UpdateUser(ctx context.Context, id int64, login *string, me
 }
 
 func (s *Controller) MakePremium(ctx context.Context, id int64, invoiceID, createdAt, expiresAt string) (err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("make premium",
 		slog.Int64("id", id),
@@ -295,18 +236,18 @@ func (s *Controller) MakePremium(ctx context.Context, id int64, invoiceID, creat
 	)
 
 	cmd, err := proto.Marshal(&users.MakePremiumCommand{
-		InvoiceId:       invoiceID,
-		Id:              id,
-		CreatedAt:       createdAt,
-		ExpiresAt:       expiresAt,
+		InvoiceId: invoiceID,
+		Id:        id,
+		CreatedAt: createdAt,
+		ExpiresAt: expiresAt,
 	})
 	if err != nil {
 		return err
 	}
 
 	_, err = s.client.Apply(ctx, &api.Command{
-		ReqType: int32(machine.MakePremiumRequest),
-		Cmd: cmd,
+		ReqType:  int32(machine.MakePremiumRequest),
+		Cmd:      cmd,
 		Duration: "10s",
 	})
 
@@ -314,11 +255,6 @@ func (s *Controller) MakePremium(ctx context.Context, id int64, invoiceID, creat
 }
 
 func (s *Controller) LoginUser(ctx context.Context, login, password string) (session *sessions.Session, err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("login user",
 		slog.String("login", login),
@@ -326,7 +262,7 @@ func (s *Controller) LoginUser(ctx context.Context, login, password string) (ses
 	)
 
 	user, err := s.client.FindUser(ctx, &users.FindUserRequest{
-		Login:   login,
+		Login: login,
 	})
 	if err != nil {
 		return nil, err
@@ -348,11 +284,6 @@ func (s *Controller) LoginUser(ctx context.Context, login, password string) (ses
 }
 
 func (s *Controller) DeleteUser(ctx context.Context, id int64) (err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("delete user", slog.Int64("id", id))
 
@@ -370,8 +301,8 @@ func (s *Controller) DeleteUser(ctx context.Context, id int64) (err error) {
 	}
 
 	_, err = s.client.Apply(ctx, &api.Command{
-		ReqType: int32(machine.DeleteRequest),
-		Cmd: cmd,
+		ReqType:  int32(machine.DeleteRequest),
+		Cmd:      cmd,
 		Duration: "10s",
 	})
 	if err != nil {
@@ -387,11 +318,6 @@ func (s *Controller) DeleteUser(ctx context.Context, id int64) (err error) {
 }
 
 func (s *Controller) LogoutUser(ctx context.Context, token string) (err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("logout user", slog.String("token", token))
 
@@ -399,4 +325,3 @@ func (s *Controller) LogoutUser(ctx context.Context, token string) (err error) {
 
 	return
 }
-

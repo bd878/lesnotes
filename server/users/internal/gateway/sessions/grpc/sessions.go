@@ -3,33 +3,24 @@ package sessions
 import (
 	"context"
 	"fmt"
-	"log/slog"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api/sessions"
-	"github.com/bd878/gallery/server/internal/rpc"
 	"github.com/bd878/gallery/server/db/sessions/pkg/loadbalance"
 	"github.com/bd878/gallery/server/db/sessions/pkg/model"
+	"github.com/bd878/gallery/server/internal/rpc"
 )
 
 type Gateway struct {
-	addr          string
-	client        sessions.SessionsClient
-	conn          *grpc.ClientConn
+	addr   string
+	client sessions.SessionsClient
+	conn   *grpc.ClientConn
 }
 
 func New(addr string) *Gateway {
 	g := &Gateway{addr: addr}
-	g.setupConnection()
-	return g
-}
-
-func (g *Gateway) setupConnection() error {
-	g.Close()
-
 	conn, err := rpc.NewClient(
 		fmt.Sprintf(
 			"%s:///%s",
@@ -39,43 +30,18 @@ func (g *Gateway) setupConnection() error {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		return err
+		panic(err)
 	}
-
 	g.conn = conn
 	g.client = sessions.NewSessionsClient(conn)
-
 	return nil
-}
-
-func (g *Gateway) Close() {
-	if g.conn != nil {
-		if err := g.conn.Close(); err != nil {
-			slog.Error("failed to close sessions conn", slog.String("error", err.Error()))
-		}
-	}
-}
-
-func (g *Gateway) isConnFailed() bool {
-	state := g.conn.GetState()
-	if state == connectivity.Shutdown ||
-		state == connectivity.TransientFailure ||
-		state == connectivity.Connecting {
-		slog.Debug("sessions conn failed", slog.String("state", state.String()))
-		return true
-	}
-	return false
+	return g
 }
 
 func (g *Gateway) GetSession(ctx context.Context, token string) (session *model.Session, err error) {
-	if g.isConnFailed() {
-		if err = g.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	resp, err := g.client.Get(ctx, &sessions.GetSessionRequest{
-		Token:  token,
+		Token: token,
 	})
 	if err != nil {
 		return nil, err
@@ -87,11 +53,6 @@ func (g *Gateway) GetSession(ctx context.Context, token string) (session *model.
 }
 
 func (g *Gateway) ListUserSessions(ctx context.Context, userID int64) (list []*model.Session, err error) {
-	if g.isConnFailed() {
-		if err = g.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	resp, err := g.client.List(ctx, &sessions.ListUserSessionsRequest{
 		UserId: userID,
@@ -106,14 +67,9 @@ func (g *Gateway) ListUserSessions(ctx context.Context, userID int64) (list []*m
 }
 
 func (g *Gateway) CreateSession(ctx context.Context, userID int64) (session *model.Session, err error) {
-	if g.isConnFailed() {
-		if err = g.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	resp, err := g.client.Create(ctx, &sessions.CreateSessionRequest{
-		UserId:         userID,
+		UserId: userID,
 	})
 	if err != nil {
 		return nil, err
@@ -125,25 +81,15 @@ func (g *Gateway) CreateSession(ctx context.Context, userID int64) (session *mod
 }
 
 func (g *Gateway) RemoveSession(ctx context.Context, token string) (err error) {
-	if g.isConnFailed() {
-		if err = g.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	_, err = g.client.Remove(ctx, &sessions.RemoveSessionRequest{
-		Token:  token,
+		Token: token,
 	})
 
 	return
 }
 
 func (g *Gateway) RemoveAllUserSessions(ctx context.Context, userID int64) (err error) {
-	if g.isConnFailed() {
-		if err = g.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	_, err = g.client.RemoveAll(ctx, &sessions.RemoveAllSessionsRequest{
 		UserId: userID,

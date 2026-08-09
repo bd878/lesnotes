@@ -7,18 +7,17 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/translations"
+	"github.com/bd878/gallery/server/db/messages/pkg/loadbalance"
+	"github.com/bd878/gallery/server/db/messages/pkg/machine"
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/rpc"
-	"github.com/bd878/gallery/server/db/messages/pkg/machine"
-	"github.com/bd878/gallery/server/db/messages/pkg/loadbalance"
-	"github.com/bd878/gallery/server/messages/pkg/model"
 	"github.com/bd878/gallery/server/messages/internal/domain"
+	"github.com/bd878/gallery/server/messages/pkg/model"
 )
 
 type TranslationsConfig struct {
@@ -26,71 +25,37 @@ type TranslationsConfig struct {
 }
 
 type TranslationsController struct {
-	conf   TranslationsConfig
-	client translations.TranslationsClient
-	conn   *grpc.ClientConn
-	publisher    ddd.EventPublisher[ddd.Event]
+	conf      TranslationsConfig
+	client    translations.TranslationsClient
+	conn      *grpc.ClientConn
+	publisher ddd.EventPublisher[ddd.Event]
 }
 
 func NewTranslationsController(conf TranslationsConfig, publisher ddd.EventPublisher[ddd.Event]) *TranslationsController {
 	controller := &TranslationsController{
-		conf: conf,
+		conf:      conf,
 		publisher: publisher,
 	}
-
-	controller.setupConnection()
-
-	return controller
-}
-
-func (s *TranslationsController) Close() {
-	if s.conn != nil {
-		if err := s.conn.Close(); err != nil {
-			slog.Error("failed to close translations conn", slog.String("error", err.Error()))
-		}
-	}
-}
-
-func (s *TranslationsController) setupConnection() (err error) {
-	s.Close()
 
 	conn, err := rpc.NewClient(
 		fmt.Sprintf(
 			"%s:///%s",
 			loadbalance.Name,
-			s.conf.RpcAddr,
+			controller.conf.RpcAddr,
 		),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		return err
+		panic(err)
 	}
-
 	client := translations.NewTranslationsClient(conn)
+	controller.conn = conn
+	controller.client = client
 
-	s.conn = conn
-	s.client = client
-
-	return
-}
-
-func (s *TranslationsController) isConnFailed() bool {
-	state := s.conn.GetState()
-	if state == connectivity.Shutdown ||
-		state == connectivity.TransientFailure ||
-		state == connectivity.Connecting {
-		slog.Debug("translations conn failed", slog.String("state", state.String()))
-		return true
-	}
-	return false
+	return controller
 }
 
 func (s *TranslationsController) SaveTranslation(ctx context.Context, userID, messageID int64, lang, title, text string) (err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("save translation", slog.Int64("user_id", userID), slog.Int64("message_id", messageID), slog.String("lang", lang), slog.String("title", title), slog.String("text", text))
 
@@ -110,8 +75,8 @@ func (s *TranslationsController) SaveTranslation(ctx context.Context, userID, me
 	}
 
 	_, err = s.client.Apply(ctx, &api.Command{
-		ReqType: int32(machine.AppendTranslationRequest),
-		Cmd: cmd,
+		ReqType:  int32(machine.AppendTranslationRequest),
+		Cmd:      cmd,
 		Duration: "10s",
 	})
 	if err != nil {
@@ -127,11 +92,6 @@ func (s *TranslationsController) SaveTranslation(ctx context.Context, userID, me
 }
 
 func (s *TranslationsController) UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string) (err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	logValues := []any{slog.Int64("message_id", messageID), slog.String("lang", lang)}
 	if title != nil {
@@ -156,8 +116,8 @@ func (s *TranslationsController) UpdateTranslation(ctx context.Context, messageI
 	}
 
 	_, err = s.client.Apply(ctx, &api.Command{
-		ReqType: int32(machine.UpdateTranslationRequest),
-		Cmd: cmd,
+		ReqType:  int32(machine.UpdateTranslationRequest),
+		Cmd:      cmd,
 		Duration: "10s",
 	})
 	if err != nil {
@@ -173,11 +133,6 @@ func (s *TranslationsController) UpdateTranslation(ctx context.Context, messageI
 }
 
 func (s *TranslationsController) DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("delete translation", slog.Int64("message_id", messageID), slog.String("lang", lang))
 
@@ -190,8 +145,8 @@ func (s *TranslationsController) DeleteTranslation(ctx context.Context, messageI
 	}
 
 	_, err = s.client.Apply(ctx, &api.Command{
-		ReqType: int32(machine.DeleteTranslationRequest),
-		Cmd: cmd,
+		ReqType:  int32(machine.DeleteTranslationRequest),
+		Cmd:      cmd,
 		Duration: "10s",
 	})
 	if err != nil {
@@ -207,11 +162,6 @@ func (s *TranslationsController) DeleteTranslation(ctx context.Context, messageI
 }
 
 func (s *TranslationsController) ReadTranslation(ctx context.Context, userID, messageID int64, lang string, name *string) (translation *model.Translation, err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	logValues := []any{slog.Int64("user_id", userID), slog.Int64("message_id", messageID), slog.String("lang", lang)}
 	if name != nil {
@@ -220,10 +170,10 @@ func (s *TranslationsController) ReadTranslation(ctx context.Context, userID, me
 	slog.Debug("read translation", logValues...)
 
 	resp, err := s.client.ReadTranslation(ctx, &translations.ReadTranslationRequest{
-		UserId:    userID,
-		Id:        messageID,
-		Lang:      lang,
-		Name:      name,
+		UserId: userID,
+		Id:     messageID,
+		Lang:   lang,
+		Name:   name,
 	})
 	if err != nil {
 		return nil, err
@@ -235,18 +185,13 @@ func (s *TranslationsController) ReadTranslation(ctx context.Context, userID, me
 }
 
 func (s *TranslationsController) ListTranslations(ctx context.Context, userID, messageID int64, name string) (list []*model.Translation, err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("list translations", slog.Int64("user_id", userID), slog.Int64("message_id", messageID), slog.String("name", name))
 
 	resp, err := s.client.ListTranslations(ctx, &translations.ListTranslationsRequest{
-		UserId:    userID,
-		Id:        messageID,
-		Name:      name,
+		UserId: userID,
+		Id:     messageID,
+		Name:   name,
 	})
 	if err != nil {
 		return nil, err

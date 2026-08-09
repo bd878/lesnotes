@@ -7,87 +7,52 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/threads"
+	"github.com/bd878/gallery/server/db/threads/pkg/loadbalance"
+	"github.com/bd878/gallery/server/db/threads/pkg/machine"
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/rpc"
-	"github.com/bd878/gallery/server/threads/internal/domain"
-	"github.com/bd878/gallery/server/db/threads/pkg/machine"
-	"github.com/bd878/gallery/server/db/threads/pkg/loadbalance"
-	"github.com/bd878/gallery/server/threads/pkg/model"
 	"github.com/bd878/gallery/server/threads/config"
+	"github.com/bd878/gallery/server/threads/internal/domain"
+	"github.com/bd878/gallery/server/threads/pkg/model"
 )
 
 type Controller struct {
-	conf         config.Config
-	client       threads.ThreadsClient
-	conn         *grpc.ClientConn
-	publisher    ddd.EventPublisher[ddd.Event]
+	conf      config.Config
+	client    threads.ThreadsClient
+	conn      *grpc.ClientConn
+	publisher ddd.EventPublisher[ddd.Event]
 }
 
 func New(conf config.Config, publisher ddd.EventPublisher[ddd.Event]) *Controller {
 	controller := &Controller{
-		conf: conf,
+		conf:      conf,
 		publisher: publisher,
 	}
-
-	controller.setupConnection()
-
-	return controller
-}
-
-func (s *Controller) Close() {
-	if s.conn != nil {
-		if err := s.conn.Close(); err != nil {
-			slog.Error("failed to close threads conn", slog.String("error", err.Error()))
-		}
-	}
-}
-
-func (s *Controller) setupConnection() (err error) {
-	s.Close()
 
 	conn, err := rpc.NewClient(
 		fmt.Sprintf(
 			"%s:///%s",
 			loadbalance.Name,
-			s.conf.ThreadsServiceAddr,
+			controller.conf.ThreadsServiceAddr,
 		),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		return err
+		panic(err)
 	}
-
 	client := threads.NewThreadsClient(conn)
+	controller.conn = conn
+	controller.client = client
 
-	s.conn = conn
-	s.client = client
-
-	return
-}
-
-func (s *Controller) isConnFailed() bool {
-	state := s.conn.GetState()
-	if state == connectivity.Shutdown ||
-		state == connectivity.TransientFailure ||
-		state == connectivity.Connecting {
-		slog.Debug("threads conn failed", slog.String("state", state.String()))
-		return true
-	}
-	return false
+	return controller
 }
 
 func (s *Controller) ReadThread(ctx context.Context, id, userID int64, name string) (thread *model.Thread, err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("read thread", slog.Int64("id", id), slog.Int64("user_id", userID), slog.String("name", name))
 
@@ -102,11 +67,6 @@ func (s *Controller) ReadThread(ctx context.Context, id, userID int64, name stri
 }
 
 func (s *Controller) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (list []*model.Thread, isLastPage bool, err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("list threads", slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("asc", asc))
 
@@ -125,11 +85,6 @@ func (s *Controller) ListThreads(ctx context.Context, userID, parentID int64, li
 }
 
 func (s *Controller) ListMessages(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool, privateMessage *bool) (list []*model.Thread, isLastPage bool, err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("list messages", slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("asc", asc), slog.Any("private_message", privateMessage))
 
@@ -149,11 +104,6 @@ func (s *Controller) ListMessages(ctx context.Context, userID, parentID int64, l
 }
 
 func (s *Controller) ResolveThread(ctx context.Context, id, userID int64) (path []*model.PathStep, err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("resolve thread", slog.Int64("id", id), slog.Int64("user_id", userID))
 
@@ -168,28 +118,23 @@ func (s *Controller) ResolveThread(ctx context.Context, id, userID int64) (path 
 }
 
 func (s *Controller) PublishThread(ctx context.Context, id, userID int64) (err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("publish thread", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
 	cmd, err := proto.Marshal(&threads.PublishCommand{
-		Id:            id,
-		UserId:        userID,
-		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
+		Id:        id,
+		UserId:    userID,
+		UpdatedAt: time.Now().UTC().Format(time.RFC3339),
 	})
 	if err != nil {
 		return err
 	}
 
 	_, err = s.client.Apply(ctx, &api.Command{
-		ReqType: int32(machine.PublishRequest),
-		Cmd: cmd,
+		ReqType:  int32(machine.PublishRequest),
+		Cmd:      cmd,
 		Duration: "10s",
 	})
 	if err != nil {
@@ -205,28 +150,23 @@ func (s *Controller) PublishThread(ctx context.Context, id, userID int64) (err e
 }
 
 func (s *Controller) PrivateThread(ctx context.Context, id, userID int64) (err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("private thread", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
 	cmd, err := proto.Marshal(&threads.PrivateCommand{
-		Id:            id,
-		UserId:        userID,
-		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
+		Id:        id,
+		UserId:    userID,
+		UpdatedAt: time.Now().UTC().Format(time.RFC3339),
 	})
 	if err != nil {
 		return err
 	}
 
 	_, err = s.client.Apply(ctx, &api.Command{
-		ReqType: int32(machine.PrivateRequest),
-		Cmd: cmd,
+		ReqType:  int32(machine.PrivateRequest),
+		Cmd:      cmd,
 		Duration: "10s",
 	})
 	if err != nil {
@@ -241,16 +181,9 @@ func (s *Controller) PrivateThread(ctx context.Context, id, userID int64) (err e
 	return s.publisher.Publish(ctx, event)
 }
 
-
 func (s *Controller) CreateThread(ctx context.Context, id, userID, parentID int64, name, description, title string, private bool) (err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("create thread", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.String("name", name), slog.String("description", description), slog.String("title", title), slog.Bool("private", private))
-
 
 	createdAt := time.Now().UTC().Format(time.RFC3339)
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
@@ -261,23 +194,23 @@ func (s *Controller) CreateThread(ctx context.Context, id, userID, parentID int6
 	}
 
 	cmd, err := proto.Marshal(&threads.AppendCommand{
-		Id:            id,
-		UserId:        userID,
-		ParentId:      parentID,
-		Name:          name,
-		Private:       private,
-		Description:   description,
-		CreatedAt:     createdAt,
-		UpdatedAt:     updatedAt,
-		Title:         title,
+		Id:          id,
+		UserId:      userID,
+		ParentId:    parentID,
+		Name:        name,
+		Private:     private,
+		Description: description,
+		CreatedAt:   createdAt,
+		UpdatedAt:   updatedAt,
+		Title:       title,
 	})
 	if err != nil {
 		return err
 	}
 
 	_, err = s.client.Apply(ctx, &api.Command{
-		ReqType: int32(machine.AppendRequest),
-		Cmd: cmd,
+		ReqType:  int32(machine.AppendRequest),
+		Cmd:      cmd,
 		Duration: "10s",
 	})
 	if err != nil {
@@ -288,11 +221,6 @@ func (s *Controller) CreateThread(ctx context.Context, id, userID, parentID int6
 }
 
 func (s *Controller) UpdateThread(ctx context.Context, id, userID int64, name, description, title *string) (err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("update thread", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Any("name", name), slog.Any("description", description), slog.Any("title", title))
 
@@ -304,20 +232,20 @@ func (s *Controller) UpdateThread(ctx context.Context, id, userID int64, name, d
 	}
 
 	cmd, err := proto.Marshal(&threads.UpdateCommand{
-		Id:            id,
-		UserId:        userID,
-		Name:          name,
-		Description:   description,
-		Title:         title,
-		UpdatedAt:     updatedAt,
+		Id:          id,
+		UserId:      userID,
+		Name:        name,
+		Description: description,
+		Title:       title,
+		UpdatedAt:   updatedAt,
 	})
 	if err != nil {
 		return err
 	}
 
 	_, err = s.client.Apply(ctx, &api.Command{
-		ReqType: int32(machine.UpdateRequest),
-		Cmd: cmd,
+		ReqType:  int32(machine.UpdateRequest),
+		Cmd:      cmd,
 		Duration: "10s",
 	})
 	if err != nil {
@@ -327,31 +255,25 @@ func (s *Controller) UpdateThread(ctx context.Context, id, userID int64, name, d
 	return s.publisher.Publish(ctx, event)
 }
 
-
 func (s *Controller) ReorderThread(ctx context.Context, id, userID, parentID, nextID, prevID int64) (err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("reorder thread", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.Int64("next_id", nextID), slog.Int64("prev_id", prevID))
 
 	cmd, err := proto.Marshal(&threads.ReorderCommand{
-		Id:            id,
-		UserId:        userID,
-		ParentId:      parentID,
-		NextId:        nextID,
-		PrevId:        prevID,
-		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
+		Id:        id,
+		UserId:    userID,
+		ParentId:  parentID,
+		NextId:    nextID,
+		PrevId:    prevID,
+		UpdatedAt: time.Now().UTC().Format(time.RFC3339),
 	})
 	if err != nil {
 		return err
 	}
 
 	_, err = s.client.Apply(ctx, &api.Command{
-		ReqType: int32(machine.ReorderRequest),
-		Cmd: cmd,
+		ReqType:  int32(machine.ReorderRequest),
+		Cmd:      cmd,
 		Duration: "10s",
 	})
 	if err != nil {
@@ -370,27 +292,21 @@ func (s *Controller) ReorderThread(ctx context.Context, id, userID, parentID, ne
 	return
 }
 
-
 func (s *Controller) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("private thread messages", slog.Any("ids", ids), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&threads.PrivateMessagesCommand{
-		Ids:         ids,
-		UserId:      userID,
+		Ids:    ids,
+		UserId: userID,
 	})
 	if err != nil {
 		return err
 	}
 
 	_, err = s.client.Apply(ctx, &api.Command{
-		ReqType: int32(machine.PrivateMessagesRequest),
-		Cmd: cmd,
+		ReqType:  int32(machine.PrivateMessagesRequest),
+		Cmd:      cmd,
 		Duration: "10s",
 	})
 	if err != nil {
@@ -401,25 +317,20 @@ func (s *Controller) PrivateMessages(ctx context.Context, ids []int64, userID in
 }
 
 func (s *Controller) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("publish thread messages", slog.Any("ids", ids), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&threads.PublishMessagesCommand{
-		Ids:       ids,
-		UserId:    userID,
+		Ids:    ids,
+		UserId: userID,
 	})
 	if err != nil {
 		return err
 	}
 
 	_, err = s.client.Apply(ctx, &api.Command{
-		ReqType: int32(machine.PublishMessagesRequest),
-		Cmd: cmd,
+		ReqType:  int32(machine.PublishMessagesRequest),
+		Cmd:      cmd,
 		Duration: "10s",
 	})
 	if err != nil {
@@ -430,25 +341,20 @@ func (s *Controller) PublishMessages(ctx context.Context, ids []int64, userID in
 }
 
 func (s *Controller) DeleteThread(ctx context.Context, id, userID int64) (err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("delete thread", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&threads.DeleteCommand{
-		Id:       id,
-		UserId:   userID,
+		Id:     id,
+		UserId: userID,
 	})
 	if err != nil {
 		return err
 	}
 
 	_, err = s.client.Apply(ctx, &api.Command{
-		ReqType: int32(machine.DeleteRequest),
-		Cmd: cmd,
+		ReqType:  int32(machine.DeleteRequest),
+		Cmd:      cmd,
 		Duration: "10s",
 	})
 	if err != nil {

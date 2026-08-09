@@ -7,12 +7,11 @@ import (
 	"log/slog"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api/threads"
-	"github.com/bd878/gallery/server/internal/rpc"
 	"github.com/bd878/gallery/server/db/threads/pkg/loadbalance"
+	"github.com/bd878/gallery/server/internal/rpc"
 	"github.com/bd878/gallery/server/threads/pkg/model"
 )
 
@@ -25,57 +24,25 @@ type Gateway struct {
 func New(addr string) *Gateway {
 	gateway := &Gateway{addr: addr}
 
-	gateway.setupConnection()
-
-	return gateway
-}
-
-func (g *Gateway) setupConnection() error {
-	g.Close()
-
 	conn, err := rpc.NewClient(
 		fmt.Sprintf(
 			"%s:///%s",
 			loadbalance.Name,
-			g.addr,
+			gateway.addr,
 		),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		return err
+		panic(err)
 	}
-
-	g.conn = conn
-	g.client = threads.NewThreadsClient(conn)
-
+	gateway.conn = conn
+	gateway.client = threads.NewThreadsClient(conn)
 	return nil
-}
 
-func (g *Gateway) Close() {
-	if g.conn != nil {
-		if err := g.conn.Close(); err != nil {
-			slog.Error("failed to close threads conn", slog.String("error", err.Error()))
-		}
-	}
-}
-
-func (g *Gateway) isConnFailed() bool {
-	state := g.conn.GetState()
-	if state == connectivity.Shutdown ||
-		state == connectivity.TransientFailure ||
-		state == connectivity.Connecting {
-		slog.Debug("threads conn failed", slog.String("state", state.String()))
-		return true
-	}
-	return false
+	return gateway
 }
 
 func (g *Gateway) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32) (list []*model.Thread, isLastPage bool, err error) {
-	if g.isConnFailed() {
-		if err = g.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("list threads", slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)))
 
@@ -96,11 +63,6 @@ func (g *Gateway) ListThreads(ctx context.Context, userID, parentID int64, limit
 }
 
 func (g *Gateway) ListMessages(ctx context.Context, userID, parentID int64, limit, offset int32, privateMessage *bool) (list []*model.Thread, isLastPage bool, err error) {
-	if g.isConnFailed() {
-		if err = g.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	logValues := []any{slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.Int("limit", int(limit)), slog.Int("offset", int(offset))}
 	if privateMessage != nil {
@@ -126,11 +88,6 @@ func (g *Gateway) ListMessages(ctx context.Context, userID, parentID int64, limi
 }
 
 func (g *Gateway) CountThreads(ctx context.Context, id, userID int64) (total int32, err error) {
-	if g.isConnFailed() {
-		if err = g.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("count threads", slog.Int64("id", id), slog.Int64("user_id", userID))
 
@@ -148,11 +105,6 @@ func (g *Gateway) CountThreads(ctx context.Context, id, userID int64) (total int
 }
 
 func (g *Gateway) CountMessages(ctx context.Context, id, userID int64, privateMessage *bool) (total int32, err error) {
-	if g.isConnFailed() {
-		if err = g.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	logValues := []any{slog.Int64("id", id), slog.Int64("user_id", userID)}
 	if privateMessage != nil {
@@ -176,11 +128,6 @@ func (g *Gateway) CountMessages(ctx context.Context, id, userID int64, privateMe
 }
 
 func (g *Gateway) ResolvePath(ctx context.Context, userID, id int64) (path []*threads.PathStep, err error) {
-	if g.isConnFailed() {
-		if err = g.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("resolve path", slog.Int64("user_id", userID), slog.Int64("id", id))
 
@@ -198,11 +145,6 @@ func (g *Gateway) ResolvePath(ctx context.Context, userID, id int64) (path []*th
 }
 
 func (g *Gateway) ReadThread(ctx context.Context, userID, id int64, name string) (thread *model.Thread, err error) {
-	if g.isConnFailed() {
-		if err = g.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("read thread", slog.Int64("user_id", userID), slog.Int64("id", id), slog.String("name", name))
 
@@ -221,17 +163,12 @@ func (g *Gateway) ReadThread(ctx context.Context, userID, id int64, name string)
 }
 
 func (g *Gateway) ReadParent(ctx context.Context, userID, id int64) (thread *model.Thread, err error) {
-	if g.isConnFailed() {
-		if err = g.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("read parent", slog.Int64("user_id", userID), slog.Int64("id", id))
 
 	resp, err := g.client.ReadParent(ctx, &threads.ReadParentRequest{
 		UserId: userID,
-		Id: id,
+		Id:     id,
 	})
 	if err != nil {
 		return nil, err
@@ -239,8 +176,8 @@ func (g *Gateway) ReadParent(ctx context.Context, userID, id int64) (thread *mod
 
 	if resp.IsRoot {
 		return &model.Thread{
-			ID: 0,
-			Name: "",
+			ID:      0,
+			Name:    "",
 			Private: true,
 		}, nil
 	}

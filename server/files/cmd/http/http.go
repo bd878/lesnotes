@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log/slog"
 	"context"
 	"os"
 
@@ -26,10 +25,6 @@ func main() {
 	}
 
 	cfg := config.Load(flag.Arg(0))
-	logger.SetDefault(logger.New(logger.Config{
-		NodeName:   cfg.NodeName,
-		SkipCaller: 0,
-	}))
 
 	server := http.New(http.Config{
 		Addr:                 cfg.HttpAddr,

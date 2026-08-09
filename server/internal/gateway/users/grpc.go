@@ -3,33 +3,24 @@ package grpc
 import (
 	"context"
 	"fmt"
-	"log/slog"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bd878/gallery/server/api/users"
-	"github.com/bd878/gallery/server/internal/rpc"
 	"github.com/bd878/gallery/server/db/users/pkg/loadbalance"
+	"github.com/bd878/gallery/server/internal/rpc"
 	"github.com/bd878/gallery/server/users/pkg/model"
 )
 
 type Gateway struct {
-	addr            string
-	client          users.UsersClient
-	conn            *grpc.ClientConn
+	addr   string
+	client users.UsersClient
+	conn   *grpc.ClientConn
 }
 
 func New(addr string) *Gateway {
 	g := &Gateway{addr: addr}
-	g.setupConnection()
-	return g
-}
-
-func (g *Gateway) setupConnection() error {
-	g.Close()
-
 	conn, err := rpc.NewClient(
 		fmt.Sprintf(
 			"%s:///%s",
@@ -38,40 +29,15 @@ func (g *Gateway) setupConnection() error {
 		), grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		return err
+		panic(err)
 	}
-
 	g.conn = conn
 	g.client = users.NewUsersClient(conn)
-
 	return nil
-}
-
-func (g *Gateway) Close() {
-	if g.conn != nil {
-		if err := g.conn.Close(); err != nil {
-			slog.Error("users gateway close", slog.String("error", err.Error()))
-		}
-	}
-}
-
-func (g *Gateway) isConnFailed() bool {
-	state := g.conn.GetState()
-	if state == connectivity.Shutdown ||
-		state == connectivity.TransientFailure ||
-		state == connectivity.Connecting {
-		slog.Debug("users gateway conn failed", slog.String("state", state.String()))
-		return true
-	}
-	return false
+	return g
 }
 
 func (g *Gateway) GetUser(ctx context.Context, userID int64) (*model.User, error) {
-	if g.isConnFailed() {
-		if err := g.setupConnection(); err != nil {
-			return nil, err
-		}
-	}
 
 	resp, err := g.client.GetUser(ctx, &users.GetUserRequest{
 		Id: userID,

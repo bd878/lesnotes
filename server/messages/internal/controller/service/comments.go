@@ -7,18 +7,17 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/comments"
+	"github.com/bd878/gallery/server/db/messages/pkg/loadbalance"
+	"github.com/bd878/gallery/server/db/messages/pkg/machine"
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/rpc"
-	"github.com/bd878/gallery/server/db/messages/pkg/loadbalance"
-	"github.com/bd878/gallery/server/messages/pkg/model"
 	"github.com/bd878/gallery/server/messages/internal/domain"
-	"github.com/bd878/gallery/server/db/messages/pkg/machine"
+	"github.com/bd878/gallery/server/messages/pkg/model"
 )
 
 type CommentsConfig struct {
@@ -26,71 +25,37 @@ type CommentsConfig struct {
 }
 
 type CommentsController struct {
-	conf   CommentsConfig
-	client comments.CommentsClient
-	conn   *grpc.ClientConn
-	publisher    ddd.EventPublisher[ddd.Event]
+	conf      CommentsConfig
+	client    comments.CommentsClient
+	conn      *grpc.ClientConn
+	publisher ddd.EventPublisher[ddd.Event]
 }
 
 func NewCommentsController(conf CommentsConfig, publisher ddd.EventPublisher[ddd.Event]) *CommentsController {
 	c := &CommentsController{
-		conf: conf,
+		conf:      conf,
 		publisher: publisher,
 	}
-
-	c.setupConnection()
-
-	return c
-}
-
-func (s *CommentsController) Close() {
-	if s.conn != nil {
-		if err := s.conn.Close(); err != nil {
-			slog.Error("failed to close comments conn", slog.String("error", err.Error()))
-		}
-	}
-}
-
-func (s *CommentsController) setupConnection() (err error) {
-	s.Close()
 
 	conn, err := rpc.NewClient(
 		fmt.Sprintf(
 			"%s:///%s",
 			loadbalance.Name,
-			s.conf.RpcAddr,
+			c.conf.RpcAddr,
 		),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		return err
+		panic(err)
 	}
-
 	client := comments.NewCommentsClient(conn)
+	c.conn = conn
+	c.client = client
 
-	s.conn = conn
-	s.client = client
-
-	return
-}
-
-func (s *CommentsController) isConnFailed() bool {
-	state := s.conn.GetState()
-	if state == connectivity.Shutdown ||
-		state == connectivity.TransientFailure ||
-		state == connectivity.Connecting {
-		slog.Error("comments conn failed", slog.String("state", state.String()))
-		return true
-	}
-	return false
+	return c
 }
 
 func (s *CommentsController) SendComment(ctx context.Context, id, userID, messageID int64, text string, metadata []byte) (err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("save comment", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Int64("message_id", messageID), slog.String("text", text), slog.String("metadata", fmt.Sprintf("%v", metadata)))
 
@@ -111,8 +76,8 @@ func (s *CommentsController) SendComment(ctx context.Context, id, userID, messag
 	}
 
 	_, err = s.client.Apply(ctx, &api.Command{
-		ReqType: int32(machine.AppendCommentRequest),
-		Cmd: cmd,
+		ReqType:  int32(machine.AppendCommentRequest),
+		Cmd:      cmd,
 		Duration: "10s",
 	})
 	if err != nil {
@@ -128,11 +93,6 @@ func (s *CommentsController) SendComment(ctx context.Context, id, userID, messag
 }
 
 func (s *CommentsController) UpdateComment(ctx context.Context, id, userID int64, text *string) (err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	logValues := []any{slog.Int64("id", id), slog.Int64("user_id", userID)}
 	if text != nil {
@@ -152,10 +112,9 @@ func (s *CommentsController) UpdateComment(ctx context.Context, id, userID int64
 		return err
 	}
 
-
 	_, err = s.client.Apply(ctx, &api.Command{
-		ReqType: int32(machine.UpdateCommentRequest),
-		Cmd: cmd,
+		ReqType:  int32(machine.UpdateCommentRequest),
+		Cmd:      cmd,
 		Duration: "10s",
 	})
 	if err != nil {
@@ -171,11 +130,6 @@ func (s *CommentsController) UpdateComment(ctx context.Context, id, userID int64
 }
 
 func (s *CommentsController) DeleteComment(ctx context.Context, id, userID int64) (err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("delete comment", slog.Int64("id", id), slog.Int64("user_id", userID))
 
@@ -188,8 +142,8 @@ func (s *CommentsController) DeleteComment(ctx context.Context, id, userID int64
 	}
 
 	_, err = s.client.Apply(ctx, &api.Command{
-		ReqType: int32(machine.DeleteCommentRequest),
-		Cmd: cmd,
+		ReqType:  int32(machine.DeleteCommentRequest),
+		Cmd:      cmd,
 		Duration: "10s",
 	})
 	if err != nil {
@@ -205,11 +159,6 @@ func (s *CommentsController) DeleteComment(ctx context.Context, id, userID int64
 }
 
 func (s *CommentsController) DeleteMessageComments(ctx context.Context, messageID int64) (err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("delete message comments", slog.Int64("message_id", messageID))
 
@@ -221,8 +170,8 @@ func (s *CommentsController) DeleteMessageComments(ctx context.Context, messageI
 	}
 
 	_, err = s.client.Apply(ctx, &api.Command{
-		ReqType: int32(machine.DeleteMessageCommentsRequest),
-		Cmd: cmd,
+		ReqType:  int32(machine.DeleteMessageCommentsRequest),
+		Cmd:      cmd,
 		Duration: "10s",
 	})
 	if err != nil {
@@ -238,11 +187,6 @@ func (s *CommentsController) DeleteMessageComments(ctx context.Context, messageI
 }
 
 func (s *CommentsController) ReadComment(ctx context.Context, id, userID int64) (comment *model.Comment, err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("read comment", slog.Int64("id", id), slog.Int64("user_id", userID))
 
@@ -260,11 +204,6 @@ func (s *CommentsController) ReadComment(ctx context.Context, id, userID int64) 
 }
 
 func (s *CommentsController) ListComments(ctx context.Context, userID, messageID *int64, name *string, limit, offset int32, asc bool) (list *model.CommentsList, err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	logValues := []any{slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("ascending", asc)}
 	if messageID != nil {

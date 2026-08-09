@@ -3,7 +3,6 @@ package http
 import (
 	"os"
 	"fmt"
-	"log/slog"
 	"time"
 	"context"
 	"net/http"
@@ -38,7 +37,7 @@ func New(cfg Config) *Server {
 
 	usersGateway := usersgateway.New(cfg.UsersServiceAddr)
 	sessionsGateway := sessionsgateway.New(cfg.SessionsServiceAddr)
-	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
+	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(usersGateway, sessionsGateway, usermodel.PublicUserID))
 
 	grpcCtrl := controller.New(controller.Config{
 		RpcAddr: cfg.RpcAddr,
@@ -52,7 +51,7 @@ func New(cfg Config) *Server {
 	middleware.NoAuth()
 	mux.Handle("GET /liveness",           middleware.Build(handler.GetStatus))
 
-	middleware.NoAuth().WithAuth(httpmiddleware.TokenAuthBuilder(logger.Default(), usersGateway, sessionsGateway, usermodel.PublicUserID))
+	middleware.NoAuth().WithAuth(httpmiddleware.TokenAuthBuilder(usersGateway, sessionsGateway, usermodel.PublicUserID))
 	mux.Handle("POST /files/v2/read_meta",       middleware.Build(handler.ReadFileMetaJsonAPI))
 	mux.Handle("POST /files/v2/upload",          middleware.Build(handler.UploadFileJsonAPI))
 	mux.Handle("DELETE /files/v2/delete",        middleware.Build(handler.DeleteFileJsonAPI))

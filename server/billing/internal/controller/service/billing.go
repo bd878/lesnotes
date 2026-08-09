@@ -7,87 +7,53 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/billing"
+	"github.com/bd878/gallery/server/billing/internal/domain"
+	"github.com/bd878/gallery/server/billing/pkg/model"
 	"github.com/bd878/gallery/server/db/billing/pkg/loadbalance"
 	"github.com/bd878/gallery/server/db/billing/pkg/machine"
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/rpc"
-	"github.com/bd878/gallery/server/billing/pkg/model"
-	"github.com/bd878/gallery/server/billing/internal/domain"
 )
 
 type Config struct {
-	RpcAddr  string
+	RpcAddr string
 }
 
 type Controller struct {
-	conf         Config
-	client       billing.BillingClient
-	conn         *grpc.ClientConn
-	publisher    ddd.EventPublisher[ddd.Event]
+	conf      Config
+	client    billing.BillingClient
+	conn      *grpc.ClientConn
+	publisher ddd.EventPublisher[ddd.Event]
 }
 
 func New(conf Config, publisher ddd.EventPublisher[ddd.Event]) *Controller {
 	controller := &Controller{conf: conf, publisher: publisher}
 
-	controller.setupConnection()
-
-	return controller
-}
-
-func (s *Controller) Close() {
-	if s.conn != nil {
-		if err := s.conn.Close(); err != nil {
-			slog.Error("failed to close billing conn", slog.String("error", err.Error()))
-		}
-	}
-}
-
-func (s *Controller) setupConnection() (err error) {
-	s.Close()
-
 	conn, err := rpc.NewClient(
 		fmt.Sprintf(
 			"%s:///%s",
 			loadbalance.Name,
-			s.conf.RpcAddr,
+			controller.conf.RpcAddr,
 		),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		return err
+		panic(err)
 	}
 
 	client := billing.NewBillingClient(conn)
+	controller.conn = conn
+	controller.client = client
 
-	s.conn = conn
-	s.client = client
-
-	return
-}
-
-func (s *Controller) isConnFailed() bool {
-	state := s.conn.GetState()
-	if state == connectivity.Shutdown ||
-		state == connectivity.TransientFailure ||
-		state == connectivity.Connecting {
-		slog.Debug("billing conn failed", slog.String("state", state.String()))
-		return true
-	}
-	return false
+	return controller
 }
 
 func (s *Controller) CreateInvoice(ctx context.Context, id string, userID int64, total int64, metadata []byte, cart *model.Cart) (err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("create invoice", slog.String("id", id), slog.Int64("user_id", userID), slog.Int64("total", total), slog.Any("metadata", metadata), slog.Any("cart", cart))
 
@@ -102,14 +68,14 @@ func (s *Controller) CreateInvoice(ctx context.Context, id string, userID int64,
 	}
 
 	cmd, err := proto.Marshal(&billing.AppendInvoiceCommand{
-		Id:            id,
-		UserId:        userID,
-		Total:         total,
-		Cart:          cartProto,
-		Status:        "unpaid",
-		Metadata:      metadata,
-		CreatedAt:     time.Now().UTC().Format(time.RFC3339),
-		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
+		Id:        id,
+		UserId:    userID,
+		Total:     total,
+		Cart:      cartProto,
+		Status:    "unpaid",
+		Metadata:  metadata,
+		CreatedAt: time.Now().UTC().Format(time.RFC3339),
+		UpdatedAt: time.Now().UTC().Format(time.RFC3339),
 	})
 	if err != nil {
 		return err
@@ -125,47 +91,36 @@ func (s *Controller) CreateInvoice(ctx context.Context, id string, userID int64,
 }
 
 func (s *Controller) StartPayment(ctx context.Context, id, userID int64, invoiceID string, currency string, total int64, metadata []byte) (err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("start payment", slog.Int64("id", id), slog.Int64("user_id", userID), slog.String("invoice_id", invoiceID), slog.String("currency", currency), slog.Int64("total", total), slog.Any("metadata", metadata))
 
 	cmd, err := proto.Marshal(&billing.AppendPaymentCommand{
-		Id:            id,
-		UserId:        userID,
-		InvoiceId:     invoiceID,
-		Status:        "pending",
-		Currency:      currency,
-		Total:         total,
-		Metadata:      metadata,
-		CreatedAt:     time.Now().UTC().Format(time.RFC3339),
-		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
+		Id:        id,
+		UserId:    userID,
+		InvoiceId: invoiceID,
+		Status:    "pending",
+		Currency:  currency,
+		Total:     total,
+		Metadata:  metadata,
+		CreatedAt: time.Now().UTC().Format(time.RFC3339),
+		UpdatedAt: time.Now().UTC().Format(time.RFC3339),
 	})
 	if err != nil {
 		return err
 	}
 
 	_, err = s.client.Apply(ctx, &api.Command{
-		ReqType:   int32(machine.AppendPaymentRequest),
-		Cmd:       cmd,
-		Duration:  "10s",
+		ReqType:  int32(machine.AppendPaymentRequest),
+		Cmd:      cmd,
+		Duration: "10s",
 	})
 
 	return
 }
 
 func (s *Controller) ProceedPayment(ctx context.Context, id, userID int64) (err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("proceed payment", slog.Int64("id", id), slog.Int64("user_id", userID))
-
 
 	payment, err := s.GetPayment(ctx, id, userID)
 	if err != nil {
@@ -173,9 +128,9 @@ func (s *Controller) ProceedPayment(ctx context.Context, id, userID int64) (err 
 	}
 
 	cmd, err := proto.Marshal(&billing.ProceedPaymentCommand{
-		Id:            id,
-		UserId:        userID,
-		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
+		Id:        id,
+		UserId:    userID,
+		UpdatedAt: time.Now().UTC().Format(time.RFC3339),
 	})
 	if err != nil {
 		return err
@@ -218,18 +173,18 @@ func (s *Controller) ProceedPayment(ctx context.Context, id, userID int64) (err 
 	}
 
 	cmd1, err := proto.Marshal(&billing.PayInvoiceCommand{
-		Id:            payment.InvoiceID,
-		UserId:        userID,
-		UpdatedAt:     updatedAt,
+		Id:        payment.InvoiceID,
+		UserId:    userID,
+		UpdatedAt: updatedAt,
 	})
 	if err != nil {
 		return err
 	}
 
 	_, err = s.client.Apply(ctx, &api.Command{
-		ReqType:    int32(machine.ProceedPaymentRequest),
-		Cmd:        cmd,
-		Duration:   "10s",
+		ReqType:  int32(machine.ProceedPaymentRequest),
+		Cmd:      cmd,
+		Duration: "10s",
 	})
 	if err != nil {
 		// TODO: rollback payment if failed
@@ -237,8 +192,8 @@ func (s *Controller) ProceedPayment(ctx context.Context, id, userID int64) (err 
 	}
 
 	_, err = s.client.Apply(ctx, &api.Command{
-		ReqType: int32(machine.PayInvoiceRequest),
-		Cmd:     cmd1,
+		ReqType:  int32(machine.PayInvoiceRequest),
+		Cmd:      cmd1,
 		Duration: "10s",
 	})
 	if err != nil {
@@ -250,18 +205,13 @@ func (s *Controller) ProceedPayment(ctx context.Context, id, userID int64) (err 
 }
 
 func (s *Controller) CancelPayment(ctx context.Context, id, userID int64) (err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("cancel payment", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&billing.CancelPaymentCommand{
-		Id:            id,
-		UserId:        userID,
-		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
+		Id:        id,
+		UserId:    userID,
+		UpdatedAt: time.Now().UTC().Format(time.RFC3339),
 	})
 	if err != nil {
 		return err
@@ -277,18 +227,13 @@ func (s *Controller) CancelPayment(ctx context.Context, id, userID int64) (err e
 }
 
 func (s *Controller) RefundPayment(ctx context.Context, id, userID int64) (err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("refund payment", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&billing.RefundPaymentCommand{
-		Id:            id,
-		UserId:        userID,
-		UpdatedAt:     time.Now().UTC().Format(time.RFC3339),
+		Id:        id,
+		UserId:    userID,
+		UpdatedAt: time.Now().UTC().Format(time.RFC3339),
 	})
 	if err != nil {
 		return err
@@ -304,17 +249,12 @@ func (s *Controller) RefundPayment(ctx context.Context, id, userID int64) (err e
 }
 
 func (s *Controller) GetInvoice(ctx context.Context, id string, userID int64) (invoice *model.Invoice, err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("get invoice", slog.String("id", id), slog.Int64("user_id", userID))
 
 	resp, err := s.client.GetInvoice(ctx, &billing.GetInvoiceRequest{
-		Id:        id,
-		UserId:    userID,
+		Id:     id,
+		UserId: userID,
 	})
 	if err != nil {
 		return nil, err
@@ -329,17 +269,12 @@ func (s *Controller) GetInvoice(ctx context.Context, id string, userID int64) (i
 }
 
 func (s *Controller) GetPayment(ctx context.Context, id, userID int64) (payment *model.Payment, err error) {
-	if s.isConnFailed() {
-		if err = s.setupConnection(); err != nil {
-			return
-		}
-	}
 
 	slog.Debug("get payment", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	resp, err := s.client.GetPayment(ctx, &billing.GetPaymentRequest{
-		Id:       id,
-		UserId:   userID,
+		Id:     id,
+		UserId: userID,
 	})
 	if err != nil {
 		return nil, err

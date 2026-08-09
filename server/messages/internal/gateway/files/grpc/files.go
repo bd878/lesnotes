@@ -26,7 +26,6 @@ func New(filesAddr string) *Gateway {
 }
 
 func (g *Gateway) setupConnection() (err error) {
-	g.Close()
 
 	conn, err := rpc.NewClient(
 		g.filesAddr,
@@ -39,14 +38,6 @@ func (g *Gateway) setupConnection() (err error) {
 	g.conn = conn
 	g.client = files.NewFilesClient(conn)
 	return nil
-}
-
-func (g *Gateway) Close() {
-	if g.conn != nil {
-		if err := g.conn.Close(); err != nil {
-			slog.Error("failed to close files conn", slog.String("error", err.Error()))
-		}
-	}
 }
 
 func (g *Gateway) isConnFailed() bool {
@@ -69,7 +60,7 @@ func (g *Gateway) ReadMessageFiles(ctx context.Context, messageID int64, userIDs
 	}
 
 	resp, err := g.client.ReadMessageFiles(ctx, &files.ReadMessageFilesRequest{
-		Id: messageID,
+		Id:      messageID,
 		UserIds: userIDs,
 	})
 	if err != nil {
