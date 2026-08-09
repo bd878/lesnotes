@@ -871,7 +871,7 @@ components:
           type: object
           properties:
             ids:
-              type: array:
+              type: array
               items:
                 type: integer
             description:

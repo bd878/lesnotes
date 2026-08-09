@@ -5,23 +5,8 @@ info:
     This API allows searching through various messages and files
   version: 1.0.0
 paths:
-# SEARCH MESSAGES
+  # SEARCH MESSAGES
   /search/v1/messages:
-    parameters:
-      - $ref: '#/components/parameters/token'
-      - $ref: '#/components/parameters/user'
-      query:
-        in: query
-        type: string
-        required: true
-      thread:
-        in: query
-        type: integer
-        required: false
-      public:
-        in: query
-        type: integer
-        required: false
     get:
       summary: Search messages by text
       description: |
@@ -29,15 +14,30 @@ paths:
         for a substring of a given string.
         Search is case insensitive
       operationId: searchMessages
+      parameters:
+        - $ref: '#/components/parameters/token'
+        - $ref: '#/components/parameters/user'
+        - name: query
+          in: query
+          type: string
+          required: true
+        - name: thread
+          in: query
+          type: integer
+          required: false
+        - name: public
+          in: query
+          type: integer
+          required: false
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                - $ref: '#/components/schemas/searchOk'
+                $ref: '#/components/schemas/searchOk'
         "4XX":
-          description: error 
+          description: error
           content:
             application/json:
               schema:
@@ -62,39 +62,38 @@ paths:
           content:
             application/json:
               schema:
-                - $ref: '#/components/schemas/searchOk'
+                $ref: '#/components/schemas/searchOk'
         "4XX":
-          description: error 
+          description: error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/serverError'
-# END SEARCH MESSAGES
 
-# SEARCH FILES
+  # SEARCH FILES
   /search/v1/files:
-    parameters:
-      - $ref: '#/components/parameters/token'
-      - $ref: '#/components/parameters/user'
-      query:
-        in: query
-        type: string
-        required: true
     get:
       summary: Search files by text
       description: |
         Searches user files, both public and private,
         by given substring in file name
       operationId: searchFiles
-      response:
+      parameters:
+        - $ref: '#/components/parameters/token'
+        - $ref: '#/components/parameters/user'
+        - name: query
+          in: query
+          type: string
+          required: true
+      responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                - $ref: "#/components/schemas/searchOk"
+                $ref: "#/components/schemas/searchOk"
         "4XX":
-          description: error 
+          description: error
           content:
             application/json:
               schema:
@@ -112,20 +111,19 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/searchFilesJson'
-      response:
+      responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                - $ref: "#/components/schemas/searchOk"
+                $ref: "#/components/schemas/searchOk"
         "4XX":
-          description: error 
+          description: error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/serverError'
-# END SEARCH FILES
 
 components:
   parameters:
@@ -135,7 +133,6 @@ components:
       schema:
         type: string
         example: token=AAAAAA
-# we may pass a user token to find users's public entities
     user:
       name: user
       in: query
@@ -145,75 +142,67 @@ components:
         example: 1
 
   schemas:
-# ERROR
     serverError:
       type: object
-      status:
-        type: string
-        default: "error"
-      error:
-        type: object
-        properties:
-          code:
-            type: integer
-          explain:
-            type: string
-          human:
-            type: string
-# END ERROR
+      properties:
+        status:
+          type: string
+          default: "error"
+        error:
+          type: object
+          properties:
+            code:
+              type: integer
+            explain:
+              type: string
+            human:
+              type: string
 
-# SEARCH MESSAGES
     searchMessagesJson:
       type: object
-      token:
-        type: string
-        example: "AAAAAA"
-      request:
-        type: object
-        properties:
-          query:
-            type: string
-            required: true
-          thread:
-            type: id
-            required: false
-          public:
-            type: integer
-            required: false
+      properties:
+        token:
+          type: string
+          example: "AAAAAA"
+        request:
+          type: object
+          properties:
+            query:
+              type: string
+            thread:
+              type: integer
+            public:
+              type: integer
+
+    searchFilesJson:
+      type: object
+      properties:
+        token:
+          type: string
+          example: "AAAAAA"
+        request:
+          type: object
+          properties:
+            user:
+              type: integer
 
     searchOk:
       type: object
-      status:
-        type: string
-      response:
-        type: object
-        properties:
-          count:
-            type: integer
-            required: false
-          list:
-            type: array
-            items:
-              oneOf:
-                - $ref: '#/components/schemas/message'
-                - $ref: '#/components/schemas/file'
+      properties:
+        status:
+          type: string
+        response:
+          type: object
+          properties:
+            count:
+              type: integer
+            list:
+              type: array
+              items:
+                oneOf:
+                  - $ref: '#/components/schemas/message'
+                  - $ref: '#/components/schemas/file'
 
-# END SEARCH MESSAGES
-
-# SEARCH FILES
-    searchFilesJson:
-      type: object
-      token:
-        type: string
-        example: "AAAAAA"
-      request:
-        type: object
-        properties:
-          user:
-            type: integer
-            required: false
-
-# END SEARCH FILES
     message:
       type: object
       properties:
