@@ -11,8 +11,6 @@ type (
 
 	RawMessageSubscriber = MessageSubscriber
 
-	RawMessageStream = MessageStream
-
 	RawMessage struct {
 		id    string
 		name  string
@@ -35,3 +33,4 @@ func (m RawMessage) Data() []byte { return m.data }
 func (m RawMessage) Metadata() ddd.Metadata { return m.metadata }
 func (m RawMessage) SentAt() time.Time { return m.sentAt }
 func (m RawMessage) Subject() string { return m.subject }
+

@@ -5,8 +5,10 @@ import (
 
 	"github.com/bd878/gallery/server/internal/jetstream"
 	"github.com/bd878/gallery/server/internal/am"
+	"github.com/bd878/gallery/server/internal/tm"
 	"github.com/bd878/gallery/server/internal/system"
 	"github.com/bd878/gallery/server/internal/ddd"
+	pg "github.com/bd878/gallery/server/internal/postgres"
 	"github.com/bd878/gallery/server/users/internal/handler/stream"
 	"github.com/bd878/gallery/server/users/config"
 	users "github.com/bd878/gallery/server/users/pkg/model"
@@ -23,10 +25,14 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
 	js := jetstream.NewStream(svc.Config().NatsStream, svc.JS())
+
+	outboxStore := pg.NewOutboxStore(svc.Pool(), "users_stream.outbox")
+
 	stream.RegisterDomainEventHandlers(dispatcher,
 		stream.NewDomainEventHandlers(
 			am.NewMessagePublisher(
 				js,
+				tm.NewOutboxStreamMiddleware(outboxStore),
 			),
 		))
 

@@ -23,7 +23,11 @@ type (
 
 	IncomingMessage interface {
 		MessageBase
-		Data() []byte // TODO: remove, use ddd.Event in integrationEvents
+		Data() []byte
+		Ack() error
+		NAck() error
+		Extend() error
+		Kill() error
 	}
 
 	MessageHandler interface {

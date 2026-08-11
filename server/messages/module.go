@@ -12,6 +12,8 @@ import (
 	"github.com/bd878/gallery/server/internal/jetstream"
 	"github.com/bd878/gallery/server/internal/am"
 	"github.com/bd878/gallery/server/internal/ddd"
+	"github.com/bd878/gallery/server/internal/tm"
+	pg "github.com/bd878/gallery/server/internal/postgres"
 
 	"github.com/bd878/gallery/server/messages/internal/handler/stream"
 	sessionsgateway "github.com/bd878/gallery/server/internal/gateway/sessions"
@@ -33,11 +35,14 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	filesGateway := filesgateway.New(cfg.FilesServiceAddr)
 	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(usersGateway, sessionsGateway, usermodel.PublicUserID))
 
+	outboxStore := pg.NewOutboxStore(svc.Pool(), "messages_stream.outbox")
+
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
 	js := jetstream.NewStream(svc.Config().NatsStream, svc.JS())
 	stream.RegisterDomainEventHandlers(dispatcher, stream.NewDomainEventHandlers(
 		am.NewMessagePublisher(
 			js,
+			tm.NewOutboxStreamMiddleware(outboxStore),
 		),
 	))
 
