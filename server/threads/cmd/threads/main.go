@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/bd878/gallery/server/threads/migrations"
 	_ "github.com/bd878/gallery/server/db/threads/pkg/loadbalance"
 	_ "github.com/bd878/gallery/server/db/sessions/pkg/loadbalance"
 
@@ -35,8 +36,14 @@ func main() {
 		NatsStream: cfg.NatsStream,
 		NatsAddr: cfg.NatsAddr,
 		HttpAddr: cfg.HttpAddr,
+		PGConn: cfg.PGConn,
+		GooseTableName: cfg.GooseTableName,
 	})
 	if err != nil {
+		panic(err)
+	}
+
+	if err := s.MigrateDB(migrations.FS); err != nil {
 		panic(err)
 	}
 

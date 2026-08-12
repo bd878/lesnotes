@@ -9,4 +9,6 @@ type Config struct {
 	LogLevel             string      `json:"log_level"`
 	NatsAddr             string      `json:"nats_addr"`
 	NatsStream           string      `json:"nats_stream"`
+	PGConn              string   `json:"pg_conn"`
+	GooseTableName      string   `json:"goose_table_name"`
 }

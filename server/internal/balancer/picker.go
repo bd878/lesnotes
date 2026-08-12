@@ -7,8 +7,6 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"log/slog"
-
 	"google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/balancer/base"
 )
@@ -33,13 +31,10 @@ func (p *SubchannelPicker) Build(buildInfo base.PickerBuildInfo) balancer.Picker
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	slog.Debug("build picker")
-
 	p.leader = nil
 
 	var followers []*conn
 	for sc, scInfo := range buildInfo.ReadySCs {
-		slog.Debug("scinfo", slog.String("address", fmt.Sprintf("%v", scInfo.Address.Addr)), slog.String("is_leader", fmt.Sprintf("%v", scInfo.Address.Attributes.Value("is_leader"))))
 
 		isLeader := scInfo.
 			Address.
@@ -58,7 +53,7 @@ func (p *SubchannelPicker) Build(buildInfo base.PickerBuildInfo) balancer.Picker
 		followers = append(followers, &conn{SubConn: sc, Address: scInfo.Address.Addr})
 	}
 	p.followers = followers
-	fmt.Fprintln(os.Stdout, "len(followers)", len(p.followers))
+
 	return p
 }
 
@@ -67,8 +62,6 @@ var _ balancer.Picker = (*SubchannelPicker)(nil)
 func (p *SubchannelPicker) Pick(info balancer.PickInfo) (balancer.PickResult, error) {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
-
-	slog.Debug("picker pick", slog.String("FullMethodName", info.FullMethodName))
 
 	var result balancer.PickResult
 
@@ -83,7 +76,6 @@ func (p *SubchannelPicker) Pick(info balancer.PickInfo) (balancer.PickResult, er
 	}
 
 	if endpoint == nil {
-		fmt.Fprintln(os.Stdout, "no sub conn available", "method_name", info.FullMethodName)
 		return result, balancer.ErrNoSubConnAvailable
 	}
 	result.SubConn = endpoint.SubConn
@@ -92,7 +84,6 @@ func (p *SubchannelPicker) Pick(info balancer.PickInfo) (balancer.PickResult, er
 		fmt.Fprintf(os.Stdout, "done info [%T]: %+[1]v\n", info)
 	}
 
-	fmt.Fprintln(os.Stdout, "pick conn", "method_name", info.FullMethodName, "addr", endpoint.Address)
 	return result, nil
 }
 

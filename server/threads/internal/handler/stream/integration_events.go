@@ -37,6 +37,8 @@ func NewIntegrationEventHandlers(messages MessagesController, threads ThreadsCon
 
 func RegisterIntegrationEventHandlers(stream am.RawMessageStream, handlers am.MessageHandler[am.EventMessage]) (err error) {
 	evtMsgHandler := am.RawMessageHandlerFunc(func(ctx context.Context, msg am.RawMessage) error {
+		slog.Debug("receive raw message", slog.String("subject", msg.Subject()))
+
 		// TODO: open/commit/rollback tx
 		evtHandlers := am.RawMessageHandlerWithMiddleware(
 			am.NewEventMessageHandler(

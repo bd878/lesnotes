@@ -38,8 +38,6 @@ func (r *Resolver) Build(t resolver.Target, cc resolver.ClientConn, _ resolver.B
 		r.target = t.Endpoint()
 	}
 
-	slog.Debug("build resolver", slog.String("endpoint", r.target))
-
 	r.clientConn = cc
 	r.resolverConn, err = grpc.NewClient(
 		r.target,
@@ -71,15 +69,13 @@ func (r *Resolver) ResolveNow(options resolver.ResolveNowOptions) {
 
 	ticker := time.NewTicker(1*time.Second)
 	defer ticker.Stop()
-	for i := range 10 {
+	for range 10 {
 		client := api.NewDistributedClient(r.resolverConn)
-
-		slog.Debug("resolver resolve now servers", slog.Int("retry", i), slog.String("target", r.resolverConn.Target()))
 
 		res, err := client.GetServers(context.TODO(), &api.GetServersRequest{})
 		if err != nil {
 			if status, ok := status.FromError(err); ok {
-				slog.Debug("failed to get servers", slog.String("code", status.Code().String()), slog.String("status", status.Message()))
+				slog.Error("failed to get servers", slog.String("code", status.Code().String()), slog.String("status", status.Message()))
 
 				if len(r.addrs) > 0 && (
 					status.Code() == codes.Unavailable ||
@@ -113,7 +109,7 @@ func (r *Resolver) ResolveNow(options resolver.ResolveNowOptions) {
 						fmt.Sprintf(`{"loadBalancingConfig":[{"%s":{}}]}`, r.name),
 					)
 
-					slog.Debug("recover", slog.String("target", r.target))
+					slog.Info("recover", slog.String("target", r.target))
 
 					continue
 				}
@@ -129,13 +125,9 @@ func (r *Resolver) ResolveNow(options resolver.ResolveNowOptions) {
 			return
 		}
 
-		slog.Debug("resolver received new servers", slog.String("servers", fmt.Sprintf("%v", res.Servers)))
-
 		var addrs []resolver.Address
 		var hasLeader bool
 		for _, server := range res.Servers {
-			slog.Debug("server", slog.String("raft_addr", server.RaftAddr), slog.String("is_leader", fmt.Sprintf("%v", server.IsLeader)))
-
 			if server.IsLeader {
 				hasLeader = true
 			}
@@ -159,7 +151,7 @@ func (r *Resolver) ResolveNow(options resolver.ResolveNowOptions) {
 			return
 		}
 
-		slog.Debug("no leader")
+		slog.Error("no leader")
 
 		<-ticker.C
 	}
@@ -167,7 +159,6 @@ func (r *Resolver) ResolveNow(options resolver.ResolveNowOptions) {
 
 func (r *Resolver) Close() {
 	if r.resolverConn != nil {
-		slog.Debug("close resolver conn")
 		if err := r.resolverConn.Close(); err != nil {
 			slog.Error("close resolver conn", slog.String("error", err.Error()))
 		}

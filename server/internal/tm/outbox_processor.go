@@ -1,6 +1,7 @@
 package tm
 
 import (
+	"log/slog"
 	"context"
 	"time"
 	"github.com/bd878/gallery/server/internal/am"
@@ -26,6 +27,9 @@ func NewOutboxProcessor(publisher am.MessagePublisher[am.RawMessage], store Outb
 }
 
 func (p outboxProcessor) Start(ctx context.Context) error {
+	slog.Info("start outbox processor")
+	defer slog.Info("stop outbox processor")
+
 	errC := make(chan error)
 
 	go func() {
@@ -53,6 +57,7 @@ func (p outboxProcessor) processMessages(ctx context.Context) error {
 			ids := make([]string, len(msgs))
 			for i , msg := range msgs {
 				ids[i] = msg.ID()
+				slog.Debug("processor publish message", slog.String("id", msg.ID()), slog.String("subject", msg.Subject()))
 				err = p.publisher.Publish(ctx, msg.Subject(), msg)
 				if err != nil {
 					return err

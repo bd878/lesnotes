@@ -1,6 +1,7 @@
 package threads
 
 import (
+	"log/slog"
 	"context"
 
 	"github.com/bd878/gallery/server/threads/config"
@@ -8,7 +9,9 @@ import (
 	"github.com/bd878/gallery/server/internal/jetstream"
 	"github.com/bd878/gallery/server/internal/am"
 	"github.com/bd878/gallery/server/internal/ddd"
+	"github.com/bd878/gallery/server/internal/tm"
 	"github.com/bd878/gallery/server/threads/internal/handler/stream"
+	pg "github.com/bd878/gallery/server/internal/postgres"
 
 	usermodel "github.com/bd878/gallery/server/users/pkg/model"
 	httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
@@ -24,6 +27,8 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	usersGateway := usersgateway.New(cfg.UsersServiceAddr)
 	sessionsGateway := sessionsgateway.New(cfg.SessionsServiceAddr)
 
+	outboxStore := pg.NewOutboxStore(svc.Pool(), "threads_stream.outbox")
+
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
 	js := jetstream.NewStream(svc.Config().NatsStream, svc.JS())
 	stream.RegisterDomainEventHandlers(dispatcher,
@@ -31,9 +36,12 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 			am.NewEventStream(
 				am.RawMessageStreamWithMiddleware(
 					js,
+					tm.NewOutboxStreamMiddleware(outboxStore),
 				),
 			),
 		))
+
+	startOutboxProcessor(ctx, js, svc.Pool())
 
 	ctrl := controller.New(cfg, dispatcher)
 
@@ -65,4 +73,16 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	svc.ServeMux().Handle("/threads/v2/reorder", middleware.Build(handler.ReorderThreadJsonAPI))
 
 	return nil
+}
+
+func startOutboxProcessor(ctx context.Context, stream am.MessagePublisher[am.RawMessage], db pg.DB) {
+	store := pg.NewOutboxStore(db, "threads_stream.outbox")
+	outboxProcessor := tm.NewOutboxProcessor(stream, store)
+
+	go func() {
+		err := outboxProcessor.Start(ctx)
+		if err != nil {
+			slog.Error("failed to start outbox processor", slog.String("err", err.Error()))
+		}
+	}()
 }
