@@ -3,7 +3,6 @@ package search
 import (
 	"context"
 
-	"github.com/bd878/gallery/server/internal/am"
 	"github.com/bd878/gallery/server/internal/jetstream"
 	"github.com/bd878/gallery/server/search/config"
 	"github.com/bd878/gallery/server/internal/system"
@@ -27,9 +26,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 
 	js := jetstream.NewStream(svc.Config().NatsStream, svc.JS())
 	stream.RegisterIntegrationEventHandlers(
-		am.NewMessageSubscriber(
-			js,
-		),
+		js,
 		stream.NewIntegrationEventHandlers(ctrl, ctrl, ctrl, ctrl))
 
 	handler := httphandler.New(ctrl)

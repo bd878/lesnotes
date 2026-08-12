@@ -14,13 +14,13 @@ import (
 )
 
 type domainHandler[T ddd.Event] struct {
-	publisher am.MessagePublisher
+	stream am.EventStream
 }
 
 var _ ddd.EventHandler[ddd.Event] = (*domainHandler[ddd.Event])(nil)
 
-func NewDomainEventHandlers(publisher am.MessagePublisher) *domainHandler[ddd.Event] {
-	return &domainHandler[ddd.Event]{publisher}
+func NewDomainEventHandlers(stream am.EventStream) *domainHandler[ddd.Event] {
+	return &domainHandler[ddd.Event]{stream}
 }
 
 func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.Event], handler ddd.EventHandler[ddd.Event]) {
@@ -55,7 +55,7 @@ func (h domainHandler[T]) onInvoicePayed(ctx context.Context, event ddd.Event) e
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.BillingChannel, am.NewRawMessage(event.ID(), events.InvoicePayedEvent, data, event.Metadata(), events.BillingChannel))
+	return h.stream.Publish(ctx, events.BillingChannel, am.NewEventMessage(event.ID(), events.InvoicePayedEvent, data, event.Metadata()))
 }
 
 func (h domainHandler[T]) onPremiumPayed(ctx context.Context, event ddd.Event) error {
@@ -73,5 +73,5 @@ func (h domainHandler[T]) onPremiumPayed(ctx context.Context, event ddd.Event) e
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.BillingChannel, am.NewRawMessage(event.ID(), events.PremiumPayedEvent, data, event.Metadata(), events.BillingChannel))
+	return h.stream.Publish(ctx, events.BillingChannel, am.NewEventMessage(event.ID(), events.PremiumPayedEvent, data, event.Metadata()))
 }

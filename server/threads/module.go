@@ -28,8 +28,10 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	js := jetstream.NewStream(svc.Config().NatsStream, svc.JS())
 	stream.RegisterDomainEventHandlers(dispatcher,
 		stream.NewDomainEventHandlers(
-			am.NewMessagePublisher(
-				js,
+			am.NewEventStream(
+				am.RawMessageStreamWithMiddleware(
+					js,
+				),
 			),
 		))
 
@@ -38,9 +40,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	handler := httphandler.New(ctrl)
 
 	stream.RegisterIntegrationEventHandlers(
-		am.NewMessageSubscriber(
-			js,
-		),
+		js,
 		stream.NewIntegrationEventHandlers(ctrl, ctrl),
 	)
 

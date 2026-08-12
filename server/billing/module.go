@@ -26,8 +26,10 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
 	stream.RegisterDomainEventHandlers(dispatcher, stream.NewDomainEventHandlers(
-		am.NewMessagePublisher(
-			jetstream.NewStream(svc.Config().NatsStream, svc.JS()),
+		am.NewEventStream(
+			am.RawMessageStreamWithMiddleware(
+				jetstream.NewStream(svc.Config().NatsStream, svc.JS()),
+			),
 		),
 	))
 

@@ -53,10 +53,10 @@ type integrationHandlers struct {
 	translations   TranslationsController
 }
 
-var _ am.RawMessageHandler = (*integrationHandlers)(nil)
+var _ am.MessageHandler[am.EventMessage] = (*integrationHandlers)(nil)
 
 func NewIntegrationEventHandlers(messages MessagesController, threads ThreadsController,
-	files FilesController, translations TranslationsController) am.RawMessageHandler {
+	files FilesController, translations TranslationsController) am.MessageHandler[am.EventMessage] {
 	return integrationHandlers{
 		messages:       messages,
 		translations:   translations,
@@ -65,23 +65,35 @@ func NewIntegrationEventHandlers(messages MessagesController, threads ThreadsCon
 	}
 }
 
-func RegisterIntegrationEventHandlers(subscriber am.RawMessageSubscriber, handlers am.RawMessageHandler) (err error) {
-	_, err = subscriber.Subscribe(messageevents.MessagesChannel, handlers, am.GroupName("search-messages"))
+func RegisterIntegrationEventHandlers(stream am.RawMessageStream, handlers am.MessageHandler[am.EventMessage]) (err error) {
+	evtMsgHandler := am.RawMessageHandlerFunc(func(ctx context.Context, msg am.RawMessage) error {
+		// TODO: open/commit/rollback tx
+		evtHandlers := am.RawMessageHandlerWithMiddleware(
+			am.NewEventMessageHandler(
+				handlers,
+			),
+			// TODO: inboxMiddleware.(am.RawMessageHandlerMiddleware)
+		)
+
+		return evtHandlers.HandleMessage(ctx, msg)
+	})
+
+	err = stream.Subscribe(messageevents.MessagesChannel, evtMsgHandler, am.GroupName("search-messages"))
 	if err != nil {
 		return
 	}
 
-	_, err = subscriber.Subscribe(threadsevents.ThreadsChannel, handlers, am.GroupName("search-threads"))
+	err = stream.Subscribe(threadsevents.ThreadsChannel, evtMsgHandler, am.GroupName("search-threads"))
 	if err != nil {
 		return
 	}
 
-	_, err = subscriber.Subscribe(filesevents.FilesChannel, handlers, am.GroupName("search-files"))
+	err = stream.Subscribe(filesevents.FilesChannel, evtMsgHandler, am.GroupName("search-files"))
 	if err != nil {
 		return
 	}
 
-	_, err = subscriber.Subscribe(messageevents.TranslationsChannel, handlers, am.GroupName("search-translations"))
+	err = stream.Subscribe(messageevents.TranslationsChannel, evtMsgHandler, am.GroupName("search-translations"))
 	if err != nil {
 		return
 	}
@@ -89,8 +101,8 @@ func RegisterIntegrationEventHandlers(subscriber am.RawMessageSubscriber, handle
 	return
 }
 
-func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingMessage) error {
-	slog.Debug("handle message", slog.String("name", msg.MessageName()), slog.String("subject", msg.Subject()))
+func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.EventMessage) error {
+	slog.Debug("handle message", slog.String("name", msg.MessageName()))
 
 	switch msg.MessageName() {
 	case messageevents.MessageCreatedEvent:
@@ -137,7 +149,7 @@ func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingM
 	return nil
 }
 
-func (h integrationHandlers) handleMessageCreated(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleMessageCreated(ctx context.Context, msg am.EventMessage) error {
 	m := &messages.MessageCreated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
@@ -147,7 +159,7 @@ func (h integrationHandlers) handleMessageCreated(ctx context.Context, msg am.In
 		m.GetTitle(), m.GetText(), m.GetPrivate(), m.GetCreatedAt(), m.GetUpdatedAt())
 }
 
-func (h integrationHandlers) handleMessageDeleted(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleMessageDeleted(ctx context.Context, msg am.EventMessage) error {
 	m := &messages.MessageDeleted{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
@@ -156,7 +168,7 @@ func (h integrationHandlers) handleMessageDeleted(ctx context.Context, msg am.In
 	return h.messages.DeleteMessage(ctx, m.GetId(), m.GetUserId())
 }
 
-func (h integrationHandlers) handleMessageUpdated(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleMessageUpdated(ctx context.Context, msg am.EventMessage) error {
 	m := &messages.MessageUpdated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
@@ -165,7 +177,7 @@ func (h integrationHandlers) handleMessageUpdated(ctx context.Context, msg am.In
 	return h.messages.UpdateMessage(ctx, m.GetId(), m.GetUserId(), m.Name, m.Title, m.Text, m.GetUpdatedAt())
 }
 
-func (h integrationHandlers) handleMessagesPublish(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleMessagesPublish(ctx context.Context, msg am.EventMessage) error {
 	m := &messages.MessagesPublished{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
@@ -174,7 +186,7 @@ func (h integrationHandlers) handleMessagesPublish(ctx context.Context, msg am.I
 	return h.messages.PublishMessages(ctx, m.GetIds(), m.GetUserId(), m.GetUpdatedAt())
 }
 
-func (h integrationHandlers) handleMessagesPrivate(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleMessagesPrivate(ctx context.Context, msg am.EventMessage) error {
 	m := &messages.MessagesPrivated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
@@ -183,7 +195,7 @@ func (h integrationHandlers) handleMessagesPrivate(ctx context.Context, msg am.I
 	return h.messages.PrivateMessages(ctx, m.GetIds(), m.GetUserId(), m.GetUpdatedAt())
 }
 
-func (h integrationHandlers) handleThreadCreated(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleThreadCreated(ctx context.Context, msg am.EventMessage) error {
 	m := &threads.ThreadCreated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
@@ -193,7 +205,7 @@ func (h integrationHandlers) handleThreadCreated(ctx context.Context, msg am.Inc
 		m.GetName(), m.GetDescription(), m.GetPrivate(), m.GetCreatedAt(), m.GetUpdatedAt())
 }
 
-func (h integrationHandlers) handleThreadDeleted(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleThreadDeleted(ctx context.Context, msg am.EventMessage) error {
 	m := &threads.ThreadDeleted{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
@@ -202,7 +214,7 @@ func (h integrationHandlers) handleThreadDeleted(ctx context.Context, msg am.Inc
 	return h.threads.DeleteThread(ctx, m.GetId(), m.GetUserId())
 }
 
-func (h integrationHandlers) handleThreadUpdated(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleThreadUpdated(ctx context.Context, msg am.EventMessage) error {
 	m := &threads.ThreadUpdated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
@@ -211,7 +223,7 @@ func (h integrationHandlers) handleThreadUpdated(ctx context.Context, msg am.Inc
 	return h.threads.UpdateThread(ctx, m.GetId(), m.GetUserId(), m.Name, m.Description, m.GetUpdatedAt())
 }
 
-func (h integrationHandlers) handleThreadParentChanged(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleThreadParentChanged(ctx context.Context, msg am.EventMessage) error {
 	m := &threads.ThreadCreated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
@@ -220,7 +232,7 @@ func (h integrationHandlers) handleThreadParentChanged(ctx context.Context, msg 
 	return h.threads.ChangeThreadParent(ctx, m.GetId(), m.GetUserId(), m.GetParentId())
 }
 
-func (h integrationHandlers) handleThreadPrivated(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleThreadPrivated(ctx context.Context, msg am.EventMessage) error {
 	m := &threads.ThreadPrivated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
@@ -229,7 +241,7 @@ func (h integrationHandlers) handleThreadPrivated(ctx context.Context, msg am.In
 	return h.threads.PrivateThread(ctx, m.GetId(), m.GetUserId(), m.GetUpdatedAt())
 }
 
-func (h integrationHandlers) handleThreadPublished(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleThreadPublished(ctx context.Context, msg am.EventMessage) error {
 	m := &threads.ThreadPublished{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
@@ -238,7 +250,7 @@ func (h integrationHandlers) handleThreadPublished(ctx context.Context, msg am.I
 	return h.threads.PublishThread(ctx, m.GetId(), m.GetUserId(), m.GetUpdatedAt())
 }
 
-func (h integrationHandlers) handleFileUploaded(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleFileUploaded(ctx context.Context, msg am.EventMessage) error {
 	m := &files.FileUploaded{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
@@ -248,7 +260,7 @@ func (h integrationHandlers) handleFileUploaded(ctx context.Context, msg am.Inco
 		m.GetDescription(), m.GetMime(), m.GetPrivate(), m.GetSize(), m.GetCreatedAt(), m.GetUpdatedAt())
 }
 
-func (h integrationHandlers) handleFilesDeleted(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleFilesDeleted(ctx context.Context, msg am.EventMessage) error {
 	m := &files.FilesDeleted{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
@@ -257,7 +269,7 @@ func (h integrationHandlers) handleFilesDeleted(ctx context.Context, msg am.Inco
 	return h.files.DeleteFiles(ctx, m.GetIds(), m.GetUserId())
 }
 
-func (h integrationHandlers) handleFilesPublished(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleFilesPublished(ctx context.Context, msg am.EventMessage) error {
 	m := &files.FilesPublished{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
@@ -266,7 +278,7 @@ func (h integrationHandlers) handleFilesPublished(ctx context.Context, msg am.In
 	return h.files.PublishFiles(ctx, m.GetIds(), m.GetUserId(), m.GetUpdatedAt())
 }
 
-func (h integrationHandlers) handleFilesPrivated(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleFilesPrivated(ctx context.Context, msg am.EventMessage) error {
 	m := &files.FilesPrivated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
@@ -275,7 +287,7 @@ func (h integrationHandlers) handleFilesPrivated(ctx context.Context, msg am.Inc
 	return h.files.PrivateFiles(ctx, m.GetIds(), m.GetUserId(), m.GetUpdatedAt())
 }
 
-func (h integrationHandlers) handleTranslationCreated(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleTranslationCreated(ctx context.Context, msg am.EventMessage) error {
 	m := &translations.TranslationCreated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
@@ -285,7 +297,7 @@ func (h integrationHandlers) handleTranslationCreated(ctx context.Context, msg a
 		m.GetLang(), m.GetTitle(), m.GetText(), m.GetCreatedAt(), m.GetUpdatedAt())
 }
 
-func (h integrationHandlers) handleTranslationDeleted(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleTranslationDeleted(ctx context.Context, msg am.EventMessage) error {
 	m := &translations.TranslationDeleted{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
@@ -294,7 +306,7 @@ func (h integrationHandlers) handleTranslationDeleted(ctx context.Context, msg a
 	return h.translations.DeleteTranslation(ctx, m.GetId(), m.GetLang())
 }
 
-func (h integrationHandlers) handleTranslationUpdated(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleTranslationUpdated(ctx context.Context, msg am.EventMessage) error {
 	m := &translations.TranslationUpdated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err

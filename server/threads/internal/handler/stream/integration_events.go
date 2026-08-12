@@ -26,26 +26,33 @@ type integrationHandlers struct {
 	threads    ThreadsController
 }
 
-var _ am.RawMessageHandler = (*integrationHandlers)(nil)
+var _ am.MessageHandler[am.EventMessage] = (*integrationHandlers)(nil)
 
-func NewIntegrationEventHandlers(messages MessagesController, threads ThreadsController) am.RawMessageHandler {
+func NewIntegrationEventHandlers(messages MessagesController, threads ThreadsController) am.MessageHandler[am.EventMessage] {
 	return integrationHandlers{
 		messages:    messages,
 		threads:     threads,
 	}
 }
 
-func RegisterIntegrationEventHandlers(subscriber am.RawMessageSubscriber, handlers am.RawMessageHandler) (err error) {
-	_, err = subscriber.Subscribe(messageevents.MessagesChannel, handlers, am.GroupName("threads-messages"))
-	if err != nil {
-		return
-	}
+func RegisterIntegrationEventHandlers(stream am.RawMessageStream, handlers am.MessageHandler[am.EventMessage]) (err error) {
+	evtMsgHandler := am.RawMessageHandlerFunc(func(ctx context.Context, msg am.RawMessage) error {
+		// TODO: open/commit/rollback tx
+		evtHandlers := am.RawMessageHandlerWithMiddleware(
+			am.NewEventMessageHandler(
+				handlers,
+			),
+			// TODO: inboxMiddleware.(am.RawMessageHandlerMiddleware)
+		)
 
-	return
+		return evtHandlers.HandleMessage(ctx, msg)
+	})
+
+	return stream.Subscribe(messageevents.MessagesChannel, evtMsgHandler, am.GroupName("threads-messages"))
 }
 
-func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingMessage) error {
-	slog.Debug("handle message", slog.String("name", msg.MessageName()), slog.String("subject", msg.Subject()))
+func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.EventMessage) error {
+	slog.Debug("handle message", slog.String("name", msg.MessageName()))
 
 	switch msg.MessageName() {
 	case messageevents.MessagesPublishEvent:
@@ -63,7 +70,7 @@ func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingM
 
 // TODO: delete user threads when user deleted
 
-func (h integrationHandlers) handleMessageCreated(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleMessageCreated(ctx context.Context, msg am.EventMessage) error {
 	m := &messages.MessageCreated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 	return err
@@ -72,7 +79,7 @@ func (h integrationHandlers) handleMessageCreated(ctx context.Context, msg am.In
 	return h.threads.CreateThread(ctx, m.Id, m.UserId, m.ThreadId, m.Name, "", "", m.Private)
 }
 
-func (h integrationHandlers) handleMessageDeleted(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleMessageDeleted(ctx context.Context, msg am.EventMessage) error {
 	m := &messages.MessageDeleted{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
@@ -81,7 +88,7 @@ func (h integrationHandlers) handleMessageDeleted(ctx context.Context, msg am.In
 	return h.threads.DeleteThread(ctx, m.Id, m.UserId)
 }
 
-func (h integrationHandlers) handleMessagesPublish(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleMessagesPublish(ctx context.Context, msg am.EventMessage) error {
 	m := &messages.MessagesPublished{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
@@ -90,7 +97,7 @@ func (h integrationHandlers) handleMessagesPublish(ctx context.Context, msg am.I
 	return h.messages.PublishMessages(ctx, m.GetIds(), m.GetUserId())
 }
 
-func (h integrationHandlers) handleMessagesPrivate(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleMessagesPrivate(ctx context.Context, msg am.EventMessage) error {
 	m := &messages.MessagesPrivated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
