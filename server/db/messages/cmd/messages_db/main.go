@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"flag"
 	"fmt"
 	"os"
@@ -39,16 +38,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	defer func(db *sql.DB) {
-		if err1 := s.ResetDB(); err1 != nil {
-			fmt.Fprintln(os.Stderr, "failed to reset db", err1)
-		}
-
-		if err2 := db.Close(); err2 != nil {
-			fmt.Fprintln(os.Stderr, "failed to close db", err2)
-		}
-	}(s.DB())
 
 	err = s.MigrateDB(migrations.FS)
 	if err != nil {

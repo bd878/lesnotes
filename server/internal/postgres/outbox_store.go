@@ -51,6 +51,8 @@ func (s OutboxStore) Save(ctx context.Context, msg am.RawMessage) error {
 		}
 	}
 
+	slog.Debug("message saved in outbox store", slog.String("name", msg.MessageName()))
+
 	return err
 }
 

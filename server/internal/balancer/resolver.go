@@ -161,6 +161,7 @@ func (r *Resolver) Close() {
 	if r.resolverConn != nil {
 		if err := r.resolverConn.Close(); err != nil {
 			slog.Error("close resolver conn", slog.String("error", err.Error()))
+			
 		}
 	}
 }

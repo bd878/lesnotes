@@ -1,6 +1,7 @@
 package system
 
 import (
+	"errors"
 	"bytes"
 	"context"
 	"database/sql"
@@ -10,7 +11,6 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/soheilhy/cmux"
@@ -124,7 +124,7 @@ func (s *System) initOpenTelemetry() error {
 
 	s.waiter.Cleanup(func() {
 		if err := s.tp.Shutdown(context.Background()); err != nil {
-			fmt.Fprintf(os.Stdout, "ran into an issue shutting down thre tracer provider %v", err)
+			slog.Error("ran into an issue shutting down thre tracer provider", slog.String("error", err.Error()))
 		}
 	})
 
@@ -161,7 +161,7 @@ func (s *System) initOtelLog() error {
 
 	s.waiter.Cleanup(func() {
 		if err := provider.Shutdown(context.Background()); err != nil {
-			fmt.Fprintln(os.Stdout, err)
+			slog.Error(err.Error())
 		}
 	})
 
@@ -336,8 +336,8 @@ func (s *System) WaitForHTTP(ctx context.Context) (err error) {
 	group, gCtx := errgroup.WithContext(ctx)
 
 	group.Go(func() error {
-		fmt.Fprintf(os.Stdout, "http server started %s\n", s.HttpAddr())
-		defer fmt.Fprintln(os.Stdout, "http server shutdown")
+		slog.Info("http server started", slog.String("addr", s.HttpAddr()))
+		defer slog.Info("http server shutdown")
 		if err := s.HTTP().ListenAndServe(); err != nil {
 			return err
 		}
@@ -345,11 +345,11 @@ func (s *System) WaitForHTTP(ctx context.Context) (err error) {
 	})
 	group.Go(func() error {
 		<-gCtx.Done()
-		fmt.Fprintln(os.Stdout, "http server to be shutdown")
+		slog.Info("http server to be shutdown")
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 		defer cancel()
 		if err := s.HTTP().Shutdown(ctx); err != nil {
-			fmt.Fprintln(os.Stderr, "http server failed to stop gracefully")
+			slog.Error("http server failed to stop gracefully")
 			return err
 		}
 		return nil
@@ -362,7 +362,7 @@ func (s *System) WaitForRPC(ctx context.Context) (err error) {
 	group, gCtx := errgroup.WithContext(ctx)
 
 	group.Go(func() error {
-		fmt.Fprintf(os.Stdout, "rpc server started %s\n", s.Addr())
+		slog.Info("rpc server started", slog.String("addr", s.Addr()))
 		if err := s.RPC().Serve(s.Mux().Match(cmux.Any())); err != nil {
 			return err
 		}
@@ -370,7 +370,7 @@ func (s *System) WaitForRPC(ctx context.Context) (err error) {
 	})
 	group.Go(func() error {
 		<-gCtx.Done()
-		fmt.Fprintln(os.Stdout, "rpc server to be shutdown")
+		slog.Info("rpc server to be shutdown")
 		stopped := make(chan struct{})
 		go func() {
 			s.RPC().GracefulStop()
@@ -380,9 +380,10 @@ func (s *System) WaitForRPC(ctx context.Context) (err error) {
 		select {
 		case <-timeout.C:
 			s.RPC().Stop()
-			return fmt.Errorf("rpc server failed to stop gracefully")
+			slog.Error("rpc server failed to stop gracefully")
+			return errors.New("rpc server failed to stop gracefully : timeout")
 		case <-stopped:
-			fmt.Fprintln(os.Stdout, "rpc server stopped gracefully")
+			slog.Info("rpc server stopped gracefully")
 			return nil
 		}
 	})
@@ -394,14 +395,14 @@ func (s *System) WaitForMux(ctx context.Context) (err error) {
 	group, gCtx := errgroup.WithContext(ctx)
 
 	group.Go(func() error {
-		fmt.Fprintln(os.Stdout, "mux serve")
+		slog.Info("mux serve")
 		s.mux.Serve()
 		return nil
 	})
 
 	group.Go(func() error {
 		<-gCtx.Done()
-		fmt.Fprintln(os.Stdout, "mux to be shutdown")
+		slog.Info("mux to be shutdown")
 		s.mux.Close()
 		return nil
 	})
@@ -414,7 +415,7 @@ func (s *System) WaitForPool(ctx context.Context) (err error) {
 
 	group.Go(func() error {
 		<-gCtx.Done()
-		fmt.Fprintln(os.Stdout, "pgpool to be shutdown")
+		slog.Info("pgpool to be shutdown")
 		s.pool.Close()
 		return nil
 	})
@@ -429,14 +430,14 @@ func (s *System) WaitForStream(ctx context.Context) error {
 	})
 	group, gCtx := errgroup.WithContext(ctx)
 	group.Go(func() error {
-		fmt.Fprintln(os.Stdout, "message stream started")
-		defer fmt.Fprintln(os.Stdout, "message stream stopped")
+		slog.Info("message stream started")
+		defer slog.Info("message stream stopped")
 		<-closed
 		return nil
 	})
 	group.Go(func() error {
 		<-gCtx.Done()
-		fmt.Fprintln(os.Stdout, "message stream to be shutdown")
+		slog.Info("message stream to be shutdown")
 		return s.nc.Drain()
 	})
 	return group.Wait()
@@ -447,7 +448,7 @@ func (s *System) WaitForChannelz(ctx context.Context) (err error) {
 
 	group.Go(func() error {
 		lis, err := net.Listen("tcp", ":50050")
-		defer fmt.Fprintln(os.Stdout, "grpc server channelz shutdown")
+		defer slog.Info("grpc server channelz shutdown")
 		if err != nil {
 			return err
 		}
@@ -458,7 +459,7 @@ func (s *System) WaitForChannelz(ctx context.Context) (err error) {
 	})
 	group.Go(func() error {
 		<-gCtx.Done()
-		fmt.Fprintln(os.Stdout, "grpc channelz server to be shutdown")
+		slog.Info("grpc channelz server to be shutdown")
 		if s.channelzServer != nil {
 			s.channelzServer.Stop()
 		}

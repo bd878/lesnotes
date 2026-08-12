@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS billing_stream.outbox
 	name         text NOT NULL,
 	subject      text NOT NULL,
 	data         bytea NOT NULL,
-	published_at timestamptz NOT NULL DEFAULT NOW(),
+	published_at timestamptz,
 	PRIMARY KEY (id)
 );
 
