@@ -13,13 +13,13 @@ import (
 )
 
 type domainHandler[T ddd.Event] struct {
-	publisher am.MessagePublisher
+	stream am.EventStream
 }
 
 var _ ddd.EventHandler[ddd.Event] = (*domainHandler[ddd.Event])(nil)
 
-func NewDomainEventHandlers(publisher am.MessagePublisher) *domainHandler[ddd.Event] {
-	return &domainHandler[ddd.Event]{publisher}
+func NewDomainEventHandlers(stream am.EventStream) *domainHandler[ddd.Event] {
+	return &domainHandler[ddd.Event]{stream}
 }
 
 func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.Event], handler ddd.EventHandler[ddd.Event]) {
@@ -47,5 +47,5 @@ func (h domainHandler[T]) onUserDeleted(ctx context.Context, event ddd.Event) er
 		return err
 	}
 
-	return h.publisher.Publish(ctx, events.UsersChannel, am.NewRawMessage(event.ID(), events.UserDeletedEvent, data, event.Metadata(), events.UsersChannel))
+	return h.stream.Publish(ctx, events.UsersChannel, am.NewEventMessage(event.ID(), events.UserDeletedEvent, data, event.Metadata()))
 }

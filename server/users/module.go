@@ -2,6 +2,7 @@ package users
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/bd878/gallery/server/internal/jetstream"
 	"github.com/bd878/gallery/server/internal/am"
@@ -9,6 +10,7 @@ import (
 	"github.com/bd878/gallery/server/internal/system"
 	"github.com/bd878/gallery/server/internal/ddd"
 	pg "github.com/bd878/gallery/server/internal/postgres"
+
 	"github.com/bd878/gallery/server/users/internal/handler/stream"
 	"github.com/bd878/gallery/server/users/config"
 	users "github.com/bd878/gallery/server/users/pkg/model"
@@ -30,17 +32,18 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 
 	stream.RegisterDomainEventHandlers(dispatcher,
 		stream.NewDomainEventHandlers(
-			am.NewMessagePublisher(
-				js,
-				tm.NewOutboxStreamMiddleware(outboxStore),
+			am.NewEventStream(
+				am.RawMessageStreamWithMiddleware(
+					js,
+					tm.NewOutboxStreamMiddleware(outboxStore),
+				),
 			),
 		))
 
 	ctrl := controller.New(cfg, sessionsGateway, dispatcher)
 
-	stream.RegisterIntegrationEventHandlers(am.NewMessageSubscriber(
-			js,
-		),
+	stream.RegisterIntegrationEventHandlers(
+		js,
 		stream.NewIntegrationEventHandlers(ctrl),
 	)
 
@@ -69,4 +72,16 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	svc.ServeMux().Handle("/users/v2/login",  middleware.Build(handler.LoginJsonAPI))
 
 	return nil
+}
+
+func startOutboxProcessor(ctx context.Context, stream am.MessagePublisher[am.RawMessage], db pg.DB) {
+	store := pg.NewOutboxStore(db, "users_stream.outbox")
+	outboxProcessor := tm.NewOutboxProcessor(stream, store)
+
+	go func() {
+		err := outboxProcessor.Start(ctx)
+		if err != nil {
+			slog.Error("failed to start outbox processor", slog.String("err", err.Error()))
+		}
+	}()
 }

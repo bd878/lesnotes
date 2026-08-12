@@ -18,28 +18,32 @@ type integrationHandlers struct {
 	users     UsersController
 }
 
-var _ am.RawMessageHandler = (*integrationHandlers)(nil)
+var _ am.MessageHandler[am.EventMessage] = (*integrationHandlers)(nil)
 
-func NewIntegrationEventHandlers(users UsersController) am.RawMessageHandler {
+func NewIntegrationEventHandlers(users UsersController) am.MessageHandler[am.EventMessage] {
 	return integrationHandlers{
 		users:   users,
 	}
 }
 
-func RegisterIntegrationEventHandlers(subscriber am.RawMessageSubscriber, handlers am.RawMessageHandler) (err error) {
-	_, err = subscriber.Subscribe(billingevents.BillingChannel, handlers, am.GroupName("users-billing"))
-	if err != nil {
-		return
-	}
+func RegisterIntegrationEventHandlers(stream am.RawMessageStream, handlers am.MessageHandler[am.EventMessage]) (err error) {
+	evtMsgHandler := am.RawMessageHandlerFunc(func(ctx context.Context, msg am.RawMessage) error {
+		// TODO: open/commit/rollback tx
+		evtHandlers := am.RawMessageHandlerWithMiddleware(
+			am.NewEventMessageHandler(
+				handlers,
+			),
+			// TODO: inboxMiddleware.(am.RawMessageHandlerMiddleware)
+		)
 
-	return
+		return evtHandlers.HandleMessage(ctx, msg)
+	})
+
+	return stream.Subscribe(billingevents.BillingChannel, evtMsgHandler, am.GroupName("users-billing"))
 }
 
-func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingMessage) error {
-	slog.Debug("handle message",
-		slog.String("name", msg.MessageName()),
-		slog.String("subject", msg.Subject()),
-	)
+func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.EventMessage) error {
+	slog.Debug("handle message", slog.String("name", msg.MessageName()))
 
 	switch msg.MessageName() {
 	case billingevents.PremiumPayedEvent:
@@ -50,7 +54,7 @@ func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingM
 }
 
 // TODO: event ddd.Event
-func (h integrationHandlers) handlePremiumPayed(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handlePremiumPayed(ctx context.Context, msg am.EventMessage) error {
 	m := &billing.PremiumPayed{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
