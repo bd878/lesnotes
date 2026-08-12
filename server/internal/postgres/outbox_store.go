@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"context"
 	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/bd878/gallery/server/internal/am"
 	"github.com/bd878/gallery/server/internal/tm"
@@ -16,7 +17,15 @@ type OutboxStore struct {
 	tableName string
 }
 
+type outboxMessage struct {
+	id string
+	name string
+	subject string
+	data []byte
+}
+
 var _ tm.OutboxStore = (*OutboxStore)(nil)
+var _ am.RawMessage = (*outboxMessage)(nil)
 
 func NewOutboxStore(db DB, tableName string) OutboxStore {
 	return OutboxStore{
@@ -25,7 +34,7 @@ func NewOutboxStore(db DB, tableName string) OutboxStore {
 	}
 }
 
-func (s OutboxStore) Save(ctx context.Context, msg am.Message) error {
+func (s OutboxStore) Save(ctx context.Context, msg am.RawMessage) error {
 	const query = "INSERT INTO %s(id, name, subject, data) VALUES ($1, $2, $3, $4)"
 
 	_, err := s.db.Exec(ctx, s.table(query), msg.ID(), msg.MessageName(), msg.Subject(), msg.Data())
@@ -45,14 +54,61 @@ func (s OutboxStore) Save(ctx context.Context, msg am.Message) error {
 	return err
 }
 
-func (s OutboxStore) FindUnpublished(ctx context.Context, limit int) ([]am.Message, error) {
-	return nil, nil
+func (s OutboxStore) FindUnpublished(ctx context.Context, limit int) ([]am.RawMessage, error) {
+	const query = "SELECT id, name, subject, data FROM %s WHERE published_at IS NULL LIMIT %d"
+
+	rows, err := s.db.Query(ctx, s.table(query, limit))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var msgs []am.RawMessage
+	for rows.Next() {
+		msg := outboxMessage{}
+		err = rows.Scan(&msg.id, &msg.name, &msg.subject, &msg.data)
+		if err != nil {
+			return msgs, err
+		}
+
+		msgs = append(msgs, msg)
+	}
+
+	return msgs, rows.Err()
 }
 
 func (s OutboxStore) MarkPublished(ctx context.Context, ids ...string) error {
-	return nil
+	const query = "UPDATE %s SET published_at = CURRENT_TIMESTAMP WHERE id = ANY ($1)"
+
+	msgIDs := &pgtype.TextArray{}
+	err := msgIDs.Set(ids)
+	if err != nil {
+		return err
+	}
+
+	_, err = s.db.Exec(ctx, s.table(query), msgIDs)
+
+	return err
 }
 
-func (s OutboxStore) table(query string) string {
-	return fmt.Sprintf(query, s.tableName)
+func (s OutboxStore) table(query string, args ...any) string {
+	params := []any{s.tableName}
+	params = append(params, args...)
+	return fmt.Sprintf(query, params...)
+}
+
+func (m outboxMessage) ID() string {
+	return m.id
+}
+
+func (m outboxMessage) Subject() string {
+	return m.subject
+}
+
+func (m outboxMessage) MessageName() string {
+	return m.name
+}
+
+func (m outboxMessage) Data() []byte {
+	return m.data
 }

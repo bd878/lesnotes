@@ -11,6 +11,10 @@ message StreamMessage {
 	string  id = 1;
 	string  name = 2;
 	bytes   data = 3;
-	google.protobuf.Struct metadata = 4;
-	google.protobuf.Timestamp sent_at = 5;
+}
+
+message EventMessageData {
+	bytes payload = 1;
+	google.protobuf.Timestamp occurred_at = 2;
+	google.protobuf.Struct metadata = 3;
 }

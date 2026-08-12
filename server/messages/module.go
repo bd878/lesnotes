@@ -1,6 +1,7 @@
 package messages
 
 import (
+	"log/slog"
 	"context"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -40,11 +41,15 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
 	js := jetstream.NewStream(svc.Config().NatsStream, svc.JS())
 	stream.RegisterDomainEventHandlers(dispatcher, stream.NewDomainEventHandlers(
-		am.NewMessagePublisher(
-			js,
-			tm.NewOutboxStreamMiddleware(outboxStore),
+		am.NewEventStream(
+			am.RawMessageStreamWithMiddleware(
+				js,
+				tm.NewOutboxStreamMiddleware(outboxStore),
+			),
 		),
 	))
+
+	startOutboxProcessor(ctx, js, svc.Pool())
 
 	messagesSaved := promauto.NewCounter(
 		prometheus.CounterOpts{
@@ -57,9 +62,8 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	translationsController := controller.NewTranslationsController(controller.TranslationsConfig{RpcAddr: cfg.MessagesServiceAddr}, dispatcher)
 	commentsController := controller.NewCommentsController(controller.CommentsConfig{RpcAddr: cfg.MessagesServiceAddr}, dispatcher)
 
-	stream.RegisterIntegrationEventHandlers(am.NewMessageSubscriber(
-			js,
-		),
+	stream.RegisterIntegrationEventHandlers(
+		js,
 		stream.NewIntegrationEventHandlers(messagesController),
 	)
 
@@ -101,4 +105,16 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	svc.ServeMux().Handle("POST /comments/v2/list", middleware.Build(handler.ListCommentsJsonAPI))
 
 	return nil
+}
+
+func startOutboxProcessor(ctx context.Context, stream am.MessagePublisher[am.RawMessage], db pg.DB) {
+	store := pg.NewOutboxStore(db, "messages_stream.outbox")
+	outboxProcessor := tm.NewOutboxProcessor(stream, store)
+
+	go func() {
+		err := outboxProcessor.Start(ctx)
+		if err != nil {
+			slog.Error("failed to start outbox processor", slog.String("err", err.Error()))
+		}
+	}()
 }

@@ -7,8 +7,6 @@ import (
 	"time"
 
 	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/types/known/timestamppb"
-	"google.golang.org/protobuf/types/known/structpb"
 	"github.com/nats-io/nats.go"
 
 	"github.com/bd878/gallery/server/api"
@@ -21,10 +19,9 @@ type Stream struct {
 	streamName string
 	js         nats.JetStreamContext
 	mu         sync.Mutex
-	subs       []*nats.Subscription
 }
 
-var _ am.MessageStream = (*Stream)(nil)
+var _ am.RawMessageStream = (*Stream)(nil)
 
 func NewStream(streamName string, js nats.JetStreamContext) *Stream {
 	return &Stream{
@@ -33,20 +30,13 @@ func NewStream(streamName string, js nats.JetStreamContext) *Stream {
 	}
 }
 
-func (s *Stream) Publish(ctx context.Context, topicName string, rawMsg am.Message) (err error) {
+func (s *Stream) Publish(ctx context.Context, topicName string, rawMsg am.RawMessage) (err error) {
 	var data []byte
-
-	metadata, err := structpb.NewStruct(rawMsg.Metadata())
-	if err != nil {
-		return err
-	}
 
 	data, err = proto.Marshal(&api.StreamMessage{
 		Id:      rawMsg.ID(),
 		Name:    rawMsg.MessageName(),
 		Data:    rawMsg.Data(),
-		Metadata: metadata,
-		SentAt: timestamppb.New(rawMsg.SentAt()),
 	})
 	if err != nil {
 		return
@@ -92,7 +82,7 @@ func (s *Stream) Publish(ctx context.Context, topicName string, rawMsg am.Messag
 	return
 }
 
-func (s *Stream) Subscribe(topicName string, handler am.MessageHandler, options ...am.SubscriberOption) (am.Subscription, error) {
+func (s *Stream) Subscribe(topicName string, handler am.RawMessageHandler, options ...am.SubscriberOption) error {
 	var err error
 
 	s.mu.Lock()
@@ -130,36 +120,19 @@ func (s *Stream) Subscribe(topicName string, handler am.MessageHandler, options 
 
 	_, err = s.js.AddConsumer(s.streamName, cfg)
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	var sub *nats.Subscription
 
 	if groupName := subCfg.GroupName(); groupName == "" {
-		sub, err = s.js.Subscribe(topicName, s.handleMsg(subCfg, handler), opts...)
+		_, err = s.js.Subscribe(topicName, s.handleMsg(subCfg, handler), opts...)
 	} else {
-		sub, err = s.js.QueueSubscribe(topicName, groupName, s.handleMsg(subCfg, handler), opts...)
+		_, err = s.js.QueueSubscribe(topicName, groupName, s.handleMsg(subCfg, handler), opts...)
 	}
 
-	s.subs = append(s.subs, sub)
-
-	return subscription{sub}, nil
-}
-
-func (s *Stream) Unsubscribe() error {
-	for _, sub := range s.subs {
-		if !sub.IsValid() {
-			continue
-		}
-		err := sub.Drain()
-		if err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
-func (s *Stream) handleMsg(cfg am.SubscriberConfig, handler am.MessageHandler) func(*nats.Msg) {
+func (s *Stream) handleMsg(cfg am.SubscriberConfig, handler am.RawMessageHandler) func(*nats.Msg) {
 	return func(natsMsg *nats.Msg) {
 		var err error
 
@@ -175,9 +148,6 @@ func (s *Stream) handleMsg(cfg am.SubscriberConfig, handler am.MessageHandler) f
 			name:  m.GetName(),
 			subject: natsMsg.Subject,
 			data: m.GetData(),
-			metadata: m.GetMetadata().AsMap(),
-			sentAt: m.SentAt.AsTime(),
-			receivedAt: time.Now(),
 			acked: false,
 			ackFn: func() error { return natsMsg.Ack() },
 			nackFn: func() error { return natsMsg.Nak() },

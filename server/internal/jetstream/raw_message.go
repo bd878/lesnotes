@@ -1,9 +1,7 @@
 package jetstream
 
 import (
-	"time"
 	"github.com/bd878/gallery/server/internal/am"
-	"github.com/bd878/gallery/server/internal/ddd"
 )
 
 type rawMessage struct {
@@ -11,9 +9,6 @@ type rawMessage struct {
 	name     string
 	subject  string
 	data     []byte
-	metadata ddd.Metadata
-	sentAt   time.Time
-	receivedAt time.Time
 	acked    bool
 	ackFn    func() error
 	nackFn   func() error
@@ -21,15 +16,12 @@ type rawMessage struct {
 	killFn   func() error
 }
 
-var _ am.Message = (*rawMessage)(nil)
+var _ am.RawMessage = (*rawMessage)(nil)
 
 func (m *rawMessage) ID() string        { return m.id }
 func (m *rawMessage) Subject() string   { return m.subject }
 func (m *rawMessage) MessageName() string { return m.name }
 func (m *rawMessage) Data() []byte { return m.data }
-func (m *rawMessage) Metadata() ddd.Metadata { return m.metadata }
-func (m *rawMessage) SentAt() time.Time { return m.sentAt }
-func (m *rawMessage) ReceivedAt() time.Time { return m.receivedAt }
 
 func (m *rawMessage) Ack() error {
 	if m.acked {

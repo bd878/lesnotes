@@ -28,8 +28,6 @@ type StreamMessage struct {
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	Data          []byte                 `protobuf:"bytes,3,opt,name=data,proto3" json:"data,omitempty"`
-	Metadata      *structpb.Struct       `protobuf:"bytes,4,opt,name=metadata,proto3" json:"metadata,omitempty"`
-	SentAt        *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=sent_at,json=sentAt,proto3" json:"sent_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -85,16 +83,62 @@ func (x *StreamMessage) GetData() []byte {
 	return nil
 }
 
-func (x *StreamMessage) GetMetadata() *structpb.Struct {
+type EventMessageData struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Payload       []byte                 `protobuf:"bytes,1,opt,name=payload,proto3" json:"payload,omitempty"`
+	OccurredAt    *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=occurred_at,json=occurredAt,proto3" json:"occurred_at,omitempty"`
+	Metadata      *structpb.Struct       `protobuf:"bytes,3,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EventMessageData) Reset() {
+	*x = EventMessageData{}
+	mi := &file_protos_stream_message_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EventMessageData) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EventMessageData) ProtoMessage() {}
+
+func (x *EventMessageData) ProtoReflect() protoreflect.Message {
+	mi := &file_protos_stream_message_proto_msgTypes[1]
 	if x != nil {
-		return x.Metadata
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EventMessageData.ProtoReflect.Descriptor instead.
+func (*EventMessageData) Descriptor() ([]byte, []int) {
+	return file_protos_stream_message_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *EventMessageData) GetPayload() []byte {
+	if x != nil {
+		return x.Payload
 	}
 	return nil
 }
 
-func (x *StreamMessage) GetSentAt() *timestamppb.Timestamp {
+func (x *EventMessageData) GetOccurredAt() *timestamppb.Timestamp {
 	if x != nil {
-		return x.SentAt
+		return x.OccurredAt
+	}
+	return nil
+}
+
+func (x *EventMessageData) GetMetadata() *structpb.Struct {
+	if x != nil {
+		return x.Metadata
 	}
 	return nil
 }
@@ -103,13 +147,16 @@ var File_protos_stream_message_proto protoreflect.FileDescriptor
 
 const file_protos_stream_message_proto_rawDesc = "" +
 	"\n" +
-	"\x1bprotos/stream_message.proto\x12\tstream.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\"\xb1\x01\n" +
+	"\x1bprotos/stream_message.proto\x12\tstream.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\"G\n" +
 	"\rStreamMessage\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
-	"\x04data\x18\x03 \x01(\fR\x04data\x123\n" +
-	"\bmetadata\x18\x04 \x01(\v2\x17.google.protobuf.StructR\bmetadata\x123\n" +
-	"\asent_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\x06sentAtB%Z#github.com/bd878/gallery/server/apib\x06proto3"
+	"\x04data\x18\x03 \x01(\fR\x04data\"\x9e\x01\n" +
+	"\x10EventMessageData\x12\x18\n" +
+	"\apayload\x18\x01 \x01(\fR\apayload\x12;\n" +
+	"\voccurred_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"occurredAt\x123\n" +
+	"\bmetadata\x18\x03 \x01(\v2\x17.google.protobuf.StructR\bmetadataB%Z#github.com/bd878/gallery/server/apib\x06proto3"
 
 var (
 	file_protos_stream_message_proto_rawDescOnce sync.Once
@@ -123,15 +170,16 @@ func file_protos_stream_message_proto_rawDescGZIP() []byte {
 	return file_protos_stream_message_proto_rawDescData
 }
 
-var file_protos_stream_message_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_protos_stream_message_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_protos_stream_message_proto_goTypes = []any{
 	(*StreamMessage)(nil),         // 0: stream.v1.StreamMessage
-	(*structpb.Struct)(nil),       // 1: google.protobuf.Struct
+	(*EventMessageData)(nil),      // 1: stream.v1.EventMessageData
 	(*timestamppb.Timestamp)(nil), // 2: google.protobuf.Timestamp
+	(*structpb.Struct)(nil),       // 3: google.protobuf.Struct
 }
 var file_protos_stream_message_proto_depIdxs = []int32{
-	1, // 0: stream.v1.StreamMessage.metadata:type_name -> google.protobuf.Struct
-	2, // 1: stream.v1.StreamMessage.sent_at:type_name -> google.protobuf.Timestamp
+	2, // 0: stream.v1.EventMessageData.occurred_at:type_name -> google.protobuf.Timestamp
+	3, // 1: stream.v1.EventMessageData.metadata:type_name -> google.protobuf.Struct
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
@@ -150,7 +198,7 @@ func file_protos_stream_message_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_protos_stream_message_proto_rawDesc), len(file_protos_stream_message_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

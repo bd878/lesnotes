@@ -19,25 +19,32 @@ type integrationHandlers struct {
 	messages MessagesController
 }
 
-var _ am.RawMessageHandler = (*integrationHandlers)(nil)
+var _ am.MessageHandler[am.EventMessage] = (*integrationHandlers)(nil)
 
-func NewIntegrationEventHandlers(messages MessagesController) am.RawMessageHandler {
+func NewIntegrationEventHandlers(messages MessagesController) am.MessageHandler[am.EventMessage] {
 	return integrationHandlers{
 		messages: messages,
 	}
 }
 
-func RegisterIntegrationEventHandlers(subscriber am.RawMessageSubscriber, handlers am.RawMessageHandler) (err error) {
-	_, err = subscriber.Subscribe(events.UsersChannel, handlers, am.GroupName("messages-users"))
-	if err != nil {
-		return
-	}
+func RegisterIntegrationEventHandlers(stream am.RawMessageStream, handlers am.MessageHandler[am.EventMessage]) (err error) {
+	evtMsgHandler := am.RawMessageHandlerFunc(func(ctx context.Context, msg am.RawMessage) error {
+		// TODO: open/commit/rollback tx
+		evtHandlers := am.RawMessageHandlerWithMiddleware(
+			am.NewEventMessageHandler(
+				handlers,
+			),
+			// TODO: inboxMiddleware.(am.RawMessageHandlerMiddleware)
+		)
 
-	return
+		return evtHandlers.HandleMessage(ctx, msg)
+	})
+
+	return stream.Subscribe(events.UsersChannel, evtMsgHandler, am.GroupName("messages-users"))
 }
 
-func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingMessage) error {
-	slog.Debug("handle message", slog.String("name", msg.MessageName()), slog.String("subject", msg.Subject()))
+func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.EventMessage) error {
+	slog.Debug("handle message", slog.String("name", msg.MessageName()))
 
 	switch msg.MessageName() {
 	case events.UserDeletedEvent:
@@ -47,7 +54,7 @@ func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingM
 	return nil
 }
 
-func (h integrationHandlers) handleUserDeleted(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleUserDeleted(ctx context.Context, msg am.EventMessage) error {
 	m := &users.UserDeleted{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err

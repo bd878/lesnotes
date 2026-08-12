@@ -1,36 +1,73 @@
 package am
 
 import (
-	"time"
-
-	"github.com/bd878/gallery/server/internal/ddd"
+	"context"
 )
 
 type (
-	RawMessageHandler = MessageHandler
+	RawMessageHandler = MessageHandler[RawMessage]
 
-	RawMessageSubscriber = MessageSubscriber
+	RawMessageSubscriber = MessageSubscriber[RawMessage]
 
-	RawMessage struct {
+	RawMessageHandlerFunc       func(ctx context.Context, msg RawMessage) error
+	RawMessageStream = MessageStream[RawMessage, RawMessage]
+	RawMessageStreamMiddleware = func(stream RawMessageStream) RawMessageStream
+	RawMessageHandlerMiddleware = func(handler RawMessageHandler) RawMessageHandler
+
+	RawMessage interface {
+		Message
+		Data() []byte
+		Subject() string
+	}
+
+	rawMessage struct {
 		id    string
 		name  string
-		data  []byte
-		metadata ddd.Metadata
-		sentAt time.Time
 		subject string
+		data  []byte
 	}
 )
 
-var _ Message = (*RawMessage)(nil)
+var _ RawMessage = (*rawMessage)(nil)
 
-func NewRawMessage(id, name string, data []byte, metadata ddd.Metadata, subject string) *RawMessage {
-	return &RawMessage{id: id, name: name, data: data, metadata: metadata, subject: subject, sentAt: time.Now()}
+func NewRawMessage(id, name, subject string, data []byte) *rawMessage {
+	return &rawMessage{
+		id: id,
+		name: name,
+		subject: subject,
+		data: data,
+	}
 }
 
-func (m RawMessage) ID() string { return m.id }
-func (m RawMessage) MessageName() string { return m.name }
-func (m RawMessage) Data() []byte { return m.data }
-func (m RawMessage) Metadata() ddd.Metadata { return m.metadata }
-func (m RawMessage) SentAt() time.Time { return m.sentAt }
-func (m RawMessage) Subject() string { return m.subject }
+func (m rawMessage) ID() string { return m.id }
+func (m rawMessage) Subject() string { return m.subject }
+func (m rawMessage) MessageName() string { return m.name }
+func (m rawMessage) Data() []byte { return m.data }
 
+func (f RawMessageHandlerFunc) HandleMessage(ctx context.Context, cmd RawMessage) error {
+	return f(ctx, cmd)
+}
+
+func RawMessageStreamWithMiddleware(stream RawMessageStream, mws ...RawMessageStreamMiddleware) RawMessageStream {
+	s := stream
+	// middleware are applied in reverse; this makes the first middleware
+	// in the slice the outermost i.e. first to enter, last to exit
+	// given: store, A, B, C
+	// result: A(B(C(store)))
+	for i := len(mws) - 1; i >= 0; i-- {
+		s = mws[i](s)
+	}
+	return s
+}
+
+func RawMessageHandlerWithMiddleware(handler RawMessageHandler, mws ...RawMessageHandlerMiddleware) RawMessageHandler {
+	h := handler
+	// middleware are applied in reverse; this makes the first middleware
+	// in the slice the outermost i.e. first to enter, last to exit
+	// given: store, A, B, C
+	// result: A(B(C(store)))
+	for i := len(mws) - 1; i >= 0; i-- {
+		h = mws[i](h)
+	}
+	return h
+}
