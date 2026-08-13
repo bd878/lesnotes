@@ -2,57 +2,32 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"time"
 
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/translations"
-	"github.com/bd878/gallery/server/db/messages/pkg/loadbalance"
 	"github.com/bd878/gallery/server/db/messages/pkg/machine"
+	"github.com/bd878/gallery/server/internal/di"
 	"github.com/bd878/gallery/server/internal/ddd"
-	"github.com/bd878/gallery/server/internal/rpc"
 	"github.com/bd878/gallery/server/messages/internal/domain"
 	"github.com/bd878/gallery/server/messages/pkg/model"
 )
 
-type TranslationsConfig struct {
-	RpcAddr string
-}
-
 type TranslationsController struct {
-	conf      TranslationsConfig
 	client    translations.TranslationsClient
-	conn      *grpc.ClientConn
 	publisher ddd.EventPublisher[ddd.Event]
 }
 
-func NewTranslationsController(conf TranslationsConfig, publisher ddd.EventPublisher[ddd.Event]) *TranslationsController {
-	controller := &TranslationsController{
-		conf:      conf,
+func NewTranslationsController(container di.Container, publisher ddd.EventPublisher[ddd.Event]) *TranslationsController {
+	client := container.Get("translationsClient").(translations.TranslationsClient)
+
+	return &TranslationsController{
+		client: client,
 		publisher: publisher,
 	}
-
-	conn, err := rpc.NewClient(
-		fmt.Sprintf(
-			"%s:///%s",
-			loadbalance.Name,
-			controller.conf.RpcAddr,
-		),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
-	if err != nil {
-		panic(err)
-	}
-	client := translations.NewTranslationsClient(conn)
-	controller.conn = conn
-	controller.client = client
-
-	return controller
 }
 
 func (s *TranslationsController) SaveTranslation(ctx context.Context, userID, messageID int64, lang, title, text string) (err error) {
@@ -60,6 +35,16 @@ func (s *TranslationsController) SaveTranslation(ctx context.Context, userID, me
 
 	createdAt := time.Now().UTC().Format(time.RFC3339)
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
+	event, err := domain.CreateTranslation(userID, messageID, lang, title, text, createdAt, updatedAt)
+	if err != nil {
+		return err
+	}
+
+	err = s.publisher.Publish(ctx, event)
+	if err != nil {
+		return
+	}
 
 	cmd, err := proto.Marshal(&translations.AppendTranslationCommand{
 		MessageId: messageID,
@@ -78,16 +63,8 @@ func (s *TranslationsController) SaveTranslation(ctx context.Context, userID, me
 		Cmd:      cmd,
 		Duration: "10s",
 	})
-	if err != nil {
-		return err
-	}
 
-	event, err := domain.CreateTranslation(userID, messageID, lang, title, text, createdAt, updatedAt)
-	if err != nil {
-		return err
-	}
-
-	return s.publisher.Publish(ctx, event)
+	return
 }
 
 func (s *TranslationsController) UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string) (err error) {
@@ -102,6 +79,16 @@ func (s *TranslationsController) UpdateTranslation(ctx context.Context, messageI
 	slog.Debug("update translation", logValues...)
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
+	event, err := domain.UpdateTranslation(messageID, lang, title, text, updatedAt)
+	if err != nil {
+		return err
+	}
+
+	err = s.publisher.Publish(ctx, event)
+	if err != nil {
+		return
+	}
 
 	cmd, err := proto.Marshal(&translations.UpdateTranslationCommand{
 		MessageId: messageID,
@@ -119,20 +106,22 @@ func (s *TranslationsController) UpdateTranslation(ctx context.Context, messageI
 		Cmd:      cmd,
 		Duration: "10s",
 	})
-	if err != nil {
-		return err
-	}
 
-	event, err := domain.UpdateTranslation(messageID, lang, title, text, updatedAt)
-	if err != nil {
-		return err
-	}
-
-	return s.publisher.Publish(ctx, event)
+	return
 }
 
 func (s *TranslationsController) DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error) {
 	slog.Debug("delete translation", slog.Int64("message_id", messageID), slog.String("lang", lang))
+
+	event, err := domain.DeleteTranslation(messageID, lang)
+	if err != nil {
+		return err
+	}
+
+	err = s.publisher.Publish(ctx, event)
+	if err != nil {
+		return
+	}
 
 	cmd, err := proto.Marshal(&translations.DeleteTranslationCommand{
 		MessageId: messageID,
@@ -147,16 +136,8 @@ func (s *TranslationsController) DeleteTranslation(ctx context.Context, messageI
 		Cmd:      cmd,
 		Duration: "10s",
 	})
-	if err != nil {
-		return err
-	}
 
-	event, err := domain.DeleteTranslation(messageID, lang)
-	if err != nil {
-		return err
-	}
-
-	return s.publisher.Publish(ctx, event)
+	return
 }
 
 func (s *TranslationsController) ReadTranslation(ctx context.Context, userID, messageID int64, lang string, name *string) (translation *model.Translation, err error) {

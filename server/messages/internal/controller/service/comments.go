@@ -6,53 +6,29 @@ import (
 	"log/slog"
 	"time"
 
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/comments"
-	"github.com/bd878/gallery/server/db/messages/pkg/loadbalance"
 	"github.com/bd878/gallery/server/db/messages/pkg/machine"
 	"github.com/bd878/gallery/server/internal/ddd"
-	"github.com/bd878/gallery/server/internal/rpc"
+	"github.com/bd878/gallery/server/internal/di"
 	"github.com/bd878/gallery/server/messages/internal/domain"
 	"github.com/bd878/gallery/server/messages/pkg/model"
 )
 
-type CommentsConfig struct {
-	RpcAddr string
-}
-
 type CommentsController struct {
-	conf      CommentsConfig
 	client    comments.CommentsClient
-	conn      *grpc.ClientConn
 	publisher ddd.EventPublisher[ddd.Event]
 }
 
-func NewCommentsController(conf CommentsConfig, publisher ddd.EventPublisher[ddd.Event]) *CommentsController {
-	c := &CommentsController{
-		conf:      conf,
+func NewCommentsController(container di.Container, publisher ddd.EventPublisher[ddd.Event]) *CommentsController {
+	client := container.Get("commentsClient").(comments.CommentsClient)
+
+	return &CommentsController{
+		client: client,
 		publisher: publisher,
 	}
-
-	conn, err := rpc.NewClient(
-		fmt.Sprintf(
-			"%s:///%s",
-			loadbalance.Name,
-			c.conf.RpcAddr,
-		),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
-	if err != nil {
-		panic(err)
-	}
-	client := comments.NewCommentsClient(conn)
-	c.conn = conn
-	c.client = client
-
-	return c
 }
 
 func (s *CommentsController) SendComment(ctx context.Context, id, userID, messageID int64, text string, metadata []byte) (err error) {
@@ -60,6 +36,16 @@ func (s *CommentsController) SendComment(ctx context.Context, id, userID, messag
 
 	createdAt := time.Now().UTC().Format(time.RFC3339)
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
+	event, err := domain.CreateComment(id, userID, messageID, text, createdAt, updatedAt)
+	if err != nil {
+		return err
+	}
+
+	err = s.publisher.Publish(ctx, event)
+	if err != nil {
+		return
+	}
 
 	cmd, err := proto.Marshal(&comments.AppendCommentCommand{
 		Id:        id,
@@ -79,16 +65,8 @@ func (s *CommentsController) SendComment(ctx context.Context, id, userID, messag
 		Cmd:      cmd,
 		Duration: "10s",
 	})
-	if err != nil {
-		return err
-	}
 
-	event, err := domain.CreateComment(id, userID, messageID, text, createdAt, updatedAt)
-	if err != nil {
-		return err
-	}
-
-	return s.publisher.Publish(ctx, event)
+	return
 }
 
 func (s *CommentsController) UpdateComment(ctx context.Context, id, userID int64, text *string) (err error) {
@@ -100,6 +78,16 @@ func (s *CommentsController) UpdateComment(ctx context.Context, id, userID int64
 	slog.Debug("update comment", logValues...)
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
+	event, err := domain.UpdateComment(id, userID, text, updatedAt)
+	if err != nil {
+		return err
+	}
+
+	err = s.publisher.Publish(ctx, event)
+	if err != nil {
+		return
+	}
 
 	cmd, err := proto.Marshal(&comments.UpdateCommentCommand{
 		Id:        id,
@@ -116,20 +104,22 @@ func (s *CommentsController) UpdateComment(ctx context.Context, id, userID int64
 		Cmd:      cmd,
 		Duration: "10s",
 	})
-	if err != nil {
-		return err
-	}
 
-	event, err := domain.UpdateComment(id, userID, text, updatedAt)
-	if err != nil {
-		return err
-	}
-
-	return s.publisher.Publish(ctx, event)
+	return
 }
 
 func (s *CommentsController) DeleteComment(ctx context.Context, id, userID int64) (err error) {
 	slog.Debug("delete comment", slog.Int64("id", id), slog.Int64("user_id", userID))
+
+	event, err := domain.DeleteComment(id, userID)
+	if err != nil {
+		return err
+	}
+
+	err = s.publisher.Publish(ctx, event)
+	if err != nil {
+		return
+	}
 
 	cmd, err := proto.Marshal(&comments.DeleteCommentCommand{
 		Id:     id,
@@ -144,20 +134,22 @@ func (s *CommentsController) DeleteComment(ctx context.Context, id, userID int64
 		Cmd:      cmd,
 		Duration: "10s",
 	})
-	if err != nil {
-		return err
-	}
 
-	event, err := domain.DeleteComment(id, userID)
-	if err != nil {
-		return err
-	}
-
-	return s.publisher.Publish(ctx, event)
+	return 
 }
 
 func (s *CommentsController) DeleteMessageComments(ctx context.Context, messageID int64) (err error) {
 	slog.Debug("delete message comments", slog.Int64("message_id", messageID))
+
+	event, err := domain.DeleteMessageComments(messageID)
+	if err != nil {
+		return err
+	}
+
+	err = s.publisher.Publish(ctx, event)
+	if err != nil {
+		return
+	}
 
 	cmd, err := proto.Marshal(&comments.DeleteMessageCommentsCommand{
 		MessageId: messageID,
@@ -171,16 +163,8 @@ func (s *CommentsController) DeleteMessageComments(ctx context.Context, messageI
 		Cmd:      cmd,
 		Duration: "10s",
 	})
-	if err != nil {
-		return err
-	}
 
-	event, err := domain.DeleteMessageComments(messageID)
-	if err != nil {
-		return err
-	}
-
-	return s.publisher.Publish(ctx, event)
+	return
 }
 
 func (s *CommentsController) ReadComment(ctx context.Context, id, userID int64) (comment *model.Comment, err error) {

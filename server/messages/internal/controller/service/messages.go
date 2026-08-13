@@ -9,26 +9,20 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/bd878/gallery/server/api"
-	"github.com/bd878/gallery/server/api/files"
 	"github.com/bd878/gallery/server/api/messages"
+	"github.com/bd878/gallery/server/api/files"
 	"github.com/bd878/gallery/server/api/threads"
-	"github.com/bd878/gallery/server/db/messages/pkg/loadbalance"
 	"github.com/bd878/gallery/server/db/messages/pkg/machine"
+	"github.com/bd878/gallery/server/internal/di"
 	"github.com/bd878/gallery/server/internal/ddd"
-	"github.com/bd878/gallery/server/internal/rpc"
 	"github.com/bd878/gallery/server/messages/internal/domain"
 	"github.com/bd878/gallery/server/messages/pkg/model"
 	threadsmodel "github.com/bd878/gallery/server/threads/pkg/model"
 )
-
-type MessagesConfig struct {
-	RpcAddr string
-}
 
 type ThreadsGateway interface {
 	ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32) (list []*threadsmodel.Thread, isLastPage bool, err error)
@@ -46,44 +40,36 @@ type FilesGateway interface {
 }
 
 type MessagesController struct {
-	conf          MessagesConfig
-	client        messages.MessagesClient
-	conn          *grpc.ClientConn
+	client messages.MessagesClient
 	threads       ThreadsGateway
 	filesGateway  FilesGateway
 	messagesSaved prometheus.Counter
 	publisher     ddd.EventPublisher[ddd.Event]
 }
 
-func NewMessagesController(conf MessagesConfig, publisher ddd.EventPublisher[ddd.Event], filesGateway FilesGateway,
-	threads ThreadsGateway, messagesSaved prometheus.Counter) *MessagesController {
-	controller := &MessagesController{
-		conf:          conf,
+func NewMessagesController(container di.Container, publisher ddd.EventPublisher[ddd.Event], filesGateway FilesGateway, threads ThreadsGateway, messagesSaved prometheus.Counter) MessagesController {
+	client := container.Get("messagesClient").(messages.MessagesClient)
+
+	return MessagesController{
+		client: client,
 		filesGateway:  filesGateway,
 		threads:       threads,
 		publisher:     publisher,
 		messagesSaved: messagesSaved,
 	}
-
-	conn, err := rpc.NewClient(
-		fmt.Sprintf(
-			"%s:///%s",
-			loadbalance.Name,
-			controller.conf.RpcAddr,
-		),
-	)
-	if err != nil {
-		panic(err)
-	}
-	client := messages.NewMessagesClient(conn)
-	controller.conn = conn
-	controller.client = client
-
-	return controller
 }
 
-func (s *MessagesController) SaveMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (message *model.Message, err error) {
-	slog.Debug("save message", slog.Int64("id", id), slog.String("text", text), slog.String("title", title), slog.String("file_ids", fmt.Sprintf("%v", fileIDs)), slog.Int64("thread_id", threadID), slog.Int64("user_id", userID), slog.Bool("private", private), slog.String("name", name))
+func (s MessagesController) SaveMessage(ctx context.Context, id int64, text, title string, fileIDs []int64, threadID int64, userID int64, private bool, name string) (message *model.Message, err error) {
+	slog.Debug("save message",
+		slog.Int64("id", id),
+		slog.String("text", text),
+		slog.String("title", title),
+		slog.String("file_ids", fmt.Sprintf("%v", fileIDs)),
+		slog.Int64("thread_id", threadID),
+		slog.Int64("user_id", userID),
+		slog.Bool("private", private),
+		slog.String("name", name),
+	)
 
 	createdAt := time.Now().UTC().Format(time.RFC3339)
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
@@ -103,15 +89,7 @@ func (s *MessagesController) SaveMessage(ctx context.Context, id int64, text, ti
 		return nil, err
 	}
 
-	_, err = s.client.Apply(ctx, &api.Command{
-		ReqType:  int32(machine.AppendRequest),
-		Cmd:      cmd,
-		Duration: "10s",
-	})
-	if err != nil {
-		return
-	}
-
+	// save in outbox first in a transaction
 	event, err := domain.CreateMessage(id, threadID, text, title, fileIDs, userID, private, name, createdAt, updatedAt)
 	if err != nil {
 		return nil, err
@@ -120,6 +98,15 @@ func (s *MessagesController) SaveMessage(ctx context.Context, id int64, text, ti
 	err = s.publisher.Publish(ctx, event)
 	if err != nil {
 		return nil, err
+	}
+
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType:  int32(machine.AppendRequest),
+		Cmd:      cmd,
+		Duration: "10s",
+	})
+	if err != nil {
+		return
 	}
 
 	message = &model.Message{
@@ -137,7 +124,7 @@ func (s *MessagesController) SaveMessage(ctx context.Context, id int64, text, ti
 	return
 }
 
-func (s *MessagesController) DeleteUserMessages(ctx context.Context, userID int64) (err error) {
+func (s MessagesController) DeleteUserMessages(ctx context.Context, userID int64) (err error) {
 	slog.Debug("delete user messages", slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&messages.DeleteUserMessagesCommand{
@@ -156,12 +143,17 @@ func (s *MessagesController) DeleteUserMessages(ctx context.Context, userID int6
 	return
 }
 
-func (s *MessagesController) DeleteMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+func (s MessagesController) DeleteMessages(ctx context.Context, ids []int64, userID int64) (err error) {
 	slog.Debug("delete messages", slog.String("ids", fmt.Sprintf("%v", ids)), slog.Int64("user_id", userID))
 
 	for _, id := range ids {
 
 		event, err := domain.DeleteMessage(id, userID)
+		if err != nil {
+			return err
+		}
+
+		err = s.publisher.Publish(ctx, event)
 		if err != nil {
 			return err
 		}
@@ -183,17 +175,25 @@ func (s *MessagesController) DeleteMessages(ctx context.Context, ids []int64, us
 			return err
 		}
 
-		s.publisher.Publish(ctx, event)
-
 	}
 
 	return
 }
 
-func (s *MessagesController) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+func (s MessagesController) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
 	slog.Debug("publish messages", slog.String("ids", fmt.Sprintf("%v", ids)), slog.Int64("user_id", userID))
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
+	event, err := domain.PublishMessages(userID, ids, updatedAt)
+	if err != nil {
+		return err
+	}
+
+	err = s.publisher.Publish(ctx, event)
+	if err != nil {
+		return err
+	}
 
 	cmd, err := proto.Marshal(&messages.PublishCommand{
 		Ids:       ids,
@@ -209,22 +209,24 @@ func (s *MessagesController) PublishMessages(ctx context.Context, ids []int64, u
 		Cmd:      cmd,
 		Duration: "10s",
 	})
-	if err != nil {
-		return err
-	}
 
-	event, err := domain.PublishMessages(userID, ids, updatedAt)
-	if err != nil {
-		return err
-	}
-
-	return s.publisher.Publish(ctx, event)
+	return
 }
 
-func (s *MessagesController) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+func (s MessagesController) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
 	slog.Debug("private messages", slog.String("ids", fmt.Sprintf("%v", ids)), slog.Int64("user_id", userID))
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
+	event, err := domain.PrivateMessages(userID, ids, updatedAt)
+	if err != nil {
+		return err
+	}
+
+	err = s.publisher.Publish(ctx, event)
+	if err != nil {
+		return err
+	}
 
 	cmd, err := proto.Marshal(&messages.PrivateCommand{
 		Ids:       ids,
@@ -240,19 +242,11 @@ func (s *MessagesController) PrivateMessages(ctx context.Context, ids []int64, u
 		Cmd:      cmd,
 		Duration: "10s",
 	})
-	if err != nil {
-		return err
-	}
 
-	event, err := domain.PrivateMessages(userID, ids, updatedAt)
-	if err != nil {
-		return err
-	}
-
-	return s.publisher.Publish(ctx, event)
+	return 
 }
 
-func (s *MessagesController) UpdateMessage(ctx context.Context, id int64, text, title, name *string, fileIDs []int64, userID int64) (err error) {
+func (s MessagesController) UpdateMessage(ctx context.Context, id int64, text, title, name *string, fileIDs []int64, userID int64) (err error) {
 
 	logValues := []any{slog.Int64("id", id), slog.Int64("user_id", userID)}
 	if text != nil {
@@ -270,6 +264,11 @@ func (s *MessagesController) UpdateMessage(ctx context.Context, id int64, text, 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
 	event, err := domain.UpdateMessage(id, text, title, fileIDs, userID, name, updatedAt)
+	if err != nil {
+		return err
+	}
+
+	err = s.publisher.Publish(ctx, event)
 	if err != nil {
 		return err
 	}
@@ -292,15 +291,12 @@ func (s *MessagesController) UpdateMessage(ctx context.Context, id int64, text, 
 		Cmd:      cmd,
 		Duration: "10s",
 	})
-	if err != nil {
-		return
-	}
 
-	return s.publisher.Publish(ctx, event)
+	return
 }
 
 // Get messages in order
-func (s *MessagesController) ReadThreadMessages(ctx context.Context, userID, threadID int64, threadName string,
+func (s MessagesController) ReadThreadMessages(ctx context.Context, userID, threadID int64, threadName string,
 	limit, offset int32, ascending bool, privateMessage *bool) (list *model.MessagesList, err error) {
 
 	logValues := []any{slog.Int64("user_id", userID), slog.Int64("thread_id", threadID), slog.String("thread_name", threadName), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("ascending", ascending)}
@@ -378,7 +374,7 @@ func (s *MessagesController) ReadThreadMessages(ctx context.Context, userID, thr
 }
 
 // Read messages by given ids
-func (s *MessagesController) ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (list []*model.Message, err error) {
+func (s MessagesController) ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (list []*model.Message, err error) {
 	slog.Debug("read batch messages", slog.Int64("user_id", userID), slog.String("ids", fmt.Sprintf("%v", ids)))
 
 	res, err := s.client.ReadBatchMessages(ctx, &messages.ReadBatchMessagesRequest{
@@ -408,7 +404,7 @@ func (s *MessagesController) ReadBatchMessages(ctx context.Context, userID int64
 }
 
 // read all messages not concerning thread
-func (s *MessagesController) ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (list *model.MessagesList, err error) {
+func (s MessagesController) ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (list *model.MessagesList, err error) {
 	slog.Debug("read messages", slog.Int64("user_id", userID), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("ascending", ascending))
 
 	res, err := s.client.ReadMessages(ctx, &messages.ReadMessagesRequest{
@@ -440,7 +436,7 @@ func (s *MessagesController) ReadMessages(ctx context.Context, userID int64, lim
 	return
 }
 
-func (s *MessagesController) ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *model.Message, err error) {
+func (s MessagesController) ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *model.Message, err error) {
 	slog.Debug("read message", slog.Int64("id", id), slog.String("name", name), slog.String("user_ids", fmt.Sprintf("%v", userIDs)))
 
 	res, err := s.client.ReadMessage(ctx, &messages.ReadMessageRequest{
@@ -500,7 +496,7 @@ func (s *MessagesController) ReadMessage(ctx context.Context, id int64, name str
 	return
 }
 
-func (s *MessagesController) ReadPath(ctx context.Context, userID, id int64, name string) (path []*model.Message, parentID int64, err error) {
+func (s MessagesController) ReadPath(ctx context.Context, userID, id int64, name string) (path []*model.Message, parentID int64, err error) {
 	slog.Debug("read path", slog.Int64("user_id", userID), slog.Int64("id", id), slog.String("name", name))
 
 	if name != "" && id == 0 {
@@ -684,7 +680,7 @@ func (m *idMap) String() (result string) {
 
 const limitPathMessages = 10 /* any other number ? */
 
-func (s *MessagesController) ReadTree(ctx context.Context, userID, highlightID int64, highlightName string,
+func (s MessagesController) ReadTree(ctx context.Context, userID, highlightID int64, highlightName string,
 	rootID int64, rootName string, limit, offset int32, privateMessage *bool, pairs []*model.IDLimitOffset) (list *model.MessagesList, err error) {
 
 	logValues := []any{slog.Int64("user_id", userID), slog.Int64("highlight_id", highlightID), slog.String("highlight_name", highlightName), slog.Int64("message_id", rootID), slog.String("name", rootName), slog.Int("limit", int(limit)), slog.Int("offset", int(offset))}
@@ -717,7 +713,7 @@ func (s *MessagesController) ReadTree(ctx context.Context, userID, highlightID i
 	return
 }
 
-func (s *MessagesController) resolveTree(ctx context.Context, highlightMap *idMap, list *model.MessagesList, map1 *limitOffsetMap, privateMessage *bool) (err error) {
+func (s MessagesController) resolveTree(ctx context.Context, highlightMap *idMap, list *model.MessagesList, map1 *limitOffsetMap, privateMessage *bool) (err error) {
 	for _, message := range list.Messages {
 		if highlightMap.Has(message.ID) {
 			message.Highlight = true

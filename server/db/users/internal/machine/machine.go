@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/encoding/prototext"
 
 	"github.com/bd878/gallery/server/api/users"
 	"github.com/bd878/gallery/server/db/users/pkg/machine"
@@ -63,14 +62,7 @@ func (f *Machine) applyAppend(raw []byte) interface{} {
 	var cmd users.AppendCommand
 	proto.Unmarshal(raw, &cmd)
 
-	bytes, err := prototext.Marshal(&cmd)
-	if err != nil {
-		slog.Debug("error", slog.String("error", err.Error()))
-	} else {
-		slog.Debug("append", slog.String("data", string(bytes)))
-	}
-
-	err = f.usersRepo.Save(context.TODO(), cmd.Id, cmd.Login, cmd.HashedPassword, cmd.Metadata, cmd.CreatedAt, cmd.UpdatedAt)
+	err := f.usersRepo.Save(context.TODO(), cmd.Id, cmd.Login, cmd.HashedPassword, cmd.Metadata, cmd.CreatedAt, cmd.UpdatedAt)
 	if err != nil {
 		slog.Debug("error", slog.String("error", err.Error()))
 	}
@@ -82,14 +74,7 @@ func (f *Machine) applyUpdate(raw []byte) interface{} {
 	var cmd users.UpdateCommand
 	proto.Unmarshal(raw, &cmd)
 
-	bytes, err := prototext.Marshal(&cmd)
-	if err != nil {
-		slog.Debug("error", slog.String("error", err.Error()))
-	} else {
-		slog.Debug("update", slog.String("data", string(bytes)))
-	}
-
-	err = f.usersRepo.Update(context.TODO(), cmd.Id, cmd.Login, cmd.Metadata, cmd.UpdatedAt)
+	err := f.usersRepo.Update(context.TODO(), cmd.Id, cmd.Login, cmd.Metadata, cmd.UpdatedAt)
 	if err != nil {
 		slog.Debug("error", slog.String("error", err.Error()))
 	}
@@ -101,14 +86,7 @@ func (f *Machine) applyDelete(raw []byte) interface{} {
 	var cmd users.DeleteCommand
 	proto.Unmarshal(raw, &cmd)
 
-	bytes, err := prototext.Marshal(&cmd)
-	if err != nil {
-		slog.Debug("error", slog.String("error", err.Error()))
-	} else {
-		slog.Debug("delete", slog.String("data", string(bytes)))
-	}
-
-	err = f.usersRepo.Delete(context.TODO(), cmd.Id)
+	err := f.usersRepo.Delete(context.TODO(), cmd.Id)
 	if err != nil {
 		slog.Debug("error", slog.String("error", err.Error()))
 	}
@@ -120,14 +98,7 @@ func (f *Machine) applyMakePremium(raw []byte) interface{} {
 	var cmd users.MakePremiumCommand
 	proto.Unmarshal(raw, &cmd)
 
-	bytes, err := prototext.Marshal(&cmd)
-	if err != nil {
-		slog.Debug("error", slog.String("error", err.Error()))
-	} else {
-		slog.Debug("make premium", slog.String("data", string(bytes)))
-	}
-
-	err = f.usersRepo.MakePremium(context.TODO(), cmd.Id, cmd.InvoiceId, cmd.CreatedAt, cmd.ExpiresAt)
+	err := f.usersRepo.MakePremium(context.TODO(), cmd.Id, cmd.InvoiceId, cmd.CreatedAt, cmd.ExpiresAt)
 	if err != nil {
 		slog.Debug("error", slog.String("error", err.Error()))
 	}

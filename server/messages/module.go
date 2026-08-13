@@ -1,9 +1,11 @@
 package messages
 
 import (
+	"fmt"
 	"log/slog"
 	"context"
 
+	"google.golang.org/grpc"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -12,10 +14,16 @@ import (
 	"github.com/bd878/gallery/server/internal/system"
 	"github.com/bd878/gallery/server/internal/jetstream"
 	"github.com/bd878/gallery/server/internal/am"
+	"github.com/bd878/gallery/server/internal/di"
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/tm"
+	"github.com/bd878/gallery/server/internal/rpc"
 	pg "github.com/bd878/gallery/server/internal/postgres"
 
+	"github.com/bd878/gallery/server/api/messages"
+	"github.com/bd878/gallery/server/api/translations"
+	"github.com/bd878/gallery/server/api/comments"
+	"github.com/bd878/gallery/server/db/messages/pkg/loadbalance"
 	"github.com/bd878/gallery/server/messages/internal/handler/stream"
 	sessionsgateway "github.com/bd878/gallery/server/internal/gateway/sessions"
 	usersgateway "github.com/bd878/gallery/server/internal/gateway/users"
@@ -28,6 +36,30 @@ import (
 )
 
 func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error) {
+	container := di.New()
+
+	container.AddSingleton("conn", func(c di.Container) (any, error) {
+		return rpc.NewClient(
+			fmt.Sprintf(
+				"%s:///%s",
+				loadbalance.Name,
+				cfg.MessagesServiceAddr,
+			),
+		)
+	})
+	container.AddSingleton("messagesClient", func(c di.Container) (any, error) {
+		client := messages.NewMessagesClient(c.Get("conn").(*grpc.ClientConn))
+		return client, nil
+	})
+	container.AddSingleton("translationsClient", func(c di.Container) (any, error) {
+		client := translations.NewTranslationsClient(c.Get("conn").(*grpc.ClientConn))
+		return client, nil
+	})
+	container.AddSingleton("commentsClient", func(c di.Container) (any, error) {
+		client := comments.NewCommentsClient(c.Get("conn").(*grpc.ClientConn))
+		return client, nil
+	})
+
 	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log)
 
 	usersGateway := usersgateway.New(cfg.UsersServiceAddr)
@@ -57,10 +89,9 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 		},
 	)
 
-	messagesController := controller.NewMessagesController(controller.MessagesConfig{RpcAddr: cfg.MessagesServiceAddr},
-		dispatcher, filesGateway, threadsGateway, messagesSaved)
-	translationsController := controller.NewTranslationsController(controller.TranslationsConfig{RpcAddr: cfg.MessagesServiceAddr}, dispatcher)
-	commentsController := controller.NewCommentsController(controller.CommentsConfig{RpcAddr: cfg.MessagesServiceAddr}, dispatcher)
+	messagesController := controller.NewMessagesController(container, dispatcher, filesGateway, threadsGateway, messagesSaved)
+	translationsController := controller.NewTranslationsController(container, dispatcher)
+	commentsController := controller.NewCommentsController(container, dispatcher)
 
 	stream.RegisterIntegrationEventHandlers(
 		js,
