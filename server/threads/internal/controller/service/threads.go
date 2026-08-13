@@ -96,6 +96,16 @@ func (s *Controller) PublishThread(ctx context.Context, id, userID int64) (err e
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
+	event, err := domain.PublishThread(id, userID, updatedAt)
+	if err != nil {
+		return err
+	}
+
+	err = s.publisher.Publish(ctx, event)
+	if err != nil {
+		return
+	}
+
 	cmd, err := proto.Marshal(&threads.PublishCommand{
 		Id:        id,
 		UserId:    userID,
@@ -110,22 +120,24 @@ func (s *Controller) PublishThread(ctx context.Context, id, userID int64) (err e
 		Cmd:      cmd,
 		Duration: "10s",
 	})
-	if err != nil {
-		return
-	}
 
-	event, err := domain.PublishThread(id, userID, updatedAt)
-	if err != nil {
-		return err
-	}
-
-	return s.publisher.Publish(ctx, event)
+	return
 }
 
 func (s *Controller) PrivateThread(ctx context.Context, id, userID int64) (err error) {
 	slog.Debug("private thread", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
+
+	event, err := domain.PrivateThread(id, userID, updatedAt)
+	if err != nil {
+		return err
+	}
+
+	err = s.publisher.Publish(ctx, event)
+	if err != nil {
+		return
+	}
 
 	cmd, err := proto.Marshal(&threads.PrivateCommand{
 		Id:        id,
@@ -141,16 +153,8 @@ func (s *Controller) PrivateThread(ctx context.Context, id, userID int64) (err e
 		Cmd:      cmd,
 		Duration: "10s",
 	})
-	if err != nil {
-		return
-	}
 
-	event, err := domain.PrivateThread(id, userID, updatedAt)
-	if err != nil {
-		return err
-	}
-
-	return s.publisher.Publish(ctx, event)
+	return 
 }
 
 func (s *Controller) CreateThread(ctx context.Context, id, userID, parentID int64, name, description, title string, private bool) (err error) {
@@ -162,6 +166,11 @@ func (s *Controller) CreateThread(ctx context.Context, id, userID, parentID int6
 	event, err := domain.CreateThread(id, userID, parentID, name, description, title, private, createdAt, updatedAt)
 	if err != nil {
 		return err
+	}
+
+	err = s.publisher.Publish(ctx, event)
+	if err != nil {
+		return
 	}
 
 	cmd, err := proto.Marshal(&threads.AppendCommand{
@@ -184,11 +193,8 @@ func (s *Controller) CreateThread(ctx context.Context, id, userID, parentID int6
 		Cmd:      cmd,
 		Duration: "10s",
 	})
-	if err != nil {
-		return
-	}
 
-	return s.publisher.Publish(ctx, event)
+	return 
 }
 
 func (s *Controller) UpdateThread(ctx context.Context, id, userID int64, name, description, title *string) (err error) {
@@ -199,6 +205,11 @@ func (s *Controller) UpdateThread(ctx context.Context, id, userID int64, name, d
 	event, err := domain.UpdateThread(id, userID, name, description, title, updatedAt)
 	if err != nil {
 		return err
+	}
+
+	err = s.publisher.Publish(ctx, event)
+	if err != nil {
+		return
 	}
 
 	cmd, err := proto.Marshal(&threads.UpdateCommand{
@@ -218,15 +229,24 @@ func (s *Controller) UpdateThread(ctx context.Context, id, userID int64, name, d
 		Cmd:      cmd,
 		Duration: "10s",
 	})
-	if err != nil {
-		return
-	}
 
-	return s.publisher.Publish(ctx, event)
+	return
 }
 
 func (s *Controller) ReorderThread(ctx context.Context, id, userID, parentID, nextID, prevID int64) (err error) {
 	slog.Debug("reorder thread", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.Int64("next_id", nextID), slog.Int64("prev_id", prevID))
+
+	if parentID != -1 {
+		event, err := domain.ChangeThreadParent(id, userID, parentID)
+		if err != nil {
+			return err
+		}
+
+		err = s.publisher.Publish(ctx, event)
+		if err != nil {
+			return err
+		}
+	}
 
 	cmd, err := proto.Marshal(&threads.ReorderCommand{
 		Id:        id,
@@ -245,18 +265,6 @@ func (s *Controller) ReorderThread(ctx context.Context, id, userID, parentID, ne
 		Cmd:      cmd,
 		Duration: "10s",
 	})
-	if err != nil {
-		return
-	}
-
-	if parentID != -1 {
-		event, err := domain.ChangeThreadParent(id, userID, parentID)
-		if err != nil {
-			return err
-		}
-
-		err = s.publisher.Publish(ctx, event)
-	}
 
 	return
 }
@@ -310,6 +318,16 @@ func (s *Controller) PublishMessages(ctx context.Context, ids []int64, userID in
 func (s *Controller) DeleteThread(ctx context.Context, id, userID int64) (err error) {
 	slog.Debug("delete thread", slog.Int64("id", id), slog.Int64("user_id", userID))
 
+	event, err := domain.DeleteThread(id, userID)
+	if err != nil {
+		return err
+	}
+
+	err = s.publisher.Publish(ctx, event)
+	if err != nil {
+		return
+	}
+
 	cmd, err := proto.Marshal(&threads.DeleteCommand{
 		Id:     id,
 		UserId: userID,
@@ -323,14 +341,6 @@ func (s *Controller) DeleteThread(ctx context.Context, id, userID int64) (err er
 		Cmd:      cmd,
 		Duration: "10s",
 	})
-	if err != nil {
-		return
-	}
 
-	event, err := domain.DeleteThread(id, userID)
-	if err != nil {
-		return err
-	}
-
-	return s.publisher.Publish(ctx, event)
+	return
 }

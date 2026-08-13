@@ -27,22 +27,6 @@ func NewIntegrationEventHandlers(messages MessagesController) am.MessageHandler[
 	}
 }
 
-func RegisterIntegrationEventHandlers(stream am.RawMessageStream, handlers am.MessageHandler[am.EventMessage]) (err error) {
-	evtMsgHandler := am.RawMessageHandlerFunc(func(ctx context.Context, msg am.RawMessage) error {
-		// TODO: open/commit/rollback tx
-		evtHandlers := am.RawMessageHandlerWithMiddleware(
-			am.NewEventMessageHandler(
-				handlers,
-			),
-			// TODO: inboxMiddleware.(am.RawMessageHandlerMiddleware)
-		)
-
-		return evtHandlers.HandleMessage(ctx, msg)
-	})
-
-	return stream.Subscribe(events.UsersChannel, evtMsgHandler, am.GroupName("messages-users"))
-}
-
 func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.EventMessage) error {
 	slog.Debug("handle message", slog.String("name", msg.MessageName()))
 

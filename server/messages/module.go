@@ -72,6 +72,11 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 		pool := c.Get("db").(*pgxpool.Pool)
 		return pool.BeginTx(ctx, pgx.TxOptions{})
 	})
+	container.AddScoped("inboxMiddleware", func(c di.Container) (any, error) {
+		tx := c.Get("tx").(pgx.Tx)
+		inboxStore := pg.NewInboxStore(tx, "messages.inbox")
+		return tm.NewInboxHandlerMiddleware(inboxStore), nil
+	})
 
 	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log)
 
@@ -121,10 +126,12 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 		controller.NewCommentsController(container, dispatcher),
 	)
 
-	stream.RegisterIntegrationEventHandlers(
-		container.Get("js").(am.RawMessageStream),
-		stream.NewIntegrationEventHandlers(messagesController),
-	)
+	container.AddScoped("integrationEventHandlers", func(c di.Container) (any, error) {
+		ctrl := stream.NewIntegrationEventHandlers(messagesController)
+		return ctrl, nil
+	})
+
+	stream.RegisterIntegrationEventHandlersTx(container)
 
 	handler := httphandler.New(messagesController, translationsController, commentsController)
 
