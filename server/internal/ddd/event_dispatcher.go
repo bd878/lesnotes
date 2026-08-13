@@ -10,6 +10,8 @@ type (
 		HandleEvent(ctx context.Context, event T) error
 	}
 
+	EventHandlerFunc[T Event] func(ctx context.Context, event T) error
+
 	EventSubscriber[T Event] interface {
 		Subscribe(handler EventHandler[T], events ...string)
 	}
@@ -73,4 +75,8 @@ func (h *EventDispatcher[T]) Publish(ctx context.Context, events ...T) error {
 		}
 	}
 	return nil
+}
+
+func (f EventHandlerFunc[T]) HandleEvent(ctx context.Context, event T) error {
+	return f(ctx, event)
 }

@@ -25,8 +25,8 @@ func NewDomainEventHandlers(stream am.EventStream) *domainHandler[ddd.Event] {
 	return &domainHandler[ddd.Event]{stream}
 }
 
-func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.Event], handler ddd.EventHandler[ddd.Event]) {
-	subscriber.Subscribe(handler,
+func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.Event], handlers ddd.EventHandler[ddd.Event]) {
+	subscriber.Subscribe(handlers,
 		domain.MessageCreatedEvent,
 		domain.MessageDeletedEvent,
 		domain.MessagesPrivateEvent,

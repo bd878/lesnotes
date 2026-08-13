@@ -6,6 +6,8 @@ import (
 	"context"
 
 	"google.golang.org/grpc"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -59,6 +61,17 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 		client := comments.NewCommentsClient(c.Get("conn").(*grpc.ClientConn))
 		return client, nil
 	})
+	container.AddSingleton("db", func(c di.Container) (any, error) {
+		return svc.Pool(), nil
+	})
+	container.AddSingleton("js", func(c di.Container) (any, error) {
+		js := jetstream.NewStream(svc.Config().NatsStream, svc.JS())
+		return js, nil
+	})
+	container.AddScoped("tx", func(c di.Container) (any, error) {
+		pool := c.Get("db").(*pgxpool.Pool)
+		return pool.BeginTx(ctx, pgx.TxOptions{})
+	})
 
 	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log)
 
@@ -68,20 +81,26 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	filesGateway := filesgateway.New(cfg.FilesServiceAddr)
 	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(usersGateway, sessionsGateway, usermodel.PublicUserID))
 
-	outboxStore := pg.NewOutboxStore(svc.Pool(), "messages_stream.outbox")
+	container.AddScoped("domainEventHandlers", func(c di.Container) (any, error) {
+		tx := c.Get("tx").(pgx.Tx)
+		outboxStore := pg.NewOutboxStore(tx, "messages_stream.outbox")
+
+		js := c.Get("js").(am.RawMessageStream)
+
+		return stream.NewDomainEventHandlers(
+			am.NewEventStream(
+				am.RawMessageStreamWithMiddleware(
+					js,
+					tm.NewOutboxStreamMiddleware(outboxStore),
+				),
+			),
+		), nil
+	})
 
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
-	js := jetstream.NewStream(svc.Config().NatsStream, svc.JS())
-	stream.RegisterDomainEventHandlers(dispatcher, stream.NewDomainEventHandlers(
-		am.NewEventStream(
-			am.RawMessageStreamWithMiddleware(
-				js,
-				tm.NewOutboxStreamMiddleware(outboxStore),
-			),
-		),
-	))
+	stream.RegisterDomainEventHandlersTx(dispatcher)
 
-	startOutboxProcessor(ctx, js, svc.Pool())
+	startOutboxProcessor(ctx, container)
 
 	messagesSaved := promauto.NewCounter(
 		prometheus.CounterOpts{
@@ -89,12 +108,15 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 		},
 	)
 
-	messagesController := controller.NewMessagesController(container, dispatcher, filesGateway, threadsGateway, messagesSaved)
+	messagesController := controller.NewMessagesControllerTx(
+		container,
+		controller.NewMessagesController(container, dispatcher, filesGateway, threadsGateway, messagesSaved),
+	)
 	translationsController := controller.NewTranslationsController(container, dispatcher)
 	commentsController := controller.NewCommentsController(container, dispatcher)
 
 	stream.RegisterIntegrationEventHandlers(
-		js,
+		container.Get("js").(am.RawMessageStream),
 		stream.NewIntegrationEventHandlers(messagesController),
 	)
 
@@ -138,7 +160,10 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	return nil
 }
 
-func startOutboxProcessor(ctx context.Context, stream am.MessagePublisher[am.RawMessage], db pg.DB) {
+func startOutboxProcessor(ctx context.Context, container di.Container) {
+	db := container.Get("db").(pg.DB)
+	stream := container.Get("js").(am.MessagePublisher[am.RawMessage])
+
 	store := pg.NewOutboxStore(db, "messages_stream.outbox")
 	outboxProcessor := tm.NewOutboxProcessor(stream, store)
 
