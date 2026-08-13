@@ -1,49 +1,95 @@
 package billing
 
 import (
-	"log/slog"
+	"fmt"
 	"context"
+	"log/slog"
 
+	"google.golang.org/grpc"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"google.golang.org/grpc/credentials/insecure"
+
+	"github.com/bd878/gallery/server/internal/jetstream"
 	"github.com/bd878/gallery/server/internal/am"
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/tm"
-	"github.com/bd878/gallery/server/billing/config"
-	"github.com/bd878/gallery/server/internal/system"
-	"github.com/bd878/gallery/server/internal/jetstream"
-	"github.com/bd878/gallery/server/billing/internal/handler/stream"
+	"github.com/bd878/gallery/server/internal/di"
 	pg "github.com/bd878/gallery/server/internal/postgres"
 
+	"github.com/bd878/gallery/server/api/billing"
+	"github.com/bd878/gallery/server/billing/config"
+	"github.com/bd878/gallery/server/internal/rpc"
+	"github.com/bd878/gallery/server/db/billing/pkg/loadbalance"
+	"github.com/bd878/gallery/server/billing/internal/handler/stream"
+	"github.com/bd878/gallery/server/billing/internal/controller/service"
 	usermodel "github.com/bd878/gallery/server/users/pkg/model"
 	httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
 	usersgateway "github.com/bd878/gallery/server/internal/gateway/users"
 	sessionsgateway "github.com/bd878/gallery/server/internal/gateway/sessions"
 	httphandler "github.com/bd878/gallery/server/billing/internal/handler/http"
-	controller "github.com/bd878/gallery/server/billing/internal/controller/service"
+	"github.com/bd878/gallery/server/internal/system"
 )
 
 func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error) {
+	container := di.New()
+
+	container.AddSingleton("conn", func(c di.Container) (any, error) {
+		return rpc.NewClient(
+			fmt.Sprintf(
+				"%s:///%s",
+				loadbalance.Name,
+				cfg.BillingServiceAddr,
+			),
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+		)
+	})
+	container.AddSingleton("billingClient", func(c di.Container) (any, error) {
+		client := billing.NewBillingClient(c.Get("conn").(*grpc.ClientConn))
+		return client, nil
+	})
+	container.AddSingleton("db", func(c di.Container) (any, error) {
+		return svc.Pool(), nil
+	})
+	container.AddSingleton("js", func(c di.Container) (any, error) {
+		js := jetstream.NewStream(svc.Config().NatsStream, svc.JS())
+		return js, nil
+	})
+	container.AddScoped("tx", func(c di.Container) (any, error) {
+		pool := c.Get("db").(*pgxpool.Pool)
+		return pool.BeginTx(ctx, pgx.TxOptions{})
+	})
+
+	container.AddScoped("domainEventHandlers", func(c di.Container) (any, error) {
+		tx := c.Get("tx").(pgx.Tx)
+		outboxStore := pg.NewOutboxStore(tx, "billing_stream.outbox")
+
+		js := c.Get("js").(am.RawMessageStream)
+
+		return stream.NewDomainEventHandlers(
+			am.NewEventStream(
+				am.RawMessageStreamWithMiddleware(
+					js,
+					tm.NewOutboxStreamMiddleware(outboxStore),
+				),
+			),
+		), nil
+	})
+
 	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log)
 
 	usersGateway := usersgateway.New(cfg.UsersServiceAddr)
 	sessionsGateway := sessionsgateway.New(cfg.SessionsServiceAddr)
 
-	outboxStore := pg.NewOutboxStore(svc.Pool(), "billing_stream.outbox")
-
-	js := jetstream.NewStream(svc.Config().NatsStream, svc.JS())
-
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
-	stream.RegisterDomainEventHandlers(dispatcher, stream.NewDomainEventHandlers(
-		am.NewEventStream(
-			am.RawMessageStreamWithMiddleware(
-				js,
-				tm.NewOutboxStreamMiddleware(outboxStore),
-			),
-		),
-	))
+	stream.RegisterDomainEventHandlersTx(dispatcher)
 
-	startOutboxProcessor(ctx, js, svc.Pool())
+	startOutboxProcessor(ctx, container)
 
-	ctrl := controller.New(controller.Config{RpcAddr: cfg.BillingServiceAddr}, dispatcher)
+	ctrl := service.NewBillingControllerTx(
+		container,
+		service.New(container, dispatcher),
+	)
 
 	handler := httphandler.New(ctrl)
 
@@ -64,7 +110,10 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	return nil
 }
 
-func startOutboxProcessor(ctx context.Context, stream am.MessagePublisher[am.RawMessage], db pg.DB) {
+func startOutboxProcessor(ctx context.Context, container di.Container) {
+	db := container.Get("db").(pg.DB)
+	stream := container.Get("js").(am.MessagePublisher[am.RawMessage])
+
 	store := pg.NewOutboxStore(db, "billing_stream.outbox")
 	outboxProcessor := tm.NewOutboxProcessor(stream, store)
 

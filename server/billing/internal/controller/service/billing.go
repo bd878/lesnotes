@@ -2,58 +2,32 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"time"
 
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/billing"
 	"github.com/bd878/gallery/server/billing/internal/domain"
 	"github.com/bd878/gallery/server/billing/pkg/model"
-	"github.com/bd878/gallery/server/db/billing/pkg/loadbalance"
 	"github.com/bd878/gallery/server/db/billing/pkg/machine"
 	"github.com/bd878/gallery/server/internal/ddd"
-	"github.com/bd878/gallery/server/internal/rpc"
+	"github.com/bd878/gallery/server/internal/di"
 )
 
-type Config struct {
-	RpcAddr string
-}
-
 type Controller struct {
-	conf      Config
 	client    billing.BillingClient
-	conn      *grpc.ClientConn
 	publisher ddd.EventPublisher[ddd.Event]
 }
 
-func New(conf Config, publisher ddd.EventPublisher[ddd.Event]) *Controller {
-	controller := &Controller{conf: conf, publisher: publisher}
+func New(container di.Container, publisher ddd.EventPublisher[ddd.Event]) Controller {
+	client := container.Get("billingClient").(billing.BillingClient)
 
-	conn, err := rpc.NewClient(
-		fmt.Sprintf(
-			"%s:///%s",
-			loadbalance.Name,
-			controller.conf.RpcAddr,
-		),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	client := billing.NewBillingClient(conn)
-	controller.conn = conn
-	controller.client = client
-
-	return controller
+	return Controller{client: client, publisher: publisher}
 }
 
-func (s *Controller) CreateInvoice(ctx context.Context, id string, userID int64, total int64, metadata []byte, cart *model.Cart) (err error) {
+func (s Controller) CreateInvoice(ctx context.Context, id string, userID int64, total int64, metadata []byte, cart *model.Cart) (err error) {
 	slog.Debug("create invoice", slog.String("id", id), slog.Int64("user_id", userID), slog.Int64("total", total), slog.Any("metadata", metadata), slog.Any("cart", cart))
 
 	cc, err := model.CartToProto(cart)
@@ -89,7 +63,7 @@ func (s *Controller) CreateInvoice(ctx context.Context, id string, userID int64,
 	return
 }
 
-func (s *Controller) StartPayment(ctx context.Context, id, userID int64, invoiceID string, currency string, total int64, metadata []byte) (err error) {
+func (s Controller) StartPayment(ctx context.Context, id, userID int64, invoiceID string, currency string, total int64, metadata []byte) (err error) {
 	slog.Debug("start payment", slog.Int64("id", id), slog.Int64("user_id", userID), slog.String("invoice_id", invoiceID), slog.String("currency", currency), slog.Int64("total", total), slog.Any("metadata", metadata))
 
 	cmd, err := proto.Marshal(&billing.AppendPaymentCommand{
@@ -116,7 +90,7 @@ func (s *Controller) StartPayment(ctx context.Context, id, userID int64, invoice
 	return
 }
 
-func (s *Controller) ProceedPayment(ctx context.Context, id, userID int64) (err error) {
+func (s Controller) ProceedPayment(ctx context.Context, id, userID int64) (err error) {
 	slog.Debug("proceed payment", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	payment, err := s.GetPayment(ctx, id, userID)
@@ -169,6 +143,11 @@ func (s *Controller) ProceedPayment(ctx context.Context, id, userID int64) (err 
 		}
 	}
 
+	err = s.publisher.Publish(ctx, events...)
+	if err != nil {
+		return
+	}
+
 	cmd1, err := proto.Marshal(&billing.PayInvoiceCommand{
 		Id:        payment.InvoiceID,
 		UserId:    userID,
@@ -184,7 +163,7 @@ func (s *Controller) ProceedPayment(ctx context.Context, id, userID int64) (err 
 		Duration: "10s",
 	})
 	if err != nil {
-		// TODO: rollback payment if failed
+		// TODO: rollback payment if failed, saga
 		return
 	}
 
@@ -193,15 +172,11 @@ func (s *Controller) ProceedPayment(ctx context.Context, id, userID int64) (err 
 		Cmd:      cmd1,
 		Duration: "10s",
 	})
-	if err != nil {
-		// TODO: rollback payment if failed
-		return err
-	}
 
-	return s.publisher.Publish(ctx, events...)
+	return 
 }
 
-func (s *Controller) CancelPayment(ctx context.Context, id, userID int64) (err error) {
+func (s Controller) CancelPayment(ctx context.Context, id, userID int64) (err error) {
 	slog.Debug("cancel payment", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&billing.CancelPaymentCommand{
@@ -222,7 +197,7 @@ func (s *Controller) CancelPayment(ctx context.Context, id, userID int64) (err e
 	return
 }
 
-func (s *Controller) RefundPayment(ctx context.Context, id, userID int64) (err error) {
+func (s Controller) RefundPayment(ctx context.Context, id, userID int64) (err error) {
 	slog.Debug("refund payment", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&billing.RefundPaymentCommand{
@@ -243,7 +218,7 @@ func (s *Controller) RefundPayment(ctx context.Context, id, userID int64) (err e
 	return
 }
 
-func (s *Controller) GetInvoice(ctx context.Context, id string, userID int64) (invoice *model.Invoice, err error) {
+func (s Controller) GetInvoice(ctx context.Context, id string, userID int64) (invoice *model.Invoice, err error) {
 	slog.Debug("get invoice", slog.String("id", id), slog.Int64("user_id", userID))
 
 	resp, err := s.client.GetInvoice(ctx, &billing.GetInvoiceRequest{
@@ -262,7 +237,7 @@ func (s *Controller) GetInvoice(ctx context.Context, id string, userID int64) (i
 	return
 }
 
-func (s *Controller) GetPayment(ctx context.Context, id, userID int64) (payment *model.Payment, err error) {
+func (s Controller) GetPayment(ctx context.Context, id, userID int64) (payment *model.Payment, err error) {
 	slog.Debug("get payment", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	resp, err := s.client.GetPayment(ctx, &billing.GetPaymentRequest{
