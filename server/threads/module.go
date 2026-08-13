@@ -1,54 +1,100 @@
 package threads
 
 import (
-	"log/slog"
 	"context"
+	"fmt"
+	"log/slog"
 
-	"github.com/bd878/gallery/server/threads/config"
-	"github.com/bd878/gallery/server/internal/system"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
+
 	"github.com/bd878/gallery/server/internal/jetstream"
 	"github.com/bd878/gallery/server/internal/am"
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/tm"
-	"github.com/bd878/gallery/server/threads/internal/handler/stream"
+	"github.com/bd878/gallery/server/internal/di"
+	"github.com/bd878/gallery/server/internal/rpc"
 	pg "github.com/bd878/gallery/server/internal/postgres"
 
+	"github.com/bd878/gallery/server/api/threads"
+	"github.com/bd878/gallery/server/threads/config"
+	"github.com/bd878/gallery/server/threads/internal/handler/stream"
+	"github.com/bd878/gallery/server/threads/internal/controller/service"
+	"github.com/bd878/gallery/server/db/threads/pkg/loadbalance"
 	usermodel "github.com/bd878/gallery/server/users/pkg/model"
 	httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
 	usersgateway "github.com/bd878/gallery/server/internal/gateway/users"
 	sessionsgateway "github.com/bd878/gallery/server/internal/gateway/sessions"
 	httphandler "github.com/bd878/gallery/server/threads/internal/handler/http"
-	controller "github.com/bd878/gallery/server/threads/internal/controller/service"
+	"github.com/bd878/gallery/server/internal/system"
 )
 
 func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error) {
-	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log)
+	container := di.New()
 
-	usersGateway := usersgateway.New(cfg.UsersServiceAddr)
-	sessionsGateway := sessionsgateway.New(cfg.SessionsServiceAddr)
+	container.AddSingleton("conn", func(c di.Container) (any, error) {
+		return rpc.NewClient(
+			fmt.Sprintf(
+				"%s:///%s",
+				loadbalance.Name,
+				cfg.ThreadsServiceAddr,
+			),
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+		)
+	})
+	container.AddSingleton("threadsClient", func(c di.Container) (any, error) {
+		client := threads.NewThreadsClient(c.Get("conn").(*grpc.ClientConn))
+		return client, nil
+	})
+	container.AddSingleton("db", func(c di.Container) (any, error) {
+		return svc.Pool(), nil
+	})
+	container.AddSingleton("js", func(c di.Container) (any, error) {
+		js := jetstream.NewStream(svc.Config().NatsStream, svc.JS())
+		return js, nil
+	})
+	container.AddScoped("tx", func(c di.Container) (any, error) {
+		pool := c.Get("db").(*pgxpool.Pool)
+		return pool.BeginTx(ctx, pgx.TxOptions{})
+	})
 
-	outboxStore := pg.NewOutboxStore(svc.Pool(), "threads_stream.outbox")
+	container.AddScoped("domainEventHandlers", func(c di.Container) (any, error) {
+		tx := c.Get("tx").(pgx.Tx)
+		outboxStore := pg.NewOutboxStore(tx, "threads_stream.outbox")
 
-	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
-	js := jetstream.NewStream(svc.Config().NatsStream, svc.JS())
-	stream.RegisterDomainEventHandlers(dispatcher,
-		stream.NewDomainEventHandlers(
+		js := c.Get("js").(am.RawMessageStream)
+
+		return stream.NewDomainEventHandlers(
 			am.NewEventStream(
 				am.RawMessageStreamWithMiddleware(
 					js,
 					tm.NewOutboxStreamMiddleware(outboxStore),
 				),
 			),
-		))
+		), nil
+	})
 
-	startOutboxProcessor(ctx, js, svc.Pool())
+	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log)
 
-	ctrl := controller.New(cfg, dispatcher)
+	usersGateway := usersgateway.New(cfg.UsersServiceAddr)
+	sessionsGateway := sessionsgateway.New(cfg.SessionsServiceAddr)
+
+	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
+	stream.RegisterDomainEventHandlersTx(dispatcher)
+
+	startOutboxProcessor(ctx, container)
+
+	ctrl := service.NewThreadsControllerTx(
+		container,
+		service.New(container, dispatcher),
+	)
 
 	handler := httphandler.New(ctrl)
 
 	stream.RegisterIntegrationEventHandlers(
-		js,
+		container.Get("js").(am.RawMessageStream),
 		stream.NewIntegrationEventHandlers(ctrl, ctrl),
 	)
 
@@ -75,7 +121,10 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	return nil
 }
 
-func startOutboxProcessor(ctx context.Context, stream am.MessagePublisher[am.RawMessage], db pg.DB) {
+func startOutboxProcessor(ctx context.Context, container di.Container) {
+	db := container.Get("db").(pg.DB)
+	stream := container.Get("js").(am.MessagePublisher[am.RawMessage])
+
 	store := pg.NewOutboxStore(db, "threads_stream.outbox")
 	outboxProcessor := tm.NewOutboxProcessor(stream, store)
 

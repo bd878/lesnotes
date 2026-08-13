@@ -2,54 +2,32 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"time"
 
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/threads"
-	"github.com/bd878/gallery/server/db/threads/pkg/loadbalance"
 	"github.com/bd878/gallery/server/db/threads/pkg/machine"
 	"github.com/bd878/gallery/server/internal/ddd"
-	"github.com/bd878/gallery/server/internal/rpc"
-	"github.com/bd878/gallery/server/threads/config"
+	"github.com/bd878/gallery/server/internal/di"
 	"github.com/bd878/gallery/server/threads/internal/domain"
 	"github.com/bd878/gallery/server/threads/pkg/model"
 )
 
 type Controller struct {
-	conf      config.Config
 	client    threads.ThreadsClient
-	conn      *grpc.ClientConn
 	publisher ddd.EventPublisher[ddd.Event]
 }
 
-func New(conf config.Config, publisher ddd.EventPublisher[ddd.Event]) *Controller {
-	controller := &Controller{
-		conf:      conf,
+func New(container di.Container, publisher ddd.EventPublisher[ddd.Event]) *Controller {
+	client := container.Get("threadsClient").(threads.ThreadsClient)
+
+	return &Controller{
+		client:    client,
 		publisher: publisher,
 	}
-
-	conn, err := rpc.NewClient(
-		fmt.Sprintf(
-			"%s:///%s",
-			loadbalance.Name,
-			controller.conf.ThreadsServiceAddr,
-		),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
-	if err != nil {
-		panic(err)
-	}
-	client := threads.NewThreadsClient(conn)
-	controller.conn = conn
-	controller.client = client
-
-	return controller
 }
 
 func (s *Controller) ReadThread(ctx context.Context, id, userID int64, name string) (thread *model.Thread, err error) {
