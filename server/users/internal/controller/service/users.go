@@ -8,18 +8,14 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/users"
 	sessions "github.com/bd878/gallery/server/db/sessions/pkg/model"
-	"github.com/bd878/gallery/server/db/users/pkg/loadbalance"
 	"github.com/bd878/gallery/server/db/users/pkg/machine"
 	"github.com/bd878/gallery/server/internal/ddd"
-	"github.com/bd878/gallery/server/internal/rpc"
-	"github.com/bd878/gallery/server/users/config"
+	"github.com/bd878/gallery/server/internal/di"
 	"github.com/bd878/gallery/server/users/internal/controller"
 	"github.com/bd878/gallery/server/users/internal/domain"
 	"github.com/bd878/gallery/server/users/pkg/model"
@@ -34,39 +30,22 @@ type SessionsGateway interface {
 }
 
 type Controller struct {
-	conf      config.Config
 	client    users.UsersClient
-	conn      *grpc.ClientConn
 	sessions  SessionsGateway
 	publisher ddd.EventPublisher[ddd.Event]
 }
 
-func New(conf config.Config, sessions SessionsGateway, publisher ddd.EventPublisher[ddd.Event]) *Controller {
-	controller := &Controller{
-		conf:      conf,
+func New(container di.Container, sessions SessionsGateway, publisher ddd.EventPublisher[ddd.Event]) Controller {
+	client := container.Get("usersClient").(users.UsersClient)
+
+	return Controller{
+		client: client,
 		sessions:  sessions,
 		publisher: publisher,
 	}
-
-	conn, err := rpc.NewClient(
-		fmt.Sprintf(
-			"%s:///%s",
-			loadbalance.Name,
-			controller.conf.UsersServiceAddr,
-		),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
-	if err != nil {
-		panic(err)
-	}
-	client := users.NewUsersClient(conn)
-	controller.conn = conn
-	controller.client = client
-
-	return controller
 }
 
-func (s *Controller) CreateUser(ctx context.Context, id int64, login, password string) (user *model.User, err error) {
+func (s Controller) CreateUser(ctx context.Context, id int64, login, password string) (user *model.User, err error) {
 	slog.Debug("create user",
 		slog.Int64("id", id),
 		slog.String("login", login),
@@ -118,7 +97,7 @@ func (s *Controller) CreateUser(ctx context.Context, id int64, login, password s
 	return
 }
 
-func (s *Controller) FindUser(ctx context.Context, id int64, login, token string) (user *model.User, err error) {
+func (s Controller) FindUser(ctx context.Context, id int64, login, token string) (user *model.User, err error) {
 	slog.Debug("find user",
 		slog.Int64("id", id),
 		slog.String("login", login),
@@ -149,7 +128,7 @@ func (s *Controller) FindUser(ctx context.Context, id int64, login, token string
 	return
 }
 
-func (s *Controller) AuthUser(ctx context.Context, token string) (user *model.User, err error) {
+func (s Controller) AuthUser(ctx context.Context, token string) (user *model.User, err error) {
 	slog.Debug("auth user", slog.String("token", token))
 
 	session, err := s.sessions.GetSession(ctx, token)
@@ -182,7 +161,7 @@ func (s *Controller) AuthUser(ctx context.Context, token string) (user *model.Us
 	return
 }
 
-func (s *Controller) GetUser(ctx context.Context, id int64) (user *model.User, err error) {
+func (s Controller) GetUser(ctx context.Context, id int64) (user *model.User, err error) {
 	slog.Debug("get user", slog.Int64("id", id))
 
 	userProto, err := s.client.GetUser(ctx, &users.GetUserRequest{Id: id})
@@ -195,7 +174,7 @@ func (s *Controller) GetUser(ctx context.Context, id int64) (user *model.User, e
 	return
 }
 
-func (s *Controller) UpdateUser(ctx context.Context, id int64, login *string, metadata []byte) (err error) {
+func (s Controller) UpdateUser(ctx context.Context, id int64, login *string, metadata []byte) (err error) {
 	slog.Debug("update user",
 		slog.Int64("id", id),
 		slog.String("login", *login),
@@ -221,7 +200,7 @@ func (s *Controller) UpdateUser(ctx context.Context, id int64, login *string, me
 	return
 }
 
-func (s *Controller) MakePremium(ctx context.Context, id int64, invoiceID, createdAt, expiresAt string) (err error) {
+func (s Controller) MakePremium(ctx context.Context, id int64, invoiceID, createdAt, expiresAt string) (err error) {
 	slog.Debug("make premium",
 		slog.Int64("id", id),
 		slog.String("invoice_id", invoiceID),
@@ -248,7 +227,7 @@ func (s *Controller) MakePremium(ctx context.Context, id int64, invoiceID, creat
 	return
 }
 
-func (s *Controller) LoginUser(ctx context.Context, login, password string) (session *sessions.Session, err error) {
+func (s Controller) LoginUser(ctx context.Context, login, password string) (session *sessions.Session, err error) {
 	slog.Debug("login user",
 		slog.String("login", login),
 		slog.Int("len(password)", len(password)),
@@ -276,8 +255,18 @@ func (s *Controller) LoginUser(ctx context.Context, login, password string) (ses
 	return
 }
 
-func (s *Controller) DeleteUser(ctx context.Context, id int64) (err error) {
+func (s Controller) DeleteUser(ctx context.Context, id int64) (err error) {
 	slog.Debug("delete user", slog.Int64("id", id))
+
+	event, err := domain.DeleteUser(id)
+	if err != nil {
+		return err
+	}
+
+	err = s.publisher.Publish(ctx, event)
+	if err != nil {
+		return
+	}
 
 	// TODO: emit event, not call
 	err = s.sessions.RemoveAllUserSessions(ctx, id)
@@ -297,19 +286,11 @@ func (s *Controller) DeleteUser(ctx context.Context, id int64) (err error) {
 		Cmd:      cmd,
 		Duration: "10s",
 	})
-	if err != nil {
-		return err
-	}
 
-	event, err := domain.DeleteUser(id)
-	if err != nil {
-		return err
-	}
-
-	return s.publisher.Publish(ctx, event)
+	return 
 }
 
-func (s *Controller) LogoutUser(ctx context.Context, token string) (err error) {
+func (s Controller) LogoutUser(ctx context.Context, token string) (err error) {
 	slog.Debug("logout user", slog.String("token", token))
 
 	err = s.sessions.RemoveSession(ctx, token)

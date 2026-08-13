@@ -1,19 +1,30 @@
 package users
 
 import (
+	"fmt"
 	"context"
 	"log/slog"
+
+	"google.golang.org/grpc"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"google.golang.org/grpc/credentials/insecure"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/bd878/gallery/server/internal/jetstream"
 	"github.com/bd878/gallery/server/internal/am"
 	"github.com/bd878/gallery/server/internal/tm"
+	"github.com/bd878/gallery/server/internal/rpc"
 	"github.com/bd878/gallery/server/internal/system"
 	"github.com/bd878/gallery/server/internal/ddd"
+	"github.com/bd878/gallery/server/internal/di"
 	pg "github.com/bd878/gallery/server/internal/postgres"
 
+	"github.com/bd878/gallery/server/api/users"
 	"github.com/bd878/gallery/server/users/internal/handler/stream"
 	"github.com/bd878/gallery/server/users/config"
-	users "github.com/bd878/gallery/server/users/pkg/model"
+	"github.com/bd878/gallery/server/db/users/pkg/loadbalance"
+	usersmodel "github.com/bd878/gallery/server/users/pkg/model"
 	httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
 	httphandler "github.com/bd878/gallery/server/users/internal/handler/http"
 	sessionsgateway "github.com/bd878/gallery/server/users/internal/gateway/sessions/grpc"
@@ -21,60 +32,101 @@ import (
 )
 
 func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error) {
-	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log).WithLang(httpmiddleware.Language)
+	container := di.New()
 
-	sessionsGateway := sessionsgateway.New(cfg.SessionsServiceAddr)
+	container.AddSingleton("conn", func(c di.Container) (any, error) {
+		return rpc.NewClient(
+			fmt.Sprintf(
+				"%s:///%s",
+				loadbalance.Name,
+				cfg.UsersServiceAddr,
+			),
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+		)
+	})
+	container.AddSingleton("usersClient", func(c di.Container) (any, error) {
+		client := users.NewUsersClient(c.Get("conn").(*grpc.ClientConn))
+		return client, nil
+	})
+	container.AddSingleton("db", func(c di.Container) (any, error) {
+		return svc.Pool(), nil
+	})
+	container.AddSingleton("js", func(c di.Container) (any, error) {
+		js := jetstream.NewStream(svc.Config().NatsStream, svc.JS())
+		return js, nil
+	})
+	container.AddScoped("tx", func(c di.Container) (any, error) {
+		pool := c.Get("db").(*pgxpool.Pool)
+		return pool.BeginTx(ctx, pgx.TxOptions{})
+	})
 
-	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
-	js := jetstream.NewStream(svc.Config().NatsStream, svc.JS())
+	container.AddScoped("domainEventHandlers", func(c di.Container) (any, error) {
+		tx := c.Get("tx").(pgx.Tx)
+		outboxStore := pg.NewOutboxStore(tx, "users_stream.outbox")
 
-	outboxStore := pg.NewOutboxStore(svc.Pool(), "users_stream.outbox")
+		js := c.Get("js").(am.RawMessageStream)
 
-	stream.RegisterDomainEventHandlers(dispatcher,
-		stream.NewDomainEventHandlers(
+		return stream.NewDomainEventHandlers(
 			am.NewEventStream(
 				am.RawMessageStreamWithMiddleware(
 					js,
 					tm.NewOutboxStreamMiddleware(outboxStore),
 				),
 			),
-		))
+		), nil
+	})
 
-	ctrl := controller.New(cfg, sessionsGateway, dispatcher)
+	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log).WithLang(httpmiddleware.Language)
+
+	sessionsGateway := sessionsgateway.New(cfg.SessionsServiceAddr)
+
+	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
+	stream.RegisterDomainEventHandlersTx(dispatcher)
+
+	startOutboxProcessor(ctx, container)
+
+	ctrl := controller.NewUsersControllerTx(
+		container,
+		controller.New(container, sessionsGateway, dispatcher),
+	)
 
 	stream.RegisterIntegrationEventHandlers(
-		js,
+		container.Get("js").(am.RawMessageStream),
 		stream.NewIntegrationEventHandlers(ctrl),
 	)
 
 	handler := httphandler.New(ctrl, httphandler.Config{
-		CookieDomain:    cfg.CookieDomain,
+		CookieDomain: cfg.CookieDomain,
 	})
 
-	// TODO: middleware.Build(handler, ...middlewares)
-	middleware.WithAuth(httpmiddleware.AuthBuilder(ctrl, sessionsGateway, users.PublicUserID))
-	svc.ServeMux().Handle("/users/v1/me",     middleware.Build(handler.GetMe))
-	svc.ServeMux().Handle("/users/v1/logout", middleware.Build(handler.Logout))
-	svc.ServeMux().Handle("/users/v1/update", middleware.Build(handler.Update))
+	middleware.WithAuth(httpmiddleware.AuthBuilder(ctrl, sessionsGateway, usersmodel.PublicUserID))
+	svc.ServeMux().Handle("/users/v1/me",      middleware.Build(handler.GetMe))
+	svc.ServeMux().Handle("/users/v1/logout",  middleware.Build(handler.Logout))
+	svc.ServeMux().Handle("/users/v1/update",  middleware.Build(handler.Update))
 
-	middleware.NoAuth().WithAuth(httpmiddleware.TokenAuthBuilder(ctrl, sessionsGateway, users.PublicUserID))
+	middleware.NoAuth().WithAuth(httpmiddleware.TokenAuthBuilder(ctrl, sessionsGateway, usersmodel.PublicUserID))
 	svc.ServeMux().Handle("/users/v2/delete", middleware.Build(handler.DeleteJsonAPI))
-	svc.ServeMux().Handle("/users/v2/me",     middleware.Build(handler.GetMe))
-	svc.ServeMux().Handle("/users/v2/update", middleware.Build(handler.UpdateJsonAPI))
+	svc.ServeMux().Handle("/users/v2/me",      middleware.Build(handler.GetMe))
+	svc.ServeMux().Handle("/users/v2/update",  middleware.Build(handler.UpdateJsonAPI))
 
 	middleware.NoAuth()
 	svc.ServeMux().Handle("/users/v1/signup", middleware.Build(handler.Signup))
 	svc.ServeMux().Handle("/users/v1/login",  middleware.Build(handler.Login))
 	svc.ServeMux().Handle("/users/v1/auth",   middleware.Build(handler.Auth))
-	svc.ServeMux().Handle("/liveness", middleware.Build(handler.Status))
-	svc.ServeMux().Handle("/users/v2/signup", middleware.Build(handler.SignupJsonAPI))
-	svc.ServeMux().Handle("/users/v2/auth",   middleware.Build(handler.AuthJsonAPI))
-	svc.ServeMux().Handle("/users/v2/login",  middleware.Build(handler.LoginJsonAPI))
+	svc.ServeMux().Handle("/liveness",         middleware.Build(handler.Status))
+	svc.ServeMux().Handle("/users/v2/signup",  middleware.Build(handler.SignupJsonAPI))
+	svc.ServeMux().Handle("/users/v2/auth",    middleware.Build(handler.AuthJsonAPI))
+	svc.ServeMux().Handle("/users/v2/login",   middleware.Build(handler.LoginJsonAPI))
+
+	svc.ServeMux().Handle("/metrics", promhttp.Handler())
 
 	return nil
 }
 
-func startOutboxProcessor(ctx context.Context, stream am.MessagePublisher[am.RawMessage], db pg.DB) {
+func startOutboxProcessor(ctx context.Context, container di.Container) {
+	db := container.Get("db").(pg.DB)
+	stream := container.Get("js").(am.MessagePublisher[am.RawMessage])
+
 	store := pg.NewOutboxStore(db, "users_stream.outbox")
 	outboxProcessor := tm.NewOutboxProcessor(stream, store)
 
