@@ -112,8 +112,14 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 		container,
 		controller.NewMessagesController(container, dispatcher, filesGateway, threadsGateway, messagesSaved),
 	)
-	translationsController := controller.NewTranslationsController(container, dispatcher)
-	commentsController := controller.NewCommentsController(container, dispatcher)
+	translationsController := controller.NewTranslationsControllerTx(
+		container,
+		controller.NewTranslationsController(container, dispatcher),
+	)
+	commentsController := controller.NewCommentsControllerTx(
+		container,
+		controller.NewCommentsController(container, dispatcher),
+	)
 
 	stream.RegisterIntegrationEventHandlers(
 		container.Get("js").(am.RawMessageStream),

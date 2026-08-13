@@ -22,16 +22,16 @@ type CommentsController struct {
 	publisher ddd.EventPublisher[ddd.Event]
 }
 
-func NewCommentsController(container di.Container, publisher ddd.EventPublisher[ddd.Event]) *CommentsController {
+func NewCommentsController(container di.Container, publisher ddd.EventPublisher[ddd.Event]) CommentsController {
 	client := container.Get("commentsClient").(comments.CommentsClient)
 
-	return &CommentsController{
+	return CommentsController{
 		client: client,
 		publisher: publisher,
 	}
 }
 
-func (s *CommentsController) SendComment(ctx context.Context, id, userID, messageID int64, text string, metadata []byte) (err error) {
+func (s CommentsController) SendComment(ctx context.Context, id, userID, messageID int64, text string, metadata []byte) (err error) {
 	slog.Debug("save comment", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Int64("message_id", messageID), slog.String("text", text), slog.String("metadata", fmt.Sprintf("%v", metadata)))
 
 	createdAt := time.Now().UTC().Format(time.RFC3339)
@@ -69,7 +69,7 @@ func (s *CommentsController) SendComment(ctx context.Context, id, userID, messag
 	return
 }
 
-func (s *CommentsController) UpdateComment(ctx context.Context, id, userID int64, text *string) (err error) {
+func (s CommentsController) UpdateComment(ctx context.Context, id, userID int64, text *string) (err error) {
 
 	logValues := []any{slog.Int64("id", id), slog.Int64("user_id", userID)}
 	if text != nil {
@@ -108,7 +108,7 @@ func (s *CommentsController) UpdateComment(ctx context.Context, id, userID int64
 	return
 }
 
-func (s *CommentsController) DeleteComment(ctx context.Context, id, userID int64) (err error) {
+func (s CommentsController) DeleteComment(ctx context.Context, id, userID int64) (err error) {
 	slog.Debug("delete comment", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	event, err := domain.DeleteComment(id, userID)
@@ -138,7 +138,7 @@ func (s *CommentsController) DeleteComment(ctx context.Context, id, userID int64
 	return 
 }
 
-func (s *CommentsController) DeleteMessageComments(ctx context.Context, messageID int64) (err error) {
+func (s CommentsController) DeleteMessageComments(ctx context.Context, messageID int64) (err error) {
 	slog.Debug("delete message comments", slog.Int64("message_id", messageID))
 
 	event, err := domain.DeleteMessageComments(messageID)
@@ -167,7 +167,7 @@ func (s *CommentsController) DeleteMessageComments(ctx context.Context, messageI
 	return
 }
 
-func (s *CommentsController) ReadComment(ctx context.Context, id, userID int64) (comment *model.Comment, err error) {
+func (s CommentsController) ReadComment(ctx context.Context, id, userID int64) (comment *model.Comment, err error) {
 	slog.Debug("read comment", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	res, err := s.client.ReadComment(ctx, &comments.ReadCommentRequest{
@@ -183,7 +183,7 @@ func (s *CommentsController) ReadComment(ctx context.Context, id, userID int64) 
 	return
 }
 
-func (s *CommentsController) ListComments(ctx context.Context, userID, messageID *int64, name *string, limit, offset int32, asc bool) (list *model.CommentsList, err error) {
+func (s CommentsController) ListComments(ctx context.Context, userID, messageID *int64, name *string, limit, offset int32, asc bool) (list *model.CommentsList, err error) {
 
 	logValues := []any{slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("ascending", asc)}
 	if messageID != nil {
