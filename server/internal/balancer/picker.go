@@ -1,8 +1,6 @@
 package balancer
 
 import (
-	"fmt"
-	"os"
 	"sync"
 	"strings"
 	"sync/atomic"
@@ -41,11 +39,6 @@ func (p *SubchannelPicker) Build(buildInfo base.PickerBuildInfo) balancer.Picker
 			Attributes.
 			Value("is_leader").(bool)
 
-		sc.RegisterHealthListener(func (subConn balancer.SubConnState) {
-			fmt.Fprintln(os.Stdout, "address", scInfo.Address.Addr,
-				"ConnectivityState", subConn.ConnectivityState.String(), "ConnectionError", subConn.ConnectionError)
-		})
-
 		if isLeader {
 			p.leader = &conn{SubConn: sc, Address: scInfo.Address.Addr}
 			continue
@@ -79,10 +72,6 @@ func (p *SubchannelPicker) Pick(info balancer.PickInfo) (balancer.PickResult, er
 		return result, balancer.ErrNoSubConnAvailable
 	}
 	result.SubConn = endpoint.SubConn
-
-	result.Done = func(info balancer.DoneInfo) {
-		fmt.Fprintf(os.Stdout, "done info [%T]: %+[1]v\n", info)
-	}
 
 	return result, nil
 }
