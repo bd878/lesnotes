@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"context"
 	"log/slog"
 
@@ -25,7 +26,7 @@ func (s commentsControllerTx) SendComment(ctx context.Context, id, userID, messa
 	ctx = s.container.Scoped(ctx)
 	defer func(tx pgx.Tx) {
 		err = s.closeTx(tx, err)
-		slog.Debug("commit send comment transaction", slog.String("err", err.Error()))
+		slog.Debug(fmt.Sprintf("commit send comment transaction, err: %v", err))
 	}(di.Get(ctx, "tx").(pgx.Tx))
 
 	return s.CommentsController.SendComment(ctx, id, userID, messageID, text, metadata)
@@ -35,7 +36,7 @@ func (s commentsControllerTx) UpdateComment(ctx context.Context, id, userID int6
 	ctx = s.container.Scoped(ctx)
 	defer func(tx pgx.Tx) {
 		err = s.closeTx(tx, err)
-		slog.Debug("commit update comment transaction", slog.String("err", err.Error()))
+		slog.Debug(fmt.Sprintf("commit update comment transaction, err: %v", err))
 	}(di.Get(ctx, "tx").(pgx.Tx))
 
 	return s.CommentsController.UpdateComment(ctx, id, userID, text)
@@ -45,7 +46,7 @@ func (s commentsControllerTx) DeleteComment(ctx context.Context, id, userID int6
 	ctx = s.container.Scoped(ctx)
 	defer func(tx pgx.Tx) {
 		err = s.closeTx(tx, err)
-		slog.Debug("commit delete comment transaction", slog.String("err", err.Error()))
+		slog.Debug(fmt.Sprintf("commit delete comment transaction, err: %v", err))
 	}(di.Get(ctx, "tx").(pgx.Tx))
 
 	return s.CommentsController.DeleteComment(ctx, id, userID)
@@ -55,7 +56,7 @@ func (s commentsControllerTx) DeleteMessageComments(ctx context.Context, message
 	ctx = s.container.Scoped(ctx)
 	defer func(tx pgx.Tx) {
 		err = s.closeTx(tx, err)
-		slog.Debug("commit delete message comments transaction", slog.String("err", err.Error()))
+		slog.Debug(fmt.Sprintf("commit delete message comments transaction, err: %v", err))
 	}(di.Get(ctx, "tx").(pgx.Tx))
 
 	return s.CommentsController.DeleteMessageComments(ctx, messageID)

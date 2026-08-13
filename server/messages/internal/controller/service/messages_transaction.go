@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"context"
 	"log/slog"
 	"github.com/jackc/pgx/v5"
@@ -24,7 +25,7 @@ func (s messagesControllerTx) SaveMessage(ctx context.Context, id int64, text, t
 	ctx = s.container.Scoped(ctx)
 	defer func(tx pgx.Tx) {
 		err = s.closeTx(tx, err)
-		slog.Debug("commit save message transaction", slog.String("err", err.Error()))
+		slog.Debug(fmt.Sprintf("commit save message transaction, err: %v", err))
 	}(di.Get(ctx, "tx").(pgx.Tx))
 
 	return s.MessagesController.SaveMessage(ctx, id, text, title, fileIDs, threadID, userID, private, name)
@@ -34,7 +35,7 @@ func (s messagesControllerTx) DeleteUserMessages(ctx context.Context, userID int
 	ctx = s.container.Scoped(ctx)
 	defer func(tx pgx.Tx) {
 		err = s.closeTx(tx, err)
-		slog.Debug("commit delete user messages transaction", slog.String("err", err.Error()))
+		slog.Debug(fmt.Sprintf("commit delete user messages transaction, err: %v", err))
 	}(di.Get(ctx, "tx").(pgx.Tx))
 
 	return s.MessagesController.DeleteUserMessages(ctx, userID) 
@@ -44,7 +45,7 @@ func (s messagesControllerTx) DeleteMessages(ctx context.Context, ids []int64, u
 	ctx = s.container.Scoped(ctx)
 	defer func(tx pgx.Tx) {
 		err = s.closeTx(tx, err)
-		slog.Debug("commit delete messages transaction", slog.String("err", err.Error()))
+		slog.Debug(fmt.Sprintf("commit delete messages transaction, err: %v", err))
 	}(di.Get(ctx, "tx").(pgx.Tx))
 
 	return s.MessagesController.DeleteMessages(ctx, ids, userID)
@@ -54,7 +55,7 @@ func (s messagesControllerTx) PublishMessages(ctx context.Context, ids []int64, 
 	ctx = s.container.Scoped(ctx)
 	defer func(tx pgx.Tx) {
 		err = s.closeTx(tx, err)
-		slog.Debug("commit publish message transaction", slog.String("err", err.Error()))
+		slog.Debug(fmt.Sprintf("commit publish message transaction, err: %v", err))
 	}(di.Get(ctx, "tx").(pgx.Tx))
 
 	return s.MessagesController.PublishMessages(ctx, ids, userID)
@@ -64,7 +65,7 @@ func (s messagesControllerTx) PrivateMessages(ctx context.Context, ids []int64, 
 	ctx = s.container.Scoped(ctx)
 	defer func(tx pgx.Tx) {
 		err = s.closeTx(tx, err)
-		slog.Debug("commit private message transaction", slog.String("err", err.Error()))
+		slog.Debug(fmt.Sprintf("commit private message transaction, err: %v", err))
 	}(di.Get(ctx, "tx").(pgx.Tx))
 
 	return s.MessagesController.PrivateMessages(ctx, ids, userID)
@@ -74,7 +75,7 @@ func (s messagesControllerTx) UpdateMessage(ctx context.Context, id int64, text,
 	ctx = s.container.Scoped(ctx)
 	defer func(tx pgx.Tx) {
 		err = s.closeTx(tx, err)
-		slog.Debug("commit update message transaction", slog.String("err", err.Error()))
+		slog.Debug(fmt.Sprintf("commit update message transaction, err: %v", err))
 	}(di.Get(ctx, "tx").(pgx.Tx))
 
 	return s.MessagesController.UpdateMessage(ctx, id, text, title, name, fileIDs, userID)

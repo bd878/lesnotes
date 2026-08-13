@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"context"
 	"log/slog"
 
@@ -25,7 +26,7 @@ func (s translationsControllerTx) SaveTranslation(ctx context.Context, userID, m
 	ctx = s.container.Scoped(ctx)
 	defer func(tx pgx.Tx) {
 		err = s.closeTx(tx, err)
-		slog.Debug("commit save translation transaction", slog.String("err", err.Error()))
+		slog.Debug(fmt.Sprintf("commit save translation transaction: %v", err))
 	}(di.Get(ctx, "tx").(pgx.Tx))
 
 	return s.TranslationsController.SaveTranslation(ctx, userID, messageID, lang, title, text)
@@ -35,7 +36,7 @@ func (s translationsControllerTx) UpdateTranslation(ctx context.Context, message
 	ctx = s.container.Scoped(ctx)
 	defer func(tx pgx.Tx) {
 		err = s.closeTx(tx, err)
-		slog.Debug("commit update translation transaction", slog.String("err", err.Error()))
+		slog.Debug(fmt.Sprintf("commit update translation transaction: %v", err))
 	}(di.Get(ctx, "tx").(pgx.Tx))
 
 	return s.TranslationsController.UpdateTranslation(ctx, messageID, lang, title, text)
@@ -45,7 +46,7 @@ func (s translationsControllerTx) DeleteTranslation(ctx context.Context, message
 	ctx = s.container.Scoped(ctx)
 	defer func(tx pgx.Tx) {
 		err = s.closeTx(tx, err)
-		slog.Debug("commit delete translation transaction", slog.String("err", err.Error()))
+		slog.Debug(fmt.Sprintf("commit delete translation transaction: %v", err))
 	}(di.Get(ctx, "tx").(pgx.Tx))
 
 	return s.TranslationsController.DeleteTranslation(ctx, messageID, lang)
