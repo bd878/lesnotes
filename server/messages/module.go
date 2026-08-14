@@ -74,7 +74,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	})
 	container.AddScoped("inboxMiddleware", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(pgx.Tx)
-		inboxStore := pg.NewInboxStore(tx, "messages.inbox")
+		inboxStore := pg.NewInboxStore(tx, "messages_stream.inbox")
 		return tm.NewInboxHandlerMiddleware(inboxStore), nil
 	})
 

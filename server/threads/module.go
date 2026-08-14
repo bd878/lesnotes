@@ -60,6 +60,12 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 		return pool.BeginTx(ctx, pgx.TxOptions{})
 	})
 
+	container.AddScoped("inboxMiddleware", func(c di.Container) (any, error) {
+		tx := c.Get("tx").(pgx.Tx)
+		inboxStore := pg.NewInboxStore(tx, "threads_stream.inbox")
+		return tm.NewInboxHandlerMiddleware(inboxStore), nil
+	})
+
 	container.AddScoped("domainEventHandlers", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(pgx.Tx)
 		outboxStore := pg.NewOutboxStore(tx, "threads_stream.outbox")
@@ -91,12 +97,13 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 		service.New(container, dispatcher),
 	)
 
-	handler := httphandler.New(ctrl)
+	container.AddScoped("integrationEventHandlers", func(c di.Container) (any, error) {
+		return stream.NewIntegrationEventHandlers(ctrl, ctrl), nil
+	})
 
-	stream.RegisterIntegrationEventHandlers(
-		container.Get("js").(am.RawMessageStream),
-		stream.NewIntegrationEventHandlers(ctrl, ctrl),
-	)
+	stream.RegisterIntegrationEventHandlersTx(container)
+
+	handler := httphandler.New(ctrl)
 
 	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(usersGateway, sessionsGateway, usermodel.PublicUserID))
 	svc.ServeMux().Handle("/threads/v1/publish", middleware.Build(handler.PublishThread))

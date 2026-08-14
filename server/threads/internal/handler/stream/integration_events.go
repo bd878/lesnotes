@@ -35,24 +35,6 @@ func NewIntegrationEventHandlers(messages MessagesController, threads ThreadsCon
 	}
 }
 
-func RegisterIntegrationEventHandlers(stream am.RawMessageStream, handlers am.MessageHandler[am.EventMessage]) (err error) {
-	evtMsgHandler := am.RawMessageHandlerFunc(func(ctx context.Context, msg am.RawMessage) error {
-		slog.Debug("receive raw message", slog.String("subject", msg.Subject()))
-
-		// TODO: open/commit/rollback tx
-		evtHandlers := am.RawMessageHandlerWithMiddleware(
-			am.NewEventMessageHandler(
-				handlers,
-			),
-			// TODO: inboxMiddleware.(am.RawMessageHandlerMiddleware)
-		)
-
-		return evtHandlers.HandleMessage(ctx, msg)
-	})
-
-	return stream.Subscribe(messageevents.MessagesChannel, evtMsgHandler, am.GroupName("threads-messages"))
-}
-
 func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.EventMessage) error {
 	slog.Debug("handle message", slog.String("name", msg.MessageName()))
 
@@ -75,7 +57,7 @@ func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.EventMess
 func (h integrationHandlers) handleMessageCreated(ctx context.Context, msg am.EventMessage) error {
 	m := &messages.MessageCreated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
-	return err
+		return err
 	}
 
 	return h.threads.CreateThread(ctx, m.Id, m.UserId, m.ThreadId, m.Name, "", "", m.Private)
