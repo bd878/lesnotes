@@ -22,25 +22,20 @@ type integrationHandlers struct {
 	files FilesController
 }
 
-var _ am.RawMessageHandler = (*integrationHandlers)(nil)
+var _ am.MessageHandler[am.EventMessage] = (*integrationHandlers)(nil)
 
-func NewIntegrationEventHandlers(files FilesController) am.RawMessageHandler {
+func NewIntegrationEventHandlers(files FilesController) am.MessageHandler[am.EventMessage] {
 	return integrationHandlers{
 		files: files,
 	}
 }
 
-func RegisterIntegrationEventHandlers(subscriber am.RawMessageSubscriber, handlers am.RawMessageHandler) (err error) {
-	_, err = subscriber.Subscribe(messagesevents.MessagesChannel, handlers, am.GroupName("files-messages"))
-	if err != nil {
-		return
-	}
-
-	return
+func RegisterIntegrationEventHandlers(subscriber am.RawMessageSubscriber, handlers am.RawMessageHandler) error {
+	return subscriber.Subscribe(messagesevents.MessagesChannel, handlers, am.GroupName("files-messages"))
 }
 
-func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingMessage) error {
-	slog.Debug("handle message", slog.String("name", msg.MessageName()), slog.String("subject", msg.Subject()))
+func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.EventMessage) error {
+	slog.Debug("handle message", slog.String("name", msg.MessageName()))
 
 	switch msg.MessageName() {
 	case messagesevents.MessageCreatedEvent:
@@ -58,7 +53,7 @@ func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.IncomingM
 	return nil
 }
 
-func (h integrationHandlers) handleMessageCreated(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleMessageCreated(ctx context.Context, msg am.EventMessage) error {
 	m := &messages.MessageCreated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
@@ -67,7 +62,7 @@ func (h integrationHandlers) handleMessageCreated(ctx context.Context, msg am.In
 	return h.files.SaveMessageFiles(ctx, m.GetId(), m.GetUserId(), m.GetFileIds())
 }
 
-func (h integrationHandlers) handleMessageDeleted(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleMessageDeleted(ctx context.Context, msg am.EventMessage) error {
 	m := &messages.MessageDeleted{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
@@ -76,7 +71,7 @@ func (h integrationHandlers) handleMessageDeleted(ctx context.Context, msg am.In
 	return h.files.DeleteMessageFiles(ctx, m.GetId(), m.GetUserId())
 }
 
-func (h integrationHandlers) handleMessageUpdated(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleMessageUpdated(ctx context.Context, msg am.EventMessage) error {
 	m := &messages.MessageUpdated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
@@ -85,7 +80,7 @@ func (h integrationHandlers) handleMessageUpdated(ctx context.Context, msg am.In
 	return h.files.UpdateMessageFiles(ctx, m.GetId(), m.GetUserId(), m.GetFileIds())
 }
 
-func (h integrationHandlers) handleMessagesPublished(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleMessagesPublished(ctx context.Context, msg am.EventMessage) error {
 	m := &messages.MessagesPublished{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err
@@ -94,7 +89,7 @@ func (h integrationHandlers) handleMessagesPublished(ctx context.Context, msg am
 	return h.files.PublishMessageFiles(ctx, m.GetUserId(), m.GetIds())
 }
 
-func (h integrationHandlers) handleMessagesPrivated(ctx context.Context, msg am.IncomingMessage) error {
+func (h integrationHandlers) handleMessagesPrivated(ctx context.Context, msg am.EventMessage) error {
 	m := &messages.MessagesPrivated{}
 	if err := proto.Unmarshal(msg.Data(), m); err != nil {
 		return err

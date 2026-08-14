@@ -28,13 +28,13 @@ func RegisterIntegrationEventHandlersTx(c di.Container) (err error) {
 			default:
 				err = tx.Commit(ctx)
 			}
-		}(c.Get("tx").(pgx.Tx))
+		}(di.Get(ctx, "tx").(pgx.Tx))
 
 		evtHandlers := am.RawMessageHandlerWithMiddleware(
 			am.NewEventMessageHandler(
-				c.Get("integrationEventHandlers").(am.MessageHandler[am.EventMessage]),
+				di.Get(ctx, "integrationEventHandlers").(am.MessageHandler[am.EventMessage]),
 			),
-			c.Get("inboxMiddleware").(am.RawMessageHandlerMiddleware),
+			di.Get(ctx, "inboxMiddleware").(am.RawMessageHandlerMiddleware),
 		)
 
 		return evtHandlers.HandleMessage(ctx, msg)

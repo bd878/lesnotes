@@ -3,14 +3,16 @@ package stream
 import (
 	"context"
 	"log/slog"
+
 	"github.com/jackc/pgx/v5"
+
 	"github.com/bd878/gallery/server/internal/di"
 	"github.com/bd878/gallery/server/internal/am"
-	"github.com/bd878/gallery/server/users/pkg/events"
+	messagesevents "github.com/bd878/gallery/server/messages/pkg/events"
 )
 
 func RegisterIntegrationEventHandlersTx(c di.Container) (err error) {
-	evtMsgHandeler := am.RawMessageHandlerFunc(func(ctx context.Context, msg am.RawMessage) error {
+	evtMsgHandler := am.RawMessageHandlerFunc(func(ctx context.Context, msg am.RawMessage) error {
 		ctx = c.Scoped(ctx)
 		defer func(tx pgx.Tx) {
 			p := recover()
@@ -38,5 +40,5 @@ func RegisterIntegrationEventHandlersTx(c di.Container) (err error) {
 
 	js := c.Get("js").(am.RawMessageStream)
 
-	return js.Subscribe(events.UsersChannel, evtMsgHandeler, am.GroupName("messages-users"))
+	return js.Subscribe(messagesevents.MessagesChannel, evtMsgHandler, am.GroupName("files-messages"))
 }
