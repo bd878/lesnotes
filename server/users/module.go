@@ -60,6 +60,12 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 		return pool.BeginTx(ctx, pgx.TxOptions{})
 	})
 
+	container.AddScoped("inboxMiddleware", func(c di.Container) (any, error) {
+		tx := c.Get("tx").(pgx.Tx)
+		inboxStore := pg.NewInboxStore(tx, "users_inbox.inbox")
+		return tm.NewInboxHandlerMiddleware(inboxStore), nil
+	})
+
 	container.AddScoped("domainEventHandlers", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(pgx.Tx)
 		outboxStore := pg.NewOutboxStore(tx, "users_stream.outbox")
@@ -90,10 +96,11 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 		controller.New(container, sessionsGateway, dispatcher),
 	)
 
-	stream.RegisterIntegrationEventHandlers(
-		container.Get("js").(am.RawMessageStream),
-		stream.NewIntegrationEventHandlers(ctrl),
-	)
+	container.AddScoped("integrationEventHandlers", func(c di.Container) (any, error) {
+		return stream.NewIntegrationEventHandlers(ctrl), nil
+	})
+
+	stream.RegisterIntegrationEventHandlersTx(container)
 
 	handler := httphandler.New(ctrl, httphandler.Config{
 		CookieDomain: cfg.CookieDomain,
