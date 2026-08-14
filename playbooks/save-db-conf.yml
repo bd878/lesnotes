@@ -1,6 +1,6 @@
 ---
 - name: Save db service conf, update systemd service file
-  hosts: hosts
+  hosts: gallery-prod-4
   become: Yes
 
   tasks:
@@ -34,7 +34,7 @@
       - envs
     ansible.builtin.template:
       src: templates/{{ item }}_db.conf.j2
-      dest: /srv/gallery/stage/{{ item }}/config/db.conf
+      dest: /srv/gallery/prod/{{ item }}/config/db.conf
       owner: snd
       group: snd
       mode: '644'
@@ -57,6 +57,19 @@
       - users
       - billing
       - threads
+      - messages
+
+  - name: Start services
+    ansible.builtin.systemd_service:
+      name: "{{ item }}-db"
+      state: started
+      enabled: true
+    loop:
+      - search
+      - billing
+      - sessions
+      - threads
+      - users
       - messages
 
   handlers:

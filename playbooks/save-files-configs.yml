@@ -1,0 +1,36 @@
+---
+- name: Save files configs
+  hosts: gallery-stage-files
+
+  tasks:
+  - name: Save endpoint json
+    ansible.builtin.template:
+      src: templates/files.json.j2
+      dest: /srv/gallery/stage/files/config/service.json
+      owner: snd
+      group: snd
+      mode: '644'
+
+  - name: Save endpoint conf
+    ansible.builtin.template:
+      src: templates/files.conf.j2
+      dest: /srv/gallery/stage/files/config/service.conf
+      owner: snd
+      group: snd
+      mode: '644'
+
+  - name: Save db json
+    ansible.builtin.template:
+      src: templates/files_db.json.j2
+      dest: /srv/gallery/stage/files/config/db.json
+      owner: snd
+      group: snd
+      mode: '644'
+
+  - name: Save db conf
+    ansible.builtin.template:
+      src: templates/files_db.conf.j2
+      dest: /srv/gallery/stage/files/config/db.conf
+      owner: snd
+      group: snd
+      mode: '644'

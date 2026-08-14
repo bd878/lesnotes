@@ -29,6 +29,10 @@ processors:
 exporters:
   prometheus:
     endpoint: "{{ prometheus_endpoint }}"
+  otlp_http:
+    endpoint: "{{ otlp_http_endpoint }}"
+    compression: none
+    encoding: json
   debug:
     verbosity: normal
       
@@ -57,12 +61,12 @@ service:
     metrics:
       receivers: [otlp, prometheus]
       processors: [batch]
-      exporters: [debug, prometheus]
+      exporters: [prometheus]
 
     logs:
       receivers: [otlp]
       processors: [batch]
-      exporters: [debug]
+      exporters: [otlp_http]
 
   extensions: [health_check, pprof, zpages]
 

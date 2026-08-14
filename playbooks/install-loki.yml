@@ -1,0 +1,62 @@
+---
+- name: Install loki
+  become: Yes
+  hosts: infra
+
+  tasks:
+  - name: Wget rpm loki
+    ansible.builtin.get_url:
+      url: https://github.com/grafana/loki/releases/download/v3.7.6/loki-3.7.6-1.x86_64.rpm
+      dest: /home/snd/loki.rpm
+    tags:
+      - loki
+
+  - name: Install rpm loki
+    ansible.builtin.dnf:
+      name: /home/snd/loki.rpm
+      state: present
+      disable_gpg_check: yes
+    tags:
+      - loki
+
+  - name: Create loki user
+    ansible.builtin.user:
+      name: loki
+      create_home: no
+      shell: /bin/false
+
+  - name: Create system folders
+    ansible.builtin.file:
+      path: /opt/loki/
+      state: directory
+      mode: '0755'
+      owner: loki
+      group: loki
+
+  - name: Setup loki config
+    ansible.builtin.template:
+      src: templates/loki/loki-local-config.yaml.j2
+      dest: /etc/loki/loki-local-config.yaml
+      owner: snd
+      group: snd
+      mode: '0644'
+    tags:
+      - loki
+
+  - name: Create systemd service
+    ansible.builtin.template:
+      src: templates/loki.service.j2
+      dest: /etc/systemd/system/loki.service
+    tags:
+      - loki
+
+  - name: Start and enable
+    ansible.builtin.systemd_service:
+      name: loki
+      daemon_reload: true
+      state: started
+      enabled: true
+    tags:
+      - loki
+
+

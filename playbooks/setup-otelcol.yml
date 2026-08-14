@@ -1,0 +1,37 @@
+---
+- name: Install and setup otelcol
+  become: Yes
+  hosts: infra
+
+  tasks:
+  - name: Set messages endpoints
+    ansible.builtin.set_fact:
+      messages_endpoints: |
+        {% set server_list = [] %}
+        {% for s in groups['hosts'] %}
+        {%   set port = hostvars[s]['messages_http_port'] %}
+        {%   set host = hostvars[s]['addr'] %}
+        {%   set _ = server_list.append(host ~ ':' ~ port) %}
+        {% endfor %}
+        {{ server_list }}
+    tags:
+      - debug
+      - otelcol
+
+  - name: Setup otelcol config
+    ansible.builtin.template:
+      src: templates/otelcol/config.yaml.j2
+      dest: /etc/otelcol/config.yaml
+      owner: snd
+      group: snd
+      mode: '0644'
+    tags:
+      - otelcol
+
+  - name: Restart service
+    ansible.builtin.systemd_service:
+      name: otelcol
+      state: restarted
+      enabled: true
+    tags:
+      - otelcol

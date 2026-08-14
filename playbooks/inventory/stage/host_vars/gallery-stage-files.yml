@@ -1,0 +1,12 @@
+---
+addr: "192.168.10.150"
+sessions_addr: "192.168.10.140"
+sessions_port: "9134"
+users_addr: "192.168.10.140"
+users_port: "9124"
+
+http_port: "8182"
+rpc_port: "8186"
+files_name: "files"
+
+

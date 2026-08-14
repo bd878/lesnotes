@@ -1,6 +1,6 @@
 ---
 - name: List gallery systemd units
-  hosts: hosts
+  hosts: gallery-stage
   become: Yes
 
   tasks:
@@ -17,7 +17,7 @@
         - messages-db.service
         - search.service
         - search-db.service
-        - sessions.service
+        - sessions-db.service
     register: systemd_output
 
   - name: Print gathered info

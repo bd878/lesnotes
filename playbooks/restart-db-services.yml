@@ -1,13 +1,14 @@
 ---
 - name: Restart db services after data path renaming
   become: Yes
-  hosts: gallery-stage
+  hosts: gallery-prod
 
   tasks:
   - name: Restart
     ansible.builtin.service:
       name: "{{ item }}-db"
       state: restarted
+      enabled: true
       daemon_reload: true
     loop:
       - sessions

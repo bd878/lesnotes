@@ -1,0 +1,72 @@
+---
+- name: Rename files db and http services
+  hosts: gallery-stage-files
+  become: Yes
+
+  tasks:
+  - name: Stop http service
+    ansible.builtin.systemd_service:
+      name: "gallery-files-http"
+      state: stopped
+      enabled: false
+
+  - name: Stop db service
+    ansible.builtin.systemd_service:
+      name: "gallery-files"
+      state: stopped
+      enabled: false
+
+  - name: Remove http service file
+    ansible.builtin.file:
+      path: /etc/systemd/system/gallery-files-http.service
+      state: absent
+
+  - name: Remove db service file
+    ansible.builtin.file:
+      path: /etc/systemd/system/gallery-files.service
+      state: absent
+
+    notify: Reload systemd daemon
+
+  - name: Write http service
+    ansible.builtin.template:
+      src: templates/endpoint.service.j2
+      dest: /etc/systemd/system/files.service
+    loop:
+      - files
+    tags:
+      - ensure
+
+  - name: Write db service
+    ansible.builtin.template:
+      src: templates/db.service.j2
+      dest: /etc/systemd/system/files-db.service
+    loop:
+      - files
+    tags:
+      - ensure
+
+  - name: Ensure endpoint enabled and started
+    ansible.builtin.systemd_service:
+      name: "{{ item }}"
+      state: started
+      enabled: true
+    loop:
+      - files
+    tags:
+      - ensure
+
+  - name: Ensure endpoint enabled and started
+    ansible.builtin.systemd_service:
+      name: "{{ item }}-db"
+      state: started
+      enabled: true
+    loop:
+      - files
+    tags:
+      - ensure
+
+  handlers:
+  - name: Reload systemd daemon
+    ansible.builtin.systemd_service:
+      daemon_reload: true

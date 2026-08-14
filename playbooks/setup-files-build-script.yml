@@ -1,0 +1,10 @@
+---
+- name: Write build scripts
+  hosts: schwarzwald
+
+  tasks:
+  - name: Write files build script
+    ansible.builtin.template:
+      src: templates/build-files.j2
+      dest: /srv/misc/scripts/build-files
+

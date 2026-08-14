@@ -4,6 +4,8 @@
   "http_addr": "{{ addr }}:{{ threads_http_port }}",
   "nats_addr": "{{ nats }}",
   "nats_stream": "gallery",
+  "pg_conn": "{{ pg_conn }}",
+  "goose_table_name": "threads_stream_goose_db_version",
   "users_service_addr": "{{ addr }}:{{ users_port }}",
   "sessions_service_addr": "{{ addr }}:{{ sessions_port }}",
   "log_level": "{{ log_level }}"
