@@ -3,7 +3,14 @@ package search
 import (
 	"context"
 
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
+
 	"github.com/bd878/gallery/server/internal/jetstream"
+	"github.com/bd878/gallery/server/internal/tm"
+	"github.com/bd878/gallery/server/internal/di"
+	pg "github.com/bd878/gallery/server/internal/postgres"
+
 	"github.com/bd878/gallery/server/search/config"
 	"github.com/bd878/gallery/server/internal/system"
 	"github.com/bd878/gallery/server/search/internal/handler/stream"
@@ -17,6 +24,25 @@ import (
 )
 
 func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error) {
+	container := di.New()
+
+	container.AddSingleton("db", func(c di.Container) (any, error) {
+		return svc.Pool(), nil
+	})
+	container.AddSingleton("js", func(c di.Container) (any, error) {
+		js := jetstream.NewStream(svc.Config().NatsStream, svc.JS())
+		return js, nil
+	})
+	container.AddScoped("tx", func(c di.Container) (any, error) {
+		pool := c.Get("db").(*pgxpool.Pool)
+		return pool.BeginTx(ctx, pgx.TxOptions{})
+	})
+	container.AddScoped("inboxMiddleware", func(c di.Container) (any, error) {
+		tx := c.Get("tx").(pgx.Tx)
+		inboxStore := pg.NewInboxStore(tx, "search_stream.inbox")
+		return tm.NewInboxHandlerMiddleware(inboxStore), nil
+	})
+
 	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log)
 
 	usersGateway := usersgateway.New(cfg.UsersServiceAddr)
@@ -24,10 +50,11 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 
 	ctrl := controller.New(controller.Config{RpcAddr: cfg.SearchServiceAddr})
 
-	js := jetstream.NewStream(svc.Config().NatsStream, svc.JS())
-	stream.RegisterIntegrationEventHandlers(
-		js,
-		stream.NewIntegrationEventHandlers(ctrl, ctrl, ctrl, ctrl))
+	container.AddScoped("integrationEventHandlers", func(c di.Container) (any, error) {
+		return stream.NewIntegrationEventHandlers(ctrl, ctrl, ctrl, ctrl), nil
+	})
+
+	stream.RegisterIntegrationEventHandlersTx(container)
 
 	handler := httphandler.New(ctrl)
 

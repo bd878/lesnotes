@@ -65,42 +65,6 @@ func NewIntegrationEventHandlers(messages MessagesController, threads ThreadsCon
 	}
 }
 
-func RegisterIntegrationEventHandlers(stream am.RawMessageStream, handlers am.MessageHandler[am.EventMessage]) (err error) {
-	evtMsgHandler := am.RawMessageHandlerFunc(func(ctx context.Context, msg am.RawMessage) error {
-		// TODO: open/commit/rollback tx
-		evtHandlers := am.RawMessageHandlerWithMiddleware(
-			am.NewEventMessageHandler(
-				handlers,
-			),
-			// TODO: inboxMiddleware.(am.RawMessageHandlerMiddleware)
-		)
-
-		return evtHandlers.HandleMessage(ctx, msg)
-	})
-
-	err = stream.Subscribe(messageevents.MessagesChannel, evtMsgHandler, am.GroupName("search-messages"))
-	if err != nil {
-		return
-	}
-
-	err = stream.Subscribe(threadsevents.ThreadsChannel, evtMsgHandler, am.GroupName("search-threads"))
-	if err != nil {
-		return
-	}
-
-	err = stream.Subscribe(filesevents.FilesChannel, evtMsgHandler, am.GroupName("search-files"))
-	if err != nil {
-		return
-	}
-
-	err = stream.Subscribe(messageevents.TranslationsChannel, evtMsgHandler, am.GroupName("search-translations"))
-	if err != nil {
-		return
-	}
-
-	return
-}
-
 func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.EventMessage) error {
 	slog.Debug("handle message", slog.String("name", msg.MessageName()))
 
