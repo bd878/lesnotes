@@ -28,4 +28,14 @@ func (m Metadata) configureEvent(e *event) {
 	}
 }
 
-// TODO: reply, command
+func (m Metadata) configureCommand(c *command) {
+	for key, value := range m {
+		c.metadata[key] = value
+	}
+}
+
+func (m Metadata) configureReply(r *reply) {
+	for key, value := range m {
+		r.metadata[key] = value
+	}
+}
