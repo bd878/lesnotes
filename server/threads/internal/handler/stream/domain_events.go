@@ -8,7 +8,7 @@ import (
 	"github.com/bd878/gallery/server/internal/am"
 	"github.com/bd878/gallery/server/api/threads"
 	"github.com/bd878/gallery/server/threads/internal/domain"
-	"github.com/bd878/gallery/server/threads/pkg/events"
+	threadsevents "github.com/bd878/gallery/server/threads/pkg"
 )
 
 type domainHandler[T ddd.Event] struct {
@@ -67,7 +67,7 @@ func (h domainHandler[T]) onThreadCreated(ctx context.Context, event ddd.Event) 
 		return err
 	}
 
-	return h.stream.Publish(ctx, events.ThreadsChannel, am.NewEventMessage(event.ID(), events.ThreadCreatedEvent, data, event.Metadata()))
+	return h.stream.Publish(ctx, threadsevents.ThreadsChannel, am.NewEventMessage(event.ID(), threadsevents.ThreadCreatedEvent, data, event.Metadata()))
 }
 
 func (h domainHandler[T]) onThreadDeleted(ctx context.Context, event ddd.Event) error {
@@ -80,7 +80,7 @@ func (h domainHandler[T]) onThreadDeleted(ctx context.Context, event ddd.Event) 
 		return err
 	}
 
-	return h.stream.Publish(ctx, events.ThreadsChannel, am.NewEventMessage(event.ID(), events.ThreadDeletedEvent, data, event.Metadata()))	
+	return h.stream.Publish(ctx, threadsevents.ThreadsChannel, am.NewEventMessage(event.ID(), threadsevents.ThreadDeletedEvent, data, event.Metadata()))	
 }
 
 func (h domainHandler[T]) onThreadPrivated(ctx context.Context, event ddd.Event) error {
@@ -94,7 +94,7 @@ func (h domainHandler[T]) onThreadPrivated(ctx context.Context, event ddd.Event)
 		return err
 	}
 
-	return h.stream.Publish(ctx, events.ThreadsChannel, am.NewEventMessage(event.ID(), events.ThreadPrivatedEvent, data, event.Metadata()))	
+	return h.stream.Publish(ctx, threadsevents.ThreadsChannel, am.NewEventMessage(event.ID(), threadsevents.ThreadPrivatedEvent, data, event.Metadata()))	
 }
 
 func (h domainHandler[T]) onThreadUpdated(ctx context.Context, event ddd.Event) error {
@@ -111,7 +111,7 @@ func (h domainHandler[T]) onThreadUpdated(ctx context.Context, event ddd.Event) 
 		return err
 	}
 
-	return h.stream.Publish(ctx, events.ThreadsChannel, am.NewEventMessage(event.ID(), events.ThreadUpdatedEvent, data, event.Metadata()))	
+	return h.stream.Publish(ctx, threadsevents.ThreadsChannel, am.NewEventMessage(event.ID(), threadsevents.ThreadUpdatedEvent, data, event.Metadata()))	
 }
 
 func (h domainHandler[T]) onThreadPublished(ctx context.Context, event ddd.Event) error {
@@ -125,7 +125,7 @@ func (h domainHandler[T]) onThreadPublished(ctx context.Context, event ddd.Event
 		return err
 	}
 
-	return h.stream.Publish(ctx, events.ThreadsChannel, am.NewEventMessage(event.ID(), events.ThreadPublishedEvent, data, event.Metadata()))	
+	return h.stream.Publish(ctx, threadsevents.ThreadsChannel, am.NewEventMessage(event.ID(), threadsevents.ThreadPublishedEvent, data, event.Metadata()))	
 }
 
 func (h domainHandler[T]) onThreadParentChanged(ctx context.Context, event ddd.Event) error {
@@ -139,5 +139,5 @@ func (h domainHandler[T]) onThreadParentChanged(ctx context.Context, event ddd.E
 		return err
 	}
 
-	return h.stream.Publish(ctx, events.ThreadsChannel, am.NewEventMessage(event.ID(), events.ThreadParentChangedEvent, data, event.Metadata()))		
+	return h.stream.Publish(ctx, threadsevents.ThreadsChannel, am.NewEventMessage(event.ID(), threadsevents.ThreadParentChangedEvent, data, event.Metadata()))		
 }

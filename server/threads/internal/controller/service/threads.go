@@ -31,7 +31,11 @@ func New(container di.Container, publisher ddd.EventPublisher[ddd.Event]) *Contr
 }
 
 func (s *Controller) ReadThread(ctx context.Context, id, userID int64, name string) (thread *model.Thread, err error) {
-	slog.Debug("read thread", slog.Int64("id", id), slog.Int64("user_id", userID), slog.String("name", name))
+	slog.Debug("read thread",
+		slog.Int64("id", id),
+		slog.Int64("user_id", userID),
+		slog.String("name", name),
+	)
 
 	resp, err := s.client.Read(ctx, &threads.ReadRequest{Id: id, UserId: userID, Name: name})
 	if err != nil {
@@ -44,7 +48,13 @@ func (s *Controller) ReadThread(ctx context.Context, id, userID int64, name stri
 }
 
 func (s *Controller) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool) (list []*model.Thread, isLastPage bool, err error) {
-	slog.Debug("list threads", slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("asc", asc))
+	slog.Debug("list threads",
+		slog.Int64("user_id", userID),
+		slog.Int64("parent_id", parentID),
+		slog.Int("limit", int(limit)),
+		slog.Int("offset", int(offset)),
+		slog.Bool("asc", asc),
+	)
 
 	resp, err := s.client.List(ctx, &threads.ListRequest{
 		UserId:   userID,
@@ -61,7 +71,14 @@ func (s *Controller) ListThreads(ctx context.Context, userID, parentID int64, li
 }
 
 func (s *Controller) ListMessages(ctx context.Context, userID, parentID int64, limit, offset int32, asc bool, privateMessage *bool) (list []*model.Thread, isLastPage bool, err error) {
-	slog.Debug("list messages", slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.Int("limit", int(limit)), slog.Int("offset", int(offset)), slog.Bool("asc", asc), slog.Any("private_message", privateMessage))
+	slog.Debug("list messages",
+		slog.Int64("user_id", userID),
+		slog.Int64("parent_id", parentID),
+		slog.Int("limit", int(limit)),
+		slog.Int("offset", int(offset)),
+		slog.Bool("asc", asc),
+		slog.Any("private_message", privateMessage),
+	)
 
 	resp, err := s.client.ListMessages(ctx, &threads.ListMessagesRequest{
 		UserId:   userID,
@@ -158,7 +175,15 @@ func (s *Controller) PrivateThread(ctx context.Context, id, userID int64) (err e
 }
 
 func (s *Controller) CreateThread(ctx context.Context, id, userID, parentID int64, name, description, title string, private bool) (err error) {
-	slog.Debug("create thread", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.String("name", name), slog.String("description", description), slog.String("title", title), slog.Bool("private", private))
+	slog.Debug("create thread",
+		slog.Int64("id", id),
+		slog.Int64("user_id", userID),
+		slog.Int64("parent_id", parentID),
+		slog.String("name", name),
+		slog.String("description", description),
+		slog.String("title", title),
+		slog.Bool("private", private),
+	)
 
 	createdAt := time.Now().UTC().Format(time.RFC3339)
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
@@ -198,7 +223,13 @@ func (s *Controller) CreateThread(ctx context.Context, id, userID, parentID int6
 }
 
 func (s *Controller) UpdateThread(ctx context.Context, id, userID int64, name, description, title *string) (err error) {
-	slog.Debug("update thread", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Any("name", name), slog.Any("description", description), slog.Any("title", title))
+	slog.Debug("update thread",
+		slog.Int64("id", id),
+		slog.Int64("user_id", userID),
+		slog.Any("name", name),
+		slog.Any("description", description),
+		slog.Any("title", title),
+	)
 
 	updatedAt := time.Now().UTC().Format(time.RFC3339)
 
@@ -234,7 +265,13 @@ func (s *Controller) UpdateThread(ctx context.Context, id, userID int64, name, d
 }
 
 func (s *Controller) ReorderThread(ctx context.Context, id, userID, parentID, nextID, prevID int64) (err error) {
-	slog.Debug("reorder thread", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.Int64("next_id", nextID), slog.Int64("prev_id", prevID))
+	slog.Debug("reorder thread",
+		slog.Int64("id", id),
+		slog.Int64("user_id", userID),
+		slog.Int64("parent_id", parentID),
+		slog.Int64("next_id", nextID),
+		slog.Int64("prev_id", prevID),
+	)
 
 	if parentID != -1 {
 		event, err := domain.ChangeThreadParent(id, userID, parentID)

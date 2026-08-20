@@ -79,7 +79,12 @@ func (s eventStream) Publish(ctx context.Context, topicName string, msg EventMes
 		return err
 	}
 
-	return s.stream.Publish(ctx, topicName, NewRawMessage(msg.ID(), msg.MessageName(), topicName, data))
+	return s.stream.Publish(ctx, topicName, rawMessage{
+		id: msg.ID(),
+		name: msg.MessageName(),
+		subject: topicName,
+		data: data,
+	})
 }
 
 func NewEventMessageHandler(handler MessageHandler[EventMessage]) RawMessageHandler {

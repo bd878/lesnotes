@@ -14,6 +14,8 @@ type (
 		HandleMessage(ctx context.Context, msg I) error
 	}
 
+	MessageHandlerFunc[I any] func(ctx context.Context, msg I) error
+
 	MessagePublisher[O any] interface {
 		Publish(ctx context.Context, topicName string, msg O) error
 	}
@@ -27,3 +29,7 @@ type (
 		MessageSubscriber[I]
 	}
 )
+
+func (f MessageHandlerFunc[I]) HandleMessage(ctx context.Context, msg I) error {
+	return f(ctx, msg)
+}

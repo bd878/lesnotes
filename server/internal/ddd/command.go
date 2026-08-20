@@ -11,10 +11,6 @@ type (
 		HandleCommand(ctx context.Context, cmd T) (Reply, error)
 	}
 
-	CommandHandlerFunc[T Command] func(ctx context.Context, cmd T) (Reply, error)
-
-	CommandPayload any
-
 	CommandOption interface {
 		configureCommand(*command)
 	}
@@ -22,7 +18,7 @@ type (
 	Command interface {
 		IDer
 		CommandName() string
-		Payload() CommandPayload
+		Data() []byte
 		Metadata() Metadata
 		OccurredAt() time.Time
 	}
@@ -30,7 +26,7 @@ type (
 	command struct {
 		id         string
 		name       string
-		payload CommandPayload
+		data []byte
 		metadata Metadata
 		occurredAt time.Time
 	}
@@ -38,15 +34,15 @@ type (
 
 var _ Command = (*command)(nil)
 
-func NewCommand(name string, payload CommandPayload, options ...CommandOption) Command {
-	return newCommand(name, payload, options...)
+func NewCommand(name string, data []byte, options ...CommandOption) Command {
+	return newCommand(name, data, options...)
 }
 
-func newCommand(name string, payload CommandPayload, options ...CommandOption) command {
+func newCommand(name string, data []byte, options ...CommandOption) command {
 	evt := command{
 		id:         uuid.New().String(),
 		name:       name,
-		payload:    payload,
+		data: data,
 		metadata:   make(Metadata),
 		occurredAt: time.Now(),
 	}
@@ -60,10 +56,6 @@ func newCommand(name string, payload CommandPayload, options ...CommandOption) c
 
 func (e command) ID() string { return e.id }
 func (e command) CommandName() string { return e.name }
-func (e command) Payload() CommandPayload { return e.payload }
+func (e command) Data() []byte { return e.data }
 func (e command) Metadata() Metadata { return e.metadata }
 func (e command) OccurredAt() time.Time { return e.occurredAt }
-
-func (f CommandHandlerFunc[T]) HandleCommand(ctx context.Context, cmd T) (Reply, error) {
-	return f(ctx, cmd)
-}

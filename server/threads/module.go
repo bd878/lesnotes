@@ -48,6 +48,9 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 		client := threads.NewThreadsClient(c.Get("conn").(*grpc.ClientConn))
 		return client, nil
 	})
+	container.AddSingleton("domainDispatcher", func(c di.Container) (any, error) {
+		return ddd.NewEventDispatcher[ddd.Event](), nil
+	})
 	container.AddSingleton("db", func(c di.Container) (any, error) {
 		return svc.Pool(), nil
 	})
@@ -59,6 +62,20 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 		pool := c.Get("db").(*pgxpool.Pool)
 		return pool.BeginTx(ctx, pgx.TxOptions{})
 	})
+	container.AddScoped("txStream", func(c di.Container) (any, error) {
+		tx := c.Get("tx").(pgx.Tx)
+		outboxStore := pg.NewOutboxStore(tx, "threads_stream.outbox")
+		return am.RawMessageStreamWithMiddleware(
+			c.Get("js").(am.RawMessageStream),
+			tm.NewOutboxStreamMiddleware(outboxStore),
+		), nil
+	})
+	container.AddScoped("eventStrema", func(c di.Container) (any, error) {
+		return am.NewEventStream(c.Get("txStream").(am.RawMessageStream)), nil
+	})
+	container.AddScoped("replyStream", func(c di.Container) (any, error) {
+		return am.NewReplyStream(c.Get("txStream").(am.RawMessageStream)), nil
+	})
 
 	container.AddScoped("inboxMiddleware", func(c di.Container) (any, error) {
 		tx := c.Get("tx").(pgx.Tx)
@@ -67,19 +84,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	})
 
 	container.AddScoped("domainEventHandlers", func(c di.Container) (any, error) {
-		tx := c.Get("tx").(pgx.Tx)
-		outboxStore := pg.NewOutboxStore(tx, "threads_stream.outbox")
-
-		js := c.Get("js").(am.RawMessageStream)
-
-		return stream.NewDomainEventHandlers(
-			am.NewEventStream(
-				am.RawMessageStreamWithMiddleware(
-					js,
-					tm.NewOutboxStreamMiddleware(outboxStore),
-				),
-			),
-		), nil
+		return stream.NewDomainEventHandlers(c.Get("eventStream").(am.EventStream)), nil
 	})
 
 	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log)
@@ -87,18 +92,23 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	usersGateway := usersgateway.New(cfg.UsersServiceAddr)
 	sessionsGateway := sessionsgateway.New(cfg.SessionsServiceAddr)
 
-	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
-	stream.RegisterDomainEventHandlersTx(dispatcher)
+	stream.RegisterDomainEventHandlersTx(container.Get("domainDispatcher").(*ddd.EventDispatcher[ddd.Event]))
+	if err = stream.RegisterCommandHandlersTx(container); err != nil {
+		return err
+	}
 
 	startOutboxProcessor(ctx, container)
 
 	ctrl := service.NewThreadsControllerTx(
 		container,
-		service.New(container, dispatcher),
+		service.New(container, container.Get("domainDispatcher").(*ddd.EventDispatcher[ddd.Event])),
 	)
 
 	container.AddScoped("integrationEventHandlers", func(c di.Container) (any, error) {
 		return stream.NewIntegrationEventHandlers(ctrl, ctrl), nil
+	})
+	container.AddScoped("commandHandlers", func(c di.Container) (any, error) {
+		return stream.NewCommandHandlers(ctrl), nil
 	})
 
 	stream.RegisterIntegrationEventHandlersTx(container)

@@ -43,8 +43,6 @@ func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.EventMess
 		return h.handleMessagesPublish(ctx, msg)
 	case messageevents.MessagesPrivateEvent:
 		return h.handleMessagesPrivate(ctx, msg)
-	case messageevents.MessageCreatedEvent:
-		return h.handleMessageCreated(ctx, msg)
 	case messageevents.MessageDeletedEvent:
 		return h.handleMessageDeleted(ctx, msg)
 	}
@@ -53,15 +51,6 @@ func (h integrationHandlers) HandleMessage(ctx context.Context, msg am.EventMess
 }
 
 // TODO: delete user threads when user deleted
-
-func (h integrationHandlers) handleMessageCreated(ctx context.Context, msg am.EventMessage) error {
-	m := &messages.MessageCreated{}
-	if err := proto.Unmarshal(msg.Data(), m); err != nil {
-		return err
-	}
-
-	return h.threads.CreateThread(ctx, m.Id, m.UserId, m.ThreadId, m.Name, "", "", m.Private)
-}
 
 func (h integrationHandlers) handleMessageDeleted(ctx context.Context, msg am.EventMessage) error {
 	m := &messages.MessageDeleted{}

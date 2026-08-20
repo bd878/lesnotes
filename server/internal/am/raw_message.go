@@ -30,15 +30,6 @@ type (
 
 var _ RawMessage = (*rawMessage)(nil)
 
-func NewRawMessage(id, name, subject string, data []byte) *rawMessage {
-	return &rawMessage{
-		id: id,
-		name: name,
-		subject: subject,
-		data: data,
-	}
-}
-
 func (m rawMessage) ID() string { return m.id }
 func (m rawMessage) Subject() string { return m.subject }
 func (m rawMessage) MessageName() string { return m.name }

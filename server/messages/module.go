@@ -27,6 +27,7 @@ import (
 	"github.com/bd878/gallery/server/api/comments"
 	"github.com/bd878/gallery/server/db/messages/pkg/loadbalance"
 	"github.com/bd878/gallery/server/messages/internal/handler/stream"
+	"github.com/bd878/gallery/server/messages/internal/orchestrator"
 	sessionsgateway "github.com/bd878/gallery/server/internal/gateway/sessions"
 	usersgateway "github.com/bd878/gallery/server/internal/gateway/users"
 	httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
@@ -77,6 +78,20 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 		inboxStore := pg.NewInboxStore(tx, "messages_stream.inbox")
 		return tm.NewInboxHandlerMiddleware(inboxStore), nil
 	})
+	container.AddScoped("txStream", func(c di.Container) (any, error) {
+		tx := c.Get("tx").(pgx.Tx)
+		outboxStore := pg.NewOutboxStore(tx, "messages_stream.outbox")
+		return am.RawMessageStreamWithMiddleware(
+			c.Get("js").(am.RawMessageStream),
+			tm.NewOutboxStreamMiddleware(outboxStore),
+		), nil
+	})
+	container.AddScoped("eventStream", func(c di.Container) (any, error) {
+		return am.NewEventStream(c.Get("txStream").(am.RawMessageStream)), nil
+	})
+	container.AddScoped("commandStream", func(c di.Container) (any, error) {
+		return am.NewCommandStream(c.Get("txStream").(am.RawMessageStream)), nil
+	})
 
 	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log)
 
@@ -87,23 +102,15 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(usersGateway, sessionsGateway, usermodel.PublicUserID))
 
 	container.AddScoped("domainEventHandlers", func(c di.Container) (any, error) {
-		tx := c.Get("tx").(pgx.Tx)
-		outboxStore := pg.NewOutboxStore(tx, "messages_stream.outbox")
-
-		js := c.Get("js").(am.RawMessageStream)
-
-		return stream.NewDomainEventHandlers(
-			am.NewEventStream(
-				am.RawMessageStreamWithMiddleware(
-					js,
-					tm.NewOutboxStreamMiddleware(outboxStore),
-				),
-			),
-		), nil
+		return stream.NewDomainEventHandlers(c.Get("eventStream").(am.EventStream)), nil
+	})
+	container.AddScoped("orchestratorEventHandlers", func(c di.Container) (any, error) {
+		return orchestrator.NewOrchestratorHandlers(c.Get("commandStream").(am.CommandStream)), nil
 	})
 
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
 	stream.RegisterDomainEventHandlersTx(dispatcher)
+	orchestrator.RegisterDomainEventHandlers(dispatcher)
 
 	startOutboxProcessor(ctx, container)
 
@@ -127,11 +134,14 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	)
 
 	container.AddScoped("integrationEventHandlers", func(c di.Container) (any, error) {
-		ctrl := stream.NewIntegrationEventHandlers(messagesController)
-		return ctrl, nil
+		return stream.NewIntegrationEventHandlers(messagesController), nil
+	})
+	container.AddScoped("replyHandlers", func(c di.Container) (any, error) {
+		return orchestrator.NewReplyHandlers(), nil
 	})
 
 	stream.RegisterIntegrationEventHandlersTx(container)
+	orchestrator.RegisterReplyHandlers(container)
 
 	handler := httphandler.New(messagesController, translationsController, commentsController)
 

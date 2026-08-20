@@ -1,8 +1,10 @@
 syntax = "proto3";
 
-package threads_events.v1;
+package threads_messages.v1;
 
 option go_package = "github.com/bd878/gallery/server/api/threads";
+
+// events
 
 message ThreadCreated {
 	int64  id = 1;
@@ -46,4 +48,16 @@ message ThreadParentChanged {
 	int64  id = 1;
 	int64  user_id = 2;
 	int64  parent_id = 3;
+}
+
+// commands
+
+message CreateThread {
+	int64 thread_id = 1;
+	int64 user_id = 2;
+	int64 parent_id = 3;
+	string name = 4;
+	optional string description = 5;
+	optional bool private = 6;
+	optional string title = 7;
 }

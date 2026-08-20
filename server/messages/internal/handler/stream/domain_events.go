@@ -45,7 +45,11 @@ func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.Event], hand
 }
 
 func (h domainHandler[T]) HandleEvent(ctx context.Context, event T) (err error) {
-	slog.Debug("handle event", slog.String("name", event.EventName()), slog.Any("id", event.ID()), slog.Any("payload", event.Payload()))
+	slog.Debug("handle event",
+		slog.String("name", event.EventName()),
+		slog.Any("id", event.ID()),
+		slog.Any("payload", event.Payload()),
+	)
 
 	switch event.EventName() {
 	case domain.MessageCreatedEvent:

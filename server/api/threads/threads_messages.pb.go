@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.11
 // 	protoc        v3.19.4
-// source: protos/threads_events.proto
+// source: protos/threads_messages.proto
 
 package threads
 
@@ -38,7 +38,7 @@ type ThreadCreated struct {
 
 func (x *ThreadCreated) Reset() {
 	*x = ThreadCreated{}
-	mi := &file_protos_threads_events_proto_msgTypes[0]
+	mi := &file_protos_threads_messages_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -50,7 +50,7 @@ func (x *ThreadCreated) String() string {
 func (*ThreadCreated) ProtoMessage() {}
 
 func (x *ThreadCreated) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_events_proto_msgTypes[0]
+	mi := &file_protos_threads_messages_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -63,7 +63,7 @@ func (x *ThreadCreated) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ThreadCreated.ProtoReflect.Descriptor instead.
 func (*ThreadCreated) Descriptor() ([]byte, []int) {
-	return file_protos_threads_events_proto_rawDescGZIP(), []int{0}
+	return file_protos_threads_messages_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *ThreadCreated) GetId() int64 {
@@ -139,7 +139,7 @@ type ThreadDeleted struct {
 
 func (x *ThreadDeleted) Reset() {
 	*x = ThreadDeleted{}
-	mi := &file_protos_threads_events_proto_msgTypes[1]
+	mi := &file_protos_threads_messages_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -151,7 +151,7 @@ func (x *ThreadDeleted) String() string {
 func (*ThreadDeleted) ProtoMessage() {}
 
 func (x *ThreadDeleted) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_events_proto_msgTypes[1]
+	mi := &file_protos_threads_messages_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -164,7 +164,7 @@ func (x *ThreadDeleted) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ThreadDeleted.ProtoReflect.Descriptor instead.
 func (*ThreadDeleted) Descriptor() ([]byte, []int) {
-	return file_protos_threads_events_proto_rawDescGZIP(), []int{1}
+	return file_protos_threads_messages_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *ThreadDeleted) GetId() int64 {
@@ -195,7 +195,7 @@ type ThreadUpdated struct {
 
 func (x *ThreadUpdated) Reset() {
 	*x = ThreadUpdated{}
-	mi := &file_protos_threads_events_proto_msgTypes[2]
+	mi := &file_protos_threads_messages_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -207,7 +207,7 @@ func (x *ThreadUpdated) String() string {
 func (*ThreadUpdated) ProtoMessage() {}
 
 func (x *ThreadUpdated) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_events_proto_msgTypes[2]
+	mi := &file_protos_threads_messages_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -220,7 +220,7 @@ func (x *ThreadUpdated) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ThreadUpdated.ProtoReflect.Descriptor instead.
 func (*ThreadUpdated) Descriptor() ([]byte, []int) {
-	return file_protos_threads_events_proto_rawDescGZIP(), []int{2}
+	return file_protos_threads_messages_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ThreadUpdated) GetId() int64 {
@@ -276,7 +276,7 @@ type ThreadPublished struct {
 
 func (x *ThreadPublished) Reset() {
 	*x = ThreadPublished{}
-	mi := &file_protos_threads_events_proto_msgTypes[3]
+	mi := &file_protos_threads_messages_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -288,7 +288,7 @@ func (x *ThreadPublished) String() string {
 func (*ThreadPublished) ProtoMessage() {}
 
 func (x *ThreadPublished) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_events_proto_msgTypes[3]
+	mi := &file_protos_threads_messages_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -301,7 +301,7 @@ func (x *ThreadPublished) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ThreadPublished.ProtoReflect.Descriptor instead.
 func (*ThreadPublished) Descriptor() ([]byte, []int) {
-	return file_protos_threads_events_proto_rawDescGZIP(), []int{3}
+	return file_protos_threads_messages_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ThreadPublished) GetId() int64 {
@@ -336,7 +336,7 @@ type ThreadPrivated struct {
 
 func (x *ThreadPrivated) Reset() {
 	*x = ThreadPrivated{}
-	mi := &file_protos_threads_events_proto_msgTypes[4]
+	mi := &file_protos_threads_messages_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -348,7 +348,7 @@ func (x *ThreadPrivated) String() string {
 func (*ThreadPrivated) ProtoMessage() {}
 
 func (x *ThreadPrivated) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_events_proto_msgTypes[4]
+	mi := &file_protos_threads_messages_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -361,7 +361,7 @@ func (x *ThreadPrivated) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ThreadPrivated.ProtoReflect.Descriptor instead.
 func (*ThreadPrivated) Descriptor() ([]byte, []int) {
-	return file_protos_threads_events_proto_rawDescGZIP(), []int{4}
+	return file_protos_threads_messages_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ThreadPrivated) GetId() int64 {
@@ -396,7 +396,7 @@ type ThreadParentChanged struct {
 
 func (x *ThreadParentChanged) Reset() {
 	*x = ThreadParentChanged{}
-	mi := &file_protos_threads_events_proto_msgTypes[5]
+	mi := &file_protos_threads_messages_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -408,7 +408,7 @@ func (x *ThreadParentChanged) String() string {
 func (*ThreadParentChanged) ProtoMessage() {}
 
 func (x *ThreadParentChanged) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_events_proto_msgTypes[5]
+	mi := &file_protos_threads_messages_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -421,7 +421,7 @@ func (x *ThreadParentChanged) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ThreadParentChanged.ProtoReflect.Descriptor instead.
 func (*ThreadParentChanged) Descriptor() ([]byte, []int) {
-	return file_protos_threads_events_proto_rawDescGZIP(), []int{5}
+	return file_protos_threads_messages_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ThreadParentChanged) GetId() int64 {
@@ -445,11 +445,103 @@ func (x *ThreadParentChanged) GetParentId() int64 {
 	return 0
 }
 
-var File_protos_threads_events_proto protoreflect.FileDescriptor
+type CreateThread struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ThreadId      int64                  `protobuf:"varint,1,opt,name=thread_id,json=threadId,proto3" json:"thread_id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ParentId      int64                  `protobuf:"varint,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	Name          string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	Description   *string                `protobuf:"bytes,5,opt,name=description,proto3,oneof" json:"description,omitempty"`
+	Private       *bool                  `protobuf:"varint,6,opt,name=private,proto3,oneof" json:"private,omitempty"`
+	Title         *string                `protobuf:"bytes,7,opt,name=title,proto3,oneof" json:"title,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
 
-const file_protos_threads_events_proto_rawDesc = "" +
+func (x *CreateThread) Reset() {
+	*x = CreateThread{}
+	mi := &file_protos_threads_messages_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateThread) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateThread) ProtoMessage() {}
+
+func (x *CreateThread) ProtoReflect() protoreflect.Message {
+	mi := &file_protos_threads_messages_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateThread.ProtoReflect.Descriptor instead.
+func (*CreateThread) Descriptor() ([]byte, []int) {
+	return file_protos_threads_messages_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *CreateThread) GetThreadId() int64 {
+	if x != nil {
+		return x.ThreadId
+	}
+	return 0
+}
+
+func (x *CreateThread) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *CreateThread) GetParentId() int64 {
+	if x != nil {
+		return x.ParentId
+	}
+	return 0
+}
+
+func (x *CreateThread) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateThread) GetDescription() string {
+	if x != nil && x.Description != nil {
+		return *x.Description
+	}
+	return ""
+}
+
+func (x *CreateThread) GetPrivate() bool {
+	if x != nil && x.Private != nil {
+		return *x.Private
+	}
+	return false
+}
+
+func (x *CreateThread) GetTitle() string {
+	if x != nil && x.Title != nil {
+		return *x.Title
+	}
+	return ""
+}
+
+var File_protos_threads_messages_proto protoreflect.FileDescriptor
+
+const file_protos_threads_messages_proto_rawDesc = "" +
 	"\n" +
-	"\x1bprotos/threads_events.proto\x12\x11threads_events.v1\"\xf9\x01\n" +
+	"\x1dprotos/threads_messages.proto\x12\x13threads_messages.v1\"\xf9\x01\n" +
 	"\rThreadCreated\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x1b\n" +
@@ -489,30 +581,43 @@ const file_protos_threads_events_proto_rawDesc = "" +
 	"\x13ThreadParentChanged\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x1b\n" +
-	"\tparent_id\x18\x03 \x01(\x03R\bparentIdB-Z+github.com/bd878/gallery/server/api/threadsb\x06proto3"
+	"\tparent_id\x18\x03 \x01(\x03R\bparentId\"\xfc\x01\n" +
+	"\fCreateThread\x12\x1b\n" +
+	"\tthread_id\x18\x01 \x01(\x03R\bthreadId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x1b\n" +
+	"\tparent_id\x18\x03 \x01(\x03R\bparentId\x12\x12\n" +
+	"\x04name\x18\x04 \x01(\tR\x04name\x12%\n" +
+	"\vdescription\x18\x05 \x01(\tH\x00R\vdescription\x88\x01\x01\x12\x1d\n" +
+	"\aprivate\x18\x06 \x01(\bH\x01R\aprivate\x88\x01\x01\x12\x19\n" +
+	"\x05title\x18\a \x01(\tH\x02R\x05title\x88\x01\x01B\x0e\n" +
+	"\f_descriptionB\n" +
+	"\n" +
+	"\b_privateB\b\n" +
+	"\x06_titleB-Z+github.com/bd878/gallery/server/api/threadsb\x06proto3"
 
 var (
-	file_protos_threads_events_proto_rawDescOnce sync.Once
-	file_protos_threads_events_proto_rawDescData []byte
+	file_protos_threads_messages_proto_rawDescOnce sync.Once
+	file_protos_threads_messages_proto_rawDescData []byte
 )
 
-func file_protos_threads_events_proto_rawDescGZIP() []byte {
-	file_protos_threads_events_proto_rawDescOnce.Do(func() {
-		file_protos_threads_events_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_protos_threads_events_proto_rawDesc), len(file_protos_threads_events_proto_rawDesc)))
+func file_protos_threads_messages_proto_rawDescGZIP() []byte {
+	file_protos_threads_messages_proto_rawDescOnce.Do(func() {
+		file_protos_threads_messages_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_protos_threads_messages_proto_rawDesc), len(file_protos_threads_messages_proto_rawDesc)))
 	})
-	return file_protos_threads_events_proto_rawDescData
+	return file_protos_threads_messages_proto_rawDescData
 }
 
-var file_protos_threads_events_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
-var file_protos_threads_events_proto_goTypes = []any{
-	(*ThreadCreated)(nil),       // 0: threads_events.v1.ThreadCreated
-	(*ThreadDeleted)(nil),       // 1: threads_events.v1.ThreadDeleted
-	(*ThreadUpdated)(nil),       // 2: threads_events.v1.ThreadUpdated
-	(*ThreadPublished)(nil),     // 3: threads_events.v1.ThreadPublished
-	(*ThreadPrivated)(nil),      // 4: threads_events.v1.ThreadPrivated
-	(*ThreadParentChanged)(nil), // 5: threads_events.v1.ThreadParentChanged
+var file_protos_threads_messages_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_protos_threads_messages_proto_goTypes = []any{
+	(*ThreadCreated)(nil),       // 0: threads_messages.v1.ThreadCreated
+	(*ThreadDeleted)(nil),       // 1: threads_messages.v1.ThreadDeleted
+	(*ThreadUpdated)(nil),       // 2: threads_messages.v1.ThreadUpdated
+	(*ThreadPublished)(nil),     // 3: threads_messages.v1.ThreadPublished
+	(*ThreadPrivated)(nil),      // 4: threads_messages.v1.ThreadPrivated
+	(*ThreadParentChanged)(nil), // 5: threads_messages.v1.ThreadParentChanged
+	(*CreateThread)(nil),        // 6: threads_messages.v1.CreateThread
 }
-var file_protos_threads_events_proto_depIdxs = []int32{
+var file_protos_threads_messages_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
 	0, // [0:0] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
@@ -520,27 +625,28 @@ var file_protos_threads_events_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for field type_name
 }
 
-func init() { file_protos_threads_events_proto_init() }
-func file_protos_threads_events_proto_init() {
-	if File_protos_threads_events_proto != nil {
+func init() { file_protos_threads_messages_proto_init() }
+func file_protos_threads_messages_proto_init() {
+	if File_protos_threads_messages_proto != nil {
 		return
 	}
-	file_protos_threads_events_proto_msgTypes[2].OneofWrappers = []any{}
+	file_protos_threads_messages_proto_msgTypes[2].OneofWrappers = []any{}
+	file_protos_threads_messages_proto_msgTypes[6].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_protos_threads_events_proto_rawDesc), len(file_protos_threads_events_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_protos_threads_messages_proto_rawDesc), len(file_protos_threads_messages_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_protos_threads_events_proto_goTypes,
-		DependencyIndexes: file_protos_threads_events_proto_depIdxs,
-		MessageInfos:      file_protos_threads_events_proto_msgTypes,
+		GoTypes:           file_protos_threads_messages_proto_goTypes,
+		DependencyIndexes: file_protos_threads_messages_proto_depIdxs,
+		MessageInfos:      file_protos_threads_messages_proto_msgTypes,
 	}.Build()
-	File_protos_threads_events_proto = out.File
-	file_protos_threads_events_proto_goTypes = nil
-	file_protos_threads_events_proto_depIdxs = nil
+	File_protos_threads_messages_proto = out.File
+	file_protos_threads_messages_proto_goTypes = nil
+	file_protos_threads_messages_proto_depIdxs = nil
 }

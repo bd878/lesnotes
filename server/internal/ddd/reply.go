@@ -11,18 +11,14 @@ type (
 		HandleReply(ctx context.Context, reply T) error
 	}
 
-	ReplyHandlerFunc[T Reply] func(ctx context.Context, reply T) error
-
 	ReplyOption interface {
 		configureReply(*reply)
 	}
 
-	ReplyPayload any
-
 	Reply interface {
 		IDer
 		ReplyName() string
-		Payload() ReplyPayload
+		Data() []byte
 		Metadata() Metadata
 		OccurredAt() time.Time
 	}
@@ -31,23 +27,23 @@ type (
 		id         string
 		name       string
 		occurredAt time.Time
-		payload    ReplyPayload
+		data []byte
 		metadata   Metadata
 	}
 )
 
 var _ Reply = (*reply)(nil)
 
-func NewReply(name string, payload ReplyPayload, options ...ReplyOption) Reply {
-	return newReply(name, payload, options...)
+func NewReply(name string, data []byte, options ...ReplyOption) Reply {
+	return newReply(name, data, options...)
 }
 
-func newReply(name string, payload ReplyPayload, options ...ReplyOption) reply {
+func newReply(name string, data []byte, options ...ReplyOption) reply {
 	rep := reply{
 		id:         uuid.New().String(),
 		name:       name,
 		occurredAt: time.Now(),
-		payload:    payload,
+		data: data,
 		metadata:   make(Metadata),
 	}
 
@@ -60,10 +56,6 @@ func newReply(name string, payload ReplyPayload, options ...ReplyOption) reply {
 
 func (e reply) ID() string { return e.id }
 func (e reply) ReplyName() string     { return e.name }
-func (e reply) Payload() ReplyPayload { return e.payload }
+func (e reply) Data() []byte { return e.data }
 func (e reply) Metadata() Metadata    { return e.metadata }
 func (e reply) OccurredAt() time.Time { return e.occurredAt }
-
-func (f ReplyHandlerFunc[T]) HandleReply(ctx context.Context, reply T) error {
-	return f(ctx, reply)
-}
