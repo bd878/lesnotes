@@ -2,6 +2,7 @@ package tm
 
 import (
 	"fmt"
+	"log/slog"
 	"errors"
 	"context"
 	"github.com/bd878/gallery/server/internal/am"
@@ -35,6 +36,10 @@ func (i inbox) HandleMessage(ctx context.Context, msg am.RawMessage) error {
 	if err != nil {
 		var errDupe ErrDuplicateMessage
 		if errors.Is(err, errDupe) {
+			slog.Debug("duplicate message",
+				slog.String("subject", msg.Subject()),
+				slog.String("name", msg.MessageName()),
+			)
 			return nil
 		}
 		return err

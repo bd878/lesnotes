@@ -70,7 +70,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 			tm.NewOutboxStreamMiddleware(outboxStore),
 		), nil
 	})
-	container.AddScoped("eventStrema", func(c di.Container) (any, error) {
+	container.AddScoped("eventStream", func(c di.Container) (any, error) {
 		return am.NewEventStream(c.Get("txStream").(am.RawMessageStream)), nil
 	})
 	container.AddScoped("replyStream", func(c di.Container) (any, error) {

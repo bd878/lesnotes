@@ -44,7 +44,7 @@ func (h orchestratorHandler[T]) HandleEvent(ctx context.Context, event T) (err e
 }
 
 func (h orchestratorHandler[T]) onMessageCreated(ctx context.Context, event ddd.Event) error {
-	slog.Debug("handle event",
+	slog.Debug("handle domain command event",
 		slog.String("name", event.EventName()),
 		slog.Any("id", event.ID()),
 		slog.Any("payload", event.Payload()),

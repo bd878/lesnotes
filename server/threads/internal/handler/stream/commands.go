@@ -16,7 +16,7 @@ type commandHandlers struct {
 	threads ThreadsController
 }
 
-func NewCommandHandlers(threads ThreadsController) ddd.CommandHandler[am.CommandMessage] {
+func NewCommandHandlers(threads ThreadsController) ddd.CommandHandler[ddd.Command] {
 	return commandHandlers{threads: threads}
 }
 
@@ -24,7 +24,7 @@ func RegisterCommandHandlers(subscriber am.RawMessageSubscriber, handlers am.Raw
 	return subscriber.Subscribe(pkg.CommandChannel, handlers, am.GroupName("threads-commands"))
 }
 
-func (h commandHandlers) HandleCommand(ctx context.Context, cmd am.CommandMessage) (ddd.Reply, error) {
+func (h commandHandlers) HandleCommand(ctx context.Context, cmd ddd.Command) (ddd.Reply, error) {
 	slog.Debug("handle command", slog.String("name", cmd.CommandName()))
 
 	switch cmd.CommandName() {
@@ -35,7 +35,7 @@ func (h commandHandlers) HandleCommand(ctx context.Context, cmd am.CommandMessag
 	return nil, nil
 }
 
-func (h commandHandlers) doCreateThread(ctx context.Context, cmd am.CommandMessage) (ddd.Reply, error) {
+func (h commandHandlers) doCreateThread(ctx context.Context, cmd ddd.Command) (ddd.Reply, error) {
 	m := &threads.CreateThread{}
 	if err := proto.Unmarshal(cmd.Data(), m); err != nil {
 		return nil, err
