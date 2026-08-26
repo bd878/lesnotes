@@ -7,7 +7,7 @@ import (
 
 	"github.com/bd878/gallery/server/internal/am"
 	"github.com/bd878/gallery/server/api/messages"
-	messagesevents "github.com/bd878/gallery/server/messages/pkg/events"
+	messagesevents "github.com/bd878/gallery/server/messages/pkg"
 )
 
 type FilesController interface {

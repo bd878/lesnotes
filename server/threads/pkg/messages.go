@@ -13,4 +13,5 @@ const (
 	ThreadParentChangedEvent  = "threadsapi.ThreadParentChangedEvent"
 
 	CreateThreadCommand = "threadsapi.CreateCommand"
+	DeleteThreadCommand = "threadsapi.DeleteCommand"
 )

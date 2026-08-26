@@ -1,9 +1,11 @@
-package events
+package pkg
 
 const (
 	MessagesChannel     = "gallery.messages.Message"
 	TranslationsChannel = "gallery.messages.Translation"
 	CommentsChannel     = "gallery.messages.Comment"
+
+	CommandChannel = "gallery.messages.commands"
 
 	MessageCreatedEvent  = "messagesapi.MessageCreated"
 	MessageDeletedEvent  = "messagesapi.MessageDeleted"
@@ -19,4 +21,6 @@ const (
 	CommentUpdatedEvent         = "messagesapi.CommentUpdated"
 	CommentDeletedEvent         = "messagesapi.CommentDeleted"
 	MessageCommentsDeletedEvent = "messagesapi.MessageCommentsDeleted"
+
+	DeleteMessageCommand = "messagesapi.DeleteMessage"
 )

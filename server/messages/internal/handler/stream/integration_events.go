@@ -12,6 +12,7 @@ import (
 )
 
 type MessagesController interface {
+	DeleteMessages(ctx context.Context, ids []int64, userID int64) (err error)
 	DeleteUserMessages(ctx context.Context, userID int64) (err error)
 }
 

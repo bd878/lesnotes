@@ -8,7 +8,7 @@ import (
 
 	"github.com/bd878/gallery/server/internal/am"
 	"github.com/bd878/gallery/server/api/messages"
-	messageevents "github.com/bd878/gallery/server/messages/pkg/events"
+	messageevents "github.com/bd878/gallery/server/messages/pkg"
 )
 
 type MessagesController interface {

@@ -16,6 +16,7 @@ import (
 	"github.com/bd878/gallery/server/internal/system"
 	"github.com/bd878/gallery/server/internal/jetstream"
 	"github.com/bd878/gallery/server/internal/am"
+	"github.com/bd878/gallery/server/internal/sec"
 	"github.com/bd878/gallery/server/internal/di"
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/tm"
@@ -27,7 +28,7 @@ import (
 	"github.com/bd878/gallery/server/api/comments"
 	"github.com/bd878/gallery/server/db/messages/pkg/loadbalance"
 	"github.com/bd878/gallery/server/messages/internal/handler/stream"
-	"github.com/bd878/gallery/server/messages/internal/orchestrator"
+	"github.com/bd878/gallery/server/messages/internal/saga"
 	sessionsgateway "github.com/bd878/gallery/server/internal/gateway/sessions"
 	usersgateway "github.com/bd878/gallery/server/internal/gateway/users"
 	httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
@@ -69,6 +70,9 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 		js := jetstream.NewStream(svc.Config().NatsStream, svc.JS())
 		return js, nil
 	})
+	container.AddSingleton("createMessageSaga", func(c di.Container) (any, error) {
+		return saga.NewCreateMessageSaga(cfg.NodeName), nil
+	})
 	container.AddScoped("tx", func(c di.Container) (any, error) {
 		pool := c.Get("db").(*pgxpool.Pool)
 		return pool.BeginTx(ctx, pgx.TxOptions{})
@@ -92,6 +96,14 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	container.AddScoped("commandStream", func(c di.Container) (any, error) {
 		return am.NewCommandStream(c.Get("txStream").(am.RawMessageStream)), nil
 	})
+	container.AddScoped("sagaRepo", func(c di.Container) (any, error) {
+		return sec.NewSagaRepository(
+			pg.NewSagaStore(
+				"messages_stream.sagas",
+				c.Get("tx").(pgx.Tx),
+			),
+		), nil
+	})
 
 	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log)
 
@@ -104,13 +116,20 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	container.AddScoped("domainEventHandlers", func(c di.Container) (any, error) {
 		return stream.NewDomainEventHandlers(c.Get("eventStream").(am.EventStream)), nil
 	})
-	container.AddScoped("orchestratorEventHandlers", func(c di.Container) (any, error) {
-		return orchestrator.NewOrchestratorHandlers(c.Get("commandStream").(am.CommandStream)), nil
+	container.AddScoped("createMessageOrchestrator", func(c di.Container) (any, error) {
+		return sec.NewOrchestrator(
+			c.Get("createMessageSaga").(sec.Saga),
+			c.Get("sagaRepo").(sec.SagaRepository),
+			c.Get("commandStream").(am.CommandStream),
+		), nil
+	})
+	container.AddScoped("sagaEventHandlers", func(c di.Container) (any, error) {
+		return saga.NewEventHandlers(c.Get("createMessageOrchestrator").(sec.Orchestrator)), nil
 	})
 
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
 	stream.RegisterDomainEventHandlersTx(dispatcher)
-	orchestrator.RegisterDomainEventHandlers(dispatcher)
+	saga.RegisterDomainEventHandlers(dispatcher)
 
 	startOutboxProcessor(ctx, container)
 
@@ -136,12 +155,19 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	container.AddScoped("integrationEventHandlers", func(c di.Container) (any, error) {
 		return stream.NewIntegrationEventHandlers(messagesController), nil
 	})
-	container.AddScoped("replyHandlers", func(c di.Container) (any, error) {
-		return orchestrator.NewReplyHandlers(), nil
+	container.AddScoped("commandHandlers", func(c di.Container) (any, error) {
+		return stream.NewCommandHandlers(messagesController), nil
 	})
 
+	if err = stream.RegisterCommandHandlersTx(container); err != nil {
+		return err
+	}
+
+	if err = saga.RegisterReplyHandlersTx(container); err != nil {
+		return err
+	}
+
 	stream.RegisterIntegrationEventHandlersTx(container)
-	orchestrator.RegisterReplyHandlers(container)
 
 	handler := httphandler.New(messagesController, translationsController, commentsController)
 

@@ -16,11 +16,11 @@ type commandHandlers struct {
 	threads ThreadsController
 }
 
-func NewCommandHandlers(threads ThreadsController) ddd.CommandHandler[ddd.Command] {
+func NewIntegrationCommandHandlers(threads ThreadsController) ddd.CommandHandler[ddd.Command] {
 	return commandHandlers{threads: threads}
 }
 
-func RegisterCommandHandlers(subscriber am.RawMessageSubscriber, handlers am.RawMessageHandler) error {
+func RegisterIntegrationCommandHandlers(subscriber am.RawMessageSubscriber, handlers am.RawMessageHandler) error {
 	return subscriber.Subscribe(pkg.CommandChannel, handlers, am.GroupName("threads-commands"))
 }
 

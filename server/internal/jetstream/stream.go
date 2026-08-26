@@ -42,7 +42,7 @@ func (s *Stream) Publish(ctx context.Context, topicName string, rawMsg am.RawMes
 		return
 	}
 
-	slog.Debug("subject", slog.String("subject", rawMsg.Subject()))
+	slog.Debug("publish", slog.String("subject", rawMsg.Subject()), slog.String("topicName", topicName))
 
 	var p nats.PubAckFuture
 	p, err = s.js.PublishMsgAsync(&nats.Msg{
@@ -93,17 +93,17 @@ func (s *Stream) Subscribe(topicName string, handler am.RawMessageHandler, optio
 	opts := []nats.SubOpt{
 		nats.MaxDeliver(subCfg.MaxRedeliver()),
 	}
-	cfg := &nats.ConsumerConfig{
-		MaxDeliver: subCfg.MaxRedeliver(),
-		DeliverSubject: topicName,
-		FilterSubject: topicName,
-	}
+
+	cfg := &nats.ConsumerConfig{}
 	if groupName := subCfg.GroupName(); groupName != "" {
 		cfg.DeliverSubject = groupName
 		cfg.DeliverGroup = groupName
 		cfg.Durable = groupName
 
 		opts = append(opts, nats.Bind(s.streamName, groupName), nats.Durable(groupName))
+	} else {
+		cfg.MaxDeliver = subCfg.MaxRedeliver()
+		cfg.DeliverSubject = nats.NewInbox()
 	}
 
 	if ackType := subCfg.AckType(); ackType != am.AckTypeAuto {

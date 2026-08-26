@@ -8,7 +8,7 @@ import (
 
 	"github.com/bd878/gallery/server/internal/di"
 	"github.com/bd878/gallery/server/internal/am"
-	messageevents "github.com/bd878/gallery/server/messages/pkg/events"
+	messageevents "github.com/bd878/gallery/server/messages/pkg"
 )
 
 func RegisterIntegrationEventHandlersTx(c di.Container) (err error) {

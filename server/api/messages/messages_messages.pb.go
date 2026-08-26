@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.11
 // 	protoc        v3.19.4
-// source: protos/messages_events.proto
+// source: protos/messages_messages.proto
 
 package messages
 
@@ -39,7 +39,7 @@ type MessageCreated struct {
 
 func (x *MessageCreated) Reset() {
 	*x = MessageCreated{}
-	mi := &file_protos_messages_events_proto_msgTypes[0]
+	mi := &file_protos_messages_messages_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -51,7 +51,7 @@ func (x *MessageCreated) String() string {
 func (*MessageCreated) ProtoMessage() {}
 
 func (x *MessageCreated) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_events_proto_msgTypes[0]
+	mi := &file_protos_messages_messages_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -64,7 +64,7 @@ func (x *MessageCreated) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MessageCreated.ProtoReflect.Descriptor instead.
 func (*MessageCreated) Descriptor() ([]byte, []int) {
-	return file_protos_messages_events_proto_rawDescGZIP(), []int{0}
+	return file_protos_messages_messages_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *MessageCreated) GetId() int64 {
@@ -147,7 +147,7 @@ type MessageDeleted struct {
 
 func (x *MessageDeleted) Reset() {
 	*x = MessageDeleted{}
-	mi := &file_protos_messages_events_proto_msgTypes[1]
+	mi := &file_protos_messages_messages_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -159,7 +159,7 @@ func (x *MessageDeleted) String() string {
 func (*MessageDeleted) ProtoMessage() {}
 
 func (x *MessageDeleted) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_events_proto_msgTypes[1]
+	mi := &file_protos_messages_messages_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -172,7 +172,7 @@ func (x *MessageDeleted) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MessageDeleted.ProtoReflect.Descriptor instead.
 func (*MessageDeleted) Descriptor() ([]byte, []int) {
-	return file_protos_messages_events_proto_rawDescGZIP(), []int{1}
+	return file_protos_messages_messages_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *MessageDeleted) GetId() int64 {
@@ -204,7 +204,7 @@ type MessageUpdated struct {
 
 func (x *MessageUpdated) Reset() {
 	*x = MessageUpdated{}
-	mi := &file_protos_messages_events_proto_msgTypes[2]
+	mi := &file_protos_messages_messages_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -216,7 +216,7 @@ func (x *MessageUpdated) String() string {
 func (*MessageUpdated) ProtoMessage() {}
 
 func (x *MessageUpdated) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_events_proto_msgTypes[2]
+	mi := &file_protos_messages_messages_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -229,7 +229,7 @@ func (x *MessageUpdated) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MessageUpdated.ProtoReflect.Descriptor instead.
 func (*MessageUpdated) Descriptor() ([]byte, []int) {
-	return file_protos_messages_events_proto_rawDescGZIP(), []int{2}
+	return file_protos_messages_messages_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *MessageUpdated) GetId() int64 {
@@ -292,7 +292,7 @@ type MessagesPublished struct {
 
 func (x *MessagesPublished) Reset() {
 	*x = MessagesPublished{}
-	mi := &file_protos_messages_events_proto_msgTypes[3]
+	mi := &file_protos_messages_messages_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -304,7 +304,7 @@ func (x *MessagesPublished) String() string {
 func (*MessagesPublished) ProtoMessage() {}
 
 func (x *MessagesPublished) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_events_proto_msgTypes[3]
+	mi := &file_protos_messages_messages_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -317,7 +317,7 @@ func (x *MessagesPublished) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MessagesPublished.ProtoReflect.Descriptor instead.
 func (*MessagesPublished) Descriptor() ([]byte, []int) {
-	return file_protos_messages_events_proto_rawDescGZIP(), []int{3}
+	return file_protos_messages_messages_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *MessagesPublished) GetIds() []int64 {
@@ -352,7 +352,7 @@ type MessagesPrivated struct {
 
 func (x *MessagesPrivated) Reset() {
 	*x = MessagesPrivated{}
-	mi := &file_protos_messages_events_proto_msgTypes[4]
+	mi := &file_protos_messages_messages_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -364,7 +364,7 @@ func (x *MessagesPrivated) String() string {
 func (*MessagesPrivated) ProtoMessage() {}
 
 func (x *MessagesPrivated) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_events_proto_msgTypes[4]
+	mi := &file_protos_messages_messages_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -377,7 +377,7 @@ func (x *MessagesPrivated) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MessagesPrivated.ProtoReflect.Descriptor instead.
 func (*MessagesPrivated) Descriptor() ([]byte, []int) {
-	return file_protos_messages_events_proto_rawDescGZIP(), []int{4}
+	return file_protos_messages_messages_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *MessagesPrivated) GetIds() []int64 {
@@ -401,11 +401,63 @@ func (x *MessagesPrivated) GetUpdatedAt() string {
 	return ""
 }
 
-var File_protos_messages_events_proto protoreflect.FileDescriptor
+type DeleteMessage struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
 
-const file_protos_messages_events_proto_rawDesc = "" +
+func (x *DeleteMessage) Reset() {
+	*x = DeleteMessage{}
+	mi := &file_protos_messages_messages_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteMessage) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteMessage) ProtoMessage() {}
+
+func (x *DeleteMessage) ProtoReflect() protoreflect.Message {
+	mi := &file_protos_messages_messages_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteMessage.ProtoReflect.Descriptor instead.
+func (*DeleteMessage) Descriptor() ([]byte, []int) {
+	return file_protos_messages_messages_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *DeleteMessage) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *DeleteMessage) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+var File_protos_messages_messages_proto protoreflect.FileDescriptor
+
+const file_protos_messages_messages_proto_rawDesc = "" +
 	"\n" +
-	"\x1cprotos/messages_events.proto\x12\x12messages_events.v1\"\x87\x02\n" +
+	"\x1eprotos/messages_messages.proto\x12\x14messages_messages.v1\"\x87\x02\n" +
 	"\x0eMessageCreated\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x12\n" +
@@ -444,29 +496,33 @@ const file_protos_messages_events_proto_rawDesc = "" +
 	"\x03ids\x18\x01 \x03(\x03R\x03ids\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\x03 \x01(\tR\tupdatedAtB.Z,github.com/bd878/gallery/server/api/messagesb\x06proto3"
+	"updated_at\x18\x03 \x01(\tR\tupdatedAt\"8\n" +
+	"\rDeleteMessage\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userIdB.Z,github.com/bd878/gallery/server/api/messagesb\x06proto3"
 
 var (
-	file_protos_messages_events_proto_rawDescOnce sync.Once
-	file_protos_messages_events_proto_rawDescData []byte
+	file_protos_messages_messages_proto_rawDescOnce sync.Once
+	file_protos_messages_messages_proto_rawDescData []byte
 )
 
-func file_protos_messages_events_proto_rawDescGZIP() []byte {
-	file_protos_messages_events_proto_rawDescOnce.Do(func() {
-		file_protos_messages_events_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_protos_messages_events_proto_rawDesc), len(file_protos_messages_events_proto_rawDesc)))
+func file_protos_messages_messages_proto_rawDescGZIP() []byte {
+	file_protos_messages_messages_proto_rawDescOnce.Do(func() {
+		file_protos_messages_messages_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_protos_messages_messages_proto_rawDesc), len(file_protos_messages_messages_proto_rawDesc)))
 	})
-	return file_protos_messages_events_proto_rawDescData
+	return file_protos_messages_messages_proto_rawDescData
 }
 
-var file_protos_messages_events_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
-var file_protos_messages_events_proto_goTypes = []any{
-	(*MessageCreated)(nil),    // 0: messages_events.v1.MessageCreated
-	(*MessageDeleted)(nil),    // 1: messages_events.v1.MessageDeleted
-	(*MessageUpdated)(nil),    // 2: messages_events.v1.MessageUpdated
-	(*MessagesPublished)(nil), // 3: messages_events.v1.MessagesPublished
-	(*MessagesPrivated)(nil),  // 4: messages_events.v1.MessagesPrivated
+var file_protos_messages_messages_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_protos_messages_messages_proto_goTypes = []any{
+	(*MessageCreated)(nil),    // 0: messages_messages.v1.MessageCreated
+	(*MessageDeleted)(nil),    // 1: messages_messages.v1.MessageDeleted
+	(*MessageUpdated)(nil),    // 2: messages_messages.v1.MessageUpdated
+	(*MessagesPublished)(nil), // 3: messages_messages.v1.MessagesPublished
+	(*MessagesPrivated)(nil),  // 4: messages_messages.v1.MessagesPrivated
+	(*DeleteMessage)(nil),     // 5: messages_messages.v1.DeleteMessage
 }
-var file_protos_messages_events_proto_depIdxs = []int32{
+var file_protos_messages_messages_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
 	0, // [0:0] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
@@ -474,27 +530,27 @@ var file_protos_messages_events_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for field type_name
 }
 
-func init() { file_protos_messages_events_proto_init() }
-func file_protos_messages_events_proto_init() {
-	if File_protos_messages_events_proto != nil {
+func init() { file_protos_messages_messages_proto_init() }
+func file_protos_messages_messages_proto_init() {
+	if File_protos_messages_messages_proto != nil {
 		return
 	}
-	file_protos_messages_events_proto_msgTypes[2].OneofWrappers = []any{}
+	file_protos_messages_messages_proto_msgTypes[2].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_protos_messages_events_proto_rawDesc), len(file_protos_messages_events_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_protos_messages_messages_proto_rawDesc), len(file_protos_messages_messages_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_protos_messages_events_proto_goTypes,
-		DependencyIndexes: file_protos_messages_events_proto_depIdxs,
-		MessageInfos:      file_protos_messages_events_proto_msgTypes,
+		GoTypes:           file_protos_messages_messages_proto_goTypes,
+		DependencyIndexes: file_protos_messages_messages_proto_depIdxs,
+		MessageInfos:      file_protos_messages_messages_proto_msgTypes,
 	}.Build()
-	File_protos_messages_events_proto = out.File
-	file_protos_messages_events_proto_goTypes = nil
-	file_protos_messages_events_proto_depIdxs = nil
+	File_protos_messages_messages_proto = out.File
+	file_protos_messages_messages_proto_goTypes = nil
+	file_protos_messages_messages_proto_depIdxs = nil
 }

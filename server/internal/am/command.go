@@ -3,6 +3,7 @@ package am
 import (
 	"strings"
 	"context"
+	"log/slog"
 
 	"google.golang.org/protobuf/proto"
 
@@ -70,6 +71,8 @@ func (h commandMsgHandler) HandleMessage(ctx context.Context, msg RawMessage) er
 	}
 
 	destination := commandMsg.Metadata().Get(CommandReplyChannelHdr).(string)
+
+	slog.Debug("publish reply", slog.String("destination", destination), slog.String("name", msg.MessageName()))
 
 	reply, err := h.handler.HandleCommand(ctx, commandMsg)
 	if err != nil {

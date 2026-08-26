@@ -11,7 +11,7 @@ import (
 	"github.com/bd878/gallery/server/api/threads"
 	"github.com/bd878/gallery/server/api/files"
 	"github.com/bd878/gallery/server/api/translations"
-	messageevents "github.com/bd878/gallery/server/messages/pkg/events"
+	messageevents "github.com/bd878/gallery/server/messages/pkg"
 	threadsevents "github.com/bd878/gallery/server/threads/pkg"
 	filesevents "github.com/bd878/gallery/server/files/pkg/events"
 )

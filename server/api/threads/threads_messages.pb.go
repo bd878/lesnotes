@@ -537,6 +537,58 @@ func (x *CreateThread) GetTitle() string {
 	return ""
 }
 
+type DeleteThread struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ThreadId      int64                  `protobuf:"varint,1,opt,name=thread_id,json=threadId,proto3" json:"thread_id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteThread) Reset() {
+	*x = DeleteThread{}
+	mi := &file_protos_threads_messages_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteThread) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteThread) ProtoMessage() {}
+
+func (x *DeleteThread) ProtoReflect() protoreflect.Message {
+	mi := &file_protos_threads_messages_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteThread.ProtoReflect.Descriptor instead.
+func (*DeleteThread) Descriptor() ([]byte, []int) {
+	return file_protos_threads_messages_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *DeleteThread) GetThreadId() int64 {
+	if x != nil {
+		return x.ThreadId
+	}
+	return 0
+}
+
+func (x *DeleteThread) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
 var File_protos_threads_messages_proto protoreflect.FileDescriptor
 
 const file_protos_threads_messages_proto_rawDesc = "" +
@@ -593,7 +645,10 @@ const file_protos_threads_messages_proto_rawDesc = "" +
 	"\f_descriptionB\n" +
 	"\n" +
 	"\b_privateB\b\n" +
-	"\x06_titleB-Z+github.com/bd878/gallery/server/api/threadsb\x06proto3"
+	"\x06_title\"D\n" +
+	"\fDeleteThread\x12\x1b\n" +
+	"\tthread_id\x18\x01 \x01(\x03R\bthreadId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userIdB-Z+github.com/bd878/gallery/server/api/threadsb\x06proto3"
 
 var (
 	file_protos_threads_messages_proto_rawDescOnce sync.Once
@@ -607,7 +662,7 @@ func file_protos_threads_messages_proto_rawDescGZIP() []byte {
 	return file_protos_threads_messages_proto_rawDescData
 }
 
-var file_protos_threads_messages_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_protos_threads_messages_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_protos_threads_messages_proto_goTypes = []any{
 	(*ThreadCreated)(nil),       // 0: threads_messages.v1.ThreadCreated
 	(*ThreadDeleted)(nil),       // 1: threads_messages.v1.ThreadDeleted
@@ -616,6 +671,7 @@ var file_protos_threads_messages_proto_goTypes = []any{
 	(*ThreadPrivated)(nil),      // 4: threads_messages.v1.ThreadPrivated
 	(*ThreadParentChanged)(nil), // 5: threads_messages.v1.ThreadParentChanged
 	(*CreateThread)(nil),        // 6: threads_messages.v1.CreateThread
+	(*DeleteThread)(nil),        // 7: threads_messages.v1.DeleteThread
 }
 var file_protos_threads_messages_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -638,7 +694,7 @@ func file_protos_threads_messages_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_protos_threads_messages_proto_rawDesc), len(file_protos_threads_messages_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

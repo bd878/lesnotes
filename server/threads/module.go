@@ -93,7 +93,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	sessionsGateway := sessionsgateway.New(cfg.SessionsServiceAddr)
 
 	stream.RegisterDomainEventHandlersTx(container.Get("domainDispatcher").(*ddd.EventDispatcher[ddd.Event]))
-	if err = stream.RegisterCommandHandlersTx(container); err != nil {
+	if err = stream.RegisterIntegrationCommandHandlersTx(container); err != nil {
 		return err
 	}
 
@@ -108,7 +108,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 		return stream.NewIntegrationEventHandlers(ctrl, ctrl), nil
 	})
 	container.AddScoped("commandHandlers", func(c di.Container) (any, error) {
-		return stream.NewCommandHandlers(ctrl), nil
+		return stream.NewIntegrationCommandHandlers(ctrl), nil
 	})
 
 	stream.RegisterIntegrationEventHandlersTx(container)

@@ -9,7 +9,7 @@ import (
 	"github.com/bd878/gallery/server/internal/ddd"
 )
 
-func RegisterCommandHandlersTx(c di.Container) (err error) {
+func RegisterIntegrationCommandHandlersTx(c di.Container) (err error) {
 	cmdMsgHandlers := am.RawMessageHandlerFunc(func(ctx context.Context, msg am.RawMessage) error {
 		ctx = c.Scoped(ctx)
 		defer func(tx pgx.Tx) {
@@ -39,5 +39,5 @@ func RegisterCommandHandlersTx(c di.Container) (err error) {
 
 	js := c.Get("js").(am.RawMessageStream)
 
-	return RegisterCommandHandlers(js, cmdMsgHandlers)
+	return RegisterIntegrationCommandHandlers(js, cmdMsgHandlers)
 }

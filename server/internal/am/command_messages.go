@@ -17,6 +17,7 @@ type (
 		ddd.Command
 	}
 
+	CommandPublisher = MessagePublisher[ddd.Command]
 	CommandStream interface {
 		MessagePublisher[ddd.Command]
 		MessageSubscriber[CommandMessage]

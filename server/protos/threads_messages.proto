@@ -61,3 +61,8 @@ message CreateThread {
 	optional bool private = 6;
 	optional string title = 7;
 }
+
+message DeleteThread {
+	int64 thread_id = 1;
+	int64 user_id = 2;
+}

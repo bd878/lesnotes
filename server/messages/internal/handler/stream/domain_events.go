@@ -12,7 +12,7 @@ import (
 
 	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/messages/internal/domain"
-	"github.com/bd878/gallery/server/messages/pkg/events"
+	"github.com/bd878/gallery/server/messages/pkg"
 )
 
 type domainHandler[T ddd.Event] struct {
@@ -100,7 +100,7 @@ func (h domainHandler[T]) onMessageCreated(ctx context.Context, event ddd.Event)
 		return err
 	}
 
-	return h.stream.Publish(ctx, events.MessagesChannel, am.NewEventMessage(event.ID(), events.MessageCreatedEvent, data, event.Metadata()))
+	return h.stream.Publish(ctx, pkg.MessagesChannel, am.NewEventMessage(event.ID(), pkg.MessageCreatedEvent, data, event.Metadata()))
 }
 
 func (h domainHandler[T]) onMessageDeleted(ctx context.Context, event ddd.Event) error {
@@ -113,7 +113,7 @@ func (h domainHandler[T]) onMessageDeleted(ctx context.Context, event ddd.Event)
 		return err
 	}
 
-	return h.stream.Publish(ctx, events.MessagesChannel, am.NewEventMessage(event.ID(), events.MessageDeletedEvent, data, event.Metadata()))
+	return h.stream.Publish(ctx, pkg.MessagesChannel, am.NewEventMessage(event.ID(), pkg.MessageDeletedEvent, data, event.Metadata()))
 }
 
 func (h domainHandler[T]) onMessageUpdated(ctx context.Context, event ddd.Event) error {
@@ -131,7 +131,7 @@ func (h domainHandler[T]) onMessageUpdated(ctx context.Context, event ddd.Event)
 		return err
 	}
 
-	return h.stream.Publish(ctx, events.MessagesChannel, am.NewEventMessage(event.ID(), events.MessageUpdatedEvent, data, event.Metadata()))
+	return h.stream.Publish(ctx, pkg.MessagesChannel, am.NewEventMessage(event.ID(), pkg.MessageUpdatedEvent, data, event.Metadata()))
 }
 
 func (h domainHandler[T]) onMessagesPrivate(ctx context.Context, event ddd.Event) error {
@@ -145,7 +145,7 @@ func (h domainHandler[T]) onMessagesPrivate(ctx context.Context, event ddd.Event
 		return err
 	}
 
-	return h.stream.Publish(ctx, events.MessagesChannel, am.NewEventMessage(event.ID(), events.MessagesPrivateEvent, data, event.Metadata()))
+	return h.stream.Publish(ctx, pkg.MessagesChannel, am.NewEventMessage(event.ID(), pkg.MessagesPrivateEvent, data, event.Metadata()))
 }
 
 func (h domainHandler[T]) onMessagesPublish(ctx context.Context, event ddd.Event) error {
@@ -159,7 +159,7 @@ func (h domainHandler[T]) onMessagesPublish(ctx context.Context, event ddd.Event
 		return err
 	}
 
-	return h.stream.Publish(ctx, events.MessagesChannel, am.NewEventMessage(event.ID(), events.MessagesPublishEvent, data, event.Metadata()))
+	return h.stream.Publish(ctx, pkg.MessagesChannel, am.NewEventMessage(event.ID(), pkg.MessagesPublishEvent, data, event.Metadata()))
 }
 
 func (h domainHandler[T]) onTranslationCreated(ctx context.Context, event ddd.Event) error {
@@ -177,7 +177,7 @@ func (h domainHandler[T]) onTranslationCreated(ctx context.Context, event ddd.Ev
 		return err
 	}
 
-	return h.stream.Publish(ctx, events.TranslationsChannel, am.NewEventMessage(event.ID(), events.TranslationCreatedEvent, data, event.Metadata()))
+	return h.stream.Publish(ctx, pkg.TranslationsChannel, am.NewEventMessage(event.ID(), pkg.TranslationCreatedEvent, data, event.Metadata()))
 }
 
 func (h domainHandler[T]) onTranslationDeleted(ctx context.Context, event ddd.Event) error {
@@ -190,7 +190,7 @@ func (h domainHandler[T]) onTranslationDeleted(ctx context.Context, event ddd.Ev
 		return err
 	}
 
-	return h.stream.Publish(ctx, events.TranslationsChannel, am.NewEventMessage(event.ID(), events.TranslationDeletedEvent, data, event.Metadata()))
+	return h.stream.Publish(ctx, pkg.TranslationsChannel, am.NewEventMessage(event.ID(), pkg.TranslationDeletedEvent, data, event.Metadata()))
 }
 
 func (h domainHandler[T]) onTranslationUpdated(ctx context.Context, event ddd.Event) error {
@@ -206,7 +206,7 @@ func (h domainHandler[T]) onTranslationUpdated(ctx context.Context, event ddd.Ev
 		return err
 	}
 
-	return h.stream.Publish(ctx, events.TranslationsChannel, am.NewEventMessage(event.ID(), events.TranslationUpdatedEvent, data, event.Metadata()))
+	return h.stream.Publish(ctx, pkg.TranslationsChannel, am.NewEventMessage(event.ID(), pkg.TranslationUpdatedEvent, data, event.Metadata()))
 }
 
 func (h domainHandler[T]) onCommentCreated(ctx context.Context, event ddd.Event) error {
@@ -223,7 +223,7 @@ func (h domainHandler[T]) onCommentCreated(ctx context.Context, event ddd.Event)
 		return err
 	}
 
-	return h.stream.Publish(ctx, events.CommentsChannel, am.NewEventMessage(event.ID(), events.CommentCreatedEvent, data, event.Metadata()))
+	return h.stream.Publish(ctx, pkg.CommentsChannel, am.NewEventMessage(event.ID(), pkg.CommentCreatedEvent, data, event.Metadata()))
 }
 
 func (h domainHandler[T]) onCommentUpdated(ctx context.Context, event ddd.Event) error {
@@ -238,7 +238,7 @@ func (h domainHandler[T]) onCommentUpdated(ctx context.Context, event ddd.Event)
 		return err
 	}
 
-	return h.stream.Publish(ctx, events.CommentsChannel, am.NewEventMessage(event.ID(), events.CommentUpdatedEvent, data, event.Metadata()))
+	return h.stream.Publish(ctx, pkg.CommentsChannel, am.NewEventMessage(event.ID(), pkg.CommentUpdatedEvent, data, event.Metadata()))
 }
 
 func (h domainHandler[T]) onCommentDeleted(ctx context.Context, event ddd.Event) error {
@@ -251,7 +251,7 @@ func (h domainHandler[T]) onCommentDeleted(ctx context.Context, event ddd.Event)
 		return err
 	}
 
-	return h.stream.Publish(ctx, events.CommentsChannel, am.NewEventMessage(event.ID(), events.CommentDeletedEvent, data, event.Metadata()))
+	return h.stream.Publish(ctx, pkg.CommentsChannel, am.NewEventMessage(event.ID(), pkg.CommentDeletedEvent, data, event.Metadata()))
 }
 
 func (h domainHandler[T]) onMessageCommentsDeleted(ctx context.Context, event ddd.Event) error {
@@ -263,5 +263,5 @@ func (h domainHandler[T]) onMessageCommentsDeleted(ctx context.Context, event dd
 		return err
 	}
 
-	return h.stream.Publish(ctx, events.CommentsChannel, am.NewEventMessage(event.ID(), events.MessageCommentsDeletedEvent, data, event.Metadata()))
+	return h.stream.Publish(ctx, pkg.CommentsChannel, am.NewEventMessage(event.ID(), pkg.MessageCommentsDeletedEvent, data, event.Metadata()))
 }
