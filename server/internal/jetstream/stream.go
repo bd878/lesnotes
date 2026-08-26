@@ -88,13 +88,18 @@ func (s *Stream) Subscribe(topicName string, handler am.RawMessageHandler, optio
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
+	slog.Debug("subscribe", slog.String("topicName", topicName))
+
 	subCfg := am.NewSubscriberConfig(options)
 
 	opts := []nats.SubOpt{
 		nats.MaxDeliver(subCfg.MaxRedeliver()),
 	}
 
-	cfg := &nats.ConsumerConfig{}
+	cfg := &nats.ConsumerConfig{
+		FilterSubject: topicName,
+		MaxDeliver: subCfg.MaxRedeliver(),
+	}
 	if groupName := subCfg.GroupName(); groupName != "" {
 		cfg.DeliverSubject = groupName
 		cfg.DeliverGroup = groupName
@@ -102,7 +107,6 @@ func (s *Stream) Subscribe(topicName string, handler am.RawMessageHandler, optio
 
 		opts = append(opts, nats.Bind(s.streamName, groupName), nats.Durable(groupName))
 	} else {
-		cfg.MaxDeliver = subCfg.MaxRedeliver()
 		cfg.DeliverSubject = nats.NewInbox()
 	}
 

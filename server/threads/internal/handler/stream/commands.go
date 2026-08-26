@@ -21,6 +21,7 @@ func NewIntegrationCommandHandlers(threads ThreadsController) ddd.CommandHandler
 }
 
 func RegisterIntegrationCommandHandlers(subscriber am.RawMessageSubscriber, handlers am.RawMessageHandler) error {
+	slog.Debug("register command handlers")
 	return subscriber.Subscribe(pkg.CommandChannel, handlers, am.GroupName("threads-commands"))
 }
 

@@ -12,6 +12,7 @@ import (
 func RegisterIntegrationCommandHandlersTx(c di.Container) (err error) {
 	cmdMsgHandlers := am.RawMessageHandlerFunc(func(ctx context.Context, msg am.RawMessage) error {
 		ctx = c.Scoped(ctx)
+		slog.Debug("receive command message", slog.String("name", msg.MessageName()))
 		defer func(tx pgx.Tx) {
 			p := recover()
 			switch {
