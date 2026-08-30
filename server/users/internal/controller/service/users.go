@@ -249,8 +249,9 @@ func (s Controller) LoginUser(ctx context.Context, login, password string) (sess
 	}
 
 	session, err = s.sessions.CreateSession(ctx, int64(user.Id))
-
-	slog.Debug("session created", slog.String("token", session.Token))
+	if err == nil {
+		slog.Debug("session created", slog.String("token", session.Token))
+	}
 
 	return
 }
