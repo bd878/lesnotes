@@ -349,7 +349,7 @@ func (s *System) WaitForHTTP(ctx context.Context) (err error) {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 		defer cancel()
 		if err := s.HTTP().Shutdown(ctx); err != nil {
-			slog.Error("http server failed to stop gracefully")
+			slog.Error("http server failed to stop gracefully", slog.String("error", err.Error()))
 			return err
 		}
 		return nil

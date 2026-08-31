@@ -21,6 +21,7 @@ import (
 	pg "github.com/bd878/gallery/server/internal/postgres"
 
 	"github.com/bd878/gallery/server/api/users"
+	"github.com/bd878/gallery/server/api/sessions"
 	"github.com/bd878/gallery/server/users/internal/handler/stream"
 	"github.com/bd878/gallery/server/users/config"
 	"github.com/bd878/gallery/server/db/users/pkg/loadbalance"
@@ -28,6 +29,7 @@ import (
 	httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
 	httphandler "github.com/bd878/gallery/server/users/internal/handler/http"
 	sessionsgateway "github.com/bd878/gallery/server/users/internal/gateway/sessions/grpc"
+	sessionsloadbalance "github.com/bd878/gallery/server/db/sessions/pkg/loadbalance"
 	controller "github.com/bd878/gallery/server/users/internal/controller/service"
 )
 
@@ -44,8 +46,22 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		)
 	})
+	container.AddSingleton("sessionsConn", func(c di.Container) (any, error) {
+		return rpc.NewClient(
+			fmt.Sprintf(
+				"%s:///%s",
+				sessionsloadbalance.Name,
+				cfg.SessionsServiceAddr,
+			),
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+		)
+	})
 	container.AddSingleton("usersClient", func(c di.Container) (any, error) {
 		client := users.NewUsersClient(c.Get("conn").(*grpc.ClientConn))
+		return client, nil
+	})
+	container.AddSingleton("sessionsClient", func(c di.Container) (any, error) {
+		client := sessions.NewSessionsClient(c.Get("sessionsConn").(*grpc.ClientConn))
 		return client, nil
 	})
 	container.AddSingleton("db", func(c di.Container) (any, error) {
@@ -84,7 +100,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 
 	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log).WithLang(httpmiddleware.Language)
 
-	sessionsGateway := sessionsgateway.New(cfg.SessionsServiceAddr)
+	sessionsGateway := sessionsgateway.New(container)
 
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
 	stream.RegisterDomainEventHandlersTx(dispatcher)

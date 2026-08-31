@@ -85,6 +85,7 @@ router
 	.get("status",                 "/status",                       status, noCache, getState)
 	.post("doLogin",               "/login",                        etag, getState, validateLogin, redirectHome)
 	.post("doSignup",              "/signup",                       etag, getState, validateSignup, redirectHome)
+	.post("doSendMessage",         "/message/send",                 getState, authed, sendMessage)
 	.post("doDeleteMessage",       "/message/delete",               getState, authed, deleteMessage)
 	.post("doPublishMessage",      "/message/publish",              getState, authed, publishMessage)
 	.post("doPrivateMessage",      "/message/private",              getState, authed, privateMessage)

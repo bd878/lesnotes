@@ -24,17 +24,22 @@ func (h *Handler) GetMe(w http.ResponseWriter, req *http.Request) (err error) {
 		return
 	}
 
-	if user.ID == users.PublicUserID {
-		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(server.ServerResponse{
-			Status:   "error",
-			Error:    &server.ErrorCode{
-				Code:     server.CodeNoUser,
-				Explain:  "not authorized",
-			},
-		})
+	if user != nil {
+		if user.ID == users.PublicUserID {
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(server.ServerResponse{
+				Status:   "error",
+				Error:    &server.ErrorCode{
+					Code:     server.CodeNoUser,
+					Explain:  "not authorized",
+				},
+			})
 
-		return
+			return
+		}
+	} else {
+		w.WriteHeader(http.StatusInternalServerError)
+		return err
 	}
 
 	response, err := json.Marshal(users.GetMeResponse{
