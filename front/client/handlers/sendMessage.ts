@@ -17,6 +17,11 @@ async function sendMessage(ctx) {
 	if (is.notEmpty(form.file_ids)) {
 		if (is.array(form.file_ids)) {
 			fileIDs = form.file_ids
+		} else if (is.string(form.file_ids)) {
+			fileIDs = JSON.parse(form.file_ids)
+			if (!is.array(fileIDs)) {
+				fileIDs = []
+			}
 		} else {
 			fileIDs = [form.file_ids]
 		}
