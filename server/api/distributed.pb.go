@@ -161,6 +161,50 @@ func (x *Server) GetIsLeader() bool {
 	return false
 }
 
+type Servers struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Servers       []*Server              `protobuf:"bytes,1,rep,name=servers,proto3" json:"servers,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Servers) Reset() {
+	*x = Servers{}
+	mi := &file_protos_distributed_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Servers) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Servers) ProtoMessage() {}
+
+func (x *Servers) ProtoReflect() protoreflect.Message {
+	mi := &file_protos_distributed_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Servers.ProtoReflect.Descriptor instead.
+func (*Servers) Descriptor() ([]byte, []int) {
+	return file_protos_distributed_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *Servers) GetServers() []*Server {
+	if x != nil {
+		return x.Servers
+	}
+	return nil
+}
+
 type Command struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ReqType       int32                  `protobuf:"varint,1,opt,name=req_type,json=reqType,proto3" json:"req_type,omitempty"`
@@ -172,7 +216,7 @@ type Command struct {
 
 func (x *Command) Reset() {
 	*x = Command{}
-	mi := &file_protos_distributed_proto_msgTypes[3]
+	mi := &file_protos_distributed_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -184,7 +228,7 @@ func (x *Command) String() string {
 func (*Command) ProtoMessage() {}
 
 func (x *Command) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_distributed_proto_msgTypes[3]
+	mi := &file_protos_distributed_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -197,7 +241,7 @@ func (x *Command) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Command.ProtoReflect.Descriptor instead.
 func (*Command) Descriptor() ([]byte, []int) {
-	return file_protos_distributed_proto_rawDescGZIP(), []int{3}
+	return file_protos_distributed_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *Command) GetReqType() int32 {
@@ -230,7 +274,7 @@ type CommandResponse struct {
 
 func (x *CommandResponse) Reset() {
 	*x = CommandResponse{}
-	mi := &file_protos_distributed_proto_msgTypes[4]
+	mi := &file_protos_distributed_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -242,7 +286,7 @@ func (x *CommandResponse) String() string {
 func (*CommandResponse) ProtoMessage() {}
 
 func (x *CommandResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_distributed_proto_msgTypes[4]
+	mi := &file_protos_distributed_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -255,7 +299,7 @@ func (x *CommandResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CommandResponse.ProtoReflect.Descriptor instead.
 func (*CommandResponse) Descriptor() ([]byte, []int) {
-	return file_protos_distributed_proto_rawDescGZIP(), []int{4}
+	return file_protos_distributed_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *CommandResponse) GetErr() string {
@@ -276,7 +320,9 @@ const file_protos_distributed_proto_rawDesc = "" +
 	"\x06Server\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
 	"\traft_addr\x18\x02 \x01(\tR\braftAddr\x12\x1b\n" +
-	"\tis_leader\x18\x03 \x01(\bR\bisLeader\"R\n" +
+	"\tis_leader\x18\x03 \x01(\bR\bisLeader\";\n" +
+	"\aServers\x120\n" +
+	"\aservers\x18\x01 \x03(\v2\x16.distributed.v1.ServerR\aservers\"R\n" +
 	"\aCommand\x12\x19\n" +
 	"\breq_type\x18\x01 \x01(\x05R\areqType\x12\x10\n" +
 	"\x03cmd\x18\x02 \x01(\fR\x03cmd\x12\x1a\n" +
@@ -300,23 +346,25 @@ func file_protos_distributed_proto_rawDescGZIP() []byte {
 	return file_protos_distributed_proto_rawDescData
 }
 
-var file_protos_distributed_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_protos_distributed_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_protos_distributed_proto_goTypes = []any{
 	(*GetServersRequest)(nil),  // 0: distributed.v1.GetServersRequest
 	(*GetServersResponse)(nil), // 1: distributed.v1.GetServersResponse
 	(*Server)(nil),             // 2: distributed.v1.Server
-	(*Command)(nil),            // 3: distributed.v1.Command
-	(*CommandResponse)(nil),    // 4: distributed.v1.CommandResponse
+	(*Servers)(nil),            // 3: distributed.v1.Servers
+	(*Command)(nil),            // 4: distributed.v1.Command
+	(*CommandResponse)(nil),    // 5: distributed.v1.CommandResponse
 }
 var file_protos_distributed_proto_depIdxs = []int32{
 	2, // 0: distributed.v1.GetServersResponse.servers:type_name -> distributed.v1.Server
-	0, // 1: distributed.v1.Distributed.GetServers:input_type -> distributed.v1.GetServersRequest
-	1, // 2: distributed.v1.Distributed.GetServers:output_type -> distributed.v1.GetServersResponse
-	2, // [2:3] is the sub-list for method output_type
-	1, // [1:2] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	2, // 1: distributed.v1.Servers.servers:type_name -> distributed.v1.Server
+	0, // 2: distributed.v1.Distributed.GetServers:input_type -> distributed.v1.GetServersRequest
+	1, // 3: distributed.v1.Distributed.GetServers:output_type -> distributed.v1.GetServersResponse
+	3, // [3:4] is the sub-list for method output_type
+	2, // [2:3] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_protos_distributed_proto_init() }
@@ -324,14 +372,14 @@ func file_protos_distributed_proto_init() {
 	if File_protos_distributed_proto != nil {
 		return
 	}
-	file_protos_distributed_proto_msgTypes[4].OneofWrappers = []any{}
+	file_protos_distributed_proto_msgTypes[5].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_protos_distributed_proto_rawDesc), len(file_protos_distributed_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

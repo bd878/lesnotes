@@ -8,7 +8,16 @@ import (
 	"net/http"
 	"golang.org/x/sync/errgroup"
 
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+
+	"github.com/bd878/gallery/server/api/users"
+	"github.com/bd878/gallery/server/api/sessions"
 	"github.com/bd878/gallery/server/internal/waiter"
+	"github.com/bd878/gallery/server/internal/di"
+	"github.com/bd878/gallery/server/internal/rpc"
+	sessionsloadbalance "github.com/bd878/gallery/server/db/sessions/pkg/loadbalance"
+	usersloadbalance "github.com/bd878/gallery/server/db/users/pkg/loadbalance"
 	usermodel "github.com/bd878/gallery/server/users/pkg/model"
 	usersgateway "github.com/bd878/gallery/server/internal/gateway/users"
 	sessionsgateway "github.com/bd878/gallery/server/internal/gateway/sessions"
@@ -31,12 +40,42 @@ type Server struct {
 }
 
 func New(cfg Config) *Server {
+	container := di.New()
 	mux := http.NewServeMux()
+
+	container.AddSingleton("sessionsConn", func(c di.Container) (any, error) {
+		return rpc.NewClient(
+			fmt.Sprintf(
+				"%s:///%s",
+				sessionsloadbalance.Name,
+				cfg.SessionsServiceAddr,
+			),
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+		)
+	})
+	container.AddSingleton("usersConn", func(c di.Container) (any, error) {
+		return rpc.NewClient(
+			fmt.Sprintf(
+				"%s:///%s",
+				usersloadbalance.Name,
+				cfg.UsersServiceAddr,
+			),
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+		)
+	})
+	container.AddSingleton("usersClient", func(c di.Container) (any, error) {
+		client := users.NewUsersClient(c.Get("usersConn").(*grpc.ClientConn))
+		return client, nil
+	})
+	container.AddSingleton("sessionsClient", func(c di.Container) (any, error) {
+		client := sessions.NewSessionsClient(c.Get("sessionsConn").(*grpc.ClientConn))
+		return client, nil
+	})
 
 	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log)
 
-	usersGateway := usersgateway.New(cfg.UsersServiceAddr)
-	sessionsGateway := sessionsgateway.New(cfg.SessionsServiceAddr)
+	usersGateway := usersgateway.New(container)
+	sessionsGateway := sessionsgateway.New(container)
 	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(usersGateway, sessionsGateway, usermodel.PublicUserID))
 
 	grpcCtrl := controller.New(controller.Config{

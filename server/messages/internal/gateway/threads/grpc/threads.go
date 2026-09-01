@@ -2,45 +2,22 @@ package grpc
 
 import (
 	"context"
-	"fmt"
 
 	"log/slog"
 
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-
+	"github.com/bd878/gallery/server/internal/di"
 	"github.com/bd878/gallery/server/api/threads"
-	"github.com/bd878/gallery/server/db/threads/pkg/loadbalance"
-	"github.com/bd878/gallery/server/internal/rpc"
 	"github.com/bd878/gallery/server/threads/pkg/model"
 )
 
 type Gateway struct {
-	addr   string
 	client threads.ThreadsClient
-	conn   *grpc.ClientConn
 }
 
-func New(addr string) *Gateway {
-	gateway := &Gateway{addr: addr}
+func New(container di.Container) *Gateway {
+	client := container.Get("threadsClient").(threads.ThreadsClient)
 
-	conn, err := rpc.NewClient(
-		fmt.Sprintf(
-			"%s:///%s",
-			loadbalance.Name,
-			gateway.addr,
-		),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	gateway.conn = conn
-	gateway.client = threads.NewThreadsClient(conn)
-
-
-	return gateway
+	return &Gateway{client}
 }
 
 func (g *Gateway) ListThreads(ctx context.Context, userID, parentID int64, limit, offset int32) (list []*model.Thread, isLastPage bool, err error) {

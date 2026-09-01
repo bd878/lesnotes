@@ -6,6 +6,7 @@ import (
 	"context"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/prometheus/client_golang/prometheus"
@@ -26,9 +27,16 @@ import (
 	"github.com/bd878/gallery/server/api/messages"
 	"github.com/bd878/gallery/server/api/translations"
 	"github.com/bd878/gallery/server/api/comments"
+	"github.com/bd878/gallery/server/api/users"
+	"github.com/bd878/gallery/server/api/sessions"
+	"github.com/bd878/gallery/server/api/threads"
+	"github.com/bd878/gallery/server/api/files"
 	"github.com/bd878/gallery/server/db/messages/pkg/loadbalance"
 	"github.com/bd878/gallery/server/messages/internal/handler/stream"
 	"github.com/bd878/gallery/server/messages/internal/saga"
+	sessionsloadbalance "github.com/bd878/gallery/server/db/sessions/pkg/loadbalance"
+	threadsloadbalance "github.com/bd878/gallery/server/db/threads/pkg/loadbalance"
+	usersloadbalance "github.com/bd878/gallery/server/db/users/pkg/loadbalance"
 	sessionsgateway "github.com/bd878/gallery/server/internal/gateway/sessions"
 	usersgateway "github.com/bd878/gallery/server/internal/gateway/users"
 	httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
@@ -51,6 +59,42 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 			),
 		)
 	})
+	container.AddSingleton("sessionsConn", func(c di.Container) (any, error) {
+		return rpc.NewClient(
+			fmt.Sprintf(
+				"%s:///%s",
+				sessionsloadbalance.Name,
+				cfg.SessionsServiceAddr,
+			),
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+		)
+	})
+	container.AddSingleton("threadsConn", func(c di.Container) (any, error) {
+		return rpc.NewClient(
+			fmt.Sprintf(
+				"%s:///%s",
+				threadsloadbalance.Name,
+				cfg.ThreadsServiceAddr,
+			),
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+		)
+	})
+	container.AddSingleton("filesConn", func(c di.Container) (any, error) {
+		return rpc.NewClient(
+			cfg.FilesServiceAddr,
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+		)
+	})
+	container.AddSingleton("usersConn", func(c di.Container) (any, error) {
+		return rpc.NewClient(
+			fmt.Sprintf(
+				"%s:///%s",
+				usersloadbalance.Name,
+				cfg.UsersServiceAddr,
+			),
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+		)
+	})
 	container.AddSingleton("messagesClient", func(c di.Container) (any, error) {
 		client := messages.NewMessagesClient(c.Get("conn").(*grpc.ClientConn))
 		return client, nil
@@ -63,6 +107,23 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 		client := comments.NewCommentsClient(c.Get("conn").(*grpc.ClientConn))
 		return client, nil
 	})
+	container.AddSingleton("usersClient", func(c di.Container) (any, error) {
+		client := users.NewUsersClient(c.Get("usersConn").(*grpc.ClientConn))
+		return client, nil
+	})
+	container.AddSingleton("sessionsClient", func(c di.Container) (any, error) {
+		client := sessions.NewSessionsClient(c.Get("sessionsConn").(*grpc.ClientConn))
+		return client, nil
+	})
+	container.AddSingleton("threadsClient", func(c di.Container) (any, error) {
+		client := threads.NewThreadsClient(c.Get("threadsConn").(*grpc.ClientConn))
+		return client, nil
+	})
+	container.AddSingleton("filesClient", func(c di.Container) (any, error) {
+		client := files.NewFilesClient(c.Get("filesConn").(*grpc.ClientConn))
+		return client, nil
+	})
+
 	container.AddSingleton("db", func(c di.Container) (any, error) {
 		return svc.Pool(), nil
 	})
@@ -107,10 +168,10 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 
 	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log)
 
-	usersGateway := usersgateway.New(cfg.UsersServiceAddr)
-	sessionsGateway := sessionsgateway.New(cfg.SessionsServiceAddr)
-	threadsGateway := threadsgateway.New(cfg.ThreadsServiceAddr)
-	filesGateway := filesgateway.New(cfg.FilesServiceAddr)
+	usersGateway := usersgateway.New(container)
+	sessionsGateway := sessionsgateway.New(container)
+	threadsGateway := threadsgateway.New(container)
+	filesGateway := filesgateway.New(container)
 	middleware = middleware.WithAuth(httpmiddleware.AuthBuilder(usersGateway, sessionsGateway, usermodel.PublicUserID))
 
 	container.AddScoped("domainEventHandlers", func(c di.Container) (any, error) {

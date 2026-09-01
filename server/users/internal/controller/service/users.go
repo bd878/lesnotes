@@ -131,10 +131,13 @@ func (s Controller) FindUser(ctx context.Context, id int64, login, token string)
 func (s Controller) AuthUser(ctx context.Context, token string) (user *model.User, err error) {
 	slog.Debug("auth user", slog.String("token", token))
 
+	slog.Debug("get session", slog.String("token", token))
 	session, err := s.sessions.GetSession(ctx, token)
 	if err != nil {
 		return nil, err
 	}
+
+	slog.Debug("session ok", slog.String("token", session.Token))
 
 	expiresAt, err := time.Parse(time.RFC3339, session.ExpiresAt)
 	if err != nil {
@@ -145,6 +148,9 @@ func (s Controller) AuthUser(ctx context.Context, token string) (user *model.Use
 		return nil, controller.ErrTokenExpired
 	}
 
+	slog.Debug("session", slog.String("expires_at", expiresAt.String()))
+
+	slog.Debug("get user", slog.Int64("user_id", session.UserID))
 	var userProto *users.User
 	userProto, err = s.client.GetUser(ctx, &users.GetUserRequest{
 		Id: int64(session.UserID),
@@ -152,6 +158,8 @@ func (s Controller) AuthUser(ctx context.Context, token string) (user *model.Use
 	if err != nil {
 		return
 	}
+
+	slog.Debug("user ok")
 
 	user = model.UserFromProto(userProto)
 

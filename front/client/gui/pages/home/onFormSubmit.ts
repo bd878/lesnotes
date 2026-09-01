@@ -1,6 +1,4 @@
-import getMe from '../../../api/getMe';
 import uploadFile from '../../../api/uploadFile';
-import sendMessage from '../../../api/sendMessage';
 import * as is from '../../../third_party/is';
 
 const limit = parseInt(LIMIT)
@@ -12,7 +10,6 @@ async function onNewMessageFormSubmit(elems, e) {
 		console.error("[onFormSubmit]: either text of file must be present")
 		return
 	}
-	const user = await getMe()
 
 	let fileID = 0;
 
@@ -41,16 +38,8 @@ async function onNewMessageFormSubmit(elems, e) {
 		}
 	}
 
-	const response = await sendMessage(elems.newMessageFormElem.text.value, elems.newMessageFormElem.title.value, fileIDs, threadID)
-	if (response.error.error) {
-		console.log("[onFormSubmit]: cannot send message:", response)
-		return
-	}
-
-	elems.newMessageFormElem.reset()
-
-	params.set(`${threadID}`, `${limit},0`)
-	location.href = params.toString() ? ("/messages/" + response.message.ID + "?" + params.toString()) : "/home"
+	elems.newMessageFormElem.file_ids.value = JSON.stringify(fileIDs)
+	elems.newMessageFormElem.submit()
 }
 
 function either(st1: boolean, st2: boolean): boolean {

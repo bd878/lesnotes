@@ -18,11 +18,15 @@ import (
 	"github.com/bd878/gallery/server/internal/rpc"
 	pg "github.com/bd878/gallery/server/internal/postgres"
 
+	"github.com/bd878/gallery/server/api/users"
+	"github.com/bd878/gallery/server/api/sessions"
 	"github.com/bd878/gallery/server/api/threads"
 	"github.com/bd878/gallery/server/threads/config"
 	"github.com/bd878/gallery/server/threads/internal/handler/stream"
 	"github.com/bd878/gallery/server/threads/internal/controller/service"
 	"github.com/bd878/gallery/server/db/threads/pkg/loadbalance"
+	sessionsloadbalance "github.com/bd878/gallery/server/db/sessions/pkg/loadbalance"
+	usersloadbalance "github.com/bd878/gallery/server/db/users/pkg/loadbalance"
 	usermodel "github.com/bd878/gallery/server/users/pkg/model"
 	httpmiddleware "github.com/bd878/gallery/server/internal/middleware/http"
 	usersgateway "github.com/bd878/gallery/server/internal/gateway/users"
@@ -34,6 +38,34 @@ import (
 func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error) {
 	container := di.New()
 
+	container.AddSingleton("sessionsConn", func(c di.Container) (any, error) {
+		return rpc.NewClient(
+			fmt.Sprintf(
+				"%s:///%s",
+				sessionsloadbalance.Name,
+				cfg.SessionsServiceAddr,
+			),
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+		)
+	})
+	container.AddSingleton("usersConn", func(c di.Container) (any, error) {
+		return rpc.NewClient(
+			fmt.Sprintf(
+				"%s:///%s",
+				usersloadbalance.Name,
+				cfg.UsersServiceAddr,
+			),
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+		)
+	})
+	container.AddSingleton("usersClient", func(c di.Container) (any, error) {
+		client := users.NewUsersClient(c.Get("usersConn").(*grpc.ClientConn))
+		return client, nil
+	})
+	container.AddSingleton("sessionsClient", func(c di.Container) (any, error) {
+		client := sessions.NewSessionsClient(c.Get("sessionsConn").(*grpc.ClientConn))
+		return client, nil
+	})
 	container.AddSingleton("conn", func(c di.Container) (any, error) {
 		return rpc.NewClient(
 			fmt.Sprintf(
@@ -89,8 +121,8 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 
 	middleware := httpmiddleware.NewBuilder().WithLog(httpmiddleware.Log)
 
-	usersGateway := usersgateway.New(cfg.UsersServiceAddr)
-	sessionsGateway := sessionsgateway.New(cfg.SessionsServiceAddr)
+	usersGateway := usersgateway.New(container)
+	sessionsGateway := sessionsgateway.New(container)
 
 	stream.RegisterDomainEventHandlersTx(container.Get("domainDispatcher").(*ddd.EventDispatcher[ddd.Event]))
 	if err = stream.RegisterIntegrationCommandHandlersTx(container); err != nil {

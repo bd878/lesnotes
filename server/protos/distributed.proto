@@ -20,6 +20,10 @@ message Server {
 	bool   is_leader = 3;
 }
 
+message Servers {
+	repeated Server servers = 1;
+}
+
 message Command {
 	int32 req_type = 1;
 	bytes cmd = 2;

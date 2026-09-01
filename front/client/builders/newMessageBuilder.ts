@@ -35,7 +35,7 @@ class NewMessageBuilder extends AbstractBuilder {
 			titlePlaceholder: this.i18n("titlePlaceholder"),
 			textPlaceholder:  this.i18n("textPlaceholder"),
 			sendButton:       this.i18n("sendButton"),
-			sendAction:       "/send" + this.search,
+			sendAction:       "/message/send" + this.search,
 			threadID:         this.threadID,
 		}, {
 			filesList:        this.filesList,
