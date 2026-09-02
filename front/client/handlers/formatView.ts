@@ -1,7 +1,7 @@
 import * as is from '../third_party/is';
 
 async function formatView(ctx, next) {
-	console.log("--> formatView")
+	ctx.log.info("--> formatView")
 
 	if (is.notEmpty(ctx.state.message) && is.notEmpty(ctx.state.message.text)) {
 		ctx.state.message.text = ctx.state.message.text.replaceAll("\r\n", "<br />")
@@ -18,7 +18,7 @@ async function formatView(ctx, next) {
 
 	await next()
 
-	console.log("<-- formatView")
+	ctx.log.info("<-- formatView")
 }
 
 export default formatView

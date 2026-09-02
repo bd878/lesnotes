@@ -4,13 +4,13 @@ import readTranslationJson, { EmptyReadTranslation } from '../api/readTranslatio
 import * as is from '../third_party/is';
 
 async function loadTranslation(ctx, next) {   
-	console.log("--> loadTranslation")
+	ctx.log.info("--> loadTranslation")
 
 	if (is.notEmpty(ctx.state.trans) && is.notEmpty(ctx.state.trans.lang)) {
 		ctx.state.translation = await readTranslationJson(ctx.state.token, ctx.state.messageID, ctx.state.trans.lang, ctx.state.messageName)
 		if (is.notEmpty(ctx.state.translation)) {
 			if (ctx.state.translation.error.error) {
-				console.error(ctx.state.translation.error)
+				ctx.log.error(ctx.state.translation.error)
 				ctx.body = "error"
 				ctx.status = 400
 				return
@@ -24,7 +24,7 @@ async function loadTranslation(ctx, next) {
 
 	await next()
 
-	console.log("<-- loadTranslation")
+	ctx.log.info("<-- loadTranslation")
 }
 
 export default loadTranslation

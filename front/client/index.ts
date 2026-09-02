@@ -1,12 +1,12 @@
 import './node_fetch.ts'
 
 import Koa from 'koa';
+import pino from 'koa-pino-logger'
 import mustache from 'mustache';
 import Router from '@koa/router';
 import Config from 'config';
 import helmet from './handlers/helmet';
 import errors from './handlers/errors';
-import logger from './handlers/logger';
 import bodyParser from './handlers/bodyParser';
 import useragent from './handlers/useragent';
 import favicon from './handlers/favicon';
@@ -63,8 +63,10 @@ const router = new Router();
 mustache.templateCache = undefined
 
 // app.use(helmet);
+app.use(pino({
+	transport: {target: "pino-opentelemetry-transport"},
+}));
 app.use(errors);
-app.use(logger);
 app.use(bodyParser);
 app.use(useragent);
 app.use(favicon);
@@ -103,5 +105,5 @@ const port = process.env.PORT || Config.get("port") || 8080;
 const host = process.env.HOST || Config.get("addr") || "localhost";
 
 app.listen(port, host, () => {
-	console.log(`App is listening on ${port} port`);
+	console.log(`App is listening on ${port} port`)
 });

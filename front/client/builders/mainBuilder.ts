@@ -33,7 +33,6 @@ class MainBuilder extends AbstractBuilder {
 
 	build() {
 		return mustache.render(this.isMobile ? mainTemplateMobile : mainTemplate, {
-			botUsername:   `${BOT_USERNAME}`,
 			authUrl:       `https://${BACKEND_URL}/tg_auth`,
 		}, {
 			sidebar:       this.sidebar,

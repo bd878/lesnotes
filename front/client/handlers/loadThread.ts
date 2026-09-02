@@ -7,7 +7,7 @@ async function loadThread(ctx, next) {
 	const id = ctx.state.threadID
 	const name = ctx.state.parentName || ""
 
-	console.log("--> loadThread")
+	ctx.log.info("--> loadThread")
 
 	if (is.notEmpty(token)) {
 		if (is.notEmpty(id)) {
@@ -25,7 +25,7 @@ async function loadThread(ctx, next) {
 
 	if (is.notEmpty(ctx.state.thread)) {
 		if (ctx.state.thread.error.error) {
-			console.error(ctx.state.thread.error)
+			ctx.log.error(ctx.state.thread.error)
 			ctx.body = "error"
 			ctx.status = 400
 			return
@@ -38,7 +38,7 @@ async function loadThread(ctx, next) {
 
 	await next()
 
-	console.log("<-- loadThread")
+	ctx.log.info("<-- loadThread")
 }
 
 export default loadThread

@@ -27,9 +27,6 @@ let ctx = await esbuild.context({
 	define: {
 		BACKEND_URL: '"' + Config.get("domain") + '"',
 		PUBLIC_USER_ID: Config.get("public_user_id"),
-		BOT_USERNAME: '"' + Config.get("bot_username") + '"',
-		BOT_VALIDATE_URL: '"' + Config.get("bot_validate_url") + '"',
-		BOT_VALIDATE_AUTH_URL: '"' + Config.get("bot_validate_auth_url") + '"',
 		ENV: '"' + Config.get("env") + '"',
 		HTTPS: '"' + Config.get("https") + '"',
 		LIMIT: "24"

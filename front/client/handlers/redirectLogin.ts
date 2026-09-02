@@ -1,8 +1,8 @@
 async function redirectLogin(ctx, next) {
-	console.log("--> redirectLogin")
+	ctx.log.info("--> redirectLogin")
 	ctx.redirect("/login" + ctx.search)
 	ctx.status = 302
-	console.log("<-- redirectLogin")
+	ctx.log.info("<-- redirectLogin")
 }
 
 export default redirectLogin

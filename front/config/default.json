@@ -1,5 +1,6 @@
 {
 	"port": 8081,
+	"name": "front",
 	"addr": "127.0.0.1",
 	"basedir": "",
 	"https": "1",

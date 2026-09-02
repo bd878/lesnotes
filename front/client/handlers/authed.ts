@@ -2,7 +2,7 @@ import * as is from '../third_party/is';
 import api from '../api';
 
 async function authed(ctx, next) {
-	console.log("--> authed")
+	ctx.log.info("--> authed")
 
 	if (is.empty(ctx.state.token)) {
 		ctx.redirect('/login' + ctx.search)
@@ -10,7 +10,7 @@ async function authed(ctx, next) {
 	} else {
 		const resp = await api.authJson(ctx.state.token)
 		if (resp.error.error || resp.expired) {
-			console.log(resp.error)
+			ctx.log.error(resp.error)
 			ctx.redirect('/login' + ctx.search)
 			ctx.status = 302
 		} else {
@@ -18,7 +18,7 @@ async function authed(ctx, next) {
 		}
 	}
 
-	console.log("<-- authed")
+	ctx.log.info("<-- authed")
 }
 
 export default authed

@@ -2,7 +2,7 @@ import * as is from '../third_party/is'
 import api from '../api'
 
 async function sendTranslation(ctx) {
-	console.log("--> sendTranslation")
+	ctx.log.info("--> sendTranslation")
 
 	let form = ctx.request.body
 
@@ -15,7 +15,7 @@ async function sendTranslation(ctx) {
 
 	const response = await api.sendTranslationJson(ctx.state.token, messageID, form.lang, form.text, form.title)
 	if (response.error.error) {
-		console.log(response.error)
+		ctx.log.error(response.error)
 		ctx.state.error = response.error.human
 		ctx.body = "error"
 	} else {
@@ -26,7 +26,7 @@ async function sendTranslation(ctx) {
 		}
 	}
 
-	console.log("<-- sendTranslation")
+	ctx.log.info("<-- sendTranslation")
 }
 
 export default sendTranslation;

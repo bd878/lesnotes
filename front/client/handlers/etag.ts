@@ -13,7 +13,7 @@ export default async function etagMiddleware(ctx, next) {
 		ctx.set({ "ETag": etag })
 		ctx.set({ "Last-Modified": mtime })
 	} catch (e) {
-		console.log("cannot set etag", e)
+		ctx.log.error("cannot set etag", e)
 	}
 
 	await next()

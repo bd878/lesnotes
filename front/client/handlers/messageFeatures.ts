@@ -4,7 +4,7 @@ import MessageNavigationBuilder from '../builders/messageNavigationBuilder';
 import TranslationsBuilder from '../builders/translationsBuilder';
 
 async function messageFeatures(ctx, next) {
-	console.log("--> messageFeatures")
+	ctx.log.info("--> messageFeatures")
 
 	const messageFeatures = new MessageFeaturesBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const messageNavigation = new MessageNavigationBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
@@ -56,7 +56,7 @@ async function messageFeatures(ctx, next) {
 
 	await next()
 
-	console.log("<-- messageFeatures")
+	ctx.log.info("<-- messageFeatures")
 }
 
 export default messageFeatures

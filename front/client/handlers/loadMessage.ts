@@ -9,7 +9,7 @@ async function loadMessage(ctx, next) {
 	const userID = parseInt(ctx.params.user) || 0
 	const token = ctx.state.token
 
-	console.log("--> loadMessage")
+	ctx.log.info("--> loadMessage")
 
 	if (is.notEmpty(token)) {
 		if (is.notEmpty(id)) {
@@ -27,7 +27,7 @@ async function loadMessage(ctx, next) {
 
 	if (is.notEmpty(ctx.state.message)) {
 		if (ctx.state.message.error.error) {
-			console.error(ctx.state.message.error)
+			ctx.log.error(ctx.state.message.error)
 			ctx.body = "error"
 			ctx.status = 400;
 			return;
@@ -42,7 +42,7 @@ async function loadMessage(ctx, next) {
 
 	await next()
 
-	console.log("<-- loadMessage")
+	ctx.log.info("<-- loadMessage")
 }
 
 export default loadMessage

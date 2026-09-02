@@ -3,23 +3,23 @@ import * as is from '../third_party/is'
 import api from '../api';
 
 async function validateLogin(ctx, next) {
-	console.log("--> validateLogin")
+	ctx.log.info("--> validateLogin")
 
 	const response = await processLogin(ctx)
 
 	if (response.error.error) {
-		console.log(response.error)
+		ctx.log.error(response.error)
 		ctx.state.error = response.error.human
 		await login(ctx)
 	} else {
 		const expiresAt = new Date(response.expiresAt)
-		console.log("expiresAt", expiresAt.toString())
+		ctx.log.info("expiresAt", expiresAt.toString())
 		ctx.set({"Set-Cookie":  "token=" + response.token + "; Expires=" + expiresAt.toString() + "; HttpOnly; Path=/; Secure; Domain=" + `${DOMAIN}`})
 
 		await next()
 	}
 
-	console.log("<-- validateLogin")
+	ctx.log.info("<-- validateLogin")
 }
 
 async function processLogin(ctx) {

@@ -7,7 +7,7 @@ import HeaderBuilder from '../builders/headerBuilder';
 import AuthBuilder from '../builders/authBuilder';
 
 async function publicMessage(ctx) {
-	console.log("--> publicMessage")
+	ctx.log.info("--> publicMessage")
 
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const view = new MessageViewBuilder(ctx.state.isAuthed, ctx.state.messageName, ctx.state.messageName, ctx.userAgent.isMobile,
@@ -42,7 +42,7 @@ async function publicMessage(ctx) {
 	ctx.body = layout.build()
 	ctx.status = 200;
 
-	console.log("<-- publicMessage")
+	ctx.log.info("<-- publicMessage")
 }
 
 export default publicMessage;

@@ -5,14 +5,14 @@ import readPathJson from '../api/readPathJson';
 async function loadCwdPath(ctx, next) {
 	const token = ctx.state.token
 
-	console.log("--> loadCwdPath")
+	ctx.log.info("--> loadCwdPath")
 
 	if (is.notEmpty(ctx.state.cwd) && (ctx.state.cwd.id != 0) /* not root */) {
 		const result = await readPathJson(token, ctx.state.cwd.id, "")
 
 		if (is.notEmpty(result)) {
 			if (result.error.error) {
-				console.error(result.error)
+				ctx.log.error(result.error)
 				ctx.body = "error"
 				ctx.status = 400;
 				return
@@ -32,7 +32,7 @@ async function loadCwdPath(ctx, next) {
 
 	await next()
 
-	console.log("<-- loadCwdPath")
+	ctx.log.info("<-- loadCwdPath")
 }
 
 export default loadCwdPath

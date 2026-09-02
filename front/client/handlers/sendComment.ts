@@ -2,7 +2,7 @@ import * as is from '../third_party/is'
 import api from '../api'
 
 async function sendComment(ctx) {
-	console.log("--> sendComment")
+	ctx.log.info("--> sendComment")
 
 	let form = ctx.request.body
 
@@ -16,7 +16,7 @@ async function sendComment(ctx) {
 	const response = await api.sendCommentJson(ctx.state.token, messageID, form.text)
 
 	if (response.error.error) {
-		console.log(response.error)
+		ctx.log.error(response.error)
 		ctx.state.error = response.error.human
 		ctx.body = "error"
 		return
@@ -28,7 +28,7 @@ async function sendComment(ctx) {
 		}
 	}
 
-	console.log("<-- sendComment")
+	ctx.log.info("<-- sendComment")
 }
 
 export default sendComment

@@ -5,7 +5,7 @@ import HeaderBuilder from '../builders/headerBuilder';
 import MessageNavigationBuilder from '../builders/messageNavigationBuilder';
 
 async function publicTranslation(ctx) {
-	console.log("--> publicTranslation")
+	ctx.log.info("--> publicTranslation")
 
 	const content = new PublicTranslationBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
@@ -17,7 +17,7 @@ async function publicTranslation(ctx) {
 	ctx.body = layout.build()
 	ctx.status = 200;
 
-	console.log("<-- publicTranslation")
+	ctx.log.info("<-- publicTranslation")
 }
 
 export default publicTranslation;

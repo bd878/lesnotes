@@ -2,7 +2,7 @@ import deleteTranslationJson from '../api/deleteTranslationJson'
 import * as is from '../third_party/is'
 
 async function deleteTranslation(ctx) {
-	console.log("--> deleteTranslation")
+	ctx.log.info("--> deleteTranslation")
 
 	let form = ctx.request.body
 
@@ -16,7 +16,7 @@ async function deleteTranslation(ctx) {
 	const response = await deleteTranslationJson(ctx.state.token, messageID, form.lang)
 
 	if (response.error.error) {
-		console.log(response.error)
+		ctx.log.error(response.error)
 		ctx.state.error = response.error.human
 		ctx.body = "error"
 	} else {
@@ -27,7 +27,7 @@ async function deleteTranslation(ctx) {
 		}
 	}
 
-	console.log("<-- deleteTranslation")
+	ctx.log.info("<-- deleteTranslation")
 }
 
 export default deleteTranslation;

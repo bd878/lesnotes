@@ -4,7 +4,7 @@ import SettingsBuilder from '../builders/settingsBuilder';
 import SidebarBuilder from '../builders/sidebarBuilder';
 
 async function login(ctx) {
-	console.log("--> login")
+	ctx.log.info("--> login")
 
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const settings = new SettingsBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
@@ -25,7 +25,7 @@ async function login(ctx) {
 	ctx.body = layout.build()
 	ctx.status = 200;
 
-	console.log("<-- login")
+	ctx.log.info("<-- login")
 }
 
 export default login;

@@ -9,7 +9,7 @@ import HeaderBuilder from '../builders/headerBuilder';
 import MessageHeaderBuilder from '../builders/messageHeaderBuilder';
 
 async function messageEdit(ctx) {
-	console.log("--> messageEdit")
+	ctx.log.info("--> messageEdit")
 
 	const panel = new ControlPanelBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
@@ -44,7 +44,7 @@ async function messageEdit(ctx) {
 	ctx.body = layout.build()
 	ctx.status = 200
 
-	console.log("<-- messageEdit")
+	ctx.log.info("<-- messageEdit")
 }
 
 export default messageEdit;

@@ -2,7 +2,7 @@ import updateTranslationJson from '../api/updateTranslationJson'
 import * as is from '../third_party/is'
 
 async function updateTranslation(ctx) {
-	console.log("--> updateTranslation")
+	ctx.log.info("--> updateTranslation")
 
 	let form = ctx.request.body
 
@@ -16,7 +16,7 @@ async function updateTranslation(ctx) {
 	const response = await updateTranslationJson(ctx.state.token, messageID, form.lang, form.title, form.text)
 
 	if (response.error.error) {
-		console.log(response.error)
+		ctx.log.error(response.error)
 		ctx.state.error = response.error.human
 		ctx.body = "error"
 	} else {
@@ -27,7 +27,7 @@ async function updateTranslation(ctx) {
 		}
 	}
 
-	console.log("<-- updateTranslation")
+	ctx.log.info("<-- updateTranslation")
 }
 
 export default updateTranslation

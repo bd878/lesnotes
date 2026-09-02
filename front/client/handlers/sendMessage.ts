@@ -7,7 +7,7 @@ const limit = parseInt(LIMIT)
 
 async function sendMessage(ctx) {
 	// TODO: proxy send message to messages service, /send
-	console.log("--> sendMessage")
+	ctx.log.info("--> sendMessage")
 
 	let form = ctx.request.body
 
@@ -34,7 +34,7 @@ async function sendMessage(ctx) {
 	const response = await api.sendMessageJson(ctx.state.token, form.text, form.title, fileIDs, parseInt(form.thread) || 0, true)
 
 	if (response.error.error) {
-		console.log(response.error)
+		ctx.log.error(response.error)
 		ctx.state.error = response.error.human
 		ctx.body = "error"
 		return
@@ -46,7 +46,7 @@ async function sendMessage(ctx) {
 	params.set(form.thread, `${limit},0`)
 	ctx.redirect(ctx.router.url('message', {idOrName: response.message.ID}, {query: params.toString()}))
 
-	console.log("<-- sendMessage")
+	ctx.log.info("<-- sendMessage")
 }
 
 export default sendMessage;
@@ -60,6 +60,6 @@ async function waitForThread(ctx, threadID) {
 			break
 		}
 		await setTimeout(500)
-		console.log("waiting thread... ", i++, threadID)
+		ctx.log.info("waiting thread... ", i++, threadID)
 	} while (response.error.error)
 }
