@@ -7,14 +7,14 @@ async function loadMessagePath(ctx, next) {
 	const token = ctx.state.token
 	const id = ctx.state.messageID
 
-	console.log("--> loadMessagePath")
+	ctx.log.info("--> loadMessagePath")
 
 	if (is.notEmpty(token) && is.notEmpty(id)) {
 		const result = await readPathJson(token, id, "")
 
 		if (is.notEmpty(result)) {
 			if (result.error.error) {
-				console.error(result.error)
+				ctx.log.error(result.error)
 				ctx.body = "error"
 				ctx.status = 400;
 				return
@@ -30,7 +30,7 @@ async function loadMessagePath(ctx, next) {
 
 	await next()
 
-	console.log("<-- loadMessagePath")
+	ctx.log.info("<-- loadMessagePath")
 }
 
 export default loadMessagePath

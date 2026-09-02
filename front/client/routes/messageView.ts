@@ -10,7 +10,7 @@ import ControlPanelBuilder from '../builders/controlPanelBuilder';
 import MessageHeaderBuilder from '../builders/messageHeaderBuilder';
 
 async function messageView(ctx) {
-	console.log("--> messageView")
+	ctx.log.info("--> messageView")
 
 	const panel = new ControlPanelBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const content = new HomeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
@@ -46,7 +46,7 @@ async function messageView(ctx) {
 	ctx.body = layout.build()
 	ctx.status = 200
 
-	console.log("<-- messageView")
+	ctx.log.info("<-- messageView")
 }
 
 export default messageView;

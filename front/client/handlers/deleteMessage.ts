@@ -2,7 +2,7 @@ import * as is from '../third_party/is'
 import api from '../api'
 
 async function deleteMessage(ctx) {
-	console.log("--> deleteMessage")
+	ctx.log.info("--> deleteMessage")
 
 	let form = ctx.request.body
 
@@ -15,7 +15,7 @@ async function deleteMessage(ctx) {
 	const response = await api.deleteMessageJson(ctx.state.token, parseInt(form.id) || 0)
 
 	if (response.error.error) {
-		console.log(response.error)
+		ctx.log.error(response.error)
 		ctx.state.error = response.error.human
 		ctx.body = "error"
 	} else {
@@ -26,7 +26,7 @@ async function deleteMessage(ctx) {
 		}
 	}
 
-	console.log("<-- deleteMessage")
+	ctx.log.info("<-- deleteMessage")
 }
 
 export default deleteMessage;

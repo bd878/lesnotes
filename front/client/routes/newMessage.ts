@@ -8,7 +8,7 @@ import ControlPanelBuilder from '../builders/controlPanelBuilder';
 import MessageHeaderBuilder from '../builders/messageHeaderBuilder';
 
 async function newMessage(ctx) {
-	console.log("--> newMessage")
+	ctx.log.info("--> newMessage")
 
 	const panel = new ControlPanelBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const messageForm = new NewMessageBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
@@ -46,7 +46,7 @@ async function newMessage(ctx) {
 	ctx.body = layout.build()
 	ctx.status = 200;
 
-	console.log("<-- newMessage")
+	ctx.log.info("<-- newMessage")
 }
 
 export default newMessage;

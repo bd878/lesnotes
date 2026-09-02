@@ -3,7 +3,7 @@ import type { SelectedFile } from '../types';
 import * as is from '../third_party/is';
 
 async function selectMessageFiles(ctx, next) {
-	console.log("--> selectMessageFiles")
+	ctx.log.info("--> selectMessageFiles")
 
 	if (is.array(ctx.state.files.files) && is.array(ctx.state.message.files)) {
 		ctx.state.files.files = ctx.state.files.files.map(searchSelected(ctx.state.message.files))
@@ -11,7 +11,7 @@ async function selectMessageFiles(ctx, next) {
 
 	await next()
 
-	console.log("<-- selectMessageFiles")
+	ctx.log.info("<-- selectMessageFiles")
 }
 
 function searchSelected(selectedFiles: File[]): (file: File) => SelectedFile {

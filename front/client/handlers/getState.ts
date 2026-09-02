@@ -4,7 +4,7 @@ import * as is from '../third_party/is';
 const defaultLimit = parseInt(LIMIT) || 10
 
 async function getState(ctx, next) {
-	console.log("--> getState")
+	ctx.log.info("--> getState")
 
 	ctx.state.fontSize = getFontSize(ctx)
 	ctx.state.lang = getLanguage(ctx)
@@ -21,11 +21,11 @@ async function getState(ctx, next) {
 	ctx.state.token = getToken(ctx)
 	ctx.state.isAuthed = getIsAuthed(ctx)
 
-	console.log("cwd", ctx.state.cwd)
+	ctx.log.info("cwd", ctx.state.cwd)
 
 	await next()
 
-	console.log("<-- getState")
+	ctx.log.info("<-- getState")
 }
 
 function getToken(ctx): string {

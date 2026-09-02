@@ -56,7 +56,6 @@ class SignupBuilder extends AbstractBuilder {
 
 		return mustache.render(this.isMobile ? signupTemplateMobile : signupTemplate, {
 			action:         function() { return "/signup" + search },
-			botUsername:    `${BOT_USERNAME}`,
 			authUrl:        `https://${BACKEND_URL}/tg_auth`,
 		}, {
 			username:  this.username,

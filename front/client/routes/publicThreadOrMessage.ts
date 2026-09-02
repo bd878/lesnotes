@@ -3,7 +3,7 @@ import publicMessage from './publicMessage'
 import publicThread from './publicThread'
 
 async function publicThreadOrMessage(ctx) {
-	console.log("--> publicThreadOrMessage")
+	ctx.log.info("--> publicThreadOrMessage")
 
 	// message with child messages is thread
 	if (is.notEmpty(ctx.state.tree) && ctx.state.tree.count > 0) {
@@ -13,7 +13,7 @@ async function publicThreadOrMessage(ctx) {
 		await publicMessage(ctx)
 	}
 
-	console.log("<-- publicThreadOrMessage")
+	ctx.log.info("<-- publicThreadOrMessage")
 }
 
 export default publicThreadOrMessage

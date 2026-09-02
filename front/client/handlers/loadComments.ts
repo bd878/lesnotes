@@ -8,12 +8,12 @@ async function loadComments(ctx, next) {
 	const name = ctx.state.messageName || ""
 	const token = ctx.state.token
 
-	console.log("--> loadComments", "id", id, "name", name, "token", token)
+	ctx.log.info("--> loadComments", "id", id, "name", name, "token", token)
 
 	ctx.state.comments = await listCommentsJson(token, id, name, commentsLimit, 0)
 	if (is.notEmpty(ctx.state.comments)) {
 		if (ctx.state.comments.error.error) {
-			console.error(ctx.state.comments.error)
+			ctx.log.error(ctx.state.comments.error)
 			ctx.body = "error"
 			ctx.status = 400
 			return
@@ -28,7 +28,7 @@ async function loadComments(ctx, next) {
 
 	await next()
 
-	console.log("<-- loadComments")
+	ctx.log.info("<-- loadComments")
 }
 
 export default loadComments

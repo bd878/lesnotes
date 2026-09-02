@@ -9,7 +9,7 @@ export default async function middleware(ctx, next) {
 		} else {
 			ctx.body = 'Internal error';
 			ctx.status = 500;
-			console.error(e.message, e.stack);
+			ctx.log.error(e.message, e.stack);
 		}
 	}
 }

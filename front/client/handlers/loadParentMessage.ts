@@ -8,7 +8,7 @@ async function loadParentMessage(ctx, next) {
 	const id = ctx.state.threadID
 	const name = ctx.state.parentName || ""
 
-	console.log("--> loadParentMessage")
+	ctx.log.info("--> loadParentMessage")
 
 	if (is.notEmpty(token)) {
 		if (is.notEmpty(id)) {
@@ -26,7 +26,7 @@ async function loadParentMessage(ctx, next) {
 
 	if (is.notEmpty(ctx.state.parentMessage)) {
 		if (ctx.state.parentMessage.error.error) {
-			console.error(ctx.state.parentMessage.error)
+			ctx.log.error(ctx.state.parentMessage.error)
 			ctx.body = "error"
 			ctx.status = 400;
 			return;
@@ -40,7 +40,7 @@ async function loadParentMessage(ctx, next) {
 
 	await next()
 
-	console.log("<-- loadParentMessage")
+	ctx.log.info("<-- loadParentMessage")
 }
 
 export default loadParentMessage

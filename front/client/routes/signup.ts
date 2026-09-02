@@ -4,7 +4,7 @@ import SidebarBuilder from '../builders/sidebarBuilder';
 import SettingsBuilder from '../builders/settingsBuilder';
 
 async function signup(ctx) {
-	console.log("--> signup")
+	ctx.log.info("--> signup")
 
 	const content = new SignupBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
@@ -24,7 +24,7 @@ async function signup(ctx) {
 	ctx.body = layout.build()
 	ctx.status = 200;
 
-	console.log("<-- signup")
+	ctx.log.info("<-- signup")
 }
 
 export default signup;

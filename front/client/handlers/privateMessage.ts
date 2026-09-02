@@ -2,7 +2,7 @@ import * as is from '../third_party/is'
 import api from '../api'
 
 async function privateMessage(ctx) {
-	console.log("--> privateMessage")
+	ctx.log.info("--> privateMessage")
 
 	let form = ctx.request.body
 
@@ -15,7 +15,7 @@ async function privateMessage(ctx) {
 
 	let response = await api.privateMessageJson(ctx.state.token, id)
 	if (response.error.error) {
-		console.log(response.error)
+		ctx.log.error(response.error)
 		ctx.state.error = response.error.human
 		ctx.body = "error"
 		return
@@ -23,7 +23,7 @@ async function privateMessage(ctx) {
 
 	response = await api.privateThreadJson(ctx.state.token, id)
 	if (response.error.error) {
-		console.log(response.error)
+		ctx.log.error(response.error)
 		ctx.state.error = response.error.human
 		ctx.body = "error"
 		return
@@ -35,7 +35,7 @@ async function privateMessage(ctx) {
 		ctx.redirect(ctx.router.url('message', {idOrName: form.id}, {query: ctx.query}))
 	}
 
-	console.log("<-- privateMessage")
+	ctx.log.info("<-- privateMessage")
 }
 
 export default privateMessage;

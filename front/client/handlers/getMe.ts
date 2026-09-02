@@ -3,9 +3,9 @@ import * as is from '../third_party/is';
 
 function log(f) {
 	return async function getMeLog(ctx, next) {
-		console.log("--> getMe")
+		ctx.log.info("--> getMe")
 		await f(ctx, next)
-		console.log("<-- getMe")
+		ctx.log.info("<-- getMe")
 	}
 }
 

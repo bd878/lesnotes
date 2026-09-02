@@ -8,7 +8,7 @@ import MessagesTreeBuilder from '../builders/messagesTreeBuilder';
 import ControlPanelBuilder from '../builders/controlPanelBuilder';
 
 async function threadView(ctx) {
-	console.log("--> threadView")
+	ctx.log.info("--> threadView")
 
 	const panel = new ControlPanelBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const view = new ThreadViewBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName,
@@ -39,7 +39,7 @@ async function threadView(ctx) {
 	ctx.body = layout.build()
 	ctx.status = 200
 
-	console.log("<-- threadView")
+	ctx.log.info("<-- threadView")
 }
 
 export default threadView;

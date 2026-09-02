@@ -1,10 +1,10 @@
 async function xxx(ctx) {
-	console.log("--> xxx")
+	ctx.log.info("--> xxx")
 
 	ctx.body = "<html>Pas de template</html>";
 	ctx.status = 500;
 
-	console.log("<-- xxx")
+	ctx.log.info("<-- xxx")
 }
 
 export default xxx;

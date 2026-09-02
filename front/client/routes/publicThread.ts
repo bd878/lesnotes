@@ -7,7 +7,7 @@ import MessageViewBuilder from '../builders/messageViewBuilder';
 import PublicMessagesTreeBuilder from '../builders/publicMessagesTreeBuilder';
 
 async function publicThread(ctx) {
-	console.log("--> publicThread")
+	ctx.log.info("--> publicThread")
 
 	const panel = new ControlPanelBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const content = new PublicThreadBuilder(ctx.state.isAuthed, ctx.state.messageName, ctx.state.messageName, ctx.userAgent.isMobile,
@@ -47,7 +47,7 @@ async function publicThread(ctx) {
 	ctx.body = layout.build()
 	ctx.status = 200
 
-	console.log("<-- publicThread")
+	ctx.log.info("<-- publicThread")
 }
 
 export default publicThread

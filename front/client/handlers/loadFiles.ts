@@ -5,7 +5,7 @@ import * as is from '../third_party/is';
 const limit = 10_000
 
 async function loadFiles(ctx, next) {
-	console.log("--> loadFiles")
+	ctx.log.info("--> loadFiles")
 
 	const userID = parseInt(ctx.params.user) || 0;
 	const token = ctx.state.token
@@ -22,7 +22,7 @@ async function loadFiles(ctx, next) {
 
 	if (is.notEmpty(ctx.state.files)) {
 		if (ctx.state.files.error.error) {
-			console.error(ctx.state.files.error)
+			ctx.log.error(ctx.state.files.error)
 			ctx.body = "error"
 			ctx.status = 400
 			return
@@ -35,7 +35,7 @@ async function loadFiles(ctx, next) {
 
 	await next()
 
-	console.log("<-- loadFiles")
+	ctx.log.info("<-- loadFiles")
 }
 
 export default loadFiles

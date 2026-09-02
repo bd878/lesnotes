@@ -57,7 +57,6 @@ class LoginBuilder extends AbstractBuilder {
 
 		return mustache.render(this.isMobile ? loginTemplateMobile : loginTemplate, {
 			action:        function() { return "/login" + search },
-			botUsername:   `${BOT_USERNAME}`,
 			authUrl:       `https://${BACKEND_URL}/tg_auth`,
 		}, {
 			username:      this.username,

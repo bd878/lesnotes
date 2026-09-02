@@ -2,14 +2,14 @@ import api from '../api';
 import * as is from '../third_party/is';
 
 async function loadTree(ctx, next) {
-	console.log("--> loadTree")
+	ctx.log.info("--> loadTree")
 
 	ctx.state.tree = await api.readTreeJson(ctx.state.token, ctx.state.messageID, ctx.state.messageName,
 		ctx.state.cwd.id, ctx.state.parentName, ctx.state.cwd.limit, ctx.state.cwd.offset, ctx.state.leaves)
 
 	if (is.notEmpty(ctx.state.tree)) {
 		if (ctx.state.tree.error.error) {
-			console.error(ctx.state.tree.error)
+			ctx.log.error(ctx.state.tree.error)
 			ctx.body = "error"
 			ctx.status = 400;
 			return;
@@ -21,7 +21,7 @@ async function loadTree(ctx, next) {
 
 	await next()
 
-	console.log("<-- loadTree")
+	ctx.log.info("<-- loadTree")
 }
 
 export default loadTree

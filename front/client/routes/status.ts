@@ -1,10 +1,10 @@
 async function status(ctx) {
-	console.log("--> status")
+	ctx.log.info("--> status")
 
 	ctx.body = 'ok\n';
 	ctx.status = 200;
 
-	console.log("<-- status")
+	ctx.log.info("<-- status")
 }
 
 export default status;
