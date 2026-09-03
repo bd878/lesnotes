@@ -3,10 +3,10 @@ package grpc
 import (
 	"time"
 	"context"
+	"log/slog"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/search"
-	"log/slog"
 	"github.com/bd878/gallery/server/db/search/pkg/machine"
 )
 

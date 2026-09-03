@@ -6,6 +6,8 @@ import (
 	"bytes"
 	"log/slog"
 
+	"google.golang.org/protobuf/encoding/prototext"
+
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/users"
 	"github.com/bd878/gallery/server/db/users/pkg/machine"
@@ -60,5 +62,15 @@ func (m *Distributed) GetUser(ctx context.Context, id int64) (user *users.User, 
 
 func (m *Distributed) GetServers(ctx context.Context) ([]*api.Server, error) {
 	slog.Debug("get servers")
-	return m.consensus.GetServers(ctx)
+	servers, err := m.consensus.GetServers(ctx)
+	if err != nil {
+		return nil, err
+	}
+	out, err := prototext.Marshal(&api.Servers{Servers: servers})
+	if err != nil {
+		return nil, err
+	}
+
+	slog.Debug("servers", string(out))
+	return servers, nil
 }

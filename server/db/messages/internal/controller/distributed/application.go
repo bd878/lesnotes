@@ -8,6 +8,8 @@ import (
 	"log/slog"
 	"time"
 
+	"google.golang.org/protobuf/encoding/prototext"
+
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/comments"
 	"github.com/bd878/gallery/server/api/translations"
@@ -228,5 +230,15 @@ func (m *Distributed) ListComments(ctx context.Context, userID, messageID *int64
 
 func (m *Distributed) GetServers(ctx context.Context) ([]*api.Server, error) {
 	slog.Debug("get servers")
-	return m.consensus.GetServers(ctx)
+	servers, err := m.consensus.GetServers(ctx)
+	if err != nil {
+		return nil, err
+	}
+	out, err := prototext.Marshal(&api.Servers{Servers: servers})
+	if err != nil {
+		return nil, err
+	}
+
+	slog.Debug("servers", string(out))
+	return servers, nil
 }

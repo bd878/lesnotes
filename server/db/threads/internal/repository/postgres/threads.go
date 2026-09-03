@@ -254,7 +254,11 @@ func (r *ThreadsRepository) ListMessages(ctx context.Context, userID, parentID i
 
 	end := min(int32(len(list)), offset+limit)
 
-	list = list[offset:end]
+	if end < offset {
+		list = list[end:end]
+	} else {
+		list = list[offset:end]
+	}
 
 	return
 }

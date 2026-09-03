@@ -6,6 +6,8 @@ import (
 	"bytes"
 	"log/slog"
 
+	"google.golang.org/protobuf/encoding/prototext"
+
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/threads"
 	"github.com/bd878/gallery/server/db/threads/pkg/machine"
@@ -112,5 +114,15 @@ func (m *Distributed) CountMessages(ctx context.Context, id, userID int64, priva
 
 func (m *Distributed) GetServers(ctx context.Context) ([]*api.Server, error) {
 	slog.Debug("get servers")
-	return m.consensus.GetServers(ctx)
+	servers, err := m.consensus.GetServers(ctx)
+	if err != nil {
+		return nil, err
+	}
+	out, err := prototext.Marshal(&api.Servers{Servers: servers})
+	if err != nil {
+		return nil, err
+	}
+
+	slog.Debug("servers", string(out))
+	return servers, nil
 }
