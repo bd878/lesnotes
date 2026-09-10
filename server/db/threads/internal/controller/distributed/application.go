@@ -25,7 +25,7 @@ type ThreadsRepository interface {
 }
 
 type Consensus interface {
-	Apply(cmd []byte, timeout time.Duration) (err error)
+	Apply(ctx context.Context, cmd []byte, timeout time.Duration) (err error)
 	GetServers(ctx context.Context) ([]*api.Server, error)
 }
 
@@ -53,7 +53,10 @@ func (m *Distributed) Apply(ctx context.Context, reqType machine.RequestType, cm
 		return
 	}
 
-	return m.consensus.Apply(buf.Bytes(), duration)
+	timedCtx, cancel := context.WithTimeout(ctx, 5 * time.Second)
+	defer cancel()
+
+	return m.consensus.Apply(timedCtx, buf.Bytes(), duration)
 }
 
 func (m *Distributed) ResolveThread(ctx context.Context, id, userID int64) (path []*threads.PathStep, err error) {
