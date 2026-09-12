@@ -21,7 +21,7 @@ type SessionsRepository interface {
 }
 
 type Consensus interface {
-	Apply(cmd []byte, timeout time.Duration) (err error)
+	Apply(ctx context.Context, cmd []byte, timeout time.Duration) (err error)
 	GetServers(ctx context.Context) ([]*api.Server, error)
 }
 
@@ -49,7 +49,10 @@ func (m *Distributed) apply(ctx context.Context, reqType machine.RequestType, cm
 		return
 	}
 
-	return m.consensus.Apply(buf.Bytes(), 10*time.Second)
+	timedCtx, cancel := context.WithTimeout(ctx, 5 * time.Second)
+	defer cancel()
+
+	return m.consensus.Apply(timedCtx, buf.Bytes(), 10*time.Second)
 }
 
 func (m *Distributed) CreateSession(ctx context.Context, userID int64) (session *sessions.Session, err error) {

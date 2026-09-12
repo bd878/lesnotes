@@ -38,7 +38,7 @@ type (
 	}
 
 	Consensus interface {
-		Apply(cmd []byte, timeout time.Duration) (err error)
+		Apply(ctx context.Context, cmd []byte, timeout time.Duration) (err error)
 		GetServers(ctx context.Context) ([]*api.Server, error)
 	}
 
@@ -85,7 +85,10 @@ func (m *Distributed) Apply(ctx context.Context, reqType machine.RequestType, cm
 		return
 	}
 
-	return m.consensus.Apply(buf.Bytes(), duration)
+	timedCtx, cancel := context.WithTimeout(ctx, 5 * time.Second)
+	defer cancel()
+
+	return m.consensus.Apply(timedCtx, buf.Bytes(), duration)
 }
 
 // TODO: pass one userID only, for public messages create ReadPublicMessage request
