@@ -56,6 +56,7 @@ func setupSerf(svc system.Service, cfg config.Config, handler serf.Handler) erro
 		serf.Config{
 			NodeName: cfg.NodeName,
 			BindAddr: cfg.SerfAddr,
+			LogLevel: cfg.SerfLogLevel,
 			Tags: map[string]string{
 				"raft_addr": cfg.RpcAddr,
 			},
