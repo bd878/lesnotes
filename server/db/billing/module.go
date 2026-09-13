@@ -47,6 +47,7 @@ func setupSerf(svc system.Service, cfg config.Config, handler serf.Handler) erro
 	membership, err := serf.New(
 		serf.Config{
 			NodeName: cfg.NodeName,
+			LogLevel: cfg.SerfLogLevel,
 			BindAddr: cfg.SerfAddr,
 			Tags: map[string]string{
 				"raft_addr": cfg.RpcAddr,
