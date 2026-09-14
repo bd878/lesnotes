@@ -20,6 +20,7 @@ type Membership struct {
 type Config struct {
 	NodeName       string
 	BindAddr       string
+	LogLevel       string
 	Tags           map[string]string
 	SerfJoinAddrs  []string
 }
@@ -40,10 +41,24 @@ func (m *Membership) setupSerf() error {
 	if err != nil {
 		return err
 	}
+
+	serfLogLevel := slog.LevelInfo
+	switch m.LogLevel {
+	case "debug":
+		serfLogLevel = slog.LevelDebug
+	case "info":
+		serfLogLevel = slog.LevelInfo
+	case "warn":
+		serfLogLevel = slog.LevelWarn
+	case "error":
+		serfLogLevel = slog.LevelError
+	}
+
 	config := serf.DefaultConfig()
 	config.Init()
 	config.MemberlistConfig.BindAddr = addr.IP.String()
 	config.MemberlistConfig.BindPort = addr.Port
+	config.MemberlistConfig.Logger = slog.NewLogLogger(slog.Default().Handler(), serfLogLevel)
 	m.events = make(chan serf.Event)
 	config.EventCh = m.events
 	config.Tags = m.Tags
