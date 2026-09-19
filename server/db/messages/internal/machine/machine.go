@@ -2,6 +2,7 @@ package machine
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
@@ -9,7 +10,6 @@ import (
 	"github.com/bd878/gallery/server/api/messages"
 	"github.com/bd878/gallery/server/api/comments"
 	"github.com/bd878/gallery/server/api/translations"
-	"log/slog"
 	"github.com/bd878/gallery/server/db/messages/pkg/machine"
 )
 
@@ -17,6 +17,7 @@ type MessagesRepository interface {
 	Create(ctx context.Context, id int64, text, title string, userID int64, private bool, name, createdAt, updatedAt string) (err error)
 	Update(ctx context.Context, userID, id int64, text, title, name *string, updatedAt string) (err error)
 	DeleteMessage(ctx context.Context, userID, id int64) (err error)
+	RestoreMessage(ctx context.Context, userID, id int64) (err error)
 	Publish(ctx context.Context, userID int64, ids []int64, updatedAt string) (err error)
 	Private(ctx context.Context, userID int64, ids []int64, updatedAt string) (err error)
 	DeleteUserMessages(ctx context.Context, userID int64) (err error)
@@ -27,6 +28,7 @@ type TranslationsRepository interface {
 	UpdateTranslation(ctx context.Context, messageID int64, lang string, text, title *string, updatedAt string) (err error)
 	DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error)
 	DeleteMessage(ctx context.Context, messageID int64) (err error)
+	RestoreMessage(ctx context.Context, messageID int64) (err error)
 }
 
 type CommentsRepository interface {
@@ -71,6 +73,8 @@ func (f *Machine) Apply(record *raft.Log) interface{} {
 		return f.applyUpdate(buf[1:])
 	case machine.DeleteUserMessagesRequest:
 		return f.applyDeleteUserMessages(buf[1:])
+	case machine.RestoreMessageRequest:
+		return f.applyRestoreMessage(buf[1:])
 	case machine.DeleteRequest:
 		return f.applyDelete(buf[1:])
 	case machine.PublishRequest:
@@ -129,6 +133,25 @@ func (f *Machine) applyDelete(raw []byte) interface{} {
 	}
 
 	err = f.translationsRepo.DeleteMessage(context.TODO(), cmd.Id)
+	if err != nil {
+		return err
+	}
+
+	// TODO: delete comments
+
+	return nil
+}
+
+func (f *Machine) applyRestoreMessage(raw []byte) interface{} {
+	var cmd messages.RestoreCommand
+	proto.Unmarshal(raw, &cmd)
+
+	err := f.messagesRepo.RestoreMessage(context.TODO(), cmd.UserId, cmd.Id)
+	if err != nil {
+		return err
+	}
+
+	err = f.translationsRepo.RestoreMessage(context.TODO(), cmd.Id)
 	if err != nil {
 		return err
 	}

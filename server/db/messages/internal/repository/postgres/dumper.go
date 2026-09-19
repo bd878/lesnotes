@@ -57,7 +57,7 @@ func (r *Dumper) Open(ctx context.Context) (ch chan *messages.MessagesSnapshot, 
 }
 
 func (r *Dumper) runMessages() {
-	query := "SELECT id, text, private, name, user_id, title, created_at, updated_at FROM %s"
+	query := "SELECT id, text, private, name, user_id, title, created_at, updated_at, deleted FROM %s"
 
 	defer r.wg.Done()
 	defer slog.Debug("messages dump finished")
@@ -76,7 +76,7 @@ func (r *Dumper) runMessages() {
 
 		var createdAt, updatedAt *time.Time
 		err = rows.Scan(&message.Id, &message.Text, &message.Private, &message.Name,
-			&message.UserId, &message.Title, &createdAt, &updatedAt)
+			&message.UserId, &message.Title, &createdAt, &updatedAt, &message.Deleted)
 		if err != nil {
 			slog.Error(err.Error())
 			r.cancel(err)
@@ -107,7 +107,7 @@ func (r *Dumper) runMessages() {
 }
 
 func (r *Dumper) runTranslations() {
-	query := "SELECT message_id, lang, text, title, created_at, updated_at FROM %s"
+	query := "SELECT message_id, lang, text, title, created_at, updated_at, deleted FROM %s"
 
 	defer r.wg.Done()
 	defer slog.Debug("translations dump finished")
@@ -126,7 +126,7 @@ func (r *Dumper) runTranslations() {
 
 		var createdAt, updatedAt *time.Time
 		err = rows.Scan(&translation.Id, &translation.Lang, &translation.Text,
-			&translation.Title, &createdAt, &updatedAt)
+			&translation.Title, &createdAt, &updatedAt, &translation.Deleted)
 		if err != nil {
 			slog.Error(err.Error())
 			r.cancel(err)
@@ -217,19 +217,19 @@ func (r *Dumper) Restore(ctx context.Context, snapshot *messages.MessagesSnapsho
 	switch v := snapshot.Item.(type) {
 	case *messages.MessagesSnapshot_Message:
 
-		query := "INSERT INTO %s(id, text, private, name, user_id, title, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)"
+		query := "INSERT INTO %s(id, text, private, name, user_id, title, created_at, updated_at, deleted) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)"
 
 		_, err = r.pool.Exec(ctx, r.messagesTable(query), v.Message.Id, v.Message.Text, v.Message.Private,
-			v.Message.Name, v.Message.UserId, v.Message.Title, v.Message.CreatedAt, v.Message.UpdatedAt)
+			v.Message.Name, v.Message.UserId, v.Message.Title, v.Message.CreatedAt, v.Message.UpdatedAt, v.Message.Deleted)
 
 		return
 
 	case *messages.MessagesSnapshot_Translation:
 
-		query := "INSERT INTO %s(message_id, lang, text, title, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6)"
+		query := "INSERT INTO %s(message_id, lang, text, title, created_at, updated_at, deleted) VALUES ($1,$2,$3,$4,$5,$6,$7)"
 
 		_, err = r.pool.Exec(ctx, r.translationsTable(query), v.Translation.Id, v.Translation.Lang, v.Translation.Text,
-			v.Translation.Title, v.Translation.CreatedAt, v.Translation.UpdatedAt)
+			v.Translation.Title, v.Translation.CreatedAt, v.Translation.UpdatedAt, v.Translation.Deleted)
 
 		return
 

@@ -34,6 +34,7 @@ message MessageSnapshotItem {
 	string   created_at = 6;
 	string   updated_at = 7;
 	string   title = 8;
+	bool     deleted = 9;
 }
 
 message Message {

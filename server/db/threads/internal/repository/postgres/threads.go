@@ -23,7 +23,24 @@ func NewThreadsRepository(pool *pgxpool.Pool, tableName string) *ThreadsReposito
 }
 
 func (r *ThreadsRepository) ReadThreadByID(ctx context.Context, id, userID int64 /*may be public*/) (thread *threads.Thread, err error) {
-	query := "SELECT user_id, parent_id, next_id, prev_id, name, description, title, private, private_message, created_at, updated_at FROM %s WHERE id = $1 AND (user_id = $2 OR private = false)"
+	query := `
+SELECT
+	user_id,
+	parent_id,
+	next_id,
+	prev_id,
+	name,
+	description,
+	title,
+	private,
+	private_message,
+	created_at,
+	updated_at
+FROM %s
+WHERE id = $1
+	AND (user_id = $2 OR private = false)
+	AND deleted = false
+`
 
 	thread = &threads.Thread{
 		Id: id,
@@ -40,13 +57,35 @@ func (r *ThreadsRepository) ReadThreadByID(ctx context.Context, id, userID int64
 	thread.CreatedAt = createdAt.Format(time.RFC3339)
 	thread.UpdatedAt = updatedAt.Format(time.RFC3339)
 
-	err = r.pool.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2"), thread.UserId, thread.Id).Scan(&thread.Count)
+	countQuery := `
+SELECT COUNT(*) FROM %s
+WHERE user_id = $1 AND parent_id = $2 AND deleted = false
+`
+
+	err = r.pool.QueryRow(ctx, r.table(countQuery), thread.UserId, thread.Id).Scan(&thread.Count)
 
 	return
 }
 
 func (r *ThreadsRepository) ReadThreadByName(ctx context.Context, name string, userID int64 /*may be public*/) (thread *threads.Thread, err error) {
-	query := "SELECT user_id, id, parent_id, next_id, prev_id, description, title, private, private_message, created_at, updated_at FROM %s WHERE name = $1 AND (user_id = $2 OR private = false)"
+	query := `
+SELECT
+	user_id,
+	id,
+	parent_id,
+	next_id,
+	prev_id,
+	description,
+	title,
+	private,
+	private_message,
+	created_at,
+	updated_at
+FROM %s
+WHERE name = $1
+	AND (user_id = $2 OR private = false)
+	AND deleted = false
+`
 
 	thread = &threads.Thread{
 		Name: name,
@@ -63,7 +102,12 @@ func (r *ThreadsRepository) ReadThreadByName(ctx context.Context, name string, u
 	thread.CreatedAt = createdAt.Format(time.RFC3339)
 	thread.UpdatedAt = updatedAt.Format(time.RFC3339)
 
-	err = r.pool.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2"), thread.UserId, thread.Id).Scan(&thread.Count)
+	countQuery := `
+SELECT COUNT(*) FROM %s
+WHERE user_id = $1 AND parent_id = $2 AND deleted = false
+`
+
+	err = r.pool.QueryRow(ctx, r.table(countQuery), thread.UserId, thread.Id).Scan(&thread.Count)
 
 	return
 }
@@ -87,7 +131,10 @@ func (r *ThreadsRepository) ListThreads(ctx context.Context, userID, parentID in
 		}
 	}()
 
-	const selectThreads = "SELECT id, name, private, private_message, next_id, prev_id, created_at, updated_at FROM %s WHERE user_id = $1 AND parent_id = $2"
+	const selectThreads = `
+SELECT id, name, private, private_message, next_id, prev_id, created_at, updated_at
+FROM %s WHERE user_id = $1 AND parent_id = $2 AND deleted = false
+`
 
 	var rows pgx.Rows
 	rows, err = tx.Query(ctx, r.table(selectThreads), userID, parentID)
@@ -133,8 +180,13 @@ func (r *ThreadsRepository) ListThreads(ctx context.Context, userID, parentID in
 		return
 	}
 
+	countQuery := `
+SELECT COUNT(*) FROM %s
+WHERE user_id = $1 AND parent_id = $2 AND deleted = false
+`
+
 	for _, thread := range list {
-		err = tx.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2"), userID, thread.Id).Scan(&thread.Count)
+		err = tx.QueryRow(ctx, r.table(countQuery), userID, thread.Id).Scan(&thread.Count)
 		if err != nil {
 			return
 		}
@@ -172,9 +224,17 @@ func (r *ThreadsRepository) ListMessages(ctx context.Context, userID, parentID i
 
 	/* TODO: use limit, offset in query */
 
-	query := "SELECT id, name, private, private_message, next_id, prev_id, created_at, updated_at FROM %s WHERE user_id = $1 AND parent_id = $2"
+	query := `
+SELECT id, name, private, private_message, next_id, prev_id, created_at, updated_at FROM %s
+WHERE user_id = $1 AND parent_id = $2 AND deleted = false
+`
 
-	slog.Debug("list messages", slog.String("user_id", fmt.Sprintf("%v", userID)), slog.String("parentID", fmt.Sprintf("%v", parentID)), slog.String("limit", fmt.Sprintf("%v", limit)), slog.String("offset", fmt.Sprintf("%v", offset)))
+	slog.Debug("list messages",
+		slog.String("user_id", fmt.Sprintf("%v", userID)),
+		slog.String("parentID", fmt.Sprintf("%v", parentID)),
+		slog.String("limit", fmt.Sprintf("%v", limit)),
+		slog.String("offset", fmt.Sprintf("%v", offset)),
+	)
 
 	var rows pgx.Rows
 	rows, err = tx.Query(ctx, r.table(query), userID, parentID)
@@ -235,11 +295,11 @@ func (r *ThreadsRepository) ListMessages(ctx context.Context, userID, parentID i
 	for _, thread := range list {
 		var countQuery string
 		if privateMessage == nil {
-			countQuery = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2"
+			countQuery = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2 deleted = false"
 		} else if *privateMessage == true {
-			countQuery = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2 AND private_message = true"
+			countQuery = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2 AND private_message = true AND deleted = false"
 		} else if *privateMessage == false {
-			countQuery = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2 AND private_message = false"
+			countQuery = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2 AND private_message = false AND deleted = false"
 		}
 
 		err = tx.QueryRow(ctx, r.table(countQuery), userID, thread.Id).Scan(&thread.Count)
@@ -264,8 +324,13 @@ func (r *ThreadsRepository) ListMessages(ctx context.Context, userID, parentID i
 }
 
 func (r *ThreadsRepository) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+	query := `
+UPDATE %s SET private_message = false
+WHERE user_id = $1 AND id = $2 AND deleted = false
+`
+
 	for _, id := range ids {
-		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private_message = false WHERE user_id = $1 AND id = $2"), userID, id)
+		_, err = r.pool.Exec(ctx, r.table(query), userID, id)
 		if err != nil {
 			slog.Error(err.Error())
 		}
@@ -275,8 +340,13 @@ func (r *ThreadsRepository) PublishMessages(ctx context.Context, ids []int64, us
 }
 
 func (r *ThreadsRepository) PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error) {
+	query := `
+UPDATE %s SET private_message = true
+WHERE user_id = $1 AND id = $2 AND deleted = false
+`
+
 	for _, id := range ids {
-		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private_message = true WHERE user_id = $1 AND id = $2"), userID, id)
+		_, err = r.pool.Exec(ctx, r.table(query), userID, id)
 		if err != nil {
 			slog.Error(err.Error())
 		}
@@ -286,7 +356,10 @@ func (r *ThreadsRepository) PrivateMessages(ctx context.Context, ids []int64, us
 }
 
 func (r *ThreadsRepository) CountThreads(ctx context.Context, id, userID int64) (total int32, err error) {
-	const query = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2"
+	query := `
+SELECT COUNT(*) FROM %s
+WHERE user_id = $1 AND parent_id = $2 AND deleted = false
+`
 
 	err = r.pool.QueryRow(ctx, r.table(query), userID, id).Scan(&total)
 
@@ -296,14 +369,18 @@ func (r *ThreadsRepository) CountThreads(ctx context.Context, id, userID int64) 
 func (r *ThreadsRepository) CountMessages(ctx context.Context, id, userID int64, privateMessage *bool) (total int32, err error) {
 	var query string
 	if privateMessage == nil {
-		query = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2"
+		query = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2 AND deleted = false"
 	} else if *privateMessage == true {
-		query = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2 AND private_message = true"
+		query = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2 AND private_message = true AND deleted = false"
 	} else if *privateMessage == false {
-		query = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2 AND private_message = false"
+		query = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2 AND private_message = false AND deleted = false"
 	}
 
-	slog.Debug("count messages", slog.String("id", fmt.Sprintf("%v", id)), slog.String("user_id", fmt.Sprintf("%v", userID)), slog.String("query", fmt.Sprintf("%v", query)))
+	slog.Debug("count messages",
+		slog.String("id", fmt.Sprintf("%v", id)),
+		slog.String("user_id", fmt.Sprintf("%v", userID)),
+		slog.String("query", fmt.Sprintf("%v", query)),
+	)
 
 	err = r.pool.QueryRow(ctx, r.table(query), userID, id).Scan(&total)
 
@@ -333,13 +410,18 @@ func (r *ThreadsRepository) ReorderThread(ctx context.Context, id, userID, paren
 
 	// validate arguments
 
-	const updateNextThread = "UPDATE %s SET prev_id = $3 WHERE user_id = $1 AND id = $2"
-	const updatePrevThread = "UPDATE %s SET next_id = $3 WHERE user_id = $1 AND id = $2"
-	const selectParentID = "SELECT parent_id FROM %s WHERE user_id = $1 AND id = $2"
-	const updateMe = "UPDATE %s SET parent_id = $3, next_id = $4, prev_id = $5, updated_at = $6 WHERE user_id = $1 AND id = $2"
+	updateNextThread := "UPDATE %s SET prev_id = $3 WHERE user_id = $1 AND id = $2"
+	updatePrevThread := "UPDATE %s SET next_id = $3 WHERE user_id = $1 AND id = $2"
+	selectParentID := "SELECT parent_id FROM %s WHERE user_id = $1 AND id = $2"
+	updateMe := "UPDATE %s SET parent_id = $3, next_id = $4, prev_id = $5, updated_at = $6 WHERE user_id = $1 AND id = $2"
+
+	query := `
+SELECT parent_id, next_id, prev_id FROM %s
+WHERE user_id = $1 AND id = $2 AND deleted = false
+`
 
 	var currentParentID, currentNextID, currentPrevID, prevIDParent, nextIDParent int64
-	err = tx.QueryRow(ctx, r.table("SELECT parent_id, next_id, prev_id FROM %s WHERE user_id = $1 AND id = $2"), userID, id).
+	err = tx.QueryRow(ctx, r.table(query), userID, id).
 		Scan(&currentParentID, &currentNextID, &currentPrevID)
 	if err != nil {
 		slog.Debug("failed to select thread", slog.String("error", err.Error()))
@@ -394,6 +476,11 @@ func (r *ThreadsRepository) ReorderThread(ctx context.Context, id, userID, paren
 		}
 	}
 
+	parentQuery := `
+SELECT parent_id FROM %s
+WHERE user_id = $1 AND id = $2 AND deleted = false
+`
+
 	// validate parent
 	threadID := parentID
 	for threadID != 0 {
@@ -401,8 +488,7 @@ func (r *ThreadsRepository) ReorderThread(ctx context.Context, id, userID, paren
 			return fmt.Errorf("new parent %s is a relative of thread %s", parentID, id)
 		}
 
-		err = tx.QueryRow(ctx, r.table("SELECT parent_id FROM %s WHERE user_id = $1 AND id = $2"),
-			userID, threadID).Scan(&threadID)
+		err = tx.QueryRow(ctx, r.table(parentQuery), userID, threadID).Scan(&threadID)
 		if err != nil {
 			return
 		}
@@ -433,9 +519,14 @@ func (r *ThreadsRepository) ReorderThread(ctx context.Context, id, userID, paren
 	if prevID != 0 {
 		// reorder before
 
+		query := `
+SELECT next_id FROM %s
+WHERE user_id = $1 AND id = $2 AND deleted = false
+`
+
 		var nextID int64
 
-		err = tx.QueryRow(ctx, r.table("SELECT next_id FROM %s WHERE user_id = $1 AND id = $2"), userID, prevID).
+		err = tx.QueryRow(ctx, r.table(query), userID, prevID).
 			Scan(&nextID)
 		if err != nil {
 			slog.Debug("failed to get next id of prev id", slog.String("prev_id", fmt.Sprintf("%v", prevID)), slog.String("error", err.Error()))
@@ -459,9 +550,14 @@ func (r *ThreadsRepository) ReorderThread(ctx context.Context, id, userID, paren
 	} else if nextID != 0 {
 		// reorder after
 
+		query := `
+SELECT prev_id FROM %s
+WHERE user_id = $1 AND id = $2 AND deleted = false
+`
+
 		var prevID int64
 
-		err = tx.QueryRow(ctx, r.table("SELECT prev_id FROM %s WHERE user_id = $1 AND id = $2"), userID, nextID).
+		err = tx.QueryRow(ctx, r.table(query), userID, nextID).
 			Scan(&prevID)
 		if err != nil {
 			slog.Debug("failed to get prev id of next id", slog.String("next_id", fmt.Sprintf("%v", nextID)), slog.String("error", err.Error()))
@@ -509,8 +605,8 @@ func (r *ThreadsRepository) AppendThread(ctx context.Context, id, userID, parent
 	}()
 
 	const insert = "INSERT INTO %s(id, user_id, parent_id, name, description, title, private, next_id, prev_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)"
-	const selectLastThread = "SELECT id FROM %s WHERE user_id = $1 AND parent_id = $2 AND next_id = 0"
-	const updateLastThread = "UPDATE %s SET next_id = $4 WHERE user_id = $1 AND id = $2 AND parent_id = $3"
+	const selectLastThread = "SELECT id FROM %s WHERE user_id = $1 AND parent_id = $2 AND next_id = 0 AND deleted = false"
+	const updateLastThread = "UPDATE %s SET next_id = $4 WHERE user_id = $1 AND id = $2 AND parent_id = $3 AND deleted = false"
 
 	var lastThreadID int64
 	err = tx.QueryRow(ctx, r.table(selectLastThread), userID, parentID).Scan(&lastThreadID)
@@ -535,7 +631,7 @@ func (r *ThreadsRepository) AppendThread(ctx context.Context, id, userID, parent
 }
 
 func (r *ThreadsRepository) UpdateThread(ctx context.Context, id, userID int64, name, description, title *string, updatedAt string) (err error) {
-	const query = "UPDATE %s SET name = $3, description = $4, title = $5, updated_at = $6 WHERE user_id = $1 AND id = $2"
+	const query = "UPDATE %s SET name = $3, description = $4, title = $5, updated_at = $6 WHERE user_id = $1 AND id = $2 AND deleted = false"
 
 	_, err = r.pool.Exec(ctx, r.table(query), userID, id, name, description, title, updatedAt)
 
@@ -543,7 +639,7 @@ func (r *ThreadsRepository) UpdateThread(ctx context.Context, id, userID int64, 
 }
 
 func (r *ThreadsRepository) PrivateThread(ctx context.Context, id, userID int64, updatedAt string) (err error) {
-	query := "UPDATE %s SET private = true, updated_at = $3 WHERE user_id = $1 AND id = $2"
+	query := "UPDATE %s SET private = true, updated_at = $3 WHERE user_id = $1 AND id = $2 AND deleted = false"
 
 	_, err = r.pool.Exec(ctx, r.table(query), userID, id, updatedAt)
 
@@ -551,11 +647,15 @@ func (r *ThreadsRepository) PrivateThread(ctx context.Context, id, userID int64,
 }
 
 func (r *ThreadsRepository) PublishThread(ctx context.Context, id, userID int64, updatedAt string) (err error) {
-	query := "UPDATE %s SET private = false, updated_at = $3 WHERE user_id = $1 AND id = $2"
+	query := "UPDATE %s SET private = false, updated_at = $3 WHERE user_id = $1 AND id = $2 AND deleted = false"
 
 	_, err = r.pool.Exec(ctx, r.table(query), userID, id, updatedAt)
 
 	return
+}
+
+func (r *ThreadsRepository) RestoreThread(ctx context.Context, id, userID int64) (err error) {
+	/* TODO: implement */
 }
 
 func (r *ThreadsRepository) DeleteThread(ctx context.Context, id, userID int64) (err error) {
@@ -579,7 +679,7 @@ func (r *ThreadsRepository) DeleteThread(ctx context.Context, id, userID int64) 
 	}()
 
 	// Unlink
-	const selectThread = "SELECT parent_id, next_id, prev_id FROM %s WHERE user_id = $1 AND id = $2"
+	const selectThread = "SELECT parent_id, next_id, prev_id FROM %s WHERE user_id = $1 AND id = $2 AND deleted = false"
 	const updateNextThread = "UPDATE %s SET prev_id = $4 WHERE user_id = $1 AND id = $2 AND parent_id = $3"
 	const updatePrevThread = "UPDATE %s SET next_id = $4 WHERE user_id = $1 AND id = $2 AND parent_id = $3"
 
@@ -607,23 +707,23 @@ func (r *ThreadsRepository) DeleteThread(ctx context.Context, id, userID int64) 
 	}
 
 	// End unlink
-	// Delete
-	const deleteThread = "DELETE FROM %s WHERE user_id = $1 AND id = $2"
+	// Mark deleted
+	const markDeleted = "UPDATE %s SET deleted = true WHERE user_id = $1 AND id = $2"
 
-	_, err = tx.Exec(ctx, r.table(deleteThread), userID, id)
+	_, err = tx.Exec(ctx, r.table(markDeleted), userID, id)
 	if err != nil {
-		slog.Debug("cannot delete thread")
+		slog.Debug("cannot mark thread deleted")
 		return
 	}
 
 	// End delete
 	// Link children
-	const countChildren = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2"
-	const selectLastParentThread = "SELECT id FROM %s WHERE user_id = $1 AND parent_id = $2 AND next_id = 0"
-	const selectFirstThread = "SELECT id FROM %s WHERE user_id = $1 AND parent_id = $2 AND prev_id = 0"
-	const updateFirstThread = "UPDATE %s SET prev_id = $3 WHERE user_id = $1 AND parent_id = $2 AND prev_id = 0"
-	const updateLastParentThread = "UPDATE %s SET next_id = $3 WHERE user_id = $1 AND parent_id = $2 AND next_id = 0"
-	const moveChildren = "UPDATE %s SET parent_id = $3 WHERE user_id = $1 AND parent_id = $2"
+	const countChildren = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2 AND deleted = false"
+	const selectLastParentThread = "SELECT id FROM %s WHERE user_id = $1 AND parent_id = $2 AND next_id = 0 AND deleted = false"
+	const selectFirstThread = "SELECT id FROM %s WHERE user_id = $1 AND parent_id = $2 AND prev_id = 0 AND deleted = false"
+	const updateFirstThread = "UPDATE %s SET prev_id = $3 WHERE user_id = $1 AND parent_id = $2 AND prev_id = 0 AND deleted = false"
+	const updateLastParentThread = "UPDATE %s SET next_id = $3 WHERE user_id = $1 AND parent_id = $2 AND next_id = 0 AND deleted = false"
+	const moveChildren = "UPDATE %s SET parent_id = $3 WHERE user_id = $1 AND parent_id = $2" // move deleted children also
 
 	var count int32
 	err = tx.QueryRow(ctx, r.table(countChildren), userID, id).Scan(&count)
@@ -681,7 +781,10 @@ func (r *ThreadsRepository) DeleteThread(ctx context.Context, id, userID int64) 
 }
 
 func (r *ThreadsRepository) ResolveThread(ctx context.Context, id, userID int64) (path []*threads.PathStep, err error) {
-	const query = "SELECT name, private, parent_id, title FROM %s WHERE user_id = $1 AND id = $2"
+	const query = `
+SELECT name, private, parent_id, title FROM %s
+WHERE user_id = $1 AND id = $2 AND deleted = false
+`
 
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})

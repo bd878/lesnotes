@@ -19,6 +19,7 @@ message TranslationSnapshotItem {
 	string    title = 4;
 	string    created_at = 5;
 	string    updated_at = 6;
+	bool      deleted = 7;
 }
 
 message Translation {

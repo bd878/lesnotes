@@ -19,6 +19,11 @@ message TranslationDeleted {
 	string   lang = 2;
 }
 
+message TranslationRestored {
+	int64    id = 1;
+	string   lang = 2;
+}
+
 message TranslationUpdated {
 	int64    id = 1;
 	string   lang = 2;

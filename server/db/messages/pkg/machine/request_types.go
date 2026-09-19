@@ -17,4 +17,5 @@ const (
 	UpdateCommentRequest
 	DeleteCommentRequest
 	DeleteMessageCommentsRequest
+	RestoreMessageRequest
 )
