@@ -14,11 +14,12 @@ import (
 )
 
 type sagaHandler[T ddd.Event] struct {
-	orchestrator sec.Orchestrator
+	createMessageSaga sec.Orchestrator
+	deleteMessageSaga sec.Orchestrator
 }
 
-func NewEventHandlers(saga sec.Orchestrator) *sagaHandler[ddd.Event] {
-	return &sagaHandler[ddd.Event]{orchestrator: saga}
+func NewEventHandlers(createMessageSaga, deleteMessageSaga sec.Orchestrator) *sagaHandler[ddd.Event] {
+	return &sagaHandler[ddd.Event]{createMessageSaga, deleteMessageSaga}
 }
 
 func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.Event]) {
@@ -38,6 +39,8 @@ func (h sagaHandler[T]) HandleEvent(ctx context.Context, event T) (err error) {
 	switch event.EventName() {
 	case domain.MessageCreatedEvent:
 		return h.onMessageCreated(ctx, event)
+	case domain.MessageDeletedEvent:
+		return h.onMessageDeleted(ctx, event)
 	}
 	return nil
 }
@@ -60,5 +63,23 @@ func (h sagaHandler[T]) onMessageCreated(ctx context.Context, event ddd.Event) e
 		return err
 	}
 
-	return h.orchestrator.Start(ctx, event.ID(), data)
+	return h.createMessageSaga.Start(ctx, event.ID(), data)
+}
+
+func (h sagaHandler[T]) onMessageDeleted(ctx context.Context, event ddd.Event) error {
+	slog.Debug("handle domain command event",
+		slog.String("name", event.EventName()),
+		slog.String("id", event.ID()),
+	)
+
+	payload := event.Payload().(*domain.MessageDeleted)
+	data, err := proto.Marshal(&threads.DeleteThread{
+		ThreadId: payload.ID,
+		UserId: payload.UserID,
+	})
+	if err != nil {
+		return err
+	}
+
+	return h.deleteMessageSaga.Start(ctx, event.ID(), data)
 }

@@ -29,6 +29,7 @@ func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.Event], hand
 		domain.ThreadPrivateEvent,
 		domain.ThreadParentChangedEvent,
 		domain.ThreadUpdatedEvent,
+		domain.ThreadRestoredEvent,
 	)
 }
 
@@ -38,6 +39,8 @@ func (h domainHandler[T]) HandleEvent(ctx context.Context, event T) error {
 		return h.onThreadCreated(ctx, event)
 	case domain.ThreadDeletedEvent:
 		return h.onThreadDeleted(ctx, event)
+	case domain.ThreadRestoredEvent:
+		return h.onThreadRestored(ctx, event)
 	case domain.ThreadUpdatedEvent:
 		return h.onThreadUpdated(ctx, event)
 	case domain.ThreadPrivateEvent:
@@ -81,6 +84,19 @@ func (h domainHandler[T]) onThreadDeleted(ctx context.Context, event ddd.Event) 
 	}
 
 	return h.stream.Publish(ctx, threadsevents.ThreadsChannel, am.NewEventMessage(event.ID(), threadsevents.ThreadDeletedEvent, data, event.Metadata()))	
+}
+
+func (h domainHandler[T]) onThreadRestored(ctx context.Context, event ddd.Event) error {
+	payload := event.Payload().(*domain.ThreadRestored)
+	data, err := proto.Marshal(&threads.ThreadRestored{
+		Id:          payload.ID,
+		UserId:      payload.UserID,
+	})
+	if err != nil {
+		return err
+	}
+
+	return h.stream.Publish(ctx, threadsevents.ThreadsChannel, am.NewEventMessage(event.ID(), threadsevents.ThreadRestoredEvent, data, event.Metadata()))	
 }
 
 func (h domainHandler[T]) onThreadPrivated(ctx context.Context, event ddd.Event) error {

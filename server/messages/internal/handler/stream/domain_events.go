@@ -29,6 +29,7 @@ func RegisterDomainEventHandlers(subscriber ddd.EventSubscriber[ddd.Event], hand
 	subscriber.Subscribe(handlers,
 		domain.MessageCreatedEvent,
 		domain.MessageDeletedEvent,
+		domain.MessageRestoredEvent,
 		domain.MessagesPrivateEvent,
 		domain.MessagesPublishEvent,
 		domain.MessageUpdatedEvent,
@@ -56,6 +57,8 @@ func (h domainHandler[T]) HandleEvent(ctx context.Context, event T) (err error) 
 		return h.onMessageCreated(ctx, event)
 	case domain.MessageDeletedEvent:
 		return h.onMessageDeleted(ctx, event)
+	case domain.MessageRestoredEvent:
+		return h.onMessageRestored(ctx, event)
 	case domain.MessageUpdatedEvent:
 		return h.onMessageUpdated(ctx, event)
 	case domain.MessagesPrivateEvent:
@@ -114,6 +117,19 @@ func (h domainHandler[T]) onMessageDeleted(ctx context.Context, event ddd.Event)
 	}
 
 	return h.stream.Publish(ctx, pkg.MessagesChannel, am.NewEventMessage(event.ID(), pkg.MessageDeletedEvent, data, event.Metadata()))
+}
+
+func (h domainHandler[T]) onMessageRestored(ctx context.Context, event ddd.Event) error {
+	payload := event.Payload().(*domain.MessageRestored)
+	data, err := proto.Marshal(&messages.MessageRestored{
+		Id:     payload.ID,
+		UserId: payload.UserID,
+	})
+	if err != nil {
+		return err
+	}
+
+	return h.stream.Publish(ctx, pkg.MessagesChannel, am.NewEventMessage(event.ID(), pkg.MessageRestoredEvent, data, event.Metadata()))
 }
 
 func (h domainHandler[T]) onMessageUpdated(ctx context.Context, event ddd.Event) error {

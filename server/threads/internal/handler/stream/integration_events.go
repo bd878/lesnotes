@@ -19,6 +19,7 @@ type MessagesController interface {
 type ThreadsController interface {
 	CreateThread(ctx context.Context, id, userID, parentID int64, name, description, title string, private bool) (err error)
 	DeleteThread(ctx context.Context, id, userID int64) (err error)
+	RestoreThread(ctx context.Context, id, userID int64) (err error)
 }
 
 type integrationHandlers struct {

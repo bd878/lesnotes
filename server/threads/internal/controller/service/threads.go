@@ -381,3 +381,33 @@ func (s *Controller) DeleteThread(ctx context.Context, id, userID int64) (err er
 
 	return
 }
+
+func (s *Controller) RestoreThread(ctx context.Context, id, userID int64) (err error) {
+	slog.Debug("restore thread", slog.Int64("id", id), slog.Int64("user_id", userID))
+
+	event, err := domain.RestoreThread(id, userID)
+	if err != nil {
+		return err
+	}
+
+	err = s.publisher.Publish(ctx, event)
+	if err != nil {
+		return
+	}
+
+	cmd, err := proto.Marshal(&threads.RestoreCommand{
+		Id:     id,
+		UserId: userID,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType:  int32(machine.RestoreRequest),
+		Cmd:      cmd,
+		Duration: "10s",
+	})
+
+	return
+}

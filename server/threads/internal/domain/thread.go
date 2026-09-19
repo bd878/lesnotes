@@ -8,6 +8,7 @@ import (
 const (
 	ThreadCreatedEvent = "threads.ThreadCreated"
 	ThreadDeletedEvent = "threads.ThreadDeleted"
+	ThreadRestoredEvent = "threads.ThreadRestored"
 	ThreadUpdatedEvent = "threads.ThreadUpdated"
 	ThreadPublishEvent = "threads.ThreadPublished"
 	ThreadPrivateEvent = "threads.ThreadPrivated"
@@ -91,6 +92,24 @@ func DeleteThread(id, userID int64) (ddd.Event, error) {
 	}
 
 	return ddd.NewEvent(ThreadDeletedEvent, &ThreadDeleted{
+		ID:      id,
+		UserID:  userID,
+	}), nil
+}
+
+type ThreadRestored struct {
+	ID       int64
+	UserID   int64
+}
+
+func (ThreadRestored) Key() string { return ThreadRestoredEvent }
+
+func RestoreThread(id, userID int64) (ddd.Event, error) {
+	if id == 0 {
+		return nil, ErrIDRequired
+	}
+
+	return ddd.NewEvent(ThreadRestoredEvent, &ThreadRestored{
 		ID:      id,
 		UserID:  userID,
 	}), nil

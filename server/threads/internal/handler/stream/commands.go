@@ -31,6 +31,8 @@ func (h commandHandlers) HandleCommand(ctx context.Context, cmd ddd.Command) (dd
 	switch cmd.CommandName() {
 	case pkg.CreateThreadCommand:
 		return h.doCreateThread(ctx, cmd)
+	case pkg.RestoreThreadCommand:
+		return h.doRestoreThread(ctx, cmd)
 	}
 
 	return nil, nil
@@ -43,4 +45,13 @@ func (h commandHandlers) doCreateThread(ctx context.Context, cmd ddd.Command) (d
 	}
 
 	return nil, h.threads.CreateThread(ctx, m.ThreadId, m.UserId, m.ParentId, m.Name, "", "", true)
+}
+
+func (h commandHandlers) doRestoreThread(ctx context.Context, cmd ddd.Command) (ddd.Reply, error) {
+	m := &threads.RestoreThread{}
+	if err := proto.Unmarshal(cmd.Data(), m); err != nil {
+		return nil, err
+	}
+
+	return nil, h.threads.RestoreThread(ctx, m.ThreadId, m.UserId)
 }

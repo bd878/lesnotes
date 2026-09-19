@@ -134,6 +134,9 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	container.AddSingleton("createMessageSaga", func(c di.Container) (any, error) {
 		return saga.NewCreateMessageSaga(cfg.NodeName), nil
 	})
+	container.AddSingleton("deleteMessageSaga", func(c di.Container) (any, error) {
+		return saga.NewDeleteMessageSaga(cfg.NodeName), nil
+	})
 	container.AddScoped("tx", func(c di.Container) (any, error) {
 		pool := c.Get("db").(*pgxpool.Pool)
 		return pool.BeginTx(ctx, pgx.TxOptions{})
@@ -184,8 +187,18 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 			c.Get("commandStream").(am.CommandStream),
 		), nil
 	})
+	container.AddScoped("deleteMessageOrchestrator", func(c di.Container) (any, error) {
+		return sec.NewOrchestrator(
+			c.Get("deleteMessageSaga").(sec.Saga),
+			c.Get("sagaRepo").(sec.SagaRepository),
+			c.Get("commandStream").(am.CommandStream),
+		), nil
+	})
 	container.AddScoped("sagaEventHandlers", func(c di.Container) (any, error) {
-		return saga.NewEventHandlers(c.Get("createMessageOrchestrator").(sec.Orchestrator)), nil
+		return saga.NewEventHandlers(
+			c.Get("createMessageOrchestrator").(sec.Orchestrator),
+			c.Get("deleteMessageOrchestrator").(sec.Orchestrator),
+		), nil
 	})
 
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
