@@ -655,7 +655,219 @@ func (r *ThreadsRepository) PublishThread(ctx context.Context, id, userID int64,
 }
 
 func (r *ThreadsRepository) RestoreThread(ctx context.Context, id, userID int64) (err error) {
-	/* TODO: implement */
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			fmt.Fprintf(os.Stderr, "[RestoreThread]: rollback with error: %v\n", err)
+			err = tx.Rollback(ctx)
+		default:
+			err = tx.Commit(ctx)
+		}
+	}()
+
+	selectThread := "SELECT parent_id, next_id, prev_id FROM %s WHERE user_id = $1 AND id = $2 AND deleted = true"
+
+	var parentID, nextID, prevID int64
+	err = tx.QueryRow(ctx, r.table(selectThread), userID, id).Scan(&parentID, &nextID, &prevID)
+	if err != nil {
+		slog.Debug("cannot select thread")
+		return
+	}
+
+	if nextID == 0 && prevID != 0 {
+		return r.restoreLastThread(ctx, tx, id, userID, parentID, prevID)
+	}
+	if prevID == 0 && nextID != 0 {
+		return r.restoreFirstThread(ctx, tx, id, userID, parentID, nextID)
+	}
+	if nextID != 0 && prevID != 0 {
+		return r.restoreMiddleThread(ctx, tx, id, userID, parentID, nextID, prevID)
+	}
+
+	setRestored := "UPDATE %s SET deleted = false WHERE user_id = $1 AND id = $2"
+	_, err = tx.Exec(ctx, r.table(setRestored), userID, id)
+	if err != nil {
+		slog.Debug("cannot mark thread restored", slog.Int64("thread_id", id), slog.Int64("user_id", userID))
+	}
+
+	return
+}
+
+func (r *ThreadsRepository) restoreLastThread(ctx context.Context, tx pgx.Tx, id, userID, parentID, prevID int64) (err error) {
+
+	updateMe := "UPDATE %s SET prev_id = $4 WHERE user_id = $1 AND id = $2 AND parent_id = $3"
+	selectPrevNext := "SELECT next_id FROM %s WHERE user_id = $1 AND parent_id = $2 AND id = $3 AND deleted = false"
+	updateLastThread := "UPDATE %s SET next_id = $4 WHERE user_id = $1 AND id = $2 AND parent_id = $3"
+
+	var nextID int64
+	err = tx.QueryRow(ctx, r.table(selectPrevNext), userID, parentID, prevID).Scan(&nextID)
+	if err != nil {
+		slog.Debug("cannot select last")
+		return
+	}
+
+	// we are still the last
+	if nextID == 0 {
+		_, err = tx.Exec(ctx, r.table(updateLastThread), userID, prevID, parentID, id)
+		if err != nil {
+			slog.Debug("cannot update prev thread")
+			return
+		}
+
+		_, err = tx.Exec(ctx, r.table(updateMe), userID, id, parentID, prevID)
+		if err != nil {
+			slog.Debug("cannot update me")
+		}
+	} else {
+	// there is a new last thread (not we), link us with it
+		selectLastThread := "SELECT id FROM %s WHERE user_id = $1 AND parent_id = $2 AND next_id = 0 AND deleted = false"
+
+		var lastID int64
+		err = tx.QueryRow(ctx, r.table(selectLastThread), userID, parentID).Scan(&lastID)
+		if err != nil {
+			slog.Debug("cannot select last thread")
+			return
+		}
+
+		_, err = tx.Exec(ctx, r.table(updateLastThread), userID, lastID, parentID, id)
+		if err != nil {
+			slog.Debug("cannot update last thread")
+			return
+		}
+
+		_, err = tx.Exec(ctx, r.table(updateMe), userID, id, parentID, lastID)
+		if err != nil {
+			slog.Debug("cannot update me")
+		}
+	}
+
+	return
+
+}
+
+func (r *ThreadsRepository) restoreFirstThread(ctx context.Context, tx pgx.Tx, id, userID, parentID, nextID int64) (err error) {
+
+	updateFirstThread := "UPDATE %s SET prev_id = $4 WHERE user_id = $1 AND id = $2 AND parent_id = $3"
+	updateMe := "UPDATE %s SET next_id = $4 WHERE user_id = $1 AND id = $2 AND parent_id = $3"
+	selectNextPrev := "SELECT prev_id FROM %s WHERE user_id = $1 AND parent_id = $2 AND id = $3 AND deleted = false"
+
+	var prevID int64
+	err = tx.QueryRow(ctx, r.table(selectNextPrev), userID, parentID, nextID).Scan(&prevID)
+	if err != nil {
+		slog.Debug("cannot select prev")
+		return
+	}
+
+	// we are still the first
+	if prevID == 0 {
+		_, err = tx.Exec(ctx, r.table(updateFirstThread), userID, nextID, parentID, id)
+		if err != nil {
+			slog.Debug("cannot update next thread")
+			return
+		}
+
+		_, err = tx.Exec(ctx, r.table(updateMe), userID, id, parentID, nextID)
+		if err != nil {
+			slog.Debug("cannot update me")
+		}
+	} else {
+	// there is a new first thread (not we), move us on top
+
+		selectFirstThread := "SELECT id FROM %s WHERE user_id = $1 AND parent_id = $2 AND prev_id = 0 AND deleted = false"
+
+		var firstID int64
+		err = tx.QueryRow(ctx, r.table(selectFirstThread), userID, parentID).Scan(&firstID)
+		if err != nil {
+			slog.Debug("cannot select first thread")
+			return
+		}
+
+		_, err = tx.Exec(ctx, r.table(updateFirstThread), userID, firstID, parentID, id)
+		if err != nil {
+			slog.Debug("cannot update first thread")
+			return
+		}
+
+		_, err = tx.Exec(ctx, r.table(updateMe), userID, id, parentID, firstID)
+		if err != nil {
+			slog.Debug("cannot update me")
+		}
+	}
+
+	return
+
+}
+
+func (r *ThreadsRepository) restoreMiddleThread(ctx context.Context, tx pgx.Tx, id, userID, parentID, nextID, prevID int64) (err error) {
+
+	selectNextPrev := "SELECT prev_id FROM %s WHERE user_id = $1 AND parent_id = $2 AND id = $3 AND deleted = false"
+
+	var thisPrevID int64
+	err = tx.QueryRow(ctx, r.table(selectNextPrev), userID, parentID, nextID).Scan(&thisPrevID)
+	if err != nil {
+		slog.Debug("cannot select prev")
+		return
+	}
+
+	// we are still between these prev and next threads
+	if thisPrevID == prevID {
+		updatePrev := "UPDATE %s SET next_id = $4 WHERE user_id = $1 AND parent_id = $2 AND id = $3 AND deleted = false"
+		updateNext := "UPDATE %s SET prev_id = $4 WHERE user_id = $1 AND parent_id = $2 AND id = $3 AND deleted = false"
+		updateMe := "UPDATE %s SET prev_id = $4, next_id = $5 WHERE user_id = $1 AND parent_id = $2 AND id = $3"
+
+		_, err = tx.Exec(ctx, r.table(updatePrev), userID, parentID, prevID, id)
+		if err != nil {
+			slog.Debug("cannot update prev thread")
+			return
+		}
+
+		_, err = tx.Exec(ctx, r.table(updateNext), userID, parentID, nextID, id)
+		if err != nil {
+			slog.Debug("cannot update next thread")
+			return
+		}
+
+		_, err = tx.Exec(ctx, r.table(updateMe), userID, parentID, id, prevID, nextID)
+		if err != nil {
+			slog.Debug("cannot update me")
+		}
+	} else {
+	// there is a new thread between prev and next, move us on top
+
+		selectLast := "SELECT id FROM %s WHERE user_id = $1 AND parent_id = $2 AND next_id = 0 AND deleted = false"
+		updateLast := "UPDATE %s SET next_id = $4 WHERE user_id = $1 AND parent_id = $2 AND id = $3 AND deleted = false"
+		updateMe := "UPDATE %s SET prev_id = $4 WHERE user_id = $1 AND parent_id = $2 AND id = $3"
+
+		var lastID int64
+		err = tx.QueryRow(ctx, r.table(selectLast), userID, parentID).Scan(&lastID)
+		if err != nil {
+			slog.Debug("cannot select last thread")
+			return
+		}
+
+		_, err = tx.Exec(ctx, r.table(updateLast), userID, parentID, lastID, id)
+		if err != nil {
+			slog.Debug("cannot update last")
+			return
+		}
+
+		_, err = tx.Exec(ctx, r.table(updateMe), userID, parentID, id, lastID)
+		if err != nil {
+			slog.Debug("cannot update me")
+		}
+	}
+
+	return
+
 }
 
 func (r *ThreadsRepository) DeleteThread(ctx context.Context, id, userID int64) (err error) {

@@ -103,6 +103,7 @@ type ThreadSnapshotItem struct {
 	UpdatedAt      string                 `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	Title          string                 `protobuf:"bytes,12,opt,name=title,proto3" json:"title,omitempty"`
 	PrivateMessage bool                   `protobuf:"varint,13,opt,name=private_message,json=privateMessage,proto3" json:"private_message,omitempty"`
+	Deleted        bool                   `protobuf:"varint,14,opt,name=deleted,proto3" json:"deleted,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -224,6 +225,13 @@ func (x *ThreadSnapshotItem) GetTitle() string {
 func (x *ThreadSnapshotItem) GetPrivateMessage() bool {
 	if x != nil {
 		return x.PrivateMessage
+	}
+	return false
+}
+
+func (x *ThreadSnapshotItem) GetDeleted() bool {
+	if x != nil {
+		return x.Deleted
 	}
 	return false
 }
@@ -1184,7 +1192,7 @@ const file_protos_threads_proto_rawDesc = "" +
 	"threads.v1\x1a\x18protos/distributed.proto\"S\n" +
 	"\x0fThreadsSnapshot\x128\n" +
 	"\x06thread\x18\x01 \x01(\v2\x1e.threads.v1.ThreadSnapshotItemH\x00R\x06threadB\x06\n" +
-	"\x04Item\"\xef\x02\n" +
+	"\x04Item\"\x89\x03\n" +
 	"\x12ThreadSnapshotItem\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x18\n" +
@@ -1201,7 +1209,8 @@ const file_protos_threads_proto_rawDesc = "" +
 	"\n" +
 	"updated_at\x18\v \x01(\tR\tupdatedAt\x12\x14\n" +
 	"\x05title\x18\f \x01(\tR\x05title\x12'\n" +
-	"\x0fprivate_message\x18\r \x01(\bR\x0eprivateMessage\"\xe3\x02\n" +
+	"\x0fprivate_message\x18\r \x01(\bR\x0eprivateMessage\x12\x18\n" +
+	"\adeleted\x18\x0e \x01(\bR\adeleted\"\xe3\x02\n" +
 	"\x06Thread\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x18\n" +

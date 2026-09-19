@@ -23,6 +23,11 @@ message ThreadDeleted {
 	int64  user_id = 2;
 }
 
+message ThreadRestored {
+	int64  id = 1;
+	int64  user_id = 2;
+}
+
 message ThreadUpdated {
 	int64  id = 1;
 	int64  user_id = 2;
@@ -63,6 +68,11 @@ message CreateThread {
 }
 
 message DeleteThread {
+	int64 thread_id = 1;
+	int64 user_id = 2;
+}
+
+message RestoreThread {
 	int64 thread_id = 1;
 	int64 user_id = 2;
 }

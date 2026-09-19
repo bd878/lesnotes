@@ -37,6 +37,7 @@ message ThreadSnapshotItem {
 	string   updated_at = 11;
 	string   title = 12;	
 	bool     private_message = 13;
+	bool     deleted = 14;
 }
 
 message Thread {
