@@ -1,3 +1,4 @@
+import { setTimeout } from "node:timers/promises";
 import * as is from '../third_party/is'
 import api from '../api'
 import models from '../api/models'
