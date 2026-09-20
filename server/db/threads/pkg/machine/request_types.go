@@ -11,4 +11,5 @@ const (
 	ReorderRequest
 	PublishMessagesRequest
 	PrivateMessagesRequest
+	RestoreRequest
 )

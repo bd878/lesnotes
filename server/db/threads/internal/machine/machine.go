@@ -1,12 +1,12 @@
 package machine
 
 import (
+	"log/slog"
 	"context"
 
 	"github.com/hashicorp/raft"
 	"google.golang.org/protobuf/proto"
 	"github.com/bd878/gallery/server/api/threads"
-	"log/slog"
 	"github.com/bd878/gallery/server/db/threads/pkg/machine"
 )
 
@@ -16,6 +16,7 @@ type ThreadsRepository interface {
 	PrivateThread(ctx context.Context, id, userID int64, updatedAt string) error
 	PublishThread(ctx context.Context, id, userID int64, updatedAt string) error
 	DeleteThread(ctx context.Context, id, userID int64) error
+	RestoreThread(ctx context.Context, id, userID int64) error
 	ReorderThread(ctx context.Context, id, userID, parentID, nextID, prevID int64, updatedAt string) (err error)
 	PrivateMessages(ctx context.Context, ids []int64, userID int64) error
 	PublishMessages(ctx context.Context, ids []int64, userID int64) error
@@ -51,6 +52,8 @@ func (f *Machine) Apply(record *raft.Log) interface{} {
 		return f.applyUpdate(buf[1:])
 	case machine.DeleteRequest:
 		return f.applyDelete(buf[1:])
+	case machine.RestoreRequest:
+		return f.applyRestore(buf[1:])
 	case machine.PublishRequest:
 		return f.applyPublish(buf[1:])
 	case machine.PrivateRequest:
@@ -93,6 +96,13 @@ func (f *Machine) applyDelete(raw []byte) interface{} {
 	proto.Unmarshal(raw, &cmd)
 
 	return f.threadsRepo.DeleteThread(context.TODO(), cmd.Id, cmd.UserId)
+}
+
+func (f *Machine) applyRestore(raw []byte) interface{} {
+	var cmd threads.RestoreCommand
+	proto.Unmarshal(raw, &cmd)
+
+	return f.threadsRepo.RestoreThread(context.TODO(), cmd.Id, cmd.UserId)
 }
 
 func (f *Machine) applyPublish(raw []byte) interface{} {

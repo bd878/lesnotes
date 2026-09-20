@@ -32,7 +32,13 @@ func NewCommentsController(container di.Container, publisher ddd.EventPublisher[
 }
 
 func (s CommentsController) SendComment(ctx context.Context, id, userID, messageID int64, text string, metadata []byte) (err error) {
-	slog.Debug("save comment", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Int64("message_id", messageID), slog.String("text", text), slog.String("metadata", fmt.Sprintf("%v", metadata)))
+	slog.Debug("save comment",
+		slog.Int64("id", id),
+		slog.Int64("user_id", userID),
+		slog.Int64("message_id", messageID),
+		slog.String("text", text),
+		slog.String("metadata", fmt.Sprintf("%v", metadata)),
+	)
 
 	createdAt := time.Now().UTC().Format(time.RFC3339)
 	updatedAt := time.Now().UTC().Format(time.RFC3339)

@@ -51,6 +51,16 @@ func (s messagesControllerTx) DeleteMessages(ctx context.Context, ids []int64, u
 	return s.MessagesController.DeleteMessages(ctx, ids, userID)
 }
 
+func (s messagesControllerTx) RestoreMessage(ctx context.Context, id, userID int64) (err error) {
+	ctx = s.container.Scoped(ctx)
+	defer func(tx pgx.Tx) {
+		err = s.closeTx(tx, err)
+		slog.Debug(fmt.Sprintf("commit restore message transaction, err: %v", err))
+	}(di.Get(ctx, "tx").(pgx.Tx))
+
+	return s.MessagesController.RestoreMessage(ctx, id, userID)
+}
+
 func (s messagesControllerTx) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
 	ctx = s.container.Scoped(ctx)
 	defer func(tx pgx.Tx) {

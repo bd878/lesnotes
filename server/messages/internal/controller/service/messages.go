@@ -180,6 +180,36 @@ func (s MessagesController) DeleteMessages(ctx context.Context, ids []int64, use
 	return
 }
 
+func (s MessagesController) RestoreMessage(ctx context.Context, id, userID int64) (err error) {
+	slog.Debug("restore message", slog.Int64("id", id), slog.Int64("user_id", userID))
+
+	event, err := domain.RestoreMessage(id, userID)
+	if err != nil {
+		return err
+	}
+
+	err = s.publisher.Publish(ctx, event)
+	if err != nil {
+		return err
+	}
+
+	cmd, err := proto.Marshal(&messages.RestoreCommand{
+		Id: id,
+		UserId: userID,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = s.client.Apply(ctx, &api.Command{
+		ReqType: int32(machine.RestoreMessageRequest),
+		Cmd: cmd,
+		Duration: "10s",
+	})
+
+	return
+}
+
 func (s MessagesController) PublishMessages(ctx context.Context, ids []int64, userID int64) (err error) {
 	slog.Debug("publish messages", slog.String("ids", fmt.Sprintf("%v", ids)), slog.Int64("user_id", userID))
 

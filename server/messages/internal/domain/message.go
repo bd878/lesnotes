@@ -8,6 +8,7 @@ import (
 const (
 	MessageCreatedEvent = "messages.MessageCreated"
 	MessageDeletedEvent = "messages.MessageDeleted"
+	MessageRestoredEvent = "messages.MessageRestored"
 	// TODO: user deleted: delete all messages
 	MessageUpdatedEvent  = "messages.MessageUpdated"
 	MessagesPublishEvent = "messages.MessagesPublished"
@@ -64,6 +65,21 @@ func (MessageDeleted) Key() string { return MessageDeletedEvent }
 func DeleteMessage(id, userID int64) (ddd.Event, error) {
 	return ddd.NewEvent(MessageDeletedEvent, &MessageDeleted{
 		ID:     id,
+		UserID: userID,
+	}), nil
+}
+
+type MessageRestored struct {
+	ID int64
+	UserID int64
+	Name string
+}
+
+func (MessageRestored) Key() string { return MessageRestoredEvent }
+
+func RestoreMessage(id, userID int64) (ddd.Event, error) {
+	return ddd.NewEvent(MessageRestoredEvent, &MessageRestored{
+		ID: id,
 		UserID: userID,
 	}), nil
 }

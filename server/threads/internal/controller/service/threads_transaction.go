@@ -102,6 +102,16 @@ func (s *threadsControllerTx) DeleteThread(ctx context.Context, id, userID int64
 	return s.Controller.DeleteThread(ctx, id, userID)
 }
 
+func (s *threadsControllerTx) RestoreThread(ctx context.Context, id, userID int64) (err error) {
+	ctx = s.container.Scoped(ctx)
+	defer func(tx pgx.Tx) {
+		err = s.closeTx(tx, err)
+		slog.Debug(fmt.Sprintf("commit restore thread transaction, err: %v", err))
+	}(di.Get(ctx, "tx").(pgx.Tx))
+
+	return s.Controller.RestoreThread(ctx, id, userID)
+}
+
 func (s *threadsControllerTx) closeTx(tx pgx.Tx, err error) error {
 	ctx := context.Background()
 

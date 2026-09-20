@@ -34,22 +34,43 @@ func (r *MessagesRepository) Create(ctx context.Context, id int64, text string, 
 }
 
 func (r *MessagesRepository) Update(ctx context.Context, userID, id int64, text, title, name *string, updatedAt string) (err error) {
-	const query = "UPDATE %s SET text = $3, title = $4, name = $5, updated_at = $6 WHERE user_id = $1 AND id = $2"
+	const query = "UPDATE %s SET text = $3, title = $4, name = $5, updated_at = $6 WHERE user_id = $1 AND id = $2 AND deleted = false"
 
 	_, err = r.pool.Exec(ctx, r.table(query), userID, id, text, title, name, updatedAt)
 
 	return
 }
 
+func (r *MessagesRepository) RestoreMessage(ctx context.Context, userID, id int64) (err error) {
+	query := `
+UPDATE %s SET deleted = false
+WHERE id = $1 AND user_id = $2
+`
+
+	_, err = r.pool.Exec(ctx, r.table(query), id, userID)
+
+	return
+}
+
 func (r *MessagesRepository) DeleteMessage(ctx context.Context, userID, id int64) (err error) {
-	_, err = r.pool.Exec(ctx, r.table("DELETE FROM %s WHERE id = $1 AND user_id = $2"), id, userID)
+	query := `
+UPDATE %s SET deleted = true
+WHERE id = $1 AND user_id = $2
+`
+
+	_, err = r.pool.Exec(ctx, r.table(query), id, userID)
 
 	return
 }
 
 func (r *MessagesRepository) Publish(ctx context.Context, userID int64, ids []int64, updatedAt string) (err error) {
+	query := `
+UPDATE %s SET private = false, updated_at = $3
+WHERE user_id = $1 AND id = $2 AND deleted = false
+`
+
 	for _, id := range ids {
-		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = false, updated_at = $3 WHERE user_id = $1 AND id = $2"), userID, id, updatedAt)
+		_, err = r.pool.Exec(ctx, r.table(query), userID, id, updatedAt)
 		if err != nil {
 			return
 		}
@@ -59,8 +80,13 @@ func (r *MessagesRepository) Publish(ctx context.Context, userID int64, ids []in
 }
 
 func (r *MessagesRepository) Private(ctx context.Context, userID int64, ids []int64, updatedAt string) (err error) {
+	query := `
+UPDATE %s SET private = true, updated_at = $3
+WHERE user_id = $1 AND id = $2 AND deleted = false
+`
+
 	for _, id := range ids {
-		_, err = r.pool.Exec(ctx, r.table("UPDATE %s SET private = true, updated_at = $3 WHERE user_id = $1 AND id = $2"), userID, id, updatedAt)
+		_, err = r.pool.Exec(ctx, r.table(query), userID, id, updatedAt)
 		if err != nil {
 			return
 		}
@@ -94,7 +120,7 @@ func (r *MessagesRepository) ReadByID(ctx context.Context, userIDs []int64, id i
 	}
 
 	err = r.pool.QueryRow(ctx, r.table(`
-SELECT user_id, created_at, updated_at, text, private, name, title FROM %s WHERE id = $1 AND (user_id IN (`+ids+`) OR private = false)
+SELECT user_id, created_at, updated_at, text, private, name, title FROM %s WHERE id = $1 AND deleted = false AND (user_id IN (`+ids+`) OR private = false)
 `), append([]interface{}{id}, list...)...).Scan(&message.UserId, &createdAt, &updatedAt, &message.Text, &message.Private, &message.Name, &message.Title)
 	if err != nil {
 		return
@@ -124,7 +150,7 @@ func (r *MessagesRepository) ReadByName(ctx context.Context, userIDs []int64, na
 	}
 
 	err = r.pool.QueryRow(ctx, r.table(`
-SELECT id, user_id, created_at, updated_at, text, private, title FROM %s WHERE name = $1 AND (user_id IN (`+ids+`) OR private = false)
+SELECT id, user_id, created_at, updated_at, text, private, title FROM %s WHERE name = $1 AND deleted = false AND (user_id IN (`+ids+`) OR private = false)
 `), append([]interface{}{name}, list...)...).Scan(&message.Id, &message.UserId, &createdAt, &updatedAt, &message.Text, &message.Private, &message.Title)
 	if err != nil {
 		return
@@ -222,7 +248,7 @@ func (r *MessagesRepository) DeleteUserMessages(ctx context.Context, userID int6
 		}
 	}()
 
-	_, err = tx.Exec(ctx, r.table("DELETE FROM %s WHERE user_id = $1"), userID)
+	_, err = tx.Exec(ctx, r.table("UPDATE %s SET deleted = true WHERE user_id = $1"), userID)
 	return
 }
 
@@ -248,7 +274,10 @@ func (r *MessagesRepository) ReadMessages(ctx context.Context, userID int64, lim
 
 	var rows pgx.Rows
 
-	query := "SELECT id, user_id, name, text, private, created_at, updated_at, title FROM %s WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3"
+	query := `
+SELECT id, user_id, name, text, private, created_at, updated_at, title FROM %s
+WHERE user_id = $1 AND deleted = false ORDER BY created_at DESC LIMIT $2 OFFSET $3
+`
 
 	rows, err = tx.Query(ctx, r.table(query), userID, limit, offset)
 	defer rows.Close()
@@ -277,11 +306,16 @@ func (r *MessagesRepository) ReadMessages(ctx context.Context, userID int64, lim
 		return
 	}
 
+	countQuery := `
+SELECT COUNT(*) FROM %s
+WHERE user_id = $1 AND deleted = false
+`
+
 	if int32(len(list)) < limit {
 		isLastPage = true
 	} else {
 		var count int32
-		err = tx.QueryRow(ctx, r.table("SELECT COUNT(*) FROM %s WHERE user_id = $1"), userID).Scan(&count)
+		err = tx.QueryRow(ctx, r.table(countQuery), userID).Scan(&count)
 		if err != nil {
 			return
 		}

@@ -24,6 +24,11 @@ message MessageDeleted {
 	int64   user_id = 2;
 }
 
+message MessageRestored {
+	int64   id = 1;
+	int64   user_id = 2;
+}
+
 message MessageUpdated {
 	int64   id = 1;
 	int64   user_id = 2;
@@ -49,6 +54,11 @@ message MessagesPrivated {
 // commands
 
 message DeleteMessage {
+	int64 id = 1;
+	int64 user_id = 2;
+}
+
+message RestoreMessage {
 	int64 id = 1;
 	int64 user_id = 2;
 }

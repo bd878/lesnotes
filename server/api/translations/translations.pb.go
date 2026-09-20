@@ -30,6 +30,7 @@ type TranslationSnapshotItem struct {
 	Title         string                 `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`
 	CreatedAt     string                 `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt     string                 `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Deleted       bool                   `protobuf:"varint,7,opt,name=deleted,proto3" json:"deleted,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -104,6 +105,13 @@ func (x *TranslationSnapshotItem) GetUpdatedAt() string {
 		return x.UpdatedAt
 	}
 	return ""
+}
+
+func (x *TranslationSnapshotItem) GetDeleted() bool {
+	if x != nil {
+		return x.Deleted
+	}
+	return false
 }
 
 type Translation struct {
@@ -486,7 +494,7 @@ var File_protos_translations_proto protoreflect.FileDescriptor
 
 const file_protos_translations_proto_rawDesc = "" +
 	"\n" +
-	"\x19protos/translations.proto\x12\x0ftranslations.v1\x1a\x18protos/distributed.proto\"\xa5\x01\n" +
+	"\x19protos/translations.proto\x12\x0ftranslations.v1\x1a\x18protos/distributed.proto\"\xbf\x01\n" +
 	"\x17TranslationSnapshotItem\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04lang\x18\x02 \x01(\tR\x04lang\x12\x12\n" +
@@ -495,7 +503,8 @@ const file_protos_translations_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x05 \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\x06 \x01(\tR\tupdatedAt\"\x99\x01\n" +
+	"updated_at\x18\x06 \x01(\tR\tupdatedAt\x12\x18\n" +
+	"\adeleted\x18\a \x01(\bR\adeleted\"\x99\x01\n" +
 	"\vTranslation\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04lang\x18\x02 \x01(\tR\x04lang\x12\x12\n" +

@@ -8,10 +8,12 @@ const (
 	ThreadCreatedEvent   = "threadsapi.ThreadCreated"
 	ThreadDeletedEvent   = "threadsapi.ThreadDeleted"
 	ThreadUpdatedEvent   = "threadsapi.ThreadUpdated"
+	ThreadRestoredEvent  = "threadsapi.ThreadRestored"
 	ThreadPublishedEvent   = "threadsapi.ThreadPublished"
 	ThreadPrivatedEvent   = "threadsapi.ThreadPrivated"
 	ThreadParentChangedEvent  = "threadsapi.ThreadParentChangedEvent"
 
 	CreateThreadCommand = "threadsapi.CreateCommand"
 	DeleteThreadCommand = "threadsapi.DeleteCommand"
+	RestoreThreadCommand = "threadsapi.RestoreCommand"
 )

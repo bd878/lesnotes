@@ -9,12 +9,14 @@ const (
 
 	MessageCreatedEvent  = "messagesapi.MessageCreated"
 	MessageDeletedEvent  = "messagesapi.MessageDeleted"
+	MessageRestoredEvent = "messagesapi.MessageRestored"
 	MessageUpdatedEvent  = "messagesapi.MessageUpdated"
 	MessagesPublishEvent = "messagesapi.MessagesPublished"
 	MessagesPrivateEvent = "messagesapi.MessagesPrivated"
 
 	TranslationCreatedEvent = "messagesapi.TranslationCreated"
 	TranslationDeletedEvent = "messagesapi.TranslationDeleted"
+	TranslationRestoredEvent = "messagesapi.TranslationRestored"
 	TranslationUpdatedEvent = "messagesapi.TranslationUpdated"
 
 	CommentCreatedEvent         = "messagesapi.CommentCreated"
@@ -23,4 +25,5 @@ const (
 	MessageCommentsDeletedEvent = "messagesapi.MessageCommentsDeleted"
 
 	DeleteMessageCommand = "messagesapi.DeleteMessage"
+	RestoreMessageCommand = "messagesapi.RestoreMessage"
 )

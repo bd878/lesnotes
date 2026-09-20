@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"github.com/jackc/pgx/v5"
 	"github.com/bd878/gallery/server/internal/am"
-	"github.com/bd878/gallery/server/internal/sec"
+	"github.com/bd878/gallery/server/internal/ddd"
 	"github.com/bd878/gallery/server/internal/di"
 )
 
@@ -26,11 +26,14 @@ func RegisterReplyHandlersTx(c di.Container) error {
 			}
 		}(di.Get(ctx, "tx").(pgx.Tx))
 
-		slog.Debug("handle reply", slog.String("name", msg.MessageName()))
+		slog.Debug("handle reply",
+			slog.String("name", msg.MessageName()),
+			slog.String("subject", msg.Subject()),
+		)
 
 		replyHandlers := am.RawMessageHandlerWithMiddleware(
 			am.NewReplyMessageHandler(
-				di.Get(ctx, "createMessageOrchestrator").(sec.Orchestrator),
+				di.Get(ctx, "replyEventHandlers").(ddd.ReplyHandler[am.ReplyMessage]),
 			),
 			di.Get(ctx, "inboxMiddleware").(am.RawMessageHandlerMiddleware),
 		)
@@ -39,7 +42,6 @@ func RegisterReplyHandlersTx(c di.Container) error {
 	})
 
 	js := c.Get("js").(am.RawMessageStream)
-	saga := c.Get("createMessageSaga").(sec.Saga)
 
-	return js.Subscribe(saga.ReplyTopic(), replyMsgHandler)
+	return js.Subscribe(messageReplyChannel + ".>", replyMsgHandler)
 }

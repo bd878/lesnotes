@@ -29,6 +29,8 @@ func (h commandHandlers) HandleCommand(ctx context.Context, cmd ddd.Command) (dd
 	switch cmd.CommandName() {
 	case pkg.DeleteMessageCommand:
 		return h.doDeleteMessage(ctx, cmd)
+	case pkg.RestoreMessageCommand:
+		return h.doRestoreMessage(ctx, cmd)
 	}
 
 	return nil, nil
@@ -41,4 +43,13 @@ func (h commandHandlers) doDeleteMessage(ctx context.Context, cmd ddd.Command) (
 	}
 
 	return nil, h.messages.DeleteMessages(ctx, []int64{m.Id}, m.UserId)
+}
+
+func (h commandHandlers) doRestoreMessage(ctx context.Context, cmd ddd.Command) (ddd.Reply, error) {
+	m := &messages.RestoreMessage{}
+	if err := proto.Unmarshal(cmd.Data(), m); err != nil {
+		return nil, err
+	}
+
+	return nil, h.messages.RestoreMessage(ctx, m.Id, m.UserId)
 }

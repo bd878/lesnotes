@@ -28,7 +28,7 @@ func (r *TranslationsRepository) SaveTranslation(ctx context.Context, messageID 
 }
 
 func (r *TranslationsRepository) UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string, updatedAt string) (err error) {
-	const query = "UPDATE %s SET title = $3, text = $4, updated_at = $5 WHERE message_id = $1 AND lang = $2"
+	const query = "UPDATE %s SET title = $3, text = $4, updated_at = $5 WHERE message_id = $1 AND lang = $2 AND deleted = false"
 
 	_, err = r.pool.Exec(ctx, r.table(query), messageID, lang, title, text, updatedAt)
 
@@ -36,7 +36,17 @@ func (r *TranslationsRepository) UpdateTranslation(ctx context.Context, messageI
 }
 
 func (r *TranslationsRepository) DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error) {
-	const query = "DELETE FROM %s WHERE message_id = $1 AND lang = $2"
+	const query = "UPDATE %s SET deleted = true WHERE message_id = $1 AND lang = $2"
+
+	_, err = r.pool.Exec(ctx, r.table(query), messageID, lang)
+
+	return
+}
+
+func (r *TranslationsRepository) RestoreTranslation(ctx context.Context, messageID int64, lang string) (err error) {
+	query := `
+UPDATE %s SET deleted = false WHERE message_id = $1 AND lang = $2
+`
 
 	_, err = r.pool.Exec(ctx, r.table(query), messageID, lang)
 
@@ -44,7 +54,7 @@ func (r *TranslationsRepository) DeleteTranslation(ctx context.Context, messageI
 }
 
 func (r *TranslationsRepository) ReadTranslation(ctx context.Context, messageID int64, lang string) (translation *translations.Translation, err error) {
-	const query = "SELECT title, text, created_at, updated_at FROM %s WHERE message_id = $1 AND lang = $2"
+	const query = "SELECT title, text, created_at, updated_at FROM %s WHERE message_id = $1 AND lang = $2 AND deleted = false"
 
 	var createdAt, updatedAt time.Time
 
@@ -65,7 +75,7 @@ func (r *TranslationsRepository) ReadTranslation(ctx context.Context, messageID 
 }
 
 func (r *TranslationsRepository) ListTranslations(ctx context.Context, messageID int64) (list []*translations.Translation, err error) {
-	const query = "SELECT lang, title, text, created_at, updated_at FROM %s WHERE message_id = $1"
+	const query = "SELECT lang, title, text, created_at, updated_at FROM %s WHERE message_id = $1 AND deleted = false"
 
 	rows, err := r.pool.Query(ctx, r.table(query), messageID)
 	defer rows.Close()
@@ -98,7 +108,7 @@ func (r *TranslationsRepository) ListTranslations(ctx context.Context, messageID
 }
 
 func (r *TranslationsRepository) ReadMessageTranslations(ctx context.Context, messageID int64) (previews []*translations.TranslationPreview, err error) {
-	const query = "SELECT lang, title, created_at, updated_at FROM %s WHERE message_id = $1"
+	const query = "SELECT lang, title, created_at, updated_at FROM %s WHERE message_id = $1 AND deleted = false"
 
 	rows, err := r.pool.Query(ctx, r.table(query), messageID)
 	defer rows.Close()
@@ -131,7 +141,15 @@ func (r *TranslationsRepository) ReadMessageTranslations(ctx context.Context, me
 }
 
 func (r *TranslationsRepository) DeleteMessage(ctx context.Context, messageID int64) (err error) {
-	const query = "DELETE FROM %s WHERE message_id = $1"
+	query := "UPDATE %s SET deleted = true WHERE message_id = $1"
+
+	_, err = r.pool.Exec(ctx, r.table(query), messageID)
+
+	return
+}
+
+func (r *TranslationsRepository) RestoreMessage(ctx context.Context, messageID int64) (err error) {
+	query := "UPDATE %s SET deleted = false WHERE message_id = $1"
 
 	_, err = r.pool.Exec(ctx, r.table(query), messageID)
 

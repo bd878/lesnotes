@@ -181,6 +181,58 @@ func (x *ThreadDeleted) GetUserId() int64 {
 	return 0
 }
 
+type ThreadRestored struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ThreadRestored) Reset() {
+	*x = ThreadRestored{}
+	mi := &file_protos_threads_messages_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ThreadRestored) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ThreadRestored) ProtoMessage() {}
+
+func (x *ThreadRestored) ProtoReflect() protoreflect.Message {
+	mi := &file_protos_threads_messages_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ThreadRestored.ProtoReflect.Descriptor instead.
+func (*ThreadRestored) Descriptor() ([]byte, []int) {
+	return file_protos_threads_messages_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ThreadRestored) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *ThreadRestored) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
 type ThreadUpdated struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -195,7 +247,7 @@ type ThreadUpdated struct {
 
 func (x *ThreadUpdated) Reset() {
 	*x = ThreadUpdated{}
-	mi := &file_protos_threads_messages_proto_msgTypes[2]
+	mi := &file_protos_threads_messages_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -207,7 +259,7 @@ func (x *ThreadUpdated) String() string {
 func (*ThreadUpdated) ProtoMessage() {}
 
 func (x *ThreadUpdated) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_messages_proto_msgTypes[2]
+	mi := &file_protos_threads_messages_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -220,7 +272,7 @@ func (x *ThreadUpdated) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ThreadUpdated.ProtoReflect.Descriptor instead.
 func (*ThreadUpdated) Descriptor() ([]byte, []int) {
-	return file_protos_threads_messages_proto_rawDescGZIP(), []int{2}
+	return file_protos_threads_messages_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ThreadUpdated) GetId() int64 {
@@ -276,7 +328,7 @@ type ThreadPublished struct {
 
 func (x *ThreadPublished) Reset() {
 	*x = ThreadPublished{}
-	mi := &file_protos_threads_messages_proto_msgTypes[3]
+	mi := &file_protos_threads_messages_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -288,7 +340,7 @@ func (x *ThreadPublished) String() string {
 func (*ThreadPublished) ProtoMessage() {}
 
 func (x *ThreadPublished) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_messages_proto_msgTypes[3]
+	mi := &file_protos_threads_messages_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -301,7 +353,7 @@ func (x *ThreadPublished) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ThreadPublished.ProtoReflect.Descriptor instead.
 func (*ThreadPublished) Descriptor() ([]byte, []int) {
-	return file_protos_threads_messages_proto_rawDescGZIP(), []int{3}
+	return file_protos_threads_messages_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ThreadPublished) GetId() int64 {
@@ -336,7 +388,7 @@ type ThreadPrivated struct {
 
 func (x *ThreadPrivated) Reset() {
 	*x = ThreadPrivated{}
-	mi := &file_protos_threads_messages_proto_msgTypes[4]
+	mi := &file_protos_threads_messages_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -348,7 +400,7 @@ func (x *ThreadPrivated) String() string {
 func (*ThreadPrivated) ProtoMessage() {}
 
 func (x *ThreadPrivated) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_messages_proto_msgTypes[4]
+	mi := &file_protos_threads_messages_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -361,7 +413,7 @@ func (x *ThreadPrivated) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ThreadPrivated.ProtoReflect.Descriptor instead.
 func (*ThreadPrivated) Descriptor() ([]byte, []int) {
-	return file_protos_threads_messages_proto_rawDescGZIP(), []int{4}
+	return file_protos_threads_messages_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ThreadPrivated) GetId() int64 {
@@ -396,7 +448,7 @@ type ThreadParentChanged struct {
 
 func (x *ThreadParentChanged) Reset() {
 	*x = ThreadParentChanged{}
-	mi := &file_protos_threads_messages_proto_msgTypes[5]
+	mi := &file_protos_threads_messages_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -408,7 +460,7 @@ func (x *ThreadParentChanged) String() string {
 func (*ThreadParentChanged) ProtoMessage() {}
 
 func (x *ThreadParentChanged) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_messages_proto_msgTypes[5]
+	mi := &file_protos_threads_messages_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -421,7 +473,7 @@ func (x *ThreadParentChanged) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ThreadParentChanged.ProtoReflect.Descriptor instead.
 func (*ThreadParentChanged) Descriptor() ([]byte, []int) {
-	return file_protos_threads_messages_proto_rawDescGZIP(), []int{5}
+	return file_protos_threads_messages_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ThreadParentChanged) GetId() int64 {
@@ -460,7 +512,7 @@ type CreateThread struct {
 
 func (x *CreateThread) Reset() {
 	*x = CreateThread{}
-	mi := &file_protos_threads_messages_proto_msgTypes[6]
+	mi := &file_protos_threads_messages_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -472,7 +524,7 @@ func (x *CreateThread) String() string {
 func (*CreateThread) ProtoMessage() {}
 
 func (x *CreateThread) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_messages_proto_msgTypes[6]
+	mi := &file_protos_threads_messages_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -485,7 +537,7 @@ func (x *CreateThread) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateThread.ProtoReflect.Descriptor instead.
 func (*CreateThread) Descriptor() ([]byte, []int) {
-	return file_protos_threads_messages_proto_rawDescGZIP(), []int{6}
+	return file_protos_threads_messages_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *CreateThread) GetThreadId() int64 {
@@ -547,7 +599,7 @@ type DeleteThread struct {
 
 func (x *DeleteThread) Reset() {
 	*x = DeleteThread{}
-	mi := &file_protos_threads_messages_proto_msgTypes[7]
+	mi := &file_protos_threads_messages_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -559,7 +611,7 @@ func (x *DeleteThread) String() string {
 func (*DeleteThread) ProtoMessage() {}
 
 func (x *DeleteThread) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_threads_messages_proto_msgTypes[7]
+	mi := &file_protos_threads_messages_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -572,7 +624,7 @@ func (x *DeleteThread) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteThread.ProtoReflect.Descriptor instead.
 func (*DeleteThread) Descriptor() ([]byte, []int) {
-	return file_protos_threads_messages_proto_rawDescGZIP(), []int{7}
+	return file_protos_threads_messages_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *DeleteThread) GetThreadId() int64 {
@@ -583,6 +635,58 @@ func (x *DeleteThread) GetThreadId() int64 {
 }
 
 func (x *DeleteThread) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+type RestoreThread struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ThreadId      int64                  `protobuf:"varint,1,opt,name=thread_id,json=threadId,proto3" json:"thread_id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RestoreThread) Reset() {
+	*x = RestoreThread{}
+	mi := &file_protos_threads_messages_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RestoreThread) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RestoreThread) ProtoMessage() {}
+
+func (x *RestoreThread) ProtoReflect() protoreflect.Message {
+	mi := &file_protos_threads_messages_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RestoreThread.ProtoReflect.Descriptor instead.
+func (*RestoreThread) Descriptor() ([]byte, []int) {
+	return file_protos_threads_messages_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *RestoreThread) GetThreadId() int64 {
+	if x != nil {
+		return x.ThreadId
+	}
+	return 0
+}
+
+func (x *RestoreThread) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
 	}
@@ -607,6 +711,9 @@ const file_protos_threads_messages_proto_rawDesc = "" +
 	"updated_at\x18\b \x01(\tR\tupdatedAt\x12\x14\n" +
 	"\x05title\x18\t \x01(\tR\x05title\"8\n" +
 	"\rThreadDeleted\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\"9\n" +
+	"\x0eThreadRestored\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\"\xd5\x01\n" +
 	"\rThreadUpdated\x12\x0e\n" +
@@ -648,6 +755,9 @@ const file_protos_threads_messages_proto_rawDesc = "" +
 	"\x06_title\"D\n" +
 	"\fDeleteThread\x12\x1b\n" +
 	"\tthread_id\x18\x01 \x01(\x03R\bthreadId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\"E\n" +
+	"\rRestoreThread\x12\x1b\n" +
+	"\tthread_id\x18\x01 \x01(\x03R\bthreadId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userIdB-Z+github.com/bd878/gallery/server/api/threadsb\x06proto3"
 
 var (
@@ -662,16 +772,18 @@ func file_protos_threads_messages_proto_rawDescGZIP() []byte {
 	return file_protos_threads_messages_proto_rawDescData
 }
 
-var file_protos_threads_messages_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_protos_threads_messages_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_protos_threads_messages_proto_goTypes = []any{
 	(*ThreadCreated)(nil),       // 0: threads_messages.v1.ThreadCreated
 	(*ThreadDeleted)(nil),       // 1: threads_messages.v1.ThreadDeleted
-	(*ThreadUpdated)(nil),       // 2: threads_messages.v1.ThreadUpdated
-	(*ThreadPublished)(nil),     // 3: threads_messages.v1.ThreadPublished
-	(*ThreadPrivated)(nil),      // 4: threads_messages.v1.ThreadPrivated
-	(*ThreadParentChanged)(nil), // 5: threads_messages.v1.ThreadParentChanged
-	(*CreateThread)(nil),        // 6: threads_messages.v1.CreateThread
-	(*DeleteThread)(nil),        // 7: threads_messages.v1.DeleteThread
+	(*ThreadRestored)(nil),      // 2: threads_messages.v1.ThreadRestored
+	(*ThreadUpdated)(nil),       // 3: threads_messages.v1.ThreadUpdated
+	(*ThreadPublished)(nil),     // 4: threads_messages.v1.ThreadPublished
+	(*ThreadPrivated)(nil),      // 5: threads_messages.v1.ThreadPrivated
+	(*ThreadParentChanged)(nil), // 6: threads_messages.v1.ThreadParentChanged
+	(*CreateThread)(nil),        // 7: threads_messages.v1.CreateThread
+	(*DeleteThread)(nil),        // 8: threads_messages.v1.DeleteThread
+	(*RestoreThread)(nil),       // 9: threads_messages.v1.RestoreThread
 }
 var file_protos_threads_messages_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -686,15 +798,15 @@ func file_protos_threads_messages_proto_init() {
 	if File_protos_threads_messages_proto != nil {
 		return
 	}
-	file_protos_threads_messages_proto_msgTypes[2].OneofWrappers = []any{}
-	file_protos_threads_messages_proto_msgTypes[6].OneofWrappers = []any{}
+	file_protos_threads_messages_proto_msgTypes[3].OneofWrappers = []any{}
+	file_protos_threads_messages_proto_msgTypes[7].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_protos_threads_messages_proto_rawDesc), len(file_protos_threads_messages_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

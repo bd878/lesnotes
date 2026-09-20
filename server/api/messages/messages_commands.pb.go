@@ -273,6 +273,58 @@ func (x *DeleteCommand) GetUserId() int64 {
 	return 0
 }
 
+type RestoreCommand struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RestoreCommand) Reset() {
+	*x = RestoreCommand{}
+	mi := &file_protos_messages_commands_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RestoreCommand) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RestoreCommand) ProtoMessage() {}
+
+func (x *RestoreCommand) ProtoReflect() protoreflect.Message {
+	mi := &file_protos_messages_commands_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RestoreCommand.ProtoReflect.Descriptor instead.
+func (*RestoreCommand) Descriptor() ([]byte, []int) {
+	return file_protos_messages_commands_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *RestoreCommand) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *RestoreCommand) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
 type DeleteUserMessagesCommand struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
@@ -282,7 +334,7 @@ type DeleteUserMessagesCommand struct {
 
 func (x *DeleteUserMessagesCommand) Reset() {
 	*x = DeleteUserMessagesCommand{}
-	mi := &file_protos_messages_commands_proto_msgTypes[3]
+	mi := &file_protos_messages_commands_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -294,7 +346,7 @@ func (x *DeleteUserMessagesCommand) String() string {
 func (*DeleteUserMessagesCommand) ProtoMessage() {}
 
 func (x *DeleteUserMessagesCommand) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_commands_proto_msgTypes[3]
+	mi := &file_protos_messages_commands_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -307,7 +359,7 @@ func (x *DeleteUserMessagesCommand) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteUserMessagesCommand.ProtoReflect.Descriptor instead.
 func (*DeleteUserMessagesCommand) Descriptor() ([]byte, []int) {
-	return file_protos_messages_commands_proto_rawDescGZIP(), []int{3}
+	return file_protos_messages_commands_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *DeleteUserMessagesCommand) GetUserId() int64 {
@@ -328,7 +380,7 @@ type PublishCommand struct {
 
 func (x *PublishCommand) Reset() {
 	*x = PublishCommand{}
-	mi := &file_protos_messages_commands_proto_msgTypes[4]
+	mi := &file_protos_messages_commands_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -340,7 +392,7 @@ func (x *PublishCommand) String() string {
 func (*PublishCommand) ProtoMessage() {}
 
 func (x *PublishCommand) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_commands_proto_msgTypes[4]
+	mi := &file_protos_messages_commands_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -353,7 +405,7 @@ func (x *PublishCommand) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PublishCommand.ProtoReflect.Descriptor instead.
 func (*PublishCommand) Descriptor() ([]byte, []int) {
-	return file_protos_messages_commands_proto_rawDescGZIP(), []int{4}
+	return file_protos_messages_commands_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *PublishCommand) GetIds() []int64 {
@@ -388,7 +440,7 @@ type PrivateCommand struct {
 
 func (x *PrivateCommand) Reset() {
 	*x = PrivateCommand{}
-	mi := &file_protos_messages_commands_proto_msgTypes[5]
+	mi := &file_protos_messages_commands_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -400,7 +452,7 @@ func (x *PrivateCommand) String() string {
 func (*PrivateCommand) ProtoMessage() {}
 
 func (x *PrivateCommand) ProtoReflect() protoreflect.Message {
-	mi := &file_protos_messages_commands_proto_msgTypes[5]
+	mi := &file_protos_messages_commands_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -413,7 +465,7 @@ func (x *PrivateCommand) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PrivateCommand.ProtoReflect.Descriptor instead.
 func (*PrivateCommand) Descriptor() ([]byte, []int) {
-	return file_protos_messages_commands_proto_rawDescGZIP(), []int{5}
+	return file_protos_messages_commands_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *PrivateCommand) GetIds() []int64 {
@@ -468,6 +520,9 @@ const file_protos_messages_commands_proto_rawDesc = "" +
 	"\x06_title\"8\n" +
 	"\rDeleteCommand\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\"9\n" +
+	"\x0eRestoreCommand\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\"4\n" +
 	"\x19DeleteUserMessagesCommand\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\x03R\x06userId\"Z\n" +
@@ -494,14 +549,15 @@ func file_protos_messages_commands_proto_rawDescGZIP() []byte {
 	return file_protos_messages_commands_proto_rawDescData
 }
 
-var file_protos_messages_commands_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_protos_messages_commands_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_protos_messages_commands_proto_goTypes = []any{
 	(*AppendCommand)(nil),             // 0: AppendCommand
 	(*UpdateCommand)(nil),             // 1: UpdateCommand
 	(*DeleteCommand)(nil),             // 2: DeleteCommand
-	(*DeleteUserMessagesCommand)(nil), // 3: DeleteUserMessagesCommand
-	(*PublishCommand)(nil),            // 4: PublishCommand
-	(*PrivateCommand)(nil),            // 5: PrivateCommand
+	(*RestoreCommand)(nil),            // 3: RestoreCommand
+	(*DeleteUserMessagesCommand)(nil), // 4: DeleteUserMessagesCommand
+	(*PublishCommand)(nil),            // 5: PublishCommand
+	(*PrivateCommand)(nil),            // 6: PrivateCommand
 }
 var file_protos_messages_commands_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -523,7 +579,7 @@ func file_protos_messages_commands_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_protos_messages_commands_proto_rawDesc), len(file_protos_messages_commands_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
