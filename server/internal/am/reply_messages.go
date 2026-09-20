@@ -15,11 +15,12 @@ import (
 type (
 	ReplyMessage interface {
 		ddd.Reply
+		Subject() string
 	}
 
-	ReplyPublisher = MessagePublisher[ReplyMessage]
+	ReplyPublisher = MessagePublisher[ddd.Reply]
 	ReplySubscriber = MessageSubscriber[ReplyMessage]
-	ReplyStream     = MessageStream[ReplyMessage, ReplyMessage]
+	ReplyStream     = MessageStream[ddd.Reply, ReplyMessage]
 
 	replyStream struct {
 		stream RawMessageStream
@@ -29,6 +30,7 @@ type (
 		id string
 		name string
 		data []byte
+		subject string
 		metadata ddd.Metadata
 		occurredAt time.Time
 	}
@@ -44,7 +46,7 @@ func NewReplyStream(stream RawMessageStream) ReplyStream {
 	}
 }
 
-func (s replyStream) Publish(ctx context.Context, topicName string, reply ReplyMessage) error {
+func (s replyStream) Publish(ctx context.Context, topicName string, reply ddd.Reply) error {
 	metadata, err := structpb.NewStruct(reply.Metadata())
 	if err != nil {
 		return err
@@ -79,6 +81,7 @@ func (s replyStream) Subscribe(topicName string, handler MessageHandler[ReplyMes
 		replyMsg := replyMessage{
 			id: msg.ID(),
 			name: msg.MessageName(),
+			subject: msg.Subject(),
 			data: replyData.GetPayload(),
 			metadata: replyData.GetMetadata().AsMap(),
 			occurredAt: replyData.GetOccurredAt().AsTime(),
@@ -95,12 +98,13 @@ func (m replyMessage) ReplyName() string { return m.name }
 func (m replyMessage) Data() []byte { return m.data }
 func (m replyMessage) Metadata() ddd.Metadata { return m.metadata }
 func (m replyMessage) OccurredAt() time.Time { return m.occurredAt }
+func (m replyMessage) Subject() string { return m.subject }
 
 type replyMsgHandler struct {
-	handler ddd.ReplyHandler[ddd.Reply]
+	handler ddd.ReplyHandler[ReplyMessage]
 }
 
-func NewReplyMessageHandler(handler ddd.ReplyHandler[ddd.Reply]) RawMessageHandler {
+func NewReplyMessageHandler(handler ddd.ReplyHandler[ReplyMessage]) RawMessageHandler {
 	return replyMsgHandler{
 		handler: handler,
 	}
@@ -118,6 +122,7 @@ func (h replyMsgHandler) HandleMessage(ctx context.Context, msg RawMessage) erro
 		id: msg.ID(),
 		name: msg.MessageName(),
 		data: replyData.GetPayload(),
+		subject: msg.Subject(),
 		occurredAt: replyData.GetOccurredAt().AsTime(),
 		metadata: replyData.GetMetadata().AsMap(),
 	}

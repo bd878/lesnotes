@@ -60,6 +60,7 @@ async function waitForThread(ctx, threadID) {
 			break
 		}
 		await setTimeout(500)
-		ctx.log.info("waiting thread... ", i++, threadID)
+		ctx.log.info(`waiting thread... ${i}, threadID: ${threadID}`)
+		i += 1
 	} while (response.error.error)
 }

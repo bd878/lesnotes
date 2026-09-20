@@ -13,7 +13,7 @@ import (
 	messagespkg "github.com/bd878/gallery/server/messages/pkg"
 )
 
-const deleteMessageReplyChannel = "gallery.messages.replies.DeleteMessage"
+const deleteMessageReplyChannel = messageReplyChannel + ".DeleteMessage"
 const DeleteMessageSagaName = "messages.DeleteMessage"
 
 type (

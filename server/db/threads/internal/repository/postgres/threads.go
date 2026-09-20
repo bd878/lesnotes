@@ -295,7 +295,7 @@ WHERE user_id = $1 AND parent_id = $2 AND deleted = false
 	for _, thread := range list {
 		var countQuery string
 		if privateMessage == nil {
-			countQuery = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2 deleted = false"
+			countQuery = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2 AND deleted = false"
 		} else if *privateMessage == true {
 			countQuery = "SELECT COUNT(*) FROM %s WHERE user_id = $1 AND parent_id = $2 AND private_message = true AND deleted = false"
 		} else if *privateMessage == false {

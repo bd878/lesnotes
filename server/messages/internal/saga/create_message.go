@@ -13,7 +13,7 @@ import (
 	messagespkg "github.com/bd878/gallery/server/messages/pkg"
 )
 
-const createMessageReplyChannel = "gallery.messages.replies.CreateMessage"
+const createMessageReplyChannel = messageReplyChannel + ".CreateMessage"
 const CreateMessageSagaName = "messages.CreateMessage"
 
 type (

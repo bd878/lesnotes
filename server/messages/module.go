@@ -200,6 +200,12 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 			c.Get("deleteMessageOrchestrator").(sec.Orchestrator),
 		), nil
 	})
+	container.AddScoped("replyEventHandlers", func(c di.Container) (any, error) {
+		return saga.NewReplyEventHandlers(
+			c.Get("createMessageOrchestrator").(sec.Orchestrator),
+			c.Get("deleteMessageOrchestrator").(sec.Orchestrator),
+		), nil
+	})
 
 	dispatcher := ddd.NewEventDispatcher[ddd.Event]()
 	stream.RegisterDomainEventHandlersTx(dispatcher)
