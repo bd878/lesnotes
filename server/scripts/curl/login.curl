@@ -1,3 +1,4 @@
 url = https://%STAGE%lesnotes.space/users/v1/login
+-v
 -F login=%LOGIN%
 -F password=%PASSWORD%

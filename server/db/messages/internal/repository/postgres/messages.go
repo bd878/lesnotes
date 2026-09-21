@@ -197,7 +197,7 @@ func (r *MessagesRepository) ReadBatchMessages(ctx context.Context, userID int64
 	order = strings.Join(pairs, ",")
 
 	query := r.table(`SELECT m.id, m.user_id, m.name, m.text, m.private, m.created_at, m.updated_at, m.title FROM %s m `) +
-		fmt.Sprintf(` JOIN (VALUES %s) AS x(id, ordering) ON m.id = x.id WHERE m.user_id = $1 ORDER BY x.ordering ASC`, order)
+		fmt.Sprintf(` JOIN (VALUES %s) AS x(id, ordering) ON m.id = x.id WHERE (m.user_id = $1 OR private = false) ORDER BY x.ordering ASC`, order)
 
 	rows, err = tx.Query(ctx, query, userID)
 	defer rows.Close()

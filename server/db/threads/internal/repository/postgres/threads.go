@@ -995,7 +995,7 @@ func (r *ThreadsRepository) DeleteThread(ctx context.Context, id, userID int64) 
 func (r *ThreadsRepository) ResolveThread(ctx context.Context, id, userID int64) (path []*threads.PathStep, err error) {
 	const query = `
 SELECT name, private, parent_id, title FROM %s
-WHERE user_id = $1 AND id = $2 AND deleted = false
+WHERE (user_id = $1 OR private = false) AND id = $2 AND deleted = false
 `
 
 	var tx pgx.Tx

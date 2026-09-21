@@ -544,6 +544,8 @@ func (s MessagesController) ReadPath(ctx context.Context, userID, id int64, name
 		return nil, 0, err
 	}
 
+	slog.Debug("read path", slog.Int("len(threads)", len(threads)), slog.Int64("id", id), slog.Int64("userID", userID))
+
 	// TODO: log error, falls if error 0
 	thread, _ := s.threads.ReadThread(ctx, userID, id, "")
 	if thread != nil {
@@ -551,9 +553,11 @@ func (s MessagesController) ReadPath(ctx context.Context, userID, id int64, name
 	}
 
 	ids := make([]int64, len(threads))
-	for _, step := range threads {
-		ids = append(ids, step.Id)
+	for i, step := range threads {
+		ids[i] = step.Id
 	}
+
+	slog.Debug("read path", slog.Int64("id", id), slog.String("ids", fmt.Sprintf("%v", ids)))
 
 	path, err = s.ReadBatchMessages(ctx, userID, ids)
 	if err != nil {
@@ -713,7 +717,15 @@ const limitPathMessages = 10 /* any other number ? */
 func (s MessagesController) ReadTree(ctx context.Context, userID, highlightID int64, highlightName string,
 	rootID int64, rootName string, limit, offset int32, privateMessage *bool, pairs []*model.IDLimitOffset) (list *model.MessagesList, err error) {
 
-	logValues := []any{slog.Int64("user_id", userID), slog.Int64("highlight_id", highlightID), slog.String("highlight_name", highlightName), slog.Int64("message_id", rootID), slog.String("name", rootName), slog.Int("limit", int(limit)), slog.Int("offset", int(offset))}
+	logValues := []any{
+		slog.Int64("user_id", userID),
+		slog.Int64("highlight_id", highlightID),
+		slog.String("highlight_name", highlightName),
+		slog.Int64("message_id", rootID),
+		slog.String("name", rootName),
+		slog.Int("limit", int(limit)),
+		slog.Int("offset", int(offset)),
+	}
 	if privateMessage != nil {
 		logValues = append(logValues, slog.Bool("private_message", *privateMessage))
 	}

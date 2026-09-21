@@ -2,7 +2,7 @@
 
 # Deletes a message
 
-stage=${STAGE:-"stage."}
+stage=${STAGE}
 cookie=${COOKIE:-"cookie.txt"}
 id=${1?"Usage: delete_message.sh message_id"}
 
