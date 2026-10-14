@@ -22,7 +22,6 @@ class MessagesTreeBuilder extends AbstractPublicBuilder {
 	addList(tree: MessagesList) {
 		const search = this.search
 		const path = this.path
-		const messageID = this.messageID
 
 		const close = ((new URLSearchParams(search)).get("close") || "").split(",").map(parseFloat).filter(v => !isNaN(v))
 
@@ -35,6 +34,7 @@ class MessagesTreeBuilder extends AbstractPublicBuilder {
 			offset:            tree.offset,
 			count:             tree.count,
 			messages:          tree.messages,
+			threadID:          tree.threadID,
 			showThreadLink:    true,
 
 			hasMessages:       function() { return this.messages.messages.length > 0 },
@@ -47,8 +47,8 @@ class MessagesTreeBuilder extends AbstractPublicBuilder {
 			openThreadHref:    function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); params.set("cwd", this.ID); params.set(`${this.ID}`, `${limit},0`); return "/home?" + params.toString(); },
 			unfoldHref:        function() { const params = new URLSearchParams(search); params.set(this.ID || 0, `${limit},0`); return path + "?" + params.toString(); },
 			foldHref:          function() { const params = new URLSearchParams(search); params.delete(this.ID || 0); return path + "?" + params.toString(); },
-			prevPageHref:      function() { const params = new URLSearchParams(search); params.set(this.ID || messageID || 0, `${limit},${limit + this.offset}`); return path + "?" + params.toString(); },
-			nextPageHref:      function() { const params = new URLSearchParams(search); params.set(this.ID || messageID || 0, `${limit},${Math.max(0, this.offset - limit)}`); return path + "?" + params.toString(); },
+			prevPageHref:      function() { const params = new URLSearchParams(search); params.set(this.threadID || 0, `${limit},${limit + this.offset}`); return path + "?" + params.toString(); },
+			nextPageHref:      function() { const params = new URLSearchParams(search); params.set(this.threadID || 0, `${limit},${Math.max(0, this.offset - limit)}`); return path + "?" + params.toString(); },
 		}, {
 			list: this.isMobile ? messagesListTemplateMobile : messagesListTemplate,
 		})

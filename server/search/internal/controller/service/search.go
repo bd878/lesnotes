@@ -2,54 +2,31 @@ package service
 
 import (
 	"context"
-	"fmt"
 
 	"log/slog"
 
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/search"
-	"github.com/bd878/gallery/server/db/search/pkg/loadbalance"
 	"github.com/bd878/gallery/server/db/search/pkg/machine"
-	"github.com/bd878/gallery/server/internal/rpc"
+	"github.com/bd878/gallery/server/internal/di"
 	"github.com/bd878/gallery/server/search/pkg/model"
 )
 
-type Config struct {
-	RpcAddr string
-}
-
 type Controller struct {
-	conf   Config
 	client search.SearchClient
-	conn   *grpc.ClientConn
 }
 
-func New(conf Config) *Controller {
-	controller := &Controller{conf: conf}
+func New(container di.Container) Controller {
+	client := container.Get("searchClient").(search.SearchClient)
 
-	conn, err := rpc.NewClient(
-		fmt.Sprintf(
-			"%s:///%s",
-			loadbalance.Name,
-			controller.conf.RpcAddr,
-		),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
-	if err != nil {
-		panic(err)
+	return Controller{
+		client: client,
 	}
-	client := search.NewSearchClient(conn)
-	controller.conn = conn
-	controller.client = client
-
-	return controller
 }
 
-func (s *Controller) SaveMessage(ctx context.Context, id, userID int64, name, title, text string, private bool, createdAt, updatedAt string) (err error) {
+func (s Controller) SaveMessage(ctx context.Context, id, userID int64, name, title, text string, private bool, createdAt, updatedAt string) (err error) {
 	slog.Debug("save search message", slog.Int64("id", id), slog.Int64("user_id", userID), slog.String("name", name), slog.String("title", title), slog.String("text", text), slog.Bool("private", private))
 
 	cmd, err := proto.Marshal(&search.AppendMessageCommand{
@@ -75,7 +52,7 @@ func (s *Controller) SaveMessage(ctx context.Context, id, userID int64, name, ti
 	return
 }
 
-func (s *Controller) DeleteMessage(ctx context.Context, id, userID int64) (err error) {
+func (s Controller) DeleteMessage(ctx context.Context, id, userID int64) (err error) {
 	slog.Debug("delete search message", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&search.DeleteMessageCommand{
@@ -95,7 +72,7 @@ func (s *Controller) DeleteMessage(ctx context.Context, id, userID int64) (err e
 	return
 }
 
-func (s *Controller) UpdateMessage(ctx context.Context, id, userID int64, name, title, text *string, updatedAt string) (err error) {
+func (s Controller) UpdateMessage(ctx context.Context, id, userID int64, name, title, text *string, updatedAt string) (err error) {
 	slog.Debug("update search message", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Any("name", name), slog.Any("title", title), slog.Any("text", text))
 
 	cmd, err := proto.Marshal(&search.UpdateMessageCommand{
@@ -119,7 +96,7 @@ func (s *Controller) UpdateMessage(ctx context.Context, id, userID int64, name, 
 	return
 }
 
-func (s *Controller) PublishMessages(ctx context.Context, ids []int64, userID int64, updatedAt string) (err error) {
+func (s Controller) PublishMessages(ctx context.Context, ids []int64, userID int64, updatedAt string) (err error) {
 	slog.Debug("publish search messages", slog.Any("ids", ids), slog.Int64("user_id", userID), slog.String("updated_at", updatedAt))
 
 	cmd, err := proto.Marshal(&search.PublishMessagesCommand{
@@ -140,7 +117,7 @@ func (s *Controller) PublishMessages(ctx context.Context, ids []int64, userID in
 	return
 }
 
-func (s *Controller) PrivateMessages(ctx context.Context, ids []int64, userID int64, updatedAt string) (err error) {
+func (s Controller) PrivateMessages(ctx context.Context, ids []int64, userID int64, updatedAt string) (err error) {
 	slog.Debug("private search messages", slog.Any("ids", ids), slog.Int64("user_id", userID), slog.String("updated_at", updatedAt))
 
 	cmd, err := proto.Marshal(&search.PrivateMessagesCommand{
@@ -161,7 +138,7 @@ func (s *Controller) PrivateMessages(ctx context.Context, ids []int64, userID in
 	return
 }
 
-func (s *Controller) SaveThread(ctx context.Context, id, userID, parentID int64, name, description string, private bool, createdAt, updatedAt string) (err error) {
+func (s Controller) SaveThread(ctx context.Context, id, userID, parentID int64, name, description string, private bool, createdAt, updatedAt string) (err error) {
 	slog.Debug("save thread", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.String("name", name), slog.String("description", description), slog.Bool("private", private))
 
 	cmd, err := proto.Marshal(&search.AppendThreadCommand{
@@ -187,7 +164,7 @@ func (s *Controller) SaveThread(ctx context.Context, id, userID, parentID int64,
 	return
 }
 
-func (s *Controller) DeleteThread(ctx context.Context, id, userID int64) (err error) {
+func (s Controller) DeleteThread(ctx context.Context, id, userID int64) (err error) {
 	slog.Debug("delete thread", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&search.DeleteThreadCommand{
@@ -207,7 +184,7 @@ func (s *Controller) DeleteThread(ctx context.Context, id, userID int64) (err er
 	return
 }
 
-func (s *Controller) UpdateThread(ctx context.Context, id, userID int64, name, description *string, updatedAt string) (err error) {
+func (s Controller) UpdateThread(ctx context.Context, id, userID int64, name, description *string, updatedAt string) (err error) {
 	slog.Debug("update thread", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Any("name", name), slog.Any("description", description))
 
 	cmd, err := proto.Marshal(&search.UpdateThreadCommand{
@@ -230,7 +207,7 @@ func (s *Controller) UpdateThread(ctx context.Context, id, userID int64, name, d
 	return
 }
 
-func (s *Controller) ChangeThreadParent(ctx context.Context, id, userID, parentID int64) (err error) {
+func (s Controller) ChangeThreadParent(ctx context.Context, id, userID, parentID int64) (err error) {
 	slog.Debug("change thread parent", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Int64("parent_id", parentID))
 
 	cmd, err := proto.Marshal(&search.ChangeThreadParentCommand{
@@ -251,7 +228,7 @@ func (s *Controller) ChangeThreadParent(ctx context.Context, id, userID, parentI
 	return
 }
 
-func (s *Controller) PrivateThread(ctx context.Context, id, userID int64, updatedAt string) (err error) {
+func (s Controller) PrivateThread(ctx context.Context, id, userID int64, updatedAt string) (err error) {
 	slog.Debug("private thread", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&search.PrivateThreadCommand{
@@ -272,7 +249,7 @@ func (s *Controller) PrivateThread(ctx context.Context, id, userID int64, update
 	return
 }
 
-func (s *Controller) PublishThread(ctx context.Context, id, userID int64, updatedAt string) (err error) {
+func (s Controller) PublishThread(ctx context.Context, id, userID int64, updatedAt string) (err error) {
 	slog.Debug("publish thread", slog.Int64("id", id), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&search.PublishThreadCommand{
@@ -293,7 +270,7 @@ func (s *Controller) PublishThread(ctx context.Context, id, userID int64, update
 	return
 }
 
-func (s *Controller) SaveFile(ctx context.Context, id, userID int64, name, description, mime string, private bool, size int64, createdAt, updatedAt string) (err error) {
+func (s Controller) SaveFile(ctx context.Context, id, userID int64, name, description, mime string, private bool, size int64, createdAt, updatedAt string) (err error) {
 	slog.Debug("save file", slog.Int64("id", id), slog.Int64("user_id", userID), slog.String("name", name), slog.String("description", description), slog.String("mime", mime), slog.Bool("private", private), slog.Int64("size", size))
 
 	cmd, err := proto.Marshal(&search.AppendFileCommand{
@@ -320,7 +297,7 @@ func (s *Controller) SaveFile(ctx context.Context, id, userID int64, name, descr
 	return
 }
 
-func (s *Controller) PublishFiles(ctx context.Context, ids []int64, userID int64, updatedAt string) (err error) {
+func (s Controller) PublishFiles(ctx context.Context, ids []int64, userID int64, updatedAt string) (err error) {
 	slog.Debug("publish files", slog.Any("ids", ids), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&search.PublishFilesCommand{
@@ -341,7 +318,7 @@ func (s *Controller) PublishFiles(ctx context.Context, ids []int64, userID int64
 	return
 }
 
-func (s *Controller) PrivateFiles(ctx context.Context, ids []int64, userID int64, updatedAt string) (err error) {
+func (s Controller) PrivateFiles(ctx context.Context, ids []int64, userID int64, updatedAt string) (err error) {
 	slog.Debug("private files", slog.Any("ids", ids), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&search.PrivateFilesCommand{
@@ -362,7 +339,7 @@ func (s *Controller) PrivateFiles(ctx context.Context, ids []int64, userID int64
 	return
 }
 
-func (s *Controller) DeleteFiles(ctx context.Context, ids []int64, userID int64) (err error) {
+func (s Controller) DeleteFiles(ctx context.Context, ids []int64, userID int64) (err error) {
 	slog.Debug("delete files", slog.Any("ids", ids), slog.Int64("user_id", userID))
 
 	cmd, err := proto.Marshal(&search.DeleteFilesCommand{
@@ -382,7 +359,7 @@ func (s *Controller) DeleteFiles(ctx context.Context, ids []int64, userID int64)
 	return
 }
 
-func (s *Controller) SaveTranslation(ctx context.Context, userID, messageID int64, lang string, title, text string, createdAt, updatedAt string) (err error) {
+func (s Controller) SaveTranslation(ctx context.Context, userID, messageID int64, lang string, title, text string, createdAt, updatedAt string) (err error) {
 	slog.Debug("save translation", slog.Int64("user_id", userID), slog.Int64("message_id", messageID), slog.String("lang", lang), slog.String("title", title), slog.String("text", text))
 
 	cmd, err := proto.Marshal(&search.AppendTranslationCommand{
@@ -407,7 +384,7 @@ func (s *Controller) SaveTranslation(ctx context.Context, userID, messageID int6
 	return
 }
 
-func (s *Controller) DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error) {
+func (s Controller) DeleteTranslation(ctx context.Context, messageID int64, lang string) (err error) {
 	slog.Debug("delete translation", slog.Int64("message_id", messageID), slog.String("lang", lang))
 
 	cmd, err := proto.Marshal(&search.DeleteTranslationCommand{
@@ -427,7 +404,7 @@ func (s *Controller) DeleteTranslation(ctx context.Context, messageID int64, lan
 	return
 }
 
-func (s *Controller) UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string, updatedAt string) (err error) {
+func (s Controller) UpdateTranslation(ctx context.Context, messageID int64, lang string, title, text *string, updatedAt string) (err error) {
 	slog.Debug("update translation", slog.Int64("message_id", messageID), slog.String("lang", lang), slog.Any("title", title), slog.Any("text", text))
 
 	cmd, err := proto.Marshal(&search.UpdateTranslationCommand{
@@ -450,7 +427,7 @@ func (s *Controller) UpdateTranslation(ctx context.Context, messageID int64, lan
 	return
 }
 
-func (s *Controller) SearchMessages(ctx context.Context, userID int64, substr string, threadID int64, public int32) (list []*model.Message, err error) {
+func (s Controller) SearchMessages(ctx context.Context, userID int64, substr string, threadID int64, public int32) (list []*model.Message, err error) {
 	slog.Debug("search messages", slog.Int64("user_id", userID), slog.String("substr", substr), slog.Int64("thread_id", threadID), slog.Int("public", int(public)))
 
 	res, err := s.client.SearchMessages(ctx, &search.SearchMessagesRequest{

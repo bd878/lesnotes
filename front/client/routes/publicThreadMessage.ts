@@ -19,7 +19,7 @@ async function publicThreadMessage(ctx) {
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const tree = new PublicMessagesTreeBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName, ctx.userAgent.isMobile,
-		ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path, ctx.state.messageID);
+		ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
 	const params = new URLSearchParams(ctx.search)
 	params.set("cwd", ctx.state.message.ID)

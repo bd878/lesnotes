@@ -16,9 +16,11 @@ import (
 	pg "github.com/bd878/gallery/server/internal/postgres"
 
 	"github.com/bd878/gallery/server/api/users"
+	"github.com/bd878/gallery/server/api/search"
 	"github.com/bd878/gallery/server/api/sessions"
 	"github.com/bd878/gallery/server/search/config"
 	"github.com/bd878/gallery/server/internal/system"
+	"github.com/bd878/gallery/server/db/search/pkg/loadbalance"
 	"github.com/bd878/gallery/server/search/internal/handler/stream"
 
 	sessionsloadbalance "github.com/bd878/gallery/server/db/sessions/pkg/loadbalance"
@@ -34,6 +36,16 @@ import (
 func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error) {
 	container := di.New()
 
+	container.AddSingleton("conn", func(c di.Container) (any, error) {
+		return rpc.NewClient(
+			fmt.Sprintf(
+				"%s:///%s",
+				loadbalance.Name,
+				cfg.SearchServiceAddr,
+			),
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+		)
+	})
 	container.AddSingleton("sessionsConn", func(c di.Container) (any, error) {
 		return rpc.NewClient(
 			fmt.Sprintf(
@@ -53,6 +65,10 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 			),
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		)
+	})
+	container.AddSingleton("searchClient", func(c di.Container) (any, error) {
+		client := search.NewSearchClient(c.Get("conn").(*grpc.ClientConn))
+		return client, nil
 	})
 	container.AddSingleton("usersClient", func(c di.Container) (any, error) {
 		client := users.NewUsersClient(c.Get("usersConn").(*grpc.ClientConn))
@@ -84,7 +100,7 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	usersGateway := usersgateway.New(container)
 	sessionsGateway := sessionsgateway.New(container)
 
-	ctrl := controller.New(controller.Config{RpcAddr: cfg.SearchServiceAddr})
+	ctrl := controller.New(container)
 
 	container.AddScoped("integrationEventHandlers", func(c di.Container) (any, error) {
 		return stream.NewIntegrationEventHandlers(ctrl, ctrl, ctrl, ctrl), nil
