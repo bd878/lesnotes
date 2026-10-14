@@ -37,7 +37,8 @@ function getIsAuthed(ctx): boolean {
 }
 
 function getMessageID(ctx): number {
-	return parseInt(ctx.params.idOrName) || 0
+	const params = new URLSearchParams(ctx.request.search)
+	return parseInt(ctx.params.idOrName || (params.get("cwd") || "0")) || 0
 }
 
 function getMessageName(ctx): string {

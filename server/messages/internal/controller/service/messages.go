@@ -393,6 +393,7 @@ func (s MessagesController) ReadThreadMessages(ctx context.Context, userID, thre
 	list = &model.MessagesList{
 		Messages:    messages,
 		Name:        threadName,
+		ID:          threadID,
 		IsLastPage:  isLastPage,
 		IsFirstPage: offset == 0,
 		Total:       total,

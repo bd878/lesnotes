@@ -2,7 +2,7 @@
 
 # List user messages
 
-stage=${STAGE:-"stage."}
+stage=${STAGE}
 cookie=${COOKIE:-"cookie.txt"}
 limit=${1?"Usage: list_messages.sh limit offset public=-1"}
 offset=${2?"Usage: list_messages.sh limit offset public=-1"}

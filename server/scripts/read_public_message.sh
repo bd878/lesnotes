@@ -2,7 +2,7 @@
 
 # Reads a public message
 
-stage=${STAGE:-"stage."}
+stage=${STAGE}
 cookie=${COOKIE:-""}
 id=${1:?"Usage: ./read_message.sh message_id"}
 

@@ -40,6 +40,7 @@ export interface Identity {
 const EmptyMessagesList: MessagesList = Object.freeze({
 	...EmptyPaging,
 	name: "",
+	ID: 0,
 	messages: [],
 })
 
@@ -79,6 +80,7 @@ function mapMessagesListFromProto(list?: any): MessagesList {
 	const res = {
 		...paging(list),
 		name: list.name,
+		ID: list.id,
 		messages: list.messages.map(mapMessageFromProto),
 	}
 

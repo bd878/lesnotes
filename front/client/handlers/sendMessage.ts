@@ -62,5 +62,5 @@ async function waitForThread(ctx, threadID) {
 		await setTimeout(500)
 		ctx.log.info(`waiting thread... ${i}, threadID: ${threadID}`)
 		i += 1
-	} while (response.error.error)
+	} while (response.error.error || i < 20)
 }

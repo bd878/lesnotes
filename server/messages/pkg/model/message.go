@@ -35,6 +35,7 @@ type (
 	MessagesList struct {
 		Messages    []*Message   `json:"messages"`
 		Name        string       `json:"name"` // thread name
+		ID          int64        `json:"id"`   // thread id
 		IsLastPage  bool         `json:"is_last_page"`
 		IsFirstPage bool         `json:"is_first_page"`
 		Total       int32        `json:"total"`
