@@ -19,7 +19,7 @@ class MessagesTreeBuilder extends AbstractPublicBuilder {
 	list = undefined
 	threadPath = undefined
 
-	addList(tree: MessagesList) {
+	addList(tree: MessagesList, threadID: number) {
 		const search = this.search
 		const path = this.path
 
@@ -34,7 +34,7 @@ class MessagesTreeBuilder extends AbstractPublicBuilder {
 			offset:            tree.offset,
 			count:             tree.count,
 			messages:          tree.messages,
-			threadID:          tree.threadID,
+			threadID:          threadID,
 			showThreadLink:    true,
 
 			hasMessages:       function() { return this.messages.messages.length > 0 },

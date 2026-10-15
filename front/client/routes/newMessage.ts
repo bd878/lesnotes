@@ -27,7 +27,7 @@ async function newMessage(ctx) {
 				.addMessagesTree(
 					tree
 						.addThreadPath(ctx.state.cwdPath)
-						.addList(ctx.state.tree)
+						.addList(ctx.state.tree, ctx.state.tree.threadID)
 				)
 				.addNewMessageForm(
 					messageForm
@@ -40,7 +40,11 @@ async function newMessage(ctx) {
 				.addControlPanel(
 					panel.addAuth(auth.addLogout())
 				)
-				.addHeader(header.addNewNote("/home" + ctx.search))
+				.addHeader(
+					header
+						.addNewNote("/home" + ctx.search)
+						.addSearch()
+				)
 		)
 
 	ctx.body = layout.build()

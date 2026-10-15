@@ -31,8 +31,9 @@ async function publicMessage(ctx) {
 						.addDeleteRedirectUrl("/" + ctx.state.messageName + ctx.search)
 						.addMessage(ctx.state.message)
 				)
-				.addHeader(
-					header.addAuth(ctx.state.isAuthed ? auth.addLogout() : auth.addLogin())
+				.addHeader(ctx.state.isAuthed
+					? header.addAuth(auth.addLogout()).addSearch()
+					: header.addAuth(auth.addLogin())
 				)
 				.addMessageFeatures(
 					ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation)

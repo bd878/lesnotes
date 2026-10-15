@@ -121,6 +121,8 @@ func (r *MessagesRepository) SearchMessages(ctx context.Context, userID int64, s
 			return
 		}
 
+		slog.Info("message", "id", message.Id, "name", message.Name, "title", message.Title, "text", message.Text)
+
 		message.CreatedAt = createdAt.Format(time.RFC3339)
 		message.UpdatedAt = updatedAt.Format(time.RFC3339)
 

@@ -29,7 +29,7 @@ async function publicThread(ctx) {
 			content
 				.addMessagesTree(
 					tree
-						.addList(ctx.state.tree)
+						.addList(ctx.state.tree, 0 /* root public thread */)
 						.addMessage(ctx.state.message)
 				)
 				.addMessageView(
@@ -41,7 +41,12 @@ async function publicThread(ctx) {
 					ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation)
 				)
 				.addControlPanel(panel.addAuth(ctx.state.isAuthed ? auth.addLogout() : auth.addLogin()))
-				.addHeader(ctx.state.isAuthed ? header.addNewNote("/home?" + params.toString()) : header)
+				.addHeader(ctx.state.isAuthed
+					? header
+						.addNewNote("/home?" + params.toString())
+						.addSearch()
+					: header.addSearch()
+				)
 		)
 
 	ctx.body = layout.build()

@@ -27,7 +27,14 @@ func New(container di.Container) Controller {
 }
 
 func (s Controller) SaveMessage(ctx context.Context, id, userID int64, name, title, text string, private bool, createdAt, updatedAt string) (err error) {
-	slog.Debug("save search message", slog.Int64("id", id), slog.Int64("user_id", userID), slog.String("name", name), slog.String("title", title), slog.String("text", text), slog.Bool("private", private))
+	slog.Debug("save search message",
+		slog.Int64("id", id),
+		slog.Int64("user_id", userID),
+		slog.String("name", name),
+		slog.String("title", title),
+		slog.String("text", text),
+		slog.Bool("private", private),
+	)
 
 	cmd, err := proto.Marshal(&search.AppendMessageCommand{
 		Id:        id,
@@ -139,7 +146,14 @@ func (s Controller) PrivateMessages(ctx context.Context, ids []int64, userID int
 }
 
 func (s Controller) SaveThread(ctx context.Context, id, userID, parentID int64, name, description string, private bool, createdAt, updatedAt string) (err error) {
-	slog.Debug("save thread", slog.Int64("id", id), slog.Int64("user_id", userID), slog.Int64("parent_id", parentID), slog.String("name", name), slog.String("description", description), slog.Bool("private", private))
+	slog.Debug("save thread",
+		slog.Int64("id", id),
+		slog.Int64("user_id", userID),
+		slog.Int64("parent_id", parentID),
+		slog.String("name", name),
+		slog.String("description", description),
+		slog.Bool("private", private),
+	)
 
 	cmd, err := proto.Marshal(&search.AppendThreadCommand{
 		Id:          id,
@@ -271,7 +285,15 @@ func (s Controller) PublishThread(ctx context.Context, id, userID int64, updated
 }
 
 func (s Controller) SaveFile(ctx context.Context, id, userID int64, name, description, mime string, private bool, size int64, createdAt, updatedAt string) (err error) {
-	slog.Debug("save file", slog.Int64("id", id), slog.Int64("user_id", userID), slog.String("name", name), slog.String("description", description), slog.String("mime", mime), slog.Bool("private", private), slog.Int64("size", size))
+	slog.Debug("save file",
+		slog.Int64("id", id),
+		slog.Int64("user_id", userID),
+		slog.String("name", name),
+		slog.String("description", description),
+		slog.String("mime", mime),
+		slog.Bool("private", private),
+		slog.Int64("size", size),
+	)
 
 	cmd, err := proto.Marshal(&search.AppendFileCommand{
 		Id:          id,

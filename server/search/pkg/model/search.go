@@ -41,7 +41,6 @@ type (
 	}
 
 	SearchMessagesRequest struct {
-		UserID             int64         `json:"user_id"`
 		Query              string        `json:"query"`
 		Public             int           `json:"public"`
 		ThreadID           int64         `json:"thread"`
@@ -49,7 +48,11 @@ type (
 
 	SearchMessagesResponse struct {
 		Messages           []*Message    `json:"list"`
+		IsLastPage         bool          `json:"is_last_page"`
+		IsFirstPage        bool          `json:"is_first_page"`
+		Total              int32         `json:"total"`
 		Count              int32         `json:"count"`
+		Offset             int32         `json:"offset"`
 	}
 
 	SearchFilesResponse struct {

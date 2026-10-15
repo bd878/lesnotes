@@ -19,7 +19,7 @@ class PublicMessagesTreeBuilder extends AbstractPublicBuilder {
 	list = undefined
 	threadPath = undefined
 
-	addList(tree: MessagesList) {
+	addList(tree: MessagesList, threadID: number) {
 		const search = this.search
 		const path = this.path
 		const parentName = this.parentName
@@ -36,7 +36,7 @@ class PublicMessagesTreeBuilder extends AbstractPublicBuilder {
 			offset:            tree.offset,
 			count:             tree.count,
 			messages:          tree.messages,
-			threadID:          tree.threadID,
+			threadID:          threadID,
 			showThreadLink:    function() { return isAuthed || !this.thread.private },
 
 			hasMessages:       function() { return this.messages.messages.length > 0 },
@@ -70,7 +70,7 @@ class PublicMessagesTreeBuilder extends AbstractPublicBuilder {
 			lastThreadTarget: "_self",
 			lastThreadExternal: false,
 			lastThreadHref: function() { return `/${this.name}` + search },
-			threadTitle: function() { return `/${crop(this.title || this.description, 30)}` },
+			threadTitle: function() { return `/${crop(this.title || this.text, 30)}` },
 		})
 
 		return this

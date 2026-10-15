@@ -9,6 +9,7 @@ import readBatchMessagesJson from './readBatchMessagesJson';
 import readMessage from './readMessage';
 import readThreadJson from './readThreadJson';
 import readMessageJson from './readMessageJson';
+import searchMessagesJson from './searchMessagesJson';
 import sendMessageJson from './sendMessageJson';
 import sendMessage from './sendMessage';
 import sendTranslationJson from './sendTranslationJson';
@@ -101,4 +102,5 @@ export default {
 	validateTgAuthData,
 	reorderThread,
 	readTreeJson,
+	searchMessagesJson,
 }

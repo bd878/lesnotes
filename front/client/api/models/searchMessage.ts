@@ -1,3 +1,5 @@
+import type {Paging} from './paging'
+import paging, {EmptyPaging} from './paging'
 // threadID is not in /search scope, we can't receive it here
 
 export interface SearchMessage {
@@ -9,6 +11,10 @@ export interface SearchMessage {
 	private: boolean;
 }
 
+export interface SearchMessagesList extends Paging {
+	messages: SearchMessage[]
+}
+
 const EmptySearchMessage: SearchMessage = Object.freeze({
 	ID:      0,
 	userID:  0,
@@ -17,6 +23,24 @@ const EmptySearchMessage: SearchMessage = Object.freeze({
 	name:    "",
 	private: true,
 })
+
+const EmptySearchMessagesList: SearchMessagesList = Object.freeze({
+	...EmptyPaging,
+	messages: [],
+})
+
+function mapSearchMessagesListFromProto(list?: any): SearchMessagesList {
+	if (!list) {
+		return EmptySearchMessagesList
+	}
+
+	list.list.reverse()
+
+	return {
+		...paging(list),
+		messages: list.list.map(mapMessageFromProto),
+	}
+}
 
 export default function mapMessageFromProto(message?: any): SearchMessage {
 	if (!message) {
@@ -36,3 +60,5 @@ export default function mapMessageFromProto(message?: any): SearchMessage {
 }
 
 export { EmptySearchMessage }
+export { mapSearchMessagesListFromProto as searchMessagesList }
+export { EmptySearchMessagesList }

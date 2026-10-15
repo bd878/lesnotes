@@ -2,7 +2,7 @@ import message, { messagesList, EmptyMessage, EmptyMessagesList } from './messag
 import comment, { EmptyComment } from './comment'
 import translation, { EmptyTranslation } from './translation';
 import translationPreview, { EmptyTranslationPreview } from './translationPreview';
-import searchMessage, { EmptySearchMessage } from './searchMessage'
+import searchMessage, { searchMessagesList, EmptySearchMessage } from './searchMessage'
 import searchMessagePath, { EmptySearchMessagePath } from './searchMessagePath'
 import threadMessages, { EmptyThreadMessages } from './threadMessages'
 import thread, { EmptyThread } from './thread'
@@ -16,6 +16,7 @@ export default {
 	comment,
 	messagesList,
 	searchMessage,
+	searchMessagesList,
 	searchMessagePath,
 	threadMessages,
 	translation,
@@ -51,5 +52,5 @@ export type { Error } from './error'
 export type { User } from './user'
 export type { Paging } from './paging'
 export type { ThreadMessages } from './threadMessages'
-export type { SearchMessage } from './searchMessage'
+export type { SearchMessage, SearchMessagesList } from './searchMessage'
 export type { SearchMessagePath } from './searchMessagePath'

@@ -28,11 +28,15 @@ async function threadView(ctx) {
 				.addMessagesTree(
 					tree
 						.addThreadPath(ctx.state.cwdPath)
-						.addList(ctx.state.tree)
+						.addList(ctx.state.tree, ctx.state.tree.threadID)
 				)
 				.addThreadView(view.addThread(ctx.state.thread))
 				.addMessageHeader(messageHeader.addMessagePath(ctx.state.messagePath))
-				.addHeader(header.addNewNote("/home" + ctx.search))
+				.addHeader(
+					header
+						.addNewNote("/home" + ctx.search)
+						.addSearch()
+				)
 				.addControlPanel(panel.addAuth(auth.addLogout()))
 		)
 

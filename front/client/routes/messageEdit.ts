@@ -28,7 +28,7 @@ async function messageEdit(ctx) {
 				.addMessagesTree(
 					tree
 						.addThreadPath(ctx.state.cwdPath)
-						.addList(ctx.state.tree)
+						.addList(ctx.state.tree, ctx.state.tree.threadID)
 				)
 				.addMessageEditForm(
 					messageForm
@@ -37,7 +37,11 @@ async function messageEdit(ctx) {
 				)
 				.addMessageFeatures(ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation))
 				.addMessageHeader(messageHeader.addMessagePath(ctx.state.messagePath))
-				.addHeader(header.addNewNote("/home" + ctx.search))
+				.addHeader(
+					header
+						.addNewNote("/home" + ctx.search)
+						.addSearch()
+				)
 				.addControlPanel(panel.addAuth(auth.addLogout()))
 		)
 

@@ -73,35 +73,7 @@ func (m *Distributed) Apply(ctx context.Context, reqType machine.RequestType, cm
 func (m *Distributed) SearchMessages(ctx context.Context, userID int64, substr string, threadID int64, public int) (list []*search.SearchMessage, err error) {
 	slog.Debug("search messages", slog.Int64("user_id", userID), slog.String("substr", substr), slog.Int64("thread_id", threadID), slog.Int("public", public))
 
-	messages, err := m.messagesRepo.SearchMessages(ctx, userID, substr, public)
-	if err != nil {
-		return nil, err
-	}
-
-	slog.Debug("found messages", slog.Int("count", len(messages)))
-
-	if threadID == -1 && threadID == 0 {
-		return messages, nil
-	}
-
-	// get child threads
-	threads, err := m.threadsRepo.SearchThreads(ctx, threadID, userID)
-	if err != nil {
-		return nil, err
-	}
-
-	list = make([]*search.SearchMessage, 0)
-
-	// filter by thread parent id
-	for _, msg := range messages {
-		for _, thread := range threads {
-			if msg.Id == thread.Id {
-				list = append(list, msg)
-			}
-		}
-	}
-
-	return
+	return m.messagesRepo.SearchMessages(ctx, userID, substr, public)
 }
 
 func (m *Distributed) GetServers(ctx context.Context) ([]*api.Server, error) {

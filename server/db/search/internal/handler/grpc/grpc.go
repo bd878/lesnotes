@@ -3,7 +3,6 @@ package grpc
 import (
 	"time"
 	"context"
-	"log/slog"
 
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/search"
@@ -63,8 +62,6 @@ func (h *Handler) SearchMessages(ctx context.Context, req *search.SearchMessages
 	if err != nil {
 		return nil, err
 	}
-
-	slog.Debug("found messages", slog.Int("count", len(list)))
 
 	resp = &search.SearchMessagesResponse{
 		List:   list,

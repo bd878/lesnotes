@@ -21,7 +21,7 @@ class HeaderBuilder extends AbstractBuilder {
 
 	addSearch() {
 		this.searchForm = mustache.render(this.isMobile ? searchTemplateMobile : searchTemplate, {
-			action:              "/search" + this.search,
+			action:              "/message/search" + this.search,
 			searchPlaceholder:   this.i18n("searchPlaceholder"),
 			searchMessages:      this.i18n("search"),
 		})

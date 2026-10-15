@@ -32,6 +32,7 @@ import formatView from './handlers/formatView';
 import getState from './handlers/getState';
 import expireToken from './handlers/expireToken';
 import redirectHome from './handlers/redirectHome';
+import redirectSearch from './handlers/redirectSearch';
 import redirectLogin from './handlers/redirectLogin';
 import validateLogin from './handlers/validateLogin'
 import validateSignup from './handlers/validateSignup';
@@ -44,6 +45,7 @@ import sendMessage from './handlers/sendMessage';
 import sendComment from './handlers/sendComment';
 import sendTranslation from './handlers/sendTranslation';
 import loadParentMessage from './handlers/loadParentMessage';
+import searchMessages from './handlers/searchMessages';
 
 import assets from './routes/assets';
 import main from './routes/main';
@@ -55,6 +57,7 @@ import publicThreadOrMessage from './routes/publicThreadOrMessage';
 import publicThreadMessage from './routes/publicThreadMessage';
 import messageView from './routes/messageView';
 import messageEdit from './routes/messageEdit';
+import searchResult from './routes/searchResult';
 import status from './routes/status';
 
 const app = new Koa();
@@ -85,9 +88,11 @@ router
 	.get("message",                "/messages/:idOrName",           etag, noCache, getMe, getState, authed, loadCwdThread, loadTree, loadMessagePath, loadCwdPath, loadThread, loadMessage, loadComments, loadTranslation, formatView, messageFeatures, messageView)
 	.get("editMessage",            "/editor/messages/:idOrName",    etag, noCache, getMe, getState, authed, loadCwdThread, loadTree, loadMessagePath, loadCwdPath, loadMessage, loadFiles, loadComments, selectMessageFiles, loadTranslation, formatTextarea, messageFeatures, messageEdit)
 	.get("status",                 "/status",                       status, noCache, getState)
+	.get("search",                 "/search",                       etag, noCache, getMe, getState, searchMessages, searchResult)
 	.post("doLogin",               "/login",                        etag, getState, validateLogin, redirectHome)
 	.post("doSignup",              "/signup",                       etag, getState, validateSignup, redirectHome)
 	.post("doSendMessage",         "/message/send",                 getState, authed, sendMessage)
+	.post("doSearch",              "/message/search",               etag, getState, redirectSearch)
 	.post("doDeleteMessage",       "/message/delete",               getState, authed, deleteMessage)
 	.post("doPublishMessage",      "/message/publish",              getState, authed, publishMessage)
 	.post("doPrivateMessage",      "/message/private",              getState, authed, privateMessage)

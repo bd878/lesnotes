@@ -30,7 +30,7 @@ async function messageView(ctx) {
 				.addMessagesTree(
 					tree
 						.addThreadPath(ctx.state.cwdPath)
-						.addList(ctx.state.tree)
+						.addList(ctx.state.tree, ctx.state.tree.threadID)
 				)
 				.addMessageView(
 					view
@@ -39,7 +39,11 @@ async function messageView(ctx) {
 				)
 				.addMessageFeatures(ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation))
 				.addMessageHeader(messageHeader.addMessagePath(ctx.state.messagePath))
-				.addHeader(header.addNewNote("/home" + ctx.search))
+				.addHeader(
+					header
+						.addNewNote("/home" + ctx.search)
+						.addSearch()
+				)
 				.addControlPanel(panel.addAuth(auth.addLogout()))
 		)
 
