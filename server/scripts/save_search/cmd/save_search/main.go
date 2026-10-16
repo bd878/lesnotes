@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"github.com/bd878/gallery/server/api"
 	"github.com/bd878/gallery/server/api/search"
-	"github.com/bd878/gallery/server/api/messages"
+	"github.com/bd878/gallery/server/api/threads"
 	"github.com/bd878/gallery/server/db/search/pkg/machine"
 	"github.com/bd878/gallery/server/db/search/pkg/loadbalance"
 )
@@ -38,8 +38,8 @@ func main() {
 	}
 
 	rows, err := pool.Query(context.TODO(), `
-SELECT id, user_id, name, title, text, private, created_at, updated_at
-FROM messages.messages
+SELECT id, user_id, parent_id, name, description, private, created_at, updated_at
+FROM threads.threads
 	`)
 
 	defer rows.Close()
@@ -47,44 +47,44 @@ FROM messages.messages
 		panic(err)
 	}
 
-	list := make([]*messages.Message, 0)
+	list := make([]*threads.Thread, 0)
 	for rows.Next() {
-		message := &messages.Message{}
+		thread := &threads.Thread{}
 
 		var createdAt, updatedAt time.Time
 
-		err := rows.Scan(&message.Id, &message.UserId, &message.Name, &message.Title, &message.Title, &message.Private, &createdAt, &updatedAt)
+		err := rows.Scan(&thread.Id, &thread.UserId, &thread.ParentId, &thread.Name, &thread.Description, &thread.Private, &createdAt, &updatedAt)
 		if err != nil {
 			panic(err)
 		}
 
-		message.CreatedAt = createdAt.Format(time.RFC3339)
-		message.UpdatedAt = updatedAt.Format(time.RFC3339)
+		thread.CreatedAt = createdAt.Format(time.RFC3339)
+		thread.UpdatedAt = updatedAt.Format(time.RFC3339)
 
-		list = append(list, message)
+		list = append(list, thread)
 	}
 
 	if err = rows.Err(); err != nil {
 		panic(err)
 	}
 
-	for _, message := range list {
-		cmd, err := proto.Marshal(&search.AppendMessageCommand{
-			Id:        message.Id,
-			Text:      message.Text,
-			Title:     message.Title,
-			Name:      message.Name,
-			UserId:    message.UserId,
-			Private:   message.Private,
-			CreatedAt: message.CreatedAt,
-			UpdatedAt: message.UpdatedAt,
+	for _, thread := range list {
+		cmd, err := proto.Marshal(&search.AppendThreadCommand{
+			Id:        thread.Id,
+			Description:      thread.Description,
+			ParentId:  thread.ParentId,
+			Name:      thread.Name,
+			UserId:    thread.UserId,
+			Private:   thread.Private,
+			CreatedAt: thread.CreatedAt,
+			UpdatedAt: thread.UpdatedAt,
 		})
 		if err != nil {
 			panic(err)
 		}
 
 		_, err = client.Apply(context.TODO(), &api.Command{
-			ReqType:  int32(machine.AppendMessageRequest),
+			ReqType:  int32(machine.AppendThreadRequest),
 			Cmd:      cmd,
 			Duration: "10s",
 		})
