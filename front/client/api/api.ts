@@ -107,6 +107,7 @@ export default function api(url, props: any = {}): Promise<any> {
 					}
 				})
 				.catch(e => {
+					console.log(e)
 					return Promise.reject([null, {
 						error:   true,
 						status:  500,

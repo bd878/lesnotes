@@ -28,6 +28,7 @@ async function searchMessagesJson(token: string, query: string, thread: number, 
 			result.list = models.searchMessagesList(response)
 		}
 	} catch (e) {
+		console.log(e)
 		result.error.error = true
 		result.error.status  = 500
 		result.error.explain = e.toString()

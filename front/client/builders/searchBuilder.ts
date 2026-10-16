@@ -17,10 +17,21 @@ class SearchBuilder extends AbstractBuilder {
 	messagesList = undefined
 	controlPanel = undefined
 
-	addMessagesList(messagesList: SearchMessagesList) {
+	addMessagesList(list: SearchMessagesList) {
+		const search = this.search
+
+		const limit = parseInt(LIMIT)
+
 		this.messagesList = mustache.render(this.isMobile ? searchListTemplateMobile : searchListTemplate, {
-			messagesList: messagesList,
+			messages:          list.messages,
+			noMessagesText:    this.i18n("noMessagesText"),
+			showThreadLink:    true,
+
+			messageHref:       function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); return `/messages/${this.ID}?` + params.toString(); },
+			openThreadHref:    function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); params.set("cwd", this.ID); params.set(`${this.ID}`, `${limit},0`); return "/home?" + params.toString(); },
+
 		})
+
 		return this
 	}
 

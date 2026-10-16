@@ -3,7 +3,7 @@ import * as is from '../third_party/is';
 
 async function searchMessages(ctx, next) {
 	const token = ctx.state.token
-	const isPublic = Number(!ctx.state.isAuthed)
+	const isPublic = ctx.state.isAuthed ? -1 : 1;
 
 	ctx.log.info("--> searchMessages")
 
@@ -12,7 +12,6 @@ async function searchMessages(ctx, next) {
 	const resp = await searchMessagesJson(token, params.get("q"), 0, isPublic)
 	if (is.notEmpty(resp) && resp.error.error) {
 		ctx.log.error(resp.error)
-		console.log(resp.error)
 		ctx.body = "error"
 		ctx.status = 400
 		return
