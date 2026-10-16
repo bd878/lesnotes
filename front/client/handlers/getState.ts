@@ -20,12 +20,18 @@ async function getState(ctx, next) {
 	ctx.state.leaves = getLeaves(ctx)
 	ctx.state.token = getToken(ctx)
 	ctx.state.isAuthed = getIsAuthed(ctx)
+	ctx.state.searchQuery = getSearchQuery(ctx)
 
 	ctx.log.info("cwd", ctx.state.cwd)
 
 	await next()
 
 	ctx.log.info("<-- getState")
+}
+
+function getSearchQuery(ctx): string {
+	const params = new URLSearchParams(ctx.query)
+	return params.get("q")
 }
 
 function getToken(ctx): string {

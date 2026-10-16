@@ -2,6 +2,7 @@ import type {Builder, ScriptsBuilder} from './builder';
 import Config from 'config';
 import mustache from 'mustache';
 import * as is from '../third_party/is';
+import crop from '../utils/crop';
 import { readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import AbstractBuilder from './abstractBuilder';
@@ -18,9 +19,15 @@ class LayoutBuilder extends AbstractBuilder {
 	footer        = undefined;
 	header        = undefined;
 	content       = undefined;
+	title         = "Les Notes";
 
 	addHeader(header: Builder) {
 		this.header = header.build()
+		return this
+	}
+
+	addTitle(title: string) {
+		this.title = crop(title, 40)
 		return this
 	}
 
@@ -63,6 +70,7 @@ class LayoutBuilder extends AbstractBuilder {
 			},
 			scripts:  this.scripts,
 			manifest: "/public/manifest.json",
+			title:    this.title,
 			styles:   stylesTemplate,
 			lang:     lang,
 			theme:    theme,

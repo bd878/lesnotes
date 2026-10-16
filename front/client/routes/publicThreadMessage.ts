@@ -25,6 +25,7 @@ async function publicThreadMessage(ctx) {
 	params.set("cwd", ctx.state.message.ID)
 
 	layout
+		.addTitle(ctx.state.message.title || ctx.state.message.text)
 		.addFooter()
 		.addContent(
 			content

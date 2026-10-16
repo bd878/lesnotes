@@ -13,25 +13,22 @@ async function searchResult(ctx) {
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const content = new SearchBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
-	try {
-		layout
-			.addFooter()
-			.addContent(
-				content
-					.addHeader(
-						ctx.state.isAuthed
-							? header.addSearch().addNewNote("/home" + ctx.search)
-							: header.addSearch()
-					)
-					.addControlPanel(panel.addAuth(ctx.state.isAuthed ? auth.addLogout() : auth.addLogin()))
-					.addMessagesList(ctx.state.list)
-			)
+	layout
+		.addTitle(ctx.state.searchQuery)
+		.addFooter()
+		.addContent(
+			content
+				.addHeader(
+					ctx.state.isAuthed
+						? header.addSearch().addNewNote("/home" + ctx.search)
+						: header.addSearch()
+				)
+				.addControlPanel(panel.addAuth(ctx.state.isAuthed ? auth.addLogout() : auth.addLogin()))
+				.addMessagesList(ctx.state.list)
+		)
 
-		ctx.body = layout.build()
-		ctx.status = 200;
-	} catch (e) {
-		console.log(e)
-	}
+	ctx.body = layout.build()
+	ctx.status = 200;
 
 	ctx.log.info("<-- searchResult")
 }

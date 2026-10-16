@@ -7,9 +7,7 @@ async function searchMessages(ctx, next) {
 
 	ctx.log.info("--> searchMessages")
 
-	const params = new URLSearchParams(ctx.query)
-
-	const resp = await searchMessagesJson(token, params.get("q"), 0, isPublic)
+	const resp = await searchMessagesJson(token, ctx.state.searchQuery, 0, isPublic)
 	if (is.notEmpty(resp) && resp.error.error) {
 		ctx.log.error(resp.error)
 		ctx.body = "error"

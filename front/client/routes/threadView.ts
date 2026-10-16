@@ -22,6 +22,7 @@ async function threadView(ctx) {
 		ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
 	layout
+		.addTitle(ctx.state.thread.title || ctx.state.thread.description)
 		.addFooter()
 		.addContent(			
 			content

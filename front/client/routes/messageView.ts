@@ -24,6 +24,7 @@ async function messageView(ctx) {
 		ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
 	layout
+		.addTitle(ctx.state.message.title || ctx.state.message.text)
 		.addFooter()
 		.addContent(
 			content
