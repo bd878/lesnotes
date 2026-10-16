@@ -63,12 +63,8 @@
 	{{#hasPagination}}
 		<div class="flex flex-row mt-2">
 			{{^isLastPage}}
-				<a href="{{prevPageHref}}" target="_self" class="odd:mr-[4px] text-sm/6 text-center grow cursor-pointer dark:bg-slate-600 dark:hover:text-white bg-gray-300 last:mr-0"><-</a>
+				<a href="{{loadMoreHref}}" target="_self" class="odd:mr-[4px] text-sm/6 text-center grow cursor-pointer dark:bg-slate-600 dark:hover:text-white bg-gray-300 last:mr-0">+</a>
 			{{/isLastPage}}
-
-			{{^isFirstPage}}
-				<a href="{{nextPageHref}}" target="_self" class="text-center text-sm/6 grow cursor-pointer dark:bg-slate-600 dark:hover:text-white bg-gray-300">-></a>
-			{{/isFirstPage}}
 		</div>
 	{{/hasPagination}}
 </div>

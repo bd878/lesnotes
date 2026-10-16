@@ -34,8 +34,6 @@ function mapSearchMessagesListFromProto(list?: any): SearchMessagesList {
 		return EmptySearchMessagesList
 	}
 
-	list.list.reverse()
-
 	return {
 		...paging(list),
 		messages: list.list.map(mapMessageFromProto),

@@ -47,8 +47,7 @@ class MessagesTreeBuilder extends AbstractPublicBuilder {
 			openThreadHref:    function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); params.set("cwd", this.ID); params.set(`${this.ID}`, `${limit},0`); return "/home?" + params.toString(); },
 			unfoldHref:        function() { const params = new URLSearchParams(search); params.set(this.ID || 0, `${limit},0`); return path + "?" + params.toString(); },
 			foldHref:          function() { const params = new URLSearchParams(search); params.delete(this.ID || 0); return path + "?" + params.toString(); },
-			prevPageHref:      function() { const params = new URLSearchParams(search); params.set(this.threadID || 0, `${limit},${limit + this.offset}`); return path + "?" + params.toString(); },
-			nextPageHref:      function() { const params = new URLSearchParams(search); params.set(this.threadID || 0, `${limit},${Math.max(0, this.offset - limit)}`); return path + "?" + params.toString(); },
+			loadMoreHref:      function() { const params = new URLSearchParams(search); params.set(this.threadID || 0, `${this.count+limit},${this.offset}`); return path + "?" + params.toString(); },
 		}, {
 			list: this.isMobile ? messagesListTemplateMobile : messagesListTemplate,
 		})

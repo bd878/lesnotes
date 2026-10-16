@@ -76,8 +76,6 @@ function mapMessagesListFromProto(list?: any): MessagesList {
 		return EmptyMessagesList
 	}
 
-	list.messages.reverse()
-
 	const res = {
 		...paging(list),
 		name: list.name,
