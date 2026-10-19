@@ -36,13 +36,14 @@ async function messageView(ctx) {
 				.addMessageView(
 					view
 						.addRedirectUrl("")
+						.addMessageEditHref(ctx.state.messageEditHref)
 						.addMessage(ctx.state.message)
 				)
 				.addMessageFeatures(ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation))
 				.addMessageHeader(messageHeader.addMessagePath(ctx.state.messagePath))
 				.addHeader(
 					header
-						.addNewNote("/home" + ctx.search)
+						.addNewNote(ctx.state.newNoteHref)
 						.addSearch()
 				)
 				.addControlPanel(panel.addAuth(auth.addLogout()))

@@ -31,10 +31,11 @@ async function publicThread(ctx) {
 				.addMessagesTree(
 					tree
 						.addList(ctx.state.tree, 0 /* root public thread */)
-						.addMessage(ctx.state.message)
+						.addThreadPath(ctx.state.cwdPath)
 				)
 				.addMessageView(
 					view
+						.addMessageEditHref(ctx.state.messageEditHref)
 						.addDeleteRedirectUrl("/" + ctx.state.messageName + ctx.search)
 						.addMessage(ctx.state.message)
 				)
@@ -44,7 +45,7 @@ async function publicThread(ctx) {
 				.addControlPanel(panel.addAuth(ctx.state.isAuthed ? auth.addLogout() : auth.addLogin()))
 				.addHeader(ctx.state.isAuthed
 					? header
-						.addNewNote("/home?" + params.toString())
+						.addNewNote(ctx.state.newNoteHref)
 						.addSearch()
 					: header.addSearch()
 				)

@@ -14,6 +14,7 @@ class MessageViewBuilder extends AbstractPublicBuilder {
 	message = undefined
 	redirectUrl = ""
 	deleteRedirectUrl = ""
+	editHref = ""
 
 	addRedirectUrl(redirectUrl: string) {
 		this.redirectUrl = redirectUrl
@@ -30,11 +31,17 @@ class MessageViewBuilder extends AbstractPublicBuilder {
 		return this
 	}
 
+	addMessageEditHref(href: string) {
+		this.editHref = href
+		return this
+	}
+
 	build() {
+		const editHref = this.editHref
 		return mustache.render(this.isMobile ? messageViewTemplateMobile : messageViewTemplate, {
 			isAuthed:              this.isAuthed,
 			message:               this.message,
-			editHref:              `/editor/messages/${this.message.ID}` + this.search,
+			editHref:              editHref || `/messages/${this.message.ID}/edit` + this.search,
 			deleteAction:          "/message/delete" + this.search,
 			publishAction:         "/message/publish" + this.search,
 			privateAction:         "/message/private" + this.search,

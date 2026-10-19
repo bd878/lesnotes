@@ -30,8 +30,9 @@ async function sendMessage(ctx) {
 	}
 
 	fileIDs = fileIDs.map(id => parseInt(id) || 0).filter(is.notEmpty)
+	const threadID = parseInt(form.thread) || 0
 
-	const response = await api.sendMessageJson(ctx.state.token, form.text, form.title, fileIDs, parseInt(form.thread) || 0, true)
+	const response = await api.sendMessageJson(ctx.state.token, form.text, form.title, fileIDs, threadID, true)
 
 	if (response.error.error) {
 		ctx.log.error(response.error)
@@ -43,8 +44,11 @@ async function sendMessage(ctx) {
 	await waitForThread(ctx, response.message.ID)
 
 	const params = new URLSearchParams(ctx.query)
-	params.set(form.thread, `${limit},0`)
-	ctx.redirect(ctx.router.url('message', {idOrName: response.message.ID}, {query: params.toString()}))
+	if (is.notEmpty(threadID)) {
+		ctx.redirect(ctx.router.url('publicThreadMessage', {parentName: form.thread_name, messageName: response.message.name}, {query: params.toString()}))
+	} else {
+		ctx.redirect(ctx.router.url('message', {idOrName: response.message.ID}, {query: params.toString()}))
+	}
 
 	ctx.log.info("<-- sendMessage")
 }

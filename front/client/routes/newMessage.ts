@@ -32,7 +32,8 @@ async function newMessage(ctx) {
 				.addNewMessageForm(
 					messageForm
 						.addFilesList([])
-						.addThreadID(ctx.state.cwd.id)
+						.addThreadID(ctx.state.tree.threadID)
+						.addThreadName(ctx.state.tree.name)
 				)
 				.addMessageHeader(
 					messageHeader.addMessagePath(ctx.state.messagePath)
@@ -42,7 +43,7 @@ async function newMessage(ctx) {
 				)
 				.addHeader(
 					header
-						.addNewNote("/home" + ctx.search)
+						.addNewNote(ctx.state.newNoteHref)
 						.addSearch()
 				)
 		)

@@ -46,7 +46,7 @@ class PublicMessagesTreeBuilder extends AbstractPublicBuilder {
 			showCounter:       function() { return this.count > 0 },
 
 			messageHref:       function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); return `/${parentName}/${this.name}?` + params.toString(); },
-			openThreadHref:    function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); return `/${this.thread.name}?` + params.toString(); },
+			openThreadHref:    function() { return `/${this.name}/new` },
 			unfoldHref:        function() { const params = new URLSearchParams(search); params.set(this.ID || 0, `${limit},0`); return path + "?" + params.toString(); },
 			foldHref:          function() { const params = new URLSearchParams(search); params.delete(this.ID || 0); return path + "?" + params.toString(); },
 			loadMoreHref:      function() { const params = new URLSearchParams(search); params.set(this.threadID || 0, `${this.count+limit},${this.offset}`); return path + "?" + params.toString(); },
@@ -57,19 +57,21 @@ class PublicMessagesTreeBuilder extends AbstractPublicBuilder {
 		return this
 	}
 
-	addMessage(message: Message) {
+	addThreadPath(threadPath: Message[]) {
 		const search = this.search
 		const isAuthed = this.isAuthed
 		this.threadPath = mustache.render(this.isMobile ? threadPathTemplateMobile : threadPathTemplate, {
-			lastMessage:   message,
+			path:     threadPath.slice(0, -1),
+			lastMessage:   threadPath.slice(-1),
 			threadPrivate: function() { return this.private },
 			editPublicThread: function() { return isAuthed },
-			editThreadHref: function() { return `/editor/messages/${this.ID}` + search },
+			editThreadHref: function() { return `/messages/${this.ID}/edit` + search },
 
 			lastThreadTarget: "_self",
 			lastThreadExternal: false,
 			lastThreadHref: function() { return `/${this.name}` + search },
 			threadTitle: function() { return `/${crop(this.title || this.text, 30)}` },
+			pathThreadHref: function() { return `/${this.name}` + search }
 		})
 
 		return this

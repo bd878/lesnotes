@@ -1,50 +1,57 @@
-import ThreadViewBuilder from '../builders/threadViewBuilder';
-import HomeBuilder from '../builders/homeBuilder';
+import NewMessageBuilder from '../builders/newMessageBuilder'
+import HomeBuilder from '../builders/homeBuilder'
 import LayoutBuilder from '../builders/layoutBuilder';
 import AuthBuilder from '../builders/authBuilder';
 import HeaderBuilder from '../builders/headerBuilder';
-import MessageHeaderBuilder from '../builders/messageHeaderBuilder';
-import MessagesTreeBuilder from '../builders/messagesTreeBuilder';
+import PublicMessagesTreeBuilder from '../builders/publicMessagesTreeBuilder';
 import ControlPanelBuilder from '../builders/controlPanelBuilder';
+import MessageHeaderBuilder from '../builders/messageHeaderBuilder';
 
-async function threadView(ctx) {
-	ctx.log.info("--> threadView")
+async function newThreadMessage(ctx) {
+	ctx.log.info("--> newThreadMessage")
 
 	const panel = new ControlPanelBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
-	const view = new ThreadViewBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName,
-		ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const messageForm = new NewMessageBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const content = new HomeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const messageHeader = new MessageHeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
-	const tree = new MessagesTreeBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName,
+	const tree = new PublicMessagesTreeBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName,
 		ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
 	layout
-		.addTitle(ctx.state.thread.title || ctx.state.thread.description)
 		.addFooter()
-		.addContent(			
+		.addContent(
 			content
 				.addMessagesTree(
 					tree
 						.addThreadPath(ctx.state.cwdPath)
 						.addList(ctx.state.tree, ctx.state.tree.threadID)
 				)
-				.addThreadView(view.addThread(ctx.state.thread))
-				.addMessageHeader(messageHeader.addMessagePath(ctx.state.messagePath))
+				.addNewMessageForm(
+					messageForm
+						.addFilesList([])
+						.addThreadID(ctx.state.tree.threadID)
+						.addThreadName(ctx.state.tree.name)
+				)
+				.addMessageHeader(
+					messageHeader.addMessagePath(ctx.state.messagePath)
+				)
+				.addControlPanel(
+					panel.addAuth(auth.addLogout())
+				)
 				.addHeader(
 					header
-						.addNewNote("/home" + ctx.search)
+						.addNewNote(ctx.state.newNoteHref)
 						.addSearch()
 				)
-				.addControlPanel(panel.addAuth(auth.addLogout()))
 		)
 
 	ctx.body = layout.build()
 	ctx.status = 200
 
-	ctx.log.info("<-- threadView")
+	ctx.log.info("<-- newThreadMessage")
 }
 
-export default threadView;
+export default newThreadMessage

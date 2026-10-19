@@ -1,6 +1,7 @@
 import * as is from '../third_party/is';
 import publicMessage from './publicMessage'
 import publicThread from './publicThread'
+import messageView from './messageView';
 
 async function publicThreadOrMessage(ctx) {
 	ctx.log.info("--> publicThreadOrMessage")
@@ -9,8 +10,11 @@ async function publicThreadOrMessage(ctx) {
 	if (is.notEmpty(ctx.state.tree) && ctx.state.tree.count > 0) {
 		await publicThread(ctx)
 	} else {
-		// otherwise, just a message
-		await publicMessage(ctx)
+		if (ctx.state.isAuthed) {
+			await messageView(ctx)
+		} else {
+			await publicMessage(ctx)
+		}
 	}
 
 	ctx.log.info("<-- publicThreadOrMessage")

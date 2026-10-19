@@ -44,7 +44,7 @@ class MessagesTreeBuilder extends AbstractPublicBuilder {
 			showCounter:       function() { return this.count > 0 },
 
 			messageHref:       function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); return `/messages/${this.ID}?` + params.toString(); },
-			openThreadHref:    function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); params.set("cwd", this.ID); params.set(`${this.ID}`, `${limit},0`); return "/home?" + params.toString(); },
+			openThreadHref:    function() { return `/${this.name}/new` },
 			unfoldHref:        function() { const params = new URLSearchParams(search); params.set(this.ID || 0, `${limit},0`); return path + "?" + params.toString(); },
 			foldHref:          function() { const params = new URLSearchParams(search); params.delete(this.ID || 0); return path + "?" + params.toString(); },
 			loadMoreHref:      function() { const params = new URLSearchParams(search); params.set(this.threadID || 0, `${this.count+limit},${this.offset}`); return path + "?" + params.toString(); },
@@ -63,22 +63,11 @@ class MessagesTreeBuilder extends AbstractPublicBuilder {
 			path:     threadPath.slice(0, -1),
 			lastMessage:   threadPath.slice(-1),
 			editPublicThread: this.isAuthed,
-			threadPrivate: function() { return this.thread.private },
 			threadTitle: function() { return `/${crop(this.title || this.text, 30)}` },
-			lastThreadTarget: "_blank",
-			lastThreadExternal: function() { return !this.thread.private },
-			lastThreadHref:  function() { return `/${this.thread.name}` },
-			pathThreadHref: function() {
-				const params = new URLSearchParams(search);
-				switch (this.ID) {
-				case 0:
-					params.delete("cwd")
-					return urlPath + "?" + params.toString()
-				default:
-					params.set("cwd", this.ID)
-					return urlPath + "?" + params.toString()
-				}
-			},
+			lastThreadTarget: "_self",
+			lastThreadExternal: false,
+			lastThreadHref:  function() { return `/${this.name}` },
+			pathThreadHref: function() { return `/${this.name}` + search },
 		})
 		return this
 	}

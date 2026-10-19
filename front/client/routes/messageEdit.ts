@@ -40,7 +40,7 @@ async function messageEdit(ctx) {
 				.addMessageHeader(messageHeader.addMessagePath(ctx.state.messagePath))
 				.addHeader(
 					header
-						.addNewNote("/home" + ctx.search)
+						.addNewNote(ctx.state.newNoteHref)
 						.addSearch()
 				)
 				.addControlPanel(panel.addAuth(auth.addLogout()))

@@ -17,6 +17,8 @@ let messageEditFormTemplateMobile = readFileSync(resolve(join(Config.get('basedi
 class MessageEditViewBuilder extends AbstractBuilder {
 	filesList   = undefined
 	message     = undefined
+	cancelHref  = undefined
+	redirectUrl = undefined
 
 	scripts = [
 		"/public/pages/messageEdit/messageEditScript.js"
@@ -34,13 +36,25 @@ class MessageEditViewBuilder extends AbstractBuilder {
 		return this
 	}
 
+	addCancelHref(href: string) {
+		this.cancelHref = href
+		return this
+	}
+
+	addRedirectUrl(redirectUrl: string) {
+		this.redirectUrl = redirectUrl
+		return this
+	}
+
 	build() {
 		const search = this.search
+		const cancelHref = this.cancelHref
 		return mustache.render(this.isMobile ? messageEditFormTemplateMobile : messageEditFormTemplate, {
 			hasFiles:         this.filesList != undefined,
 			message:          this.message,
 			filesSummary:     this.i18n("filesSummary"),
-			cancelEditHref:   function() { return `/messages/${this.ID}` + search},
+			cancelEditHref:   cancelHref || `/messages/${this.ID}` + search,
+			redirectUrl:      this.redirectUrl,
 			namePlaceholder:  this.i18n("namePlaceholder"),
 			titlePlaceholder: this.i18n("titlePlaceholder"),
 			textPlaceholder:  this.i18n("textPlaceholder"),

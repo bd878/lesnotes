@@ -15,6 +15,8 @@ let newMessageFormTemplateMobile = readFileSync(resolve(join(Config.get('basedir
 class NewMessageBuilder extends AbstractBuilder {
 	filesList = undefined
 	threadID  = 0
+	threadName = ""
+	redirectUrl = ""
 
 	addFilesList(files: FileWithMime[]) {
 		this.filesList = mustache.render(this.isMobile ? filesListTemplateMobile : filesListTemplate, {
@@ -28,6 +30,16 @@ class NewMessageBuilder extends AbstractBuilder {
 		return this
 	}
 
+	addThreadName(name: string) {
+		this.threadName = name
+		return this
+	}
+
+	addRedirectUrl(redirectUrl: string) {
+		this.redirectUrl = redirectUrl
+		return this
+	}
+
 	build() {
 		return mustache.render(this.isMobile ? newMessageFormTemplateMobile : newMessageFormTemplate, {
 			hasFiles:         this.filesList != undefined,
@@ -37,6 +49,8 @@ class NewMessageBuilder extends AbstractBuilder {
 			sendButton:       this.i18n("sendButton"),
 			sendAction:       "/message/send" + this.search,
 			threadID:         this.threadID,
+			threadName:       this.threadName,
+			redirectUrl:      this.redirectUrl,
 		}, {
 			filesList:        this.filesList,
 		})

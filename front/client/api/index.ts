@@ -15,6 +15,7 @@ import sendMessage from './sendMessage';
 import sendTranslationJson from './sendTranslationJson';
 import sendCommentJson from './sendCommentJson';
 import updateMessage from './updateMessage';
+import updateMessageJson from './updateMessageJson';
 import updateTranslationJson from './updateTranslationJson';
 import updateThreadJson from './updateThreadJson';
 import updateThread from './updateThread';
@@ -81,6 +82,7 @@ export default {
 	sendCommentJson,
 	sendTranslationJson,
 	updateMessage,
+	updateMessageJson,
 	updateCommentJson,
 	updateThreadJson,
 	updateThread,

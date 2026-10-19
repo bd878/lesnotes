@@ -1,0 +1,38 @@
+import api from './api';
+import models from './models';
+
+async function updateMessageJson(token: string, id: number, text: string, title: string, name?: string, fileIDs?: number[]) {
+	let result = {
+		error: models.error(),
+	}
+
+	console.log("updateMessageJson", "token", token, "id", id, "text", text, "title", title, "name", name, "file_ids", fileIDs)
+
+	try {
+		const [response, error] = await api("/messages/v2/update", {
+			method: "POST",
+			body: {
+				token: token,
+				req: {
+					text:       text,
+					title:      title,
+					id:         id,
+					name:       name,
+					file_ids:   fileIDs,
+				},
+			},
+		});
+
+		if (error.error) {
+			result.error = models.error(error)
+		}
+	} catch (e) {
+		result.error.error    = true
+		result.error.status   = 500
+		result.error.explain  = e.toString()
+	}
+
+	return result
+}
+
+export default updateMessageJson

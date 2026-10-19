@@ -20,7 +20,7 @@ async function searchResult(ctx) {
 			content
 				.addHeader(
 					ctx.state.isAuthed
-						? header.addSearch().addNewNote("/home" + ctx.search)
+						? header.addSearch().addNewNote(ctx.state.newNoteHref)
 						: header.addSearch()
 				)
 				.addControlPanel(panel.addAuth(ctx.state.isAuthed ? auth.addLogout() : auth.addLogin()))
