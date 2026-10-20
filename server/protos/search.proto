@@ -109,6 +109,7 @@ message SearchMessagesRequest {
 	int64     user_id = 2;
 	optional int64  thread_id = 3;
 	optional int32  public = 4;
+	optional string name = 5;
 }
 
 message SearchMessagesResponse {

@@ -449,14 +449,21 @@ func (s Controller) UpdateTranslation(ctx context.Context, messageID int64, lang
 	return
 }
 
-func (s Controller) SearchMessages(ctx context.Context, userID int64, substr string, threadID int64, public int32) (list []*model.Message, err error) {
-	slog.Debug("search messages", slog.Int64("user_id", userID), slog.String("substr", substr), slog.Int64("thread_id", threadID), slog.Int("public", int(public)))
+func (s Controller) SearchMessages(ctx context.Context, userID int64, substr string, threadID int64, name string, public int32) (list []*model.Message, err error) {
+	slog.Debug("search messages",
+		slog.Int64("user_id", userID),
+		slog.String("substr", substr),
+		slog.Int64("thread_id", threadID),
+		slog.Int("public", int(public)),
+		slog.String("name", name),
+	)
 
 	res, err := s.client.SearchMessages(ctx, &search.SearchMessagesRequest{
 		Substr:   substr,
 		UserId:   userID,
 		ThreadId: &threadID,
 		Public:   &public,
+		Name:     &name,
 	})
 	if err != nil {
 		return nil, err

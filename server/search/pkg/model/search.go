@@ -44,6 +44,7 @@ type (
 		Query              string        `json:"query"`
 		Public             int           `json:"public"`
 		ThreadID           int64         `json:"thread"`
+		Name               string        `json:"name"`
 	}
 
 	SearchMessagesResponse struct {

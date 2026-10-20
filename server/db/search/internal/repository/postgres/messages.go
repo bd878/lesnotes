@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"strings"
 	"fmt"
 	"log/slog"
 	"os"
@@ -68,7 +69,73 @@ func (r *MessagesRepository) DeleteMessage(ctx context.Context, id, userID int64
 	return
 }
 
-func (r *MessagesRepository) SearchMessages(ctx context.Context, userID int64, substr string, public int) (list []*search.SearchMessage, err error) {
+func (r *MessagesRepository) SearchBatchMessages(ctx context.Context, userID int64, ids []int64) (list []*search.SearchMessage, err error) {
+	var tx pgx.Tx
+	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return
+	}
+	defer func() {
+		p := recover()
+		switch {
+		case p != nil:
+			_ = tx.Rollback(ctx)
+			panic(p)
+		case err != nil:
+			fmt.Fprintf(os.Stderr, "[SearchBatchMessages]: rollback with error: %v\n", err)
+			err = tx.Rollback(ctx)
+		default:
+			err = tx.Commit(ctx)
+		}
+	}()
+
+	list = make([]*search.SearchMessage, 0)
+	if len(ids) == 0 {
+		return
+	}
+
+	var rows pgx.Rows
+
+	var order string
+	pairs := make([]string, len(ids))
+	for i, messageID := range ids {
+		pairs[i] = fmt.Sprintf("(%d, %d)", messageID, i)
+	}
+	order = strings.Join(pairs, ",")
+
+	query := r.table(`SELECT m.id, m.user_id, m.name, m.text, m.private, m.created_at, m.updated_at, m.title FROM %s m `) +
+		fmt.Sprintf(` JOIN (VALUES %s) AS x(id, ordering) ON m.id = x.id WHERE (m.user_id = $1 OR private = false) ORDER BY x.ordering ASC`, order)
+
+	rows, err = tx.Query(ctx, query, userID)
+	defer rows.Close()
+	if err != nil {
+		return
+	}
+
+	for rows.Next() {
+		message := &search.SearchMessage{}
+
+		var createdAt, updatedAt *time.Time
+
+		err = rows.Scan(&message.Id, &message.UserId, &message.Name, &message.Text, &message.Private, &createdAt, &updatedAt, &message.Title)
+		if err != nil {
+			return
+		}
+
+		message.CreatedAt = createdAt.Format(time.RFC3339)
+		message.UpdatedAt = updatedAt.Format(time.RFC3339)
+
+		list = append(list, message)
+	}
+
+	if err = rows.Err(); err != nil {
+		return
+	}
+
+	return
+}
+
+func (r *MessagesRepository) SearchUserMessages(ctx context.Context, userID int64, substr string, public int) (list []*search.SearchMessage, err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -120,8 +187,6 @@ func (r *MessagesRepository) SearchMessages(ctx context.Context, userID int64, s
 		if err != nil {
 			return
 		}
-
-		slog.Info("message", "id", message.Id, "name", message.Name, "title", message.Title, "text", message.Text)
 
 		message.CreatedAt = createdAt.Format(time.RFC3339)
 		message.UpdatedAt = updatedAt.Format(time.RFC3339)

@@ -11,7 +11,7 @@ import (
 
 type Controller interface {
 	Apply(ctx context.Context, reqType machine.RequestType, cmd []byte, duration time.Duration) (err error)
-	SearchMessages(ctx context.Context, userID int64, substr string, threadID int64, public int) (list []*search.SearchMessage, err error)
+	SearchMessages(ctx context.Context, userID int64, substr string, threadID int64, name string, public int) (list []*search.SearchMessage, err error)
 	GetServers(ctx context.Context) (servers []*api.Server, err error)
 }
 
@@ -44,6 +44,7 @@ func (h *Handler) SearchMessages(ctx context.Context, req *search.SearchMessages
 	var (
 		public int
 		threadID int64
+		name string
 	)
 
 	if req.ThreadId == nil {
@@ -58,7 +59,13 @@ func (h *Handler) SearchMessages(ctx context.Context, req *search.SearchMessages
 		public = int(*req.Public)
 	}
 
-	list, err := h.controller.SearchMessages(ctx, req.UserId, req.Substr, threadID, public)
+	if req.Name == nil {
+		name = ""
+	} else {
+		name = *req.Name
+	}
+
+	list, err := h.controller.SearchMessages(ctx, req.UserId, req.Substr, threadID, name, public)
 	if err != nil {
 		return nil, err
 	}

@@ -902,6 +902,7 @@ type SearchMessagesRequest struct {
 	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	ThreadId      *int64                 `protobuf:"varint,3,opt,name=thread_id,json=threadId,proto3,oneof" json:"thread_id,omitempty"`
 	Public        *int32                 `protobuf:"varint,4,opt,name=public,proto3,oneof" json:"public,omitempty"`
+	Name          *string                `protobuf:"bytes,5,opt,name=name,proto3,oneof" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -962,6 +963,13 @@ func (x *SearchMessagesRequest) GetPublic() int32 {
 		return *x.Public
 	}
 	return 0
+}
+
+func (x *SearchMessagesRequest) GetName() string {
+	if x != nil && x.Name != nil {
+		return *x.Name
+	}
+	return ""
 }
 
 type SearchMessagesResponse struct {
@@ -1216,15 +1224,17 @@ const file_protos_search_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x04 \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\x05 \x01(\tR\tupdatedAt\"\xa0\x01\n" +
+	"updated_at\x18\x05 \x01(\tR\tupdatedAt\"\xc2\x01\n" +
 	"\x15SearchMessagesRequest\x12\x16\n" +
 	"\x06substr\x18\x01 \x01(\tR\x06substr\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12 \n" +
 	"\tthread_id\x18\x03 \x01(\x03H\x00R\bthreadId\x88\x01\x01\x12\x1b\n" +
-	"\x06public\x18\x04 \x01(\x05H\x01R\x06public\x88\x01\x01B\f\n" +
+	"\x06public\x18\x04 \x01(\x05H\x01R\x06public\x88\x01\x01\x12\x17\n" +
+	"\x04name\x18\x05 \x01(\tH\x02R\x04name\x88\x01\x01B\f\n" +
 	"\n" +
 	"_thread_idB\t\n" +
-	"\a_public\"\\\n" +
+	"\a_publicB\a\n" +
+	"\x05_name\"\\\n" +
 	"\x16SearchMessagesResponse\x12,\n" +
 	"\x04list\x18\x01 \x03(\v2\x18.search.v1.SearchMessageR\x04list\x12\x14\n" +
 	"\x05count\x18\x02 \x01(\x05R\x05count\"E\n" +

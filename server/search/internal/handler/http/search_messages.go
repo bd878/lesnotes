@@ -88,11 +88,11 @@ func (h *Handler) SearchMessages(w http.ResponseWriter, req *http.Request) (err 
 		public = -1
 	}
 
-	return h.searchMessages(req.Context(), w, user.ID, query, threadID, public)
+	return h.searchMessages(req.Context(), w, user.ID, query, threadID, "", public)
 }
 
-func (h *Handler) searchMessages(ctx context.Context, w http.ResponseWriter, userID int64, query string, threadID int64, public int32) (err error) {
-	list, err := h.controller.SearchMessages(ctx, userID, query, threadID, public)
+func (h *Handler) searchMessages(ctx context.Context, w http.ResponseWriter, userID int64, query string, threadID int64, name string, public int32) (err error) {
+	list, err := h.controller.SearchMessages(ctx, userID, query, threadID, name, public)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

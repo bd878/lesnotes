@@ -81,6 +81,52 @@ func (r *ThreadsRepository) SearchThreads(ctx context.Context, parentID, userID 
 	return
 }
 
+func (r *ThreadsRepository) ReadThread(ctx context.Context, name string) (thread *search.SearchThread, err error) {
+	const query = "SELECT id, name, user_id, description, private, parent_id, created_at, updated_at FROM %s WHERE name = $1"
+
+	var createdAt, updatedAt *time.Time
+
+	thread = &search.SearchThread{}
+
+	err = r.pool.QueryRow(ctx, r.table(query), name).Scan(&thread.Id, &thread.Name, &thread.UserId, &thread.Description, &thread.Private,
+		&thread.ParentId, &createdAt, &updatedAt)
+	if err != nil {
+		return
+	}
+
+	thread.CreatedAt = createdAt.Format(time.RFC3339)
+	thread.UpdatedAt = updatedAt.Format(time.RFC3339)
+
+	return
+}
+
+func (r *ThreadsRepository) SearchThreadIDs(ctx context.Context, parentID, userID int64) (ids []int64, err error) {
+	const query = "SELECT id FROM %s WHERE (user_id = $1 OR private = false) AND parent_id = $2"
+
+	rows, err := r.pool.Query(ctx, r.table(query), userID, parentID)
+	defer rows.Close()
+	if err != nil {
+		return
+	}
+
+	ids = make([]int64, 0)
+	for rows.Next() {
+		var id int64
+		err = rows.Scan(&id)
+		if err != nil {
+			return
+		}
+
+		ids = append(ids, id)
+	}
+
+	if err = rows.Err(); err != nil {
+		return
+	}
+
+	return
+}
+
 func (r *ThreadsRepository) UpdateThread(ctx context.Context, id, userID int64, name, description *string, updatedAt string) (err error) {
 	const update = "UPDATE %s SET name = $3, description = $4, updated_at = $5 WHERE user_id = $1 AND id = $2"
 

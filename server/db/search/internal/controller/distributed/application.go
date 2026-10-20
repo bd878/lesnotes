@@ -14,7 +14,8 @@ import (
 )
 
 type MessagesRepository interface {
-	SearchMessages(ctx context.Context, userID int64, substr string, public int) (list []*search.SearchMessage, err error)
+	SearchUserMessages(ctx context.Context, userID int64, substr string, public int) (list []*search.SearchMessage, err error)
+	SearchBatchMessages(ctx context.Context, userID int64, ids []int64) (list []*search.SearchMessage, err error)
 }
 
 type FilesRepository interface {
@@ -25,7 +26,9 @@ type TranslationsRepository interface {
 }
 
 type ThreadsRepository interface {
+	ReadThread(ctx context.Context, name string) (thread *search.SearchThread, err error)
 	SearchThreads(ctx context.Context, parentID, userID int64) (list []*search.SearchThread, err error)
+	SearchThreadIDs(ctx context.Context, parentID, userID int64) (ids []int64, err error)
 }
 
 type Consensus interface {
@@ -70,10 +73,33 @@ func (m *Distributed) Apply(ctx context.Context, reqType machine.RequestType, cm
 	return m.consensus.Apply(timedCtx, buf.Bytes(), duration)
 }
 
-func (m *Distributed) SearchMessages(ctx context.Context, userID int64, substr string, threadID int64, public int) (list []*search.SearchMessage, err error) {
-	slog.Debug("search messages", slog.Int64("user_id", userID), slog.String("substr", substr), slog.Int64("thread_id", threadID), slog.Int("public", public))
+func (m *Distributed) SearchMessages(ctx context.Context, userID int64, substr string, threadID int64, name string, public int) (list []*search.SearchMessage, err error) {
+	slog.Debug("search messages",
+		slog.Int64("user_id", userID),
+		slog.String("substr", substr),
+		slog.Int64("thread_id", threadID),
+		slog.Int("public", public),
+		slog.String("name", name),
+	)
 
-	return m.messagesRepo.SearchMessages(ctx, userID, substr, public)
+	if threadID != 0 || name != "" {
+		if threadID == 0 && name != "" {
+			thread, err := m.threadsRepo.ReadThread(ctx, name)
+			if err != nil {
+				return nil, err
+			}
+			threadID = thread.Id
+		}
+
+		ids, err := m.threadsRepo.SearchThreadIDs(ctx, threadID, userID)
+		if err != nil {
+			return nil, err
+		}
+
+		return m.messagesRepo.SearchBatchMessages(ctx, userID, ids)
+	}
+
+	return m.messagesRepo.SearchUserMessages(ctx, userID, substr, public)
 }
 
 func (m *Distributed) GetServers(ctx context.Context) ([]*api.Server, error) {
