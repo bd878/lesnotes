@@ -28,7 +28,7 @@ async function publicThread(ctx) {
 				.addMessagesTree(
 					tree
 						.addList(ctx.state.tree, 0 /* root public thread */)
-						.addThreadPath(ctx.state.cwdPath)
+						.addThreadPath(ctx.state.threadPath)
 				)
 				.addMessageView(
 					view

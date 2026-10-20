@@ -27,12 +27,7 @@ class AuthBuilder extends AbstractBuilder {
 
 		this.logout = mustache.render(this.isMobile ? logoutTemplateMobile : logoutTemplate, {
 			logout:           this.i18n("logout"),
-			logoutHref:       function() {
-				const params = new URLSearchParams(search);
-				params.delete("cwd");
-				params.delete("id"); /* TODO: delete pagination */
-				return "/logout?" + params.toString()
-			},
+			logoutHref:       "/logout" + search
 		})
 		return this
 	}
@@ -42,12 +37,7 @@ class AuthBuilder extends AbstractBuilder {
 
 		this.signup = mustache.render(this.isMobile ? signupTemplateMobile : signupTemplate, {
 			signup:           this.i18n("signup"),
-			signupHref:       function() {
-				const params = new URLSearchParams(search);
-				params.delete("cwd");
-				params.delete("id"); /* TODO: delete pagination */
-				return "/signup?" + params.toString()
-			},
+			signupHref:       "/signup" + search
 		})
 		return this
 	}
@@ -57,12 +47,7 @@ class AuthBuilder extends AbstractBuilder {
 
 		this.login = mustache.render(this.isMobile ? loginTemplateMobile : loginTemplate, {
 			login:           this.i18n("login"),
-			loginHref:       function() {
-				const params = new URLSearchParams(search);
-				params.delete("cwd");
-				params.delete("id"); /* TODO: delete pagination */
-				return "/login?" + params.toString()
-			},
+			loginHref:       "/login" + search
 		})
 		return this
 	}

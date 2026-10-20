@@ -7,6 +7,7 @@ export default async function middleware(ctx, next) {
 			ctx.body = e.message;
 			ctx.status = e.status;
 		} else {
+			console.log(e)
 			ctx.body = 'Internal error';
 			ctx.status = 500;
 			ctx.log.error(e.message, e.stack);

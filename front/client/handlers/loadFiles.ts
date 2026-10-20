@@ -7,30 +7,34 @@ const limit = 10_000
 async function loadFiles(ctx, next) {
 	ctx.log.info("--> loadFiles")
 
-	const userID = parseInt(ctx.params.user) || 0;
-	const token = ctx.state.token
-	const params = new URLSearchParams(ctx.search)
-	const offset = parseInt(params.get("files")) || 0;
+	try {
+		const userID = parseInt(ctx.params.user) || 0;
+		const token = ctx.state.token
+		const params = new URLSearchParams(ctx.search)
+		const offset = parseInt(params.get("files")) || 0;
 
-	if (is.notEmpty(token)) {
-		// all user files
-		ctx.state.files = await listFilesJson(token, 0, limit, offset)
-	} else if (is.notEmpty(userID)) {
-		// public user files
-		ctx.state.files = await listFilesJson('', userID, limit, offset)
-	}
-
-	if (is.notEmpty(ctx.state.files)) {
-		if (ctx.state.files.error.error) {
-			ctx.log.error(ctx.state.files.error)
-			ctx.body = "error"
-			ctx.status = 400
-			return
+		if (is.notEmpty(token)) {
+			// all user files
+			ctx.state.files = await listFilesJson(token, 0, limit, offset)
+		} else if (is.notEmpty(userID)) {
+			// public user files
+			ctx.state.files = await listFilesJson('', userID, limit, offset)
 		}
 
-		ctx.state.files.files.reverse()
-	} else {
-		ctx.state.files = EmptyFilesList
+		if (is.notEmpty(ctx.state.files)) {
+			if (ctx.state.files.error.error) {
+				ctx.log.error(ctx.state.files.error)
+				ctx.body = "error"
+				ctx.status = 400
+				return
+			}
+
+			ctx.state.files.files.reverse()
+		} else {
+			ctx.state.files = EmptyFilesList
+		}
+	} catch (e) {
+		console.log(e)
 	}
 
 	await next()

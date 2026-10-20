@@ -24,12 +24,12 @@ async function threadPath(ctx, next) {
 
 			result.path.reverse()
 
-			ctx.state.cwdPath = result.path
+			ctx.state.threadPath = result.path
 		} else {
-			ctx.state.cwdPath = []
+			ctx.state.threadPath = []
 		}
 	} else  if (is.notEmpty(ctx.state.message)) {
-		ctx.state.cwdPath = [ctx.state.message]
+		ctx.state.threadPath = [ctx.state.message]
 	}
 
 	await next()

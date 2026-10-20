@@ -28,8 +28,7 @@ async function messageEdit(ctx) {
 			content
 				.addMessagesTree(
 					tree
-						.addThreadPath(ctx.state.cwdPath)
-						.addList(ctx.state.tree, ctx.state.tree.threadID)
+						.addList(ctx.state.tree, 0)
 				)
 				.addMessageEditForm(
 					messageForm

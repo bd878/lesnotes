@@ -20,8 +20,6 @@ import loadTree from './handlers/loadTree';
 import loadComments from './handlers/loadComments';
 import messageFeatures from './handlers/messageFeatures'
 import loadMessagePath from './handlers/loadMessagePath';
-import loadCwdPath from './handlers/loadCwdPath';
-import loadCwdThread from './handlers/loadCwdThread';
 import loadFiles from './handlers/loadFiles';
 import loadTranslation from './handlers/loadTranslation';
 import loadMessage from './handlers/loadMessage';
@@ -91,9 +89,9 @@ router
 	.get("login",                  "/login",                        etag, noCache, getState, notAuthed, login)
 	.get("logout",                 "/logout",                       etag, noCache, getState, expireToken, redirectLogin)
 	.get("signup",                 "/signup",                       etag, noCache, getState, notAuthed, signup)
-	.get("home",                   "/home",                         etag, noCache, getMe, getState, authed, newNoteHref, loadCwdThread, loadTree, loadCwdPath, loadFiles, newMessage)
-	.get("message",                "/messages/:idOrName",           etag, noCache, getMe, getState, authed, newNoteHref, loadCwdThread, loadTree, loadMessagePath, loadCwdPath, loadThread, loadMessage, loadComments, loadTranslation, formatView, messageFeatures, messageView)
-	.get("editMessage",            "/messages/:idOrName/edit",      etag, noCache, getMe, getState, authed, newNoteHref, loadCwdThread, loadTree, loadMessagePath, loadCwdPath, loadMessage, loadFiles, loadComments, loadTranslation, formatTextarea, messageFeatures, messageEdit)
+	.get("home",                   "/home",                         etag, noCache, getMe, getState, authed, newNoteHref, loadTree, loadFiles, newMessage)
+	.get("message",                "/messages/:idOrName",           etag, noCache, getMe, getState, authed, newNoteHref, loadTree, loadMessagePath, loadThread, loadMessage, loadComments, loadTranslation, formatView, messageFeatures, messageView)
+	.get("editMessage",            "/messages/:idOrName/edit",      etag, noCache, getMe, getState, authed, newNoteHref, loadTree, loadMessagePath, loadMessage, loadFiles, loadComments, loadTranslation, formatTextarea, messageFeatures, messageEdit)
 	.get("status",                 "/status",                       status, noCache, getState)
 	.get("search",                 "/search",                       etag, noCache, getMe, getState, newNoteHref, searchMessages, searchResult)
 	.post("doLogin",               "/login",                        etag, getState, validateLogin, redirectHome)

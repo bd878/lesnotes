@@ -28,8 +28,7 @@ class SearchBuilder extends AbstractBuilder {
 			showThreadLink:    true,
 
 			messageHref:       function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); return `/messages/${this.ID}?` + params.toString(); },
-			openThreadHref:    function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); params.set("cwd", this.ID); params.set(`${this.ID}`, `${limit},0`); return "/home?" + params.toString(); },
-
+			openThreadHref:    function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); params.set(`${this.ID}`, `${limit},0`); return `/${this.name}` + search; },
 		})
 
 		return this

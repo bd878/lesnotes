@@ -21,9 +21,6 @@ async function publicThreadMessage(ctx) {
 	const tree = new PublicMessagesTreeBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName, ctx.userAgent.isMobile,
 		ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
-	const params = new URLSearchParams(ctx.search)
-	params.set("cwd", ctx.state.message.ID)
-
 	layout
 		.addTitle(ctx.state.message.title || ctx.state.message.text)
 		.addFooter()
@@ -43,7 +40,7 @@ async function publicThreadMessage(ctx) {
 				.addMessagesTree(
 					tree
 						.addList(ctx.state.tree, 0)
-						.addThreadPath(ctx.state.cwdPath)
+						.addThreadPath(ctx.state.threadPath)
 				)
 				.addMessageFeatures(
 					ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation)

@@ -9,7 +9,6 @@ async function getState(ctx, next) {
 	ctx.state.fontSize = getFontSize(ctx)
 	ctx.state.lang = getLanguage(ctx)
 	ctx.state.theme = getTheme(ctx)
-	ctx.state.thread = getThread(ctx)
 	ctx.state.nav = getMessageView(ctx)
 	ctx.state.trans = getTranslation(ctx)
 	ctx.state.cwd = getCwd(ctx)
@@ -21,8 +20,6 @@ async function getState(ctx, next) {
 	ctx.state.token = getToken(ctx)
 	ctx.state.isAuthed = getIsAuthed(ctx)
 	ctx.state.searchQuery = getSearchQuery(ctx)
-
-	ctx.log.info("cwd", ctx.state.cwd)
 
 	await next()
 
@@ -43,8 +40,7 @@ function getIsAuthed(ctx): boolean {
 }
 
 function getMessageID(ctx): number {
-	const params = new URLSearchParams(ctx.request.search)
-	return parseInt(ctx.params.idOrName || (params.get("cwd") || "0")) || 0
+	return parseInt(ctx.params.idOrName) || 0
 }
 
 function getMessageName(ctx): string {
@@ -130,15 +126,15 @@ function getMessageView(ctx) {
 	}
 }
 
-function idLimitOffset(numbers: [IDOrName, ...number[]]): IDLimitOffset {
-	const [{name: name, id: id}, limit = defaultLimit, offset = 0] = numbers
-	return {id, name, limit, offset}
-}
-
 function getCwd(ctx) {
 	const params = new URLSearchParams(ctx.request.search)
 
 	return idLimitOffset([idOrName(params.get("cwd")), ...(params.get(params.get("cwd") || "0") || "").split(",").map(parseFloat).filter(v => !isNaN(v))])
+}
+
+function idLimitOffset(numbers: [IDOrName, ...number[]]): IDLimitOffset {
+	const [{name: name, id: id}, limit = defaultLimit, offset = 0] = numbers
+	return {id, name, limit, offset}
 }
 
 function getLeaves(ctx): IDLimitOffset[] {
@@ -173,10 +169,6 @@ function idOrName(str: string): { id?: number; name?: string } {
 	}
 
 	return {id: maybeID}
-}
-
-function getThread(ctx) {
-	return parseInt(ctx.query.cwd) || 0
 }
 
 export default getState;
