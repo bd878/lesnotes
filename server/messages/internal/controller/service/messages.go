@@ -493,6 +493,13 @@ func (s MessagesController) ReadMessage(ctx context.Context, id int64, name stri
 		return nil, err
 	}
 
+	if parent.Private && !message.Private {
+		message.ParentThread = &model.Identity{Private: true}
+		message.ParentMessage = &model.Identity{Private: true}
+
+		return
+	}
+
 	message.ParentThread = &model.Identity{
 		ID:      parent.ID,
 		Title:   parent.Title,
