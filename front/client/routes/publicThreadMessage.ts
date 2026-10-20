@@ -6,6 +6,7 @@ import LayoutBuilder from '../builders/layoutBuilder';
 import AuthBuilder from '../builders/authBuilder';
 import HeaderBuilder from '../builders/headerBuilder';
 import PublicMessagesTreeBuilder from '../builders/publicMessagesTreeBuilder';
+import SearchFormBuilder from '../builders/searchFormBuilder';
 
 async function publicThreadMessage(ctx) {
 	ctx.log.info("--> publicThreadMessage")
@@ -15,6 +16,7 @@ async function publicThreadMessage(ctx) {
 		ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const view = new MessageViewBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName, ctx.userAgent.isMobile,
 		ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const searchForm = new SearchFormBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
@@ -28,8 +30,8 @@ async function publicThreadMessage(ctx) {
 			content
 				.addControlPanel(panel.addAuth(ctx.state.isAuthed ? auth.addLogout() : auth.addLogin()))
 				.addHeader(ctx.state.isAuthed
-					? header.addNewNote(ctx.state.newNoteHref).addSearch()
-					: header.addSearch()
+					? header.addNewNote(ctx.state.newNoteHref).addSearch(searchForm)
+					: header.addSearch(searchForm.addThreadName(ctx.state.parentName))
 				)
 				.addMessageView(
 					view

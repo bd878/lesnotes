@@ -11,7 +11,9 @@ async function redirectSearch(ctx, next) {
 
 	const params = new URLSearchParams(ctx.query)
 	params.set("q", form.query)
-	console.log("params:", params.toString())
+	params.set("id", form.thread)
+	params.set("name", form.thread_name)
+
 	ctx.redirect(ctx.router.url('search', {}, {query: params.toString()}))
 	ctx.status = 302
 

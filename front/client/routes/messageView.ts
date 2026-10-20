@@ -8,6 +8,7 @@ import HeaderBuilder from '../builders/headerBuilder';
 import TranslationsBuilder from '../builders/translationsBuilder';
 import ControlPanelBuilder from '../builders/controlPanelBuilder';
 import MessageHeaderBuilder from '../builders/messageHeaderBuilder';
+import SearchFormBuilder from '../builders/searchFormBuilder';
 
 async function messageView(ctx) {
 	ctx.log.info("--> messageView")
@@ -20,6 +21,7 @@ async function messageView(ctx) {
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const messageHeader = new MessageHeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const searchForm = new SearchFormBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const tree = new MessagesTreeBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName,
 		ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
@@ -39,11 +41,14 @@ async function messageView(ctx) {
 						.addMessage(ctx.state.message)
 				)
 				.addMessageFeatures(ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation))
-				.addMessageHeader(messageHeader.addMessagePath(ctx.state.messagePath))
+				.addMessageHeader(
+					messageHeader
+						.addMessagePath(ctx.state.messagePath)
+				)
 				.addHeader(
 					header
 						.addNewNote(ctx.state.newNoteHref)
-						.addSearch()
+						.addSearch(searchForm)
 				)
 				.addControlPanel(panel.addAuth(auth.addLogout()))
 		)

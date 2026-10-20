@@ -1,13 +1,13 @@
 import api from './api';
 import models from './models';
 
-async function searchMessagesJson(token: string, query: string, thread: number, isPublic: number) {
+async function searchMessagesJson(token: string, query: string, thread: number, name: string, isPublic: number) {
 	let result = {
 		error: models.error(),
 		list: models.EmptySearchList,
 	}
 
-	console.log("searchMessagesJson", "token", token, "query", query, "thread", thread, "public", isPublic)
+	console.log("searchMessagesJson", "token", token, "query", query, "thread", thread, "name", name, "public", isPublic)
 
 	try {
 		const [response, error] = await api("/search/v2/messages", {
@@ -18,6 +18,7 @@ async function searchMessagesJson(token: string, query: string, thread: number, 
 					query: query,
 					public: isPublic,
 					thread: thread,
+					name:   name,
 				}
 			}
 		})

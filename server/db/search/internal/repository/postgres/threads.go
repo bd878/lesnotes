@@ -100,7 +100,7 @@ func (r *ThreadsRepository) ReadThread(ctx context.Context, name string) (thread
 	return
 }
 
-func (r *ThreadsRepository) SearchThreadIDs(ctx context.Context, parentID, userID int64) (ids []int64, err error) {
+func (r *ThreadsRepository) ReadChildrenIDs(ctx context.Context, parentID, userID int64) (ids []int64, err error) {
 	const query = "SELECT id FROM %s WHERE (user_id = $1 OR private = false) AND parent_id = $2"
 
 	rows, err := r.pool.Query(ctx, r.table(query), userID, parentID)
@@ -122,6 +122,15 @@ func (r *ThreadsRepository) SearchThreadIDs(ctx context.Context, parentID, userI
 
 	if err = rows.Err(); err != nil {
 		return
+	}
+
+	for _, id := range ids {
+		ids2, err := r.ReadChildrenIDs(ctx, id, userID)
+		if err != nil {
+			return nil, err
+		}
+
+		ids = append(ids, ids2...)
 	}
 
 	return

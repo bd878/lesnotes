@@ -1,6 +1,7 @@
 package application
 
 import (
+	"fmt"
 	"time"
 	"context"
 	"bytes"
@@ -15,7 +16,7 @@ import (
 
 type MessagesRepository interface {
 	SearchUserMessages(ctx context.Context, userID int64, substr string, public int) (list []*search.SearchMessage, err error)
-	SearchBatchMessages(ctx context.Context, userID int64, ids []int64) (list []*search.SearchMessage, err error)
+	SearchBatchMessages(ctx context.Context, userID int64, substr string, ids []int64) (list []*search.SearchMessage, err error)
 }
 
 type FilesRepository interface {
@@ -28,7 +29,7 @@ type TranslationsRepository interface {
 type ThreadsRepository interface {
 	ReadThread(ctx context.Context, name string) (thread *search.SearchThread, err error)
 	SearchThreads(ctx context.Context, parentID, userID int64) (list []*search.SearchThread, err error)
-	SearchThreadIDs(ctx context.Context, parentID, userID int64) (ids []int64, err error)
+	ReadChildrenIDs(ctx context.Context, parentID, userID int64) (ids []int64, err error)
 }
 
 type Consensus interface {
@@ -91,12 +92,16 @@ func (m *Distributed) SearchMessages(ctx context.Context, userID int64, substr s
 			threadID = thread.Id
 		}
 
-		ids, err := m.threadsRepo.SearchThreadIDs(ctx, threadID, userID)
+		ids, err := m.threadsRepo.ReadChildrenIDs(ctx, threadID, userID)
 		if err != nil {
 			return nil, err
 		}
 
-		return m.messagesRepo.SearchBatchMessages(ctx, userID, ids)
+		ids = append(ids, threadID)
+
+		slog.Debug("search messages", slog.String("thread_ids", fmt.Sprintf("%v", ids)))
+
+		return m.messagesRepo.SearchBatchMessages(ctx, userID, substr, ids)
 	}
 
 	return m.messagesRepo.SearchUserMessages(ctx, userID, substr, public)

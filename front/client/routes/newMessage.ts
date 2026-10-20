@@ -6,6 +6,7 @@ import HeaderBuilder from '../builders/headerBuilder';
 import MessagesTreeBuilder from '../builders/messagesTreeBuilder';
 import ControlPanelBuilder from '../builders/controlPanelBuilder';
 import MessageHeaderBuilder from '../builders/messageHeaderBuilder';
+import SearchFormBuilder from '../builders/searchFormBuilder';
 
 async function newMessage(ctx) {
 	ctx.log.info("--> newMessage")
@@ -18,6 +19,7 @@ async function newMessage(ctx) {
 		const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 		const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 		const messageHeader = new MessageHeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+		const searchForm = new SearchFormBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 		const tree = new MessagesTreeBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName,
 			ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
@@ -42,7 +44,7 @@ async function newMessage(ctx) {
 					.addHeader(
 						header
 							.addNewNote(ctx.state.newNoteHref)
-							.addSearch()
+							.addSearch(searchForm)
 					)
 			)
 

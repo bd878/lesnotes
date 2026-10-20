@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"context"
-	"strings"
 	"fmt"
 	"log/slog"
 	"os"
@@ -69,7 +68,7 @@ func (r *MessagesRepository) DeleteMessage(ctx context.Context, id, userID int64
 	return
 }
 
-func (r *MessagesRepository) SearchBatchMessages(ctx context.Context, userID int64, ids []int64) (list []*search.SearchMessage, err error) {
+func (r *MessagesRepository) SearchBatchMessages(ctx context.Context, userID int64, substr string, ids []int64) (list []*search.SearchMessage, err error) {
 	var tx pgx.Tx
 	tx, err = r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -96,17 +95,16 @@ func (r *MessagesRepository) SearchBatchMessages(ctx context.Context, userID int
 
 	var rows pgx.Rows
 
-	var order string
-	pairs := make([]string, len(ids))
-	for i, messageID := range ids {
-		pairs[i] = fmt.Sprintf("(%d, %d)", messageID, i)
-	}
-	order = strings.Join(pairs, ",")
+	query := r.table(`
+SELECT id, user_id, name, text, private, created_at, updated_at, title
+FROM %s
+WHERE
+	(user_id = $1 OR private = false) AND
+	id = ANY($2) AND
+	name || ' ' || title || ' ' || text ILIKE $3
+`)
 
-	query := r.table(`SELECT m.id, m.user_id, m.name, m.text, m.private, m.created_at, m.updated_at, m.title FROM %s m `) +
-		fmt.Sprintf(` JOIN (VALUES %s) AS x(id, ordering) ON m.id = x.id WHERE (m.user_id = $1 OR private = false) ORDER BY x.ordering ASC`, order)
-
-	rows, err = tx.Query(ctx, query, userID)
+	rows, err = tx.Query(ctx, query, userID, ids, "%"+substr+"%")
 	defer rows.Close()
 	if err != nil {
 		return

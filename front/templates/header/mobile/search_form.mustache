@@ -5,5 +5,8 @@
 	class="w-full flex flex-row"
 >
 	<input required class="w-full placeholder:italic px-1 large:placeholder:text-lg small:placeholder:text-sm placeholder:text-gray-600 border rounded-md" type="text" name="query" placeholder="{{searchPlaceholder}}"></input>
+	<input type="hidden" name="thread" value="{{threadID}}" />
+	<input type="hidden" name="thread_name" value="{{threadName}}" />
+
 	<input type="submit" hidden />
 </form>

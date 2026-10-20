@@ -6,6 +6,7 @@ import HeaderBuilder from '../builders/headerBuilder';
 import PublicMessagesTreeBuilder from '../builders/publicMessagesTreeBuilder';
 import ControlPanelBuilder from '../builders/controlPanelBuilder';
 import MessageHeaderBuilder from '../builders/messageHeaderBuilder';
+import SearchFormBuilder from '../builders/searchFormBuilder';
 
 async function newThreadMessage(ctx) {
 	ctx.log.info("--> newThreadMessage")
@@ -16,6 +17,7 @@ async function newThreadMessage(ctx) {
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const searchForm = new SearchFormBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const messageHeader = new MessageHeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const tree = new PublicMessagesTreeBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName,
 		ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
@@ -33,7 +35,6 @@ async function newThreadMessage(ctx) {
 					messageForm
 						.addFilesList([])
 						.addThreadID(ctx.state.tree.threadID)
-						.addThreadName(ctx.state.tree.name)
 				)
 				.addMessageHeader(
 					messageHeader.addMessagePath(ctx.state.messagePath)
@@ -44,7 +45,7 @@ async function newThreadMessage(ctx) {
 				.addHeader(
 					header
 						.addNewNote(ctx.state.newNoteHref)
-						.addSearch()
+						.addSearch(searchForm)
 				)
 		)
 

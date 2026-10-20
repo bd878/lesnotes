@@ -7,6 +7,7 @@ import LayoutBuilder from '../builders/layoutBuilder';
 import AuthBuilder from '../builders/authBuilder';
 import HeaderBuilder from '../builders/headerBuilder';
 import MessageHeaderBuilder from '../builders/messageHeaderBuilder';
+import SearchFormBuilder from '../builders/searchFormBuilder';
 
 async function messageEdit(ctx) {
 	ctx.log.info("--> messageEdit")
@@ -18,6 +19,7 @@ async function messageEdit(ctx) {
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const messageHeader = new MessageHeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const searchForm = new SearchFormBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const tree = new MessagesTreeBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName,
 		ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
@@ -40,7 +42,7 @@ async function messageEdit(ctx) {
 				.addHeader(
 					header
 						.addNewNote(ctx.state.newNoteHref)
-						.addSearch()
+						.addSearch(searchForm)
 				)
 				.addControlPanel(panel.addAuth(auth.addLogout()))
 		)

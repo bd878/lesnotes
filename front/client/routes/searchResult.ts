@@ -2,6 +2,7 @@ import LayoutBuilder from '../builders/layoutBuilder';
 import AuthBuilder from '../builders/authBuilder';
 import HeaderBuilder from '../builders/headerBuilder';
 import SearchBuilder from '../builders/searchBuilder';
+import SearchFormBuilder from '../builders/searchFormBuilder';
 import ControlPanelBuilder from '../builders/controlPanelBuilder';
 
 async function searchResult(ctx) {
@@ -12,6 +13,7 @@ async function searchResult(ctx) {
 	const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const content = new SearchBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const searchForm = new SearchFormBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
 	layout
 		.addTitle(ctx.state.searchQuery)
@@ -20,8 +22,8 @@ async function searchResult(ctx) {
 			content
 				.addHeader(
 					ctx.state.isAuthed
-						? header.addSearch().addNewNote(ctx.state.newNoteHref)
-						: header.addSearch()
+						? header.addSearch(searchForm).addNewNote(ctx.state.newNoteHref)
+						: header.addSearch(searchForm)
 				)
 				.addControlPanel(panel.addAuth(ctx.state.isAuthed ? auth.addLogout() : auth.addLogin()))
 				.addMessagesList(ctx.state.list)
