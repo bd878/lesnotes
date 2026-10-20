@@ -17,11 +17,9 @@ import isAuthed from './handlers/isAuthed';
 import authed from './handlers/authed';
 import noCache from './handlers/noCache';
 import loadTree from './handlers/loadTree';
-import loadComments from './handlers/loadComments';
 import messageFeatures from './handlers/messageFeatures'
 import loadMessagePath from './handlers/loadMessagePath';
 import loadFiles from './handlers/loadFiles';
-import loadTranslation from './handlers/loadTranslation';
 import loadMessage from './handlers/loadMessage';
 import loadThread from './handlers/loadThread';
 import formatTextarea from './handlers/formatTextarea';
@@ -90,8 +88,8 @@ router
 	.get("logout",                 "/logout",                       etag, noCache, getState, expireToken, redirectLogin)
 	.get("signup",                 "/signup",                       etag, noCache, getState, notAuthed, signup)
 	.get("home",                   "/home",                         etag, noCache, getMe, getState, authed, newNoteHref, loadTree, loadFiles, newMessage)
-	.get("message",                "/messages/:idOrName",           etag, noCache, getMe, getState, authed, newNoteHref, loadTree, loadMessagePath, loadThread, loadMessage, loadComments, loadTranslation, formatView, messageFeatures, messageView)
-	.get("editMessage",            "/messages/:idOrName/edit",      etag, noCache, getMe, getState, authed, newNoteHref, loadTree, loadMessagePath, loadMessage, loadFiles, loadComments, loadTranslation, formatTextarea, messageFeatures, messageEdit)
+	.get("message",                "/messages/:idOrName",           etag, noCache, getMe, getState, authed, newNoteHref, loadTree, loadMessagePath, loadThread, loadMessage, formatView, messageFeatures, messageView)
+	.get("editMessage",            "/messages/:idOrName/edit",      etag, noCache, getMe, getState, authed, newNoteHref, loadTree, loadMessagePath, loadMessage, loadFiles, formatTextarea, messageFeatures, messageEdit)
 	.get("status",                 "/status",                       status, noCache, getState)
 	.get("search",                 "/search",                       etag, noCache, getMe, getState, newNoteHref, searchMessages, searchResult)
 	.post("doLogin",               "/login",                        etag, getState, validateLogin, redirectHome)
@@ -106,11 +104,11 @@ router
 	.post("doUpdateTranslation",   "/translation/update",           getState, authed, updateTranslation)
 	.post("doSendComment",         "/comment/send",                 getState, sendComment)
 	.post("doSendTranslation",     "/translation/send",             getState, authed, sendTranslation)
-	.get("publicMessage",          "/:messageOrParentName",         etag, noCache, getMe, getState, loadMessage, threadPath, newThreadNoteHref, messageEditHref, isAuthed(loadMessagePath), loadComments, loadTree, formatView, messageFeatures, publicThreadOrMessage)
-	.get("publicMessageEdit",      "/:messageOrParentName/edit",    etag, noCache, getMe, getState, authed, loadMessage, threadPath, newThreadNoteHref, isAuthed(loadMessagePath), cancelEditHref, loadComments, loadTree, loadFiles, formatView, messageFeatures, loadTranslation, formatTextarea, editThreadMessage)
+	.get("publicMessage",          "/:messageOrParentName",         etag, noCache, getMe, getState, loadMessage, threadPath, newThreadNoteHref, messageEditHref, isAuthed(loadMessagePath), loadTree, formatView, messageFeatures, publicThreadOrMessage)
+	.get("publicMessageEdit",      "/:messageOrParentName/edit",    etag, noCache, getMe, getState, authed, loadMessage, threadPath, newThreadNoteHref, isAuthed(loadMessagePath), cancelEditHref, loadTree, loadFiles, formatView, messageFeatures, formatTextarea, editThreadMessage)
 	.get("newMessage",             "/:messageOrParentName/new",     etag, noCache, getMe, getState, authed, loadMessage, threadPath, newThreadNoteHref, loadTree, formatView, newThreadMessage)
-	.get("publicThreadMessage",    "/:parentName/:messageName",     etag, noCache, getMe, getState, loadMessage, threadPath, newThreadNoteHref, messageEditHref, isAuthed(loadMessagePath), loadComments, loadParentMessage, loadTree, formatView, messageFeatures, publicThreadMessage)
-	.get("publicThreadMessageEdit",  "/:parentName/:messageName/edit",  etag, noCache, getMe, getState, authed, loadMessage, threadPath, newThreadNoteHref, isAuthed(loadMessagePath), cancelEditHref, loadComments, loadTree, loadFiles, formatView, messageFeatures, loadTranslation, formatTextarea, editThreadMessage)
+	.get("publicThreadMessage",    "/:parentName/:messageName",     etag, noCache, getMe, getState, loadMessage, threadPath, newThreadNoteHref, messageEditHref, isAuthed(loadMessagePath), loadParentMessage, loadTree, formatView, messageFeatures, publicThreadMessage)
+	.get("publicThreadMessageEdit",  "/:parentName/:messageName/edit",  etag, noCache, getMe, getState, authed, loadMessage, threadPath, newThreadNoteHref, isAuthed(loadMessagePath), cancelEditHref, loadTree, loadFiles, formatView, messageFeatures, formatTextarea, editThreadMessage)
 	.get("any",                    "/:any*",                        getState, xxx)
 
 app.use(router.routes());
