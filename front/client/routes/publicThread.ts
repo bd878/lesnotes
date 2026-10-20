@@ -20,9 +20,6 @@ async function publicThread(ctx) {
 	const view = new MessageViewBuilder(ctx.state.isAuthed, ctx.state.messageName, ctx.state.messageName,
 		ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
-	const params = new URLSearchParams(ctx.search)
-	params.set("cwd", ctx.state.message.ID)
-
 	layout
 		.addTitle(ctx.state.message.title || ctx.state.message.text)
 		.addFooter()

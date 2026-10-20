@@ -2,10 +2,10 @@ import * as is from '../third_party/is';
 import {EmptyMessage} from '../api/models/message';
 import readPathJson from '../api/readPathJson';
 
-async function threadCwdPath(ctx, next) {
+async function threadPath(ctx, next) {
 	const token = ctx.state.token
 
-	ctx.log.info("--> threadCwdPath")
+	ctx.log.info("--> threadPath")
 
 	if (is.notEmpty(ctx.state.parentName)) {
 		const result = await readPathJson(token, 0, ctx.state.parentName)
@@ -18,7 +18,9 @@ async function threadCwdPath(ctx, next) {
 				return
 			}
 
-			result.path.push(EmptyMessage /* root */)
+			if (ctx.state.isAuthed) {
+				result.path.push(EmptyMessage /* root */)
+			}
 
 			result.path.reverse()
 
@@ -32,7 +34,7 @@ async function threadCwdPath(ctx, next) {
 
 	await next()
 
-	ctx.log.info("<-- threadCwdPath")
+	ctx.log.info("<-- threadPath")
 }
 
-export default threadCwdPath
+export default threadPath

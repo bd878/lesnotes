@@ -37,7 +37,7 @@ class PublicMessagesTreeBuilder extends AbstractPublicBuilder {
 			count:             tree.count,
 			messages:          tree.messages,
 			threadID:          threadID,
-			showThreadLink:    function() { return isAuthed || !this.thread.private },
+			showThreadLink:    function() { return isAuthed || (!this.thread.private && this.count > 0) },
 
 			hasMessages:       function() { return this.messages.messages.length > 0 },
 			isFolded:          function() { return this.messages.messages.length > 0 },
@@ -46,7 +46,7 @@ class PublicMessagesTreeBuilder extends AbstractPublicBuilder {
 			showCounter:       function() { return this.count > 0 },
 
 			messageHref:       function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); return `/${parentName}/${this.name}?` + params.toString(); },
-			openThreadHref:    function() { return `/${this.name}/new` },
+			openThreadHref:    function() { return isAuthed ? `/${this.name}/new` + search : `/${this.name}` + search },
 			unfoldHref:        function() { const params = new URLSearchParams(search); params.set(this.ID || 0, `${limit},0`); return path + "?" + params.toString(); },
 			foldHref:          function() { const params = new URLSearchParams(search); params.delete(this.ID || 0); return path + "?" + params.toString(); },
 			loadMoreHref:      function() { const params = new URLSearchParams(search); params.set(this.threadID || 0, `${this.count+limit},${this.offset}`); return path + "?" + params.toString(); },
