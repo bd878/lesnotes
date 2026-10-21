@@ -53,7 +53,7 @@ class MessageEditViewBuilder extends AbstractBuilder {
 			hasFiles:         this.filesList != undefined,
 			message:          this.message,
 			filesSummary:     this.i18n("filesSummary"),
-			cancelEditHref:   cancelHref || `/messages/${this.ID}` + search,
+			cancelEditHref:   cancelHref || `/messages/${this.message.ID}` + search,
 			redirectUrl:      this.redirectUrl,
 			namePlaceholder:  this.i18n("namePlaceholder"),
 			titlePlaceholder: this.i18n("titlePlaceholder"),
