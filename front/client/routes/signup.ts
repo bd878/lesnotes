@@ -1,7 +1,6 @@
 import SignupBuilder from '../builders/signupBuilder'
 import LayoutBuilder from '../builders/layoutBuilder';
 import SidebarBuilder from '../builders/sidebarBuilder';
-import SettingsBuilder from '../builders/settingsBuilder';
 
 async function signup(ctx) {
 	ctx.log.info("--> signup")
@@ -9,7 +8,6 @@ async function signup(ctx) {
 	const content = new SignupBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const sidebar = new SidebarBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
-	const settings = new SettingsBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
 	layout
 		.addFooter()
@@ -18,7 +16,7 @@ async function signup(ctx) {
 				.addUsername()
 				.addPassword()
 				.addSubmit()
-				.addSidebar(sidebar.addSettings(settings))
+				.addSidebar(sidebar)
 		)
 
 	ctx.body = layout.build()

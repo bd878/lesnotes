@@ -1,9 +1,9 @@
-<div class="flex flex-row items-center justify-between">
-	<div>
+<div class="flex flex-col justify-between">
+	<div class="flex flex-row justify-between mb-1">
 		<a class="italic text-xl small:text-lg large:text-2xl mr-6 inline-block cursor-pointer dark:hover:text-white hover:text-blue-600" href="{{mainHref}}" target="_self">Les Notes</a>
-		{{> searchForm}}
+		{{> newNote}}
+		{{> auth}}
 	</div>
 
-	{{> newNote}}
-	{{> auth}}
+	{{> searchForm}}
 </div>

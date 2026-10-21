@@ -76,6 +76,7 @@ class HomeBuilder extends AbstractBuilder {
 	build() {
 		return mustache.render(this.isMobile ? homeTemplateMobile : homeTemplate, {
 			hasFeatures:          this.messageFeatures != undefined,
+			hasMessage:           this.messageView != undefined,
 		}, {
 			messageEditForm:      this.messageEditForm,
 			messageView:          this.messageView,

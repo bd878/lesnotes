@@ -56,6 +56,7 @@ import main from './routes/main';
 import login from './routes/login';
 import signup from './routes/signup';
 import newMessage from './routes/newMessage';
+import home from './routes/home';
 import xxx from './routes/xxx';
 import publicThreadOrMessage from './routes/publicThreadOrMessage';
 import publicThreadMessage from './routes/publicThreadMessage';
@@ -91,7 +92,7 @@ router
 	.get("login",                  "/login",                        etag, noCache, getState, notAuthed, login)
 	.get("logout",                 "/logout",                       etag, noCache, getState, expireToken, redirectLogin)
 	.get("signup",                 "/signup",                       etag, noCache, getState, notAuthed, signup)
-	.get("home",                   "/home",                         etag, noCache, getMe, getState, authed, newNoteHref, loadTree, loadFiles, newMessage)
+	.get("home",                   "/home",                         etag, noCache, getMe, getState, authed, newNoteHref, loadTree, loadFiles, home)
 	.get("message",                "/messages/:idOrName",           etag, noCache, getMe, getState, authed, newNoteHref, loadTree, loadMessagePath, loadThread, loadMessage, formatView, messageFeatures, messageView)
 	.get("editMessage",            "/messages/:idOrName/edit",      etag, noCache, getMe, getState, authed, newNoteHref, loadTree, loadMessagePath, loadMessage, loadFiles, formatTextarea, messageFeatures, messageEdit)
 	.get("status",                 "/status",                       status, noCache, getState)
