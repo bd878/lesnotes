@@ -36,7 +36,7 @@ async function publicThreadMessage(ctx) {
 				.addMessageView(
 					view
 						.addMessageEditHref(ctx.state.messageEditHref)
-						.addDeleteRedirectUrl("/" + ctx.state.parentName + ctx.search)
+						.addDeleteRedirectUrl(ctx.state.deleteRedirectUrl)
 						.addMessage(ctx.state.message)
 				)
 				.addMessagesTree(

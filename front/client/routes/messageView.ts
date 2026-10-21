@@ -32,6 +32,7 @@ async function messageView(ctx) {
 			content
 				.addMessagesTree(
 					tree
+						.addThreadPath(ctx.state.threadPath || [] /* for root */)
 						.addList(ctx.state.tree, 0)
 				)
 				.addMessageView(

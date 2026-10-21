@@ -35,7 +35,7 @@ async function publicThread(ctx) {
 				.addMessageView(
 					view
 						.addMessageEditHref(ctx.state.messageEditHref)
-						.addDeleteRedirectUrl("/" + ctx.state.messageName + ctx.search)
+						.addDeleteRedirectUrl(ctx.state.deleteRedirectUrl)
 						.addMessage(ctx.state.message)
 				)
 				.addThreadFeatures(

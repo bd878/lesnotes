@@ -34,6 +34,7 @@ async function newThreadMessage(ctx) {
 				.addNewMessageForm(
 					messageForm
 						.addFilesList([])
+						.addThreadName(ctx.state.parentName)
 						.addThreadID(ctx.state.tree.threadID)
 				)
 				.addMessageHeader(

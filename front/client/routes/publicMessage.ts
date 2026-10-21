@@ -31,7 +31,7 @@ async function publicMessage(ctx) {
 				)
 				.addMessageView(
 					view
-						.addDeleteRedirectUrl("/" + ctx.state.messageName + ctx.search)
+						.addDeleteRedirectUrl(ctx.state.deleteRedirectUrl)
 						.addMessage(ctx.state.message)
 				)
 				.addHeader(ctx.state.isAuthed

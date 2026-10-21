@@ -35,8 +35,8 @@ async function editThreadMessage(ctx) {
 				)
 				.addMessageEditForm(
 					messageForm
-						.addRedirectUrl(ctx.path + ctx.search)
-						.addCancelHref(ctx.state.cancelEditHref)
+						.addRedirectUrl(ctx.state.editHrefRedirect)
+						.addCancelHref(ctx.state.editHrefRedirect)
 						.addFilesList(ctx.state.message.files)
 						.addMessage(ctx.state.message)
 				)
