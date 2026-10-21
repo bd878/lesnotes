@@ -22,17 +22,20 @@ async function newMessage(ctx) {
 	const tree = new MessagesTreeBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName,
 		ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
+	if (!ctx.userAgent.isMobile) {
+		content.addMessagesTree(tree.addList(ctx.state.tree, 0))
+	}
+
+	if (ctx.state.tree.count > 0) {
+		header.addSearch(searchForm)
+	}
+
 	layout
 		.addFooter()
 		.addContent(
 			content
-				.addMessagesTree(
-					tree
-						.addList(ctx.state.tree, 0)
-				)
 				.addNewMessageForm(
-					messageForm
-						.addFilesList([])
+					messageForm.addFilesList([])
 				)
 				.addMessageHeader(
 					messageHeader.addMessagePath(ctx.state.messagePath)
@@ -40,11 +43,7 @@ async function newMessage(ctx) {
 				.addControlPanel(
 					panel.addAuth(auth.addLogout())
 				)
-				.addHeader(
-					header
-						.addNewNote(ctx.state.newNoteHref)
-						.addSearch(searchForm)
-				)
+				.addHeader(header.addNewNote(ctx.state.newNoteHref))
 		)
 
 

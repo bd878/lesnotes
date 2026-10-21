@@ -4,7 +4,7 @@
 	</div>
 
 	{{#hasMessage}}
-		<div class="w-full h-[300px] flex flex-row mb-5 small:mb-3">
+		<div class="grow w-full h-[300px] flex flex-row mb-5 small:mb-3">
 			<div class="flex flex-col grow-2 w-full h-full">
 				{{> messageHeader}}
 				<div class="w-full h-full overflow-x-hidden border border-1 border-solid rounded-md">
@@ -22,9 +22,11 @@
 		</div>
 	{{/hasFeatures}}
 
-	<div class="h-0 grow mb-5 small:mb-3">
-		{{> messagesTree}}
-	</div>
+	{{#hasMessagesTree}}
+		<div class="h-0 grow mb-5 small:mb-3">
+			{{> messagesTree}}
+		</div>
+	{{/hasMessagesTree}}
 
 	<div class="mb-5 small:mb-3 ">
 		{{> controlPanel}}

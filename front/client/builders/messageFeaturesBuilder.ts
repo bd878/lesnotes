@@ -30,6 +30,10 @@ class MessageFeaturesBuilder extends AbstractBuilder {
 	filesView = undefined;
 	translations = undefined;
 
+	hasFeatures() {
+		return this.comments != undefined || this.filesView != undefined || this.translations != undefined
+	}
+
 	addNavigation(nav: Builder) {
 		this.navigation = nav.build()
 		return this

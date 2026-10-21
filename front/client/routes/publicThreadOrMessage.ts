@@ -6,6 +6,8 @@ import messageView from './messageView';
 async function publicThreadOrMessage(ctx) {
 	ctx.log.info("--> publicThreadOrMessage")
 
+	console.log("publicThreadOrMessage")
+
 	// message with child messages is thread
 	if (is.notEmpty(ctx.state.tree) && ctx.state.tree.count > 0) {
 		await publicThread(ctx)

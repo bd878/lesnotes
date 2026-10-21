@@ -25,23 +25,30 @@ async function messageView(ctx) {
 	const tree = new MessagesTreeBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName,
 		ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
+	if (!ctx.userAgent.isMobile) {
+		content
+			.addMessagesTree(
+				tree
+					.addThreadPath(ctx.state.threadPath || [] /* for root */)
+					.addList(ctx.state.tree, 0)
+			)
+	}
+
+	if (ctx.state.messageFeatures.hasFeatures()) {
+		content.addMessageFeatures(ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation))
+	}
+
 	layout
 		.addTitle(ctx.state.message.title || ctx.state.message.text)
 		.addFooter()
 		.addContent(
 			content
-				.addMessagesTree(
-					tree
-						.addThreadPath(ctx.state.threadPath || [] /* for root */)
-						.addList(ctx.state.tree, 0)
-				)
 				.addMessageView(
 					view
 						.addRedirectUrl("")
 						.addMessageEditHref(ctx.state.messageEditHref)
 						.addMessage(ctx.state.message)
 				)
-				.addMessageFeatures(ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation))
 				.addMessageHeader(
 					messageHeader
 						.addMessagePath(ctx.state.messagePath)
