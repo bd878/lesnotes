@@ -14,7 +14,10 @@ let searchListTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'
 
 class SearchBuilder extends AbstractBuilder {
 	header = undefined
+	messageView = undefined
 	messagesList = undefined
+	messageFeatures = undefined;
+	messageHeader = undefined;
 	controlPanel = undefined
 
 	addMessagesList(list: SearchMessagesList) {
@@ -27,7 +30,7 @@ class SearchBuilder extends AbstractBuilder {
 			noMessagesText:    this.i18n("noMessagesText"),
 			showThreadLink:    true,
 
-			messageHref:       function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); return `/messages/${this.ID}?` + params.toString(); },
+			messageHref:       function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); return `/search/${this.ID}` + search; },
 			openThreadHref:    function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); params.set(`${this.ID}`, `${limit},0`); return `/${this.name}` + search; },
 		})
 
@@ -44,11 +47,32 @@ class SearchBuilder extends AbstractBuilder {
 		return this
 	}
 
+	addMessageHeader(header: Builder) {
+		this.messageHeader = header.build()
+		return this
+	}
+
+	addMessageFeatures(features: Builder) {
+		this.messageFeatures = features.build()
+		return this
+	}
+
+	addMessageView(view: Builder) {
+		this.messageView = view.build()
+		return this
+	}
+
 	build() {
-		return mustache.render(this.isMobile ? searchTemplateMobile : searchTemplate, {}, {
+		return mustache.render(this.isMobile ? searchTemplateMobile : searchTemplate, {
+			hasFeatures: this.messageFeatures != undefined,
+			hasMessage: this.messageView != undefined,
+		}, {
 			header: this.header,
 			controlPanel: this.controlPanel,
+			messageView: this.messageView,
 			messagesList: this.messagesList,
+			messageHeader: this.messageHeader,
+			messageFeatures: this.messageFeatures,
 		})
 	}
 }

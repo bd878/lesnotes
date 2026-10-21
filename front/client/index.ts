@@ -46,8 +46,10 @@ import threadPath from './handlers/threadPath';
 import newNoteHref from './handlers/newNoteHref';
 import newThreadNoteHref from './handlers/newThreadNoteHref';
 import messageEditHref from './handlers/messageEditHref';
+import searchMessageEditHref from './handlers/searchMessageEditHref';
 import editHrefRedirect from './handlers/editHrefRedirect';
 import deleteRedirectUrl from './handlers/deleteRedirectUrl';
+import searchMessageDeleteRedirectUrl from './handlers/searchMessageDeleteRedirectUrl';
 
 import assets from './routes/assets';
 import main from './routes/main';
@@ -57,6 +59,7 @@ import newMessage from './routes/newMessage';
 import xxx from './routes/xxx';
 import publicThreadOrMessage from './routes/publicThreadOrMessage';
 import publicThreadMessage from './routes/publicThreadMessage';
+import searchMessageView from './routes/searchMessageView';
 import messageView from './routes/messageView';
 import messageEdit from './routes/messageEdit';
 import searchResult from './routes/searchResult';
@@ -93,6 +96,7 @@ router
 	.get("editMessage",            "/messages/:idOrName/edit",      etag, noCache, getMe, getState, authed, newNoteHref, loadTree, loadMessagePath, loadMessage, loadFiles, formatTextarea, messageFeatures, messageEdit)
 	.get("status",                 "/status",                       status, noCache, getState)
 	.get("search",                 "/search",                       etag, noCache, getMe, getState, newNoteHref, searchMessages, searchResult)
+	.get("searchMessage",          "/search/:idOrName",             etag, noCache, getMe, getState, newNoteHref, searchMessages, loadMessagePath, loadMessage, loadFiles, searchMessageEditHref, searchMessageDeleteRedirectUrl, formatView, messageFeatures, searchMessageView)
 	.post("doLogin",               "/login",                        etag, getState, validateLogin, redirectHome)
 	.post("doSignup",              "/signup",                       etag, getState, validateSignup, redirectHome)
 	.post("doSendMessage",         "/message/send",                 getState, authed, sendMessage)
