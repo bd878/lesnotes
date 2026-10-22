@@ -46,7 +46,6 @@ async function newMessage(ctx) {
 				.addHeader(header.addNewNote(ctx.state.newNoteHref))
 		)
 
-
 	ctx.body = layout.build()
 	ctx.status = 200;
 

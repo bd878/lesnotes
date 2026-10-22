@@ -36,6 +36,10 @@ async function messageView(ctx) {
 
 	if (ctx.state.messageFeatures.hasFeatures()) {
 		content.addMessageFeatures(ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation))
+
+		if (ctx.userAgent.isMobile) {
+			layout.addNoFixHeight()
+		}
 	}
 
 	layout

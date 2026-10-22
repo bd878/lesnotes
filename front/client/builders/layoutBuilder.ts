@@ -19,6 +19,7 @@ class LayoutBuilder extends AbstractBuilder {
 	footer        = undefined;
 	header        = undefined;
 	content       = undefined;
+	noFixHeight   = false;
 	title         = "Les Notes";
 
 	addHeader(header: Builder) {
@@ -28,6 +29,11 @@ class LayoutBuilder extends AbstractBuilder {
 
 	addTitle(title: string) {
 		this.title = crop(title, 40)
+		return this
+	}
+
+	addNoFixHeight() {
+		this.noFixHeight = true
 		return this
 	}
 
@@ -74,6 +80,7 @@ class LayoutBuilder extends AbstractBuilder {
 			styles:   stylesTemplate,
 			lang:     lang,
 			theme:    theme,
+			noFixHeight: this.noFixHeight,
 		}, {
 			footer: this.footer,
 			header: header,
