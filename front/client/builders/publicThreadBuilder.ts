@@ -49,6 +49,7 @@ class PublicThreadBuilder extends AbstractPublicBuilder {
 	build() {
 		return mustache.render(this.isMobile ? threadTemplateMobile : threadTemplate, {
 			hasContent:    this.threadView != undefined || this.messageView != undefined,
+			hasFeatures:   this.threadFeatures != undefined,
 		}, {
 			header:        this.header,
 			messagesTree:  this.tree,

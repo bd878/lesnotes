@@ -177,9 +177,9 @@ const texts = {
 		commentPlaceholder: "Neu Kommentar",
 		mainMessage: "Haupt Notiz",
 
-		terms: "",
-		contact: "",
-		docs: "",
+		terms: "Einrichtung",
+		contact: "Kontakt",
+		docs: "Dokumentation",
 		fontSizeHeader: ""
 	},
 	"fr": {
@@ -238,9 +238,9 @@ const texts = {
 		commentPlaceholder: "Nouveau commentaire",
 		mainMessage: "La note principale",
 
-		terms: "",
-		contact: "",
-		docs: "",
+		terms: "Règles",
+		contact: "Contacts",
+		docs: "Détails téchniques",
 		fontSizeHeader: ""
 	}
 }

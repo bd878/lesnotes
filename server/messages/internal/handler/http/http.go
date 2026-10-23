@@ -14,7 +14,7 @@ type MessagesController interface {
 	DeleteMessages(ctx context.Context, ids []int64, userID int64) (err error)
 	PublishMessages(ctx context.Context, ids []int64, userID int64) (err error)
 	PrivateMessages(ctx context.Context, ids []int64, userID int64) (err error)
-	ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *messages.Message, err error)
+	ReadMessage(ctx context.Context, id int64, name string, userIDs []int64, publicOnly bool) (message *messages.Message, err error)
 	ReadMessages(ctx context.Context, userID int64, limit, offset int32, ascending bool) (list *messages.MessagesList, err error)
 	ReadThreadMessages(ctx context.Context, userID, threadID int64, threadName string, limit, offset int32, ascending bool, privateMessage *bool) (list *messages.MessagesList, err error)
 	ReadBatchMessages(ctx context.Context, userID int64, ids []int64) (messages []*messages.Message, err error)

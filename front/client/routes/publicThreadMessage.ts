@@ -7,6 +7,8 @@ import AuthBuilder from '../builders/authBuilder';
 import HeaderBuilder from '../builders/headerBuilder';
 import PublicMessagesTreeBuilder from '../builders/publicMessagesTreeBuilder';
 import SearchFormBuilder from '../builders/searchFormBuilder';
+import ThreadPathBuilder from '../builders/threadPathBuilder'
+import MessagesListBuilder from '../builders/messagesListBuilder';
 
 async function publicThreadMessage(ctx) {
 	ctx.log.info("--> publicThreadMessage")
@@ -19,6 +21,8 @@ async function publicThreadMessage(ctx) {
 	const searchForm = new SearchFormBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const threadPath = new ThreadPathBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const messagesList = new MessagesListBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName, ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const tree = new PublicMessagesTreeBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName, ctx.userAgent.isMobile,
 		ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
@@ -41,8 +45,8 @@ async function publicThreadMessage(ctx) {
 				)
 				.addMessagesTree(
 					tree
-						.addList(ctx.state.tree, 0)
-						.addThreadPath(ctx.state.threadPath)
+						.addList(messagesList.addTree(ctx.state.tree))
+						.addThreadPath(threadPath.addPath(ctx.state.threadPath))
 				)
 				.addMessageFeatures(
 					ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation)

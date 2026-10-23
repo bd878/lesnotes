@@ -1,11 +1,21 @@
-<div class="h-full">
+<div class="grow flex flex-col">
 	<div class="flex flex-col overflow-x-hidden mb-5 small:mb-3 w-full max-w-md">
 		{{> header}}
 	</div>
 
-	<div class="mb-5 small:mb-3">
-		{{> messagesList}}
-	</div>
+	{{#hasMessage}}
+		<div class="flex flex-col grow w-full mb-3 small:mb-1">
+			{{> messageHeader}}
+			<div class="flex flex-col grow border border-1 border-solid rounded-md">
+				{{> messageView}}
+			</div>
+		</div>
+	{{/hasMessage}}
+	{{^hasMessage}}
+		<div class="grow mb-5 small:mb-3">
+			{{> messagesList}}
+		</div>
+	{{/hasMessage}}
 
 	{{> controlPanel}}
 </div>

@@ -19,6 +19,7 @@ class HomeBuilder extends AbstractBuilder {
 	messageView          = undefined;
 	newMessageForm       = undefined;
 	threadView           = undefined;
+	threadPath           = undefined;
 	header               = undefined;
 	messagesTree         = undefined;
 	messageFeatures      = undefined;
@@ -73,6 +74,11 @@ class HomeBuilder extends AbstractBuilder {
 		return this
 	}
 
+	addThreadPath(threadPath: Builder) {
+		this.threadPath = threadPath.build()
+		return this
+	}
+
 	build() {
 		return mustache.render(this.isMobile ? homeTemplateMobile : homeTemplate, {
 			hasFeatures:          this.messageFeatures != undefined,
@@ -81,6 +87,7 @@ class HomeBuilder extends AbstractBuilder {
 						|| this.newMessageForm != undefined,
 			hasMessagesTree:      this.messagesTree != undefined,
 		}, {
+			threadPath:           this.threadPath,
 			messageEditForm:      this.messageEditForm,
 			messageView:          this.messageView,
 			threadView:           this.threadView,

@@ -53,6 +53,7 @@ class NewMessageBuilder extends AbstractBuilder {
 			redirectUrl:      this.redirectUrl,
 		}, {
 			filesList:        this.filesList,
+			threadPath:       this.threadPath,
 		})
 	}
 }

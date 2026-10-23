@@ -8,6 +8,7 @@ import AuthBuilder from '../builders/authBuilder';
 import HeaderBuilder from '../builders/headerBuilder';
 import MessageHeaderBuilder from '../builders/messageHeaderBuilder';
 import SearchFormBuilder from '../builders/searchFormBuilder';
+import MessagesListBuilder from '../builders/messagesListBuilder';
 
 async function messageEdit(ctx) {
 	ctx.log.info("--> messageEdit")
@@ -20,6 +21,7 @@ async function messageEdit(ctx) {
 	const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const messageHeader = new MessageHeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const searchForm = new SearchFormBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const messagesList = new MessagesListBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName, ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const tree = new MessagesTreeBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName,
 		ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
@@ -30,7 +32,7 @@ async function messageEdit(ctx) {
 			content
 				.addMessagesTree(
 					tree
-						.addList(ctx.state.tree, 0)
+						.addList(messagesList.addTree(ctx.state.tree))
 				)
 				.addMessageEditForm(
 					messageForm

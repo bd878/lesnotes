@@ -9,6 +9,8 @@ import TranslationsBuilder from '../builders/translationsBuilder';
 import ControlPanelBuilder from '../builders/controlPanelBuilder';
 import MessageHeaderBuilder from '../builders/messageHeaderBuilder';
 import SearchFormBuilder from '../builders/searchFormBuilder';
+import ThreadPathBuilder from '../builders/threadPathBuilder';
+import MessagesListBuilder from '../builders/messagesListBuilder';
 
 async function messageView(ctx) {
 	ctx.log.info("--> messageView")
@@ -22,6 +24,8 @@ async function messageView(ctx) {
 	const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const messageHeader = new MessageHeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const searchForm = new SearchFormBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const threadPath = new ThreadPathBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const messagesList = new MessagesListBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName, ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const tree = new MessagesTreeBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName,
 		ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
@@ -29,17 +33,13 @@ async function messageView(ctx) {
 		content
 			.addMessagesTree(
 				tree
-					.addThreadPath(ctx.state.threadPath || [] /* for root */)
-					.addList(ctx.state.tree, 0)
+					.addThreadPath(threadPath.addPath(ctx.state.threadPath || [] /* for root */))
+					.addList(messagesList.addTree(ctx.state.tree))
 			)
 	}
 
 	if (ctx.state.messageFeatures.hasFeatures()) {
 		content.addMessageFeatures(ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation))
-
-		if (ctx.userAgent.isMobile) {
-			layout.addNoFixHeight()
-		}
 	}
 
 	layout
@@ -49,6 +49,7 @@ async function messageView(ctx) {
 			content
 				.addMessageView(
 					view
+						.addDeleteRedirectUrl(ctx.state.deleteRedirectUrl)
 						.addRedirectUrl("")
 						.addMessageEditHref(ctx.state.messageEditHref)
 						.addMessage(ctx.state.message)

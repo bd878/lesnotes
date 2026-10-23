@@ -6,13 +6,13 @@
 					<div class="flex flex-row max-w-full whitespace-nowrap justify-between">
 						{{#showCounter}}
 							{{#isFolded}}
-								<a href="{{foldHref}}" target="_self" data-thread-id="{{ID}}" class="mr-2 justify-end flex flex-row px-2 dark:hover:text-white hover:text-blue-600 select-text cursor-pointer text-end">
+								<a href="{{foldHref}}" target="_self" data-thread-id="{{ID}}" class="mr-2 justify-end flex flex-row dark:hover:text-white hover:text-blue-600 select-text cursor-pointer text-end">
 									<span class="mr-1">{{count}}</span>
 									<span class="">v</span>
 								</a>
 							{{/isFolded}}
 							{{^isFolded}}
-								<a href="{{unfoldHref}}" target="_self" data-thread-id="{{ID}}" class="mr-2 justify-end flex flex-row px-2 dark:hover:text-white hover:text-blue-600 select-text cursor-pointer text-end">
+								<a href="{{unfoldHref}}" target="_self" data-thread-id="{{ID}}" class="mr-2 justify-end flex flex-row dark:hover:text-white hover:text-blue-600 select-text cursor-pointer text-end">
 									<span class="mr-1">{{count}}</span>
 									<span class="">></span>
 								</a>

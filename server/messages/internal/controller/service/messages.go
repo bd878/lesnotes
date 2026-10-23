@@ -467,7 +467,7 @@ func (s MessagesController) ReadMessages(ctx context.Context, userID int64, limi
 	return
 }
 
-func (s MessagesController) ReadMessage(ctx context.Context, id int64, name string, userIDs []int64) (message *model.Message, err error) {
+func (s MessagesController) ReadMessage(ctx context.Context, id int64, name string, userIDs []int64, publicOnly bool) (message *model.Message, err error) {
 	slog.Debug("read message", slog.Int64("id", id), slog.String("name", name), slog.String("user_ids", fmt.Sprintf("%v", userIDs)))
 
 	res, err := s.client.ReadMessage(ctx, &messages.ReadMessageRequest{
@@ -493,7 +493,7 @@ func (s MessagesController) ReadMessage(ctx context.Context, id int64, name stri
 		return nil, err
 	}
 
-	if parent.Private && !message.Private {
+	if publicOnly && parent.Private && !message.Private {
 		message.ParentThread = &model.Identity{Private: true}
 		message.ParentMessage = &model.Identity{Private: true}
 
@@ -538,7 +538,7 @@ func (s MessagesController) ReadPath(ctx context.Context, userID, id int64, name
 	slog.Debug("read path", slog.Int64("user_id", userID), slog.Int64("id", id), slog.String("name", name))
 
 	if name != "" && id == 0 {
-		message, err := s.ReadMessage(ctx, id, name, []int64{userID})
+		message, err := s.ReadMessage(ctx, id, name, []int64{userID}, false)
 		if err != nil {
 			return nil, 0, err
 		}

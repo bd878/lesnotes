@@ -301,7 +301,7 @@ func (h *Handler) readMessageOrMessages(ctx context.Context, w http.ResponseWrit
 func (h *Handler) readMessage(ctx context.Context, w http.ResponseWriter, userID, messageID int64, name string, publicOnly bool) (err error) {
 	slog.Debug("read message", slog.Int64("user_id", userID), slog.Int64("message_id", messageID), slog.String("name", name), slog.Bool("public", publicOnly))
 
-	message, err := h.controller.ReadMessage(ctx, messageID, name, []int64{userID, users.PublicUserID})
+	message, err := h.controller.ReadMessage(ctx, messageID, name, []int64{userID, users.PublicUserID}, publicOnly)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(server.ServerResponse{

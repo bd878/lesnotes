@@ -1,13 +1,13 @@
-<div class="flex flex-col">
-	<div class="w-full max-w-5xl mb-3 px-5 small:px-3">
-		{{> sidebar}}
+<div class="w-full flex flex-col">
+	<div class="flex flex-col overflow-x-hidden mb-5 small:mb-3 w-full max-w-md">
+		{{> header}}
 	</div>
 
 	{{#hasContent}}
-		<div class="w-full flex px-5 flex-row mb-3">
+		<div class="w-full grow flex flex-row mb-3">
 			<div class="flex flex-col grow-2 w-full">
 				{{> translations}}
-				<div class="flex flex-col grow p-2 mb-2 border border-1 border-solid rounded-md">
+				<div class="flex flex-col grow border border-1 border-solid rounded-md">
 					{{> messageView}}
 					{{> threadView}}
 				</div>
@@ -15,19 +15,10 @@
 		</div>
 
 		<div class="px-5 flex flex-col">
-			{{> messageNavigation}}
-			{{> filesView}}
-			{{> comments}}
+			{{> messageFeatures}}
+			{{> threadFeatures}}
 		</div>
 	{{/hasContent}}
-
-	<div class="flex flex-col px-5 overflow-x-hidden w-full">
-		<div class="flex flex-col overflow-x-hidden">
-			<div class="flex flex-row overflow-x-auto">
-				{{> messagesList}}
-			</div>
-		</div>
-	</div>
 
 	<div class="mb-5 small:mb-3 ">
 		{{> controlPanel}}

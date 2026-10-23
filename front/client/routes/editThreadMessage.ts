@@ -6,7 +6,9 @@ import PublicMessagesTreeBuilder from '../builders/publicMessagesTreeBuilder';
 import LayoutBuilder from '../builders/layoutBuilder';
 import AuthBuilder from '../builders/authBuilder';
 import HeaderBuilder from '../builders/headerBuilder';
+import ThreadPathBuilder from '../builders/threadPathBuilder';
 import MessageHeaderBuilder from '../builders/messageHeaderBuilder';
+import MessagesListBuilder from '../builders/messagesListBuilder';
 import SearchFormBuilder from '../builders/searchFormBuilder';
 
 async function editThreadMessage(ctx) {
@@ -20,8 +22,9 @@ async function editThreadMessage(ctx) {
 	const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const messageHeader = new MessageHeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const searchForm = new SearchFormBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
-	const tree = new PublicMessagesTreeBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName,
-		ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const threadPath = new ThreadPathBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const messagesList = new MessagesListBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName, ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const tree = new PublicMessagesTreeBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName, ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
 	layout
 		.addTitle(ctx.state.message.title || ctx.state.message.text)
@@ -30,8 +33,8 @@ async function editThreadMessage(ctx) {
 			content
 				.addMessagesTree(
 					tree
-						.addThreadPath(ctx.state.threadPath)
-						.addList(ctx.state.tree, ctx.state.tree.threadID)
+						.addThreadPath(threadPath.addPath(ctx.state.threadPath))
+						.addList(messagesList.addTree(ctx.state.tree).addThreadID(ctx.state.tree.threadID))
 				)
 				.addMessageEditForm(
 					messageForm

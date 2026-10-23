@@ -20,6 +20,10 @@ async function searchMessageView(ctx) {
 	const content = new SearchBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const searchForm = new SearchFormBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
+	if (ctx.state.messageFeatures.hasFeatures()) {
+		content.addMessageFeatures(ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation))
+	}
+
 	layout
 		.addTitle(ctx.state.searchQuery)
 		.addFooter()
@@ -38,7 +42,6 @@ async function searchMessageView(ctx) {
 						.addMessageEditHref(ctx.state.messageEditHref)
 						.addMessage(ctx.state.message)
 				)
-				.addMessageFeatures(ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation))
 				.addMessageHeader(
 					messageHeader
 						.addMessagePath(ctx.state.messagePath)

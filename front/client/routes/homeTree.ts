@@ -5,6 +5,7 @@ import SearchFormBuilder from '../builders/searchFormBuilder';
 import HomeBuilder from '../builders/homeBuilder'
 import HeaderBuilder from '../builders/headerBuilder';
 import AuthBuilder from '../builders/authBuilder';
+import MessagesListBuilder from '../builders/messagesListBuilder';
 
 async function homeTree(ctx) {
 	ctx.log.info("--> homeTree")
@@ -15,6 +16,7 @@ async function homeTree(ctx) {
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const searchForm = new SearchFormBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const messagesList = new MessagesListBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName, ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const tree = new MessagesTreeBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName,
 		ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
@@ -24,7 +26,7 @@ async function homeTree(ctx) {
 			content
 				.addMessagesTree(
 					tree
-						.addList(ctx.state.tree, 0)
+						.addList(messagesList.addTree(ctx.state.tree))
 				)
 				.addControlPanel(
 					panel.addAuth(auth.addLogout())

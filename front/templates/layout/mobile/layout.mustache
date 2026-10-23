@@ -16,22 +16,16 @@
 		<title>Les Notes</title>
 	</head>
 	<body class="large:text-xl small:text-sm dark:bg-gray-900 dark:text-gray-400 text-gray-950">
-		{{#noFixHeight}}
-			<div data-is-mobile="true" class="max-w-md w-full flex flex-col items-start relative">
-		{{/noFixHeight}}
-		{{^noFixHeight}}
-			<div data-is-mobile="true" class="h-dvh max-w-md w-full flex flex-col items-start relative">
-		{{/noFixHeight}}
-
-			<div class="small:px-3 px-5 w-full pt-5">
+		<div data-is-mobile="true" class="min-h-dvh max-w-md w-full flex flex-col items-start relative">
+			<div class="small:px-1 px-3 w-full pt-3">
 				{{> header}}
 			</div>
 
-			<div class="h-full w-full small:px-3 px-5 grow">
+			<div class="w-full small:px-1 px-3 grow flex">
 				{{> content}}
 			</div>
 
-			<div class="py-5 small:px-3 px-5 w-full">
+			<div class="py-3 small:px-1 px-3 w-full">
 				{{> footer}}
 			</div>
 		</div>

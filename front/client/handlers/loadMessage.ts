@@ -23,6 +23,8 @@ async function loadMessage(ctx, next) {
 		}
 	} else if (is.notEmpty(name)) {
 		ctx.state.message = await readMessageJson("", 0 /* public */, 0, name /* public name */)
+	} else if (is.notEmpty(id)) {
+		ctx.state.message = await readMessageJson("", 0 /* public */, id)
 	}
 
 	if (is.notEmpty(ctx.state.message)) {
