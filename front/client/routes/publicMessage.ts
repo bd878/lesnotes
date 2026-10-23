@@ -21,6 +21,10 @@ async function publicMessage(ctx) {
 	const content = new PublicMessageBuilder(ctx.state.isAuthed, ctx.state.messageName, ctx.state.messageName, ctx.userAgent.isMobile,
 		ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
+	if (ctx.state.messageFeatures.hasFeatures()) {
+		content.addMessageFeatures(ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation))
+	}
+
 	layout
 		.addTitle(ctx.state.message.title || ctx.state.message.text)
 		.addFooter()
@@ -39,9 +43,6 @@ async function publicMessage(ctx) {
 					: ctx.state.message.parentMessage.private
 						? header.addAuth(auth.addLogin())
 						: header.addAuth(auth.addLogin()).addSearch(searchForm.addThreadName(ctx.state.message.parentMessage.name))
-				)
-				.addMessageFeatures(
-					ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation)
 				)
 		)
 

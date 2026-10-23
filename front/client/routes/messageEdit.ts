@@ -25,6 +25,10 @@ async function messageEdit(ctx) {
 	const tree = new MessagesTreeBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName,
 		ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
+	if (ctx.state.messageFeatures.hasFeatures()) {
+		content.addMessageFeatures(ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation))
+	}
+
 	layout
 		.addTitle(ctx.state.message.title || ctx.state.message.text)
 		.addFooter()
@@ -39,7 +43,6 @@ async function messageEdit(ctx) {
 						.addFilesList(ctx.state.message.files)
 						.addMessage(ctx.state.message)
 				)
-				.addMessageFeatures(ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation))
 				.addMessageHeader(messageHeader.addMessagePath(ctx.state.messagePath))
 				.addHeader(
 					header

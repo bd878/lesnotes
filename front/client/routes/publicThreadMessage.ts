@@ -27,6 +27,10 @@ async function publicThreadMessage(ctx) {
 	const tree = new PublicMessagesTreeBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName, ctx.userAgent.isMobile,
 		ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
+	if (ctx.state.messageFeatures.hasFeatures()) {
+		content.addMessageFeatures(ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation))
+	}
+
 	layout
 		.addTitle(ctx.state.message.title || ctx.state.message.text)
 		.addFooter()
@@ -47,9 +51,6 @@ async function publicThreadMessage(ctx) {
 					tree
 						.addList(messagesList.addTree(ctx.state.tree))
 						.addThreadPath(threadPath.addPath(ctx.state.threadPath))
-				)
-				.addMessageFeatures(
-					ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation)
 				)
 		)
 
