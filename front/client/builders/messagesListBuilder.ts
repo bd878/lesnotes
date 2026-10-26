@@ -64,7 +64,7 @@ class MessagesListBuilder extends AbstractPublicBuilder {
 			},
 			openThreadHref:    function() { 
 				if (isMobile) {
-					return `/${this.name}/tree` + search
+					return `/${this.name}` + search
 				} else {
 					return isAuthed ? `/${this.name}/new` + search : `/${this.name}` + search
 				}

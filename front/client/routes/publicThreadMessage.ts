@@ -31,6 +31,16 @@ async function publicThreadMessage(ctx) {
 		content.addMessageFeatures(ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation))
 	}
 
+	if (ctx.userAgent.isMobile) {
+		content.addThreadPath(threadPath.addPath(ctx.state.threadPath))
+	} else {
+		content.addMessagesTree(
+			tree
+				.addList(messagesList.addTree(ctx.state.tree))
+				.addThreadPath(threadPath.addPath(ctx.state.threadPath))
+		)
+	}
+
 	layout
 		.addTitle(ctx.state.message.title || ctx.state.message.text)
 		.addFooter()
@@ -46,11 +56,6 @@ async function publicThreadMessage(ctx) {
 						.addMessageEditHref(ctx.state.messageEditHref)
 						.addDeleteRedirectUrl(ctx.state.deleteRedirectUrl)
 						.addMessage(ctx.state.message)
-				)
-				.addMessagesTree(
-					tree
-						.addList(messagesList.addTree(ctx.state.tree))
-						.addThreadPath(threadPath.addPath(ctx.state.threadPath))
 				)
 		)
 

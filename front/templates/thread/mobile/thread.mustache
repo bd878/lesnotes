@@ -4,23 +4,26 @@
 	</div>
 
 	{{#hasContent}}
-		<div class="w-full grow flex flex-row mb-3">
-			<div class="flex flex-col grow-2 w-full">
-				{{> translations}}
-				<div class="flex flex-col grow border border-1 border-solid rounded-md">
+		<div class="grow w-full flex flex-row mb-5 small:mb-3">
+			<div class="flex flex-col grow-2 w-full h-full">
+				{{> threadPath}}
+				<div class="flex flex-col w-full h-full overflow-x-hidden border border-1 border-solid rounded-md">
 					{{> messageView}}
-					{{> threadView}}
 				</div>
 			</div>
 		</div>
-
-		<div class="px-5 flex flex-col">
-			{{> messageFeatures}}
-			{{> threadFeatures}}
+	{{/hasContent}}
+	{{^hasContent}}
+		<div class="h-0 grow mb-5 small:mb-3">
+			{{> messagesTree}}
 		</div>
 	{{/hasContent}}
 
-	<div class="mb-5 small:mb-3 ">
-		{{> controlPanel}}
-	</div>
+	{{#hasFeatures}}
+		<div class="mb-5 small:mb-3">
+			{{> messageFeatures}}
+		</div>
+	{{/hasFeatures}}
+
+	{{> controlPanel}}
 </div>

@@ -17,5 +17,11 @@
 		</div>
 	{{/hasMessage}}
 
+	{{#hasFeatures}}
+		<div class="mb-5 small:mb-3">
+			{{> messageFeatures}}
+		</div>
+	{{/hasFeatures}}
+
 	{{> controlPanel}}
 </div>

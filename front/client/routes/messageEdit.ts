@@ -29,15 +29,18 @@ async function messageEdit(ctx) {
 		content.addMessageFeatures(ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation))
 	}
 
+	if (!ctx.userAgent.isMobile) {
+		content.addMessagesTree(
+				tree
+					.addList(messagesList.addTree(ctx.state.tree))
+			)
+	}
+
 	layout
 		.addTitle(ctx.state.message.title || ctx.state.message.text)
 		.addFooter()
 		.addContent(
 			content
-				.addMessagesTree(
-					tree
-						.addList(messagesList.addTree(ctx.state.tree))
-				)
 				.addMessageEditForm(
 					messageForm
 						.addFilesList(ctx.state.message.files)

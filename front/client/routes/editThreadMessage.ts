@@ -30,16 +30,22 @@ async function editThreadMessage(ctx) {
 		content.addMessageFeatures(ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation))
 	}
 
+	if (!ctx.userAgent.isMobile) {
+		content
+			.addMessagesTree(
+				tree
+					.addThreadPath(threadPath.addPath(ctx.state.threadPath))
+					.addList(messagesList.addTree(ctx.state.tree).addThreadID(ctx.state.tree.threadID))
+			)
+	} else {
+		content.addThreadPath(threadPath.addPath(ctx.state.threadPath))
+	}
+
 	layout
 		.addTitle(ctx.state.message.title || ctx.state.message.text)
 		.addFooter()
 		.addContent(
 			content
-				.addMessagesTree(
-					tree
-						.addThreadPath(threadPath.addPath(ctx.state.threadPath))
-						.addList(messagesList.addTree(ctx.state.tree).addThreadID(ctx.state.tree.threadID))
-				)
 				.addMessageEditForm(
 					messageForm
 						.addRedirectUrl(ctx.state.editHrefRedirect)

@@ -5,13 +5,13 @@ async function deleteRedirectUrl(ctx, next) {
 
 	if (is.notEmpty(ctx.params.parentName)) {
 		if (ctx.userAgent.isMobile) {
-			ctx.state.deleteRedirectUrl = "/" + ctx.params.parentName + "/tree" + ctx.search
+			ctx.state.deleteRedirectUrl = "/" + ctx.params.parentName + ctx.search
 		} else {
 			ctx.state.deleteRedirectUrl = "/" + ctx.params.parentName + "/new" + ctx.search
 		}
 	} else if (is.notEmpty(ctx.params.messageOrParentName)) {
 		if (ctx.userAgent.isMobile) {
-			ctx.state.deleteRedirectUrl = "/" + ctx.state.message.parentMessage.name + "/tree" + ctx.search
+			ctx.state.deleteRedirectUrl = "/" + ctx.state.message.parentMessage.name + ctx.search
 		} else {
 			ctx.state.deleteRedirectUrl = "/" + ctx.state.message.parentMessage.name + "/new" + ctx.search
 		}

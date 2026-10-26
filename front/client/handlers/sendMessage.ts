@@ -43,11 +43,15 @@ async function sendMessage(ctx) {
 
 	await waitForThread(ctx, response.message.ID)
 
-	const params = new URLSearchParams(ctx.query)
-	if (is.notEmpty(threadID)) {
-		ctx.redirect(ctx.router.url('publicThreadMessage', {parentName: form.thread_name, messageName: response.message.name}, {query: params.toString()}))
+	if (is.notEmpty(form.redirectUrl)) {
+		ctx.redirect(form.redirectUrl)
 	} else {
-		ctx.redirect(ctx.router.url('message', {idOrName: response.message.ID}, {query: params.toString()}))
+		const params = new URLSearchParams(ctx.query)
+		if (is.notEmpty(threadID)) {
+			ctx.redirect(ctx.router.url('publicThreadMessage', {parentName: form.thread_name, messageName: response.message.name}, {query: params.toString()}))
+		} else {
+			ctx.redirect(ctx.router.url('message', {idOrName: response.message.ID}, {query: params.toString()}))
+		}
 	}
 
 	ctx.log.info("<-- sendMessage")

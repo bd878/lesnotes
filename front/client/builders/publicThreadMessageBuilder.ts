@@ -12,6 +12,7 @@ class PublicThreadMessageBuilder extends AbstractPublicBuilder {
 	header             = undefined;
 	tree               = undefined;
 	messageFeatures    = undefined;
+	threadPath         = undefined;
 	messageView        = undefined;
 	controlPanel       = undefined;
 
@@ -40,10 +41,17 @@ class PublicThreadMessageBuilder extends AbstractPublicBuilder {
 		return this
 	}
 
+	addThreadPath(threadPath: Builder) {
+		this.threadPath = threadPath.build()
+		return this
+	}
+
 	build() {
 		return mustache.render(this.isMobile ? threadMessageTemplateMobile : threadMessageTemplate, {
 			hasContent:        this.messageView != undefined,
+			hasFeatures:       this.messageFeatures != undefined,
 		}, {
+			threadPath:        this.threadPath,
 			header:            this.header,
 			messagesTree:      this.tree,
 			messageView:       this.messageView,

@@ -30,6 +30,15 @@ async function publicThread(ctx) {
 		content.addThreadFeatures(ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation))
 	}
 
+	if (!ctx.userAgent.isMobile) {
+		content.addMessageView(
+			view
+				.addMessageEditHref(ctx.state.messageEditHref)
+				.addDeleteRedirectUrl(ctx.state.deleteRedirectUrl)
+				.addMessage(ctx.state.message)
+		)
+	}
+
 	layout
 		.addTitle(ctx.state.message.title || ctx.state.message.text)
 		.addFooter()
@@ -39,12 +48,6 @@ async function publicThread(ctx) {
 					tree
 						.addList(messagesList.addTree(ctx.state.tree))
 						.addThreadPath(threadPath.addPath(ctx.state.threadPath))
-				)
-				.addMessageView(
-					view
-						.addMessageEditHref(ctx.state.messageEditHref)
-						.addDeleteRedirectUrl(ctx.state.deleteRedirectUrl)
-						.addMessage(ctx.state.message)
 				)
 				.addControlPanel(panel.addAuth(ctx.state.isAuthed ? auth.addLogout() : auth.addLogin()))
 				.addHeader(ctx.state.isAuthed

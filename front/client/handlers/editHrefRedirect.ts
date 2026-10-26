@@ -4,6 +4,7 @@ async function editHrefRedirect(ctx, next) {
 	ctx.log.info("--> editHrefRedirect")
 
 	if (is.notEmpty(ctx.params.parentName)) {
+		// TODO: it will fail, it messageName link is edited
 		ctx.state.editHrefRedirect = "/" + ctx.params.parentName + "/" + ctx.params.messageName + ctx.search
 	} else if (is.notEmpty(ctx.params.messageOrParentName)) {
 		ctx.state.editHrefRedirect = "/" + ctx.params.messageOrParentName + ctx.search

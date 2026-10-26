@@ -38,6 +38,8 @@ async function newThreadMessage(ctx) {
 			)
 	} else {
 		content.addThreadPath(threadPath.addPath(ctx.state.threadPath))
+
+		messageForm.addRedirectUrl(`/${ctx.state.parentName}` + ctx.search)
 	}
 
 	layout
