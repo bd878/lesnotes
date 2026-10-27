@@ -97,7 +97,7 @@ router
 	.get("signup",                 "/signup",                       etag, noCache, getState, notAuthed, signup)
 	.get("home",                   "/home",                         etag, noCache, getMe, getState, authed, newNoteHref, loadTree, loadFiles, home)
 	.get("newRootMessage",         "/new",                          etag, noCache, getMe, getState, authed, newNoteHref, loadTree, newRootMessage)
-	.get("message",                "/messages/:idOrName",           etag, noCache, getMe, getState, authed, newNoteHref, loadTree, loadMessagePath, loadThread, loadMessage, formatView, messageFeatures, messageView)
+	.get("message",                "/messages/:idOrName",           etag, noCache, getMe, getState, authed, newNoteHref, loadTree, loadMessagePath, loadThread, loadMessage, messageParentName, threadPath, formatView, messageFeatures, messageView)
 	.get("editMessage",            "/messages/:idOrName/edit",      etag, noCache, getMe, getState, authed, newNoteHref, loadTree, loadMessagePath, loadMessage, loadFiles, formatTextarea, messageFeatures, messageEdit)
 	.get("status",                 "/status",                       status, noCache, getState)
 	.get("search",                 "/search",                       etag, noCache, getMe, getState, newNoteHref, searchMessages, searchResult)

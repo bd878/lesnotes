@@ -29,7 +29,7 @@ async function threadPath(ctx, next) {
 			ctx.state.threadPath = []
 		}
 	} else  if (is.notEmpty(ctx.state.message)) {
-		ctx.state.threadPath = [ctx.state.message]
+		ctx.state.threadPath = [ctx.state.isAuthed && EmptyMessage, ctx.state.message].filter(Boolean)
 	}
 
 	await next()

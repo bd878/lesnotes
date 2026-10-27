@@ -37,7 +37,9 @@ class PublicMessageBuilder extends AbstractPublicBuilder {
 	}
 
 	build() {
-		return mustache.render(this.isMobile ? messageTemplateMobile : messageTemplate, {}, {
+		return mustache.render(this.isMobile ? messageTemplateMobile : messageTemplate, {
+			hasFeatures: this.messageFeatures != undefined,
+		}, {
 			messageView:       this.messageView,
 			messageFeatures:   this.messageFeatures,
 			header:            this.header,

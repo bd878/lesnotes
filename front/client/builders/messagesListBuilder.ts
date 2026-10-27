@@ -57,8 +57,6 @@ class MessagesListBuilder extends AbstractPublicBuilder {
 					return `/messages/${this.ID}` + search
 				} else {
 					const params = new URLSearchParams(search);
-					params.delete("nav");
-					params.delete("trans");
 					return `/${parentName}/${this.name}?` + params.toString();
 				}
 			},

@@ -1,18 +1,22 @@
-<div class="h-full flex flex-col">
-	<div class="mb-5 small:mb-3">
-		<div class="flex flex-col w-full h-full">
-			{{> header}}
+<div class="grow w-full flex flex-col">
+	<div class="mb-5 small:mb-3 flex flex-col grow">
+		<div class="grow flex flex-col w-full">
+			<div class="mb-5 small:mb-3">
+				{{> header}}
+			</div>
 
-			<div class="flex flex-col grow w-full h-full">
+			<div class="grow flex flex-col w-full">
 				{{> messageHeader}}
-				<div class="flex flex-col grow p-2 border border-1 border-solid rounded-md">
+				<div class="grow flex flex-col p-2 border border-1 border-solid rounded-md">
 					{{> messageView}}
 				</div>
 			</div>
 		</div>
 	</div>
 
-	<div class="h-full w-full flex flex-col overflow-x-hidden">
-		{{> messageFeatures}}
-	</div>
+	{{#hasFeatures}}
+		<div class="h-full w-full flex flex-col overflow-x-hidden">
+			{{> messageFeatures}}
+		</div>
+	{{/hasFeatures}}
 </div>

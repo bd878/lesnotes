@@ -18,7 +18,7 @@ class PublicMessageHeaderBuilder extends AbstractPublicBuilder {
 			return this
 		}
 
-		this.threadLink = "/" + identity.name + this.search
+		this.threadLink = (this.isMobile ? "/" + identity.name + "/tree" : "/" + identity.name) + this.search;
 		this.threadTitle = identity.title
 
 		return this
