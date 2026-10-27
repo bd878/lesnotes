@@ -2,8 +2,8 @@
 	<div id="files-list" class="px-1 max-h-[150px] w-full overflow-y-auto whitespace-nowrap text-ellipsis">
 		{{#files}}
 			{{! see onFileInputChange.ts }}
-			<div class="mb-2 overflow-hidden text-ellipsis">
-				<button type="button" class="cursor-pointer underline dark:hover:text-white hover:text-blue-600 mr-2">X</button>
+			<div id="{{ID}}" class="mb-2 overflow-hidden text-ellipsis">
+				<button type="button" data-file-id="{{ID}}" class="cursor-pointer underline dark:hover:text-white hover:text-blue-600 mr-2">X</button>
 				<span class="overflow-hidden dark:text-white text-ellipsis">
 					{{name}}
 				</span>

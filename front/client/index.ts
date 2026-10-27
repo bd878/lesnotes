@@ -49,6 +49,7 @@ import messageEditHref from './handlers/messageEditHref';
 import searchMessageEditHref from './handlers/searchMessageEditHref';
 import editHrefRedirect from './handlers/editHrefRedirect';
 import deleteRedirectUrl from './handlers/deleteRedirectUrl';
+import messageParentName from './handlers/messageParentName';
 import searchMessageDeleteRedirectUrl from './handlers/searchMessageDeleteRedirectUrl';
 
 import assets from './routes/assets';
@@ -61,6 +62,7 @@ import home from './routes/home';
 import xxx from './routes/xxx';
 import publicThreadOrMessage from './routes/publicThreadOrMessage';
 import publicThreadMessage from './routes/publicThreadMessage';
+import publicMessageTree from './routes/publicMessageTree'
 import searchMessageView from './routes/searchMessageView';
 import messageView from './routes/messageView';
 import messageEdit from './routes/messageEdit';
@@ -99,7 +101,7 @@ router
 	.get("editMessage",            "/messages/:idOrName/edit",      etag, noCache, getMe, getState, authed, newNoteHref, loadTree, loadMessagePath, loadMessage, loadFiles, formatTextarea, messageFeatures, messageEdit)
 	.get("status",                 "/status",                       status, noCache, getState)
 	.get("search",                 "/search",                       etag, noCache, getMe, getState, newNoteHref, searchMessages, searchResult)
-	.get("searchMessage",          "/search/:idOrName",             etag, noCache, getMe, getState, newNoteHref, searchMessages, loadMessagePath, loadMessage, loadFiles, searchMessageEditHref, searchMessageDeleteRedirectUrl, formatView, messageFeatures, searchMessageView)
+	.get("searchMessage",          "/search/:idOrName",             etag, noCache, getMe, getState, newNoteHref, searchMessages, loadMessagePath, loadMessage, messageParentName, threadPath, loadFiles, searchMessageEditHref, searchMessageDeleteRedirectUrl, formatView, messageFeatures, searchMessageView)
 	.post("doLogin",               "/login",                        etag, getState, validateLogin, redirectHome)
 	.post("doSignup",              "/signup",                       etag, getState, validateSignup, redirectHome)
 	.post("doSendMessage",         "/message/send",                 getState, authed, sendMessage)
@@ -113,6 +115,7 @@ router
 	.post("doSendComment",         "/comment/send",                 getState, sendComment)
 	.post("doSendTranslation",     "/translation/send",             getState, authed, sendTranslation)
 	.get("publicMessage",          "/:messageOrParentName",         etag, noCache, getMe, getState, loadMessage, threadPath, newThreadNoteHref, messageEditHref, isAuthed(loadMessagePath), deleteRedirectUrl, loadTree, formatView, messageFeatures, publicThreadOrMessage)
+	.get("publicMessageTree",      "/:messageOrParentName/tree",    etag, noCache, getMe, getState, loadMessage, threadPath, newThreadNoteHref, messageEditHref, isAuthed(loadMessagePath), deleteRedirectUrl, loadTree, formatView, messageFeatures, publicMessageTree)
 	.get("publicMessageEdit",      "/:messageOrParentName/edit",    etag, noCache, getMe, getState, authed, loadMessage, threadPath, newThreadNoteHref, isAuthed(loadMessagePath), editHrefRedirect, loadTree, loadFiles, formatView, messageFeatures, formatTextarea, editThreadMessage)
 	.get("newMessage",             "/:messageOrParentName/new",     etag, noCache, getMe, getState, authed, loadMessage, threadPath, newThreadNoteHref, loadTree, formatView, newThreadMessage)
 	.get("publicThreadMessage",    "/:parentName/:messageName",         etag, noCache, getMe, getState, loadMessage, threadPath, newThreadNoteHref, messageEditHref, isAuthed(loadMessagePath), deleteRedirectUrl, loadParentMessage, loadTree, formatView, messageFeatures, publicThreadMessage)

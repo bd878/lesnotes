@@ -19,9 +19,11 @@ class SearchBuilder extends AbstractBuilder {
 	messageFeatures = undefined;
 	messageHeader = undefined;
 	controlPanel = undefined
+	threadPath = undefined;
 
 	addMessagesList(list: SearchMessagesList) {
 		const search = this.search
+		const isMobile = this.isMobile
 
 		const limit = parseInt(LIMIT)
 
@@ -31,7 +33,7 @@ class SearchBuilder extends AbstractBuilder {
 			showThreadLink:    true,
 
 			messageHref:       function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); return `/search/${this.ID}` + search; },
-			openThreadHref:    function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); params.set(`${this.ID}`, `${limit},0`); return `/${this.name}` + search; },
+			openThreadHref:    function() { const params = new URLSearchParams(search); params.delete("nav"); params.delete("trans"); params.set(`${this.ID}`, `${limit},0`); return isMobile ? `/${this.name}/tree` + search : `/${this.name}` + search; },
 		})
 
 		return this
@@ -62,12 +64,18 @@ class SearchBuilder extends AbstractBuilder {
 		return this
 	}
 
+	addThreadPath(threadPath: Builder) {
+		this.threadPath = threadPath.build()
+		return this
+	}
+
 	build() {
 		return mustache.render(this.isMobile ? searchTemplateMobile : searchTemplate, {
 			hasFeatures: this.messageFeatures != undefined,
 			hasMessage: this.messageView != undefined,
 		}, {
 			header: this.header,
+			threadPath: this.threadPath,
 			controlPanel: this.controlPanel,
 			messageView: this.messageView,
 			messagesList: this.messagesList,

@@ -1,4 +1,4 @@
-<div class="flex flex-col grow">
+<div class="flex flex-col grow overflow-x-hidden">
 	<div class="flex flex-col overflow-x-hidden mb-5 small:mb-3 w-full max-w-md">
 		{{> header}}
 	</div>
@@ -6,7 +6,6 @@
 	{{#hasMessage}}
 		<div class="grow w-full flex flex-row mb-5 small:mb-3">
 			<div class="flex flex-col grow-2 w-full h-full">
-				{{> messageHeader}}
 				{{> threadPath}}
 				<div class="flex flex-col w-full h-full overflow-x-hidden border border-1 border-solid rounded-md">
 					{{> messageEditForm}}

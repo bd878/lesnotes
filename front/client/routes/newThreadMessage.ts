@@ -39,7 +39,7 @@ async function newThreadMessage(ctx) {
 	} else {
 		content.addThreadPath(threadPath.addPath(ctx.state.threadPath))
 
-		messageForm.addRedirectUrl(`/${ctx.state.parentName}` + ctx.search)
+		messageForm.addRedirectUrl((ctx.state.parentName ? `/${ctx.state.parentName}/tree` : "/") + ctx.search)
 	}
 
 	layout

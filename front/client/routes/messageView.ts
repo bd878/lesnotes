@@ -36,6 +36,8 @@ async function messageView(ctx) {
 					.addThreadPath(threadPath.addPath(ctx.state.threadPath || [] /* for root */))
 					.addList(messagesList.addTree(ctx.state.tree))
 			)
+	} else {
+		content.addThreadPath(threadPath.addPath(ctx.state.threadPath || []))
 	}
 
 	if (ctx.state.messageFeatures.hasFeatures()) {

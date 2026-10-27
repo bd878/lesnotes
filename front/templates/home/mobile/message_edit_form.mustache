@@ -3,9 +3,9 @@
 		id="edit-message-form"
 		autocomplete="off"
 		method="POST"
-		action="{{updateAction}}"
 		onsubmit="return false;"
-		class="w-full flex flex-col grow"
+		action="{{updateAction}}"
+		class="w-full flex flex-col grow min-h-[50vh]"
 	>
 		<div class="flex flex-col grow">
 			{{^private}}
@@ -15,10 +15,10 @@
 				<input name="name" type="hidden" value="{{name}}">
 			{{/private}}
 			<input name="id" type="hidden" value="{{ID}}">
-			<input type="hidden" name="file_ids" value="[]" />
 			<input type="hidden" name="redirectUrl" value="{{redirectUrl}}" />
+			<input type="hidden" name="file_ids" value="[]" />
 			<input name="title" class="mb-2 w-full dark:text-white focus:outline-none resize-none px-1 placeholder:italic placeholder:text-gray-600 rounded-md text-lg" placeholder="{{titlePlaceholder}}" value="{{title}}"></input>
-			<textarea name="text" type="input" class="w-full h-full focus:outline-none dark:text-white px-1 mb-2 resize-none overflow-y-auto wrap-break-word text-start placeholder:italic placeholder:text-gray-600 rounded-md" placeholder="{{textPlaceholder}}">{{{text}}}</textarea>
+			<textarea name="text" type="input" class="grow w-full h-full focus:outline-none dark:text-white px-1 mb-2 resize-none overflow-y-auto wrap-break-word text-start placeholder:italic placeholder:text-gray-600 rounded-md" placeholder="{{textPlaceholder}}">{{{text}}}</textarea>
 
 			<div class="mb-2 px-1">
 				{{> filesList}}

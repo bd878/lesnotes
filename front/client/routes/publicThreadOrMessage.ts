@@ -1,14 +1,14 @@
 import * as is from '../third_party/is';
 import publicMessage from './publicMessage'
 import publicThread from './publicThread'
+import newThreadMessage from './newThreadMessage'
 import messageView from './messageView';
-import newThreadMessage from './newThreadMessage';
 
 async function publicThreadOrMessage(ctx) {
 	ctx.log.info("--> publicThreadOrMessage")
 
 	// message with child messages is thread
-	if (is.notEmpty(ctx.state.tree) && ctx.state.tree.count > 0) {
+	if (is.notEmpty(ctx.state.tree) && ctx.state.tree.count > 0 && !ctx.userAgent.isMobile) {
 		await publicThread(ctx)
 	} else {
 		if (ctx.state.isAuthed) {

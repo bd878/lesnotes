@@ -19,6 +19,7 @@ class ThreadPathBuilder extends AbstractBuilder {
 
 	build() {
 		const search = this.search
+		const isMobile = this.isMobile
 
 		return mustache.render(this.isMobile ? threadPathTemplateMobile : threadPathTemplate, {
 			path:     this.path.slice(0, -1),
@@ -29,9 +30,9 @@ class ThreadPathBuilder extends AbstractBuilder {
 
 			lastThreadTarget: "_self",
 			lastThreadExternal: false,
-			lastThreadHref: function() { return `/${this.name}` + search },
+			lastThreadHref: function() { return (isMobile ? this.name ? `/${this.name}/tree` : "/" : `/${this.name}`) + search },
 			threadTitle: function() { return `/${crop(this.title || this.text, 30)}` },
-			pathThreadHref: function() { return `/${this.name}` + search }
+			pathThreadHref: function() { return (isMobile ? this.name ? `/${this.name}/tree` : "/" : `/${this.name}`) + search }
 		})
 	}
 }
