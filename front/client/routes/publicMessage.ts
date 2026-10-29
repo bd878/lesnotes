@@ -44,6 +44,9 @@ async function publicMessage(ctx) {
 			}
 
 			header.addSearch(searchForm)
+		} else if (!ctx.state.message.parentMessage.private) {
+			searchForm.addThreadName(ctx.state.message.parentMessage.name)
+			header.addSearch(searchForm)
 		}
 	}
 
@@ -52,9 +55,6 @@ async function publicMessage(ctx) {
 		.addFooter()
 		.addContent(
 			content
-				.addMessageHeader(
-					messageHeader.addThreadLink(ctx.state.message.parentMessage)
-				)
 				.addMessageView(
 					view
 						.addDeleteRedirectUrl(ctx.state.deleteRedirectUrl)
