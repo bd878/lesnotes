@@ -484,9 +484,19 @@ func (s MessagesController) ReadMessage(ctx context.Context, id int64, name stri
 		return
 	}
 
-	// TODO: add threads count
-
 	message = model.MessageFromProto(res.Message)
+
+	var privateMessage *bool
+	if publicOnly == true {
+		*privateMessage = false
+	} else {
+		privateMessage = nil
+	}
+
+	message.Count, err = s.threads.CountMessages(ctx, id, message.UserID, privateMessage)
+	if err != nil {
+		return
+	}
 
 	parent, err := s.threads.ReadParent(ctx, message.UserID, message.ID)
 	if err != nil {
