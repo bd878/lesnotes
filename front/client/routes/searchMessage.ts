@@ -7,8 +7,8 @@ import SearchBuilder from '../builders/searchBuilder';
 import SearchFormBuilder from '../builders/searchFormBuilder';
 import ControlPanelBuilder from '../builders/controlPanelBuilder';
 
-async function searchMessageView(ctx) {
-	ctx.log.info("--> searchMessageView")
+async function searchMessage(ctx) {
+	ctx.log.info("--> searchMessage")
 
 	const panel = new ControlPanelBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const view = new MessageViewBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName, ctx.userAgent.isMobile,
@@ -48,7 +48,7 @@ async function searchMessageView(ctx) {
 	ctx.body = layout.build()
 	ctx.status = 200;
 
-	ctx.log.info("<-- searchMessageView")
+	ctx.log.info("<-- searchMessage")
 }
 
-export default searchMessageView
+export default searchMessage

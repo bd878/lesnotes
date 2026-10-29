@@ -23,6 +23,18 @@ async function mobileTree(ctx) {
 	const tree = new PublicMessagesTreeBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName,
 		ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
+	if (ctx.state.isAuthed) {
+		header.addNewNote(ctx.state.newNoteHref).addSearch(searchForm)
+		auth.addLogout()
+	} else {
+		auth.addLogin()
+
+		if (ctx.state.tree.count > 0) {
+			searchForm.addThreadName(ctx.state.parentName)
+			header.addSearch(searchForm)
+		}
+	}
+
 	layout
 		.addFooter()
 		.addContent(
@@ -32,14 +44,8 @@ async function mobileTree(ctx) {
 						.addThreadPath(threadPath.addPath(ctx.state.threadPath))
 						.addList(messagesList.addTree(ctx.state.tree).addThreadID(ctx.state.tree.threadID))
 				)
-				.addControlPanel(
-					panel.addAuth(auth.addLogout())
-				)
-				.addHeader(
-					header
-						.addNewNote(ctx.state.newNoteHref)
-						.addSearch(searchForm)
-				)
+				.addControlPanel(panel.addAuth(auth))
+				.addHeader(header)
 		)
 
 	ctx.body = layout.build()

@@ -468,7 +468,12 @@ func (s MessagesController) ReadMessages(ctx context.Context, userID int64, limi
 }
 
 func (s MessagesController) ReadMessage(ctx context.Context, id int64, name string, userIDs []int64, publicOnly bool) (message *model.Message, err error) {
-	slog.Debug("read message", slog.Int64("id", id), slog.String("name", name), slog.String("user_ids", fmt.Sprintf("%v", userIDs)))
+	slog.Debug("read message",
+		slog.Int64("id", id),
+		slog.String("name", name),
+		slog.String("user_ids", fmt.Sprintf("%v", userIDs)),
+		slog.Bool("public_only", publicOnly),
+	)
 
 	res, err := s.client.ReadMessage(ctx, &messages.ReadMessageRequest{
 		Id:      id,
@@ -486,14 +491,14 @@ func (s MessagesController) ReadMessage(ctx context.Context, id int64, name stri
 
 	message = model.MessageFromProto(res.Message)
 
-	var privateMessage *bool
+	privateMessage := new(bool)
 	if publicOnly == true {
 		*privateMessage = false
 	} else {
 		privateMessage = nil
 	}
 
-	message.Count, err = s.threads.CountMessages(ctx, id, message.UserID, privateMessage)
+	message.Count, err = s.threads.CountMessages(ctx, message.ID, message.UserID, privateMessage)
 	if err != nil {
 		return
 	}

@@ -163,10 +163,10 @@ func (h *Handler) ReadMessages(w http.ResponseWriter, req *http.Request) (err er
 		// read batch messages by given ids
 		return h.readBatchMessages(req.Context(), w, user.ID, ids)
 	} else if user.ID == users.PublicUserID {
-		// read private messages
+		// read public messages
 		return h.readMessageOrMessages(req.Context(), w, user.ID, limit, offset, messageID, threadID, name, order, true)
 	} else {
-		// read public messages
+		// read private messages
 		return h.readMessageOrMessages(req.Context(), w, user.ID, limit, offset, messageID, threadID, name, order, false)
 	}
 }

@@ -1,0 +1,73 @@
+import * as is from '../third_party/is';
+import MessageEditViewBuilder from '../builders/messageEditViewBuilder';
+import ControlPanelBuilder from '../builders/controlPanelBuilder';
+import HomeBuilder from '../builders/homeBuilder';
+import PublicMessagesTreeBuilder from '../builders/publicMessagesTreeBuilder';
+import LayoutBuilder from '../builders/layoutBuilder';
+import AuthBuilder from '../builders/authBuilder';
+import HeaderBuilder from '../builders/headerBuilder';
+import ThreadPathBuilder from '../builders/threadPathBuilder';
+import MessageHeaderBuilder from '../builders/messageHeaderBuilder';
+import MessagesListBuilder from '../builders/messagesListBuilder';
+import SearchFormBuilder from '../builders/searchFormBuilder';
+
+async function threadMessageEdit(ctx) {
+	ctx.log.info("--> threadMessageEdit")
+
+	const panel = new ControlPanelBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const messageForm = new MessageEditViewBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const content = new HomeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const messageHeader = new MessageHeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const searchForm = new SearchFormBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const threadPath = new ThreadPathBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const messagesList = new MessagesListBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName, ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const tree = new PublicMessagesTreeBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName, ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+
+	if (ctx.state.messageFeatures.hasFeatures()) {
+		content.addMessageFeatures(ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation))
+	}
+
+	if (!ctx.userAgent.isMobile) {
+		content
+			.addMessagesTree(
+				tree
+					.addThreadPath(threadPath.addPath(ctx.state.threadPath))
+					.addList(messagesList.addTree(ctx.state.tree).addThreadID(ctx.state.tree.threadID))
+			)
+	} else {
+		content.addThreadPath(threadPath.addPath(ctx.state.threadPath))
+	}
+
+	layout
+		.addTitle(ctx.state.message.title || ctx.state.message.text)
+		.addFooter()
+		.addContent(
+			content
+				.addMessageEditForm(
+					messageForm
+						.addRedirectUrl(ctx.state.editHrefRedirect)
+						.addCancelHref(ctx.state.editHrefRedirect)
+						.addFilesList(ctx.state.message.files)
+						.addMessage(ctx.state.message)
+				)
+				.addMessageHeader(messageHeader.addMessagePath(ctx.state.messagePath))
+				.addHeader(
+					header
+						.addNewNote(ctx.state.newNoteHref)
+						.addSearch(
+							searchForm
+						)
+				)
+				.addControlPanel(panel.addAuth(auth.addLogout()))
+		)
+
+	ctx.body = layout.build()
+	ctx.status = 200
+
+	ctx.log.info("<-- threadMessageEdit")
+}
+
+export default threadMessageEdit

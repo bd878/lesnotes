@@ -10,8 +10,8 @@ import SearchFormBuilder from '../builders/searchFormBuilder';
 import ThreadPathBuilder from '../builders/threadPathBuilder'
 import MessagesListBuilder from '../builders/messagesListBuilder';
 
-async function publicThreadMessage(ctx) {
-	ctx.log.info("--> publicThreadMessage")
+async function threadMessage(ctx) {
+	ctx.log.info("--> threadMessage")
 
 	const panel = new ControlPanelBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const content = new PublicThreadMessageBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName,
@@ -62,7 +62,7 @@ async function publicThreadMessage(ctx) {
 	ctx.body = layout.build()
 	ctx.status = 200
 
-	ctx.log.info("<-- publicThreadMessage")
+	ctx.log.info("<-- threadMessage")
 }
 
-export default publicThreadMessage
+export default threadMessage

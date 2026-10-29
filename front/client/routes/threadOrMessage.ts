@@ -4,8 +4,8 @@ import publicThread from './publicThread'
 import newThreadMessage from './newThreadMessage'
 import messageView from './messageView';
 
-async function publicThreadOrMessage(ctx) {
-	ctx.log.info("--> publicThreadOrMessage")
+async function threadOrMessage(ctx) {
+	ctx.log.info("--> threadOrMessage")
 
 	// message with child messages is thread
 	if (is.notEmpty(ctx.state.tree) && ctx.state.tree.count > 0 && !ctx.userAgent.isMobile) {
@@ -22,7 +22,7 @@ async function publicThreadOrMessage(ctx) {
 		}
 	}
 
-	ctx.log.info("<-- publicThreadOrMessage")
+	ctx.log.info("<-- threadOrMessage")
 }
 
-export default publicThreadOrMessage
+export default threadOrMessage

@@ -29,15 +29,15 @@ async function messageView(ctx) {
 	const tree = new MessagesTreeBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName,
 		ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
-	if (!ctx.userAgent.isMobile) {
+	if (ctx.userAgent.isMobile) {
+		content.addThreadPath(threadPath.addPath(ctx.state.threadPath || []))
+	} else {
 		content
 			.addMessagesTree(
 				tree
 					.addThreadPath(threadPath.addPath(ctx.state.threadPath || [] /* for root */))
 					.addList(messagesList.addTree(ctx.state.tree))
 			)
-	} else {
-		content.addThreadPath(threadPath.addPath(ctx.state.threadPath || []))
 	}
 
 	if (ctx.state.messageFeatures.hasFeatures()) {
