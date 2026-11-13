@@ -2,7 +2,7 @@ import * as is from '../third_party/is';
 import publicMessage from './publicMessage'
 import publicThread from './publicThread'
 import newThreadMessage from './newThreadMessage'
-import messageView from './messageView';
+import threadMessage from './threadMessage';
 
 async function threadOrMessage(ctx) {
 	ctx.log.info("--> threadOrMessage")
@@ -15,7 +15,7 @@ async function threadOrMessage(ctx) {
 			if (ctx.userAgent.isMobile) {
 				await newThreadMessage(ctx)
 			} else {
-				await messageView(ctx)
+				await threadMessage(ctx)
 			}
 		} else {
 			await publicMessage(ctx)

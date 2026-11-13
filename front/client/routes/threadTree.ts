@@ -3,8 +3,8 @@ import mobileTree from './mobileTree';
 import publicMessage from './publicMessage'
 import newThreadMessage from './newThreadMessage';
 
-async function messageTree(ctx) {
-	ctx.log.info("--> messageTree")
+async function threadTree(ctx) {
+	ctx.log.info("--> threadTree")
 
 	if (is.notEmpty(ctx.state.tree) && ctx.state.tree.count > 0 && ctx.userAgent.isMobile) {
 		await mobileTree(ctx)
@@ -16,7 +16,7 @@ async function messageTree(ctx) {
 		}
 	}
 
-	ctx.log.info("<-- messageTree")
+	ctx.log.info("<-- threadTree")
 }
 
-export default messageTree
+export default threadTree

@@ -1,7 +1,7 @@
 import ContentBuilder from './contentBuilder'
 
 class HomeContentBuilder extends ContentBuilder {
-	scripts              = ["/public/pages/home/homeScript.js"]
+	scripts              = ["/public/components/content/contentScript.js"]
 }
 
 export default HomeContentBuilder

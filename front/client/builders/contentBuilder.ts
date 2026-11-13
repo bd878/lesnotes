@@ -20,8 +20,9 @@ class ContentBuilder extends AbstractBuilder {
 	controlPanel         = undefined;
 	messageHeader        = undefined;
 
-	addMessagesTree(tree: Builder) {
+	addMessagesTree(tree: ScriptsBuilder) {
 		this.messagesTree = tree.build()
+		this.scripts.push(...tree.scripts)
 		return this
 	}
 

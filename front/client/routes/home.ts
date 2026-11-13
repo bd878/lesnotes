@@ -1,5 +1,5 @@
 import * as is from '../third_party/is';
-import newMessage from './newMessage';
+import newRootMessage from './newRootMessage';
 import homeTree from './homeTree';
 
 async function home(ctx) {
@@ -9,10 +9,10 @@ async function home(ctx) {
 		if (is.notEmpty(ctx.state.tree) && ctx.state.tree.count > 0) {
 			await homeTree(ctx)
 		} else {
-			await newMessage(ctx)
+			await newRootMessage(ctx)
 		}
 	} else {
-		await newMessage(ctx)
+		await newRootMessage(ctx)
 	}
 
 	ctx.log.info("<-- home")

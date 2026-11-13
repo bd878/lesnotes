@@ -56,19 +56,18 @@ import assets from './routes/assets';
 import main from './routes/main';
 import login from './routes/login';
 import signup from './routes/signup';
-import newMessage from './routes/newMessage';
-import newRootMessage from './routes/newRootMessage';
 import home from './routes/home';
 import xxx from './routes/xxx';
-import threadOrMessage from './routes/threadOrMessage';
-import threadMessage from './routes/threadMessage';
-import messageTree from './routes/messageTree'
-import searchMessage from './routes/searchMessage';
 import rootMessage from './routes/rootMessage';
+import newRootMessage from './routes/newRootMessage';
 import rootMessageEdit from './routes/rootMessageEdit';
-import searchResult from './routes/searchResult';
-import threadMessageEdit from './routes/threadMessageEdit';
+import threadMessage from './routes/threadMessage';
 import newThreadMessage from './routes/newThreadMessage'
+import threadMessageEdit from './routes/threadMessageEdit';
+import threadTree from './routes/threadTree'
+import threadOrMessage from './routes/threadOrMessage';
+import searchMessage from './routes/searchMessage';
+import searchResult from './routes/searchResult';
 import status from './routes/status';
 
 const app = new Koa();
@@ -115,7 +114,7 @@ router
 	.post("doSendComment",         "/comment/send",                 getState, sendComment)
 	.post("doSendTranslation",     "/translation/send",             getState, authed, sendTranslation)
 	.get("publicMessage",          "/:messageOrParentName",         etag, noCache, getMe, getState, loadMessage, threadPath, newThreadNoteHref, messageEditHref, isAuthed(loadMessagePath), deleteRedirectUrl, loadTree, formatView, messageFeatures, threadOrMessage)
-	.get("publicMessageTree",      "/:messageOrParentName/tree",    etag, noCache, getMe, getState, loadMessage, threadPath, newThreadNoteHref, messageEditHref, isAuthed(loadMessagePath), deleteRedirectUrl, loadTree, formatView, messageFeatures, messageTree)
+	.get("publicMessageTree",      "/:messageOrParentName/tree",    etag, noCache, getMe, getState, loadMessage, threadPath, newThreadNoteHref, messageEditHref, isAuthed(loadMessagePath), deleteRedirectUrl, loadTree, formatView, messageFeatures, threadTree)
 	.get("publicMessageEdit",      "/:messageOrParentName/edit",    etag, noCache, getMe, getState, authed, loadMessage, threadPath, newThreadNoteHref, isAuthed(loadMessagePath), editHrefRedirect, loadTree, loadFiles, messageFeatures, formatTextarea, threadMessageEdit)
 	.get("newMessage",             "/:messageOrParentName/new",     etag, noCache, getMe, getState, authed, loadMessage, threadPath, newThreadNoteHref, loadTree, formatView, newThreadMessage)
 	.get("publicThreadMessage",    "/:parentName/:messageName",         etag, noCache, getMe, getState, loadMessage, threadPath, newThreadNoteHref, messageEditHref, isAuthed(loadMessagePath), deleteRedirectUrl, loadParentMessage, loadTree, formatView, messageFeatures, threadMessage)

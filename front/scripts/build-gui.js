@@ -19,8 +19,9 @@ for (const file of files) {
 
 let ctx = await esbuild.context({
 	entryPoints: [
-		'client/gui/pages/home/homeScript.ts',
+		'client/gui/components/content/contentScript.ts',
 		'client/gui/pages/messageEdit/messageEditScript.ts',
+		'client/gui/components/messagesTree/messagesTreeScript.ts',
 		'client/gui/styles/styles.css'
 	],
 	entryNames: '[dir]/[name]',

@@ -1,4 +1,5 @@
 import type {Message} from '../api/models';
+import type {Builder} from './builder';
 import Config from 'config';
 import mustache from 'mustache';
 import { readFileSync } from 'node:fs';
@@ -11,6 +12,8 @@ let messagesTreeTemplateMobile = readFileSync(resolve(join(Config.get('basedir')
 class MessagesTreeBuilder extends AbstractPublicBuilder {
 	list = undefined
 	threadPath = undefined
+
+	scripts = ["/public/components/messagesTree/messagesTreeScript.js"]
 
 	addList(list: Builder) {
 		this.list = list.build()

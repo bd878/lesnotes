@@ -14,15 +14,13 @@ let filesListTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'t
 let messageEditFormTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/content/desktop/message_edit_form.mustache')), { encoding: 'utf-8' });
 let messageEditFormTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/content/mobile/message_edit_form.mustache')), { encoding: 'utf-8' });
 
-class MessageEditViewBuilder extends AbstractBuilder {
+class MessageEditFormBuilder extends AbstractBuilder {
 	filesList   = undefined
 	message     = undefined
 	cancelHref  = undefined
 	redirectUrl = undefined
 
-	scripts = [
-		"/public/pages/messageEdit/messageEditScript.js"
-	]
+	scripts = ["/public/pages/messageEdit/messageEditScript.js"]
 
 	addFilesList(files: FileWithMime[]) {
 		this.filesList = mustache.render(this.isMobile ? filesListTemplateMobile : filesListTemplate, {
@@ -68,4 +66,4 @@ class MessageEditViewBuilder extends AbstractBuilder {
 	}
 }
 
-export default MessageEditViewBuilder
+export default MessageEditFormBuilder

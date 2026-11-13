@@ -1,7 +1,7 @@
 {
   "include": [
     "./client/api/*",
-    "./client/gui/pages/home/homeScript.ts",
+    "./client/gui/components/content/contenScript.ts",
     "environment.d.ts"
   ],
   "compilerOptions": {
