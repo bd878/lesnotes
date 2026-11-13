@@ -1,8 +1,10 @@
 import onFormSubmit from './onFormSubmit';
 import onMessagesListDragStart from './onMessagesListDragStart';
 import onMessagesListDrop from './onMessagesListDrop';
+import onMessagesListScroll, { restoreMessagesListScroll } from './onMessagesListScroll';
 import onFileInputChange from './onFileInputChange';
 import onSelectFilesClick from './onSelectFilesClick';
+import debounce from '../../scripts/debounce'
 import getByID from '../../scripts/getByID'
 
 const elems = {
@@ -21,8 +23,11 @@ const elems = {
 function init() {
 	console.log("homeScript loaded")
 
+	restoreMessagesListScroll(elems)
+
 	elems.newMessageFormElem.addEventListener("submit",   e => onFormSubmit(elems, e))
 	elems.messagesListElem.addEventListener('dragstart',  e => onMessagesListDragStart(elems, e))
+	elems.messagesListElem.addEventListener('scroll',     debounce(e => onMessagesListScroll(elems, e), 1000))
 	elems.filesButtonElem.addEventListener("click",       e => onSelectFilesClick(elems, e))
 	elems.messagesListElem.addEventListener('drop',       e => onMessagesListDrop(elems, e))
 	elems.filesInputElem.addEventListener("change",       e => onFileInputChange(elems, e))

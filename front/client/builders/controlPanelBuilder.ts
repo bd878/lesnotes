@@ -5,8 +5,8 @@ import { readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import AbstractBuilder from './abstractBuilder';
 
-let controlPanelTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/home/desktop/control_panel.mustache')), { encoding: 'utf-8' });
-let controlPanelTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/home/mobile/control_panel.mustache')), { encoding: 'utf-8' });
+let controlPanelTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/content/desktop/control_panel.mustache')), { encoding: 'utf-8' });
+let controlPanelTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/content/mobile/control_panel.mustache')), { encoding: 'utf-8' });
 
 class ControlPanelBuilder extends AbstractBuilder {
 	auth = undefined

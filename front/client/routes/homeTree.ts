@@ -2,7 +2,7 @@ import LayoutBuilder from '../builders/layoutBuilder';
 import MessagesTreeBuilder from '../builders/messagesTreeBuilder';
 import ControlPanelBuilder from '../builders/controlPanelBuilder';
 import SearchFormBuilder from '../builders/searchFormBuilder';
-import HomeBuilder from '../builders/homeBuilder'
+import HomeContentBuilder from '../builders/homeContentBuilder'
 import HeaderBuilder from '../builders/headerBuilder';
 import AuthBuilder from '../builders/authBuilder';
 import MessagesListBuilder from '../builders/messagesListBuilder';
@@ -11,7 +11,7 @@ async function homeTree(ctx) {
 	ctx.log.info("--> homeTree")
 
 	const panel = new ControlPanelBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
-	const content = new HomeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const content = new HomeContentBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);

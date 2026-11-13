@@ -9,8 +9,6 @@ async function autosaveMessage(elems, _e) {
 	const fileIDs = getSelectedValues((elems.messageEditForm.elements.namedItem("file_ids") || elems.select).selectedOptions)
 		.map(id => parseInt(id) || 0).filter(is.notEmpty)
 
-	console.log("autosaveMessage", "id", id)
-
 	try {
 		await updateMessage(id, text, title, name, fileIDs)
 	} catch (e) {

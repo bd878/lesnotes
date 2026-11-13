@@ -1,20 +1,14 @@
 import type {Builder, ScriptsBuilder} from './builder';
-import type {File, Message} from '../api/models';
-import type {FileWithMime} from '../types';
 import Config from 'config';
 import mustache from 'mustache';
-import api from '../api';
-import { unwrapPaging } from '../api/models/paging';
-import * as is from '../third_party/is';
-import i18n from '../i18n';
 import { readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import AbstractBuilder from './abstractBuilder'
 
-let homeTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/home/desktop/home.mustache')), { encoding: 'utf-8' });
-let homeTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/home/mobile/home.mustache')), { encoding: 'utf-8' });
+let contentTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/content/desktop/content.mustache')), { encoding: 'utf-8' });
+let contentTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/content/mobile/content.mustache')), { encoding: 'utf-8' });
 
-class HomeBuilder extends AbstractBuilder {
+class ContentBuilder extends AbstractBuilder {
 	messageEditForm      = undefined;
 	messageView          = undefined;
 	newMessageForm       = undefined;
@@ -25,7 +19,6 @@ class HomeBuilder extends AbstractBuilder {
 	messageFeatures      = undefined;
 	controlPanel         = undefined;
 	messageHeader        = undefined;
-	scripts              = ["/public/pages/home/homeScript.js"]
 
 	addMessagesTree(tree: Builder) {
 		this.messagesTree = tree.build()
@@ -80,7 +73,7 @@ class HomeBuilder extends AbstractBuilder {
 	}
 
 	build() {
-		return mustache.render(this.isMobile ? homeTemplateMobile : homeTemplate, {
+		return mustache.render(this.isMobile ? contentTemplateMobile : contentTemplate, {
 			hasFeatures:          this.messageFeatures != undefined,
 			hasMessage:           this.messageView != undefined
 						|| this.messageEditForm != undefined
@@ -101,4 +94,4 @@ class HomeBuilder extends AbstractBuilder {
 	}
 }
 
-export default HomeBuilder
+export default ContentBuilder

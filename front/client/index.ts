@@ -65,7 +65,6 @@ import threadMessage from './routes/threadMessage';
 import messageTree from './routes/messageTree'
 import searchMessage from './routes/searchMessage';
 import rootMessage from './routes/rootMessage';
-import messageEdit from './routes/messageEdit';
 import rootMessageEdit from './routes/rootMessageEdit';
 import searchResult from './routes/searchResult';
 import threadMessageEdit from './routes/threadMessageEdit';

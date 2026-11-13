@@ -1,7 +1,7 @@
 import * as is from '../third_party/is';
 import MessageEditViewBuilder from '../builders/messageEditViewBuilder';
 import ControlPanelBuilder from '../builders/controlPanelBuilder';
-import HomeBuilder from '../builders/homeBuilder';
+import HomeContentBuilder from '../builders/homeContentBuilder';
 import MessagesTreeBuilder from '../builders/messagesTreeBuilder';
 import LayoutBuilder from '../builders/layoutBuilder';
 import AuthBuilder from '../builders/authBuilder';
@@ -17,7 +17,7 @@ async function rootMessageEdit(ctx) {
 	const panel = new ControlPanelBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const messageForm = new MessageEditViewBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
-	const content = new HomeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const content = new HomeContentBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const messageHeader = new MessageHeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);

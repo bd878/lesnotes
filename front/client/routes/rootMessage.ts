@@ -1,6 +1,6 @@
 import * as is from '../third_party/is';
 import MessageViewBuilder from '../builders/messageViewBuilder';
-import HomeBuilder from '../builders/homeBuilder';
+import HomeContentBuilder from '../builders/homeContentBuilder';
 import MessagesTreeBuilder from '../builders/messagesTreeBuilder';
 import LayoutBuilder from '../builders/layoutBuilder';
 import AuthBuilder from '../builders/authBuilder';
@@ -16,7 +16,7 @@ async function rootMessage(ctx) {
 	ctx.log.info("--> rootMessage")
 
 	const panel = new ControlPanelBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
-	const content = new HomeBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const content = new HomeContentBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const view = new MessageViewBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName, ctx.userAgent.isMobile,
 		ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
