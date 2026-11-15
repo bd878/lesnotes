@@ -35,6 +35,7 @@ async function threadMessage(ctx) {
 		content
 			.addMessagesTree(
 				tree
+					.addThreadID(ctx.state.tree.threadID)
 					.addThreadPath(threadPath.addPath(ctx.state.threadPath || [] /* for root */))
 					.addList(messagesList.addTree(ctx.state.tree))
 			)

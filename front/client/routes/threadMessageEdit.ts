@@ -2,7 +2,7 @@ import * as is from '../third_party/is';
 import MessageEditFormBuilder from '../builders/messageEditFormBuilder';
 import ControlPanelBuilder from '../builders/controlPanelBuilder';
 import ThreadContentBuilder from '../builders/threadContentBuilder';
-import PublicMessagesTreeBuilder from '../builders/publicMessagesTreeBuilder';
+import MessagesTreeBuilder from '../builders/messagesTreeBuilder';
 import LayoutBuilder from '../builders/layoutBuilder';
 import AuthBuilder from '../builders/authBuilder';
 import HeaderBuilder from '../builders/headerBuilder';
@@ -24,7 +24,7 @@ async function threadMessageEdit(ctx) {
 	const searchForm = new SearchFormBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const threadPath = new ThreadPathBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const messagesList = new MessagesListBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName, ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
-	const tree = new PublicMessagesTreeBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName, ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
+	const tree = new MessagesTreeBuilder(ctx.state.isAuthed, ctx.state.parentName, ctx.state.messageName, ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
 	if (ctx.state.messageFeatures.hasFeatures()) {
 		content.addMessageFeatures(ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation))
@@ -34,6 +34,7 @@ async function threadMessageEdit(ctx) {
 		content
 			.addMessagesTree(
 				tree
+					.addThreadID(ctx.state.tree.threadID)
 					.addThreadPath(threadPath.addPath(ctx.state.threadPath))
 					.addList(messagesList.addTree(ctx.state.tree).addThreadID(ctx.state.tree.threadID))
 			)
