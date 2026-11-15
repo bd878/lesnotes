@@ -7,8 +7,8 @@ import { readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import AbstractPublicBuilder from './abstractPublicBuilder';
 
-let messageViewTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/message/desktop/message_view.mustache')), { encoding: 'utf-8' });
-let messageViewTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/message/mobile/message_view.mustache')), { encoding: 'utf-8' });
+let messageViewTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/message_view/desktop/message_view.mustache')), { encoding: 'utf-8' });
+let messageViewTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/message_view/mobile/message_view.mustache')), { encoding: 'utf-8' });
 
 class MessageViewBuilder extends AbstractPublicBuilder {
 	message = undefined

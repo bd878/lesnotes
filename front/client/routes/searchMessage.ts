@@ -3,7 +3,7 @@ import AuthBuilder from '../builders/authBuilder';
 import MessageViewBuilder from '../builders/messageViewBuilder';
 import HeaderBuilder from '../builders/headerBuilder';
 import ThreadPathBuilder from '../builders/threadPathBuilder';
-import SearchBuilder from '../builders/searchBuilder';
+import SearchContentBuilder from '../builders/searchContentBuilder';
 import SearchFormBuilder from '../builders/searchFormBuilder';
 import ControlPanelBuilder from '../builders/controlPanelBuilder';
 
@@ -17,7 +17,7 @@ async function searchMessage(ctx) {
 	const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const threadPath = new ThreadPathBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
-	const content = new SearchBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+	const content = new SearchContentBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const searchForm = new SearchFormBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
 	if (ctx.state.messageFeatures.hasFeatures()) {

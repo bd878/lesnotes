@@ -5,7 +5,6 @@ import MessagesTreeBuilder from '../builders/messagesTreeBuilder';
 import LayoutBuilder from '../builders/layoutBuilder';
 import AuthBuilder from '../builders/authBuilder';
 import HeaderBuilder from '../builders/headerBuilder';
-import TranslationsBuilder from '../builders/translationsBuilder';
 import ControlPanelBuilder from '../builders/controlPanelBuilder';
 import MessageHeaderBuilder from '../builders/messageHeaderBuilder';
 import SearchFormBuilder from '../builders/searchFormBuilder';

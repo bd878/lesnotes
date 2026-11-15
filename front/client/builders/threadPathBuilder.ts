@@ -6,8 +6,8 @@ import { resolve, join } from 'node:path';
 import AbstractBuilder from './abstractBuilder'
 import crop from '../utils/crop';
 
-let threadPathTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/messages_tree/desktop/thread_path.mustache')), { encoding: 'utf-8' });
-let threadPathTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/messages_tree/mobile/thread_path.mustache')), { encoding: 'utf-8' });
+let template = readFileSync(resolve(join(Config.get('basedir'),'templates/thread_path/desktop/thread_path.mustache')), { encoding: 'utf-8' });
+let templateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/thread_path/mobile/thread_path.mustache')), { encoding: 'utf-8' });
 
 class ThreadPathBuilder extends AbstractBuilder {
 	path = undefined
@@ -21,7 +21,7 @@ class ThreadPathBuilder extends AbstractBuilder {
 		const search = this.search
 		const isMobile = this.isMobile
 
-		return mustache.render(this.isMobile ? threadPathTemplateMobile : threadPathTemplate, {
+		return mustache.render(this.isMobile ? templateMobile : template, {
 			path:     this.path.slice(0, -1),
 			lastMessage:   this.path.slice(-1),
 			threadPrivate: function() { return this.private },

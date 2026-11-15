@@ -1,24 +1,16 @@
 import * as is from '../third_party/is';
 import MessageFeaturesBuilder from '../builders/messageFeaturesBuilder';
 import MessageNavigationBuilder from '../builders/messageNavigationBuilder';
-import TranslationsBuilder from '../builders/translationsBuilder';
 
 async function messageFeatures(ctx, next) {
 	ctx.log.info("--> messageFeatures")
 
 	const messageFeatures = new MessageFeaturesBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const messageNavigation = new MessageNavigationBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
-	// const translations = new TranslationsBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
 	if (is.array(ctx.state.message.files) && ctx.state.message.files.length > 0) {
 		messageNavigation.addAttachments()
 	}
-
-	// messageNavigation.addComments()
-
-	// if (ctx.state.isAuthed || ctx.state.message.translations.length > 0) {
-	// 	messageNavigation.addTranslations()
-	// }
 
 	if (ctx.state.nav == "comments") {
 		// messageFeatures.addComments(ctx.state.message.ID, ctx.state.comments)

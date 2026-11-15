@@ -1,5 +1,5 @@
 import * as is from '../third_party/is';
-import PublicMessageBuilder from '../builders/publicMessageBuilder';
+import PublicMessageContentBuilder from '../builders/publicMessageContentBuilder';
 import MessageViewBuilder from '../builders/messageViewBuilder';
 import LayoutBuilder from '../builders/layoutBuilder';
 import HeaderBuilder from '../builders/headerBuilder';
@@ -17,7 +17,7 @@ async function publicMessage(ctx) {
 	const header = new HeaderBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const auth = new AuthBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 	const searchForm = new SearchFormBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
-	const content = new PublicMessageBuilder(ctx.state.isAuthed, ctx.state.messageName, ctx.state.messageName, ctx.userAgent.isMobile,
+	const content = new PublicMessageContentBuilder(ctx.state.isAuthed, ctx.state.messageName, ctx.state.messageName, ctx.userAgent.isMobile,
 		ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 
 	if (ctx.state.messageFeatures.hasFeatures()) {
