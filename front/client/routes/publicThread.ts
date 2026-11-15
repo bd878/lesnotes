@@ -27,7 +27,7 @@ async function publicThread(ctx) {
 		ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path);
 
 	if (ctx.state.messageFeatures.hasFeatures()) {
-		content.addThreadFeatures(ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation))
+		content.addMessageFeatures(ctx.state.messageFeatures.addNavigation(ctx.state.messageNavigation))
 	}
 
 	if (!ctx.userAgent.isMobile) {

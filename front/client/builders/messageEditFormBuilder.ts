@@ -8,11 +8,11 @@ import { readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import AbstractBuilder from './abstractBuilder';
 
-let filesListTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/content/desktop/files_list.mustache')), { encoding: 'utf-8' });
-let filesListTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/content/mobile/files_list.mustache')), { encoding: 'utf-8' });
+let filesListTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/files_list/desktop/files_list.mustache')), { encoding: 'utf-8' });
+let filesListTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/files_list/mobile/files_list.mustache')), { encoding: 'utf-8' });
 
-let messageEditFormTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/content/desktop/message_edit_form.mustache')), { encoding: 'utf-8' });
-let messageEditFormTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/content/mobile/message_edit_form.mustache')), { encoding: 'utf-8' });
+let messageEditFormTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/message_edit_form/desktop/message_edit_form.mustache')), { encoding: 'utf-8' });
+let messageEditFormTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/message_edit_form/mobile/message_edit_form.mustache')), { encoding: 'utf-8' });
 
 class MessageEditFormBuilder extends AbstractBuilder {
 	filesList   = undefined
