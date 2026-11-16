@@ -2,7 +2,7 @@ import Config from 'config';
 import mustache from 'mustache';
 import { readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
-import ContentBuilder from './ContentBuilder'
+import ContentBuilder from './contentBuilder'
 
 let template = readFileSync(resolve(join(Config.get('basedir'),'templates/content/desktop/public_message_content.mustache')), { encoding: 'utf-8' });
 let mobileTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/content/mobile/public_message_content.mustache')), { encoding: 'utf-8' });

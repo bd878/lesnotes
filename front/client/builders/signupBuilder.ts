@@ -5,14 +5,14 @@ import { readFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import AbstractBuilder from './abstractBuilder'
 
-let usernameTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/signup/desktop/username.mustache')), { encoding: 'utf-8' });
-let usernameTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/signup/mobile/username.mustache')), { encoding: 'utf-8' });
+let usernameTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/input/desktop/username.mustache')), { encoding: 'utf-8' });
+let usernameTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/input/mobile/username.mustache')), { encoding: 'utf-8' });
 
-let passwordTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/signup/desktop/password.mustache')), { encoding: 'utf-8' });
-let passwordTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/signup/mobile/password.mustache')), { encoding: 'utf-8' });
+let passwordTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/input/desktop/password.mustache')), { encoding: 'utf-8' });
+let passwordTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/input/mobile/password.mustache')), { encoding: 'utf-8' });
 
-let submitTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/signup/desktop/submit.mustache')), { encoding: 'utf-8' });
-let submitTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/signup/mobile/submit.mustache')), { encoding: 'utf-8' });
+let submitTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/input/desktop/submit.mustache')), { encoding: 'utf-8' });
+let submitTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/input/mobile/submit.mustache')), { encoding: 'utf-8' });
 
 let signupTemplate = readFileSync(resolve(join(Config.get('basedir'),'templates/signup/desktop/signup.mustache')), { encoding: 'utf-8' });
 let signupTemplateMobile = readFileSync(resolve(join(Config.get('basedir'),'templates/signup/mobile/signup.mustache')), { encoding: 'utf-8' });
@@ -22,6 +22,7 @@ class SignupBuilder extends AbstractBuilder {
 	password = undefined;
 	submit = undefined;
 	sidebar = undefined;
+	error = undefined;
 
 	addUsername() {
 		this.username = mustache.render(this.isMobile ? usernameTemplateMobile : usernameTemplate, {
@@ -39,9 +40,9 @@ class SignupBuilder extends AbstractBuilder {
 
 	addSubmit() {
 		this.submit = mustache.render(this.isMobile ? submitTemplateMobile : submitTemplate, {
-			loginHref: "/login" + this.search,
-			signup:   this.i18n("signup"),
-			login:    this.i18n("login"),
+			href: "/login" + this.search,
+			submitText:   this.i18n("signup"),
+			linkText:    this.i18n("login"),
 		})
 		return this
 	}
@@ -51,12 +52,17 @@ class SignupBuilder extends AbstractBuilder {
 		return this
 	}
 
+	addError(error: string) {
+		this.error = error
+		return this
+	}
+
 	build() {
 		const search = this.search
 
 		return mustache.render(this.isMobile ? signupTemplateMobile : signupTemplate, {
-			action:         function() { return "/signup" + search },
-			authUrl:        `https://${BACKEND_URL}/tg_auth`,
+			action:         "/signup" + search,
+			error:         this.error,
 		}, {
 			username:  this.username,
 			password:  this.password,

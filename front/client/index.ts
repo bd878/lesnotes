@@ -29,8 +29,8 @@ import expireToken from './handlers/expireToken';
 import redirectHome from './handlers/redirectHome';
 import redirectSearch from './handlers/redirectSearch';
 import redirectLogin from './handlers/redirectLogin';
-import validateLogin from './handlers/validateLogin'
-import validateSignup from './handlers/validateSignup';
+import doLogin from './handlers/doLogin'
+import doSignup from './handlers/doSignup';
 import deleteMessage from './handlers/deleteMessage';
 import deleteTranslation from './handlers/deleteTranslation';
 import updateTranslation from './handlers/updateTranslation';
@@ -101,8 +101,8 @@ router
 	.get("status",                 "/status",                       status, noCache, getState)
 	.get("search",                 "/search",                       etag, noCache, getMe, getState, newNoteHref, searchMessages, searchResult)
 	.get("searchMessage",          "/search/:idOrName",             etag, noCache, getMe, getState, newNoteHref, searchMessages, loadMessagePath, loadMessage, messageParentName, threadPath, loadFiles, searchMessageEditHref, searchMessageDeleteRedirectUrl, formatView, messageFeatures, searchMessage)
-	.post("doLogin",               "/login",                        etag, getState, validateLogin, redirectHome)
-	.post("doSignup",              "/signup",                       etag, getState, validateSignup, redirectHome)
+	.post("doLogin",               "/login",                        etag, getState, doLogin, redirectHome)
+	.post("doSignup",              "/signup",                       etag, getState, doSignup, redirectHome)
 	.post("doSendMessage",         "/message/send",                 getState, authed, sendMessage)
 	.post("doSearch",              "/message/search",               etag, getState, redirectSearch)
 	.post("doDeleteMessage",       "/message/delete",               getState, authed, deleteMessage)

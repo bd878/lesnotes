@@ -1,3 +1,4 @@
+import * as is from '../third_party/is'
 import SignupBuilder from '../builders/signupBuilder'
 import LayoutBuilder from '../builders/layoutBuilder';
 import SidebarBuilder from '../builders/sidebarBuilder';
@@ -8,6 +9,10 @@ async function signup(ctx) {
 	const content = new SignupBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const layout = new LayoutBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
 	const sidebar = new SidebarBuilder(ctx.userAgent.isMobile, ctx.state.lang, ctx.state.theme, ctx.state.fontSize, ctx.search, ctx.path)
+
+	if (is.notEmpty(ctx.state.error)) {
+		content.addError(ctx.state.error)
+	}
 
 	layout
 		.addFooter()

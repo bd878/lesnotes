@@ -83,7 +83,7 @@ export default function api(url, props: any = {}): Promise<any> {
 							return Promise.resolve([null, {
 								error:   true,
 								status:  res.status,
-								explain: text,
+								explain: value.error.explain,
 								code:    value.error.code,
 								human:   value.error.human,
 							}])
@@ -97,12 +97,13 @@ export default function api(url, props: any = {}): Promise<any> {
 							}])
 						}
 					} catch (e) {
+						console.log(e)
 						return Promise.resolve([null, {
 							error:   true,
 							status:  res.status,
 							explain: text,
 							code:    993,
-							human:   text,
+							human:   "",
 						}])
 					}
 				})
@@ -118,6 +119,7 @@ export default function api(url, props: any = {}): Promise<any> {
 			}
 		)
 		.catch(e => {
+			console.log(e)
 			return Promise.reject([null, {
 				error:   true,
 				status:  500,

@@ -1,16 +1,16 @@
-import signup from '../routes/signup'
+import login from '../routes/login'
 import * as is from '../third_party/is'
 import api from '../api';
 
-async function validateSignup(ctx, next) {
-	ctx.log.info("--> validateSignup")
+async function doLogin(ctx, next) {
+	ctx.log.info("--> doLogin")
 
-	const response = await processSignup(ctx)
+	const response = await processLogin(ctx)
 
 	if (response.error.error) {
 		ctx.log.error(response.error)
 		ctx.state.error = response.error.human
-		await signup(ctx)
+		await login(ctx)
 	} else {
 		const expiresAt = new Date(response.expiresAt)
 		ctx.log.info("expiresAt", expiresAt.toString())
@@ -19,12 +19,11 @@ async function validateSignup(ctx, next) {
 		await next()
 	}
 
-	ctx.log.info("<-- validateSignup")
+	ctx.log.info("<-- doLogin")
 }
 
-async function processSignup(ctx) {
+async function processLogin(ctx) {
 	let form = ctx.request.body
-
 
 	if (is.empty(form)) {
 		// let backend validate
@@ -33,7 +32,7 @@ async function processSignup(ctx) {
 
 	const params = new URLSearchParams(ctx.search)
 
-	return await api.signup(form.login, form.password, params.get("lang"))
+	return await api.login(form.login, form.password, params.get("lang"))
 }
 
-export default validateSignup
+export default doLogin;
