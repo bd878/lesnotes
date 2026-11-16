@@ -9,8 +9,6 @@ const elems = {
 }
 
 function init() {
-	console.log("messagesTreeScript loaded")
-
 	restoreMessagesListScroll(elems)
 
 	elems.messagesListElem.addEventListener('scroll',     debounce(e => onMessagesListScroll(elems, e), 1000))

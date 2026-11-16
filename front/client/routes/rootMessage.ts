@@ -50,10 +50,6 @@ async function rootMessage(ctx) {
 						.addMessageEditHref(ctx.state.messageEditHref)
 						.addMessage(ctx.state.message)
 				)
-				.addMessageHeader(
-					messageHeader
-						.addMessagePath(ctx.state.messagePath)
-				)
 				.addHeader(
 					header
 						.addNewNote(ctx.state.newNoteHref)

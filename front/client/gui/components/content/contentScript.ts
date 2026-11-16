@@ -20,8 +20,6 @@ const elems = {
 }
 
 function init() {
-	console.log("contentScript loaded")
-
 	elems.newMessageFormElem.addEventListener("submit",   e => onFormSubmit(elems, e))
 	elems.messagesListElem.addEventListener('dragstart',  e => onMessagesListDragStart(elems, e))
 	elems.filesButtonElem.addEventListener("click",       e => onSelectFilesClick(elems, e))

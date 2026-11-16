@@ -47,7 +47,6 @@ async function rootMessageEdit(ctx) {
 						.addFilesList(ctx.state.message.files)
 						.addMessage(ctx.state.message)
 				)
-				.addMessageHeader(messageHeader.addMessagePath(ctx.state.messagePath))
 				.addHeader(
 					header
 						.addNewNote(ctx.state.newNoteHref)

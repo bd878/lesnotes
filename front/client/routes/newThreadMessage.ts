@@ -34,9 +34,6 @@ async function newThreadMessage(ctx) {
 					.addThreadPath(threadPath.addPath(ctx.state.threadPath))
 					.addList(messagesList.addTree(ctx.state.tree).addThreadID(ctx.state.tree.threadID))
 			)
-			.addMessageHeader(
-				messageHeader.addMessagePath(ctx.state.messagePath)
-			)
 	} else {
 		content.addThreadPath(threadPath.addPath(ctx.state.threadPath))
 

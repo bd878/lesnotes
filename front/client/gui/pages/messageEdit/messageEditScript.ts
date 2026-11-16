@@ -16,8 +16,6 @@ const elems = {
 }
 
 function init() {
-	console.log("messageEditScript loaded");
-
 	// elems.messageEditForm.addEventListener("change", debounce(e => autosaveMessage(elems, e), 5000 /* we might save by submit button */))
 	elems.messageEditFormElem.addEventListener("submit", e => onFormSubmit(elems, e))
 	elems.filesListElem.addEventListener("click",    e => onFilesListClick(elems, e))
