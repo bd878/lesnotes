@@ -1,6 +1,7 @@
 package am
 
 import (
+	"fmt"
 	"strings"
 	"context"
 	"log/slog"
@@ -70,7 +71,11 @@ func (h commandMsgHandler) HandleMessage(ctx context.Context, msg RawMessage) er
 		occurredAt: commandData.GetOccurredAt().AsTime(),
 	}
 
-	destination := commandMsg.Metadata().Get(CommandReplyChannelHdr).(string)
+	replyChannel := commandMsg.Metadata().Get(CommandReplyChannelHdr)
+	destination, ok := replyChannel.(string)
+	if !ok {
+		return fmt.Errorf("CommandReplyChannelHdr expected string, got %T", replyChannel)
+	}
 
 	slog.Debug("publish reply", slog.String("destination", destination), slog.String("name", msg.MessageName()))
 

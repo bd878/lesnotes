@@ -160,6 +160,9 @@ func Root(ctx context.Context, cfg config.Config, svc system.Service) (err error
 	container.AddScoped("commandStream", func(c di.Container) (any, error) {
 		return am.NewCommandStream(c.Get("txStream").(am.RawMessageStream)), nil
 	})
+	container.AddScoped("replyStream", func(c di.Container) (any, error) {
+		return am.NewReplyStream(c.Get("txStream").(am.RawMessageStream)), nil
+	})
 	container.AddScoped("sagaRepo", func(c di.Container) (any, error) {
 		return sec.NewSagaRepository(
 			pg.NewSagaStore(

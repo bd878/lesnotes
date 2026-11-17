@@ -78,11 +78,15 @@ WHERE NOT EXISTS (
 
 		slog.Debug("msg", slog.Int64("id", cmd.Id), slog.Int64("user_id", cmd.UserId))
 
-		cmd := am.NewCommand(messagespkg.DeleteMessageCommand, messagespkg.CommandChannel, data)
+		msg := am.NewCommand(messagespkg.DeleteMessageCommand, messagespkg.CommandChannel, data)
 
-		slog.Debug("cmd", slog.String("destination", cmd.Destination()), slog.String("id", cmd.ID()))
+		slog.Debug("cmd", slog.String("destination", msg.Destination()), slog.String("id", msg.ID()))
 
-		err = commandStream.Publish(context.TODO(), cmd.Destination(), cmd)
+		msg.Metadata().Set("COMMAND_REPLY_CHANNEL", "gallery.messages.replies.DeleteMessage.stage-3")
+		msg.Metadata().Set("COMMAND_SAGA_ID", msg.ID())
+		msg.Metadata().Set("COMMAND_SAGA_NAME", "messages.DeleteMessage")
+
+		err = commandStream.Publish(context.TODO(), msg.Destination(), msg)
 		if err != nil {
 			panic(err)
 		}
